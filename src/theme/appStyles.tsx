@@ -6,6 +6,9 @@ export const AppStyles = StyleSheet.create({
     flex: {
         flex: 1,
     },
+     flexGrow: {
+    flexGrow: 1,
+  },
     side:{
         paddingHorizontal:20
     },

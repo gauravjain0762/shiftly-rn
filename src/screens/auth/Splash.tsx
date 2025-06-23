@@ -15,7 +15,7 @@ const Splash = (props: Props) => {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-      resetNavigation(SCREENS.WelcomeScreen);
+      resetNavigation(SCREENS.SelectRollScreen);
     }, 1000);
   }, []);
   return (

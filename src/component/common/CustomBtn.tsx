@@ -7,6 +7,7 @@ import {
   TextInputProps,
   TouchableOpacity,
   Image,
+  ImageBackground,
 } from 'react-native';
 import {commonFontStyle} from '../../theme/fonts';
 import {useTheme} from '@react-navigation/native';
@@ -16,12 +17,14 @@ interface CustomTextInputProps extends TextInputProps {
   label: string;
   required?: boolean;
   showRightIcon?: boolean;
+  onPress?:any
 }
 
-const CustomTextInput: React.FC<CustomTextInputProps> = ({
+const CustomBtn: React.FC<CustomTextInputProps> = ({
   label,
   required = false,
   showRightIcon,
+  onPress,
   ...rest
 }) => {
   const {colors} = useTheme();
@@ -29,44 +32,28 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        secureTextEntry={showPassword}
-        {...rest}
-      />
-      {showRightIcon && (
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Image
-            source={IMAGES.eye_on}
-            style={{width: 24, height: 24, resizeMode: 'contain'}}
-          />
+      <TouchableOpacity onPress={() => onPress()}>
+        <ImageBackground source={IMAGES.btnBg} resizeMode='cover' style={styles.btnStyle}>
+        <Text style={styles.label}>{label}</Text>
+        </ImageBackground>
         </TouchableOpacity>
-      )}
-    </View>
   );
 };
 
 const getGlobalStyles = (props: any) => {
   const {colors} = props;
   return StyleSheet.create({
-    container: {
-      marginBottom: 15,
-      flexDirection: 'row',
-      alignItems: 'center',
+    btnStyle: {
+      height:59,
+      justifyContent:"center",
+      alignItems:'center',
     },
     label: {
-      marginBottom: 5,
-      ...commonFontStyle(500, 16, colors.black),
+      ...commonFontStyle(500, 20, "#051A33"),
+      top:-3
     },
-    required: {
-      color: 'red',
-    },
-    input: {
-      ...commonFontStyle(700, 22, '#F4E2B8'),
-      flex: 1,
-    },
+  
   });
 };
 
-export default CustomTextInput;
+export default CustomBtn;

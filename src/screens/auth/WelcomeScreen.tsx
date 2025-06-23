@@ -12,10 +12,16 @@ import {IMAGES} from '../../assets/Images';
 import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
+import {useTranslation} from 'react-i18next';
+import {navigateTo} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
 
 const WelcomeScreen = () => {
+  const {t, i18n} = useTranslation();
   return (
-    <LinearGradient colors={['#0D468C', '#041326']} style={styles.gradient}>
+    <LinearGradient
+      colors={[colors._0D468C, colors._041326]}
+      style={styles.gradient}>
       <SafeAreaView style={styles.container1}>
         <StatusBar barStyle="light-content" backgroundColor="#00204A" />
         {/* Logo */}
@@ -30,7 +36,9 @@ const WelcomeScreen = () => {
 
         {/* Description */}
         <Text style={styles.subtitle}>
-         {" Find your next role in Dubai's top hotels,\nbeach clubs, &restaurants.Let's get you hired! Start your Shiftly journey"}
+          {t(
+            "Find your next role in Dubai's top hotels, beach clubs, &restaurants.Let's get you hired! Start your Shiftly journey",
+          )}
         </Text>
 
         {/* Dots */}
@@ -41,20 +49,24 @@ const WelcomeScreen = () => {
         </View>
 
         {/* Buttons */}
-        <TouchableOpacity style={styles.emailButton}>
+        <TouchableOpacity
+          style={styles.emailButton}
+          onPress={() => {
+            navigateTo(SCREENS.LoginScreen);
+          }}>
           {/* <Icon name="envelope" size={16} color="#000" /> */}
           <Image source={IMAGES.e_icon} style={styles.icon} />
-          <Text style={styles.emailText}> Continue with email</Text>
+          <Text style={styles.emailText}>{t('Continue with email')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.whiteButton}>
           <Image source={IMAGES.a_icon} style={styles.icon} />
-          <Text style={styles.whiteText}> Continue with Apple</Text>
+          <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.whiteButton}>
           <Image source={IMAGES.g_icon} style={styles.icon} />
-          <Text style={styles.whiteText}> Continue with Google</Text>
+          <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     </LinearGradient>
@@ -97,15 +109,15 @@ const styles = StyleSheet.create({
   dot: {
     width: 10,
     height: 10,
-    backgroundColor: '#DADADA',
+    backgroundColor: colors._DADADA,
     borderRadius: 5,
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: '#F4E2B8',
+    backgroundColor: colors._F4E2B8,
   },
   emailButton: {
-    backgroundColor: '#F4E2B8',
+    backgroundColor: colors._F4E2B8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -119,7 +131,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors.black),
   },
   whiteButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -136,8 +148,8 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     resizeMode: 'contain',
-    position:'absolute',
-    left:49
+    position: 'absolute',
+    left: 49,
   },
 });
 

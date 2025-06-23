@@ -3,6 +3,12 @@ export const colors = {
   white: "#ffffff",
   mainColor: "orange",
   _DADADA: "#DADADA",
+  _FBE7BD:  '#FBE7BD',
+  _0B3970:  '#0B3970',
+  _104686:  '#104686',
+  _0D468C:  '#0D468C',
+  _041326:  '#041326',
+  _F4E2B8:  '#F4E2B8',
 
   _25201a: '#25201a',
   containerBGColor: 'rgba(51, 50, 50, 0.4)',

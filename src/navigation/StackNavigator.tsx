@@ -1,13 +1,14 @@
-import { FC } from "react";
-import { createStackNavigator } from "@react-navigation/stack";
-import { useAppDispatch } from "../redux/hooks";
-import { colors } from "../theme/colors";
-import { Text } from "react-native";
-import HomeScreen from "../screens/home/HomeScreen";
-import { ScreenNames, SCREENS } from "./screenNames";
-import LoginScreen from "../screens/auth/LoginScreen";
-import SplashScreen from "../screens/auth/Splash";
-import WelcomeScreen from "../screens/auth/WelcomeScreen";
+import {FC} from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import {useAppDispatch} from '../redux/hooks';
+import {colors} from '../theme/colors';
+import {Text} from 'react-native';
+import HomeScreen from '../screens/employer/home/HomeScreen';
+import {ScreenNames, SCREENS} from './screenNames';
+import SplashScreen from '../screens/auth/Splash';
+import WelcomeScreen from '../screens/auth/WelcomeScreen';
+import SelectRollScreen from '../screens/auth/SelectRollScreen';
+import LoginScreen from '../screens/employer/auth/LoginScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -21,7 +22,7 @@ const headerStyleTransparent = {
   headerTitleStyle: {
     // ...commonFontStyle(i18n.language, 500, 19, colors.black),
   },
-  headerTitleAlign: "center",
+  headerTitleAlign: 'center',
   // ...TransitionPresets.SlideFromRightIOS,
 };
 const Stack = createStackNavigator<ScreenNames>();
@@ -142,25 +143,35 @@ const StackNavigator: FC = () => {
   return (
     <Stack.Navigator initialRouteName={SCREENS.SplashScreen}>
       <Stack.Screen
-        options={({ navigation }) => ({ headerShown: false })}
+        options={({navigation}) => ({headerShown: false})}
         name={SCREENS.SplashScreen}
         component={SplashScreen}
       />
       <Stack.Screen
-        options={({ navigation }) => ({ headerShown: false })}
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.SelectRollScreen}
+        component={SelectRollScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
         name={SCREENS.WelcomeScreen}
         component={WelcomeScreen}
       />
+
+      {/* Employer */}
+
       <Stack.Screen
-        options={({ navigation }) => ({ headerShown: false })}
+        options={({navigation}) => ({headerShown: false})}
         name={SCREENS.LoginScreen}
         component={LoginScreen}
       />
       <Stack.Screen
-        options={({ navigation }) => ({ headerShown: false })}
+        options={({navigation}) => ({headerShown: false})}
         name={SCREENS.HomeScreen}
         component={HomeScreen}
       />
+
+      {/* Seeker */}
     </Stack.Navigator>
   );
 };

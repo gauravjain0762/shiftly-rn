@@ -3,6 +3,7 @@ export const SCREENS = {
   LoginScreen: "LoginScreen",
   SplashScreen: "SplashScreen",
   WelcomeScreen: "WelcomeScreen",
+  SelectRollScreen: "SelectRollScreen",
 };
 
 export interface ScreenNames {
@@ -11,6 +12,7 @@ export interface ScreenNames {
   LoginScreen: string;
   SplashScreen: string;
   WelcomeScreen: string;
+  SelectRollScreen: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

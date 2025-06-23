@@ -17,4 +17,11 @@ export const IMAGES = {
     g_icon: require("./image/g_icon.png"),
     e_icon: require("./image/e_icon.png"),
     a_icon: require("./image/a_icon.png"),
+    Seeker: require("./image/Seeker.png"),
+    logoText: require("./image/logoText.png"),
+    Employer: require("./image/Employer.png"),
+    leftSide: require("./image/leftSide.png"),
+    info: require("./image/info.png"),
+    eye_on: require("./image/eye_on.png"),
+    btnBg: require("./image/btnBg.png"),
 };
