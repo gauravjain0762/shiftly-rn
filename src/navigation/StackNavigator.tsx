@@ -6,7 +6,8 @@ import { Text } from "react-native";
 import HomeScreen from "../screens/home/HomeScreen";
 import { ScreenNames, SCREENS } from "./screenNames";
 import LoginScreen from "../screens/auth/LoginScreen";
-import SplashScreen from "../screens/auth/SplashScreen";
+import SplashScreen from "../screens/auth/Splash";
+import WelcomeScreen from "../screens/auth/WelcomeScreen";
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -139,11 +140,16 @@ const StackNavigator: FC = () => {
   // }
 
   return (
-    <Stack.Navigator initialRouteName={SCREENS.HomeScreen}>
+    <Stack.Navigator initialRouteName={SCREENS.SplashScreen}>
       <Stack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.SplashScreen}
         component={SplashScreen}
+      />
+      <Stack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.WelcomeScreen}
+        component={WelcomeScreen}
       />
       <Stack.Screen
         options={({ navigation }) => ({ headerShown: false })}

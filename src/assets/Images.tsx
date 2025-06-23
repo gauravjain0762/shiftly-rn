@@ -1,4 +1,5 @@
 export const IMAGES = {
+    launch_screen: require("./image/launch_screen.png"),
     user: require("./image/user.png"),
     pen: require("./image/pen.png"),
     ic_down: require("./image/ic_down.png"),
@@ -7,8 +8,13 @@ export const IMAGES = {
     share: require("./image/share.png"),
     back: require("./image/back.png"),
     qr: require("./image/qr.png"),
-    logo: require("./image/logo.png"),
     close: require("./image/close.png"),
     checked: require("./image/checked.png"),
     cancel: require("./image/cancel.png"),
+
+    logog: require("./image/logog.png"),
+    login_bg: require("./image/login_bg.png"),
+    g_icon: require("./image/g_icon.png"),
+    e_icon: require("./image/e_icon.png"),
+    a_icon: require("./image/a_icon.png"),
 };

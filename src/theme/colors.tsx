@@ -2,6 +2,7 @@ export const colors = {
   black: "#000000",
   white: "#ffffff",
   mainColor: "orange",
+  _DADADA: "#DADADA",
 
   _25201a: '#25201a',
   containerBGColor: 'rgba(51, 50, 50, 0.4)',
