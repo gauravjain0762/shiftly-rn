@@ -9,6 +9,7 @@ import SplashScreen from '../screens/auth/Splash';
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import SelectRollScreen from '../screens/auth/SelectRollScreen';
 import LoginScreen from '../screens/employer/auth/LoginScreen';
+import SignUp from '../screens/employer/auth/SignUp';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -169,6 +170,12 @@ const StackNavigator: FC = () => {
         options={({navigation}) => ({headerShown: false})}
         name={SCREENS.HomeScreen}
         component={HomeScreen}
+      />
+
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.SignUp}
+        component={SignUp}
       />
 
       {/* Seeker */}

@@ -17,7 +17,7 @@ interface CustomTextInputProps extends TextInputProps {
   label: string;
   required?: boolean;
   showRightIcon?: boolean;
-  onPress?:any
+  onPress?: any;
 }
 
 const CustomBtn: React.FC<CustomTextInputProps> = ({
@@ -32,11 +32,14 @@ const CustomBtn: React.FC<CustomTextInputProps> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-      <TouchableOpacity onPress={() => onPress()}>
-        <ImageBackground source={IMAGES.btnBg} resizeMode='cover' style={styles.btnStyle}>
+    <TouchableOpacity onPress={() => onPress()}>
+      <ImageBackground
+        source={IMAGES.btnBg}
+        resizeMode="cover"
+        style={styles.btnStyle}>
         <Text style={styles.label}>{label}</Text>
-        </ImageBackground>
-        </TouchableOpacity>
+      </ImageBackground>
+    </TouchableOpacity>
   );
 };
 
@@ -44,15 +47,14 @@ const getGlobalStyles = (props: any) => {
   const {colors} = props;
   return StyleSheet.create({
     btnStyle: {
-      height:59,
-      justifyContent:"center",
-      alignItems:'center',
+      height: 59,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     label: {
-      ...commonFontStyle(500, 20, "#051A33"),
-      top:-3
+      ...commonFontStyle(500, 20, '#051A33'),
+      top: -3,
     },
-  
   });
 };
 

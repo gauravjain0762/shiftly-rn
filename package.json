@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@dreamwalk-os/react-native-smooth-pincode-input": "^1.0.2",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/geolocation": "^3.4.0",
     "@react-native/gradle-plugin": "^0.79.2",
@@ -32,11 +33,13 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-modal": "^14.0.0-rc.1",
+    "react-native-progress": "^5.0.1",
     "react-native-responsive-fontsize": "^0.5.1",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "^4.10.0",
     "react-native-splash-screen": "^3.3.0",
+    "react-native-svg": "^15.12.0",
     "react-native-toast-message": "^2.3.0",
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",

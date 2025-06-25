@@ -13,7 +13,7 @@ import {useTheme} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
 
 interface CustomTextInputProps extends TextInputProps {
-  label: string;
+  label?: string;
   required?: boolean;
   showRightIcon?: boolean;
 }

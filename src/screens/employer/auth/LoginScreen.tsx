@@ -17,6 +17,8 @@ import {AppStyles} from '../../../theme/appStyles';
 import {CustomTextInput} from '../../../component';
 import CustomBtn from '../../../component/common/CustomBtn';
 import {useTranslation} from 'react-i18next';
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const LoginScreen = () => {
   const {t, i18n} = useTranslation();
@@ -56,7 +58,10 @@ const LoginScreen = () => {
 
           <Text style={styles.orText}>Or</Text>
 
-          <CustomBtn label={t('Sign Up')} onPress={() => {}} />
+          <CustomBtn
+            label={t('Sign Up')}
+            onPress={() => navigateTo(SCREENS.SignUp)}
+          />
         </View>
       </KeyboardAwareScrollView>
     </LinearGradient>
