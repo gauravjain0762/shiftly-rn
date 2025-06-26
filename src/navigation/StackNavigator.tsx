@@ -10,6 +10,7 @@ import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import SelectRollScreen from '../screens/auth/SelectRollScreen';
 import LoginScreen from '../screens/employer/auth/LoginScreen';
 import SignUp from '../screens/employer/auth/SignUp';
+import TabNavigator from './TabNavigator';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -178,6 +179,11 @@ const StackNavigator: FC = () => {
         component={SignUp}
       />
 
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.TabNavigator}
+        component={TabNavigator}
+      />
       {/* Seeker */}
     </Stack.Navigator>
   );

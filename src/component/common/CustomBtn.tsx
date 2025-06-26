@@ -12,41 +12,42 @@ import {
 import {commonFontStyle} from '../../theme/fonts';
 import {useTheme} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
+import { colors } from '../../theme/colors';
 
 interface CustomTextInputProps extends TextInputProps {
   label: string;
   required?: boolean;
   showRightIcon?: boolean;
   onPress?: any;
+  outline?: any;
+  btnStyle?: any;
 }
 
 const CustomBtn: React.FC<CustomTextInputProps> = ({
   label,
   required = false,
   showRightIcon,
+  outline,
+  btnStyle,
   onPress,
   ...rest
 }) => {
-  const {colors} = useTheme();
-  const styles = React.useMemo(() => getGlobalStyles({colors}), [colors]);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <TouchableOpacity onPress={() => onPress()}>
       <ImageBackground
-        source={IMAGES.btnBg}
+        source={outline ? IMAGES.outlineBtn : IMAGES.btnBg}
         resizeMode="cover"
-        style={styles.btnStyle}>
-        <Text style={styles.label}>{label}</Text>
+        style={[styles.btnStyle,{height: outline ? 70 : 53,},btnStyle]}>
+        <Text style={[styles.label,{color:outline ? colors.white : colors.black}]}>{label}</Text>
       </ImageBackground>
     </TouchableOpacity>
   );
 };
 
-const getGlobalStyles = (props: any) => {
-  const {colors} = props;
-  return StyleSheet.create({
-    btnStyle: {
+const styles = StyleSheet.create({
+  btnStyle: {
       height: 59,
       justifyContent: 'center',
       alignItems: 'center',
@@ -55,7 +56,6 @@ const getGlobalStyles = (props: any) => {
       ...commonFontStyle(500, 20, '#051A33'),
       top: -3,
     },
-  });
-};
+});
 
 export default CustomBtn;

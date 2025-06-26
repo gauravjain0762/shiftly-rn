@@ -24,4 +24,23 @@ export const IMAGES = {
     info: require("./image/info.png"),
     eye_on: require("./image/eye_on.png"),
     btnBg: require("./image/btnBg.png"),
+    error_icon: require("./image/error_icon.png"),
+    ic_down1: require("./image/ic_down1.png"),
+    right: require("./image/right.png"),
+    welcome_icon: require("./image/welcome_icon.png"),
+    mark: require("./image/mark.png"),
+    down: require("./image/down.png"),
+    cake: require("./image/cake.png"),
+    flag: require("./image/flag.png"),
+    outlineBtn: require("./image/outlineBtn.png"),
+
+    //tab
+    Activity_off: require("./image/tab/Activity_off.png"),
+    Activity_on: require("./image/tab/Activity_on.png"),
+    home_off: require("./image/tab/home_off.png"),
+    home_on: require("./image/tab/home_on.png"),
+    Jobs_off: require("./image/tab/Jobs_off.png"),
+    Jobs_on: require("./image/tab/Jobs_on.png"),
+    user_off: require("./image/tab/user_off.png"),
+    user_on: require("./image/tab/user_on.png"),
 };

@@ -14,7 +14,7 @@ import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {AppStyles} from '../../../theme/appStyles';
-import {CustomTextInput} from '../../../component';
+import {CustomTextInput, GradientButton} from '../../../component';
 import CustomBtn from '../../../component/common/CustomBtn';
 import {useTranslation} from 'react-i18next';
 import {navigateTo} from '../../../utils/commonFunction';
@@ -54,12 +54,16 @@ const LoginScreen = () => {
         </TouchableOpacity>
 
         <View style={{marginHorizontal: 35}}>
-          <CustomBtn label={t('Login')} onPress={() => {}} />
-
+          {/* <CustomBtn label={t('Login')} onPress={() => {}} /> */}
+          <GradientButton
+            style={styles.btn}
+            title={t('Login')}
+            onPress={() => navigateTo(SCREENS.TabNavigator)}
+          />
           <Text style={styles.orText}>Or</Text>
-
-          <CustomBtn
-            label={t('Sign Up')}
+          <GradientButton
+            style={styles.btn}
+            title={t('Sign Up')}
             onPress={() => navigateTo(SCREENS.SignUp)}
           />
         </View>

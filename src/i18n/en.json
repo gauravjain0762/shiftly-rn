@@ -14,6 +14,32 @@
     "What is your email address?": "What is your email address?",
     "What’s your full name?": "What’s your full name?",
     "Type your name here...": "Type your name here...",
-    "Set a secure password": "Set a secure password"
+    "Set a secure password": "Set a secure password",
+    "Please enter a valid phone number":"Please enter a valid phone number",
+    "Verify OTP Code":"Verify OTP Code",
+    "You will receive OTP by email":"You will receive OTP by email",
+    "Didn't receive the code? Resend in":"Didn't receive the code? Resend in",
+    "s":"s",
+    "Sec":"Sec",
+    "Next":"Next",
+    "Welcome":"Welcome",
+    "Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.":"Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.",
+    "Lets get your job!":"Lets get your job!",
+    "Invalid OTP":"Invalid OTP",
+    "Which best describes you?":"Which best describes you?",
+    "I’m a job seeker":"I’m a job seeker",
+    "What is your date of birth?":"What is your date of birth?",
+    "What is your gender?":"What is your gender?",
+    "Male":"Male",
+    "Select your nationality ":"Select your nationality ",
+    "Where are you currently residing?":"Where are you currently residing?",
+    "United":"United",
+    "How about adding your photo?":"How about adding your photo?",
+    "Let employers see who you are first impressions make all the difference!":"Let employers see who you are first impressions make all the difference!",
+    "Finish Setup":"Finish Setup",
+    "Completion Acknowledgment":"Completion Acknowledgment",
+    "You're almost there! Your profile is 70% complete. Add your experience & skills to start applying for the best opportunities.":"You're almost there! Your profile is 70% complete. Add your experience & skills to start applying for the best opportunities.",
+    "Complete My Profile":"Complete My Profile"
+
   }
 }
