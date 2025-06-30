@@ -10,11 +10,11 @@ import {
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 const WelcomeModal = ({visible, name = 'William', onClose}) => {
-      const {t, i18n} = useTranslation();
-    
+  const {t, i18n} = useTranslation();
+
   return (
     <Modal
       animationType="slide"
@@ -25,13 +25,22 @@ const WelcomeModal = ({visible, name = 'William', onClose}) => {
         <View style={styles.modalContent}>
           <Image
             source={IMAGES.welcome_icon}
-            style={{width: 90, height: 90, resizeMode: 'contain'}}
+            style={{
+              width: 90,
+              height: 90,
+              resizeMode: 'contain',
+              alignSelf: 'center',
+            }}
           />
 
-          <Text style={styles.welcomeText}>{t("Welcome")} {name}</Text>
+          <Text style={styles.welcomeText}>
+            {t('Welcome')} {name}
+          </Text>
 
           <Text style={styles.messageText}>
-            {t("Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.")}
+            {t(
+              'Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.',
+            )}
           </Text>
           {/* <Text style={styles.messageText}>
             You're all set to explore hospitality{'\n'}
@@ -39,7 +48,7 @@ const WelcomeModal = ({visible, name = 'William', onClose}) => {
           </Text> */}
 
           <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>{t("Lets get your job!")}</Text>
+            <Text style={styles.buttonText}>{t('Lets get your job!')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -58,7 +67,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     padding: 24,
-    alignItems: 'center',
+    // alignItems: 'center',
   },
   iconWrapper: {
     backgroundColor: '#03386E',
@@ -72,22 +81,23 @@ const styles = StyleSheet.create({
   welcomeText: {
     ...commonFontStyle(500, 25, colors._050505),
     marginBottom: 14,
-    marginTop:20
+    marginTop: 20,
+    alignSelf: 'center',
   },
   messageText: {
     ...commonFontStyle(400, 18, '#585656'),
-textAlign:'center',
+    textAlign: 'center',
     marginBottom: 8,
-    lineHeight:30
+    lineHeight: 30,
   },
   button: {
     backgroundColor: '#061F3D',
-    paddingHorizontal: 86,
-    // paddingVertical: 12,
     borderRadius: 50,
     marginTop: 24,
-    height:63,
-    justifyContent:'center'
+    height: 63,
+    justifyContent: 'center',
+    flex: 1,
+    alignItems: 'center',
   },
   buttonText: {
     ...commonFontStyle(400, 22, colors.white),
