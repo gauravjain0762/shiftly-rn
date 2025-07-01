@@ -13,6 +13,7 @@ import SignUp from '../screens/employer/auth/SignUp';
 import TabNavigator from './TabNavigator';
 import JobDetail from '../screens/employer/jobs/JobDetail';
 import ApplyJob from '../screens/employer/jobs/ApplyJob';
+import Messages from '../screens/employer/chat/Messages';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -195,6 +196,11 @@ const StackNavigator: FC = () => {
         options={({navigation}) => ({headerShown: false})}
         name={SCREENS.ApplyJob}
         component={ApplyJob}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.Messages}
+        component={Messages}
       />
       {/* Seeker */}
     </Stack.Navigator>

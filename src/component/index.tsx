@@ -10,6 +10,8 @@ import ActivitiesCard from './employe/ActivitiesCard';
 import JobCard from './employe/JobCard';
 import ShareModal from './employe/ShareModal';
 import ApplicationSuccessModal from './employe/ApplicationSuccessModal';
+import SearchBar from './common/SearchBar';
+import MessageItem from './employe/MessageList';
 
 export {
   Loader,
@@ -24,4 +26,6 @@ export {
   JobCard,
   ShareModal,
   ApplicationSuccessModal,
+  SearchBar,
+  MessageItem,
 };

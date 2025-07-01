@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
@@ -11,7 +11,7 @@ type props = {
 
 const ActivitiesCard: FC<props> = ({onPress = () => {}, item}) => {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity onPress={() => onPress()} style={styles.card}>
       <View style={styles.left}>
         <Image
           source={IMAGES.Activitielogo}
@@ -30,7 +30,7 @@ const ActivitiesCard: FC<props> = ({onPress = () => {}, item}) => {
           <Text style={styles.tagText}>{item?.tag}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

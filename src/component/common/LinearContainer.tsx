@@ -29,8 +29,6 @@ const LinearContainer = ({
   colors = '',
   SafeAreaProps = {edges: ['top']},
 }: Props) => {
-  console.log(':::::::', {...SafeAreaProps});
-
   return (
     <View style={[styles.mainContainer]}>
       <LinearGradient

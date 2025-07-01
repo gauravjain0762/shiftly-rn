@@ -4,6 +4,8 @@ import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREEN_NAMES} from '../../../navigation/screenNames';
 
 const activities = [
   {
@@ -54,7 +56,12 @@ const ActivityScreen = () => {
         data={activities}
         style={AppStyles.flex}
         keyExtractor={item => item.id}
-        renderItem={(item: any) => <ActivitiesCard {...item} />}
+        renderItem={(item: any) => (
+          <ActivitiesCard
+            onPress={() => navigateTo(SCREEN_NAMES?.Messages)}
+            {...item}
+          />
+        )}
         contentContainerStyle={styles.scrollContainer}
         ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
         showsVerticalScrollIndicator={false}
