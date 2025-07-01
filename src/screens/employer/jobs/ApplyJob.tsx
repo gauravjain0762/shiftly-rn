@@ -11,6 +11,7 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import {useRoute} from '@react-navigation/native';
+import {navigationRef} from '../../../navigation/RootContainer';
 
 const documents = [
   {id: 'cv', label: 'CV', icon: IMAGES.CV},
@@ -30,63 +31,73 @@ const ApplyJob = () => {
   const [visible, setVisible] = useState(false);
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
-      <BackHeader title={t('Apply Job')} containerStyle={styles.header} />
-      <View style={styles.container}>
-        {/* Job Card */}
-        <View style={styles.jobCard}>
-          <View style={styles.logoBg}>
-            <Image
-              source={{
-                uri: data?.logo,
-              }}
-              style={styles.logo}
-            />
-          </View>
-          <View style={{flex: 1}}>
-            <Text style={styles.jobTitle}>{data?.title}</Text>
-            <Text style={styles.location}>{data?.company}</Text>
-            <Text style={styles.meta}>Dubai, UAE - Full Time</Text>
-          </View>
-          <Text style={styles.salary}>AED 10k</Text>
-        </View>
-
-        {/* Divider */}
-        <View style={styles.divider} />
-
-        {/* Heading */}
-        <View style={styles.Doccontainer}>
-          <Text style={styles.heading}>{t('Choose documents to apply')}</Text>
-
-          {/* Document List */}
-          {documents?.map(doc => (
-            <TouchableOpacity
-              key={doc.id}
-              style={styles.docRow}
-              onPress={() => setSelected(doc.id)}>
-              <View style={styles.radioCircle}>
-                {selected === doc.id && (
-                  <View style={styles.check}>
-                    <Image source={IMAGES.check} style={styles.checked} />
-                  </View>
-                )}
+    <>
+      <LinearContainer
+        SafeAreaProps={{edges: ['bottom', 'top']}}
+        colors={['#0D468C', '#041326']}>
+        <BackHeader title={t('Apply Job')} containerStyle={styles.header} />
+        <View style={styles.container}>
+          {/* Job Card */}
+          <View style={styles.jobCard}>
+            <View style={styles.logoBg}>
+              <Image
+                source={{
+                  uri: data?.logo,
+                }}
+                style={styles.logo}
+              />
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.jobTitle}>{data?.title}</Text>
+              <Text style={styles.location}>{data?.company}</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={styles.meta}>Dubai, UAE - Full Time</Text>
+                <Text style={styles.salary}>AED 10k</Text>
               </View>
-              <Text style={styles.docLabel}>{doc.label}</Text>
-              <Image source={doc.icon} style={styles.docIcon} />
-            </TouchableOpacity>
-          ))}
+            </View>
+          </View>
+
+          {/* Divider */}
+          <View style={styles.divider} />
+
+          {/* Heading */}
+          <View style={styles.Doccontainer}>
+            <Text style={styles.heading}>{t('Choose documents to apply')}</Text>
+
+            {/* Document List */}
+            {documents?.map(doc => (
+              <TouchableOpacity
+                key={doc.id}
+                style={styles.docRow}
+                onPress={() => setSelected(doc.id)}>
+                <View style={styles.radioCircle}>
+                  {selected === doc.id && (
+                    <View style={styles.check}>
+                      <Image source={IMAGES.check} style={styles.checked} />
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.docLabel}>{doc.label}</Text>
+                <Image source={doc.icon} style={styles.docIcon} />
+              </TouchableOpacity>
+            ))}
+          </View>
+          <GradientButton
+            style={styles.btn}
+            onPress={() => setVisible(!visible)}
+            title={t('Apply Now')}
+          />
         </View>
-        <GradientButton
-          style={styles.btn}
-          onPress={() => setVisible(!visible)}
-          title={t('Apply Now')}
-        />
-      </View>
+      </LinearContainer>
       <ApplicationSuccessModal
         visible={visible}
         onClose={() => setVisible(!visible)}
+        onJobList={() => {
+          navigationRef.goBack();
+          setVisible(false);
+        }}
       />
-    </LinearContainer>
+    </>
   );
 };
 
@@ -118,14 +129,16 @@ const styles = StyleSheet.create({
     ...commonFontStyle(700, 17, colors._33485B),
   },
   location: {
+    marginTop: 3,
     ...commonFontStyle(400, 15, colors._33485B),
+    flex: 1,
   },
   meta: {
     ...commonFontStyle(400, 14, '#33485B'),
+    flex: 1,
   },
   salary: {
     ...commonFontStyle(700, 16, '#33485B'),
-    marginLeft: 10,
   },
   divider: {
     height: 1,

@@ -38,8 +38,8 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
       {showRightIcon && (
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           <Image
-            source={IMAGES.eye_on}
-            style={{width: 24, height: 24, resizeMode: 'contain'}}
+            source={!showPassword ? IMAGES.eye : IMAGES.eye_on}
+            style={{width: 24, height: 24, resizeMode: 'contain',tintColor:"#F4E2B8"}}
           />
         </TouchableOpacity>
       )}

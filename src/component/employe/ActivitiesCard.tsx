@@ -21,7 +21,25 @@ const ActivitiesCard: FC<props> = ({onPress = () => {}, item}) => {
         <View style={styles.cardContent}>
           <Text style={styles.title}>{item?.name}</Text>
           <Text style={styles.subtitle}>{item?.subtitle}</Text>
-          <Text style={styles.details}>{item?.details}</Text>
+          {item?.tag == 'Chat' && (
+            <Text style={styles.details}>{item?.details}</Text>
+          )}
+          {item?.tag != 'Chat' && (
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={styles.details}>
+                {item?.startDetails} {' - '}
+              </Text>
+              <View
+                style={{flexDirection: 'row', alignItems: 'center', gap: 2}}>
+                <Image
+                  source={IMAGES.distance}
+                  resizeMode="contain"
+                  style={{width: 11, height: 15, resizeMode: 'contain'}}
+                />
+                <Text style={styles.details}>{item?.endDetails}</Text>
+              </View>
+            </View>
+          )}
         </View>
       </View>
       <View style={styles.rightSide}>

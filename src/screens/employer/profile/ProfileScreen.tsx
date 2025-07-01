@@ -12,9 +12,10 @@ import {LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
-import Slider from 'react-native-slider';
-import { navigateTo } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
+import Slider from '@react-native-community/slider';
+
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const ProfileScreen = () => {
   const [range, setRange] = useState('');
@@ -28,9 +29,13 @@ const ProfileScreen = () => {
   );
 
   const Section = useCallback(
-    ({title, content,onPress}) => (
+    ({title, content, onPress}) => (
       <View style={styles.card}>
-        <TouchableOpacity onPress={()=>{onPress && onPress()}} style={styles.addButton}>
+        <TouchableOpacity
+          onPress={() => {
+            onPress && onPress();
+          }}
+          style={styles.addButton}>
           <Image source={IMAGES.pluse} style={styles.plus} />
         </TouchableOpacity>
         <HeaderWithAdd title={title} />
@@ -58,15 +63,23 @@ const ProfileScreen = () => {
             <Text style={styles.location}>Dubai Marina, Dubai - U.A.E</Text>
           </View>
 
-          <TouchableOpacity onPress={()=>{
-            navigateTo(SCREENS.AccountScreen)
-          }} style={styles.editButton}>
+          <TouchableOpacity
+            onPress={() => {
+              navigateTo(SCREENS.AccountScreen);
+            }}
+            style={styles.editButton}>
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
 
           <View style={styles.statsRow}>
             <Text style={styles.statText}>0 Connections</Text>
-            <Text style={styles.statText}>0 Profile Views</Text>
+            <Text
+              style={[
+                styles.statText,
+                {opacity: 0.6, color: 'rgba(255, 255, 255, 1)'},
+              ]}>
+              0 Profile Views
+            </Text>
           </View>
 
           <View style={styles.completionCard}>
@@ -109,16 +122,22 @@ const ProfileScreen = () => {
           />
 
           {/* Section: My Languages */}
-          <View style={styles.card}>
+
+          <View style={[styles.card, {width: '90%'}]}>
+            <TouchableOpacity style={styles.addButton}>
+              <Image source={IMAGES.pluse} style={styles.plus} />
+            </TouchableOpacity>
             <HeaderWithAdd title="My Languages" />
             <Text style={styles.languageText}>English</Text>
-            {/* <Slider value={range} onValueChange={value => setRange(value)} /> */}
+            <Slider style={{}} value={range} minimumTrackTintColor={"#F4E2B8"} maximumTrackTintColor={"#17457D"} onValueChange={value => setRange(value)} />
           </View>
 
           {/* Section: Education */}
           <Section
             title="Education"
-            onPress={()=>{navigateTo(SCREENS.CreateProfileScreen)}}
+            onPress={() => {
+              navigateTo(SCREENS.CreateProfileScreen);
+            }}
             content="Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text."
           />
 
@@ -162,15 +181,15 @@ const ProfileScreen = () => {
             <TouchableOpacity style={styles.addButton}>
               <Image source={IMAGES.pluse} style={styles.plus} />
             </TouchableOpacity>
-            <HeaderWithAdd title="Achievements and Certifications" />
+            <HeaderWithAdd title={"Achievements \nand Certifications"} />
             <View style={styles.certRow}>
-              {/* {[1, 2, 3, 4].map(item => (
+              {[1, 2, 3, 4].map(item => (
                 <Image
                   key={item}
-                  source={require('./assets/certificate-placeholder.png')} // Replace with actual images
+                  source={IMAGES.Maskgroup} // Replace with actual images
                   style={styles.certImage}
                 />
-              ))} */}
+              ))}
             </View>
           </View>
         </View>
@@ -263,7 +282,7 @@ const styles = StyleSheet.create({
   },
   ctaCard: {
     marginTop: 16,
-    backgroundColor: 'rgba(245, 245, 245, 0.2)',
+    backgroundColor: '#F5F5F5)',
     paddingHorizontal: wp(26),
     width: '100%',
     flexDirection: 'row',
@@ -302,6 +321,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     transform: [{rotate: '180deg'}],
     tintColor: colors._F4E2B8,
+    marginLeft: 20,
   },
   card: {
     backgroundColor: '#0B3970',
@@ -378,8 +398,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   certImage: {
-    width: 60,
-    height: 40,
+    width: 82,
+    height: 58,
     resizeMode: 'contain',
   },
   scrollContiner: {},

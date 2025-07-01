@@ -97,6 +97,7 @@ const CustomDropdown = ({
           autoScroll={false}
           maxHeight={200}
           minHeight={30}
+    
           keyboardAvoiding={true}
           activeColor={"transparent"}
           renderRightIcon={() => {
@@ -130,7 +131,8 @@ export default CustomDropdown;
 
 const styles = StyleSheet.create({
   label: {
-    marginBottom: 8,
+    marginTop:20,
+    marginBottom: 12,
     ...commonFontStyle(400, 18, '#DADADA'),
   },
   required: {
@@ -148,18 +150,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
   },
   containerStyle: {
-    borderRadius: 10,
+    borderRadius: 20,
     top: 2,
-    backgroundColor: 'transparent',
+    backgroundColor: '#0D468C',
     borderColor: '#225797',
     borderWidth: 1.5,
     shadowOpacity: 0,
     shadowRadius: 0,
     elevation: 0,
+    zIndex:1,
   },
   inputContainer: {
     borderWidth: 0.5,
-    borderRadius: 10,
+    borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: hp(0.3),
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
   },
   dropdownStyle: {
     paddingHorizontal: wp(16),
-    borderRadius: 10,
+    borderRadius: 20,
     height: 59,
     borderWidth: 1.5,
     borderColor: '#225797',

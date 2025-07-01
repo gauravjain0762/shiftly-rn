@@ -50,10 +50,24 @@ const notifications = [
     time: '10:50 PM',
     highlight: false,
   },
+  {
+    id: '5',
+    icon: 'star',
+    text: 'Congratulations, your profile has been completed post your job.',
+    time: '10:40 PM',
+    highlight: true,
+  },
+  {
+    id: '6',
+    icon: 'check-circle',
+    text: 'Royal Tech Solution view your profile and shortlist for interview.',
+    time: '10:50 PM',
+    highlight: false,
+  },
 ];
 const NotificationScreen = () => {
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={['#0D468C', '#041326']}  SafeAreaProps={{edges: ['bottom', 'top']}}>
       <View style={styles.topConrainer}>
         <BackHeader
           containerStyle={styles.header}

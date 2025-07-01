@@ -15,6 +15,27 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
 import {navigateTo} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
+import Onboarding from '../../component/common/Onboarding';
+
+const AppOnboardingData = [
+  {
+    id: '1',
+    title: 'Discover Local Services, Fast',
+    description: `Find your next role in Dubai's top hotels, beach clubs, & restaurants. Let's get you hired!Start your Shiftly journey`,
+  },
+  {
+    id: '2',
+    title: 'Book Appointments Instantly',
+    description:
+      'Submit a booking request for the service you need, and we will connect you to verified local providers instantly. Once you confirm your requirements, qualified professionals will be notified, and you will receive quick responses to schedule your appointment.',
+  },
+  {
+    id: '3',
+    title: 'Chat with Providers, Directly',
+    description:
+      'Once your booking is accepted, you can chat directly with the service provider via WhatsApp for easy coordination. No extra steps—just simple, direct communication to confirm your appointment details!',
+  },
+];
 
 const WelcomeScreen = () => {
   const {t, i18n} = useTranslation();
@@ -24,31 +45,15 @@ const WelcomeScreen = () => {
       style={styles.gradient}>
       <SafeAreaView style={styles.container1}>
         <StatusBar barStyle="light-content" backgroundColor="#00204A" />
-        {/* Logo */}
-        <Image source={IMAGES.logog} style={styles.logo} />
-
-        {/* Illustration */}
-        <Image
-          source={IMAGES.login_bg}
-          style={styles.illustration}
-          resizeMode="contain"
+        {/* <View> */}
+        <Onboarding
+          data={AppOnboardingData}
+          // onComplete={handleOnboardingComplete}
         />
-
-        {/* Description */}
-        <Text style={styles.subtitle}>
-          {t(
-            "Find your next role in Dubai's top hotels, beach clubs, &restaurants.Let's get you hired! Start your Shiftly journey",
-          )}
-        </Text>
-
-        {/* Dots */}
-        <View style={styles.dots}>
-          <View style={[styles.dot, styles.activeDot]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View>
-
+        {/* </View> */}
+      
         {/* Buttons */}
+        <View style={{width:"90%",alignItems:'center',marginBottom:20}}>
         <TouchableOpacity
           style={styles.emailButton}
           onPress={() => {
@@ -68,6 +73,7 @@ const WelcomeScreen = () => {
           <Image source={IMAGES.g_icon} style={styles.icon} />
           <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
         </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -80,7 +86,7 @@ const styles = StyleSheet.create({
   container1: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'center',
   },
   logo: {
     height: 60,
@@ -124,7 +130,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 30,
     width: '90%',
-    marginBottom: 15,
+    marginBottom: 30,
     paddingHorizontal: 49,
   },
   emailText: {
@@ -138,7 +144,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 30,
     width: '90%',
-    marginBottom: 15,
+    marginBottom: 30,
     paddingHorizontal: 49,
   },
   whiteText: {

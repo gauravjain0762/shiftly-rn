@@ -60,6 +60,9 @@ export const IMAGES = {
   ChangePassword: require('./image/ChangePassword.png'),
   account: require('./image/account.png'),
   down1: require('./image/down1.png'),
+  eye: require('./image/eye.png'),
+  distance: require('./image/distance.png'),
+  Maskgroup: require('./image/Maskgroup.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

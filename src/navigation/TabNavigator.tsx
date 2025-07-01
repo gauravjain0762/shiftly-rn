@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     // paddingVertical: Platform.OS == 'ios' ? 0 : hp(0),
     width: '100%',
     paddingVertical: 12,
+    paddingBottom:16
   },
   tabButton: {
     width: wp(65),

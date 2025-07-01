@@ -20,6 +20,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import NotificationCard from '../../../component/employe/NotificationCard';
 import {IMAGES} from '../../../assets/Images';
 import Stepper from '../../../component/employe/Stepper';
+import CustomDatePicker from '../../../component/common/CustomDatePicker';
 
 const educationOptions = [
   {label: 'High School', value: 'high_school'},
@@ -33,6 +34,12 @@ const CreateProfileScreen = () => {
   const [activeStep, setActiveStep] = useState(1);
 
   const [education, setEducation] = useState(__DEV__ ? 'diploma ' : '');
+  const [degree, setDegree] = useState('');
+  const [university, setUniversity] = useState('');
+  const [country, setCountry] = useState('');
+  const [province, setProvince] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
@@ -49,15 +56,32 @@ const CreateProfileScreen = () => {
       <View style={{paddingHorizontal: 29}}>
         <CustomDropdown
           data={educationOptions}
-          label="Preferred Position"
-          placeholder={'Select preferred position'}
-          value={education}
+          label="Degree"
+          placeholder={'Select Degree'}
+          value={degree}
           container={{marginBottom: 15}}
           disable={false}
           onChange={selectedItem => {
-            setEducation(selectedItem?.value);
+            setDegree(selectedItem?.value);
           }}
         />
+        <CustomDropdown
+          data={educationOptions}
+          label="University"
+          placeholder={'Select University'}
+          value={university}
+          container={{marginBottom: 15}}
+          disable={false}
+          onChange={selectedItem => {
+            setUniversity(selectedItem?.value);
+          }}
+        />
+         {/* Start & End Date */}
+        <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+          <CustomDatePicker label="Start Date" value={startDate} onChange={setStartDate} />
+          <CustomDatePicker label="End Date" value={endDate} onChange={setEndDate} />
+        </View>
+
       </View>
     </LinearContainer>
   );

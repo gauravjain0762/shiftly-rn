@@ -49,6 +49,8 @@ const carouselImages = [
 
 const JobsScreen = () => {
   const {t, i18n} = useTranslation();
+  const [activeIndex, setActiveIndex] = useState(0);
+
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <View style={styles.header}>
@@ -60,7 +62,8 @@ const JobsScreen = () => {
           <TouchableOpacity>
             <Image style={styles.headerIcons} source={IMAGES.filter} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigateTo(SCREENS.NotificationScreen)}>
+          <TouchableOpacity
+            onPress={() => navigateTo(SCREENS.NotificationScreen)}>
             <Image style={styles.headerIcons} source={IMAGES.notification} />
           </TouchableOpacity>
         </View>
@@ -74,6 +77,7 @@ const JobsScreen = () => {
           autoPlay={true}
           data={carouselImages}
           scrollAnimationDuration={2500}
+          onSnapToItem={index => setActiveIndex(index)}
           renderItem={({item}) => (
             <Image
               source={{uri: item}}
@@ -84,6 +88,21 @@ const JobsScreen = () => {
         />
       </View>
 
+      <View
+        style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10}}>
+        {carouselImages?.map((_, index) => (
+          <View
+            key={index}
+            style={{
+              width: index === activeIndex ? 17 : 6,
+              height: 6,
+              borderRadius: 5,
+              backgroundColor: colors.white,
+              marginHorizontal: 4,
+            }}
+          />
+        ))}
+      </View>
       <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
       <FlatList
         data={jobs}

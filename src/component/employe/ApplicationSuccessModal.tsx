@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 22, colors.white),
   },
   container: {
-    marginHorizontal: 0,
     justifyContent: 'flex-end',
+    margin:0,
   },
 });

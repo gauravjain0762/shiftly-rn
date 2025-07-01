@@ -1,6 +1,8 @@
 import {
+  Dimensions,
   Image,
   Keyboard,
+  KeyboardAvoidingView,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,7 +12,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -31,8 +33,9 @@ import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import moment from 'moment';
 import CustomCalendar from '../../../component/auth/CustomCalendar';
-import { navigateTo } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+const {width} = Dimensions.get('window');
 
 const PIN_LENGTH = 8;
 const SignUp = () => {
@@ -83,6 +86,53 @@ const SignUp = () => {
       navigationRef.goBack();
     }
     setStep(prev => prev - 1);
+  };
+
+  const [password, setPassword] = useState(new Array(8).fill(''));
+  const [otp, setOtp] = useState(new Array(4).fill(''));
+  const inputRefs = useRef([]);
+  const inputRefsOtp = useRef([]);
+
+  const handleChange = (text:any, index:any) => {
+    const newPass = [...password];
+    newPass[index] = text;
+    setPassword(newPass);
+
+    if (text && index < 7) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPress = (e:any, index:any) => {
+    if (
+      e.nativeEvent.key === 'Backspace' &&
+      password[index] === '' &&
+      index > 0
+    ) {
+      const newPass = [...password];
+      newPass[index - 1] = '';
+      setPassword(newPass);
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleChangeOtp = (text:any, index:any) => {
+    const newPass = [...otp];
+    newPass[index] = text;
+    setOtp(newPass);
+
+    if (text && index < 7) {
+      inputRefsOtp.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPressOtp = (e:any, index:any) => {
+    if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
+      const newPass = [...otp];
+      newPass[index - 1] = '';
+      setOtp(newPass);
+      inputRefsOtp.current[index - 1]?.focus();
+    }
   };
 
   const renderStep = () => {
@@ -144,7 +194,25 @@ const SignUp = () => {
                   }
                 </Text>
               </View>
-              <SmoothPinCodeInput
+              {/* OTP Input */}
+              <View style={styles.otpContainer}>
+                {password.map((val, idx) => (
+                  <TextInput
+                    key={idx}
+                    ref={el => (inputRefs.current[idx] = el)}
+                    value={val ? '*' : ''}
+                    onChangeText={text => handleChange(text, idx)}
+                    onKeyPress={e => handleKeyPress(e, idx)}
+                    maxLength={1}
+                    style={styles.otpBox}
+                    keyboardType="decimal-pad"
+                    // secureTextEntry
+                    autoFocus={idx === 0}
+                  />
+                ))}
+              </View>
+              {/* <SmoothPinCodeInput
+                ref={pinInput}
                 password
                 // mask="﹡"
                 cellSize={34}
@@ -154,11 +222,14 @@ const SignUp = () => {
                 onTextChange={(password: any) => setPin(password)}
                 cellStyle={styles.cellStyle}
                 cellStyleFocused={styles.cellStyleFocused}
-                animationFocused={false}
+                // animationFocused={false}
                 textStyle={styles.textStyle}
                 containerStyle={styles.pinconatiner}
-                animated={false}
-              />
+                // onFulfill={code => {
+                //   Keyboard.dismiss(); // or pinInput.current?.blur()
+                // }}
+                // animated={false}
+              /> */}
             </View>
             <GradientButton
               style={styles.btn}
@@ -197,21 +268,37 @@ const SignUp = () => {
                   </Text>
                 </View>
               )}
-              <SmoothPinCodeInput
+              <View style={styles.otpContainer}>
+                {otp.map((val, idx) => (
+                  <TextInput
+                    key={idx}
+                    ref={el => (inputRefsOtp.current[idx] = el)}
+                    value={val ? '*' : ''}
+                    onChangeText={text => handleChangeOtp(text, idx)}
+                    onKeyPress={e => handleKeyPressOtp(e, idx)}
+                    maxLength={1}
+                    style={styles.otpBox1}
+                   keyboardType="decimal-pad"
+                    
+                    autoFocus={idx === 0}
+                  />
+                ))}
+              </View>
+              {/* <SmoothPinCodeInput
                 password
                 // mask="﹡"
                 cellSize={71}
                 codeLength={4}
-                value={pin}
+                value={otp}
                 autoFocus
-                onTextChange={(password: any) => setPin(password)}
+                onTextChange={(password: any) => setOtp(password)}
                 cellStyle={styles.cellStyle1}
                 cellStyleFocused={styles.cellStyleFocused}
                 animationFocused={false}
                 textStyle={styles.textStyle1}
                 containerStyle={styles.pinconatiner1}
                 animated={false}
-              />
+              /> */}
               <>
                 {timer == 0 ? (
                   <Text
@@ -224,13 +311,13 @@ const SignUp = () => {
                 ) : (
                   <View style={[{marginTop: hp(31), alignItems: 'center'}]}>
                     <Text style={styles.secText}>
-                      {timer}
-                      {t('Sec')}
+                      {timer} {t('Sec')}
                     </Text>
                     <Text style={styles.secText1}>
-                      {t("Didn't receive the code? Resend in")} {timer} {'s'}
+                      {t("Didn't receive the code? Resend in")} {timer}
+                      {'s'}
                     </Text>
-                    {true && (
+                    {/* {true && (
                       <View style={styles.errorRow}>
                         <Image
                           source={IMAGES.error_icon}
@@ -238,7 +325,7 @@ const SignUp = () => {
                         />
                         <Text style={styles.errorText}>{t('Invalid OTP')}</Text>
                       </View>
-                    )}
+                    )} */}
                   </View>
                 )}
               </>
@@ -558,6 +645,7 @@ const SignUp = () => {
       <KeyboardAwareScrollView
         enableAutomaticScroll
         scrollEnabled={false}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollcontainer}
         style={styles.container}>
         <View style={styles.rowView}>
@@ -572,9 +660,11 @@ const SignUp = () => {
             />
           </TouchableOpacity>
           {step == 9 && (
-            <TouchableOpacity onPress={()=>{
-              nextStep()
-            }} style={styles.skipBtn}>
+            <TouchableOpacity
+              onPress={() => {
+                nextStep();
+              }}
+              style={styles.skipBtn}>
               <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
           )}
@@ -694,8 +784,8 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderBottomWidth: 2,
     borderColor: colors._F4E2B8,
-    marginLeft: 6,
-    marginRight: 6,
+    // marginLeft: 6,
+    // marginRight: 6,
   },
   cellStyle1: {
     borderWidth: 0,
@@ -705,11 +795,11 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   cellStyleFocused: {
-    borderWidth: 0,
+    // borderWidth: 0,
   },
   textStyle: {
     ...commonFontStyle(300, 30, colors._F4E2B8),
-    paddingBottom: hp(40),
+    // bottom: 9,
   },
   textStyle1: {
     ...commonFontStyle(300, 30, colors._F4E2B8),
@@ -779,7 +869,27 @@ const styles = StyleSheet.create({
     backgroundColor: colors._F4E2B8,
     marginBottom: 20,
   },
-
+  otpBox1: {
+    width: 70,
+    height: 50,
+    borderBottomWidth: 2,
+    borderColor: '#ffeecf',
+    textAlign: 'center',
+    ...commonFontStyle(700, 30, '#F4E2B8'),
+  },
+  otpBox: {
+    width: (width - 48 - 14 * 7) / 8,
+    height: 50,
+    borderBottomWidth: 2,
+    borderColor: '#ffeecf',
+    textAlign: 'center',
+    ...commonFontStyle(700, 30, '#F4E2B8'),
+  },
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: hp(40),
+  },
   uploadBox: {
     borderColor: '#12519C',
     borderWidth: 2,
