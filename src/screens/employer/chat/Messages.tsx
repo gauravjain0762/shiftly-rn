@@ -5,6 +5,8 @@ import {hp, wp} from '../../../theme/fonts';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
 import MessageList from '../../../component/employe/MessageList';
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const Messages = () => {
   const {t, i18n} = useTranslation();
@@ -91,7 +93,12 @@ const Messages = () => {
       </View>
       <FlatList
         data={messages}
-        renderItem={({item}) => <MessageList item={item} />}
+        renderItem={({item}) => (
+          <MessageList
+            onPressMessage={e => navigateTo(SCREENS.Chat, {data: e})}
+            item={item}
+          />
+        )}
         keyExtractor={item => item.id}
       />
     </LinearContainer>

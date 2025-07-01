@@ -1,6 +1,7 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import {colors} from '../../theme/colors';
 
 type MessageItem = {
   id: string;
@@ -22,7 +23,9 @@ const MessageList: FC<Props> = ({onPressMessage = () => {}, item}) => {
     <TouchableOpacity
       style={styles.itemContainer}
       onPress={() => onPressMessage(item)}>
-      <Image source={{uri: item?.logo}} style={styles.logo} />
+      <View style={styles.logoBg}>
+        <Image source={{uri: item?.logo}} style={styles.logo} />
+      </View>
       <View style={styles.textContainer}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.sender}>{item.sender}</Text>
@@ -47,31 +50,30 @@ export default MessageList;
 const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
-    padding: 12,
+    paddingHorizontal: wp(22),
     borderBottomWidth: 1,
-    borderBottomColor: '#0E4C96',
-    backgroundColor: '#002B64',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: hp(20),
   },
   logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 10,
+    height: hp(28),
+    resizeMode: 'contain',
+    width: '100%',
   },
   textContainer: {
     flex: 1,
     justifyContent: 'center',
+    marginLeft: wp(14),
+    gap: hp(7),
   },
   title: {
-    ...commonFontStyle(700, 14, '#FFFFFF'),
+    ...commonFontStyle(600, 18, colors.white),
   },
   sender: {
-    ...commonFontStyle(400, 12, '#D4D4D4'),
-    marginTop: 2,
+    ...commonFontStyle(400, 12, colors.white),
   },
   preview: {
-    ...commonFontStyle(400, 12, '#AAAAAA'),
-    marginTop: 2,
+    ...commonFontStyle(400, 12, colors.white),
   },
   rightContainer: {
     alignItems: 'flex-end',
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 12, '#FFFFFF'),
   },
   badge: {
-    backgroundColor: '#F5C144',
+    backgroundColor: colors.white,
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -90,5 +92,13 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     ...commonFontStyle(700, 12, '#002B64'),
+  },
+  logoBg: {
+    width: wp(62),
+    height: wp(62),
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
   },
 });
