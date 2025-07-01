@@ -12,7 +12,7 @@ import React, {useState} from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {Dropdown as DropdownElement} from 'react-native-element-dropdown';
-import { IMAGES } from '../../assets/Images';
+import {IMAGES} from '../../assets/Images';
 
 type Props = {
   title?: string;
@@ -66,16 +66,15 @@ const CustomDropdown = ({
   dateMode,
   renderEmptyComponent,
   flatListProps,
-  required
+  required,
 }: Props) => {
-
   return (
     <>
       <View style={container}>
         <Text style={styles.label}>
-               {label}
-               {required && <Text style={styles.required}>*</Text>}
-             </Text>
+          {label}
+          {required && <Text style={styles.required}>*</Text>}
+        </Text>
         <DropdownElement
           onFocus={() => {
             Keyboard.dismiss();
@@ -91,25 +90,22 @@ const CustomDropdown = ({
           valueField={valueField === undefined ? 'value' : valueField}
           placeholder={placeholder}
           placeholderStyle={styles.placeholderStyle}
-          // itemContainerStyle={{backgroundColor: colors.modalBg}}
+          // itemContainerStyle={styles.containerStyle}
+          containerStyle={styles.containerStyle}
           selectedTextStyle={styles.inputStyle}
           search={isSearch || false}
           autoScroll={false}
           maxHeight={200}
           minHeight={30}
           keyboardAvoiding={true}
-          activeColor={colors.mainColor}
+          activeColor={"transparent"}
           renderRightIcon={() => {
             return (
               <Image
-                source={IMAGES.ic_down}
+                source={IMAGES.down1}
                 style={{
-                  width: 10,
-                  height: 5,
-                  // bottom: 7,
-                  // right: -9,
-                  tintColor: '#3B4256',
-                  // opacity: disable ? 0.6 : 1,
+                  width: 12,
+                  height: 13,
                   resizeMode: 'contain',
                 }}
               />
@@ -118,7 +114,9 @@ const CustomDropdown = ({
           renderItem={res => {
             return (
               <View style={styles.rowStyle}>
-                <Text style={styles.inputStyle}>{res?.label}</Text>
+                <Text style={[styles.inputStyle, {color: res?.value == value ? "#F4E2B8"  : '#DADADA'}]}>
+                  {res?.label}
+                </Text>
               </View>
             );
           }}
@@ -132,8 +130,8 @@ export default CustomDropdown;
 
 const styles = StyleSheet.create({
   label: {
-    marginBottom: 5,
-    ...commonFontStyle(500, 16, colors.black),
+    marginBottom: 8,
+    ...commonFontStyle(400, 18, '#DADADA'),
   },
   required: {
     color: 'red',
@@ -149,14 +147,23 @@ const styles = StyleSheet.create({
     marginBottom: hp(0.7),
     paddingHorizontal: wp(4),
   },
+  containerStyle: {
+    borderRadius: 10,
+    top: 2,
+    backgroundColor: 'transparent',
+    borderColor: '#225797',
+    borderWidth: 1.5,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
   inputContainer: {
     borderWidth: 0.5,
-    // height: hp(5.8),
-    borderRadius: 6,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: hp(0.3),
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     // backgroundColor: colors.white,
     // shadowColor: colors.shadow,
     shadowOffset: {
@@ -168,14 +175,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputStyle: {
-    ...commonFontStyle(400, 17, colors.black),
+    ...commonFontStyle(400, 18, '#F4E2B8'),
   },
   placeholderStyle: {
     flex: 1,
     margin: 0,
     padding: 0,
     marginHorizontal: wp(3),
-    ...commonFontStyle(400, 17, '#969595'),
+    ...commonFontStyle(400, 18, '#969595'),
   },
 
   selectedTextStyle: {
@@ -184,9 +191,9 @@ const styles = StyleSheet.create({
   dropdownStyle: {
     paddingHorizontal: wp(16),
     borderRadius: 10,
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    height: 59,
+    borderWidth: 1.5,
+    borderColor: '#225797',
     // height: 55,
   },
   rowStyle: {

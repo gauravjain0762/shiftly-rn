@@ -8,10 +8,13 @@ export const SCREENS = {
   TabNavigator: 'TabNavigator',
   ProfileScreen: 'ProfileScreen',
   ActivityScreen: 'ActivityScreen',
+  NotificationScreen: 'NotificationScreen',
+  AccountScreen: 'AccountScreen',
   JobsScreen: 'JobsScreen',
   JobDetail: 'JobDetail',
   ApplyJob: 'ApplyJob',
   Messages: 'Messages',
+  CreateProfileScreen: 'CreateProfileScreen',
 };
 
 export interface ScreenNames {
@@ -29,6 +32,9 @@ export interface ScreenNames {
   JobDetail: string;
   ApplyJob: string;
   Messages: string;
+  NotificationScreen: string;
+  AccountScreen: string;
+  CreateProfileScreen: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

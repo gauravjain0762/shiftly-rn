@@ -11,6 +11,8 @@ import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {navigationRef} from '../../navigation/RootContainer';
+import { navigateTo } from '../../utils/commonFunction';
+import { SCREENS } from '../../navigation/screenNames';
 
 type props = {
   onBackPress?: () => void;
@@ -46,7 +48,7 @@ const BackHeader: FC<props> = ({
       {isRight && !RightIcon ? (
         <TouchableOpacity
           style={[styles.bellIcon, RightIconStyle]}
-          onPress={() => onPressNotifi()}>
+          onPress={() => navigateTo(SCREENS.NotificationScreen)}>
           <Image source={IMAGES.notification} style={styles.bell} />
         </TouchableOpacity>
       ) : (

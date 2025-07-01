@@ -13,6 +13,8 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import Slider from 'react-native-slider';
+import { navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
 
 const ProfileScreen = () => {
   const [range, setRange] = useState('');
@@ -26,9 +28,9 @@ const ProfileScreen = () => {
   );
 
   const Section = useCallback(
-    ({title, content}) => (
+    ({title, content,onPress}) => (
       <View style={styles.card}>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity onPress={()=>{onPress && onPress()}} style={styles.addButton}>
           <Image source={IMAGES.pluse} style={styles.plus} />
         </TouchableOpacity>
         <HeaderWithAdd title={title} />
@@ -56,7 +58,9 @@ const ProfileScreen = () => {
             <Text style={styles.location}>Dubai Marina, Dubai - U.A.E</Text>
           </View>
 
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity onPress={()=>{
+            navigateTo(SCREENS.AccountScreen)
+          }} style={styles.editButton}>
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
 
@@ -114,6 +118,7 @@ const ProfileScreen = () => {
           {/* Section: Education */}
           <Section
             title="Education"
+            onPress={()=>{navigateTo(SCREENS.CreateProfileScreen)}}
             content="Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text."
           />
 

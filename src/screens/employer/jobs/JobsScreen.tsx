@@ -14,7 +14,7 @@ import {IMAGES} from '../../../assets/Images';
 import {AppStyles} from '../../../theme/appStyles';
 import Carousel from 'react-native-reanimated-carousel';
 import {navigateTo} from '../../../utils/commonFunction';
-import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {useTranslation} from 'react-i18next';
 const jobs = [
   {
@@ -60,7 +60,7 @@ const JobsScreen = () => {
           <TouchableOpacity>
             <Image style={styles.headerIcons} source={IMAGES.filter} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo(SCREENS.NotificationScreen)}>
             <Image style={styles.headerIcons} source={IMAGES.notification} />
           </TouchableOpacity>
         </View>

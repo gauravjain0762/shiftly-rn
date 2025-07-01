@@ -2,6 +2,8 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
+import { navigateTo } from '../../utils/commonFunction';
+import { SCREENS } from '../../navigation/screenNames';
 
 type props = {
   onPressNotifi?: () => void;
@@ -21,7 +23,7 @@ const HomeHeader: FC<props> = ({onPressNotifi = () => {}}) => {
           <Text style={styles.location}>Dubai, UAE</Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.bellIcon} onPress={() => onPressNotifi()}>
+      <TouchableOpacity style={styles.bellIcon} onPress={() => navigateTo(SCREENS.NotificationScreen)}>
         <Image source={IMAGES.notification} style={styles.bell} />
       </TouchableOpacity>
     </View>

@@ -14,6 +14,9 @@ import TabNavigator from './TabNavigator';
 import JobDetail from '../screens/employer/jobs/JobDetail';
 import ApplyJob from '../screens/employer/jobs/ApplyJob';
 import Messages from '../screens/employer/chat/Messages';
+import NotificationScreen from '../screens/employer/notification/NotificationScreen';
+import AccountScreen from '../screens/employer/profile/AccountScreen';
+import CreateProfileScreen from '../screens/employer/profile/CreateProfileScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -201,6 +204,23 @@ const StackNavigator: FC = () => {
         options={({navigation}) => ({headerShown: false})}
         name={SCREENS.Messages}
         component={Messages}
+
+      />
+       <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        
+        name={SCREENS.NotificationScreen}
+        component={NotificationScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.AccountScreen}
+        component={AccountScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.CreateProfileScreen}
+        component={CreateProfileScreen}
       />
       {/* Seeker */}
     </Stack.Navigator>
