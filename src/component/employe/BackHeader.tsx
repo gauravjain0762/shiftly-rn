@@ -6,33 +6,52 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React, {FC} from 'react';
+import React, {FC, ReactNode} from 'react';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
+import {navigationRef} from '../../navigation/RootContainer';
 
 type props = {
   onBackPress?: () => void;
   title?: string;
   onPressNotifi?: () => void;
   containerStyle?: ViewStyle;
+  isRight?: boolean;
+  RightIcon?: ReactNode;
+  RightIconStyle?: ViewStyle;
+  titleStyle?: ViewStyle;
+  leftStyle?: ViewStyle;
 };
 
 const BackHeader: FC<props> = ({
-  onBackPress = () => {},
+  onBackPress,
   onPressNotifi = () => {},
   title = 'My Activities',
   containerStyle,
+  isRight = true,
+  RightIcon,
+  RightIconStyle,
+  titleStyle,
+  leftStyle,
 }) => {
   return (
     <View style={[styles.header, containerStyle]}>
-      <TouchableOpacity onPress={() => onBackPress()}>
+      <TouchableOpacity
+        style={[leftStyle]}
+        onPress={() => (onBackPress ? onBackPress() : navigationRef?.goBack())}>
         <Image source={IMAGES.backArrow} style={styles.back} />
       </TouchableOpacity>
-      <Text style={styles.headerTitle}>{title}</Text>
-      <TouchableOpacity style={styles.bellIcon} onPress={() => onPressNotifi()}>
-        <Image source={IMAGES.notification} style={styles.bell} />
-      </TouchableOpacity>
+      <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
+      {isRight && !RightIcon ? (
+        <TouchableOpacity
+          style={[styles.bellIcon, RightIconStyle]}
+          onPress={() => onPressNotifi()}>
+          <Image source={IMAGES.notification} style={styles.bell} />
+        </TouchableOpacity>
+      ) : (
+        RightIcon
+      )}
     </View>
   );
 };

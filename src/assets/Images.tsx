@@ -17,6 +17,7 @@ export const IMAGES = {
   search: require('./image/search.png'),
   filter: require('./image/filter.png'),
   hart: require('./image/hart.png'),
+  check: require('./image/check.png'),
 
   logog: require('./image/logog.png'),
   login_bg: require('./image/login_bg.png'),
@@ -40,6 +41,12 @@ export const IMAGES = {
   flag: require('./image/flag.png'),
   outlineBtn: require('./image/outlineBtn.png'),
   avatar: require('./image/avatar.png'),
+  location: require('./image/location.png'),
+  CV: require('./image/CV.png'),
+  coverlatter: require('./image/coverlatter.png'),
+  reccomandlatter: require('./image/recommandLatter.png'),
+  marker: require('./image/marker.png'),
+  pluse: require('./image/pluse.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

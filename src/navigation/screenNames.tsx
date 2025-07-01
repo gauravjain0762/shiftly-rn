@@ -5,10 +5,12 @@ export const SCREENS = {
   WelcomeScreen: 'WelcomeScreen',
   SelectRollScreen: 'SelectRollScreen',
   SignUp: 'SignUp',
-    TabNavigator: 'TabNavigator',
-    ProfileScreen: 'ProfileScreen',
-    ActivityScreen: 'ActivityScreen',
-    JobsScreen: 'JobsScreen',
+  TabNavigator: 'TabNavigator',
+  ProfileScreen: 'ProfileScreen',
+  ActivityScreen: 'ActivityScreen',
+  JobsScreen: 'JobsScreen',
+  JobDetail: 'JobDetail',
+  ApplyJob: 'ApplyJob',
 };
 
 export interface ScreenNames {
@@ -23,6 +25,8 @@ export interface ScreenNames {
   JobsScreen: string;
   ActivityScreen: string;
   ProfileScreen: string;
+  JobDetail: string;
+  ApplyJob: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

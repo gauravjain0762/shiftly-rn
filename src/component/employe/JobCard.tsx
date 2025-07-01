@@ -13,11 +13,12 @@ import {IMAGES} from '../../assets/Images';
 
 type props = {
   item?: any;
+  onPress?: () => void;
 };
 
-const JobCard: FC<props> = ({item}) => {
+const JobCard: FC<props> = ({item, onPress = () => {}}) => {
   return (
-    <View style={styles.jobCard}>
+    <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <ImageBackground source={{uri: item?.image}} style={styles.jobImage}>
         <View style={styles.logo}>
           <Image
@@ -59,7 +60,7 @@ const JobCard: FC<props> = ({item}) => {
         </View>
         <Text style={styles.jobDescription}>{item?.description}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

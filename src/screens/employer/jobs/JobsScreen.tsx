@@ -6,50 +6,53 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {JobCard, LinearContainer} from '../../../component';
 import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {AppStyles} from '../../../theme/appStyles';
 import Carousel from 'react-native-reanimated-carousel';
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import {useTranslation} from 'react-i18next';
+const jobs = [
+  {
+    id: '1',
+    company: 'Atlantis, The Palm, Dubai',
+    logo: 'https://content.presspage.com/templates/658/2042/729924/royal-atlantis-logo.png',
+    title: 'Restaurant Manager',
+    description:
+      'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumeirah...',
+    image:
+      'https://images.unsplash.com/photo-1690923934414-fbfcaf874f79?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+    posted: 'Recently Posted',
+  },
+  {
+    id: '2',
+    company: 'Marriot, Palm Jumeirah, dubai UAE',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Marriott_hotels_logo14.svg/512px-Marriott_hotels_logo14.svg.png',
+    title: 'Restaurant Manager',
+    description:
+      'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumeirah...',
+    image:
+      'https://images.unsplash.com/photo-1721539151779-e6dc7f9de376?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjh8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+    posted: 'Posted 2 Days ago',
+  },
+];
+
+const carouselImages = [
+  'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+  'https://images.unsplash.com/photo-1551598305-fe1be9fe579e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
+];
 
 const JobsScreen = () => {
-  const jobs = [
-    {
-      id: '1',
-      company: 'Atlantis, The Palm, Dubai',
-      logo: 'https://content.presspage.com/templates/658/2042/729924/royal-atlantis-logo.png',
-      title: 'Restaurant Manager',
-      description:
-        'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumeirah...',
-      image:
-        'https://images.unsplash.com/photo-1690923934414-fbfcaf874f79?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-      posted: 'Recently Posted',
-    },
-    {
-      id: '2',
-      company: 'Marriot, Palm Jumeirah, dubai UAE',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Marriott_hotels_logo14.svg/512px-Marriott_hotels_logo14.svg.png',
-      title: 'Restaurant Manager',
-      description:
-        'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumeirah...',
-      image:
-        'https://images.unsplash.com/photo-1721539151779-e6dc7f9de376?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjh8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-      posted: 'Posted 2 Days ago',
-    },
-  ];
-
-  const carouselImages = [
-    'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-    'https://images.unsplash.com/photo-1551598305-fe1be9fe579e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-    'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
-  ];
-
+  const {t, i18n} = useTranslation();
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Search Jobs</Text>
+        <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
         <View style={styles.headerImgBar}>
           <TouchableOpacity>
             <Image style={styles.headerIcons} source={IMAGES.search} />
@@ -81,12 +84,19 @@ const JobsScreen = () => {
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Recent Jobs</Text>
+      <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
       <FlatList
         data={jobs}
         style={AppStyles.flex}
         showsVerticalScrollIndicator={false}
-        renderItem={(item: any) => <JobCard {...item} />}
+        renderItem={(item: any) => (
+          <JobCard
+            onPress={() =>
+              navigateTo(SCREEN_NAMES.JobDetail, {data: item?.item})
+            }
+            {...item}
+          />
+        )}
         keyExtractor={item => item.id}
         ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
         contentContainerStyle={styles.scrollContainer}

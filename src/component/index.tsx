@@ -8,6 +8,8 @@ import HomeHeader from './employe/HomeHeader';
 import BackHeader from './employe/BackHeader';
 import ActivitiesCard from './employe/ActivitiesCard';
 import JobCard from './employe/JobCard';
+import ShareModal from './employe/ShareModal';
+import ApplicationSuccessModal from './employe/ApplicationSuccessModal';
 
 export {
   Loader,
@@ -20,4 +22,6 @@ export {
   BackHeader,
   ActivitiesCard,
   JobCard,
+  ShareModal,
+  ApplicationSuccessModal,
 };

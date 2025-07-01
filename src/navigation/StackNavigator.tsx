@@ -11,6 +11,8 @@ import SelectRollScreen from '../screens/auth/SelectRollScreen';
 import LoginScreen from '../screens/employer/auth/LoginScreen';
 import SignUp from '../screens/employer/auth/SignUp';
 import TabNavigator from './TabNavigator';
+import JobDetail from '../screens/employer/jobs/JobDetail';
+import ApplyJob from '../screens/employer/jobs/ApplyJob';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -183,6 +185,16 @@ const StackNavigator: FC = () => {
         options={({navigation}) => ({headerShown: false})}
         name={SCREENS.TabNavigator}
         component={TabNavigator}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.JobDetail}
+        component={JobDetail}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.ApplyJob}
+        component={ApplyJob}
       />
       {/* Seeker */}
     </Stack.Navigator>
