@@ -7,6 +7,7 @@ import {
   View,
   Platform,
   Keyboard,
+  TextInput,
 } from 'react-native';
 import React, {useState} from 'react';
 import {colors} from '../../theme/colors';
@@ -16,47 +17,34 @@ import {IMAGES} from '../../assets/Images';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 
-const CustomDatePicker = ({label, value, onChange, onPress}) => {
+const CustomInput = ({label, value, onChange, onPress, placeholder}) => {
   const [showPicker, setShowPicker] = useState(false);
   const [open, setOpen] = useState(false);
 
   return (
-    <View style={{flex: 1,}}>
+    <View style={{flex: 1}}>
       <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity
+      <TextInput
+        placeholder={placeholder}
+        value={value}
+        style={styles.dropdown}
+        placeholderTextColor={'#969595'}
+        onChangeText={onChange}
+      />
+      {/* <TouchableOpacity
         onPress={() => setOpen(true)}
         style={styles.dropdown}
         activeOpacity={0.8}>
         <Text style={value ? styles.inputStyle : styles.placeholderStyle}>
           {value ? value : `${label}`}
         </Text>
-        <Image
-          source={IMAGES.down1}
-          style={{
-            width: 12,
-            height: 13,
-            resizeMode: 'contain',
-          }}
-        />
-      </TouchableOpacity>
-
-      <DateTimePicker
-        value={new Date()}
-        mode={'date'}
-        minimumDate={new Date()}
-        display={Platform.OS == 'ios' ? 'spinner' : 'default'}
-        isVisible={open}
-        onConfirm={date => {
-          setOpen(false);
-          onChange(moment(date).format('DD-MM-YYYY'));
-        }}
-        onCancel={() => setOpen(false)}
-      />
+        
+      </TouchableOpacity> */}
     </View>
   );
 };
 
-export default CustomDatePicker;
+export default CustomInput;
 
 const styles = StyleSheet.create({
   dropdown: {
@@ -67,6 +55,7 @@ const styles = StyleSheet.create({
     borderColor: '#225797',
     flexDirection: 'row',
     alignItems: 'center',
+    ...commonFontStyle(400, 18, '#F4E2B8'),
   },
   label: {
     marginTop: 20,

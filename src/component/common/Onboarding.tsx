@@ -142,11 +142,12 @@ const styles = StyleSheet.create({
     // marginBottom: 64,
   },
   paginationContainer: {
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 39,
+    width:"100%"
   },
   paginationDot: {
     height: 10,
@@ -183,7 +184,8 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     lineHeight: 30,
-    marginTop: 31,
+    marginTop: 29,
+    marginBottom:10,
     marginHorizontal: 28,
     ...commonFontStyle(600, 17, colors._DADADA),
   },

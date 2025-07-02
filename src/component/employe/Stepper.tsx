@@ -13,7 +13,7 @@ const colors = {
 const stepData = [
   {label: 'Education', step: 1},
   {label: 'Experience', step: 2},
-  {label: 'Preference', step: 3},
+  {label: 'About Me', step: 3},
 ];
 
 const Stepper = ({activeStep = 1,setActiveStep}) => {

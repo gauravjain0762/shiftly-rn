@@ -3,6 +3,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -35,6 +36,8 @@ import moment from 'moment';
 import CustomCalendar from '../../../component/auth/CustomCalendar';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import DateTimePicker from 'react-native-modal-datetime-picker';
+import ImagePickerModal from '../../../component/common/ImagePickerModal';
 const {width} = Dimensions.get('window');
 
 const PIN_LENGTH = 8;
@@ -46,11 +49,14 @@ const SignUp = () => {
   const {t, i18n} = useTranslation();
   const [timer, setTimer] = useState(30);
   const [showModal, setShowModal] = useState(false);
+  const [imageModal, setImageModal] = useState(false);
   const [selected, setSelected] = useState("I'm a job seeker");
   const [selected1, setSelected1] = useState('Male');
   const [selected2, setSelected2] = useState('United State America');
+  const [selected3, setSelected3] = useState('United State America');
   const [date, setDate] = useState(new Date('2001-02-10'));
   const [isPickerVisible, setPickerVisible] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const options = [
     "I'm currently working in hospitality",
@@ -93,7 +99,7 @@ const SignUp = () => {
   const inputRefs = useRef([]);
   const inputRefsOtp = useRef([]);
 
-  const handleChange = (text:any, index:any) => {
+  const handleChange = (text: any, index: any) => {
     const newPass = [...password];
     newPass[index] = text;
     setPassword(newPass);
@@ -103,7 +109,7 @@ const SignUp = () => {
     }
   };
 
-  const handleKeyPress = (e:any, index:any) => {
+  const handleKeyPress = (e: any, index: any) => {
     if (
       e.nativeEvent.key === 'Backspace' &&
       password[index] === '' &&
@@ -116,7 +122,7 @@ const SignUp = () => {
     }
   };
 
-  const handleChangeOtp = (text:any, index:any) => {
+  const handleChangeOtp = (text: any, index: any) => {
     const newPass = [...otp];
     newPass[index] = text;
     setOtp(newPass);
@@ -126,7 +132,7 @@ const SignUp = () => {
     }
   };
 
-  const handleKeyPressOtp = (e:any, index:any) => {
+  const handleKeyPressOtp = (e: any, index: any) => {
     if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       const newPass = [...otp];
       newPass[index - 1] = '';
@@ -278,8 +284,7 @@ const SignUp = () => {
                     onKeyPress={e => handleKeyPressOtp(e, idx)}
                     maxLength={1}
                     style={styles.otpBox1}
-                   keyboardType="decimal-pad"
-                    
+                    keyboardType="decimal-pad"
                     autoFocus={idx === 0}
                   />
                 ))}
@@ -392,7 +397,7 @@ const SignUp = () => {
               <Text style={styles.title}>
                 {t('What is your date of birth?')}
               </Text>
-              <Pressable style={styles.dateRow} onPress={{}}>
+              <Pressable style={styles.dateRow} onPress={() => {setOpen(true)}}>
                 <Image
                   source={IMAGES.cake}
                   style={{width: 24, height: 24, resizeMode: 'contain'}}
@@ -402,13 +407,26 @@ const SignUp = () => {
                 </Text>
               </Pressable>
 
+              <DateTimePicker
+                value={new Date(date)}
+                display={Platform.OS == 'ios' ? 'spinner' : 'default'}
+                isVisible={open}
+                maximumDate={new Date()}
+                onConfirm={dates => {
+                  setOpen(false);
+
+                  if (dates) setDate(dates);
+                }}
+                onCancel={() => setOpen(false)}
+              />
+
               <View style={styles.underline} />
               <Text style={[styles.title, {marginTop: 40}]}>
                 {t('What is your gender?')}
               </Text>
               {/* <CustomCalendar /> */}
-              <Pressable style={styles.dateRow} onPress={{}}>
-                <Text style={styles.dateText}>{t('Male')}</Text>
+              <Pressable style={styles.dateRow} onPress={() => {}}>
+                <Text style={styles.dateText}>{selected1}</Text>
               </Pressable>
               <View style={styles.underline} />
               {options1.map((option, index) => {
@@ -448,8 +466,8 @@ const SignUp = () => {
 
       case 8:
         return (
-          <View style={styles.innerConrainer}>
-            <ScrollView>
+          <View style={[styles.innerConrainer,{}]}>
+            {/* <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}> */}
               <Text style={styles.title}>{t('Select your nationality ')}</Text>
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center'}]}
@@ -459,11 +477,11 @@ const SignUp = () => {
                   style={{
                     width: 18,
                     height: 18,
-                    resizeMode: 'none',
+                    resizeMode: 'contain',
                     tintColor: '#F4E2B8',
                   }}
                 />
-                <Text style={styles.dateText}>{t('United')}</Text>
+                <Text style={styles.dateText}>{selected2}</Text>
               </Pressable>
 
               <View style={styles.underline} />
@@ -514,16 +532,16 @@ const SignUp = () => {
                   style={{
                     width: 18,
                     height: 18,
-                    resizeMode: 'none',
+                    resizeMode: 'contain',
                     tintColor: '#F4E2B8',
                   }}
                 />
-                <Text style={styles.dateText}>{t('United')}</Text>
+                <Text style={styles.dateText}>{selected3}</Text>
               </Pressable>
 
               <View style={styles.underline} />
               {options2.map((option, index) => {
-                const isSelected = option === selected2;
+                const isSelected = option === selected3;
                 return (
                   <TouchableOpacity
                     key={index}
@@ -531,7 +549,7 @@ const SignUp = () => {
                       styles.optionContainer,
                       // isSelected && styles.selectedOptionContainer,
                     ]}
-                    onPress={() => setSelected2(option)}>
+                    onPress={() => setSelected3(option)}>
                     <Image
                       source={IMAGES.flag}
                       style={{
@@ -557,9 +575,10 @@ const SignUp = () => {
                   </TouchableOpacity>
                 );
               })}
-            </ScrollView>
+            {/* </ScrollView> */}
+            <View style={{marginBottom:30}} />
             <GradientButton
-              style={styles.btn}
+              style={[styles.btn]}
               title={'Next'}
               onPress={() => nextStep()}
             />
@@ -579,7 +598,9 @@ const SignUp = () => {
                 )}
               </Text>
 
-              <View style={styles.uploadBox}>
+              <TouchableOpacity onPress={()=>{
+                 setImageModal(true);
+              }} style={styles.uploadBox}>
                 <View style={styles.imagePlaceholder}>
                   <Image
                     source={IMAGES.user} // Replace with your own image
@@ -590,7 +611,7 @@ const SignUp = () => {
                 <Text style={styles.uploadText}>
                   Upload Profile Image (optional)
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
             <GradientButton
               style={styles.btn}
@@ -645,6 +666,7 @@ const SignUp = () => {
       <KeyboardAwareScrollView
         enableAutomaticScroll
         scrollEnabled={false}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollcontainer}
         style={styles.container}>
@@ -676,6 +698,12 @@ const SignUp = () => {
         onClose={() => {
           setShowModal(false);
           nextStep();
+        }}
+      />
+      <ImagePickerModal
+        actionSheet={imageModal}
+        setActionSheet={() => {
+          setImageModal(false);
         }}
       />
     </LinearContainer>

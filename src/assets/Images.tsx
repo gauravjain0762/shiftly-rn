@@ -63,6 +63,13 @@ export const IMAGES = {
   eye: require('./image/eye.png'),
   distance: require('./image/distance.png'),
   Maskgroup: require('./image/Maskgroup.png'),
+  logout: require('./image/logout.png'),
+  close1: require('./image/close1.png'),
+  close_icon: require('./image/close_icon.png'),
+  edit_icon: require('./image/edit_icon.png'),
+  btnBg1: require('./image/btnBg1.png'),
+  checkBox: require('./image/checkBox.png'),
+  check_circle: require('./image/check_circle.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

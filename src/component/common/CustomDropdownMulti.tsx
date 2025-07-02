@@ -11,7 +11,7 @@ import {
 import React, {useState} from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {Dropdown as DropdownElement} from 'react-native-element-dropdown';
+import {MultiSelect} from 'react-native-element-dropdown';
 import {IMAGES} from '../../assets/Images';
 
 type Props = {
@@ -40,7 +40,7 @@ type Props = {
   dateMode?: string;
 };
 
-const CustomDropdown = ({
+const CustomDropdownMulti = ({
   data,
   value,
   onChange,
@@ -67,6 +67,8 @@ const CustomDropdown = ({
   renderEmptyComponent,
   flatListProps,
   required,
+  selectedStyle,
+  placeholderStyle
 }: Props) => {
   return (
     <>
@@ -77,13 +79,14 @@ const CustomDropdown = ({
             {required && <Text style={styles.required}>*</Text>}
           </Text>
         )}
-        <DropdownElement
+        <MultiSelect
           onFocus={() => {
             Keyboard.dismiss();
           }}
           data={data}
           value={value}
-          onChange={item => onChange(item)}
+          // onChange={item => onChange(item)}
+          onChange={items => onChange?.(items)}
           disable={disable}
           dropdownPosition={'bottom'}
           style={[styles.dropdownStyle, dropdownStyle]}
@@ -91,12 +94,12 @@ const CustomDropdown = ({
           labelField={labelField === undefined ? 'label' : labelField}
           valueField={valueField === undefined ? 'value' : valueField}
           placeholder={placeholder}
-          placeholderStyle={styles.placeholderStyle}
+          placeholderStyle={[styles.placeholderStyle,placeholderStyle]}
           // itemContainerStyle={styles.containerStyle}
           containerStyle={styles.containerStyle}
           selectedTextStyle={styles.inputStyle}
+          selectedStyle={[{borderRadius: 20}, selectedStyle]}
           search={isSearch || false}
-          autoScroll={false}
           maxHeight={200}
           minHeight={30}
           keyboardAvoiding={true}
@@ -113,16 +116,25 @@ const CustomDropdown = ({
               />
             );
           }}
-          renderItem={res => {
+          renderItem={(item: any) => {
+            const isSelected = value?.includes(item?.[valueField || 'value']);
             return (
-              <View style={styles.rowStyle}>
+              <View style={styles.item}>
                 <Text
                   style={[
-                    styles.inputStyle,
-                    {color: res?.value == value ? '#F4E2B8' : '#DADADA'},
+                    styles.itemText,
+                    {color: isSelected ? '#F4E2B8' : '#DADADA'},
                   ]}>
-                  {res?.label}
+                  {item?.[labelField || 'label']}
                 </Text>
+                {isSelected && (
+                  <Image
+                    source={
+                      IMAGES.check_circle // ✔ filled icon
+                    }
+                    style={styles.checkIcon}
+                  />
+                )}
               </View>
             );
           }}
@@ -132,7 +144,7 @@ const CustomDropdown = ({
   );
 };
 
-export default CustomDropdown;
+export default CustomDropdownMulti;
 
 const styles = StyleSheet.create({
   label: {
@@ -183,7 +195,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputStyle: {
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 10, '#F4E2B8'),
   },
   placeholderStyle: {
     flex: 1,
@@ -216,5 +228,24 @@ const styles = StyleSheet.create({
     height: 24,
     resizeMode: 'contain',
     marginRight: 6,
+  },
+
+  item: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: hp(1.5),
+    // marginHorizontal: wp(2),
+    // borderBottomWidth: 0.5,
+    // borderColor: '#1E5BA1',
+    marginHorizontal: wp(16),
+    marginVertical: hp(8),
+  },
+  itemText: {
+    ...commonFontStyle(400, 18, '#DADADA'),
+  },
+  checkIcon: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
   },
 });

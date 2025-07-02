@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
@@ -14,8 +14,13 @@ import {AppStyles} from '../../../theme/appStyles';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import NotificationCard from '../../../component/employe/NotificationCard';
 import {IMAGES} from '../../../assets/Images';
+import {navigationRef} from '../../../navigation/RootContainer';
+import {SCREENS} from '../../../navigation/screenNames';
+import CustomPopup from '../../../component/common/CustomPopup';
 
 const AccountScreen = () => {
+  const [popupVisible, setPopupVisible] = useState(false);
+
   const settingsData = [
     {
       section: 'Personal Information',
@@ -44,6 +49,13 @@ const AccountScreen = () => {
         {label: 'Privacy Policy', icon: IMAGES.PrivacyPolicy},
         {label: 'Terms of Use', icon: IMAGES.TermsUse},
         {label: 'Help & Support', icon: IMAGES.HelpSupport},
+        {
+          label: 'Logout',
+          icon: IMAGES.logout,
+          onPress: () => {
+            setPopupVisible(true);
+          },
+        },
       ],
     },
   ];
@@ -67,26 +79,65 @@ const AccountScreen = () => {
         <View key={index} style={styles.section}>
           <Text style={styles.sectionTitle}>{section.section}</Text>
           {section.items.map((item, idx) => (
-            <TouchableOpacity key={idx} style={styles.row}>
-              <Image
-                source={item.icon}
-                style={{
-                  width: 22,
-                  height: 22,
-                  resizeMode: 'contain',
-                  marginRight: 14,
-                }}
-              />
+            <TouchableOpacity
+              key={idx}
+              onPress={() => {
+                item?.onPress && item?.onPress();
+              }}
+              style={styles.row}>
+              {item.label == 'Logout' ? (
+                <Image
+                  source={item.icon}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    resizeMode: 'contain',
+                    marginRight: 14,
+                    tintColor: 'red',
+                    marginLeft: 5,
+                  }}
+                />
+              ) : (
+                <Image
+                  source={item.icon}
+                  style={{
+                    width: 22,
+                    height: 22,
+                    resizeMode: 'contain',
+                    marginRight: 14,
+                    tintColor: '#D6D6D6',
+                  }}
+                />
+              )}
               {/* <Icon name={item.icon} size={20} color={colors.lightText} style={styles.icon} /> */}
-              <Text style={styles.label}>{item.label}</Text>
-              <Image
-                source={IMAGES.right_icon}
-                style={{width: 12, height: 12, resizeMode: 'contain'}}
-              />
+              <Text
+                style={[
+                  styles.label,
+                  item.label == 'Logout' ? {color: 'red'} : {},
+                ]}>
+                {item.label}
+              </Text>
+              {item.label !== 'Logout' && (
+                <Image
+                  source={IMAGES.right_icon}
+                  style={{width: 12, height: 12, resizeMode: 'contain'}}
+                />
+              )}
             </TouchableOpacity>
           ))}
         </View>
       ))}
+
+      <CustomPopup
+        onCloseModal={() => setPopupVisible(false)}
+        isVisible={popupVisible}
+        title={'Are you sure you want to log out?'}
+        leftButton={'Cancel'}
+        rightButton={'Log Out'}
+        onPressRight={() => {
+          navigationRef.navigate(SCREENS.WelcomeScreen);
+        }}
+      />
     </LinearContainer>
   );
 };
