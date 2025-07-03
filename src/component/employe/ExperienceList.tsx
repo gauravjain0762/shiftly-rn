@@ -194,7 +194,16 @@ const ExperienceList: FC<Props> = ({
             )}
           </ImageBackground>
         </TouchableOpacity>
-        <Text style={styles.stillText}>Still working here</Text>
+        <Text
+          onPress={() => {
+            setEducationListEdit({
+              ...educationListEdit,
+              checkEnd: !educationListEdit?.checkEnd,
+            });
+          }}
+          style={styles.stillText}>
+          Still working here
+        </Text>
       </View>
       <CustomDropdown
         data={educationOptions}

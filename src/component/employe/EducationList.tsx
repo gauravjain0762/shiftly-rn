@@ -38,9 +38,11 @@ const EducationList: FC<Props> = ({
   updateField,
   index,
   addNewEducation,
-  onNextPress
+  onNextPress,
 }: any) => {
-
+  console.log('====================================');
+  console.log('educationListEdit.startDate', educationListEdit.startDate);
+  console.log('====================================');
   return (
     <View style={{paddingHorizontal: 29}}>
       <CustomDropdown
@@ -75,21 +77,32 @@ const EducationList: FC<Props> = ({
       <View style={{flexDirection: 'row', marginBottom: 20, gap: 10}}>
         <CustomDatePicker
           label="Start Date"
-          value={educationListEdit.startDate}
+          value={
+            educationListEdit.startDate
+              ? moment(educationListEdit.startDate).format('DD-MM-YYYY')
+              : ''
+          }
+          minimumDate={new Date()} // today
           onChange={date => {
             setEducationListEdit({
               ...educationListEdit,
-              startDate: moment(date).format("DD-MM-YYYY"),
+              startDate: date, // store raw Date
             });
           }}
         />
+
         <CustomDatePicker
           label="End Date"
-          value={educationListEdit.endDate}
+          value={
+            educationListEdit.endDate
+              ? moment(educationListEdit.endDate).format('DD-MM-YYYY')
+              : ''
+          }
+          minimumDate={educationListEdit.startDate || new Date()} // prevent Invalid Date
           onChange={date => {
             setEducationListEdit({
               ...educationListEdit,
-              endDate: moment(date).format("DD-MM-YYYY"),
+              endDate: date, // store raw Date
             });
           }}
         />
@@ -130,9 +143,11 @@ const EducationList: FC<Props> = ({
           }}
         />
       </View>
-      <TouchableOpacity onPress={()=>{
-        addNewEducation()
-      }} style={styles.btnRow}>
+      <TouchableOpacity
+        onPress={() => {
+          addNewEducation();
+        }}
+        style={styles.btnRow}>
         <Image
           source={IMAGES.close1}
           style={{width: 22, height: 22, resizeMode: 'contain'}}
@@ -140,7 +155,13 @@ const EducationList: FC<Props> = ({
         <Text style={styles.addEduText}>Add Another Education</Text>
       </TouchableOpacity>
 
-      <GradientButton style={styles.btn} title={'Next'} onPress={() => {onNextPress()}} />
+      <GradientButton
+        style={styles.btn}
+        title={'Next'}
+        onPress={() => {
+          onNextPress();
+        }}
+      />
     </View>
   );
 };

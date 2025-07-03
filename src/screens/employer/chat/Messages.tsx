@@ -78,7 +78,7 @@ const Messages = () => {
   ];
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer  colors={['#0D468C', '#041326']}>
       <View style={styles.headerContainer}>
         <BackHeader
           title={t('Messages')}
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
   header: {
     justifyContent: 'flex-start',
     gap: wp(20),
+     paddingTop: hp(18),
   },
   headerContainer: {
     paddingHorizontal: wp(22),

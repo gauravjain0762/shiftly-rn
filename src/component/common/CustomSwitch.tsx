@@ -6,7 +6,7 @@ const CustomSwitch = ({isOn, setIsOn}) => {
     <TouchableOpacity
       style={[
         styles.switchContainer,
-        {backgroundColor: '#fff'},
+        {backgroundColor: isOn ? '#fff' : '#ccc'},
       ]}
       onPress={() => setIsOn(!isOn)}
       activeOpacity={0.8}>

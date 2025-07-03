@@ -18,6 +18,8 @@ import NotificationScreen from '../screens/employer/notification/NotificationScr
 import AccountScreen from '../screens/employer/profile/AccountScreen';
 import CreateProfileScreen from '../screens/employer/profile/CreateProfileScreen';
 import Chat from '../screens/employer/chat/Chat';
+import EditProfileScreen from '../screens/employer/profile/EditProfileScreen';
+import ViewProfileScreen from '../screens/employer/profile/ViewProfileScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -223,8 +225,18 @@ const StackNavigator: FC = () => {
       />
       <Stack.Screen
         options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.EditProfileScreen}
+        component={EditProfileScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
         name={SCREENS.Chat}
         component={Chat}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.ViewProfileScreen}
+        component={ViewProfileScreen}
       />
       {/* Seeker */}
     </Stack.Navigator>

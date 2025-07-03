@@ -87,8 +87,9 @@ const SignUp = () => {
   }, [timer]);
 
   const nextStep = () => setStep(prev => prev + 1);
+
   const prevStep = (num?: any) => {
-    if (num == 0) {
+    if (num == 1) {
       navigationRef.goBack();
     }
     setStep(prev => prev - 1);
@@ -467,11 +468,11 @@ const SignUp = () => {
       case 8:
         return (
           <View style={[styles.innerConrainer,{}]}>
-            {/* <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}> */}
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
               <Text style={styles.title}>{t('Select your nationality ')}</Text>
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center'}]}
-                onPress={{}}>
+                onPress={()=>{}}>
                 <Image
                   source={IMAGES.close}
                   style={{
@@ -526,7 +527,7 @@ const SignUp = () => {
               {/* <CustomCalendar /> */}
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center', marginTop: 27}]}
-                onPress={{}}>
+                onPress={()=>{}}>
                 <Image
                   source={IMAGES.close}
                   style={{
@@ -575,7 +576,7 @@ const SignUp = () => {
                   </TouchableOpacity>
                 );
               })}
-            {/* </ScrollView> */}
+            </ScrollView>
             <View style={{marginBottom:30}} />
             <GradientButton
               style={[styles.btn]}
@@ -636,7 +637,7 @@ const SignUp = () => {
               <CustomBtn
                 // style={styles.btn}
                 label={t('Complete My Profile')}
-                onPress={() => navigateTo(SCREENS.TabNavigator)}
+                onPress={() => navigateTo(SCREENS.CreateProfileScreen)}
                 outline={true}
                 btnStyle={styles.btn1}
               />
@@ -672,7 +673,7 @@ const SignUp = () => {
         style={styles.container}>
         <View style={styles.rowView}>
           <TouchableOpacity
-            onPress={() => prevStep()}
+            onPress={() => {prevStep(step)}}
             hitSlop={8}
             style={[styles.backBtn, {flex: 1}]}>
             <Image

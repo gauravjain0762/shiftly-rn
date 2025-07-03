@@ -15,7 +15,9 @@ export const SCREENS = {
   ApplyJob: 'ApplyJob',
   Messages: 'Messages',
   CreateProfileScreen: 'CreateProfileScreen',
+  EditProfileScreen: 'EditProfileScreen',
   Chat: 'Chat',
+  ViewProfileScreen: 'ViewProfileScreen',
 };
 
 export interface ScreenNames {
@@ -36,7 +38,9 @@ export interface ScreenNames {
   NotificationScreen: string;
   AccountScreen: string;
   CreateProfileScreen: string;
+  EditProfileScreen: string;
   Chat: string;
+  ViewProfileScreen: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

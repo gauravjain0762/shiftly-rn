@@ -70,6 +70,9 @@ export const IMAGES = {
   btnBg1: require('./image/btnBg1.png'),
   checkBox: require('./image/checkBox.png'),
   check_circle: require('./image/check_circle.png'),
+  send: require('./image/send.png'),
+  pin: require('./image/pin.png'),
+  dots: require('./image/dots.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

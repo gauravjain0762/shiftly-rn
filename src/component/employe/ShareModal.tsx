@@ -11,6 +11,7 @@ import Modal from 'react-native-modal';
 import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../theme/fonts';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../theme/colors';
+import FastImage from 'react-native-fast-image';
 
 type modal = {
   visible?: boolean;
@@ -44,7 +45,7 @@ const shareOptions = [
   },
   {
     name: 'Behance',
-    icon: 'https://1000logos.net/wp-content/uploads/2020/11/Behance-Logo-2020.jpg',
+    icon: 'https://images.seeklogo.com/logo-png/15/1/behance-logo-png_seeklogo-157940.png',
   },
   {
     name: 'Pinterest',
@@ -71,7 +72,7 @@ const ShareModal: FC<modal> = ({visible, onClose = () => {}}) => {
           contentContainerStyle={styles.iconContainer}
           renderItem={({item}) => (
             <TouchableOpacity style={styles.iconWrapper}>
-              <Image source={{uri: item.icon}} style={styles.iconImage} />
+              <FastImage  source={{uri: item.icon}} style={styles.iconImage} />
               <Text style={styles.iconText}>{item.name}</Text>
             </TouchableOpacity>
           )}

@@ -56,14 +56,14 @@ const CustomPopup = ({
           <CommonButton
             title={leftButton}
             onPress={onCloseModal}
-            btnStyle={{...styles.btnStyle, backgroundColor: colors._DADADA}}
-            textStyle={[styles.textStyle,{color: colors.black}]}
+            btnStyle={{...styles.btnStyle, backgroundColor: "transparent",borderWidth:1,borderColor:"#061F3D"}}
+            textStyle={[styles.textStyle,{color: "#061F3D"}]}
           />
           <CommonButton
             title={rightButton}
             onPress={onPressRight}
-            btnStyle={styles.btnStyle}
-            textStyle={styles.textStyle}
+            btnStyle={{...styles.btnStyle, backgroundColor: "#061F3D"}}
+            textStyle={[styles.textStyle,{color: colors.white}]}
           />
         </View>
       </View>
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
       margin: 0,
     },
     modalView: {
-      backgroundColor: colors.white,
+      backgroundColor: '#F4E2B8',
       borderTopEndRadius: 20,
       borderTopStartRadius: 20,
       paddingHorizontal: hp(20),
@@ -93,9 +93,10 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       marginTop: 10,
       gap: 10,
+      flexDirection:'row'
     },
     btnStyle: {
-      // flex: 1,
+      flex: 1,
     },
     textStyle:{
        ...commonFontStyle(500, 20, '#000000'),

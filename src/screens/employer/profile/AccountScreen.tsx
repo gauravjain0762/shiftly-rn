@@ -136,6 +136,7 @@ const AccountScreen = () => {
         rightButton={'Log Out'}
         onPressRight={() => {
           navigationRef.navigate(SCREENS.WelcomeScreen);
+          setPopupVisible(false)
         }}
       />
     </LinearContainer>

@@ -26,12 +26,11 @@ import DateTimePicker from 'react-native-modal-datetime-picker';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import EducationList from '../../../component/employe/EducationList';
 import EducationCard from '../../../component/employe/EducationCard';
-import moment from 'moment';
 import ExperienceList from '../../../component/employe/ExperienceList';
 import AboutMeList from '../../../component/employe/AboutMeList';
 import SuccessffullyModal from '../../../component/employe/SuccessffullyModal';
 
-const CreateProfileScreen = () => {
+const EditProfileScreen = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [showModal, setShowModal] = useState(false);
 
@@ -56,7 +55,7 @@ const CreateProfileScreen = () => {
     checkEnd: false,
   });
 
-   const [aboutEdit, setAboutEdit] = useState({
+  const [aboutEdit, setAboutEdit] = useState({
     aboutMe: '',
     responsibilities: '',
     selectOne: [],
@@ -65,7 +64,6 @@ const CreateProfileScreen = () => {
     selectedLanguages: [],
     proficiency: '',
     checkEnd: false,
-    
   });
 
   const addEducation = item => {
@@ -110,7 +108,7 @@ const CreateProfileScreen = () => {
         <BackHeader
           containerStyle={styles.header}
           isRight={true}
-          title={'Create Your Profile'}
+          title={'Update Profile'}
           RightIcon={<View />}
         />
       </View>
@@ -179,7 +177,7 @@ const CreateProfileScreen = () => {
             //   addEducation(aboutEdit);
             // }}
             onNextPress={() => {
-              setShowModal(true);
+               setShowModal(true);
             }}
           />
         )}
@@ -195,7 +193,7 @@ const CreateProfileScreen = () => {
   );
 };
 
-export default CreateProfileScreen;
+export default EditProfileScreen;
 
 const styles = StyleSheet.create({
   container: {

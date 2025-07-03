@@ -16,7 +16,7 @@ import {IMAGES} from '../../assets/Images';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 
-const CustomDatePicker = ({label, value, onChange, onPress}) => {
+const CustomDatePicker = ({label, value, onChange, onPress,maximumDate,minimumDate}) => {
   const [showPicker, setShowPicker] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -43,12 +43,13 @@ const CustomDatePicker = ({label, value, onChange, onPress}) => {
       <DateTimePicker
         value={new Date()}
         mode={'date'}
-        minimumDate={new Date()}
+        minimumDate={minimumDate}
+        maximumDate={maximumDate}
         display={Platform.OS == 'ios' ? 'spinner' : 'default'}
         isVisible={open}
         onConfirm={date => {
           setOpen(false);
-          onChange(moment(date).format('DD-MM-YYYY'));
+          onChange(date);
         }}
         onCancel={() => setOpen(false)}
       />

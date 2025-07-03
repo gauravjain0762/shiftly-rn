@@ -97,6 +97,7 @@ const AboutMeList: FC<Props> = ({
             aboutMe: text,
           });
         }}
+        maxLength={400}
         textAlignVertical="top"
         placeholderTextColor={'rgba(231, 231, 231, 0.8)'}
         placeholder="If an employer visited your profile right now, what would you want them to know about you first?"
@@ -110,7 +111,7 @@ const AboutMeList: FC<Props> = ({
         label="Key Responsibilities "
         placeholder={'Key Responsibilities '}
         value={educationListEdit.responsibilities}
-        container={{marginBottom: 15}}
+        container={{marginBottom: 25}}
         disable={false}
         onChange={selectedItem => {
           setEducationListEdit({
@@ -221,7 +222,7 @@ const AboutMeList: FC<Props> = ({
         label="Key Responsibilities "
         placeholder={'Key Responsibilities '}
         value={educationListEdit.responsibilities}
-        container={{marginBottom: 15}}
+         container={{marginBottom: 20}}
         disable={false}
         onChange={selectedItem => {
           setEducationListEdit({

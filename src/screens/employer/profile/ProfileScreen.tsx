@@ -71,7 +71,11 @@ const ProfileScreen = () => {
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
 
-          <View style={styles.statsRow}>
+          <TouchableOpacity
+            onPress={() => {
+              navigateTo(SCREENS.ViewProfileScreen);
+            }}
+            style={styles.statsRow}>
             <Text style={styles.statText}>0 Connections</Text>
             <Text
               style={[
@@ -80,7 +84,7 @@ const ProfileScreen = () => {
               ]}>
               0 Profile Views
             </Text>
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.completionCard}>
             <Text style={styles.completionTitle}>Profile completion</Text>
@@ -112,6 +116,9 @@ const ProfileScreen = () => {
           {/* Section: About Me */}
           <Section
             title="About me"
+            onPress={() => {
+              navigateTo(SCREENS.EditProfileScreen);
+            }}
             content="Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text."
           />
 
@@ -129,7 +136,16 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <HeaderWithAdd title="My Languages" />
             <Text style={styles.languageText}>English</Text>
-            <Slider style={{}} value={range} minimumTrackTintColor={"#F4E2B8"} maximumTrackTintColor={"#17457D"} onValueChange={value => setRange(value)} />
+            <Slider
+              style={{ width: '100%', height: 40 }}
+              value={range}
+               minimumValue={0}
+        maximumValue={100}
+              minimumTrackTintColor={'#F4E2B8'}
+              maximumTrackTintColor={'#17457D'}
+              onValueChange={value => setRange(value)}
+              
+            />
           </View>
 
           {/* Section: Education */}
@@ -181,7 +197,7 @@ const ProfileScreen = () => {
             <TouchableOpacity style={styles.addButton}>
               <Image source={IMAGES.pluse} style={styles.plus} />
             </TouchableOpacity>
-            <HeaderWithAdd title={"Achievements \nand Certifications"} />
+            <HeaderWithAdd title={'Achievements \nand Certifications'} />
             <View style={styles.certRow}>
               {[1, 2, 3, 4].map(item => (
                 <Image
