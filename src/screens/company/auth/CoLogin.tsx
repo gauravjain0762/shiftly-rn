@@ -9,7 +9,7 @@ import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
-import {navigateTo} from '../../../utils/commonFunction';
+import {navigateTo, resetNavigation} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 
 const CoLogin = () => {
@@ -38,7 +38,12 @@ const CoLogin = () => {
           <Text style={styles.forgote}>{t('Forgot your password?')}</Text>
         </View>
         <View>
-          <GradientButton type="Company" style={styles.button} title="Login" />
+          <GradientButton
+            type="Company"
+            onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+            style={styles.button}
+            title="Login"
+          />
           <Text style={styles.accoumt}>{t('Don’t have an account?')}</Text>
           <TouchableOpacity onPress={() => navigateTo(SCREENS.CoSignUp)}>
             <Text style={styles.createAccoumt}>

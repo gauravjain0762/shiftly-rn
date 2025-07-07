@@ -20,6 +20,9 @@ export const IMAGES = {
   check: require('./image/check.png'),
   badge: require('./image/badge.png'),
   mail: require('./image/mail.png'),
+  logoImg: require('./image/logoImg.png'),
+  uploadImg: require('./image/uploadImg.png'),
+  web: require('./image/web.png'),
 
   logog: require('./image/logog.png'),
   logo1: require('./image/logo.png'),
@@ -78,6 +81,8 @@ export const IMAGES = {
   dots: require('./image/dots.png'),
   rightArrow: require('./image/rightArrow.png'),
   shield: require('./image/shield.png'),
+  edit: require('./image/edit.png'),
+  location_marker: require('./image/location_marker.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),
@@ -88,9 +93,13 @@ export const IMAGES = {
   Jobs_on: require('./image/tab/Jobs_on.png'),
   user_off: require('./image/tab/user_off.png'),
   user_on: require('./image/tab/user_on.png'),
+  postFill: require('./image/postFill.png'),
+  post_off: require('./image/post.png'),
 
   //extra
   logo: require('./extra/logo.png'),
   post: require('./extra/post.png'),
   Activitielogo: require('./extra/Activitielogo.png'),
+  profileCover: require('./extra/profileCover.png'),
+  map: require('./extra/map.png'),
 };

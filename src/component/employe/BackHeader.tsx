@@ -11,8 +11,8 @@ import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {navigationRef} from '../../navigation/RootContainer';
-import { navigateTo } from '../../utils/commonFunction';
-import { SCREENS } from '../../navigation/screenNames';
+import {navigateTo} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
 
 type props = {
   onBackPress?: () => void;
@@ -24,6 +24,7 @@ type props = {
   RightIconStyle?: ViewStyle;
   titleStyle?: ViewStyle;
   leftStyle?: ViewStyle;
+  type?: 'company' | 'employe';
 };
 
 const BackHeader: FC<props> = ({
@@ -36,15 +37,29 @@ const BackHeader: FC<props> = ({
   RightIconStyle,
   titleStyle,
   leftStyle,
+  type = 'employe',
 }) => {
   return (
     <View style={[styles.header, containerStyle]}>
       <TouchableOpacity
         style={[leftStyle]}
         onPress={() => (onBackPress ? onBackPress() : navigationRef?.goBack())}>
-        <Image source={IMAGES.backArrow} style={styles.back} />
+        <Image
+          source={IMAGES.backArrow}
+          style={[
+            styles.back,
+            {tintColor: type == 'employe' ? colors.white : colors._0B3970},
+          ]}
+        />
       </TouchableOpacity>
-      <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
+      <Text
+        style={[
+          styles.headerTitle,
+          {color: type == 'employe' ? colors.white : colors._0B3970},
+          titleStyle,
+        ]}>
+        {title}
+      </Text>
       {isRight && !RightIcon ? (
         <TouchableOpacity
           style={[styles.bellIcon, RightIconStyle]}

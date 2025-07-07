@@ -2,29 +2,62 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
-import { navigateTo } from '../../utils/commonFunction';
-import { SCREENS } from '../../navigation/screenNames';
+import {navigateTo} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
+import {colors} from '../../theme/colors';
 
 type props = {
   onPressNotifi?: () => void;
+  type?: 'company' | 'employe';
+  onPressAvatar?: () => void;
 };
 
-const HomeHeader: FC<props> = ({onPressNotifi = () => {}}) => {
+const HomeHeader: FC<props> = ({
+  onPressNotifi,
+  type = 'employe',
+  onPressAvatar,
+}) => {
   return (
     <View style={styles.header}>
       <View style={styles.row}>
-        <Image
-          source={IMAGES.avatar} // Replace with actual image
-          style={styles.avatar}
-          resizeMode="cover"
-        />
+        <TouchableOpacity onPress={() => onPressAvatar && onPressAvatar()}>
+          <Image
+            source={IMAGES.avatar} // Replace with actual image
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
         <View style={styles.info}>
-          <Text style={styles.name}>Faf Tinna Thomas</Text>
-          <Text style={styles.location}>Dubai, UAE</Text>
+          <Text
+            style={[
+              styles.name,
+              {color: type == 'company' ? colors._0B3970 : colors.white},
+            ]}>
+            Faf Tinna Thomas
+          </Text>
+          <Text
+            style={[
+              styles.location,
+              {color: type == 'company' ? colors._0B3970 : colors.white},
+            ]}>
+            Dubai, UAE
+          </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.bellIcon} onPress={() => navigateTo(SCREENS.NotificationScreen)}>
-        <Image source={IMAGES.notification} style={styles.bell} />
+      <TouchableOpacity
+        style={styles.bellIcon}
+        onPress={() =>
+          onPressNotifi
+            ? onPressNotifi()
+            : navigateTo(SCREENS.NotificationScreen)
+        }>
+        <Image
+          source={IMAGES.notification}
+          style={[
+            styles.bell,
+            {tintColor: type == 'company' ? colors._0B3970 : colors.white},
+          ]}
+        />
       </TouchableOpacity>
     </View>
   );

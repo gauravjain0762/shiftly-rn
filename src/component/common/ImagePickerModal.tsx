@@ -2,12 +2,12 @@ import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import { colors } from '../../theme/colors';
+import {colors} from '../../theme/colors';
 
-const ImagePickerModal = ({actionSheet, setActionSheet}) => {
+const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
   const [image, setimage] = useState(undefined);
 
-  const handleSelect = (action) => {
+  const handleSelect = action => {
     console.log(`User selected: ${action}`);
     setActionSheet(false);
     // Add your logic here (e.g., open camera or image picker)
@@ -28,7 +28,7 @@ const ImagePickerModal = ({actionSheet, setActionSheet}) => {
       }
       let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
       setimage(temp);
-
+      onUpdate(temp);
       closeActionSheet();
     });
   };
@@ -45,6 +45,7 @@ const ImagePickerModal = ({actionSheet, setActionSheet}) => {
       }
       let temp = {...image, name: image.path.split('/').pop()};
       setimage(temp);
+      onUpdate(temp);
       closeActionSheet();
     });
   };
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAEED2',
   },
   text: {
-  color: "#000000"
+    color: '#000000',
   },
 });
 

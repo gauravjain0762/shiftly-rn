@@ -23,6 +23,9 @@ import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
+import {resetNavigation} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import ImagePickerModal from '../../../component/common/ImagePickerModal';
 
 const options1 = [
   'Hospitality Group / Operator',
@@ -48,6 +51,20 @@ const Rule = [
   'At least 1 special character (e.g. @, #, $, !)',
 ];
 
+const services = [
+  'Hospitality',
+  'Lodging',
+  'Restaurants',
+  'Events',
+  'Food & Beverage',
+  'Resort & Leisure',
+  'Nightlife',
+  'Entertainment',
+  'Water Parks',
+  'Retail Housekeeping Services',
+  'Others',
+];
+
 const CreateAccount = () => {
   const [step, setStep] = useState(1);
   const [selected1, setSelected1] = useState('Hotel/Resort');
@@ -60,6 +77,12 @@ const CreateAccount = () => {
   const [timer, setTimer] = useState(30);
   const [showModal, setShowModal] = useState(false);
   const [web, setWeb] = useState('');
+  const [address, setAddress] = useState('');
+  const [comIntro, setcomIntro] = useState('');
+  const [mission, setMission] = useState('');
+  const [values, setValues] = useState('');
+  const [searviceSelect, setServiceSelect] = useState('Hospitality');
+  const [imageModal, setImageModal] = useState(false);
 
   const inputRefsOtp = useRef([]);
   const [otp, setOtp] = useState(new Array(4).fill(''));
@@ -162,12 +185,13 @@ const CreateAccount = () => {
               </Text>
               <View style={styles.row}>
                 <CustomTextInput
-                  placeholder={t('Enter Business / Organization Name')}
+                  placeholder={t('Enter Business / Organi...')}
                   placeholderTextColor={colors._4A4A4A}
                   onChangeText={(e: any) => setName(e)}
                   value={name}
                   style={styles.input1}
                   containerStyle={styles.Inputcontainer}
+                  numberOfLines={1}
                 />
                 <TouchableOpacity hitSlop={10}>
                   <Image
@@ -457,6 +481,221 @@ const CreateAccount = () => {
             />
           </View>
         );
+      case 9:
+        return (
+          <View style={styles.innerConrainer}>
+            <View>
+              <Text style={styles.title}>
+                {t('Confirm your business address')}
+              </Text>
+              <View style={[styles.inputIconLabel, {marginTop: hp(60)}]}>
+                <Text style={styles.label}>{t('Address')}</Text>
+                <Image style={styles.info} source={IMAGES.info} />
+              </View>
+              <View style={[styles.row, {marginTop: hp(15)}]}>
+                <CustomTextInput
+                  placeholder={t('Enter website')}
+                  placeholderTextColor={colors._4A4A4A}
+                  onChangeText={(e: any) => setAddress(e)}
+                  value={address}
+                  style={styles.addressInput}
+                  multiline
+                  textAlignVertical="top"
+                  containerStyle={styles.Inputcontainer}
+                />
+                <Image
+                  source={IMAGES.edit}
+                  resizeMode="contain"
+                  style={styles.edit}
+                />
+              </View>
+              <Text style={styles.maplable}>
+                {t('Choose your map location')}
+              </Text>
+              <View style={styles.map} />
+            </View>
+            <View>
+              <TouchableOpacity style={styles.diffButton}>
+                <Text style={styles.btnTitle}>
+                  {t('Choose a different location')}
+                </Text>
+              </TouchableOpacity>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Next')}
+                onPress={() => nextStep()}
+              />
+            </View>
+          </View>
+        );
+
+      case 10:
+        return (
+          <View style={styles.innerConrainer}>
+            <View style={AppStyles.flex}>
+              <View style={styles.titleRow}>
+                <Text style={styles.title}>
+                  {t('Describe in few lines about you business e.g.')}
+                  <Text style={{...commonFontStyle(500, 20, colors._0B3970)}}>
+                    {t('Description')}
+                  </Text>
+                </Text>
+                <Image
+                  style={[styles.info, {marginLeft: 0}]}
+                  source={IMAGES.info}
+                />
+              </View>
+              <View>
+                <CustomTextInput
+                  placeholder={t('Introduce your company in few lines')}
+                  placeholderTextColor={'#4A4A4A80'}
+                  onChangeText={(e: any) => setcomIntro(e)}
+                  value={comIntro}
+                  style={styles.coIntroInput}
+                  multiline
+                  containerStyle={styles.Inputcontainer}
+                  textAlignVertical="top"
+                />
+                <Text style={styles.characterlanght}>{'500 Characters'}</Text>
+              </View>
+              <View>
+                <Text style={styles.title}>{t('Mission')}</Text>
+                <CustomTextInput
+                  placeholderTextColor={'#4A4A4A80'}
+                  onChangeText={(e: any) => setMission(e)}
+                  value={mission}
+                  style={[styles.coIntroInput, {height: hp(80)}]}
+                  multiline
+                  containerStyle={styles.Inputcontainer}
+                  textAlignVertical="top"
+                />
+                <Text style={styles.characterlanght}>{'100 Characters'}</Text>
+              </View>
+              <View>
+                <Text style={styles.title}>{t('Values')}</Text>
+                <CustomTextInput
+                  placeholderTextColor={'#4A4A4A80'}
+                  onChangeText={(e: any) => setValues(e)}
+                  value={values}
+                  style={[styles.coIntroInput]}
+                  multiline
+                  containerStyle={styles.Inputcontainer}
+                  textAlignVertical="top"
+                />
+                <Text style={styles.characterlanght}>{'100 Characters'}</Text>
+              </View>
+            </View>
+            <GradientButton
+              style={styles.btn}
+              type="Company"
+              title={t('Next')}
+              onPress={() => nextStep()}
+            />
+          </View>
+        );
+      case 11:
+        return (
+          <View style={styles.innerConrainer}>
+            <View style={AppStyles.flex}>
+              <Text style={styles.title}>
+                {t('Select your industry sectors')}
+              </Text>
+              <Text style={[styles.title, {marginVertical: hp(33)}]}>
+                {t('Your company’s services.')}
+              </Text>
+              <Pressable
+                style={[styles.dateRow, {marginTop: hp(10)}]}
+                onPress={() => {}}>
+                <Text style={styles.dateText}>{searviceSelect}</Text>
+              </Pressable>
+              <View style={styles.underline} />
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{flexGrow: 1}}
+                style={{maxHeight: hp(300)}}>
+                {services.map((option, index) => {
+                  const isSelected = option === searviceSelect;
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.optionContainer,
+                        // isSelected && styles.selectedOptionContainer,
+                      ]}
+                      onPress={() => setServiceSelect(option)}>
+                      <Text
+                        style={[
+                          styles.optionText,
+                          isSelected && styles.selectedText,
+                        ]}>
+                        {option}
+                      </Text>
+                      {isSelected && (
+                        <Image
+                          source={IMAGES.mark}
+                          style={{
+                            width: 25,
+                            height: 22,
+                            resizeMode: 'contain',
+                            tintColor: colors._4A4A4A,
+                          }}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+            <GradientButton
+              style={styles.btn}
+              type="Company"
+              title={t('Next')}
+              onPress={() => nextStep()}
+            />
+          </View>
+        );
+      case 12:
+        return (
+          <View style={styles.innerConrainer}>
+            <View>
+              <Text style={styles.title}>
+                {t('Personalise your company profile')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setImageModal(!imageModal)}
+                style={styles.logoConatiner}>
+                <Image source={IMAGES.logoImg} style={styles.logoImg} />
+              </TouchableOpacity>
+              <Text style={styles.logolabel}>
+                {t(
+                  'Your logo helps job seekers recognise and trust your brand.',
+                )}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setImageModal(!imageModal)}
+                style={styles.logoConatiner}>
+                <Image source={IMAGES.uploadImg} style={styles.uploadImg} />
+              </TouchableOpacity>
+              <Text style={styles.logolabel}>
+                {t('Your cover image showcases your workplace or atmosphere')}
+              </Text>
+            </View>
+            <View>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Continue')}
+                onPress={() => resetNavigation(SCREENS.CompanyProfile)}
+              />
+              <TouchableOpacity
+                onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+                style={styles.skipBtn}>
+                <Text style={styles.skipNow}>{t('Skip for now')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
     }
   };
 
@@ -466,7 +705,8 @@ const CreateAccount = () => {
       colors={['#FFF8E6', '#F3E1B7']}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
-        scrollEnabled={false}
+        // scrollEnabled={false}
+        automaticallyAdjustContentInsets
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollcontainer}
@@ -511,12 +751,19 @@ const CreateAccount = () => {
             <TouchableOpacity
               onPress={() => {
                 setShowModal(!showModal);
+                resetNavigation(SCREENS.CoTabNavigator);
               }}
               style={styles.skip}>
               <Text style={styles.skiptitle}>{t('Skip')}</Text>
             </TouchableOpacity>
           </View>
         }
+      />
+      <ImagePickerModal
+        actionSheet={imageModal}
+        setActionSheet={() => {
+          setImageModal(false);
+        }}
       />
     </LinearContainer>
   );
@@ -552,16 +799,17 @@ const styles = StyleSheet.create({
   innerConrainer: {
     flex: 1,
     justifyContent: 'space-between',
+    marginTop: hp(16),
   },
   title: {
     ...commonFontStyle(500, 25, colors._0B3970),
-    paddingTop: hp(30),
+    paddingTop: hp(10),
   },
   dateRow: {
     flexDirection: 'row',
     // alignItems: 'center',
     marginBottom: 10,
-    marginTop: 67,
+    marginTop: hp(67),
   },
   dateText: {
     ...commonFontStyle(400, 22, colors._4A4A4A),
@@ -591,12 +839,12 @@ const styles = StyleSheet.create({
   },
   input1: {
     ...commonFontStyle(400, 22, colors._4A4A4A),
-    marginLeft: wp(12),
   },
   info: {
     width: wp(22),
     height: wp(22),
     tintColor: '#959595',
+    marginLeft: wp(12),
   },
   row: {
     flexDirection: 'row',
@@ -612,6 +860,7 @@ const styles = StyleSheet.create({
     width: wp(28),
     height: wp(28),
     tintColor: colors.black,
+    marginRight: wp(12),
   },
   Inputcontainer: {
     flex: 1,
@@ -621,6 +870,7 @@ const styles = StyleSheet.create({
     width: wp(20),
     height: wp(20),
     resizeMode: 'contain',
+    marginRight: wp(12),
   },
   passwordContiner: {
     justifyContent: 'space-between',
@@ -717,5 +967,93 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flex: 1,
     borderBottomColor: colors._7B7878,
+  },
+  inputIconLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  label: {
+    ...commonFontStyle(400, 22, colors._4A4A4A),
+  },
+  edit: {
+    width: wp(22),
+    height: wp(22),
+    resizeMode: 'contain',
+  },
+  addressInput: {
+    ...commonFontStyle(700, 22, colors._4A4A4A),
+  },
+  maplable: {
+    ...commonFontStyle(400, 22, colors._4A4A4A),
+    paddingVertical: hp(20),
+  },
+  map: {
+    height: hp(150),
+    flex: 1,
+    backgroundColor: colors._A3A3A3,
+    borderRadius: 15,
+  },
+  diffButton: {
+    borderRadius: 100,
+    borderWidth: 2.5,
+    borderColor: colors._0B3970,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: wp(10),
+    marginBottom: hp(36),
+  },
+  btnTitle: {
+    ...commonFontStyle(400, 20, colors._0B3970),
+    paddingVertical: hp(10),
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: wp(6),
+    marginBottom: hp(16),
+  },
+  coIntroInput: {
+    ...commonFontStyle(400, 20, '#4A4A4A80'),
+    height: hp(180),
+    borderBottomWidth: 2,
+    borderColor: '#7B7878',
+    flex: 1,
+  },
+  characterlanght: {
+    ...commonFontStyle(400, 16, colors._4A4A4A),
+    textAlign: 'right',
+    paddingVertical: hp(15),
+  },
+  logoConatiner: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: colors._EBDCB8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: hp(22),
+    marginTop: hp(33),
+  },
+  logoImg: {
+    width: wp(113),
+    height: wp(113),
+    resizeMode: 'contain',
+  },
+  logolabel: {
+    marginTop: hp(14),
+    ...commonFontStyle(400, 15, colors._050505),
+  },
+  uploadImg: {
+    width: wp(70),
+    height: wp(70),
+    resizeMode: 'contain',
+  },
+  skipNow: {
+    ...commonFontStyle(400, 19, '#B4B4B4'),
+  },
+  skipBtn: {
+    alignSelf: 'center',
+    marginTop: hp(22),
   },
 });

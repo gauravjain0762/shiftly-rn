@@ -10,6 +10,7 @@ type SearchBarProps = {
   placeholder?: string;
   containerStyle?: ViewStyle;
   inputStyle?: ViewStyle;
+  type?: 'company' | 'employe';
 };
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -18,16 +19,27 @@ const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'Search by keyword...',
   containerStyle,
   inputStyle,
+  type = 'employe',
 }) => {
   return (
     <View style={[styles.container, containerStyle]}>
-      <Image source={IMAGES.search} style={styles.img} />
+      <Image
+        source={IMAGES.search}
+        style={[
+          styles.img,
+          {tintColor: type == 'company' ? colors._0B3970 : colors.white},
+        ]}
+      />
       <TextInput
-        style={[styles.input, inputStyle]}
+        style={[
+          styles.input,
+          {color: type == 'company' ? colors._0B3970 : colors.white},
+          inputStyle,
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#FFFFFF"
+        placeholderTextColor={type == 'company' ? colors._0B3970 : colors.white}
       />
     </View>
   );

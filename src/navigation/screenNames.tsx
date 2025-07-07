@@ -27,6 +27,15 @@ export const SCREENS = {
   CoLogin: 'CoLogin',
   CoSignUp: 'CoSignUp',
   CreateAccount: 'CreateAccount',
+  CompanyProfile: 'CompanyProfile',
+  CoActivity: 'CoActivity',
+  CoJob: 'CoJob',
+  CoPost: 'CoPost',
+  CoChat: 'CoChat',
+  CoTabNavigator: 'CoTabNavigator',
+  CoHome: 'CoHome',
+  CoProfile: 'CoProfile',
+  CoMessage: 'CoMessage',
 };
 
 export interface ScreenNames {
@@ -55,6 +64,15 @@ export interface ScreenNames {
   CoLogin: string;
   CoSignUp: string;
   CreateAccount: string;
+  CompanyProfile: string;
+  CoActivity: string;
+  CoJob: string;
+  CoPost: string;
+  CoChat: string;
+  CoTabNavigator: string;
+  CoHome: string;
+  CoProfile: string;
+  CoMessage: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

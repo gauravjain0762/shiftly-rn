@@ -24,6 +24,10 @@ import CoLogin from '../screens/company/auth/CoLogin';
 import useRole from '../hooks/useRole';
 import CoSignUp from '../screens/company/auth/CoSignUp';
 import CreateAccount from '../screens/company/auth/CreateAccount';
+import CompanyProfile from '../screens/company/profile/CompanyProfile';
+import CoTabNavigator from './CoTabNavigator';
+import CoMessage from '../screens/company/chat/CoMessage';
+import CoChat from '../screens/company/chat/CoChat';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -250,6 +254,26 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CreateAccount}
           component={CreateAccount}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CompanyProfile}
+          component={CompanyProfile}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoMessage}
+          component={CoMessage}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoChat}
+          component={CoChat}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoTabNavigator}
+          component={CoTabNavigator}
         />
       </Stack.Navigator>
     );

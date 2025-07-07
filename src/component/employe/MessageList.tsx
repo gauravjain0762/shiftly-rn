@@ -16,9 +16,14 @@ type MessageItem = {
 type Props = {
   onPressMessage: (item: MessageItem) => void;
   item: MessageItem[];
+  type?: 'company' | 'employe';
 };
 
-const MessageList: FC<Props> = ({onPressMessage = () => {}, item}) => {
+const MessageList: FC<Props> = ({
+  onPressMessage = () => {},
+  item,
+  type = 'employe',
+}) => {
   return (
     <TouchableOpacity
       style={styles.itemContainer}
@@ -27,17 +32,55 @@ const MessageList: FC<Props> = ({onPressMessage = () => {}, item}) => {
         <Image source={{uri: item?.logo}} style={styles.logo} />
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.sender}>{item.sender}</Text>
-        <Text style={styles.preview} numberOfLines={1}>
-          {item.preview}
+        <Text
+          style={[
+            styles.title,
+            {color: type == 'employe' ? colors.white : colors._0B3970},
+          ]}>
+          {item?.title}
+        </Text>
+        <Text
+          style={[
+            styles.sender,
+            {color: type == 'employe' ? colors.white : colors._0B3970},
+          ]}>
+          {item?.sender}
+        </Text>
+        <Text
+          style={[
+            styles.preview,
+            {color: type == 'employe' ? colors.white : colors._0B3970},
+          ]}
+          numberOfLines={1}>
+          {item?.preview}
         </Text>
       </View>
       <View style={styles.rightContainer}>
-        <Text style={styles.date}>{item.date}</Text>
-        {item.unreadCount ? (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{item.unreadCount}</Text>
+        <Text
+          style={[
+            styles.date,
+            {color: type == 'employe' ? colors.white : colors._0B3970},
+          ]}>
+          {item?.date}
+        </Text>
+        {item?.unreadCount ? (
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor:
+                  type == 'employe' ? colors.white : colors._0B3970,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.badgeText,
+                {
+                  color: type == 'employe' ? '#002B64' : colors.white,
+                },
+              ]}>
+              {item?.unreadCount}
+            </Text>
           </View>
         ) : null}
       </View>

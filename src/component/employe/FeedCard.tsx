@@ -4,9 +4,13 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
 
-const FeedCard: FC = () => {
+type card = {
+  onPressCard?: () => void;
+};
+
+const FeedCard: FC<card> = ({onPressCard = () => {}}) => {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity onPress={() => onPressCard()} style={styles.card}>
       <View style={styles.cardHeader}>
         <Image
           source={IMAGES.logo} // Replace with hotel logo
@@ -38,7 +42,7 @@ const FeedCard: FC = () => {
         Sed ut perspiciatis unden omnis istenatus error sit voluptatem accusant
         ium dolor mque.
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 
