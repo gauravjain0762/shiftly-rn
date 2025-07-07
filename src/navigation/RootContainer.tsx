@@ -2,13 +2,15 @@ import {
   NavigationContainer,
   createNavigationContainerRef,
 } from '@react-navigation/native';
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from '../redux/hooks';
 import StackNavigator from './StackNavigator';
 import {StatusBar, useColorScheme} from 'react-native';
 import {Loader} from '../component';
 import {darkThemeColors, colors} from '../theme/colors';
 import {setDarkTheme} from '../redux/service/CommonServices';
+import useRole from '../hooks/useRole';
+import Splash from '../screens/auth/Splash';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -31,15 +33,14 @@ const RootContainer: FC = () => {
   // const {isDarkTheme} = useAppSelector(state => state.common);
   const theme = useColorScheme();
   const dispatch = useAppDispatch();
+  const {role, loading} = useRole();
 
   // useEffect(() => {
   //   dispatch(setDarkTheme(theme == 'dark' ? true : false));
   // }, [theme]);
 
   return (
-    <NavigationContainer
-      theme={DefaultThemeColor}
-      ref={navigationRef}>
+    <NavigationContainer theme={DefaultThemeColor} ref={navigationRef}>
       {/* <StatusBar barStyle={'dark-content'} backgroundColor={colors.white} /> */}
       <StackNavigator />
       {/* {isLoading && <Loader />} */}

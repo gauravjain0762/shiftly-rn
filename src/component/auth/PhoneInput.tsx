@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {FC, useState} from 'react';
 import {
   View,
   TextInput,
@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ViewStyle,
+  ImageStyle,
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {commonFontStyle, hp} from '../../theme/fonts';
@@ -13,7 +15,12 @@ import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 
-const PhoneInput = () => {
+type picker = {
+  callingCodeStyle?: ViewStyle;
+  downIcon?: ImageStyle;
+};
+
+const PhoneInput: FC<picker> = ({callingCodeStyle, downIcon}) => {
   const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState('AE');
   const [showModal, setShowModal] = useState(false);
@@ -29,7 +36,7 @@ const PhoneInput = () => {
     <View style={styles.container}>
       <View style={styles.phoneRow}>
         <CountryPicker
-         visible={showModal}
+          visible={showModal}
           countryCode={countryCode}
           withFilter
           withFlag
@@ -38,16 +45,22 @@ const PhoneInput = () => {
             setCountryCode(country.cca2);
             setCallingCode(country.callingCode[0]);
           }}
-          onClose={()=>{
-            setShowModal(false)
+          onClose={() => {
+            setShowModal(false);
           }}
           containerButtonStyle={styles.countryPicker}
         />
-        <TouchableOpacity onPress={()=>{setShowModal(true)}} style={{flexDirection: 'row', alignItems: 'center',top:2}}>
-          <Text style={styles.callingCode}>+{callingCode}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setShowModal(true);
+          }}
+          style={{flexDirection: 'row', alignItems: 'center', top: 2}}>
+          <Text style={[styles.callingCode, callingCodeStyle]}>
+            +{callingCode}
+          </Text>
           <Image
             source={IMAGES.ic_down1}
-            style={{width: 12, height: 12, resizeMode: 'contain'}}
+            style={[{width: 12, height: 12, resizeMode: 'contain'}, downIcon]}
           />
         </TouchableOpacity>
         <TextInput

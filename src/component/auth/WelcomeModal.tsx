@@ -12,7 +12,13 @@ import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {useTranslation} from 'react-i18next';
 
-const WelcomeModal = ({visible, name = 'William', onClose}) => {
+const WelcomeModal = ({
+  visible,
+  name = 'William',
+  onClose,
+  description,
+  ButtonContainer,
+}) => {
   const {t, i18n} = useTranslation();
 
   return (
@@ -38,18 +44,21 @@ const WelcomeModal = ({visible, name = 'William', onClose}) => {
           </Text>
 
           <Text style={styles.messageText}>
-            {t(
-              'Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.',
-            )}
+            {description ||
+              t(
+                'Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.',
+              )}
           </Text>
           {/* <Text style={styles.messageText}>
             You're all set to explore hospitality{'\n'}
             opportunities tailored just for you.
           </Text> */}
 
-          <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>{t('Lets get your job!')}</Text>
-          </TouchableOpacity>
+          {ButtonContainer || (
+            <TouchableOpacity style={styles.button} onPress={onClose}>
+              <Text style={styles.buttonText}>{t('Lets get your job!')}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>

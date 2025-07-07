@@ -18,8 +18,11 @@ export const IMAGES = {
   filter: require('./image/filter.png'),
   hart: require('./image/hart.png'),
   check: require('./image/check.png'),
+  badge: require('./image/badge.png'),
+  mail: require('./image/mail.png'),
 
   logog: require('./image/logog.png'),
+  logo1: require('./image/logo.png'),
   login_bg: require('./image/login_bg.png'),
   g_icon: require('./image/g_icon.png'),
   e_icon: require('./image/e_icon.png'),
@@ -73,6 +76,8 @@ export const IMAGES = {
   send: require('./image/send.png'),
   pin: require('./image/pin.png'),
   dots: require('./image/dots.png'),
+  rightArrow: require('./image/rightArrow.png'),
+  shield: require('./image/shield.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

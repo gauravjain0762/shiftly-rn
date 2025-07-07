@@ -6,18 +6,27 @@ import {SCREENS} from '../../navigation/screenNames';
 import SplashScreen from 'react-native-splash-screen';
 import {IMAGES} from '../../assets/Images';
 import {SCREEN_HEIGHT, SCREEN_WIDTH} from '../../theme/fonts';
+import useRole from '../../hooks/useRole';
 
 type Props = {};
 
 const Splash = (props: Props) => {
-  const navigation = useNavigation();
-
+  const {role, setRole} = useRole();
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-      resetNavigation(SCREENS.SelectRollScreen);
+      GetRole();
     }, 1000);
   }, []);
+  const GetRole = () => {
+    if (role == 'company') {
+      resetNavigation(SCREENS.CoStack);
+    } else if (role == 'employee') {
+      resetNavigation(SCREENS.EmployeeStack);
+    } else {
+      resetNavigation(SCREENS.SelectRollScreen);
+    }
+  };
   return (
     <View>
       <Image

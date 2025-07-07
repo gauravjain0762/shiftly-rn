@@ -1,4 +1,8 @@
 export const SCREENS = {
+  //stack
+  CoStack: 'CoStack',
+  EmployeeStack: 'EmployeeStack',
+
   HomeScreen: 'HomeScreen',
   LoginScreen: 'LoginScreen',
   SplashScreen: 'SplashScreen',
@@ -18,6 +22,11 @@ export const SCREENS = {
   EditProfileScreen: 'EditProfileScreen',
   Chat: 'Chat',
   ViewProfileScreen: 'ViewProfileScreen',
+
+  //company
+  CoLogin: 'CoLogin',
+  CoSignUp: 'CoSignUp',
+  CreateAccount: 'CreateAccount',
 };
 
 export interface ScreenNames {
@@ -41,6 +50,11 @@ export interface ScreenNames {
   EditProfileScreen: string;
   Chat: string;
   ViewProfileScreen: string;
+
+  //company
+  CoLogin: string;
+  CoSignUp: string;
+  CreateAccount: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

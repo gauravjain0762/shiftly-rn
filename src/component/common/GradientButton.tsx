@@ -18,6 +18,14 @@ interface DiamondGradientButtonProps {
   onPress?: (event: GestureResponderEvent) => void;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  stopColor?: string;
+  cx?: string;
+  cy?: string;
+  rx?: string;
+  ry?: string;
+  fx?: string;
+  fy?: string;
+  type?: 'Company' | 'Employee';
 }
 
 const GradientButton: React.FC<DiamondGradientButtonProps> = ({
@@ -25,36 +33,98 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
   onPress,
   style,
   textStyle,
+  stopColor = '',
+  cx = '',
+  cy = '',
+  fx = '',
+  fy = '',
+  rx = '',
+  ry = '',
+  type = 'Employee',
 }) => {
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.wrapper, style]}>
-      <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
-        <Defs>
-          <RadialGradient
-            id="diamond"
-            cx="50%"
-            cy="50%"
-            rx="50%"
-            ry="50%"
-            fx="50%"
-            fy="50%">
-            <Stop offset="0%" stopColor="#F4E2B8" stopOpacity="1" />
-            <Stop offset="100%" stopColor="#CBB580" stopOpacity="1" />
-          </RadialGradient>
-        </Defs>
-        <Rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          rx="0"
-          ry="0"
-          fill="url(#diamond)"
-        />
-      </Svg>
-
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.wrapper,
+        style,
+        {borderWidth: type == 'Employee' ? 2.5 : 0},
+      ]}>
+      {type == 'Employee' ? (
+        <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
+          <Defs>
+            <RadialGradient
+              id="diamond"
+              cx={cx || '50%'}
+              cy={cy || '50%'}
+              rx={rx || '50%'}
+              ry={ry || '50%'}
+              fx={fx || '50%'}
+              fy={fy || '50%'}>
+              <Stop
+                offset="0%"
+                stopColor={stopColor || '#F4E2B8'}
+                stopOpacity="1"
+              />
+              <Stop
+                offset="100%"
+                stopColor={stopColor || '#CBB580'}
+                stopOpacity="1"
+              />
+            </RadialGradient>
+          </Defs>
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            rx="0"
+            ry="0"
+            fill="url(#diamond)"
+          />
+        </Svg>
+      ) : (
+        <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
+          <Defs>
+            <RadialGradient
+              id="diamond"
+              cx={cx || '50%'}
+              cy={cy || '50%'}
+              rx={rx || '60%'}
+              ry={ry || '90%'}
+              fx={fx || '10%'}
+              fy={fy || '50%'}>
+              <Stop
+                offset="0%"
+                stopColor={stopColor || '#024AA1'}
+                stopOpacity="1"
+              />
+              <Stop
+                offset="100%"
+                stopColor={stopColor || '#041428'}
+                stopOpacity="1"
+              />
+            </RadialGradient>
+          </Defs>
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            rx="0"
+            ry="0"
+            fill="url(#diamond)"
+          />
+        </Svg>
+      )}
       <View style={styles.content}>
-        <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+        <Text
+          style={[
+            type == 'Employee' ? styles.buttonText : styles.CombuttonText,
+            textStyle,
+          ]}>
+          {title}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -81,6 +151,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  CombuttonText: {
+    ...commonFontStyle(600, 20, colors.white),
   },
 });
 

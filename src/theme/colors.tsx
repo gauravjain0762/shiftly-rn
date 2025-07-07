@@ -23,6 +23,9 @@ export const colors = {
   _061F3D: '#061F3D',
   _051C38: '#051C38',
   _4F4F4F: '#4F4F4F',
+  _7B7878: '#7B7878',
+  _234F86: '#234F86',
+  _4A4A4A: '#4A4A4A',
 
   _25201a: '#25201a',
   containerBGColor: 'rgba(51, 50, 50, 0.4)',

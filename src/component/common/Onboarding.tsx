@@ -13,7 +13,7 @@ import Animated, {
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
 import {IMAGES} from '../../assets/Images';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, hp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import ScrollingPaginationDots from './ScrollingPaginationDots';
 
@@ -66,7 +66,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
   const renderItem = ({item}: {item: OnboardingDataItem}) => {
     return (
       <View style={[styles.slide, {width}]}>
-        <Image source={IMAGES.logog} style={styles.logo} />
+        <Image resizeMode="contain" source={IMAGES.logog} style={styles.logo} />
         <Image
           source={IMAGES.login_bg}
           style={styles.illustration}
@@ -104,7 +104,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
           scrollX={scrollX}
           count={data.length}
           slideWidth={width}
-          dotColor={"red"}
+          dotColor={'red'}
           inactiveDotColor={colors._DADADA}
           dotSize={10}
           spacing={12}
@@ -126,11 +126,11 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 51,
+    marginTop: hp(20),
   },
   slide: {
     alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     paddingHorizontal: 20,
   },
   description: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 39,
-    width:"100%"
+    width: '100%',
   },
   paginationDot: {
     height: 10,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 30,
     marginTop: 29,
-    marginBottom:10,
+    marginBottom: 10,
     marginHorizontal: 28,
     ...commonFontStyle(600, 17, colors._DADADA),
   },

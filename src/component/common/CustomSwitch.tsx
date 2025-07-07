@@ -1,12 +1,29 @@
-import React, {useState} from 'react';
+import React, {FC, useState} from 'react';
 import {View, TouchableOpacity, StyleSheet} from 'react-native';
 
-const CustomSwitch = ({isOn, setIsOn}) => {
+type Switch = {
+  isOn?: boolean;
+  setIsOn?: (val: boolean) => void;
+  thumbColor?: string;
+  activeColor?: string;
+  inActiveColor?: string;
+};
+const CustomSwitch: FC<Switch> = ({
+  isOn,
+  setIsOn = () => {},
+  thumbColor = '',
+  activeColor = '',
+  inActiveColor = '',
+}) => {
   return (
     <TouchableOpacity
       style={[
         styles.switchContainer,
-        {backgroundColor: isOn ? '#fff' : '#ccc'},
+        {
+          backgroundColor: isOn
+            ? activeColor || '#fff'
+            : inActiveColor || '#ccc',
+        },
       ]}
       onPress={() => setIsOn(!isOn)}
       activeOpacity={0.8}>
@@ -14,7 +31,7 @@ const CustomSwitch = ({isOn, setIsOn}) => {
         style={[
           styles.thumb,
           {
-            backgroundColor: '#0A285F',
+            backgroundColor: thumbColor || '#0A285F',
             alignSelf: isOn ? 'flex-end' : 'flex-start',
           },
         ]}

@@ -1372,7 +1372,7 @@ PODS:
     - Yoga
   - react-native-geolocation-service (5.3.1):
     - React
-  - react-native-safe-area-context (5.5.0):
+  - react-native-safe-area-context (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1387,8 +1387,8 @@ PODS:
     - React-hermes
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.5.0)
-    - react-native-safe-area-context/fabric (= 5.5.0)
+    - react-native-safe-area-context/common (= 5.5.1)
+    - react-native-safe-area-context/fabric (= 5.5.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1398,7 +1398,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (5.5.0):
+  - react-native-safe-area-context/common (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1422,7 +1422,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (5.5.0):
+  - react-native-safe-area-context/fabric (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1872,7 +1872,7 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNGestureHandler (2.26.0):
+  - RNGestureHandler (2.27.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2449,7 +2449,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: ca2804a25fdcefffa0aa942aa23ab53b99614a34
   react-native-geolocation: 2cd348a829e84fff7bbb98b6e66b0093a3aa8e1a
   react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
-  react-native-safe-area-context: fdeca0a1561ee57464631f8334cae4bbf34265ad
+  react-native-safe-area-context: 5158c23e7f0e4be9cfbcf39a2f8f869643e18016
   react-native-slider: 351d1186b07d686b93dad14ce2b474ca62dea0fc
   react-native-splash-screen: 4312f786b13a81b5169ef346d76d33bc0c6dc457
   React-NativeModulesApple: 452b86b29fae99ed0a4015dca3ad9cd222f88abf
@@ -2486,7 +2486,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: c1bbcf629d7206d1e19310827848b98d68a4cbaf
   RNDateTimePicker: dd783850814745855f5b37b4cbaf5a3de771ee70
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
-  RNGestureHandler: 970902e9f2f6308b2a2519ce93108fbc65460933
+  RNGestureHandler: 080b116d9f25e83b1e877f1d78aa0f09e2e0e93d
   RNImageCropPicker: 64b6bec9ec185ee59b71a93d7058816bd0e1916e
   RNReanimated: 6a437c90e263e4a2202a282f9d6dea0ad28d018d
   RNScreens: c2e3cc506212228c607b4785b315205e28acbf0f

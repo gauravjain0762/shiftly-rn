@@ -7,6 +7,8 @@ import {
   TextInputProps,
   TouchableOpacity,
   Image,
+  ViewStyle,
+  ImageStyle,
 } from 'react-native';
 import {commonFontStyle} from '../../theme/fonts';
 import {useTheme} from '@react-navigation/native';
@@ -16,12 +18,16 @@ interface CustomTextInputProps extends TextInputProps {
   label?: string;
   required?: boolean;
   showRightIcon?: boolean;
+  containerStyle?: ViewStyle;
+  imgStyle?: ImageStyle;
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = ({
   label,
   required = false,
   showRightIcon,
+  containerStyle,
+  imgStyle,
   ...rest
 }) => {
   const {colors} = useTheme();
@@ -29,7 +35,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <TextInput
         style={styles.input}
         secureTextEntry={showPassword}
@@ -39,7 +45,13 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           <Image
             source={!showPassword ? IMAGES.eye : IMAGES.eye_on}
-            style={{width: 24, height: 24, resizeMode: 'contain',tintColor:"#F4E2B8"}}
+            style={{
+              width: 24,
+              height: 24,
+              resizeMode: 'contain',
+              tintColor: '#F4E2B8',
+              ...imgStyle,
+            }}
           />
         </TouchableOpacity>
       )}

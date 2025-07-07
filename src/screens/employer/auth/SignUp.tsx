@@ -29,11 +29,9 @@ import {hp} from '../../../theme/fonts';
 import CustomBtn from '../../../component/common/CustomBtn';
 import {useTranslation} from 'react-i18next';
 import {navigationRef} from '../../../navigation/RootContainer';
-import SmoothPinCodeInput from '@dreamwalk-os/react-native-smooth-pincode-input';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import moment from 'moment';
-import CustomCalendar from '../../../component/auth/CustomCalendar';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import DateTimePicker from 'react-native-modal-datetime-picker';
@@ -398,7 +396,11 @@ const SignUp = () => {
               <Text style={styles.title}>
                 {t('What is your date of birth?')}
               </Text>
-              <Pressable style={styles.dateRow} onPress={() => {setOpen(true)}}>
+              <Pressable
+                style={styles.dateRow}
+                onPress={() => {
+                  setOpen(true);
+                }}>
                 <Image
                   source={IMAGES.cake}
                   style={{width: 24, height: 24, resizeMode: 'contain'}}
@@ -467,12 +469,14 @@ const SignUp = () => {
 
       case 8:
         return (
-          <View style={[styles.innerConrainer,{}]}>
-            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+          <View style={[styles.innerConrainer, {}]}>
+            <ScrollView
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}>
               <Text style={styles.title}>{t('Select your nationality ')}</Text>
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center'}]}
-                onPress={()=>{}}>
+                onPress={() => {}}>
                 <Image
                   source={IMAGES.close}
                   style={{
@@ -527,7 +531,7 @@ const SignUp = () => {
               {/* <CustomCalendar /> */}
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center', marginTop: 27}]}
-                onPress={()=>{}}>
+                onPress={() => {}}>
                 <Image
                   source={IMAGES.close}
                   style={{
@@ -577,7 +581,7 @@ const SignUp = () => {
                 );
               })}
             </ScrollView>
-            <View style={{marginBottom:30}} />
+            <View style={{marginBottom: 30}} />
             <GradientButton
               style={[styles.btn]}
               title={'Next'}
@@ -599,9 +603,11 @@ const SignUp = () => {
                 )}
               </Text>
 
-              <TouchableOpacity onPress={()=>{
-                 setImageModal(true);
-              }} style={styles.uploadBox}>
+              <TouchableOpacity
+                onPress={() => {
+                  setImageModal(true);
+                }}
+                style={styles.uploadBox}>
                 <View style={styles.imagePlaceholder}>
                   <Image
                     source={IMAGES.user} // Replace with your own image
@@ -673,7 +679,9 @@ const SignUp = () => {
         style={styles.container}>
         <View style={styles.rowView}>
           <TouchableOpacity
-            onPress={() => {prevStep(step)}}
+            onPress={() => {
+              prevStep(step);
+            }}
             hitSlop={8}
             style={[styles.backBtn, {flex: 1}]}>
             <Image

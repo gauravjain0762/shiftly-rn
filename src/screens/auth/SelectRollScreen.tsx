@@ -15,9 +15,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
 import {navigateTo} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
+import useRole from '../../hooks/useRole';
 
 const SelectRollScreen = () => {
   const {t, i18n} = useTranslation();
+  const {role, setRole} = useRole();
 
   return (
     <LinearGradient
@@ -37,6 +39,7 @@ const SelectRollScreen = () => {
           </Text>
           <TouchableOpacity
             onPress={() => {
+              setRole('company');
               navigateTo(SCREENS.WelcomeScreen);
             }}
             style={[styles.button, {borderColor: '#000', borderTopWidth: 0.5}]}>
@@ -54,6 +57,7 @@ const SelectRollScreen = () => {
           <Text style={styles.descWhite}>{t('Let’s get started.')}</Text>
           <TouchableOpacity
             onPress={() => {
+              setRole('employee');
               navigateTo(SCREENS.WelcomeScreen);
             }}
             style={styles.button}>

@@ -13,9 +13,11 @@ import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
-import {navigateTo} from '../../utils/commonFunction';
+import {navigateTo, resetNavigation} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
 import Onboarding from '../../component/common/Onboarding';
+import {LinearContainer} from '../../component';
+import useRole from '../../hooks/useRole';
 
 const AppOnboardingData = [
   {
@@ -39,25 +41,32 @@ const AppOnboardingData = [
 
 const WelcomeScreen = () => {
   const {t, i18n} = useTranslation();
+  const {role} = useRole();
+  const onLogin = () => {
+    if (role === 'company') {
+      resetNavigation(SCREENS.CoStack);
+    } else {
+      resetNavigation(SCREENS.EmployeeStack);
+    }
+  };
   return (
-    <LinearGradient
-      colors={[colors._0D468C, colors._041326]}
-      style={styles.gradient}>
-      <SafeAreaView style={styles.container1}>
-        <StatusBar barStyle="light-content" backgroundColor="#00204A" />
-        {/* <View> */}
-        <Onboarding
-          data={AppOnboardingData}
-          // onComplete={handleOnboardingComplete}
-        />
-        {/* </View> */}
-      
-        {/* Buttons */}
-        <View style={{width:"90%",alignItems:'center',marginBottom:20}}>
+    <LinearContainer
+      containerStyle={styles.gradient}
+      colors={['#0D468C', '#041326']}>
+      <StatusBar barStyle="light-content" backgroundColor="#00204A" />
+      {/* <View> */}
+      <Onboarding
+        data={AppOnboardingData}
+        // onComplete={handleOnboardingComplete}
+      />
+      {/* </View> */}
+
+      {/* Buttons */}
+      <View style={{width: '90%', alignItems: 'center', marginBottom: 20}}>
         <TouchableOpacity
           style={styles.emailButton}
           onPress={() => {
-            navigateTo(SCREENS.LoginScreen);
+            onLogin();
           }}>
           {/* <Icon name="envelope" size={16} color="#000" /> */}
           <Image source={IMAGES.e_icon} style={styles.icon} />
@@ -73,20 +82,21 @@ const WelcomeScreen = () => {
           <Image source={IMAGES.g_icon} style={styles.icon} />
           <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
         </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </LinearGradient>
+      </View>
+    </LinearContainer>
   );
 };
 
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   container1: {
     flex: 1,
     alignItems: 'center',
-    // justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   logo: {
     height: 60,
