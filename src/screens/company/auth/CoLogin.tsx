@@ -26,12 +26,14 @@ const CoLogin = () => {
           <CustomTextInput
             style={styles.input}
             placeholder="smith@williamson.com"
+            placeholderTextColor={colors._7B7878}
           />
           <Text style={styles.label}>{t('Password')}</Text>
           <CustomTextInput
             showRightIcon
             style={styles.passinput}
             containerStyle={styles.inputcontainer}
+            placeholderTextColor={colors._7B7878}
             imgStyle={styles.eye}
             placeholder="* * * * * * * * *"
           />
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
     marginTop: hp(50),
   },
   input: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._4A4A4A),
     borderWidth: 2,
     borderColor: colors._234F86,
     borderRadius: 10,
@@ -90,7 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   passinput: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._4A4A4A),
   },
   eye: {
     tintColor: '#CDB682',

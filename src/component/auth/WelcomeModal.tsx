@@ -1,16 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {useTranslation} from 'react-i18next';
+import Modal from 'react-native-modal';
 
 const WelcomeModal = ({
   visible,
@@ -22,44 +16,38 @@ const WelcomeModal = ({
   const {t, i18n} = useTranslation();
 
   return (
-    <Modal
-      animationType="slide"
-      transparent
-      visible={visible}
-      onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          <Image
-            source={IMAGES.welcome_icon}
-            style={{
-              width: 90,
-              height: 90,
-              resizeMode: 'contain',
-              alignSelf: 'center',
-            }}
-          />
+    <Modal style={styles.modal} animationIn={'slideInUp'} isVisible={visible}>
+      <View style={styles.modalContent}>
+        <Image
+          source={IMAGES.welcome_icon}
+          style={{
+            width: 90,
+            height: 90,
+            resizeMode: 'contain',
+            alignSelf: 'center',
+          }}
+        />
 
-          <Text style={styles.welcomeText}>
-            {t('Welcome')} {name}
-          </Text>
+        <Text style={styles.welcomeText}>
+          {t('Welcome')} {name}
+        </Text>
 
-          <Text style={styles.messageText}>
-            {description ||
-              t(
-                'Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.',
-              )}
-          </Text>
-          {/* <Text style={styles.messageText}>
+        <Text style={styles.messageText}>
+          {description ||
+            t(
+              'Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.',
+            )}
+        </Text>
+        {/* <Text style={styles.messageText}>
             You're all set to explore hospitality{'\n'}
             opportunities tailored just for you.
           </Text> */}
 
-          {ButtonContainer || (
-            <TouchableOpacity style={styles.button} onPress={onClose}>
-              <Text style={styles.buttonText}>{t('Lets get your job!')}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {ButtonContainer || (
+          <TouchableOpacity style={styles.button} onPress={onClose}>
+            <Text style={styles.buttonText}>{t('Lets get your job!')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </Modal>
   );
@@ -109,6 +97,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     ...commonFontStyle(400, 22, colors.white),
+  },
+  modal: {
+    margin: 0,
+    justifyContent: 'flex-end',
   },
 });
 

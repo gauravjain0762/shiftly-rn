@@ -137,14 +137,13 @@ const ProfileScreen = () => {
             <HeaderWithAdd title="My Languages" />
             <Text style={styles.languageText}>English</Text>
             <Slider
-              style={{ width: '100%', height: 40 }}
+              style={{width: '100%', height: 40}}
               value={range}
-               minimumValue={0}
-        maximumValue={100}
+              minimumValue={0}
+              maximumValue={100}
               minimumTrackTintColor={'#F4E2B8'}
               maximumTrackTintColor={'#17457D'}
               onValueChange={value => setRange(value)}
-              
             />
           </View>
 

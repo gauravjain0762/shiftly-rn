@@ -26,6 +26,9 @@ import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {resetNavigation} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
+import MapView, {Marker} from 'react-native-maps';
+import {requestLocationPermission} from '../../../utils/locationHandler';
+import {API} from '../../../utils/apiConstant';
 
 const options1 = [
   'Hospitality Group / Operator',
@@ -43,12 +46,15 @@ const options1 = [
 
 const size = ['0 - 50', '50 - 100', '100 - 500', '500 - 1,000', '1,000+'];
 
-const Rule = [
-  'Minimum 8 characters',
-  'At least 1 uppercase letter',
-  'At least 1 lowercase letter',
-  'At least 1 number',
-  'At least 1 special character (e.g. @, #, $, !)',
+const rules = [
+  {label: 'Minimum 8 characters', test: pw => pw.length >= 8},
+  {label: 'At least 1 uppercase letter', test: pw => /[A-Z]/.test(pw)},
+  {label: 'At least 1 lowercase letter', test: pw => /[a-z]/.test(pw)},
+  {label: 'At least 1 number', test: pw => /\d/.test(pw)},
+  {
+    label: 'At least 1 special character (e.g. @, #, $, !)',
+    test: pw => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
+  },
 ];
 
 const services = [
@@ -83,9 +89,40 @@ const CreateAccount = () => {
   const [values, setValues] = useState('');
   const [searviceSelect, setServiceSelect] = useState('Hospitality');
   const [imageModal, setImageModal] = useState(false);
+  const [position, setPosition] = useState(undefined);
+  const mapRef = useRef(null);
+  const [logo, setLogo] = useState({});
+  const [cover, setCover] = useState({});
+  const [type, setType] = useState<'logo' | 'cover'>('logo');
+  const [model, setModel] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [start, setStart] = useState(false);
+
+  useEffect(() => {
+    onCurrentLocation();
+  }, []);
 
   const inputRefsOtp = useRef([]);
   const [otp, setOtp] = useState(new Array(4).fill(''));
+
+  const onCurrentLocation = async () => {
+    await requestLocationPermission(
+      false,
+      position => {
+        let dataTemp = {
+          latitude: position?.latitude,
+          longitude: position?.longitude,
+          latitudeDelta: position?.latitudeDelta,
+          longitudeDelta: position?.longitudeDelta,
+        };
+        setPosition(dataTemp);
+        mapRef?.current?.animateToRegion(dataTemp);
+      },
+      (error: any) => {
+        console.log(error);
+      },
+    );
+  };
 
   const nextStep = () => setStep(prev => prev + 1);
 
@@ -99,11 +136,13 @@ const CreateAccount = () => {
 
   useEffect(() => {
     if (timer == 0) return;
-    const interval = setInterval(() => {
-      setTimer(prev => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
+    if (start) {
+      const interval = setInterval(() => {
+        setTimer(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [timer, start]);
 
   const handleChangeOtp = (text: any, index: any) => {
     const newPass = [...otp];
@@ -121,6 +160,14 @@ const CreateAccount = () => {
       newPass[index - 1] = '';
       setOtp(newPass);
       inputRefsOtp.current[index - 1]?.focus();
+    }
+  };
+
+  const UploadPhoto = (e: any) => {
+    if (type == 'cover') {
+      setCover(e);
+    } else {
+      setLogo(e);
     }
   };
 
@@ -160,7 +207,12 @@ const CreateAccount = () => {
                       {isSelected && (
                         <Image
                           source={IMAGES.mark}
-                          style={{width: 25, height: 22, resizeMode: 'contain'}}
+                          style={{
+                            width: 25,
+                            height: 22,
+                            resizeMode: 'contain',
+                            tintColor: colors._4A4A4A,
+                          }}
                         />
                       )}
                     </TouchableOpacity>
@@ -193,7 +245,7 @@ const CreateAccount = () => {
                   containerStyle={styles.Inputcontainer}
                   numberOfLines={1}
                 />
-                <TouchableOpacity hitSlop={10}>
+                <TouchableOpacity onPress={() => setModel(!model)} hitSlop={10}>
                   <Image
                     source={IMAGES.info}
                     resizeMode="contain"
@@ -201,6 +253,27 @@ const CreateAccount = () => {
                   />
                 </TouchableOpacity>
               </View>
+              {model && (
+                <View style={styles.infomodel}>
+                  <Text style={styles.businessName}>{t('Business Name')}</Text>
+                  <Text style={styles.bussinessinfo}>
+                    {t(
+                      'This name will appear on your job listings and candidate messages',
+                    )}
+                  </Text>
+                  <GradientButton
+                    style={styles.closebtn}
+                    type="Company"
+                    title={t('Close')}
+                    onPress={() => setModel(!model)}
+                    textContainerStyle={{
+                      paddingVertical: hp(10),
+                      paddingHorizontal: wp(14),
+                    }}
+                    textStyle={{fontSize: 14}}
+                  />
+                </View>
+              )}
             </View>
             <GradientButton
               style={styles.btn}
@@ -280,11 +353,12 @@ const CreateAccount = () => {
                 placeholderTextColor={colors._4A4A4A}
                 onChangeText={(e: any) => setPassword(e)}
                 value={password}
-                secureTextEntry
-                style={styles.input1}
+                secureTextEntry={!visible}
+                style={[styles.input1, AppStyles.flex]}
                 showRightIcon
                 imgStyle={{tintColor: '#1C1B1F'}}
                 containerStyle={styles.passwordContiner}
+                onShow={e => setVisible(e)}
               />
               <View>
                 <View style={styles.passlableCon}>
@@ -295,12 +369,19 @@ const CreateAccount = () => {
                   />
                   <Text style={styles.passRule}>{t('Password Rule')}</Text>
                 </View>
-                {Rule?.map((item: any) => (
-                  <View style={styles.rules}>
-                    <View style={styles.point} />
-                    <Text style={styles.ruleTitle}>{item}</Text>
-                  </View>
-                ))}
+                {rules?.map((item: any) => {
+                  const passed = item?.test(password);
+                  return (
+                    <View style={styles.rules}>
+                      {passed ? (
+                        <Image source={IMAGES.check} style={styles.check} />
+                      ) : (
+                        <View style={styles.point} />
+                      )}
+                      <Text style={styles.ruleTitle}>{item?.label}</Text>
+                    </View>
+                  );
+                })}
               </View>
             </View>
             <GradientButton
@@ -331,11 +412,11 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => (nextStep(), setStart(true))}
             />
           </View>
         );
-      case 7:
+      case 7: {
         return (
           <View style={styles.innerConrainer}>
             <View>
@@ -348,7 +429,7 @@ const CreateAccount = () => {
                 </View>
               )}
               <View style={styles.otpContainer}>
-                {otp.map((val, idx) => (
+                {otp?.map((val, idx) => (
                   <TextInput
                     key={idx}
                     ref={el => (inputRefsOtp.current[idx] = el)}
@@ -416,7 +497,7 @@ const CreateAccount = () => {
             />
           </View>
         );
-
+      }
       case 8:
         return (
           <View style={styles.innerConrainer}>
@@ -494,7 +575,7 @@ const CreateAccount = () => {
               </View>
               <View style={[styles.row, {marginTop: hp(15)}]}>
                 <CustomTextInput
-                  placeholder={t('Enter website')}
+                  placeholder={t('Enter Address')}
                   placeholderTextColor={colors._4A4A4A}
                   onChangeText={(e: any) => setAddress(e)}
                   value={address}
@@ -512,7 +593,29 @@ const CreateAccount = () => {
               <Text style={styles.maplable}>
                 {t('Choose your map location')}
               </Text>
-              <View style={styles.map} />
+              <View style={styles.map}>
+                <MapView
+                  region={{
+                    latitude: position?.latitude,
+                    longitude: position?.longitude,
+                    latitudeDelta: position?.latitudeDelta,
+                    longitudeDelta: position?.longitudeDelta,
+                  }}
+                  ref={mapRef}
+                  key={API.MAP_KEY}
+                  style={styles.map}>
+                  <Marker
+                    coordinate={{
+                      latitude: position?.latitude,
+                      longitude: position?.longitude,
+                    }}>
+                    <Image
+                      source={IMAGES.location_marker}
+                      style={styles.marker}
+                    />
+                  </Marker>
+                </MapView>
+              </View>
             </View>
             <View>
               <TouchableOpacity style={styles.diffButton}>
@@ -663,9 +766,25 @@ const CreateAccount = () => {
                 {t('Personalise your company profile')}
               </Text>
               <TouchableOpacity
-                onPress={() => setImageModal(!imageModal)}
+                onPress={() => (setType('logo'), setImageModal(!imageModal))}
                 style={styles.logoConatiner}>
-                <Image source={IMAGES.logoImg} style={styles.logoImg} />
+                <Image
+                  source={
+                    Object.keys(logo)?.length
+                      ? {uri: logo?.path}
+                      : IMAGES.logoImg
+                  }
+                  style={
+                    Object.keys(logo)?.length
+                      ? {
+                          resizeMode: 'contain',
+                          height: hp(100),
+                          width: '100%',
+                          marginVertical: hp(22),
+                        }
+                      : styles.logoImg
+                  }
+                />
               </TouchableOpacity>
               <Text style={styles.logolabel}>
                 {t(
@@ -673,9 +792,25 @@ const CreateAccount = () => {
                 )}
               </Text>
               <TouchableOpacity
-                onPress={() => setImageModal(!imageModal)}
+                onPress={() => (setType('cover'), setImageModal(!imageModal))}
                 style={styles.logoConatiner}>
-                <Image source={IMAGES.uploadImg} style={styles.uploadImg} />
+                <Image
+                  source={
+                    Object.keys(cover)?.length
+                      ? {uri: cover?.path}
+                      : IMAGES.uploadImg
+                  }
+                  style={
+                    Object.keys(cover)?.length
+                      ? {
+                          resizeMode: 'cover',
+                          height: hp(200),
+                          width: '100%',
+                          marginVertical: hp(22),
+                        }
+                      : styles.uploadImg
+                  }
+                />
               </TouchableOpacity>
               <Text style={styles.logolabel}>
                 {t('Your cover image showcases your workplace or atmosphere')}
@@ -764,6 +899,7 @@ const CreateAccount = () => {
         setActionSheet={() => {
           setImageModal(false);
         }}
+        onUpdate={e => UploadPhoto(e)}
       />
     </LinearContainer>
   );
@@ -991,8 +1127,8 @@ const styles = StyleSheet.create({
   map: {
     height: hp(150),
     flex: 1,
-    backgroundColor: colors._A3A3A3,
     borderRadius: 15,
+    overflow: 'hidden',
   },
   diffButton: {
     borderRadius: 100,
@@ -1032,22 +1168,24 @@ const styles = StyleSheet.create({
     borderColor: colors._EBDCB8,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: hp(22),
     marginTop: hp(33),
+    overflow: 'hidden',
   },
   logoImg: {
     width: wp(113),
     height: wp(113),
     resizeMode: 'contain',
+    marginVertical: hp(22),
   },
   logolabel: {
-    marginTop: hp(14),
+    marginVertical: hp(14),
     ...commonFontStyle(400, 15, colors._050505),
   },
   uploadImg: {
     width: wp(70),
     height: wp(70),
     resizeMode: 'contain',
+    marginVertical: hp(22),
   },
   skipNow: {
     ...commonFontStyle(400, 19, '#B4B4B4'),
@@ -1055,5 +1193,34 @@ const styles = StyleSheet.create({
   skipBtn: {
     alignSelf: 'center',
     marginTop: hp(22),
+  },
+  marker: {
+    width: wp(37),
+    height: hp(56),
+    resizeMode: 'contain',
+  },
+  infomodel: {
+    backgroundColor: colors.white,
+    borderRadius: 15,
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(10),
+    marginTop: hp(4),
+  },
+  businessName: {
+    ...commonFontStyle(700, 15, colors._0B3970),
+  },
+  bussinessinfo: {
+    ...commonFontStyle(400, 13, colors.black),
+    marginTop: hp(15),
+  },
+  closebtn: {
+    justifyContent: 'flex-end',
+    alignSelf: 'flex-end',
+  },
+  check: {
+    width: wp(12),
+    height: wp(12),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
 });

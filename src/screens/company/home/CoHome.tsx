@@ -23,7 +23,10 @@ const CoHome = () => {
         ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
         data={[1, 2]}
         renderItem={(item: any) => (
-          <FeedCard onPressCard={() => navigateTo(SCREENS.CompanyProfile)} />
+          <FeedCard
+            isFollow
+            onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
+          />
         )}
       />
     </LinearContainer>

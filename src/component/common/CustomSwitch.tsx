@@ -1,5 +1,5 @@
 import React, {FC, useState} from 'react';
-import {View, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, TouchableOpacity, StyleSheet, ViewStyle} from 'react-native';
 
 type Switch = {
   isOn?: boolean;
@@ -7,6 +7,8 @@ type Switch = {
   thumbColor?: string;
   activeColor?: string;
   inActiveColor?: string;
+  switchStyle?: ViewStyle;
+  thumbStyle?: ViewStyle;
 };
 const CustomSwitch: FC<Switch> = ({
   isOn,
@@ -14,6 +16,8 @@ const CustomSwitch: FC<Switch> = ({
   thumbColor = '',
   activeColor = '',
   inActiveColor = '',
+  switchStyle,
+  thumbStyle,
 }) => {
   return (
     <TouchableOpacity
@@ -24,6 +28,7 @@ const CustomSwitch: FC<Switch> = ({
             ? activeColor || '#fff'
             : inActiveColor || '#ccc',
         },
+        switchStyle,
       ]}
       onPress={() => setIsOn(!isOn)}
       activeOpacity={0.8}>
@@ -34,6 +39,7 @@ const CustomSwitch: FC<Switch> = ({
             backgroundColor: thumbColor || '#0A285F',
             alignSelf: isOn ? 'flex-end' : 'flex-start',
           },
+          thumbStyle,
         ]}
       />
     </TouchableOpacity>
@@ -45,7 +51,6 @@ const styles = StyleSheet.create({
     width: 47,
     height: 26,
     borderRadius: 34 / 2,
-    padding: 4,
     justifyContent: 'center',
     backgroundColor: '#fff',
   },

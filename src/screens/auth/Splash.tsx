@@ -7,6 +7,8 @@ import SplashScreen from 'react-native-splash-screen';
 import {IMAGES} from '../../assets/Images';
 import {SCREEN_HEIGHT, SCREEN_WIDTH} from '../../theme/fonts';
 import useRole from '../../hooks/useRole';
+import {requestLocationPermission} from '../../utils/locationHandler';
+import {setAsyncLocation} from '../../utils/asyncStorage';
 
 type Props = {};
 
@@ -15,7 +17,7 @@ const Splash = (props: Props) => {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-      GetRole();
+      getLocation();
     }, 1000);
   }, []);
   const GetRole = () => {
@@ -26,6 +28,16 @@ const Splash = (props: Props) => {
     } else {
       resetNavigation(SCREENS.SelectRollScreen);
     }
+  };
+  const getLocation = async () => {
+    await requestLocationPermission(
+      true,
+      res => {
+        GetRole();
+        setAsyncLocation(res);
+      },
+      (err: any) => {},
+    );
   };
   return (
     <View>

@@ -46,7 +46,7 @@ const CustomTabBar = ({state, navigation}: any) => {
               iconName = isFocused ? IMAGES.Jobs_on : IMAGES.Jobs_off;
               break;
             case SCREENS.CoPost:
-              iconName = isFocused ? IMAGES.postFill : IMAGES.post_off;
+              iconName = isFocused ? IMAGES.postFill : IMAGES.postFill;
               break;
 
             case SCREENS.CoActivity:
@@ -85,13 +85,12 @@ const CustomTabBar = ({state, navigation}: any) => {
               key={route.name}
               onPress={() => navigation.navigate(route.name)}
               style={[styles.tabButton]}>
-              {route.name == SCREENS.ActivityScreen ? (
+              {route.name == SCREENS.CoPost ? (
                 <FastImage
                   source={iconName}
                   defaultSource={iconName}
                   style={styles.carImage}
                   resizeMode="contain"
-                  tintColor={isFocused ? colors._0B3970 : '#4A4A4AA8'}
                 />
               ) : (
                 <FastImage

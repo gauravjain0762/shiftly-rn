@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {IMAGES} from '../../assets/Images';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
@@ -136,12 +136,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors._F4E2B8,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingVertical: 16,
     borderRadius: 30,
     width: '90%',
     marginBottom: 30,
     paddingHorizontal: 49,
+    gap: wp(14),
   },
   emailText: {
     ...commonFontStyle(400, 18, colors.black),
@@ -150,22 +151,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingVertical: 16,
     borderRadius: 30,
     width: '90%',
     marginBottom: 30,
     paddingHorizontal: 49,
+    gap: wp(14),
   },
   whiteText: {
     ...commonFontStyle(400, 18, colors.black),
   },
   icon: {
-    width: 24,
-    height: 24,
+    width: wp(24),
+    height: wp(24),
     resizeMode: 'contain',
-    position: 'absolute',
-    left: 49,
   },
 });
 

@@ -20,6 +20,7 @@ interface CustomTextInputProps extends TextInputProps {
   showRightIcon?: boolean;
   containerStyle?: ViewStyle;
   imgStyle?: ImageStyle;
+  onShow?: (e: boolean) => void;
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = ({
@@ -28,6 +29,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   showRightIcon,
   containerStyle,
   imgStyle,
+  onShow = () => {},
   ...rest
 }) => {
   const {colors} = useTheme();
@@ -42,7 +44,10 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
         {...rest}
       />
       {showRightIcon && (
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+        <TouchableOpacity
+          onPress={() => (
+            setShowPassword(!showPassword), onShow(!showPassword)
+          )}>
           <Image
             source={!showPassword ? IMAGES.eye : IMAGES.eye_on}
             style={{

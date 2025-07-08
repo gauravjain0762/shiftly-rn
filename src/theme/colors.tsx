@@ -30,6 +30,7 @@ export const colors = {
   _EBDCB8: '#EBDCB8',
   _3D3D3D: '#3D3D3D',
   _434343: '#434343',
+  _2D5486: '#2D5486',
 
   _25201a: '#25201a',
   containerBGColor: 'rgba(51, 50, 50, 0.4)',
@@ -37,7 +38,7 @@ export const colors = {
   orangeOpacity: 'rgba(99, 45, 1, 0.9)',
   red: 'rgba(255, 0, 0, 0.9)',
   redOpacity: 'rgba(255, 0, 0, 0.2)',
-  green: 'orange',
+  green: '#40E981',
   greenOpacity: '#BEB130',
 };
 

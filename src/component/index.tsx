@@ -12,6 +12,7 @@ import ShareModal from './employe/ShareModal';
 import ApplicationSuccessModal from './employe/ApplicationSuccessModal';
 import SearchBar from './common/SearchBar';
 import MessageItem from './employe/MessageList';
+import ParallaxContainer from './common/ParallaxContainer';
 
 export {
   Loader,
@@ -28,4 +29,5 @@ export {
   ApplicationSuccessModal,
   SearchBar,
   MessageItem,
+  ParallaxContainer,
 };

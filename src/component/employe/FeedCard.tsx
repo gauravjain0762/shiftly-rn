@@ -6,9 +6,10 @@ import {colors} from '../../theme/colors';
 
 type card = {
   onPressCard?: () => void;
+  isFollow?: boolean;
 };
 
-const FeedCard: FC<card> = ({onPressCard = () => {}}) => {
+const FeedCard: FC<card> = ({onPressCard = () => {}, isFollow = false}) => {
   return (
     <TouchableOpacity onPress={() => onPressCard()} style={styles.card}>
       <View style={styles.cardHeader}>
@@ -22,13 +23,19 @@ const FeedCard: FC<card> = ({onPressCard = () => {}}) => {
             Walk-in Interview · <Text style={{color: colors._A3A3A3}}>2h</Text>
           </Text>
         </View>
-        <TouchableOpacity style={styles.heartIcon}>
-          <Image
-            source={IMAGES.like}
-            resizeMode="contain"
-            style={styles.like}
-          />
-        </TouchableOpacity>
+        {isFollow ? (
+          <TouchableOpacity style={styles.followBtn}>
+            <Text style={styles.follow}>{'Follow'}</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.heartIcon}>
+            <Image
+              source={IMAGES.like}
+              resizeMode="contain"
+              style={styles.like}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       <Text style={styles.vacancy}>Hotel Management 2 vacancy open</Text>
@@ -93,5 +100,14 @@ const styles = StyleSheet.create({
   like: {
     width: wp(26),
     height: wp(26),
+  },
+  follow: {
+    ...commonFontStyle(500, 15, colors.white),
+    paddingHorizontal: wp(15),
+    paddingVertical: hp(10),
+  },
+  followBtn: {
+    backgroundColor: colors._0B3970,
+    borderRadius: 5,
   },
 });

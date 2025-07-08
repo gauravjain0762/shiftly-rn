@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {LinearContainer} from '../../../component';
+import {LinearContainer, ParallaxContainer} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
@@ -17,22 +17,20 @@ import {SCREENS} from '../../../navigation/screenNames';
 
 const CompanyProfile = () => {
   return (
-    <LinearContainer
-      SafeAreaProps={{edges: ['bottom']}}
-      colors={['#FFF8E6', '#F3E1B7']}>
-      <Image source={IMAGES.profileCover} style={styles.bannerImage} />
-
-      {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
-        style={styles.backButton}>
-        <Image source={IMAGES.backArrow} style={styles.backArrow} />
-      </TouchableOpacity>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingHorizontal: wp(21)}}>
-        {/* Logo + Title */}
+    <ParallaxContainer
+      imagePath={IMAGES.profileCover}
+      ImageChildren={
+        <TouchableOpacity
+          onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+          style={styles.backButton}>
+          <Image source={IMAGES.backArrow} style={styles.backArrow} />
+        </TouchableOpacity>
+      }
+      ContainerStyle={styles.container}>
+      <LinearContainer
+        SafeAreaProps={{edges: ['bottom']}}
+        containerStyle={{paddingHorizontal: wp(21)}}
+        colors={['#FFF8E6', '#F3E1B7']}>
         <View style={styles.profileHeader}>
           <Image
             source={{
@@ -49,7 +47,6 @@ const CompanyProfile = () => {
           </View>
         </View>
 
-        {/* Description */}
         <Text style={styles.description}>
           Discover an extraordinary world beyond anything you’ve ever imagined.
           Our Atlantis properties in Dubai and Sanya, China redefine the concept
@@ -62,7 +59,6 @@ const CompanyProfile = () => {
           truly dedicated to wonder and excitement.
         </Text>
 
-        {/* Info Sections */}
         <View style={styles.infoRow}>
           <View style={AppStyles.flex}>
             <Text style={styles.infoTitle}>Website</Text>
@@ -91,7 +87,6 @@ const CompanyProfile = () => {
           </Text>
         </View>
 
-        {/* Location Card */}
         <View style={styles.map}>
           <View style={styles.locationCard}>
             <View style={styles.row}>
@@ -106,8 +101,8 @@ const CompanyProfile = () => {
           </View>
           <Image source={IMAGES.map} style={styles.mapImage} />
         </View>
-      </ScrollView>
-    </LinearContainer>
+      </LinearContainer>
+    </ParallaxContainer>
   );
 };
 
@@ -116,7 +111,7 @@ export default CompanyProfile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF4D9',
+    backgroundColor: '#F3E1B7',
   },
   bannerImage: {
     width: '100%',
@@ -127,6 +122,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 60,
     left: 22,
+    zIndex: 111,
   },
   profileHeader: {
     flexDirection: 'row',

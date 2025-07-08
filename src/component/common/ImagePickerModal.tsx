@@ -28,8 +28,8 @@ const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
       }
       let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
       setimage(temp);
-      onUpdate(temp);
       closeActionSheet();
+      onUpdate(temp);
     });
   };
   const openGallery = () => {
@@ -45,8 +45,8 @@ const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
       }
       let temp = {...image, name: image.path.split('/').pop()};
       setimage(temp);
-      onUpdate(temp);
       closeActionSheet();
+      onUpdate(temp);
     });
   };
 

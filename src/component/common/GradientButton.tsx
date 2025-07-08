@@ -26,6 +26,7 @@ interface DiamondGradientButtonProps {
   fx?: string;
   fy?: string;
   type?: 'Company' | 'Employee';
+  textContainerStyle?: ViewStyle;
 }
 
 const GradientButton: React.FC<DiamondGradientButtonProps> = ({
@@ -41,6 +42,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
   rx = '',
   ry = '',
   type = 'Employee',
+  textContainerStyle,
 }) => {
   return (
     <TouchableOpacity
@@ -117,7 +119,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
           />
         </Svg>
       )}
-      <View style={styles.content}>
+      <View style={[styles.content, textContainerStyle]}>
         <Text
           style={[
             type == 'Employee' ? styles.buttonText : styles.CombuttonText,
