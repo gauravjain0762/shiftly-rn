@@ -13,6 +13,7 @@ import ApplicationSuccessModal from './employe/ApplicationSuccessModal';
 import SearchBar from './common/SearchBar';
 import MessageItem from './employe/MessageList';
 import ParallaxContainer from './common/ParallaxContainer';
+import LocationContainer from './common/LocationContainer';
 
 export {
   Loader,
@@ -30,4 +31,5 @@ export {
   SearchBar,
   MessageItem,
   ParallaxContainer,
+  LocationContainer,
 };

@@ -8,7 +8,11 @@ import {
 } from 'react-native';
 import React from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {LinearContainer, ParallaxContainer} from '../../../component';
+import {
+  LinearContainer,
+  LocationContainer,
+  ParallaxContainer,
+} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
@@ -86,21 +90,7 @@ const CompanyProfile = () => {
             Industry Sectors or Specializations
           </Text>
         </View>
-
-        <View style={styles.map}>
-          <View style={styles.locationCard}>
-            <View style={styles.row}>
-              <Text style={styles.locationLabel}>Locations</Text>
-              <View style={styles.primaryTag}>
-                <Text style={styles.primary}>{'Primary'}</Text>
-              </View>
-            </View>
-            <Text style={styles.locationText}>
-              Crescent Road, The Palm Jumeirah, Dubai, 211222, AE
-            </Text>
-          </View>
-          <Image source={IMAGES.map} style={styles.mapImage} />
-        </View>
+        <LocationContainer containerStyle={styles.map} />
       </LinearContainer>
     </ParallaxContainer>
   );

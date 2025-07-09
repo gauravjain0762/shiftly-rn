@@ -7,14 +7,17 @@ import {
   View,
   Platform,
   Keyboard,
+  ImageURISource,
+  ImageStyle,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {ReactNode, useState} from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {Dropdown as DropdownElement} from 'react-native-element-dropdown';
 import {IMAGES} from '../../assets/Images';
+import {DropdownProps} from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model';
 
-type Props = {
+interface Props extends DropdownProps<any> {
   title?: string;
   extraStyle?: ViewStyle;
   onPress?: () => void;
@@ -28,7 +31,7 @@ type Props = {
   onChange?: (text: string) => void;
   isSearch?: any;
   inputContainer?: any;
-  container?: any;
+  container?: ViewStyle;
   placeholder?: any;
   dropdownStyle?: any;
   mendate?: boolean;
@@ -38,12 +41,14 @@ type Props = {
   minimumDate?: string;
   dropIcon?: string;
   dateMode?: string;
-};
+  renderRightIcon?: ImageURISource;
+  RightIconStyle?: ImageStyle;
+}
 
 const CustomDropdown = ({
   data,
   value,
-  onChange,
+  onChange = () => {},
   label,
   isSearch,
   inputContainer,
@@ -67,6 +72,9 @@ const CustomDropdown = ({
   renderEmptyComponent,
   flatListProps,
   required,
+  renderRightIcon,
+  RightIconStyle,
+  ...props
 }: Props) => {
   return (
     <>
@@ -104,12 +112,15 @@ const CustomDropdown = ({
           renderRightIcon={() => {
             return (
               <Image
-                source={IMAGES.down1}
-                style={{
-                  width: 12,
-                  height: 13,
-                  resizeMode: 'contain',
-                }}
+                source={renderRightIcon || IMAGES.down1}
+                style={[
+                  {
+                    width: 12,
+                    height: 13,
+                    resizeMode: 'contain',
+                  },
+                  RightIconStyle,
+                ]}
               />
             );
           }}
@@ -126,6 +137,7 @@ const CustomDropdown = ({
               </View>
             );
           }}
+          {...props}
         />
       </View>
     </>

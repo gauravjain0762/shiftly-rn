@@ -13,7 +13,7 @@ type props = {
 };
 
 const HomeHeader: FC<props> = ({
-  onPressNotifi,
+  onPressNotifi = () => {},
   type = 'employe',
   onPressAvatar,
 }) => {
@@ -46,11 +46,7 @@ const HomeHeader: FC<props> = ({
       </View>
       <TouchableOpacity
         style={styles.bellIcon}
-        onPress={() =>
-          onPressNotifi
-            ? onPressNotifi()
-            : navigateTo(SCREENS.NotificationScreen)
-        }>
+        onPress={() => onPressNotifi && onPressNotifi()}>
         <Image
           source={IMAGES.notification}
           style={[

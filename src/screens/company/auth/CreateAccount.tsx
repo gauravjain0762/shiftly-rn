@@ -29,6 +29,7 @@ import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MapView, {Marker} from 'react-native-maps';
 import {requestLocationPermission} from '../../../utils/locationHandler';
 import {API} from '../../../utils/apiConstant';
+import Config from 'react-native-config';
 
 const options1 = [
   'Hospitality Group / Operator',
@@ -75,7 +76,6 @@ const CreateAccount = () => {
   const [step, setStep] = useState(1);
   const [selected1, setSelected1] = useState('Hotel/Resort');
   const [selected, setSelected] = useState('0 - 50');
-
   const [name, setName] = useState('');
   const [name1, setName1] = useState('');
   const [mail, setMail] = useState('');
@@ -602,7 +602,7 @@ const CreateAccount = () => {
                     longitudeDelta: position?.longitudeDelta,
                   }}
                   ref={mapRef}
-                  key={API.MAP_KEY}
+                  key={Config?.MAP_KEY}
                   style={styles.map}>
                   <Marker
                     coordinate={{

@@ -6,14 +6,17 @@ import FeedCard from '../../../component/employe/FeedCard';
 import {hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useTranslation} from 'react-i18next';
 
 const CoHome = () => {
+  const {t} = useTranslation();
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <View style={styles.header}>
         <HomeHeader
           onPressAvatar={() => navigateTo(SCREENS.CoMessage)}
           type="company"
+          onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />
       </View>
       <FlatList

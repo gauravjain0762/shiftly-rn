@@ -83,6 +83,8 @@ export const IMAGES = {
   shield: require('./image/shield.png'),
   edit: require('./image/edit.png'),
   location_marker: require('./image/location_marker.png'),
+  notification_check: require('./image/notification_check.png'),
+  notification_star: require('./image/notification_star.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

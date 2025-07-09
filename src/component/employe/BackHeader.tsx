@@ -1,5 +1,6 @@
 import {
   Image,
+  ImageStyle,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,7 +22,7 @@ type props = {
   containerStyle?: ViewStyle;
   isRight?: boolean;
   RightIcon?: ReactNode;
-  RightIconStyle?: ViewStyle;
+  RightIconStyle?: ImageStyle;
   titleStyle?: ViewStyle;
   leftStyle?: ViewStyle;
   type?: 'company' | 'employe';

@@ -273,12 +273,12 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
   },
   otherBubble: {
-    backgroundColor: '#2D5B89',
+    backgroundColor: colors._0B3970,
     alignSelf: 'flex-start',
     borderTopLeftRadius: 0,
   },
   userBubble: {
-    backgroundColor: '#FFE8BB',
+    backgroundColor: colors._E8CE92,
     borderTopRightRadius: 0,
     alignSelf: 'flex-end',
   },
@@ -296,12 +296,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: wp(14),
     paddingVertical: hp(30),
-    // position: 'absolute',
-    // bottom: 0,
-    // width: '100%',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    // marginTop: 100,
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
   },
   input: {
     flex: 1,

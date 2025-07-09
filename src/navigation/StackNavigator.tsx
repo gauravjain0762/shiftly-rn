@@ -28,6 +28,8 @@ import CompanyProfile from '../screens/company/profile/CompanyProfile';
 import CoTabNavigator from './CoTabNavigator';
 import CoMessage from '../screens/company/chat/CoMessage';
 import CoChat from '../screens/company/chat/CoChat';
+import CoNotification from '../screens/company/notification/CoNotification';
+import SuggestedEmployee from '../screens/company/job/SuggestedEmployee';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -274,6 +276,16 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoTabNavigator}
           component={CoTabNavigator}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoNotification}
+          component={CoNotification}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.SuggestedEmployee}
+          component={SuggestedEmployee}
         />
       </Stack.Navigator>
     );
