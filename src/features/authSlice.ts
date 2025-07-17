@@ -5,15 +5,41 @@ import {persistReducer} from 'redux-persist';
 interface AppState {
   isLoading: boolean;
   loginModal: boolean;
-  flashModal: boolean;
+  guestLogin: boolean;
   getAppData?: Record<string, any>;
+  language: string;
+  fcmToken?: string | any;
+  authToken?: string | any;
+  userInfo?: Record<string, any>;
+  businessType?: any[];
+  companyRegisterForm?: any;
+  companyRegistrationStep?: number;
+  companyRegisterData?: any;
+  registerSuccessModal?: boolean
 }
 
 const initialState: AppState = {
   isLoading: false,
   loginModal: false,
-  flashModal: false,
   getAppData: {},
+  language: 'en',
+  fcmToken: null,
+  authToken: null,
+  userInfo: {},
+  guestLogin: false,
+  businessType: [],
+  companyRegisterForm: {},
+  companyRegistrationStep: 1,
+  companyRegisterData: {
+    business_type_id: '',
+    company_name: '',
+    name: '',
+    email: '',
+    password: '',
+    phone_code: '971',
+    phone: '',
+  },
+  registerSuccessModal:false
 };
 
 const authSlice = createSlice({
@@ -26,12 +52,46 @@ const authSlice = createSlice({
     setLoginModal: (state, action: PayloadAction<boolean>) => {
       state.loginModal = action.payload;
     },
-    setFlashModal: (state, action: PayloadAction<boolean>) => {
-      state.flashModal = action.payload;
+    setGuestLogin: (state, action: PayloadAction<boolean>) => {
+      state.guestLogin = action.payload;
+    },
+    setAuthToken: (state, action: PayloadAction<string | undefined>) => {
+      state.authToken = action.payload;
+    },
+    setFcmToken: (state, action: PayloadAction<string | undefined>) => {
+      state.fcmToken = action.payload;
+    },
+    setLanguages: (state, action: PayloadAction<string>) => {
+      state.language = action.payload;
     },
     setGetAppData: (state, action: PayloadAction<any>) => {
       state.getAppData = action.payload;
     },
+    setUserInfo: (state, action: PayloadAction<any>) => {
+      state.userInfo = action.payload;
+    },
+    setBusinessType: (state, action: PayloadAction<any>) => {
+      state.businessType = action.payload;
+    },
+    setCompanyRegisterForm: (state, action: PayloadAction<any>) => {
+      state.companyRegisterForm = action.payload;
+    },
+    setCompanyRegistrationStep: (state, action: PayloadAction<number>) => {
+      state.companyRegistrationStep = action.payload;
+    },
+    setCompanyRegisterData: (
+      state,
+      action: PayloadAction<Partial<AppState['companyRegisterData']>>,
+    ) => {
+      state.companyRegisterData = {
+        ...state.companyRegisterData,
+        ...action.payload,
+      };
+    },
+     setRegisterSuccessModal: (state, action: PayloadAction<boolean>) => {
+      state.registerSuccessModal = action.payload;
+    },
+
     logouts: () => initialState,
   },
 });
@@ -41,14 +101,18 @@ const authPersistConfig = {
   storage: AsyncStorage,
   // Only persist these fields
   whitelist: [
-    
-    
-
     'loginModal',
-    'flashModal',
-
-    
-    
+    'language',
+    'isLoading',
+    'authToken',
+    'fcmToken',
+    'userInfo',
+    'guestLogin',
+    'businessType',
+    'companyRegisterForm',
+    'companyRegistrationStep',
+    'companyRegisterData',
+    'registerSuccessModal'
   ],
 };
 
@@ -60,9 +124,18 @@ export const persistedAuthReducer = persistReducer(
 export const {
   setIsLoading,
   setLoginModal,
-  setFlashModal,
+  setAuthToken,
+  setFcmToken,
+  setLanguages,
   logouts,
   setGetAppData,
+  setUserInfo,
+  setGuestLogin,
+  setBusinessType,
+  setCompanyRegisterForm,
+  setCompanyRegistrationStep,
+  setCompanyRegisterData,
+  setRegisterSuccessModal,
 } = authSlice.actions;
 
 export default authSlice.reducer;

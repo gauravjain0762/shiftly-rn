@@ -4,12 +4,20 @@ import {LinearContainer} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, wp} from '../../../theme/fonts';
 import CustomPopup from '../../../component/common/CustomPopup';
-import {SCREENS} from '../../../navigation/screenNames';
+import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {navigationRef} from '../../../navigation/RootContainer';
+import {useCompanyLogoutMutation} from '../../../api/authApi';
+import {clearAsync} from '../../../utils/asyncStorage';
+import {errorToast, resetNavigation} from '../../../utils/commonFunction';
+import {logouts} from '../../../features/authSlice';
+import {persistor} from '../../../store';
+import {useAppDispatch} from '../../../redux/hooks';
 
 const CoProfile = () => {
+  const dispatch = useAppDispatch();
   const [popupVisible, setPopupVisible] = useState(false);
-
+  const [companyLogout, {isLoading: logoutLoading}] =
+    useCompanyLogoutMutation();
   const settingsData = [
     {
       section: 'About',
@@ -27,7 +35,35 @@ const CoProfile = () => {
       ],
     },
   ];
-
+  const signOutIfLoggedIn = async () => {
+    //   try {
+    //     const currentUser = auth().currentUser;
+    //     if (currentUser) {
+    //       const isGoogleSignedIn = GoogleSignin.getCurrentUser();
+    //       if (isGoogleSignedIn) {
+    //         await GoogleSignin.revokeAccess();
+    //         await GoogleSignin.signOut();
+    //       }
+    //       await auth().signOut();
+    //     }
+    //   } catch (error) {
+    //     console.error('Error signing out: ', error);
+    //   }
+  };
+  const onLogout = async () => {
+    let response = null;
+    response = await companyLogout({}).unwrap();
+    if (response?.status) {
+      clearAsync();
+      dispatch({type: 'RESET_STORE'});
+      resetNavigation(SCREEN_NAMES.WelcomeScreen);
+      dispatch(logouts());
+      persistor.purge();
+      signOutIfLoggedIn();
+    } else {
+      errorToast(response?.message);
+    }
+  };
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       {settingsData.map((section, index) => (
@@ -89,7 +125,8 @@ const CoProfile = () => {
         leftButton={'Cancel'}
         rightButton={'Log Out'}
         onPressRight={() => {
-          navigationRef.navigate(SCREENS.WelcomeScreen);
+          // navigationRef.navigate(SCREENS.WelcomeScreen);
+          onLogout();
           setPopupVisible(false);
         }}
       />

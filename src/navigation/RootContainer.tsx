@@ -11,6 +11,8 @@ import {darkThemeColors, colors} from '../theme/colors';
 import {setDarkTheme} from '../redux/service/CommonServices';
 import useRole from '../hooks/useRole';
 import Splash from '../screens/auth/Splash';
+import {useSelector} from 'react-redux';
+import {selectIsLoading} from '../features/loaderSlice';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -31,6 +33,7 @@ let DefaultThemeColor = {
 const RootContainer: FC = () => {
   // const {isLoading} = useAppSelector(state => state.common);
   // const {isDarkTheme} = useAppSelector(state => state.common);
+  const isLoading = useSelector(selectIsLoading);
   const theme = useColorScheme();
   const dispatch = useAppDispatch();
   const {role, loading} = useRole();

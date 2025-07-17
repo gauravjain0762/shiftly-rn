@@ -18,13 +18,24 @@ import {useTranslation} from 'react-i18next';
 type picker = {
   callingCodeStyle?: ViewStyle;
   downIcon?: ImageStyle;
+  callingCode?: string;
+  phone?: string;
+  setPhone?: any;
+  setCallingCode?: any;
 };
 
-const PhoneInput: FC<picker> = ({callingCodeStyle, downIcon}) => {
-  const [phone, setPhone] = useState('');
+const PhoneInput: FC<picker> = ({
+  callingCodeStyle,
+  downIcon,
+  callingCode,
+  phone,
+  setPhone,
+  setCallingCode,
+}) => {
+  // const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState('AE');
   const [showModal, setShowModal] = useState(false);
-  const [callingCode, setCallingCode] = useState('971');
+  // const [callingCode, setCallingCode] = useState('971');
   const [valid, setValid] = useState(true);
   const {t, i18n} = useTranslation();
   const handlePhoneChange = (text: string) => {
@@ -111,7 +122,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   input: {
-    ...commonFontStyle(400, 22, colors._F4E2B8),
+    ...commonFontStyle(400, 22, colors._4A4A4A),
     flex: 1,
     marginLeft: 24,
   },

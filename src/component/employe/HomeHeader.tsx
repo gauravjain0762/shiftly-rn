@@ -5,6 +5,8 @@ import {IMAGES} from '../../assets/Images';
 import {navigateTo} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
 import {colors} from '../../theme/colors';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../store';
 
 type props = {
   onPressNotifi?: () => void;
@@ -17,6 +19,9 @@ const HomeHeader: FC<props> = ({
   type = 'employe',
   onPressAvatar,
 }) => {
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log(userInfo, 'userInfo');
+
   return (
     <View style={styles.header}>
       <View style={styles.row}>
@@ -33,14 +38,14 @@ const HomeHeader: FC<props> = ({
               styles.name,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            Faf Tinna Thomas
+            {userInfo?.name ?? 'Faf Tinna Thomas'}
           </Text>
           <Text
             style={[
               styles.location,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            Dubai, UAE
+            {userInfo?.address ?? 'Dubai, UAE'}
           </Text>
         </View>
       </View>

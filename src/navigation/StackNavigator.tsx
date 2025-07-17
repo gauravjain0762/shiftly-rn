@@ -30,6 +30,8 @@ import CoMessage from '../screens/company/chat/CoMessage';
 import CoChat from '../screens/company/chat/CoChat';
 import CoNotification from '../screens/company/notification/CoNotification';
 import SuggestedEmployee from '../screens/company/job/SuggestedEmployee';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -55,6 +57,9 @@ const LogoHeader = () => {
 const StackNavigator: FC = () => {
   const dispatch = useAppDispatch();
   const {role} = useRole();
+  const authToken = useSelector((state: RootState) => state.auth?.authToken);
+
+  const isAuthenticated = !!authToken;
 
   // useEffect(() => {
   //   messaging().setAutoInitEnabled(true);
@@ -163,8 +168,12 @@ const StackNavigator: FC = () => {
   // }
 
   const EmployeeStack = () => {
+    const initialRoute = isAuthenticated
+      ? SCREENS.TabNavigator
+      : SCREENS.LoginScreen;
+
     return (
-      <Stack.Navigator initialRouteName={SCREENS.LoginScreen}>
+      <Stack.Navigator initialRouteName={initialRoute}>
         {/* Employer */}
 
         <Stack.Screen
@@ -240,8 +249,12 @@ const StackNavigator: FC = () => {
   };
 
   const CoStack = () => {
+    const initialRoute = isAuthenticated
+      ? SCREENS.CoTabNavigator
+      : SCREENS.CoLogin;
+
     return (
-      <Stack.Navigator initialRouteName={SCREENS.CoLogin}>
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoLogin}

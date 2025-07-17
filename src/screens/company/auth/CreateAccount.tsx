@@ -1,5 +1,6 @@
 import {
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -23,27 +24,30 @@ import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
-import {resetNavigation} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  resetNavigation,
+  successToast,
+} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MapView, {Marker} from 'react-native-maps';
 import {requestLocationPermission} from '../../../utils/locationHandler';
 import {API} from '../../../utils/apiConstant';
 import Config from 'react-native-config';
-
-const options1 = [
-  'Hospitality Group / Operator',
-  'Hotel / Resort',
-  'Restaurant / Café',
-  'Beach Club',
-  'Event / Catering Company',
-  'Private Company',
-  'Government Organization',
-  'School / University',
-  'Beach Club',
-  'Event / Catering Company',
-  'Private Company',
-];
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {
+  useCompanyOTPVerifyMutation,
+  useCompanySignUpMutation,
+  useGetBusinessTypesQuery,
+} from '../../../api/authApi';
+import {
+  setCompanyRegisterData,
+  setCompanyRegistrationStep,
+  setRegisterSuccessModal,
+} from '../../../features/authSlice';
+import {useAppDispatch} from '../../../redux/hooks';
 
 const size = ['0 - 50', '50 - 100', '100 - 500', '500 - 1,000', '1,000+'];
 
@@ -73,15 +77,29 @@ const services = [
 ];
 
 const CreateAccount = () => {
+  const {
+    businessType = [],
+    fcmToken,
+    language,
+    companyRegistrationStep,
+    companyRegisterData,
+    userInfo,
+    registerSuccessModal,
+  } = useSelector((state: RootState) => state.auth);
+  const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
+    {},
+  );
+  const dispatch = useAppDispatch();
   const [step, setStep] = useState(1);
-  const [selected1, setSelected1] = useState('Hotel/Resort');
+  const [companySignUp, {isLoading: signupLoading}] =
+    useCompanySignUpMutation();
+  const [OtpVerify, {isLoading: otpVerifyLoading}] =
+    useCompanyOTPVerifyMutation();
+
+  const [selected1, setSelected1] = useState(businessType[0]?.title);
+
   const [selected, setSelected] = useState('0 - 50');
-  const [name, setName] = useState('');
-  const [name1, setName1] = useState('');
-  const [mail, setMail] = useState('');
-  const [password, setPassword] = useState('');
   const [timer, setTimer] = useState(30);
-  const [showModal, setShowModal] = useState(false);
   const [web, setWeb] = useState('');
   const [address, setAddress] = useState('');
   const [comIntro, setcomIntro] = useState('');
@@ -89,8 +107,8 @@ const CreateAccount = () => {
   const [values, setValues] = useState('');
   const [searviceSelect, setServiceSelect] = useState('Hospitality');
   const [imageModal, setImageModal] = useState(false);
-  const [position, setPosition] = useState(undefined);
-  const mapRef = useRef(null);
+  const [position, setPosition] = useState<any>(undefined);
+  const mapRef = useRef<any>(null);
   const [logo, setLogo] = useState({});
   const [cover, setCover] = useState({});
   const [type, setType] = useState<'logo' | 'cover'>('logo');
@@ -102,7 +120,7 @@ const CreateAccount = () => {
     onCurrentLocation();
   }, []);
 
-  const inputRefsOtp = useRef([]);
+  const inputRefsOtp = useRef<any>([]);
   const [otp, setOtp] = useState(new Array(4).fill(''));
 
   const onCurrentLocation = async () => {
@@ -124,13 +142,15 @@ const CreateAccount = () => {
     );
   };
 
-  const nextStep = () => setStep(prev => prev + 1);
+  const nextStep = () =>
+    dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) + 1)); //setStep(prev => prev + 1);
 
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
     }
-    setStep(prev => prev - 1);
+    dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) - 1));
+    // setStep(prev => prev - 1);
   };
   const {t, i18n} = useTranslation();
 
@@ -171,8 +191,102 @@ const CreateAccount = () => {
     }
   };
 
+  const handleSignup = async () => {
+    let data = {
+      business_type_id: companyRegisterData?.business_type_id,
+      company_name: companyRegisterData?.company_name,
+      name: companyRegisterData?.name,
+      email: companyRegisterData?.email,
+      password: companyRegisterData?.password,
+      phone_code: companyRegisterData?.phone_code,
+      phone: companyRegisterData?.phone,
+      language: language,
+      deviceToken: fcmToken ?? 'ddd',
+      deviceType: Platform.OS,
+    };
+    const response = await companySignUp(data).unwrap();
+    console.log(response, 'response----');
+    if (response?.status) {
+      nextStep();
+      setStart(true);
+      dispatch(
+        setCompanyRegisterData({
+          business_type_id: '',
+          company_name: '',
+          name: '',
+          email: '',
+          password: '',
+          phone_code: '971',
+          phone: '',
+        }),
+      );
+      successToast(response?.message);
+    } else {
+      errorToast(response?.message);
+    }
+  };
+  const emailCheck = async () => {
+    // Add validation before API call
+    if (!companyRegisterData?.email) {
+      errorToast('Please enter email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(companyRegisterData.email)) {
+      errorToast('Please enter a valid email address');
+      return;
+    }
+
+    // setEmailLoading(true);
+
+    try {
+      let data = {
+        email: companyRegisterData?.email,
+        validate_email: true,
+      };
+
+      const response = await companySignUp(data).unwrap();
+      console.log(response, 'response----', companyRegistrationStep);
+
+      if (response?.status) {
+        nextStep();
+      } else {
+        errorToast(response?.message || 'Email validation failed');
+      }
+    } catch (error: any) {
+      console.error('Email validation error:', error);
+      errorToast(
+        error?.data?.message || 'Something went wrong. Please try again.',
+      );
+    } finally {
+      // setEmailLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    let data = {
+      otp: otp.join(''),
+      company_id: userInfo?._id,
+      language: language,
+      deviceToken: fcmToken ?? 'ddd',
+      deviceType: Platform.OS,
+    };
+    console.log(data, 'data');
+
+    const response = await OtpVerify(data).unwrap();
+    console.log(response, 'response----');
+    if (response?.status) {
+      dispatch(setRegisterSuccessModal(true));
+      successToast(response?.message);
+    } else {
+      errorToast(response?.message);
+    }
+  };
+
   const renderStep = () => {
-    switch (step || 1) {
+    switch (companyRegistrationStep || 1) {
       case 1:
         return (
           <View style={styles.innerConrainer}>
@@ -187,8 +301,8 @@ const CreateAccount = () => {
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={{maxHeight: hp(300)}}>
-                {options1.map((option, index) => {
-                  const isSelected = option === selected1;
+                {businessType.map((option, index) => {
+                  const isSelected = option.title === selected1;
                   return (
                     <TouchableOpacity
                       key={index}
@@ -196,13 +310,20 @@ const CreateAccount = () => {
                         styles.optionContainer,
                         // isSelected && styles.selectedOptionContainer,
                       ]}
-                      onPress={() => setSelected1(option)}>
+                      onPress={() => {
+                        setSelected1(option?.title);
+                        dispatch(
+                          setCompanyRegisterData({
+                            business_type_id: option?._id,
+                          }),
+                        );
+                      }}>
                       <Text
                         style={[
                           styles.optionText,
                           isSelected && styles.selectedText,
                         ]}>
-                        {option}
+                        {option?.title}
                       </Text>
                       {isSelected && (
                         <Image
@@ -224,7 +345,17 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                dispatch(
+                  setCompanyRegisterData({
+                    business_type_id:
+                      companyRegisterData?.business_type_id === ''
+                        ? businessType[0]?._id
+                        : companyRegisterData?.business_type_id,
+                  }),
+                );
+                nextStep();
+              }}
             />
           </View>
         );
@@ -239,8 +370,14 @@ const CreateAccount = () => {
                 <CustomTextInput
                   placeholder={t('Enter Business / Organi...')}
                   placeholderTextColor={colors._4A4A4A}
-                  onChangeText={(e: any) => setName(e)}
-                  value={name}
+                  onChangeText={(e: any) =>
+                    dispatch(
+                      setCompanyRegisterData({
+                        company_name: e,
+                      }),
+                    )
+                  }
+                  value={companyRegisterData?.company_name}
                   style={styles.input1}
                   containerStyle={styles.Inputcontainer}
                   numberOfLines={1}
@@ -297,8 +434,14 @@ const CreateAccount = () => {
                 <CustomTextInput
                   placeholder={t('Enter Name')}
                   placeholderTextColor={colors._4A4A4A}
-                  onChangeText={(e: any) => setName1(e)}
-                  value={name1}
+                  onChangeText={(e: any) =>
+                    dispatch(
+                      setCompanyRegisterData({
+                        name: e,
+                      }),
+                    )
+                  }
+                  value={companyRegisterData?.name}
                   style={styles.input1}
                   containerStyle={styles.Inputcontainer}
                 />
@@ -328,8 +471,14 @@ const CreateAccount = () => {
                 <CustomTextInput
                   placeholder={t('Enter Email')}
                   placeholderTextColor={colors._4A4A4A}
-                  onChangeText={(e: any) => setMail(e)}
-                  value={mail}
+                  onChangeText={(e: any) =>
+                    dispatch(
+                      setCompanyRegisterData({
+                        email: e,
+                      }),
+                    )
+                  }
+                  value={companyRegisterData?.email}
                   style={styles.input1}
                   containerStyle={styles.Inputcontainer}
                 />
@@ -339,7 +488,7 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={emailCheck}
             />
           </View>
         );
@@ -351,8 +500,14 @@ const CreateAccount = () => {
               <CustomTextInput
                 placeholder={t('Enter Password')}
                 placeholderTextColor={colors._4A4A4A}
-                onChangeText={(e: any) => setPassword(e)}
-                value={password}
+                onChangeText={(e: any) =>
+                  dispatch(
+                    setCompanyRegisterData({
+                      password: e,
+                    }),
+                  )
+                }
+                value={companyRegisterData?.password}
                 secureTextEntry={!visible}
                 style={[styles.input1, AppStyles.flex]}
                 showRightIcon
@@ -370,7 +525,7 @@ const CreateAccount = () => {
                   <Text style={styles.passRule}>{t('Password Rule')}</Text>
                 </View>
                 {rules?.map((item: any) => {
-                  const passed = item?.test(password);
+                  const passed = item?.test(companyRegisterData?.password);
                   return (
                     <View style={styles.rules}>
                       {passed ? (
@@ -403,16 +558,32 @@ const CreateAccount = () => {
                 callingCodeStyle={{
                   ...commonFontStyle(400, 22, colors._4A4A4A),
                 }}
+                callingCode={companyRegisterData?.phone_code}
+                phone={companyRegisterData?.phone}
                 downIcon={{
                   tintColor: colors._4A4A4A,
                 }}
+                setPhone={(e: any) =>
+                  dispatch(
+                    setCompanyRegisterData({
+                      phone: e,
+                    }),
+                  )
+                }
+                setCallingCode={(e: any) =>
+                  dispatch(
+                    setCompanyRegisterData({
+                      phone_code: e,
+                    }),
+                  )
+                }
               />
             </View>
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => (nextStep(), setStart(true))}
+              onPress={() => handleSignup()}
             />
           </View>
         );
@@ -493,7 +664,7 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => setShowModal(!showModal)}
+              onPress={() => verifyOTP()}
             />
           </View>
         );
@@ -849,7 +1020,7 @@ const CreateAccount = () => {
         <View style={styles.rowView}>
           <TouchableOpacity
             onPress={() => {
-              prevStep(step);
+              prevStep(companyRegistrationStep);
             }}
             hitSlop={8}
             style={[styles.backBtn, {flex: 1}]}>
@@ -862,38 +1033,40 @@ const CreateAccount = () => {
         </View>
         {renderStep()}
       </KeyboardAwareScrollView>
-      <WelcomeModal
-        name={t('Aboard!')}
-        description={t(
-          'We’re excited to have you here. Let’s complete your company profile to get started.',
-        )}
-        visible={showModal}
-        onClose={() => {
-          setShowModal(false);
-          nextStep();
-        }}
-        ButtonContainer={
-          <View>
-            <GradientButton
-              style={styles.btn}
-              type="Company"
-              title={t('Complete Profile')}
-              onPress={() => {
-                setShowModal(!showModal);
-                nextStep();
-              }}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                setShowModal(!showModal);
-                resetNavigation(SCREENS.CoTabNavigator);
-              }}
-              style={styles.skip}>
-              <Text style={styles.skiptitle}>{t('Skip')}</Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
+      {registerSuccessModal && (
+        <WelcomeModal
+          name={t('Aboard!')}
+          description={t(
+            'We’re excited to have you here. Let’s complete your company profile to get started.',
+          )}
+          visible={registerSuccessModal}
+          onClose={() => {
+            dispatch(setRegisterSuccessModal(false));
+            nextStep();
+          }}
+          ButtonContainer={
+            <View>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Complete Profile')}
+                onPress={() => {
+                  dispatch(setRegisterSuccessModal(false));
+                  nextStep();
+                }}
+              />
+              <TouchableOpacity
+                onPress={() => {
+                  dispatch(setRegisterSuccessModal(false));
+                  resetNavigation(SCREENS.CoTabNavigator);
+                }}
+                style={styles.skip}>
+                <Text style={styles.skiptitle}>{t('Skip')}</Text>
+              </TouchableOpacity>
+            </View>
+          }
+        />
+      )}
       <ImagePickerModal
         actionSheet={imageModal}
         setActionSheet={() => {

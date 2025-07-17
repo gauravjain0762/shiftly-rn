@@ -1,5 +1,5 @@
 // LoginScreen.tsx
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {commonFontStyle, hp} from '../../../theme/fonts';
@@ -17,12 +18,43 @@ import {AppStyles} from '../../../theme/appStyles';
 import {CustomTextInput, GradientButton} from '../../../component';
 import CustomBtn from '../../../component/common/CustomBtn';
 import {useTranslation} from 'react-i18next';
-import {navigateTo} from '../../../utils/commonFunction';
+import {
+  emailCheck,
+  errorToast,
+  navigateTo,
+} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useCompanyLoginMutation} from '../../../api/authApi';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
 
 const LoginScreen = () => {
   const {t, i18n} = useTranslation();
+  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
 
+  // const [companyLogin, {isLoading: loginLoading}] = useCompanyLoginMutation();
+  const [authData, setAuthData] = React.useState({
+    email: 'db98@company.com',
+    password: '123456',
+  });
+
+  const handleLogin = async () => {
+    if (!emailCheck(authData?.email)) {
+      errorToast(t('Please enter a valid email'));
+    } else if (authData?.password === '') {
+      errorToast(t('Please enter password'));
+    } else {
+      let data = {
+        email: authData?.email.trim().toLowerCase(),
+        password: authData?.password.trim(),
+        language: language,
+        // deviceToken: fcmToken ?? 'ddd',
+        deviceType: Platform.OS,
+      };
+      // const response = await companyLogin(data).unwrap();
+      // console.log(response, 'response----');
+    }
+  };
   return (
     <LinearGradient colors={['#043379', '#041F50']} style={styles.container}>
       <KeyboardAwareScrollView
@@ -37,6 +69,10 @@ const LoginScreen = () => {
           <CustomTextInput
             placeholder="Email"
             placeholderTextColor={colors._F4E2B8}
+            value={authData?.email}
+            onChangeText={e => {
+              setAuthData({...authData, email: e});
+            }}
           />
         </View>
 
@@ -46,6 +82,10 @@ const LoginScreen = () => {
             placeholder="Password"
             placeholderTextColor={colors._F4E2B8}
             showRightIcon={true}
+            value={authData?.password}
+            onChangeText={e => {
+              setAuthData({...authData, password: e});
+            }}
           />
         </View>
 
@@ -56,13 +96,12 @@ const LoginScreen = () => {
         <View style={{marginHorizontal: 35}}>
           {/* <CustomBtn label={t('Login')} onPress={() => {}} /> */}
           <GradientButton
-            style={styles.btn}
             title={t('Login')}
-            onPress={() => navigateTo(SCREENS.TabNavigator)}
+            onPress={() => navigateTo(SCREENS.TabNavigator)} //handleLogin}
           />
           <Text style={styles.orText}>Or</Text>
           <GradientButton
-            style={styles.btn}
+            // style={styles.btn}
             title={t('Sign Up')}
             onPress={() => navigateTo(SCREENS.SignUp)}
           />

@@ -5,6 +5,7 @@ export const asyncKeys = {
   token: '@token',
   user_info: '@user_info',
   location: '@location',
+  language: '@language',
 };
 
 export const clearAsync = async () => {
@@ -13,6 +14,19 @@ export const clearAsync = async () => {
 
 export const setAsyncToken = async (token: string) => {
   await AsyncStorage.setItem(asyncKeys.token, JSON.stringify(token));
+};
+
+export const setAsyncLanguage = async (value: any) => {
+  await AsyncStorage.setItem(asyncKeys.language, JSON.stringify(value));
+};
+
+export const getAsyncLanguage = async () => {
+  const value = await AsyncStorage.getItem(asyncKeys.language);
+  if (value) {
+    return JSON.parse(value);
+  } else {
+    return 'en';
+  }
 };
 
 export const getAsyncToken = async () => {

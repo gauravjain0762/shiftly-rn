@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {
   CustomTextInput,
@@ -9,12 +16,44 @@ import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
-import {navigateTo, resetNavigation} from '../../../utils/commonFunction';
+import {
+  emailCheck,
+  errorToast,
+  navigateTo,
+  resetNavigation,
+} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {useCompanyLoginMutation} from '../../../api/authApi';
 
 const CoLogin = () => {
   const {t, i18n} = useTranslation();
+  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
 
+  const [companyLogin, {isLoading: loginLoading}] = useCompanyLoginMutation();
+  const [authData, setAuthData] = React.useState({
+    email: 'db98@company.com',
+    password: '123456',
+  });
+
+  const handleLogin = async () => {
+    if (!emailCheck(authData?.email)) {
+      errorToast(t('Please enter a valid email'));
+    } else if (authData?.password === '') {
+      errorToast(t('Please enter password'));
+    } else {
+      let data = {
+        email: authData?.email.trim().toLowerCase(),
+        password: authData?.password.trim(),
+        language: language,
+        deviceToken: fcmToken ?? 'ddd',
+        deviceType: Platform.OS,
+      };
+      const response = await companyLogin(data).unwrap();
+      // console.log(response, 'response----');
+    }
+  };
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
@@ -27,6 +66,10 @@ const CoLogin = () => {
             style={styles.input}
             placeholder="smith@williamson.com"
             placeholderTextColor={colors._7B7878}
+            value={authData?.email}
+            onChangeText={e => {
+              setAuthData({...authData, email: e});
+            }}
           />
           <Text style={styles.label}>{t('Password')}</Text>
           <CustomTextInput
@@ -36,18 +79,21 @@ const CoLogin = () => {
             placeholderTextColor={colors._7B7878}
             imgStyle={styles.eye}
             placeholder="* * * * * * * * *"
+            onChangeText={e => {
+              setAuthData({...authData, password: e});
+            }}
           />
           <Text style={styles.forgote}>{t('Forgot your password?')}</Text>
         </View>
         <View>
           <GradientButton
             type="Company"
-            onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+            onPress={handleLogin} //() => resetNavigation(SCREENS.CoTabNavigator)}
             style={styles.button}
             title="Login"
           />
           <Text style={styles.accoumt}>{t('Don’t have an account?')}</Text>
-          <TouchableOpacity onPress={() => navigateTo(SCREENS.CoSignUp)}>
+          <TouchableOpacity onPress={() => navigateTo(SCREENS.CreateAccount)}>
             <Text style={styles.createAccoumt}>
               {t('Create Business Account')}
             </Text>

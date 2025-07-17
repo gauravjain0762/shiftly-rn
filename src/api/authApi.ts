@@ -1,36 +1,149 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {API, HTTP_METHOD} from '../utils/apiConstant';
 import {axiosBaseQuery} from '../services/api/baseQuery';
+import {setAsyncToken, setAsyncUserInfo} from '../utils/asyncStorage';
+import {errorToast, navigateTo} from '../utils/commonFunction';
+import {
+  setAuthToken,
+  setBusinessType,
+  setGuestLogin,
+  setUserInfo,
+} from '../features/authSlice';
+import {SCREENS} from '../navigation/screenNames';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: axiosBaseQuery,
-  tagTypes: ['Auth'],
+  tagTypes: ['Auth', 'getBusiness'],
   endpoints: builder => ({
-    // UserInfoInsert
-    userInfoInsert: builder.mutation<any, any>({
+    //  -------   Company    --------
+    companyLogin: builder.mutation<any, any>({
       query: credentials => ({
-        url: API.UserInfoInsert,
+        url: API.CompanyLogin,
         method: HTTP_METHOD.POST,
         data: credentials,
+        skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.company));
+              await setAsyncUserInfo(data.data?.company);
+              dispatch(setGuestLogin(false));
+              navigateTo(SCREENS.CoTabNavigator);
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
     }),
-
-     // EntityProfileInsert
-     entityProfileInsert: builder.mutation<any, any>({
+    companySignUp: builder.mutation<any, any>({
       query: credentials => ({
-        url: API.EntityProfileInsert,
+        url: API.CompanySignup,
         method: HTTP_METHOD.POST,
-        data: credentials
+        data: credentials,
+        skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data.data?.company) {
+              dispatch(setUserInfo(data.data?.company));
+              await setAsyncUserInfo(data.data?.company);
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+    companyOTPVerify: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyOTPVerify,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.company));
+              await setAsyncUserInfo(data.data?.company);
+              dispatch(setGuestLogin(false));
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+    CompanyLogout: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.CompanyLogout,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+    getBusinessTypes: builder.query<any, any>({
+      query: () => ({
+        url: API.getBusinessTypes,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+          dispatch(setBusinessType(data?.data?.types));
+        } catch (error) {
+          console.log('Guest Login Error', error);
+        }
+      },
     }),
 
+    //  -------   Employee   --------
+    //
   }),
 });
 
 export const {
-  useUserInfoInsertMutation,
-  useEntityProfileInsertMutation,
+  useCompanyLoginMutation,
+  useCompanyLogoutMutation,
+  useGetBusinessTypesQuery,
+  useCompanySignUpMutation,
+  useCompanyOTPVerifyMutation,
 } = authApi;

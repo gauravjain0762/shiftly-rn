@@ -7,9 +7,13 @@ import {hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useTranslation} from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const CoHome = () => {
   const {t} = useTranslation();
+    const {userInfo} = useSelector((state: RootState) => state.auth);
+
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <View style={styles.header}>

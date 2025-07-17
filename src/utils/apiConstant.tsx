@@ -1,6 +1,15 @@
 export const API = {
-  BASE_URL: 'https://mangalbhav.com/',
+  BASE_URL: 'https://sky.devicebee.com/Shiftly/api/',
 
+  // Company
+  CompanyLogin: '/company/login',
+  CompanyLogout: '/company/logout',
+  getBusinessTypes: '/company/getBusinessTypes',
+  CompanySignup: '/company/register',
+  companyOTPVerify: '/company/verifyOTP',
+  // CompanyLogin: '',
+
+  // Employee
   UserInfoInsert: 'UserInfoInsert',
   EntityProfileInsert: 'EntityProfileInsert',
   EntityProfileSelectAll: 'EntityProfileSelectAll',
