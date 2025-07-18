@@ -1,18 +1,55 @@
 export const API = {
   BASE_URL: 'https://sky.devicebee.com/Shiftly/api/',
 
-  // Company
+  //  -------   Company    --------
+  
+  // Auth
   CompanyLogin: '/company/login',
   CompanyLogout: '/company/logout',
-  getBusinessTypes: '/company/getBusinessTypes',
+  CompanyResendOTP: '/company/resendOTP',
   CompanySignup: '/company/register',
   companyOTPVerify: '/company/verifyOTP',
+  companyForgotPassword: '/company/forgotPassword',
+  companyResetPassword: '/company/resetPassword',
+  companyChangePassword: '/company/changePassword',
+
+  // Dashboard
+  getBusinessTypes: '/company/getBusinessTypes',
+  getServices: '/company/getServices',
+  getCompanyPosts: '/company/getPosts',
+  getCompanyJobs: '/company/getJobs',
+
+  // UserDetails
+  getCompanyProfile:'/company/getProfile',
+  updateCompanyProfile:'/company/updateProfile',
+
+ // create
+  createCompanyPost: '/company/createPost',
+  createCompanyJob: '/company/createJob',
+
   // CompanyLogin: '',
 
-  // Employee
-  UserInfoInsert: 'UserInfoInsert',
-  EntityProfileInsert: 'EntityProfileInsert',
-  EntityProfileSelectAll: 'EntityProfileSelectAll',
+  
+ //  -------   Employee    --------
+  // Auth
+  employeeLogin: '/login',
+  employeeLogout: '/logout',
+  employeeResendOTP: '/resendOTP',
+  employeeSignup: '/register',
+  employeeOTPVerify: '/verifyOTP',
+  employeeSendOTP: '/sendOTP',
+  // employeeForgotPassword: '/company/forgotPassword',
+  // employeeResetPassword: '/company/resetPassword',
+  // employeeChangePassword: '/company/changePassword',
+
+  // Dashboard
+  getPosts: '/company/getPosts',
+  getJobs: '/jobs/list',
+
+  // UserDetails
+  getProfile:'/getProfile',
+  updateProfile:'/updateProfile',
+
 };
 
 export const API_ERROR_CODE = {

@@ -20,14 +20,15 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
 }) => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log(userInfo, 'userInfo');
 
   return (
     <View style={styles.header}>
       <View style={styles.row}>
         <TouchableOpacity onPress={() => onPressAvatar && onPressAvatar()}>
           <Image
-            source={IMAGES.avatar} // Replace with actual image
+            source={
+              userInfo?.picture ? {uri: userInfo?.picture} : IMAGES.avatar
+            } // Replace with actual image
             style={styles.avatar}
             resizeMode="cover"
           />
@@ -45,7 +46,7 @@ const HomeHeader: FC<props> = ({
               styles.location,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            {userInfo?.address ?? 'Dubai, UAE'}
+            {userInfo?.country ?? 'Dubai, UAE'}
           </Text>
         </View>
       </View>

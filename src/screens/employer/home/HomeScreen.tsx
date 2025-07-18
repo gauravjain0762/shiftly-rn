@@ -7,8 +7,11 @@ import FeedCard from '../../../component/employe/FeedCard';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import { useGetEmployeeProfileQuery } from '../../../api/dashboardApi';
 
 const HomeScreen = () => {
+    const {data: getProfile, isLoading: profileLoading} = useGetEmployeeProfileQuery({});
+  
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <View style={styles.header}>

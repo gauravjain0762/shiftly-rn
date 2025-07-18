@@ -24,7 +24,7 @@ import {
   navigateTo,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useCompanyLoginMutation} from '../../../api/authApi';
+import {useEmployeeLoginMutation} from '../../../api/authApi';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 
@@ -32,10 +32,10 @@ const LoginScreen = () => {
   const {t, i18n} = useTranslation();
   const {fcmToken, language} = useSelector((state: RootState) => state.auth);
 
-  // const [companyLogin, {isLoading: loginLoading}] = useCompanyLoginMutation();
+  const [employeeLogin, {isLoading: loginLoading}] = useEmployeeLoginMutation();
   const [authData, setAuthData] = React.useState({
-    email: 'db98@company.com',
-    password: '123456',
+    email: 'bilal@devicebee.com',
+    password: '12345678',
   });
 
   const handleLogin = async () => {
@@ -51,8 +51,8 @@ const LoginScreen = () => {
         // deviceToken: fcmToken ?? 'ddd',
         deviceType: Platform.OS,
       };
-      // const response = await companyLogin(data).unwrap();
-      // console.log(response, 'response----');
+      const response = await employeeLogin(data).unwrap();
+      console.log(response, 'response----');
     }
   };
   return (
@@ -97,7 +97,7 @@ const LoginScreen = () => {
           {/* <CustomBtn label={t('Login')} onPress={() => {}} /> */}
           <GradientButton
             title={t('Login')}
-            onPress={() => navigateTo(SCREENS.TabNavigator)} //handleLogin}
+            onPress={handleLogin} //() => navigateTo(SCREENS.TabNavigator)}
           />
           <Text style={styles.orText}>Or</Text>
           <GradientButton

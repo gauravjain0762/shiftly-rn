@@ -7,12 +7,38 @@ import {hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useTranslation} from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
 
 const CoHome = () => {
   const {t} = useTranslation();
-    const {userInfo} = useSelector((state: RootState) => state.auth);
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const {data: getPost, isLoading: Loading} = useGetCompanyPostsQuery({});
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [allPosts, setAllPosts] = React.useState([]);
+  console.log(allPosts, 'getPost');
+  React.useEffect(() => {
+    if (getPost) {
+      const newData = getPost.data.posts;
+      setAllPosts(prev =>
+        currentPage === 1 ? newData : [...prev, ...newData],
+      );
+    }
+  }, [getPost, currentPage]);
+
+  const handleLoadMore = () => {
+    // Check if there are more pages to load
+    if (
+      getPost &&
+      getPost.data?.pagination?.current_page <
+        getPost.data?.pagination?.total_pages &&
+      !Loading
+    ) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+    }
+  };
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -28,13 +54,15 @@ const CoHome = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollcontainer}
         ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
-        data={[1, 2]}
-        renderItem={(item: any) => (
+        data={allPosts}
+        renderItem={({item}: any) => (
           <FeedCard
+            item={item}
             isFollow
             onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
           />
         )}
+        onEndReached={handleLoadMore}
       />
     </LinearContainer>
   );

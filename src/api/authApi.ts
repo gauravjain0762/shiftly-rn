@@ -136,6 +136,108 @@ export const authApi = createApi({
     }),
 
     //  -------   Employee   --------
+    employeeLogin: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeLogin,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.user));
+              await setAsyncUserInfo(data.data?.user);
+              dispatch(setGuestLogin(false));
+              navigateTo(SCREENS.TabNavigator);
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+    employeeSignUp: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeSignup,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data.data?.company) {
+              dispatch(setUserInfo(data.data?.company));
+              await setAsyncUserInfo(data.data?.company);
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+    employeeOTPVerify: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeOTPVerify,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.company));
+              await setAsyncUserInfo(data.data?.company);
+              dispatch(setGuestLogin(false));
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+    employeeLogout: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeLogout,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+
     //
   }),
 });
@@ -146,4 +248,6 @@ export const {
   useGetBusinessTypesQuery,
   useCompanySignUpMutation,
   useCompanyOTPVerifyMutation,
+  useEmployeeLoginMutation,
+  useEmployeeLogoutMutation,
 } = authApi;

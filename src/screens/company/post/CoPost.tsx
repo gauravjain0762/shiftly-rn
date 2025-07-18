@@ -14,16 +14,25 @@ import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {AppStyles} from '../../../theme/appStyles';
-import {navigateTo} from '../../../utils/commonFunction';
+import {errorToast, navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useCreateCompanyPostMutation} from '../../../api/dashboardApi';
 
 const CoPost = () => {
   const {t} = useTranslation();
+  const [companyPost, {isLoading: postLoading}] =
+    useCreateCompanyPostMutation();
   const [imageModal, setImageModal] = useState(false);
   const [step, setStep] = useState(1);
   const [upload, setUpload] = useState({});
   const [post, setPost] = useState('');
   const [description, setDescription] = useState('');
+  const [postImage, setPostImage] = useState<any>(null);
+  const [uploadedImages, setUploadedImages] = useState<any>([]);
+  const [createPostData, setCreatePostData] = useState({
+    title: '',
+    description: '',
+  });
 
   const nextStep = () => setStep(prev => prev + 1);
 
@@ -34,13 +43,55 @@ const CoPost = () => {
     setStep(prev => prev - 1);
   };
 
+  const handleUploadPost = async () => {
+    if (createPostData?.title === '') {
+      errorToast(t('Please enter a valid title'));
+    } else if (createPostData?.description === '') {
+      errorToast(t('Please enter description'));
+    } else {
+      let data = {
+        title: createPostData?.title.trim(),
+        description: createPostData?.description.trim(),
+        images: uploadedImages,
+      };
+      console.log(data, 'datadatadata');
+      // const formData = new FormData();
+      // formData.append('title', createPostData?.title.trim());
+      // formData.append('description', createPostData?.description.trim());
+      // if (uploadedImages?.length > 0) {
+      //   formData.append('images', uploadedImages);
+      // }
+
+      const response = await companyPost(data).unwrap();
+      console.log(response, 'response----');
+      if (response?.status) {
+        navigateTo(SCREENS.CoHome);
+      }
+    }
+  };
+  const addImage = (newImage: any) => {
+    setUploadedImages([
+      {
+        uri: newImage?.sourceURL,
+        type: newImage?.mime,
+        name: newImage?.sourceURL.split('/').pop(),
+      },
+    ]);
+    // if (uploadedImages.length < 1) {
+    //   setUploadedImages(prev => [...prev, newImage]);
+    // } else {
+    //   errorToast(t(`Maximum ${1} images allowed`));
+    // }
+  };
+
   const render = () => {
     switch (step || 1) {
       case 1:
         return (
           <View style={styles.container}>
             <View>
-              {Object?.keys(upload)?.length == 0 ? (
+              {uploadedImages.length > 0 &&
+              Object?.keys(uploadedImages[0])?.length == 0 ? (
                 <View style={styles.headercontainer}>
                   <BackHeader
                     onBackPress={() => prevStep(step)}
@@ -51,13 +102,14 @@ const CoPost = () => {
                   <Text style={styles.createPost}>{t('Create a post')}</Text>
                 </View>
               ) : (
-                <TouchableOpacity onPress={() => setUpload({})}>
+                <TouchableOpacity onPress={() => setUploadedImages([])}>
                   <Image source={IMAGES.close} style={styles.close} />
                 </TouchableOpacity>
               )}
-              {Object?.keys(upload)?.length ? (
+              {uploadedImages.length > 0 &&
+              Object?.keys(uploadedImages[0])?.length ? (
                 <Image
-                  source={{uri: upload?.sourceURL}}
+                  source={{uri: uploadedImages[0]?.uri}}
                   style={styles.uploadImg}
                 />
               ) : (
@@ -70,10 +122,13 @@ const CoPost = () => {
                 </View>
               )}
             </View>
-            {Object?.keys(upload)?.length ? (
+            {uploadedImages.length > 0 &&
+            Object?.keys(uploadedImages[0])?.length ? (
               <View>
                 <TouchableOpacity
-                  onPress={() => setImageModal(!imageModal)}
+                  onPress={() => {
+                    setImageModal(!imageModal);
+                  }}
                   style={styles.retakeBtn}>
                   <Text style={styles.retake}>{'Retake'}</Text>
                 </TouchableOpacity>
@@ -113,8 +168,10 @@ const CoPost = () => {
               <CustomTextInput
                 placeholder={t('Walk-in Interview')}
                 placeholderTextColor={colors._4A4A4A}
-                onChangeText={(e: any) => setPost(e)}
-                value={post}
+                onChangeText={(e: any) =>
+                  setCreatePostData({...createPostData, title: e})
+                }
+                value={createPostData?.title}
                 style={styles.input1}
                 containerStyle={[
                   styles.Inputcontainer,
@@ -149,15 +206,17 @@ const CoPost = () => {
               <CustomTextInput
                 placeholder={t('Enter Description')}
                 placeholderTextColor={colors._4A4A4A}
-                onChangeText={(e: any) => setDescription(e)}
-                value={description}
+                onChangeText={(e: any) =>
+                  setCreatePostData({...createPostData, description: e})
+                }
+                value={createPostData?.description}
                 style={[styles.input1, {maxHeight: 200}]}
                 multiline
                 containerStyle={[
                   styles.Inputcontainer,
                   {marginTop: hp(65), marginHorizontal: wp(35)},
                 ]}
-                numberOfLines={1}
+                // numberOfLines={1}
               />
             </View>
             <GradientButton
@@ -187,25 +246,26 @@ const CoPost = () => {
                     </TouchableOpacity>
                   }
                 />
-                <Text style={styles.post}>{post}</Text>
+                <Text style={styles.post}>{createPostData?.title}</Text>
               </View>
               <Image
-                source={{uri: upload?.sourceURL}}
+                source={{uri: uploadedImages[0]?.uri ?? ''}}
                 style={[styles.uploadImg, {marginTop: hp(20)}]}
               />
               <Text
+                numberOfLines={5}
                 style={[
                   styles.post,
                   {paddingHorizontal: wp(26), marginTop: hp(20)},
                 ]}>
-                {description}
+                {createPostData?.description}
               </Text>
             </View>
             <GradientButton
               style={styles.btn}
               type="Company"
-              title={t('Continue')}
-              onPress={() => navigateTo(SCREENS.CoHome)}
+              title={t('Create Post')}
+              onPress={handleUploadPost}
             />
           </View>
         );
@@ -232,8 +292,17 @@ const CoPost = () => {
         setActionSheet={() => {
           setImageModal(false);
         }}
-        onUpdate={e => {
-          setUpload(e);
+        onUpdate={(e: any) => {
+          addImage(e);
+          // setUpload(e);
+          //   if (currentImageIndex !== null) {
+          //     // Replace existing image
+          //     replaceImage(currentImageIndex, e);
+          //   } else {
+          //     // Add new image
+          //     addImage(e);
+          //   }
+          //   setCurrentImageIndex(null);
         }}
       />
     </LinearContainer>
