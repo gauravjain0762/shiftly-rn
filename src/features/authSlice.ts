@@ -15,7 +15,9 @@ interface AppState {
   companyRegisterForm?: any;
   companyRegistrationStep?: number;
   companyRegisterData?: any;
-  registerSuccessModal?: boolean
+  registerSuccessModal?: boolean;
+  companyProfileData?: any;
+  companyServices?: any[];
 }
 
 const initialState: AppState = {
@@ -39,7 +41,21 @@ const initialState: AppState = {
     phone_code: '971',
     phone: '',
   },
-  registerSuccessModal:false
+  registerSuccessModal: false,
+  companyProfileData: {
+    website: '',
+    company_size: '',
+    address: '',
+    lat: 0,
+    lng: 0,
+    about: '',
+    mission: '',
+    values: '',
+    services: '',
+    logo: {},
+    cover_images: {},
+  },
+  companyServices: [],
 };
 
 const authSlice = createSlice({
@@ -88,8 +104,20 @@ const authSlice = createSlice({
         ...action.payload,
       };
     },
-     setRegisterSuccessModal: (state, action: PayloadAction<boolean>) => {
+    setRegisterSuccessModal: (state, action: PayloadAction<boolean>) => {
       state.registerSuccessModal = action.payload;
+    },
+    setCompanyProfileData: (
+      state,
+      action: PayloadAction<Partial<AppState['companyProfileData']>>,
+    ) => {
+      state.companyProfileData = {
+        ...state.companyProfileData,
+        ...action.payload,
+      };
+    },
+    setCompanyServices: (state, action: PayloadAction<any[]>) => {
+      state.companyServices = action.payload;
     },
 
     logouts: () => initialState,
@@ -112,7 +140,9 @@ const authPersistConfig = {
     'companyRegisterForm',
     'companyRegistrationStep',
     'companyRegisterData',
-    'registerSuccessModal'
+    'registerSuccessModal',
+    'companyProfileData',
+    'companyServices',
   ],
 };
 
@@ -136,6 +166,8 @@ export const {
   setCompanyRegistrationStep,
   setCompanyRegisterData,
   setRegisterSuccessModal,
+  setCompanyProfileData,
+  setCompanyServices,
 } = authSlice.actions;
 
 export default authSlice.reducer;

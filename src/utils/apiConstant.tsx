@@ -2,7 +2,7 @@ export const API = {
   BASE_URL: 'https://sky.devicebee.com/Shiftly/api/',
 
   //  -------   Company    --------
-  
+
   // Auth
   CompanyLogin: '/company/login',
   CompanyLogout: '/company/logout',
@@ -20,17 +20,16 @@ export const API = {
   getCompanyJobs: '/company/getJobs',
 
   // UserDetails
-  getCompanyProfile:'/company/getProfile',
-  updateCompanyProfile:'/company/updateProfile',
+  getCompanyProfile: '/company/getProfile',
+  updateCompanyProfile: '/company/updateProfile',
 
- // create
+  // create
   createCompanyPost: '/company/createPost',
   createCompanyJob: '/company/createJob',
 
   // CompanyLogin: '',
 
-  
- //  -------   Employee    --------
+  //  -------   Employee    --------
   // Auth
   employeeLogin: '/login',
   employeeLogout: '/logout',
@@ -47,9 +46,8 @@ export const API = {
   getJobs: '/jobs/list',
 
   // UserDetails
-  getProfile:'/getProfile',
-  updateProfile:'/updateProfile',
-
+  getProfile: '/getProfile',
+  updateProfile: '/updateProfile',
 };
 
 export const API_ERROR_CODE = {

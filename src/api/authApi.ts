@@ -237,8 +237,6 @@ export const authApi = createApi({
         }
       },
     }),
-
-    //
   }),
 });
 

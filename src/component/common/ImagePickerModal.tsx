@@ -18,6 +18,7 @@ const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
   const openPicker = () => {
     ImageCropPicker.openCamera({
       mediaType: 'photo',
+      cropping: true,
     }).then(image => {
       if (Platform.OS == 'android') {
         image.sourceURL = image.path;
@@ -35,6 +36,7 @@ const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
   const openGallery = () => {
     ImageCropPicker.openPicker({
       mediaType: 'photo',
+      cropping: true,
     }).then(image => {
       if (Platform.OS == 'android') {
         image.sourceURL = image.path;

@@ -3,12 +3,18 @@ import {API, HTTP_METHOD} from '../utils/apiConstant';
 import {axiosBaseQuery} from '../services/api/baseQuery';
 import {errorToast} from '../utils/commonFunction';
 import {setAsyncUserInfo} from '../utils/asyncStorage';
-import {setUserInfo} from '../features/authSlice';
+import {setCompanyServices, setUserInfo} from '../features/authSlice';
 
 export const dashboardApi = createApi({
   reducerPath: 'dashboardApi',
   baseQuery: axiosBaseQuery,
-  tagTypes: ['GetDashboard', 'CreatePost', 'GetPost', 'GetProfile'],
+  tagTypes: [
+    'GetDashboard',
+    'CreatePost',
+    'GetPost',
+    'GetProfile',
+    'CreateProfile',
+  ],
   endpoints: builder => ({
     //  -------   Company    --------
     // Get Explore challenges
@@ -57,6 +63,43 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    createCompanyProfile: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.updateCompanyProfile,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['CreateProfile'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Update Profile Error', error);
+        }
+      },
+    }),
+    getServices: builder.query<any, any>({
+      query: () => ({
+        url: API.getServices,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+          dispatch(setCompanyServices(data?.data?.services));
+        } catch (error) {
+          console.log('Guest Login Error', error);
+        }
+      },
+    }),
 
     //  -------   Employee   --------
     // getEmployeeDashboard
@@ -86,4 +129,6 @@ export const {
   useGetCompanyPostsQuery,
   useCreateCompanyPostMutation,
   useGetEmployeeProfileQuery,
+  useGetServicesQuery,
+  useCreateCompanyProfileMutation,
 } = dashboardApi;
