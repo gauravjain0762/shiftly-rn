@@ -43,6 +43,7 @@ import {
   useGetBusinessTypesQuery,
 } from '../../../api/authApi';
 import {
+  setCompanyProfileAllData,
   setCompanyProfileData,
   setCompanyRegisterData,
   setCompanyRegistrationStep,
@@ -223,6 +224,17 @@ const CreateAccount = () => {
 
   const handleSignup = async () => {
     let data = {
+      website: companyProfileData?.website,
+      company_size: companyProfileData?.company_size,
+      address: companyProfileData?.address,
+      lat: companyProfileData?.lat,
+      lng: companyProfileData?.lng,
+      about: companyProfileData?.about,
+      mission: companyProfileData?.mission,
+      values: companyProfileData?.values,
+      services: companyProfileData?.services,
+      logo: companyProfileData?.logo,
+      cover_images: companyProfileData?.cover_images,
       business_type_id: companyRegisterData?.business_type_id,
       company_name: companyRegisterData?.company_name,
       name: companyRegisterData?.name,
@@ -235,7 +247,8 @@ const CreateAccount = () => {
       deviceType: Platform.OS,
     };
     const response = await companySignUp(data).unwrap();
-    console.log(response, response?.status, 'response----');
+    console.log(response, response?.status, 'response----handleSignup');
+    dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
       setStart(prev => !prev);
       nextStep();
@@ -328,9 +341,11 @@ const CreateAccount = () => {
       services: companyProfileData?.services,
       logo: companyProfileData?.logo,
       cover_images: companyProfileData?.cover_images,
+      company_name: companyRegisterData?.company_name,
     };
     const response = await companyProfile(data).unwrap();
-    console.log(response, response?.status, 'response----');
+    console.log(response, response?.status, 'response----handleCreateProfile');
+    dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
       resetNavigation(SCREENS.CompanyProfile);
       dispatch(
@@ -886,7 +901,19 @@ const CreateAccount = () => {
                 style={styles.btn}
                 type="Company"
                 title={t('Next')}
-                onPress={() => nextStep()}
+                onPress={() => {
+                  console.log(
+                    'lat:',
+                    position?.latitude,
+                    'lng:',
+                    position?.longitude,
+                  );
+                  dispatch(setCompanyProfileData({
+                    lat: position?.latitude,
+                    lng: position?.longitude,
+                  }));
+                  nextStep();
+                }}
               />
             </View>
           </View>

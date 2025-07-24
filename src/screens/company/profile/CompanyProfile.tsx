@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
   LinearContainer,
@@ -18,11 +18,46 @@ import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigateTo, resetNavigation} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useSelector} from 'react-redux';
+import {useTranslation} from 'react-i18next';
+import {RootState} from '../../../store';
+import { useGetProfileQuery} from '../../../api/authApi';
+import {useAppDispatch} from '../../../redux/hooks';
+import {setCompanyProfileAllData} from '../../../features/authSlice';
 
 const CompanyProfile = () => {
+  const {
+    businessType = [],
+    fcmToken,
+    language,
+    companyRegistrationStep,
+    userInfo,
+    registerSuccessModal,
+    companyProfileData,
+    companyProfileAllData,
+    companyServices = [],
+  } = useSelector((state: RootState) => state.auth);
+  console.log(
+    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
+    companyProfileData,
+  );
+  console.log(
+    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileAllData:',
+    companyProfileAllData,
+  );
+  const dispatch = useAppDispatch();
+  const {t, i18n} = useTranslation();
+  const {data, isLoading} = useGetProfileQuery();
+
+  useEffect(() => {
+    if (data?.status && data.data?.company) {
+      dispatch(setCompanyProfileAllData(data.data.company));
+    }
+  }, [data]);
+
   return (
     <ParallaxContainer
-      imagePath={IMAGES.profileCover}
+      imagePath={{uri: companyProfileData?.cover_images?.uri}}
       ImageChildren={
         <TouchableOpacity
           onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
@@ -37,13 +72,13 @@ const CompanyProfile = () => {
         colors={['#FFF8E6', '#F3E1B7']}>
         <View style={styles.profileHeader}>
           <Image
-            source={{
-              uri: 'https://dubailocal.ae/assets/business-thumbnail/590x375-1688012358_b463e97ff9e159fe7b7c.png',
-            }}
+            source={{uri: companyProfileData?.logo?.uri}}
             style={styles.logo}
           />
           <View style={styles.titleTextContainer}>
-            <Text style={styles.companyName}>Atlantis Resorts</Text>
+            <Text style={styles.companyName}>
+              {t(companyProfileAllData?.company_name) || 'N/A'}
+            </Text>
             <Text style={styles.tagline}>
               Experience a world away from your everyday
             </Text>
@@ -52,23 +87,29 @@ const CompanyProfile = () => {
         </View>
 
         <Text style={styles.description}>
-          Discover an extraordinary world beyond anything you’ve ever imagined.
+          {/* Discover an extraordinary world beyond anything you’ve ever imagined.
           Our Atlantis properties in Dubai and Sanya, China redefine the concept
           of entertainment destination resorts. They are extraordinary,
-          intriguing and unique destinations full of life, wonder and surprise.
+          intriguing and unique destinations full of life, wonder and surprise. */}
+          {t(companyProfileAllData?.about)}
         </Text>
         <Text style={styles.description}>
-          Atlantis is all about superlatives: more variety and choice than you
+          {/* Atlantis is all about superlatives: more variety and choice than you
           can imagine, experiences so creative and fun they astound, and service
-          truly dedicated to wonder and excitement.
+          truly dedicated to wonder and excitement. */}
+          {t(companyProfileAllData?.values)}
         </Text>
 
         <View style={styles.infoRow}>
           <View style={AppStyles.flex}>
-            <Text style={styles.infoTitle}>Website</Text>
+            <Text style={styles.infoTitle}>
+              {t(companyProfileAllData?.address)}
+            </Text>
             <View style={styles.row}>
               <Image source={IMAGES.web} style={styles.web} />
-              <Text style={styles.infoValue}>www.atlantis.com</Text>
+              <Text style={styles.infoValue}>
+                {t(companyProfileData?.website)}
+              </Text>
             </View>
           </View>
           <View style={AppStyles.flex}>
@@ -80,7 +121,8 @@ const CompanyProfile = () => {
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>Company size</Text>
           <Text style={styles.infoValue}>
-            5,001-10,000 employees | 8,464 associated members
+            {/* 5,001-10,000 employees | 8,464 associated members */}
+            {t(companyProfileAllData?.company_size)}
           </Text>
         </View>
 
@@ -90,7 +132,11 @@ const CompanyProfile = () => {
             Industry Sectors or Specializations
           </Text>
         </View>
-        <LocationContainer containerStyle={styles.map} />
+        <LocationContainer
+          containerStyle={styles.map}
+          lat={companyProfileAllData?.lat}
+          lng={companyProfileAllData?.lng}
+        />
       </LinearContainer>
     </ParallaxContainer>
   );

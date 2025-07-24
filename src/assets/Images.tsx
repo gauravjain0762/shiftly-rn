@@ -85,6 +85,8 @@ export const IMAGES = {
   location_marker: require('./image/location_marker.png'),
   notification_check: require('./image/notification_check.png'),
   notification_star: require('./image/notification_star.png'),
+  bell: require('./image/bell.png'),
+  invite_all: require('./image/invite_all.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

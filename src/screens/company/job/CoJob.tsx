@@ -2,6 +2,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,7 +18,13 @@ import {
   LocationContainer,
 } from '../../../component';
 import {useTranslation} from 'react-i18next';
-import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
+  commonFontStyle,
+  hp,
+  wp,
+} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {IMAGES} from '../../../assets/Images';
@@ -25,6 +32,9 @@ import {AppStyles} from '../../../theme/appStyles';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import {RFValue} from 'react-native-responsive-fontsize';
+import BottomModal from '../../../component/common/BottomModal';
+import CustomInput from '../../../component/common/CustomInput';
 
 const jobTypeData = [
   {label: 'Full-time', value: 'full_time'},
@@ -111,6 +121,24 @@ const benefitsOptions = [
   'Training & development',
 ];
 
+const jobSkills = [
+  'Hotel Management',
+  'Marketing',
+  'Music',
+  'Engineer',
+  'Programming',
+  'Finance',
+];
+
+const requirements = [
+  'Experienced in figma or Sketch.',
+  'Able to work in large or small team.',
+  'At least 1 year of working experience in agancy. freelance, or start-up.',
+  'Able to keep up with the lastest trends.',
+  'Have relevant experience for at least 3 years with diploma on institute.',
+  'Able to keep up with the lastest trends.',
+];
+
 const CoJob = () => {
   const {t} = useTranslation();
   const [title, setTitle] = useState('');
@@ -141,8 +169,10 @@ const CoJob = () => {
   const [step, setStep] = useState(0);
   const [describe, setDescribe] = useState('');
   const [selected, setSelected] = useState(['Accommodation']);
+  const [selectedJobSkills, setSelectedJobSkills] = useState<string[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
-  const toggleItem = item => {
+  const toggleItem = (item: any) => {
     setSelected(prev =>
       prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item],
     );
@@ -155,6 +185,12 @@ const CoJob = () => {
       navigationRef.goBack();
     }
     setStep(prev => prev - 1);
+  };
+
+  const handleSkillSelection = (skill: string) => {
+    if (!selectedJobSkills.includes(skill)) {
+      setSelectedJobSkills(prev => [...prev, skill]);
+    }
   };
 
   const render = () => {
@@ -221,6 +257,216 @@ const CoJob = () => {
             <View style={styles.container}>
               <View>
                 <Text style={[styles.inputLabel, {marginTop: hp(40)}]}>
+                  {t('Add Job Skills')}
+                </Text>
+                <CustomTextInput
+                  value={selectedJobSkills.join(', ')}
+                  editable={false}
+                  style={styles.input1}
+                  multiline
+                  placeholder="Select job skills"
+                  placeholderTextColor={colors._7B7878}
+                  containerStyle={styles.inputContainer}
+                />
+
+                <ScrollView style={{marginTop: hp(38)}}>
+                  <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+                    {jobSkills.map((item, index) => {
+                      return (
+                        <Pressable
+                          key={index}
+                          onPress={() => handleSkillSelection(item)}
+                          style={[
+                            {
+                              backgroundColor: colors._061F3D,
+                              borderRadius: hp(20),
+                              padding: hp(10),
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: wp(8),
+                              marginBottom: hp(8),
+                              paddingHorizontal: wp(15),
+                            },
+                          ]}>
+                          <Text
+                            style={[
+                              styles.inputLabel,
+                              {color: colors.white, fontSize: hp(15)},
+                            ]}>
+                            {item}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+              </View>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Continue')}
+                onPress={() => nextStep()}
+              />
+            </View>
+          </>
+        );
+      case 3:
+        return (
+          <>
+            <View style={styles.Backheader}>
+              <TouchableOpacity onPress={() => prevStep()}>
+                <Image source={IMAGES.backArrow} style={styles.back} />
+              </TouchableOpacity>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  {fontSize: RFValue(20, SCREEN_HEIGHT)},
+                ]}>
+                {t('Create Requirements')}
+              </Text>
+              <View />
+            </View>
+            <View style={[{flex: 1, marginTop: hp(20)}]}>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  {fontSize: RFValue(20, SCREEN_HEIGHT)},
+                ]}>
+                {t('Requirements')}
+              </Text>
+
+              <View style={{marginTop: hp(16)}}>
+                {requirements.map((item, index) => {
+                  return (
+                    <>
+                      <View style={styles.boxContainer}>
+                        <View style={styles.checkRound}>
+                          <Image
+                            source={IMAGES.mark}
+                            style={{
+                              width: wp(12),
+                              height: hp(12),
+                              resizeMode: 'contain',
+                            }}
+                          />
+                        </View>
+                        <Text
+                          style={{
+                            width: '90%',
+                            color: colors._4A4A4A,
+                            fontSize: RFValue(16, SCREEN_HEIGHT),
+                          }}
+                          numberOfLines={2}>
+                          {item}
+                        </Text>
+                      </View>
+                    </>
+                  );
+                })}
+              </View>
+
+              <Pressable
+                onPress={() => setIsModalVisible(true)}
+                style={[
+                  styles.boxContainer,
+                  {
+                    marginTop: hp(40),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  },
+                ]}>
+                <View style={styles.checkRound}>
+                  <Image
+                    source={IMAGES.close1}
+                    style={{
+                      width: wp(18),
+                      height: hp(18),
+                      resizeMode: 'contain',
+                    }}
+                    tintColor={colors.white}
+                  />
+                </View>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    color: colors._4A4A4A,
+                    fontSize: RFValue(18, SCREEN_HEIGHT),
+                  }}>
+                  {t('Add New Requirements')}
+                </Text>
+              </Pressable>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Continue')}
+                onPress={() => nextStep()}
+              />
+            </View>
+            <BottomModal
+              visible={isModalVisible}
+              onClose={() => {
+                setIsModalVisible(false);
+              }}>
+              <View>
+                <Pressable onPress={() => setIsModalVisible(false)}>
+                  <Image
+                    source={IMAGES.close}
+                    style={{
+                      width: wp(18),
+                      height: hp(18),
+                      alignSelf: 'flex-end',
+                      resizeMode: 'contain',
+                    }}
+                    tintColor={colors.black}
+                  />
+                </Pressable>
+                <Text
+                  onPress={() => setIsModalVisible(true)}
+                  style={{
+                    color: colors.black,
+                    fontSize: RFValue(18, SCREEN_HEIGHT),
+                  }}>
+                  {t('Add New Requirements')}
+                </Text>
+                <CustomTextInput
+                  containerStyle={{
+                    height: hp(100),
+                    padding: hp(18),
+                    marginTop: hp(29),
+                    borderWidth: wp(1.5),
+                    borderRadius: wp(10),
+                    borderColor: colors._D5D5D5,
+                  }}
+                  placeholder={t('Write requirements')}
+                  inputStyle={{
+                    ...commonFontStyle(400, 18, '#8F8D8D'),
+                    alignSelf: 'baseline'
+                  }}
+                />
+                <GradientButton
+                  type="Company"
+                  style={styles.btn}
+                  onPress={() => nextStep()}
+                  title={t('Add Requirement')}
+                />
+              </View>
+            </BottomModal>
+          </>
+        );
+      case 4:
+        return (
+          <>
+            <View style={styles.Backheader}>
+              <TouchableOpacity onPress={() => prevStep()}>
+                <Image source={IMAGES.backArrow} style={styles.back} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setStep(0)}>
+                <Image source={IMAGES.close} style={styles.close} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.container}>
+              <View>
+                <Text style={[styles.inputLabel, {marginTop: hp(40)}]}>
                   {t('You will Provide')}
                 </Text>
                 <FlatList
@@ -262,6 +508,7 @@ const CoJob = () => {
             </View>
           </>
         );
+
       default:
         break;
     }
@@ -611,5 +858,24 @@ const styles = StyleSheet.create({
     height: wp(24),
     resizeMode: 'contain',
     tintColor: colors._4A4A4A,
+  },
+  boxContainer: {
+    marginTop: hp(17),
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: hp(1.5),
+    borderRadius: hp(10),
+    paddingVertical: hp(17),
+    paddingHorizontal: wp(18),
+    borderColor: colors._C9B68B,
+  },
+  checkRound: {
+    width: wp(24),
+    height: hp(24),
+    marginRight: wp(15),
+    borderRadius: hp(24),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors._4A4A4A,
   },
 });

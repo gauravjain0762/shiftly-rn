@@ -9,17 +9,19 @@ import Config from 'react-native-config';
 
 type map = {
   containerStyle?: ViewStyle;
+  lat?: number | undefined;
+  lng?: number | undefined;
 };
 
-const LocationContainer: FC<map> = ({containerStyle}) => {
+const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
   useEffect(() => {
     getLocation();
   }, []);
-  const [location, setLocation] = useState(undefined);
+  // const [location, setLocation] = useState(undefined);
   const getLocation = async () => {
     const res = await getAsyncUserLocation();
     if (res) {
-      setLocation(res);
+      // setLocation(res);
     }
   };
   return (
@@ -38,8 +40,8 @@ const LocationContainer: FC<map> = ({containerStyle}) => {
       <View>
         <MapView
           region={{
-            latitude: location?.latitude,
-            longitude: location?.latitude,
+            latitude: lat,
+            longitude: lng,
             latitudeDelta: 0.04,
             longitudeDelta: 0.04,
           }}
@@ -49,8 +51,8 @@ const LocationContainer: FC<map> = ({containerStyle}) => {
           style={styles.mapImage}>
           <Marker
             coordinate={{
-              latitude: location?.latitude,
-              longitude: location?.latitude,
+              latitude: lat,
+              longitude: lng,
             }}>
             <Image
               source={IMAGES.location_marker}
