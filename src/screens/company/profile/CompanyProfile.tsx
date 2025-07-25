@@ -1,12 +1,14 @@
 import {
+  FlatList,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
   LinearContainer,
@@ -21,22 +23,51 @@ import {SCREENS} from '../../../navigation/screenNames';
 import {useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
 import {RootState} from '../../../store';
-import { useGetProfileQuery} from '../../../api/authApi';
+import {useGetProfileQuery} from '../../../api/authApi';
 import {useAppDispatch} from '../../../redux/hooks';
 import {setCompanyProfileAllData} from '../../../features/authSlice';
+import CustomPostCard from '../../../component/common/CustomPostCard';
+import MyJobCard from '../../../component/common/MyJobCard';
+
+const ProfileTabs = ['About', 'Post', 'Jobs'];
+
+const StaticPosts = [
+  {
+    id: 1,
+    title: 'Hotel Receptionist Job',
+    image: IMAGES.staticpost1,
+  },
+  {
+    id: 2,
+    title: 'Hotel & Restaurant Manager',
+    image: IMAGES.staticpost2,
+  },
+  {
+    id: 3,
+    title: 'Hotel Room Services Staff',
+    image: IMAGES.staticpost3,
+  },
+  {
+    id: 4,
+    title: 'Restaurant Chef Job',
+    image: IMAGES.staticpost4,
+  },
+  {
+    id: 5,
+    title: 'Hotel Room Services Staff',
+    image: IMAGES.staticpost3,
+  },
+  {
+    id: 6,
+    title: 'Restaurant Chef Job',
+    image: IMAGES.staticpost4,
+  },
+];
 
 const CompanyProfile = () => {
-  const {
-    businessType = [],
-    fcmToken,
-    language,
-    companyRegistrationStep,
-    userInfo,
-    registerSuccessModal,
-    companyProfileData,
-    companyProfileAllData,
-    companyServices = [],
-  } = useSelector((state: RootState) => state.auth);
+  const {companyProfileData, companyProfileAllData} = useSelector(
+    (state: RootState) => state.auth,
+  );
   console.log(
     '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
     companyProfileData,
@@ -45,9 +76,11 @@ const CompanyProfile = () => {
     '🔥🔥🔥 ~ CompanyProfile ~ companyProfileAllData:',
     companyProfileAllData,
   );
+
   const dispatch = useAppDispatch();
   const {t, i18n} = useTranslation();
   const {data, isLoading} = useGetProfileQuery();
+  const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
 
   useEffect(() => {
     if (data?.status && data.data?.company) {
@@ -68,16 +101,16 @@ const CompanyProfile = () => {
       ContainerStyle={styles.container}>
       <LinearContainer
         SafeAreaProps={{edges: ['bottom']}}
-        containerStyle={{paddingHorizontal: wp(21)}}
+        containerStyle={styles.linearContainer}
         colors={['#FFF8E6', '#F3E1B7']}>
         <View style={styles.profileHeader}>
           <Image
-            source={{uri: companyProfileData?.logo?.uri}}
             style={styles.logo}
+            source={{uri: companyProfileData?.logo?.uri}}
           />
           <View style={styles.titleTextContainer}>
             <Text style={styles.companyName}>
-              {t(companyProfileAllData?.company_name) || 'N/A'}
+              {companyProfileAllData?.company_name || 'N/A'}
             </Text>
             <Text style={styles.tagline}>
               Experience a world away from your everyday
@@ -86,57 +119,85 @@ const CompanyProfile = () => {
           </View>
         </View>
 
-        <Text style={styles.description}>
-          {/* Discover an extraordinary world beyond anything you’ve ever imagined.
-          Our Atlantis properties in Dubai and Sanya, China redefine the concept
-          of entertainment destination resorts. They are extraordinary,
-          intriguing and unique destinations full of life, wonder and surprise. */}
-          {t(companyProfileAllData?.about)}
-        </Text>
-        <Text style={styles.description}>
-          {/* Atlantis is all about superlatives: more variety and choice than you
-          can imagine, experiences so creative and fun they astound, and service
-          truly dedicated to wonder and excitement. */}
-          {t(companyProfileAllData?.values)}
-        </Text>
+        <Text style={styles.description}>{companyProfileAllData?.about}</Text>
+        <Text style={styles.description}>{companyProfileAllData?.values}</Text>
 
-        <View style={styles.infoRow}>
-          <View style={AppStyles.flex}>
-            <Text style={styles.infoTitle}>
-              {t(companyProfileAllData?.address)}
-            </Text>
-            <View style={styles.row}>
-              <Image source={IMAGES.web} style={styles.web} />
+        <View style={styles.tabRow}>
+          {ProfileTabs.map((item, index) => (
+            <Pressable
+              key={item}
+              onPress={() => setSelectedTabIndex(index)}
+              style={styles.tabItem}>
+              <Text style={styles.tabText}>{item}</Text>
+              {selectedTanIndex === index && (
+                <View style={styles.tabIndicator} />
+              )}
+            </Pressable>
+          ))}
+        </View>
+
+        <View style={styles.divider} />
+
+        {selectedTanIndex == 0 && (
+          <>
+            <View style={styles.infoRow}>
+              <View style={AppStyles.flex}>
+                <Text style={styles.infoTitle}>
+                  {companyProfileAllData?.address}
+                </Text>
+                <View style={styles.row}>
+                  <Image source={IMAGES.web} style={styles.web} />
+                  <Text style={styles.infoValue}>
+                    {companyProfileData?.website}
+                  </Text>
+                </View>
+              </View>
+              <View style={AppStyles.flex}>
+                <Text style={styles.infoTitle}>Type</Text>
+                <Text style={styles.infoValue}>Hotel</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoSection}>
+              <Text style={styles.infoTitle}>Company size</Text>
               <Text style={styles.infoValue}>
-                {t(companyProfileData?.website)}
+                {companyProfileAllData?.company_size}
               </Text>
             </View>
-          </View>
-          <View style={AppStyles.flex}>
-            <Text style={styles.infoTitle}>Type</Text>
-            <Text style={styles.infoValue}>Hotel</Text>
-          </View>
-        </View>
 
-        <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>Company size</Text>
-          <Text style={styles.infoValue}>
-            {/* 5,001-10,000 employees | 8,464 associated members */}
-            {t(companyProfileAllData?.company_size)}
-          </Text>
-        </View>
+            <View style={styles.infoSection}>
+              <Text style={styles.infoTitle}>Sectors/industry</Text>
+              <Text style={styles.infoValue}>
+                Industry Sectors or Specializations
+              </Text>
+            </View>
 
-        <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>Sectors/industry</Text>
-          <Text style={styles.infoValue}>
-            Industry Sectors or Specializations
-          </Text>
-        </View>
-        <LocationContainer
-          containerStyle={styles.map}
-          lat={companyProfileAllData?.lat}
-          lng={companyProfileAllData?.lng}
-        />
+            <LocationContainer
+              containerStyle={styles.map}
+              lat={companyProfileAllData?.lat}
+              lng={companyProfileAllData?.lng}
+            />
+          </>
+        )}
+
+        {selectedTanIndex === 1 && (
+          <FlatList
+            numColumns={2}
+            style={{marginTop: hp(10)}}
+            keyExtractor={item => item.id.toString()}
+            data={StaticPosts}
+            columnWrapperStyle={{justifyContent: 'space-between'}}
+            renderItem={({item}) => (
+              <CustomPostCard title={item?.title} image={item?.image} />
+            )}
+          />
+        )}
+
+        {selectedTanIndex === 2 && (
+          <View>
+            <MyJobCard />
+          </View>
+        )}
       </LinearContainer>
     </ParallaxContainer>
   );
@@ -149,16 +210,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F3E1B7',
   },
-  bannerImage: {
-    width: '100%',
-    height: hp(306),
-    resizeMode: 'cover',
+  linearContainer: {
+    paddingHorizontal: wp(21),
   },
   backButton: {
     position: 'absolute',
     top: 60,
     left: 22,
     zIndex: 111,
+  },
+  backArrow: {
+    width: wp(21),
+    height: wp(21),
+    tintColor: colors.black,
   },
   profileHeader: {
     flexDirection: 'row',
@@ -190,6 +254,33 @@ const styles = StyleSheet.create({
     marginTop: hp(11),
     lineHeight: hp(25),
   },
+  tabRow: {
+    flexDirection: 'row',
+    marginTop: hp(30),
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  tabText: {
+    ...commonFontStyle(500, 18, colors._0B3970),
+  },
+  tabIndicator: {
+    bottom: '-85%',
+    height: hp(4),
+    width: '50%',
+    alignSelf: 'center',
+    position: 'absolute',
+    borderRadius: hp(20),
+    backgroundColor: colors._0B3970,
+  },
+  divider: {
+    height: 1,
+    width: '150%',
+    alignSelf: 'center',
+    marginVertical: hp(16),
+    backgroundColor: '#D9D9D9',
+  },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -205,52 +296,19 @@ const styles = StyleSheet.create({
   infoValue: {
     ...commonFontStyle(400, 16, colors._434343),
   },
-  locationCard: {
-    backgroundColor: colors._0B3970,
-    paddingHorizontal: wp(22),
-    paddingVertical: hp(12),
-  },
-  locationLabel: {
-    ...commonFontStyle(400, 18, colors.white),
-  },
-  primaryTag: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 100,
-    paddingHorizontal: wp(12),
-    paddingVertical: hp(6),
-    justifyContent: 'center',
+  row: {
     alignItems: 'center',
-  },
-  locationText: {
-    ...commonFontStyle(400, 14, colors.white),
-    marginTop: hp(7),
-  },
-  mapImage: {
-    height: 140,
-    width: '100%',
-    resizeMode: 'cover',
-  },
-  backArrow: {
-    width: wp(21),
-    height: wp(21),
-    tintColor: colors.black,
+    flexDirection: 'row',
+    gap: wp(5),
   },
   web: {
     width: wp(19),
     height: wp(19),
     resizeMode: 'contain',
   },
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: wp(5),
-  },
   map: {
     borderRadius: 15,
     overflow: 'hidden',
     marginTop: hp(30),
-  },
-  primary: {
-    ...commonFontStyle(500, 11, colors.white),
   },
 });

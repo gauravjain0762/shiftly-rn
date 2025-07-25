@@ -18,7 +18,9 @@ interface AppState {
   registerSuccessModal?: boolean;
   companyProfileData?: any;
   companyServices?: any[];
-  companyProfileAllData?: any[]
+  companyProfileAllData?: any[];
+  services: any[];
+  skills: any[];
 }
 
 const initialState: AppState = {
@@ -57,7 +59,9 @@ const initialState: AppState = {
     cover_images: {},
   },
   companyServices: [],
-  companyProfileAllData: []
+  companyProfileAllData: [],
+  services: [],
+  skills: [],
 };
 
 const authSlice = createSlice({
@@ -122,7 +126,10 @@ const authSlice = createSlice({
       state.companyServices = action.payload;
     },
     setCompanyProfileAllData: (state, action: PayloadAction<any[]>) => {
-      state.companyProfileAllData = action.payload
+      state.companyProfileAllData = action.payload;
+    },
+    setSkills: (state, action: PayloadAction<any[]>) => {
+      state.skills = action.payload;
     },
     logouts: () => initialState,
   },
@@ -167,13 +174,15 @@ export const {
   setUserInfo,
   setGuestLogin,
   setBusinessType,
+  setBusinessTypesData,
   setCompanyRegisterForm,
   setCompanyRegistrationStep,
   setCompanyRegisterData,
   setRegisterSuccessModal,
   setCompanyProfileData,
   setCompanyServices,
-  setCompanyProfileAllData
+  setCompanyProfileAllData,
+  setSkills,
 } = authSlice.actions;
 
 export default authSlice.reducer;

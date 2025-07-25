@@ -18,6 +18,7 @@ export const API = {
   getServices: '/company/getServices',
   getCompanyPosts: '/company/getPosts',
   getCompanyJobs: '/company/getJobs',
+  getSkills: '/company/getSkills',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',

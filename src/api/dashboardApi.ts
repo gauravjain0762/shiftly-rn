@@ -3,7 +3,12 @@ import {API, HTTP_METHOD} from '../utils/apiConstant';
 import {axiosBaseQuery} from '../services/api/baseQuery';
 import {errorToast} from '../utils/commonFunction';
 import {setAsyncUserInfo} from '../utils/asyncStorage';
-import {setCompanyServices, setUserInfo} from '../features/authSlice';
+import {
+  setBusinessType,
+  setCompanyServices,
+  setSkills,
+  setUserInfo,
+} from '../features/authSlice';
 
 export const dashboardApi = createApi({
   reducerPath: 'dashboardApi',
@@ -39,6 +44,23 @@ export const dashboardApi = createApi({
           // dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
           console.log('Guest Login Error', error);
+        }
+      },
+    }),
+    getBusinessTypes: builder.query<any, any>({
+      query: () => ({
+        url: API.getBusinessTypes,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['GetPost'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'Business Types');
+          dispatch(setBusinessType(data?.data?.types));
+        } catch (error) {
+          console.log('Business Types Error', error);
         }
       },
     }),
@@ -100,6 +122,22 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getSkills: builder.query<any, any>({
+      query: () => ({
+        url: API.getSkills,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+          dispatch(setSkills(data?.data?.skills));
+        } catch (error) {
+          console.log('Guest Login Error', error);
+        }
+      },
+    }),
 
     //  -------   Employee   --------
     // getEmployeeDashboard
@@ -131,4 +169,6 @@ export const {
   useGetEmployeeProfileQuery,
   useGetServicesQuery,
   useCreateCompanyProfileMutation,
+  useGetSkillsQuery,
+  useGetBusinessTypesQuery,
 } = dashboardApi;

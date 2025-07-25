@@ -5,7 +5,7 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {useTranslation} from 'react-i18next';
-import {navigateTo} from '../../../utils/commonFunction';
+import {IMAGE_URL, navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
 import BottomModal from '../../../component/common/BottomModal';
@@ -114,16 +114,12 @@ const SuggestedEmployee = () => {
 
 export default SuggestedEmployee;
 
-const IMAGE_URL =
-  'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: hp(20),
     paddingHorizontal: wp(25),
   },
-  header: {},
   rightIcon: {
     tintColor: colors._0B3970,
   },

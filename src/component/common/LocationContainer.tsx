@@ -17,11 +17,12 @@ const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
   useEffect(() => {
     getLocation();
   }, []);
-  // const [location, setLocation] = useState(undefined);
+  const [location, setLocation] = useState(undefined);
+  console.log('🔥🔥🔥 ~ LocationContainer ~ location:', location);
   const getLocation = async () => {
     const res = await getAsyncUserLocation();
     if (res) {
-      // setLocation(res);
+      setLocation(res);
     }
   };
   return (
@@ -40,8 +41,8 @@ const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
       <View>
         <MapView
           region={{
-            latitude: lat,
-            longitude: lng,
+            latitude: lat || location?.latitude,
+            longitude: lng || location?.longitude,
             latitudeDelta: 0.04,
             longitudeDelta: 0.04,
           }}
@@ -51,8 +52,8 @@ const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
           style={styles.mapImage}>
           <Marker
             coordinate={{
-              latitude: lat,
-              longitude: lng,
+              latitude: lat || location?.latitude,
+              longitude: lng || location?.longitude,
             }}>
             <Image
               source={IMAGES.location_marker}

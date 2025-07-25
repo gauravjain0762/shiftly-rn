@@ -27,15 +27,13 @@ const EmplyoeeCard = ({selected, setIsSelected}: Props) => {
           </View>
         </View>
 
-        {selected ? (
-          <Pressable onPress={() => setIsSelected(!selected)}>
+        <Pressable onPress={() => setIsSelected(!selected)}>
+          {selected ? (
             <Image source={IMAGES.checked} style={styles.checkImg} />
-          </Pressable>
-        ) : (
-          <Pressable onPress={() => setIsSelected(!selected)}>
+          ) : (
             <View style={styles.unselectedCircle} />
-          </Pressable>
-        )}
+          )}
+        </Pressable>
       </View>
     </View>
   );

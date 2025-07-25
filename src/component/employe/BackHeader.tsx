@@ -26,6 +26,7 @@ type props = {
   titleStyle?: ViewStyle;
   leftStyle?: ViewStyle;
   type?: 'company' | 'employe';
+  alignBackAndTitleTogether?: boolean;
 };
 
 const BackHeader: FC<props> = ({

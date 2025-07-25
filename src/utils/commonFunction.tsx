@@ -93,3 +93,6 @@ export const getImageUrl = (imagePath: string | null): string | null => {
     ? imagePath
     : `${BASE_IMAGE_URL}${imagePath}`;
 };
+
+export const IMAGE_URL =
+  'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D';

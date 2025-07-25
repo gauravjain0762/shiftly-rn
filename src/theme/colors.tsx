@@ -40,6 +40,7 @@ export const colors = {
   _FAEED2: "#FAEED2",
   _6B6B6B: "#6B6B6B",
   _B4B4B4: "#B4B4B4",
+  _0A0A0A: "#0A0A0A",
 
   _25201a: '#25201a',
   greyOpacity: 'rgba(0,0,0,0.5)',

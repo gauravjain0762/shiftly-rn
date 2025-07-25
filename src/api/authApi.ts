@@ -7,6 +7,7 @@ import {
   setAuthToken,
   setBusinessType,
   setGuestLogin,
+  setServices,
   setUserInfo,
 } from '../features/authSlice';
 import {SCREENS} from '../navigation/screenNames';
@@ -90,6 +91,50 @@ export const authApi = createApi({
         }
       },
     }),
+    createJob: builder.mutation<any, any>({
+      query: params => {
+        console.log('🔥🔥🔥 ~ params:', params);
+        return {
+          url: API.createCompanyJob,
+          method: HTTP_METHOD.POST,
+          data: params,
+          skipLoader: false,
+        };
+      },
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data?.data) {
+              console.log('Create Job Data', data);
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.error('Create Job Error', error);
+        }
+      },
+    }),
+    // getServices: builder.query<any, void>({
+    //   query: () => ({
+    //     url: API.getServices,
+    //     method: HTTP_METHOD.GET,
+    //     skipLoader: false,
+    //   }),
+    //   async onQueryStarted(_, {dispatch, queryFulfilled}) {
+    //     try {
+    //       const {data} = await queryFulfilled;
+    //       if (data?.status && data.data?.services) {
+    //         dispatch(setServices(data?.data?.services));
+    //       } else {
+    //         errorToast(data?.message || 'Something went wrong.');
+    //       }
+    //     } catch (error) {
+    //       console.log('Get Profile Error', error);
+    //     }
+    //   },
+    // }),
 
     companyOTPVerify: builder.mutation<any, any>({
       query: credentials => ({
@@ -269,5 +314,6 @@ export const {
   useCompanyOTPVerifyMutation,
   useEmployeeLoginMutation,
   useEmployeeLogoutMutation,
-  useGetProfileQuery
+  useGetProfileQuery,
+  useCreateJobMutation,
 } = authApi;

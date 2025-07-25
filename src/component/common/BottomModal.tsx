@@ -1,15 +1,11 @@
 // components/BottomModal.tsx
 
 import React from 'react';
-import {
-  Modal,
-  View,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Pressable,
-} from 'react-native';
+import {View, StyleSheet, KeyboardAvoidingView, Platform} from 'react-native';
+
 import {hp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
+import Modal from 'react-native-modal';
 
 type BottomModalProps = {
   visible: boolean;
@@ -26,16 +22,15 @@ const BottomModal = ({
 }: BottomModalProps) => {
   return (
     <Modal
-      transparent
-      visible={visible}
-      animationType="slide"
-      onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop}>
-          <Pressable style={styles.transparent} />
-        </View>
-      </TouchableWithoutFeedback>
-      <View style={[styles.modalContent, {backgroundColor}]}>{children}</View>
+      style={styles.modal}
+      onBackdropPress={onClose}
+      avoidKeyboard
+      isVisible={visible}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoiding}>
+        <View style={[styles.container, {backgroundColor}]}>{children}</View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -43,21 +38,22 @@ const BottomModal = ({
 export default BottomModal;
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: colors.greyOpacity,
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
   },
   transparent: {
     flex: 1,
   },
-  modalContent: {
-    borderTopLeftRadius: hp(40),
-    borderTopRightRadius: hp(40),
+  keyboardAvoiding: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  container: {
     padding: hp(20),
-    maxHeight: '80%',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    maxHeight: '90%',
+    borderTopLeftRadius: hp(25),
+    borderTopRightRadius: hp(25),
+    backgroundColor: colors.white,
   },
 });

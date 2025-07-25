@@ -38,6 +38,7 @@ export const SCREENS = {
   CoMessage: 'CoMessage',
   CoNotification: 'CoNotification',
   SuggestedEmployee: 'SuggestedEmployee',
+  PostJob: 'PostJob',
 };
 
 export interface ScreenNames {

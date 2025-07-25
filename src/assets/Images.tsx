@@ -87,6 +87,12 @@ export const IMAGES = {
   notification_star: require('./image/notification_star.png'),
   bell: require('./image/bell.png'),
   invite_all: require('./image/invite_all.png'),
+  post_filter: require("./image/Post_Filter.png"),
+  dropdown: require('./image/ic_DropDown.png'),
+  staticpost1: require('./image/StaticPost1.png'),
+  staticpost2: require('./image/StaticPost2.png'),
+  staticpost3: require('./image/StaticPost3.png'),
+  staticpost4: require('./image/StaticPost4.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),
