@@ -107,6 +107,19 @@
     "Post Job": "Post Job",
     "Filters": "Filters",
     "Location": "Location",
-    "Apply": "Apply"
+    "Apply": "Apply",
+    "Forgot Password": "Forgot Password",
+    "Enter the email associated with your account and we’ll send an email instructions to forgot your password.": "Enter the email associated with your account and we’ll send an email instructions to forgot your password.",
+    "Your Email": "Your Email",
+    "Account": "Account",
+    "My Profile": "My Profile",
+    "Email": "Email",
+    "Phone": "Phone",
+    "Edit Profile": "Edit Profile",
+    "Change Password": "Change Password",
+    "Old Password": "Old Password",
+    "Post A Job": "Post A Job",
+    "Create a post": "Create a post",
+    "Write your post title": "Write your post title"
   }
 }

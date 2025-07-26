@@ -14,7 +14,7 @@ import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {AppStyles} from '../../../theme/appStyles';
-import {errorToast, navigateTo} from '../../../utils/commonFunction';
+import {errorToast, navigateTo, resetNavigation} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useCreateCompanyPostMutation} from '../../../api/dashboardApi';
 
@@ -65,7 +65,7 @@ const CoPost = () => {
       const response = await companyPost(data).unwrap();
       console.log(response, 'response----');
       if (response?.status) {
-        navigateTo(SCREENS.CoHome);
+        resetNavigation(SCREENS.CoTabNavigator);
       }
     }
   };
@@ -90,8 +90,7 @@ const CoPost = () => {
         return (
           <View style={styles.container}>
             <View>
-              {uploadedImages.length > 0 &&
-              Object?.keys(uploadedImages[0])?.length == 0 ? (
+              {uploadedImages.length === 0 && !uploadedImages[0]?.uri ? (
                 <View style={styles.headercontainer}>
                   <BackHeader
                     onBackPress={() => prevStep(step)}
@@ -197,10 +196,18 @@ const CoPost = () => {
                   onBackPress={() => prevStep(step)}
                   type="company"
                   title=""
-                  isRight={false}
+                  // isRight={false}
+                  RightIcon={
+                    <TouchableOpacity
+                      onPress={() => {
+                        prevStep();
+                      }}>
+                      <Image source={IMAGES.close} style={styles.close} />
+                    </TouchableOpacity>
+                  }
                 />
                 <Text style={styles.createPost}>
-                  {t('Would you like to add a short description?e')}
+                  {t('Would you like to add a short description?')}
                 </Text>
               </View>
               <CustomTextInput
@@ -313,6 +320,7 @@ export default CoPost;
 
 const styles = StyleSheet.create({
   headercontainer: {
+    gap: hp(10),
     paddingHorizontal: wp(35),
   },
   createPost: {
@@ -346,14 +354,14 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginHorizontal: wp(42),
-    marginBottom: hp(20),
+    marginBottom: hp(40),
   },
   close: {
     width: wp(18),
     height: wp(18),
-    tintColor: colors._0B3970,
     marginLeft: wp(42),
     marginVertical: hp(44),
+    tintColor: colors._0B3970,
   },
   uploadImg: {
     height: hp(417),
@@ -380,7 +388,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   input1: {
-    ...commonFontStyle(400, 22, colors._4A4A4A),
+    ...commonFontStyle(400, 22, colors._7B7878),
   },
   scrollConatiner: {
     flex: 1,

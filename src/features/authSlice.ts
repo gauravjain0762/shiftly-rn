@@ -174,7 +174,6 @@ export const {
   setUserInfo,
   setGuestLogin,
   setBusinessType,
-  setBusinessTypesData,
   setCompanyRegisterForm,
   setCompanyRegistrationStep,
   setCompanyRegisterData,

@@ -39,6 +39,9 @@ export const SCREENS = {
   CoNotification: 'CoNotification',
   SuggestedEmployee: 'SuggestedEmployee',
   PostJob: 'PostJob',
+  ForgotPassword: 'Forgot Password',
+  CoMyProfile: 'CoMyProfile',
+  ChangePassword: 'ChangePassword',
 };
 
 export interface ScreenNames {
@@ -78,6 +81,8 @@ export interface ScreenNames {
   CoMessage: string;
   CoNotification: string;
   SuggestedEmployee: string;
+  CoMyProfile: string;
+  ChangePassword: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

@@ -33,6 +33,11 @@ import SuggestedEmployee from '../screens/company/job/SuggestedEmployee';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store';
 import PostJob from '../screens/company/job/PostJob';
+import ForgotPassword from '../screens/company/auth/ForgotPassword';
+import CoMyProfile from '../screens/company/profile/CoMyProfile';
+import ChangePassword from '../screens/company/auth/ChangePassword';
+import CoPost from '../screens/company/post/CoPost';
+import CoHome from '../screens/company/home/CoHome';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -305,6 +310,31 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.PostJob}
           component={PostJob}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoMyProfile}
+          component={CoMyProfile}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.ForgotPassword}
+          component={ForgotPassword}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.ChangePassword}
+          component={ChangePassword}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoPost}
+          component={CoPost}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoHome}
+          component={CoHome}
         />
       </Stack.Navigator>
     );

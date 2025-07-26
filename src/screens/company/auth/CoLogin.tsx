@@ -83,7 +83,7 @@ const CoLogin = () => {
               setAuthData({...authData, password: e});
             }}
           />
-          <Text style={styles.forgote}>{t('Forgot your password?')}</Text>
+          <Text onPress={() => navigateTo(SCREENS.ForgotPassword)} style={styles.forgote}>{t('Forgot your password?')}</Text>
         </View>
         <View>
           <GradientButton

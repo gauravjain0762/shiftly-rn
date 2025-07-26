@@ -41,6 +41,8 @@ export const colors = {
   _6B6B6B: "#6B6B6B",
   _B4B4B4: "#B4B4B4",
   _0A0A0A: "#0A0A0A",
+  _555555: "#555555",
+  _4D4D4D: "#4D4D4D",
 
   _25201a: '#25201a',
   greyOpacity: 'rgba(0,0,0,0.5)',

@@ -11,6 +11,7 @@ import {
 import React, {useEffect, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
+  GradientButton,
   LinearContainer,
   LocationContainer,
   ParallaxContainer,
@@ -198,6 +199,15 @@ const CompanyProfile = () => {
             <MyJobCard />
           </View>
         )}
+
+        <GradientButton
+          type="Company"
+          style={styles.button}
+          title={t('Post A Job')}
+          onPress={() => {
+            navigateTo(SCREENS.CoPost);
+          }}
+        />
       </LinearContainer>
     </ParallaxContainer>
   );
@@ -310,5 +320,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     overflow: 'hidden',
     marginTop: hp(30),
+  },
+  button: {
+    marginVertical: hp(26),
   },
 });
