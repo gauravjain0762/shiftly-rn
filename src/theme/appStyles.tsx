@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 import { colors } from "./colors";
-import { hp } from "./fonts";
 
 export const AppStyles = StyleSheet.create({
     flex: {

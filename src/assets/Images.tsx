@@ -95,6 +95,8 @@ export const IMAGES = {
   staticpost4: require('./image/StaticPost4.png'),
   deleteAccount: require('./image/delete_account.png'),
   hotel_cover: require('./image/hotel_cover.png'),
+  chat: require('./image/chat.png'),
+  current_location: require('./image/Current_Location.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

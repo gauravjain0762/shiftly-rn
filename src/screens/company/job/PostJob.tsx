@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   BackHeader,
   CustomDropdown,
@@ -39,7 +39,7 @@ import {
   navigateTo,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {RFValue} from 'react-native-responsive-fontsize';
 import BottomModal from '../../../component/common/BottomModal';
 import CustomInput from '../../../component/common/CustomInput';
@@ -53,6 +53,8 @@ import {
   useGetServicesQuery,
   useGetSkillsQuery,
 } from '../../../api/dashboardApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
 
 const jobTypeData = [
   {label: 'Full-time', value: 'full_time'},
@@ -201,6 +203,32 @@ const PostJob = () => {
     value: item._id,
   }));
 
+  const [userAddress, setUserAddress] = useState<
+    {address: string; lat: number; lng: number} | undefined
+  >();
+  console.log('🔥 ~ PostJob ~ userAddress:', userAddress);
+
+  const getUserLocation = async () => {
+    try {
+      const locationString = await AsyncStorage.getItem('user_location');
+      if (locationString !== null) {
+        const location = JSON.parse(locationString);
+        setUserAddress(location);
+        console.log('Retrieved location:', location);
+        return location;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve user location:', error);
+    }
+    return null;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getUserLocation();
+    }, []),
+  );
+
   useEffect(() => {
     if (dropdownBusinessTypesOptions?.length) {
       setJob(dropdownBusinessTypesOptions[0]);
@@ -232,7 +260,7 @@ const PostJob = () => {
       description: describe,
       job_type: type?.value,
       area: area?.value,
-      address: 'Test Address',
+      address: userAddress?.address,
       lat: location?.latitude,
       lng: location?.longitude,
       people_anywhere: true,
@@ -754,10 +782,10 @@ const PostJob = () => {
       {step == 0 && (
         <BackHeader
           type="company"
-          title={t('Post your job')}
-          containerStyle={styles.header}
           isRight={false}
           titleStyle={styles.title}
+          title={t('Post your job')}
+          containerStyle={styles.header}
         />
       )}
       <KeyboardAwareScrollView
@@ -810,7 +838,15 @@ const PostJob = () => {
                   selectedTextStyle={styles.selectedTextStyle}
                 />
               </View>
-              <LocationContainer containerStyle={styles.map} />
+              <LocationContainer
+                address={userAddress?.address}
+                onPressMap={() => {
+                  navigateTo(SCREENS.LocationScreen);
+                }}
+                containerStyle={styles.map}
+                lat={userAddress?.lat}
+                lng={userAddress?.lng}
+              />
               <View style={[styles.row, {paddingVertical: hp(12), gap: wp(8)}]}>
                 <Image source={IMAGES.check_circle} style={styles.check} />
                 <Text style={styles.peopleTitle}>

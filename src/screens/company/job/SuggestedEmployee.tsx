@@ -19,7 +19,7 @@ const SuggestedEmployee = () => {
     <>
       <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
         <View style={styles.container}>
-          <View style={styles.header}>
+          <View>
             <BackHeader
               type={'company'}
               RightIconStyle={styles.rightIcon}

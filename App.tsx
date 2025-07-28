@@ -10,6 +10,7 @@ import RootContainer from './src/navigation/RootContainer';
 import ToastComponent from './src/component/common/ToastComponent';
 import {PersistGate} from 'redux-persist/integration/react';
 import { persistor, store } from './src/store';
+import "react-native-get-random-values"
 
 type Props = {};
 

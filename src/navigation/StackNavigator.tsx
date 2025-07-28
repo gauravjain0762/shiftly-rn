@@ -38,6 +38,8 @@ import CoMyProfile from '../screens/company/profile/CoMyProfile';
 import ChangePassword from '../screens/company/auth/ChangePassword';
 import CoPost from '../screens/company/post/CoPost';
 import CoHome from '../screens/company/home/CoHome';
+import CoJobDetails from '../screens/company/job/JobDetails';
+import LocationScreen from '../component/common/LocationScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -345,6 +347,7 @@ const StackNavigator: FC = () => {
       initialRouteName={SCREENS.SplashScreen}
       screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
+      <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />
       <Stack.Screen
         name={SCREENS.SelectRollScreen}
         component={SelectRollScreen}
@@ -356,6 +359,7 @@ const StackNavigator: FC = () => {
       />
       <Stack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
+      <Stack.Screen name={SCREENS.LocationScreen} component={LocationScreen} />
     </Stack.Navigator>
   );
 };

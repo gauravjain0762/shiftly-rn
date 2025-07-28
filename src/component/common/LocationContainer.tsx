@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, View, ViewStyle} from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+} from 'react-native';
 import React, {FC, useEffect, useState} from 'react';
 import MapView, {Marker} from 'react-native-maps';
 import {IMAGES} from '../../assets/Images';
@@ -11,9 +18,17 @@ type map = {
   containerStyle?: ViewStyle;
   lat?: number | undefined;
   lng?: number | undefined;
+  onPressMap?: () => void;
+  address?: string | undefined;
 };
 
-const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
+const LocationContainer: FC<map> = ({
+  containerStyle,
+  lat,
+  lng,
+  onPressMap,
+  address,
+}) => {
   useEffect(() => {
     getLocation();
   }, []);
@@ -35,10 +50,10 @@ const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
           </View>
         </View>
         <Text style={styles.locationText}>
-          Crescent Road, The Palm Jumeirah, Dubai, 211222, AE
+          {address || `Crescent Road, The Palm Jumeirah, Dubai, 211222, AE`}
         </Text>
       </View>
-      <View>
+      <Pressable onPress={onPressMap}>
         <MapView
           region={{
             latitude: lat || location?.latitude,
@@ -61,7 +76,7 @@ const LocationContainer: FC<map> = ({containerStyle, lat, lng}) => {
             />
           </Marker>
         </MapView>
-      </View>
+      </Pressable>
     </View>
   );
 };

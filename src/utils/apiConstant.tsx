@@ -49,6 +49,9 @@ export const API = {
   // UserDetails
   getProfile: '/getProfile',
   updateProfile: '/updateProfile',
+
+  // google Map API
+  GOOGLE_MAP_API_KEY: 'AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E',
 };
 
 export const API_ERROR_CODE = {

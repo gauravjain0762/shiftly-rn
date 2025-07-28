@@ -42,6 +42,8 @@ export const SCREENS = {
   ForgotPassword: 'Forgot Password',
   CoMyProfile: 'CoMyProfile',
   ChangePassword: 'ChangePassword',
+  CoJobDetails: 'CoJobDetails',
+  LocationScreen: 'LocationScreen',
 };
 
 export interface ScreenNames {
@@ -83,6 +85,8 @@ export interface ScreenNames {
   SuggestedEmployee: string;
   CoMyProfile: string;
   ChangePassword: string;
+  CoJobDetails: string;
+  LocationScreen: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {
