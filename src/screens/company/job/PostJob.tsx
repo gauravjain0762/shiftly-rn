@@ -1,10 +1,6 @@
 import {
-  Alert,
   FlatList,
   Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -35,26 +31,34 @@ import {IMAGES} from '../../../assets/Images';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {
+  errorToast,
   IMAGE_URL,
   navigateTo,
+  resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
+import {SCREENS} from '../../../navigation/screenNames';
 import {RFValue} from 'react-native-responsive-fontsize';
 import BottomModal from '../../../component/common/BottomModal';
-import CustomInput from '../../../component/common/CustomInput';
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
 import {useCreateJobMutation} from '../../../api/authApi';
 import {getAsyncUserLocation} from '../../../utils/asyncStorage';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
 import {
   useGetBusinessTypesQuery,
   useGetServicesQuery,
   useGetSkillsQuery,
+  useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
+import {useAppSelector} from '../../../redux/hooks';
+import {
+  resetJobFormState,
+  selectJobForm,
+  setCoPostJobSteps,
+} from '../../../features/companySlice';
+import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 
 const jobTypeData = [
   {label: 'Full-time', value: 'full_time'},
@@ -152,51 +156,77 @@ const benefitsOptions = [
 
 const PostJob = () => {
   const {t} = useTranslation();
-  const [title, setTitle] = useState('');
-  console.log('🔥🔥🔥 ~ CoJob ~ title:', title);
-  const [type, setType] = useState({label: 'Full-time', value: 'full_time'});
-  const [area, setArea] = useState({
-    label: 'Dubai Marina',
-    value: 'dubai_marina',
-  });
-  const [duration, setDuration] = useState({
-    label: '1 Month',
-    value: '1_month',
-  });
-  const [job, setJob] = useState({label: 'Hospitality', value: 'hospitality'});
-  const [startDate, setStartDate] = useState({
-    label: 'Immediately',
-    value: 'immediately',
-  });
-  const [contract, setContract] = useState({
-    label: 'Full-time experience',
-    value: 'full_time',
-  });
-  const [salary, setSalary] = useState({
-    label: '2,000 - 5,000',
-    value: '2000-5000',
-  });
-  const [currency, setCurrency] = useState({label: 'AED', value: 'aed'});
-  const [position, setPosition] = useState({label: '1', value: '1'});
-  const [step, setStep] = useState(0);
-  const [describe, setDescribe] = useState('');
-  const [selected, setSelected] = useState<any>([]);
-  console.log('🔥🔥🔥 ~ PostJob ~ selected:', selected);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [jobSkills, setJobSkills] = useState<string[]>([]);
-  const [skillId, setSkillId] = useState<string | any>([]);
-  console.log('🔥🔥🔥 ~ PostJob ~ skillId:', skillId);
-  const [requirements, setRequirements] = useState<string[]>([]);
-  const [requirementText, setRequirementText] = useState<string>('');
-  const [isSelected, setIsSelected] = useState<boolean>(false);
-  const [createJob, {isLoading, data, error}] = useCreateJobMutation();
+  const dispatch = useDispatch();
+  // const [title, setTitle] = useState('');
+  // const [type, setType] = useState({label: 'Full-time', value: 'full_time'});
+  // const [area, setArea] = useState({
+  //   label: 'Dubai Marina',
+  //   value: 'dubai_marina',
+  // });
+  // const [duration, setDuration] = useState({
+  //   label: '1 Month',
+  //   value: '1_month',
+  // });
+  // const [job, setJob] = useState({label: 'Hospitality', value: 'hospitality'});
+  // const [startDate, setStartDate] = useState({
+  //   label: 'Immediately',
+  //   value: 'immediately',
+  // });
+  // const [contract, setContract] = useState({
+  //   label: 'Full-time experience',
+  //   value: 'full_time',
+  // });
+  // const [salary, setSalary] = useState({
+  //   label: '2,000 - 5,000',
+  //   value: '2000-5000',
+  // });
+  // const [currency, setCurrency] = useState({label: 'AED', value: 'aed'});
+  // const [position, setPosition] = useState({label: '1', value: '1'});
+  // const [describe, setDescribe] = useState('');
+  // const [selected, setSelected] = useState<any>([]);
+  // const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  // const [isSuccessModalVisible, setIsSuccessModalVisible] =
+  //   useState<boolean>(false);
+  // const [jobSkills, setJobSkills] = useState<string[]>([]);
+  // const [skillId, setSkillId] = useState<string | any>([]);
+  // const [requirements, setRequirements] = useState<string[]>([]);
+  // const [requirementText, setRequirementText] = useState<string>('');
+  // const [isSelected, setIsSelected] = useState<boolean>(false);
+  const {
+    title,
+    type,
+    area,
+    duration,
+    job,
+    startDate,
+    contract,
+    salary,
+    currency,
+    position,
+    describe,
+    selected,
+    jobSkills,
+    skillId,
+    requirements,
+    requirementText,
+    isSuccessModalVisible,
+    isModalVisible,
+    canApply,
+  } = useAppSelector(selectJobForm);
+  const {updateJobForm} = useJobFormUpdater();
+  const [createJob] = useCreateJobMutation();
   const {data: servicesData} = useGetServicesQuery({});
   const services = servicesData?.data?.services;
   const {data: skillsData} = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
   const {data: businessTypesData} = useGetBusinessTypesQuery({});
   const businessTypes = businessTypesData?.data?.types as any[];
-  console.log('🔥🔥🔥 ~ PostJob ~ businessTypes:', businessTypes);
+  const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
+  const shouldSkip = !(steps === 5 && skillId.length > 0);
+  const {data: suggestedData, isLoading: isSuggestedLoading} =
+    useGetSuggestedEmployeesQuery(skillId, {skip: shouldSkip});
+  const suggestedEmployeeList = suggestedData?.data?.users;
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
 
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
@@ -204,7 +234,14 @@ const PostJob = () => {
   }));
 
   const [userAddress, setUserAddress] = useState<
-    {address: string; lat: number; lng: number} | undefined
+    | {
+        address: string;
+        lat: number;
+        lng: number;
+        state: string;
+        country: string;
+      }
+    | undefined
   >();
   console.log('🔥 ~ PostJob ~ userAddress:', userAddress);
 
@@ -231,7 +268,7 @@ const PostJob = () => {
 
   useEffect(() => {
     if (dropdownBusinessTypesOptions?.length) {
-      setJob(dropdownBusinessTypesOptions[0]);
+      updateJobForm({job: dropdownBusinessTypesOptions[0]});
     }
   }, [businessTypes]);
 
@@ -258,12 +295,12 @@ const PostJob = () => {
     const params = {
       title: title,
       description: describe,
-      job_type: type?.value,
+      job_type: type?.label,
       area: area?.value,
       address: userAddress?.address,
       lat: location?.latitude,
       lng: location?.longitude,
-      people_anywhere: true,
+      people_anywhere: canApply,
       duration: duration?.value,
       job_sector: job?.value,
       start_date: startDate?.value,
@@ -274,59 +311,85 @@ const PostJob = () => {
       skills: skillId?.join(','),
       facilities: selected?.map((item: any) => item._id).join(','),
       requirements: requirements?.join(','),
+      invite_users: selectedEmployeeIds?.map((item: any) => item._id).join(','),
     };
 
     try {
       const response = await createJob(params).unwrap();
       if (response?.status) {
+        // dispatch(setCoPostJobSteps(0));
         successToast(response?.message);
       }
       console.log('Job created:', response);
     } catch (err) {
       console.error('Failed to create job:', err);
+    } finally {
+      updateJobForm({isSuccessModalVisible: true});
     }
   };
 
   const toggleItem = (item: any) => {
-    console.log('🔥🔥🔥 ~ toggleItem ~ item:', item);
-    setSelected((prev: any) =>
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item],
-    );
+    const updatedList = selected.includes(item)
+      ? selected.filter((i: any) => i !== item)
+      : [...selected, item];
+
+    updateJobForm({selected: updatedList});
   };
 
-  const nextStep = () => setStep(prev => prev + 1);
+  const nextStep = () => dispatch(setCoPostJobSteps(steps + 1));
 
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
     }
-    setStep(prev => prev - 1);
+    dispatch(setCoPostJobSteps(steps - 1));
   };
+
+  const resetToFirstStep = () => dispatch(setCoPostJobSteps(0));
 
   const handleAddRequirements = () => {
     // Keyboard.dismiss();
-    setRequirementText('');
-    setIsModalVisible(false);
+    if (!requirementText) {
+      return;
+    }
+    updateJobForm({requirementText: '', isModalVisible: false});
     const trimmedText = requirementText.trim();
     if (trimmedText) {
-      setRequirements(prev => [...prev, trimmedText]);
+      updateJobForm({requirements: [...requirements, trimmedText]});
     }
   };
 
   const removeSkill = (skill: string) => {
-    setJobSkills(prev => prev.filter(s => s !== skill));
+    const updatedSkills = jobSkills.filter(s => s !== skill);
+    updateJobForm({jobSkills: updatedSkills});
   };
 
   const handleSkillSelection = (skill: string) => {
     if (jobSkills.includes(skill)) {
-      setJobSkills(prev => prev.filter(i => i !== skill));
+      const filtered = jobSkills.filter(i => i !== skill);
+      updateJobForm({jobSkills: filtered});
     } else {
-      setJobSkills(prev => [...prev, skill]);
+      updateJobForm({jobSkills: [...jobSkills, skill]});
     }
   };
 
+  const toggleSkillId = (id: string) => {
+    if (skillId.includes(id)) {
+      const updated = skillId.filter((i: string) => i !== id);
+      updateJobForm({skillId: updated});
+    } else {
+      updateJobForm({skillId: [...skillId, id]});
+    }
+  };
+
+  const handleEmployeeSelection = (id: string) => {
+    setSelectedEmployeeIds(prev =>
+      prev.includes(id) ? prev.filter(empId => empId !== id) : [...prev, id],
+    );
+  };
+
   const render = () => {
-    switch (step) {
+    switch (steps) {
       case 1:
         return (
           <>
@@ -334,17 +397,13 @@ const PostJob = () => {
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStep(0)}>
+              <TouchableOpacity onPress={resetToFirstStep}>
                 <Image source={IMAGES.close} style={styles.close} />
               </TouchableOpacity>
             </View>
             <View style={styles.container}>
               <View>
-                <View
-                  style={[
-                    styles.row,
-                    {justifyContent: 'space-between', marginTop: hp(30)},
-                  ]}>
+                <View style={styles.rowWithInfo}>
                   <Text style={styles.inputLabel}>
                     {t('Describe the role')}
                   </Text>
@@ -358,27 +417,30 @@ const PostJob = () => {
                 </View>
                 <CustomTextInput
                   value={describe}
-                  onChangeText={e => setDescribe(e)}
+                  onChangeText={e => updateJobForm({describe: e})}
                   placeholder={'Describe'}
                   style={styles.input1}
                   multiline
+                  maxLength={1000}
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
                 />
                 <Text
-                  style={{
-                    marginTop: hp(15),
-                    alignSelf: 'flex-end',
-                    ...commonFontStyle(400, 16, colors._4A4A4A),
-                  }}>
-                  {'1000 Characters'}
-                </Text>
+                  style={
+                    styles.characterCount
+                  }>{`${describe?.length}/1000 Characters`}</Text>
               </View>
               <GradientButton
-                style={styles.btn}
                 type="Company"
+                style={styles.btn}
                 title={t('Continue')}
-                onPress={() => nextStep()}
+                onPress={() => {
+                  // if (!describe.trim()) {
+                  //   errorToast('Please enter description');
+                  //   return;
+                  // }
+                  nextStep();
+                }}
               />
             </View>
           </>
@@ -390,13 +452,13 @@ const PostJob = () => {
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStep(0)}>
+              <TouchableOpacity onPress={resetToFirstStep}>
                 <Image source={IMAGES.close} style={styles.close} />
               </TouchableOpacity>
             </View>
             <View style={styles.container}>
               <View>
-                <Text style={[styles.inputLabel, {marginTop: hp(40)}]}>
+                <Text style={styles.inputLabelWithMargin}>
                   {t('Add Job Skills')}
                 </Text>
 
@@ -422,30 +484,14 @@ const PostJob = () => {
                   <View style={styles.bottomUnderline} />
                 </View>
 
-                {/* Disabled input just for placeholder purpose */}
-                {/* <CustomTextInput
-                  editable={false}
-                  placeholder={t('Select job skills')}
-                  placeholderTextColor={colors._7B7878}
-                  containerStyle={styles.inputContainer}
-                  style={styles.input1}
-                /> */}
-
-                <ScrollView style={{marginTop: hp(38)}}>
-                  <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+                <ScrollView style={styles.skillsScrollView}>
+                  <View style={styles.skillsWrapper}>
                     {skills.map((item, index) => {
-                      console.log('🔥🔥🔥 ~ item:', item);
                       return (
                         <Pressable
                           key={index}
                           onPress={() => {
-                            if (skillId.includes(item._id)) {
-                              setSkillId((prev: any) =>
-                                prev.filter((id: any) => id !== item._id),
-                              );
-                            } else {
-                              setSkillId((prev: any) => [...prev, item?._id]);
-                            }
+                            toggleSkillId(item._id);
                             handleSkillSelection(item.title);
                           }}
                           style={[
@@ -468,7 +514,13 @@ const PostJob = () => {
                 style={styles.btn}
                 type="Company"
                 title={t('Continue')}
-                onPress={() => nextStep()}
+                onPress={() => {
+                  if (jobSkills?.length === 0) {
+                    errorToast('Please select at least one skill');
+                    return;
+                  }
+                  nextStep();
+                }}
               />
             </View>
           </>
@@ -480,46 +532,23 @@ const PostJob = () => {
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
               </TouchableOpacity>
-              <Text
-                style={[
-                  styles.inputLabel,
-                  {fontSize: RFValue(20, SCREEN_HEIGHT)},
-                ]}>
+              <Text style={styles.inputLabelLarge}>
                 {t('Create Requirements')}
               </Text>
               <View />
             </View>
-            <View style={[{flex: 1, marginTop: hp(20)}]}>
-              <Text
-                style={[
-                  styles.inputLabel,
-                  {fontSize: RFValue(20, SCREEN_HEIGHT)},
-                ]}>
-                {t('Requirements')}
-              </Text>
+            <View style={styles.requirementsContainer}>
+              <Text style={styles.inputLabelLarge}>{t('Requirements')}</Text>
 
-              <View style={{marginTop: hp(16)}}>
+              <View style={styles.requirementsList}>
                 {requirements?.map((item, index) => {
                   return (
                     <>
                       <View key={index} style={styles.boxContainer}>
                         <View style={styles.checkRound}>
-                          <Image
-                            source={IMAGES.mark}
-                            style={{
-                              width: wp(12),
-                              height: hp(12),
-                              resizeMode: 'contain',
-                            }}
-                          />
+                          <Image source={IMAGES.mark} style={styles.markIcon} />
                         </View>
-                        <Text
-                          style={{
-                            width: '90%',
-                            color: colors._4A4A4A,
-                            fontSize: RFValue(16, SCREEN_HEIGHT),
-                          }}
-                          numberOfLines={2}>
+                        <Text style={styles.requirementText} numberOfLines={2}>
                           {item}
                         </Text>
                       </View>
@@ -529,32 +558,16 @@ const PostJob = () => {
               </View>
 
               <Pressable
-                onPress={() => setIsModalVisible(true)}
-                style={[
-                  styles.boxContainer,
-                  {
-                    marginTop: hp(40),
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  },
-                ]}>
+                onPress={() => updateJobForm({isModalVisible: true})}
+                style={styles.addRequirementButton}>
                 <View style={styles.checkRound}>
                   <Image
                     source={IMAGES.close1}
-                    style={{
-                      width: wp(18),
-                      height: hp(18),
-                      resizeMode: 'contain',
-                    }}
+                    style={styles.closeIcon}
                     tintColor={colors.white}
                   />
                 </View>
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    color: colors._4A4A4A,
-                    fontSize: RFValue(18, SCREEN_HEIGHT),
-                  }}>
+                <Text style={styles.addRequirementText}>
                   {t('Add New Requirements')}
                 </Text>
               </Pressable>
@@ -562,51 +575,48 @@ const PostJob = () => {
                 style={styles.btn}
                 type="Company"
                 title={t('Continue')}
-                onPress={() => nextStep()}
+                onPress={() => {
+                  // if (requirements?.length === 0) {
+                  //   errorToast('Please add at least one requirement');
+                  //   return;
+                  // }
+                  nextStep();
+                }}
               />
             </View>
             <BottomModal
               visible={isModalVisible}
               onClose={() => {
-                setIsModalVisible(false);
+                updateJobForm({isModalVisible: false});
               }}>
-              <Pressable onPress={() => setIsModalVisible(false)}>
+              <Pressable
+                onPress={() => {
+                  updateJobForm({requirementText: '', isModalVisible: false});
+                }}>
                 <Image
                   source={IMAGES.close}
-                  style={{
-                    width: wp(18),
-                    height: hp(18),
-                    alignSelf: 'flex-end',
-                    resizeMode: 'contain',
-                  }}
+                  style={styles.modalCloseIcon}
                   tintColor={colors.black}
                 />
               </Pressable>
               <Text
-                onPress={() => setIsModalVisible(true)}
-                style={{
-                  color: colors.black,
-                  fontSize: RFValue(18, SCREEN_HEIGHT),
-                }}>
+                onPress={() => updateJobForm({isModalVisible: true})}
+                style={styles.modalTitleText}>
                 {t('Add New Requirements')}
               </Text>
               <CustomTextInput
+                multiline
+                maxLength={400}
                 value={requirementText}
-                onChangeText={setRequirementText}
-                containerStyle={{
-                  height: hp(100),
-                  padding: hp(18),
-                  marginTop: hp(29),
-                  borderWidth: wp(1.5),
-                  borderRadius: wp(10),
-                  borderColor: colors._D5D5D5,
-                }}
+                onChangeText={text => updateJobForm({requirementText: text})}
+                containerStyle={styles.modalInputContainer}
                 placeholder={t('Write requirements')}
-                inputStyle={{
-                  ...commonFontStyle(400, 18, '#8F8D8D'),
-                  alignSelf: 'baseline',
-                }}
+                inputStyle={styles.modalInputStyle}
               />
+              <Text
+                style={
+                  styles.characterCount
+                }>{`${requirementText?.length}/400 Characters`}</Text>
               <GradientButton
                 type="Company"
                 style={styles.btn}
@@ -623,18 +633,18 @@ const PostJob = () => {
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setStep(0)}>
+              <TouchableOpacity onPress={resetToFirstStep}>
                 <Image source={IMAGES.close} style={styles.close} />
               </TouchableOpacity>
             </View>
             <View style={styles.container}>
               <View>
-                <Text style={[styles.inputLabel, {marginTop: hp(40)}]}>
+                <Text style={styles.inputLabelWithMargin}>
                   {t('You will Provide')}
                 </Text>
                 <FlatList
                   data={services}
-                  keyExtractor={item => item}
+                  keyExtractor={(_, index) => index.toString()}
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({item, index}) => {
                     const isChecked = selected.includes(item);
@@ -674,7 +684,7 @@ const PostJob = () => {
         return (
           <>
             <View style={styles.empContainer}>
-              <View style={{marginTop: hp(15)}}>
+              <View style={styles.empHeader}>
                 <BackHeader
                   type={'company'}
                   RightIconStyle={styles.rightIcon}
@@ -686,15 +696,19 @@ const PostJob = () => {
                 <View style={styles.card}>
                   <Image source={{uri: IMAGE_URL}} style={styles.avatar} />
                   <View style={styles.textContainer}>
-                    <Text style={styles.empTitle}>{'Restaurant Manager'}</Text>
+                    <Text style={styles.empTitle}>{title || 'N/A'}</Text>
                     <Text style={styles.empSubtitle}>
-                      {'Atlantis, The Palm, Dubai'}
+                      {userAddress?.address || 'Atlantis, The Palm, Dubai'}
                     </Text>
                     <View style={styles.empRow}>
                       <Text style={styles.location}>
-                        {'Dubai, UAE - Full Time'}
+                        {`${userAddress?.state}, ${userAddress?.country} - ${
+                          type?.label || 'Full-Time'
+                        }`}
                       </Text>
-                      <Text style={styles.salary}>{'AED 10k'}</Text>
+                      <Text style={styles.salary}>{`AED ${
+                        salary?.label?.split('-')[1]
+                      }`}</Text>
                     </View>
                   </View>
                 </View>
@@ -703,73 +717,56 @@ const PostJob = () => {
                   <Text style={styles.sectionTitle}>
                     {t('Suggested Employee')}
                   </Text>
-                  <View style={styles.inviteButton}>
+                  <TouchableOpacity
+                    activeOpacity={0.5}
+                    onPress={() => {
+                      if (selectedEmployeeIds?.length) {
+                        setSelectedEmployeeIds([]);
+                      } else {
+                        setSelectedEmployeeIds(
+                          suggestedEmployeeList.map((item: any) => item._id),
+                        );
+                      }
+                    }}
+                    style={styles.inviteButton}>
                     <Image source={IMAGES.invite_all} />
                     <Text style={styles.inviteText}>{t('Invite All')}</Text>
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </View>
 
-              <ScrollView
-                style={styles.empScrollContainer}
+              <FlatList
+                data={suggestedEmployeeList}
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}>
-                {[...Array(4)].map((_, index) => (
-                  <EmplyoeeCard
-                    key={index}
-                    selected={isSelected}
-                    setIsSelected={setIsSelected}
-                  />
-                ))}
-              </ScrollView>
+                keyExtractor={(_, index) => index.toString()}
+                renderItem={({item, index}) => {
+                  return (
+                    <View>
+                      <EmplyoeeCard
+                        key={index}
+                        name={item?.name}
+                        selected={selectedEmployeeIds.includes(item._id)}
+                        picture={item?.picture}
+                        responsibility={item?.responsibility}
+                        onPressEmployee={() => {
+                          handleEmployeeSelection(item?._id);
+                        }}
+                      />
+                    </View>
+                  );
+                }}
+              />
 
               <GradientButton
                 style={styles.btn}
                 type="Company"
                 title={t('Submit')}
                 onPress={() => {
-                  setIsModalVisible(true);
                   handleCreateJob();
                 }}
               />
             </View>
-
-            <BottomModal
-              visible={isModalVisible}
-              backgroundColor={colors._FAEED2}
-              onClose={() => setIsModalVisible(false)}>
-              <View style={styles.modalIconWrapper}>
-                <Image
-                  source={IMAGES.check}
-                  tintColor={colors._FAEED2}
-                  style={styles.modalCheckIcon}
-                />
-              </View>
-
-              <View>
-                <Text style={styles.modalTitle}>
-                  {'Job Posted Successfully'}
-                </Text>
-                <Text style={styles.modalSubtitle}>
-                  {
-                    'We’re excited to post your job. get ready to start receiving profiles.'
-                  }
-                </Text>
-              </View>
-
-              <GradientButton
-                style={styles.btn}
-                type="Company"
-                title={t('View Listing')}
-                // onPress={() => {}}
-              />
-
-              <Text
-                onPress={() => setIsModalVisible(false)}
-                style={styles.modalHomeText}>
-                {'Home'}
-              </Text>
-            </BottomModal>
           </>
         );
       default:
@@ -779,7 +776,7 @@ const PostJob = () => {
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
-      {step == 0 && (
+      {steps == 0 && (
         <BackHeader
           type="company"
           isRight={false}
@@ -792,14 +789,14 @@ const PostJob = () => {
         showsVerticalScrollIndicator={false}
         style={AppStyles.flex}
         contentContainerStyle={styles.scrollContainer}>
-        {step == 0 && (
+        {steps == 0 && (
           <>
             <View>
               <View style={styles.field}>
                 <Text style={styles.label}>{t('Job Title')}</Text>
                 <CustomTextInput
                   value={title}
-                  onChangeText={e => setTitle(e)}
+                  onChangeText={e => updateJobForm({title: e})}
                   placeholder={'Job Title'}
                   style={styles.input}
                   placeholderTextColor={colors._7B7878}
@@ -813,8 +810,8 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={type}
-                  onChange={e => {
-                    setType(e);
+                  onChange={(e: any) => {
+                    updateJobForm({type: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -829,8 +826,8 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={area}
-                  onChange={e => {
-                    setArea(e);
+                  onChange={(e: any) => {
+                    updateJobForm({area: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -847,21 +844,28 @@ const PostJob = () => {
                 lat={userAddress?.lat}
                 lng={userAddress?.lng}
               />
-              <View style={[styles.row, {paddingVertical: hp(12), gap: wp(8)}]}>
-                <Image source={IMAGES.check_circle} style={styles.check} />
+              <Pressable
+                onPress={() => {
+                  updateJobForm({canApply: !canApply});
+                }}
+                style={styles.peopleRow}>
+                <Image
+                  style={styles.check}
+                  source={canApply ? IMAGES.check_circle : IMAGES.blank_circle}
+                />
                 <Text style={styles.peopleTitle}>
                   {t('People from anywhere can apply')}
                 </Text>
-              </View>
-              <View style={[styles.field, {marginTop: hp(16)}]}>
+              </Pressable>
+              <View style={styles.fieldWithMargin}>
                 <Text style={styles.label}>{t('Add Duration')}</Text>
                 <CustomDropdown
                   data={durationData}
                   labelField="label"
                   valueField="value"
                   value={duration}
-                  onChange={e => {
-                    setDuration(e);
+                  onChange={(e: any) => {
+                    updateJobForm({duration: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -876,8 +880,8 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={job}
-                  onChange={e => {
-                    setJob(e);
+                  onChange={(e: any) => {
+                    updateJobForm({job: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -892,8 +896,8 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={startDate}
-                  onChange={e => {
-                    setStartDate(e);
+                  onChange={(e: any) => {
+                    updateJobForm({startDate: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -908,8 +912,8 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={contract}
-                  onChange={e => {
-                    setContract(e);
+                  onChange={(e: any) => {
+                    updateJobForm({contract: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -925,8 +929,8 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={salary}
-                    onChange={e => {
-                      setSalary(e);
+                    onChange={(e: any) => {
+                      updateJobForm({salary: e});
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
@@ -939,8 +943,8 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={currency}
-                    onChange={e => {
-                      setCurrency(e);
+                    onChange={(e: any) => {
+                      updateJobForm({currency: e});
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
@@ -959,8 +963,8 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={position}
-                  onChange={e => {
-                    setPosition(e);
+                  onChange={(e: any) => {
+                    updateJobForm({position: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -973,12 +977,61 @@ const PostJob = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                if (!title.trim()) {
+                  errorToast(t('Please enter a valid title'));
+                  return;
+                }
+                nextStep();
+              }}
             />
           </>
         )}
         {render()}
       </KeyboardAwareScrollView>
+      <BottomModal
+        visible={isSuccessModalVisible}
+        backgroundColor={colors._FAEED2}
+        onClose={() => {}}>
+        <View style={styles.modalIconWrapper}>
+          <Image
+            source={IMAGES.check}
+            tintColor={colors._FAEED2}
+            style={styles.modalCheckIcon}
+          />
+        </View>
+
+        <View>
+          <Text style={styles.modalTitle}>{'Job Posted Successfully'}</Text>
+          <Text style={styles.modalSubtitle}>
+            {
+              "We're excited to post your job. get ready to start receiving profiles."
+            }
+          </Text>
+        </View>
+
+        <GradientButton
+          style={styles.btn}
+          type="Company"
+          title={t('View Listing')}
+          onPress={() => {
+            dispatch(resetJobFormState());
+            dispatch(setCoPostJobSteps(0));
+            navigationRef?.current?.goBack();
+          }}
+        />
+
+        <Text
+          onPress={() => {
+            dispatch(resetJobFormState());
+            dispatch(setCoPostJobSteps(0));
+            updateJobForm({isSuccessModalVisible: false});
+            resetNavigation(SCREENS.CoTabNavigator);
+          }}
+          style={styles.modalHomeText}>
+          {'Home'}
+        </Text>
+      </BottomModal>
     </LinearContainer>
   );
 };
@@ -997,6 +1050,11 @@ const styles = StyleSheet.create({
   field: {
     gap: hp(12),
     marginBottom: hp(14),
+  },
+  fieldWithMargin: {
+    gap: hp(12),
+    marginBottom: hp(14),
+    marginTop: hp(16),
   },
   label: {
     ...commonFontStyle(400, 18, colors._0B3970),
@@ -1045,6 +1103,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
+  peopleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingVertical: hp(12),
+    gap: wp(8),
+  },
+  rowWithInfo: {
+    justifyContent: 'space-between',
+    marginTop: hp(30),
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
   salaryrow: {
     flex: 1,
     gap: wp(16),
@@ -1080,6 +1150,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     ...commonFontStyle(500, 25, colors._0B3970),
   },
+  inputLabelWithMargin: {
+    ...commonFontStyle(500, 25, colors._0B3970),
+    marginTop: hp(40),
+  },
+  inputLabelLarge: {
+    ...commonFontStyle(500, 25, colors._0B3970),
+    fontSize: RFValue(20, SCREEN_HEIGHT),
+  },
   input1: {
     maxHeight: hp(200),
     ...commonFontStyle(400, 22, colors._7B7878),
@@ -1092,6 +1170,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
+  },
+  characterCount: {
+    marginTop: hp(15),
+    alignSelf: 'flex-end',
+    ...commonFontStyle(400, 16, colors._4A4A4A),
   },
   checkbox: {
     height: wp(24),
@@ -1149,14 +1232,73 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors._4A4A4A,
   },
-
+  markIcon: {
+    width: wp(12),
+    height: hp(12),
+    resizeMode: 'contain',
+  },
+  requirementText: {
+    width: '90%',
+    color: colors._4A4A4A,
+    fontSize: RFValue(16, SCREEN_HEIGHT),
+  },
+  addRequirementButton: {
+    marginTop: hp(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    borderWidth: hp(1.5),
+    borderRadius: hp(10),
+    paddingVertical: hp(17),
+    paddingHorizontal: wp(18),
+    borderColor: colors._C9B68B,
+  },
+  closeIcon: {
+    width: wp(18),
+    height: hp(18),
+    resizeMode: 'contain',
+  },
+  addRequirementText: {
+    textAlign: 'center',
+    color: colors._4A4A4A,
+    fontSize: RFValue(18, SCREEN_HEIGHT),
+  },
+  requirementsContainer: {
+    flex: 1,
+    marginTop: hp(20),
+  },
+  requirementsList: {
+    marginTop: hp(16),
+  },
+  modalCloseIcon: {
+    width: wp(18),
+    height: hp(18),
+    alignSelf: 'flex-end',
+    resizeMode: 'contain',
+  },
+  modalTitleText: {
+    color: colors.black,
+    fontSize: RFValue(18, SCREEN_HEIGHT),
+  },
+  modalInputContainer: {
+    height: hp(100),
+    padding: hp(18),
+    marginTop: hp(29),
+    borderWidth: wp(1.5),
+    borderRadius: wp(10),
+    borderColor: colors._D5D5D5,
+  },
+  modalInputStyle: {
+    ...commonFontStyle(400, 18, '#8F8D8D'),
+    alignSelf: 'baseline',
+  },
   empContainer: {
     flex: 1,
     // backgroundColor: colors._F4E2B8
   },
-  // rightIcon: {
-  //   tintColor: colors._0B3970,
-  // },
+  empHeader: {
+    marginTop: hp(15),
+  },
   empScrollContainer: {
     flex: 1,
   },
@@ -1198,10 +1340,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   location: {
+    // width: '70%',
+    flex: 1,
     ...commonFontStyle(400, 15, colors._939393),
   },
   salary: {
-    ...commonFontStyle(400, 15, colors._939393),
+    ...commonFontStyle(700, 16, colors._0D468C),
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1259,7 +1403,6 @@ const styles = StyleSheet.create({
     marginBottom: hp(5),
     gap: wp(8),
   },
-
   skillTag: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1268,12 +1411,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(10),
     paddingVertical: hp(6),
   },
-
   skillText: {
     ...commonFontStyle(400, 14, colors.white),
     marginRight: wp(5),
   },
-
   closeBtn: {
     backgroundColor: colors.white,
     borderRadius: 50,
@@ -1282,11 +1423,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   closeText: {
     ...commonFontStyle(500, 12, colors._061F3D),
   },
-
   skillOption: {
     backgroundColor: colors._061F3D,
     borderRadius: hp(20),
@@ -1308,5 +1447,12 @@ const styles = StyleSheet.create({
     height: hp(1.5),
     backgroundColor: colors._7B7878,
     marginTop: hp(10),
+  },
+  skillsScrollView: {
+    marginTop: hp(38),
+  },
+  skillsWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
 });

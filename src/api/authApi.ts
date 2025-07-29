@@ -7,7 +7,6 @@ import {
   setAuthToken,
   setBusinessType,
   setGuestLogin,
-  setServices,
   setUserInfo,
 } from '../features/authSlice';
 import {SCREENS} from '../navigation/screenNames';

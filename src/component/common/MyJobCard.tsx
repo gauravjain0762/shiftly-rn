@@ -1,32 +1,59 @@
 import React from 'react';
 import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
-const MyJobCard = () => {
+type JobCardProps = {
+  address: string;
+  onPressShare?: () => void;
+  jobDescription: string;
+  totalApplicants?: number;
+  jobType: string;
+  title: string;
+};
+
+const MyJobCard = (props: JobCardProps) => {
+  const {
+    address,
+    onPressShare,
+    jobDescription,
+    totalApplicants,
+    jobType,
+    title,
+  } = props;
+
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.locationText}>Palm Jumairah, dubai UAE</Text>
-          <Text style={styles.titleText}>Restaurant Manager</Text>
+        <View style={{ width: '85%'}}>
+          <Text style={styles.locationText}>{`${
+            address || 'Palm Jumairah, dubai UAE'
+          }`}</Text>
+          <Text style={styles.titleText}>{`${
+            title || 'Restaurant Manager'
+          }`}</Text>
         </View>
 
-        <Pressable style={styles.shareButton}>
+        <Pressable onPress={onPressShare} style={styles.shareButton}>
           <Image source={IMAGES.share} style={styles.shareIcon} />
         </Pressable>
       </View>
 
       <Text numberOfLines={2} style={styles.description}>
-        We are looking for experienced restaurant manager to manage our newly
-        opened branch in Palm Jumairah...
+        {`${
+          jobDescription ||
+          'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumairah...'
+        } `}
       </Text>
 
       <View style={styles.footerRow}>
-        <Text style={styles.applicantsText}>52 Applicants</Text>
+        <Text style={styles.applicantsText}>{`${
+          totalApplicants || 52
+        }  Applicants`}</Text>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>Full Time</Text>
+          <Text style={styles.badgeText}>{`${jobType || 'Full Time'}`}</Text>
         </View>
       </View>
     </View>
@@ -42,6 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   headerRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

@@ -5,29 +5,42 @@ import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 
 interface Props {
+  name: string;
+  picture: string;
   selected: boolean;
-  setIsSelected: (val: boolean) => void;
+  responsibility: string;
+  onPressEmployee: () => void;
 }
 
-const EmplyoeeCard = ({selected, setIsSelected}: Props) => {
+const EmplyoeeCard = ({
+  name,
+  picture,
+  selected,
+  responsibility,
+  onPressEmployee,
+}: Props) => {
   return (
     <View style={styles.employeeCardWrapper}>
       <View style={styles.employeeCard}>
         <View style={styles.employeeLeft}>
           <Image
             source={{
-              uri: 'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D',
+              uri:
+                picture ||
+                'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D',
             }}
             style={styles.avatar2}
           />
           <View style={styles.employeeTextWrapper}>
-            <Text style={styles.title}>{'Tafnol Theresa'}</Text>
-            <Text style={styles.subtitle}>{'Hotel Management'}</Text>
-            <Text style={styles.location}>{'5y Experience'}</Text>
+            <Text style={styles.title}>{`${name || 'Tafnol Theresa'}`}</Text>
+            <Text style={styles.subtitle}>{`${
+              responsibility || 'Hotel Management'
+            }`}</Text>
+            {/* <Text style={styles.location}>{'5y Experience'}</Text> */}
           </View>
         </View>
 
-        <Pressable onPress={() => setIsSelected(!selected)}>
+        <Pressable onPress={onPressEmployee}>
           {selected ? (
             <Image source={IMAGES.checked} style={styles.checkImg} />
           ) : (

@@ -46,7 +46,7 @@ const ToastComponent: React.FC<ToastProps> = ({type, text1, lineAnim}) => {
             <Animated.View
               style={{
                 height: 4,
-                backgroundColor: colors.green,
+                backgroundColor: colors._0B3970,
                 width: lineAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: ['0%', '100%'], // Animate from 0% to 100%
@@ -72,7 +72,7 @@ const ToastComponent: React.FC<ToastProps> = ({type, text1, lineAnim}) => {
             <Animated.View
               style={{
                 height: 4,
-                backgroundColor: colors.red,
+                backgroundColor: colors._0B3970,
                 width: lineAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: ['0%', '100%'], // Animate from 0% to 100%

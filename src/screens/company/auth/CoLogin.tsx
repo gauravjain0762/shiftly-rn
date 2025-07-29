@@ -83,7 +83,11 @@ const CoLogin = () => {
               setAuthData({...authData, password: e});
             }}
           />
-          <Text onPress={() => navigateTo(SCREENS.ForgotPassword)} style={styles.forgote}>{t('Forgot your password?')}</Text>
+          <Text
+            onPress={() => navigateTo(SCREENS.ForgotPassword)}
+            style={styles.forgote}>
+            {t('Forgot your password?')}
+          </Text>
         </View>
         <View>
           <GradientButton
@@ -149,7 +153,7 @@ const styles = StyleSheet.create({
     marginTop: hp(20),
   },
   logincontainer: {
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     flex: 1,
     paddingHorizontal: wp(40),
   },

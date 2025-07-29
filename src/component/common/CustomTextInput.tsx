@@ -13,12 +13,13 @@ import {
 import {commonFontStyle} from '../../theme/fonts';
 import {useTheme} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
+import {colors} from '../../theme/colors';
 
 interface CustomTextInputProps extends TextInputProps {
   label?: string;
   required?: boolean;
   showRightIcon?: boolean;
-  containerStyle?: ViewStyle;
+  containerStyle?: ViewStyle | any;
   imgStyle?: ImageStyle;
   inputStyle?: ViewStyle | any;
   onShow?: (e: boolean) => void;
@@ -43,7 +44,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
       <TextInput
         style={[styles.input, inputStyle]}
         secureTextEntry={showPassword}
-        
+        // placeholderTextColor={colors._F4E2B8}
         {...rest}
       />
       {showRightIcon && (
@@ -68,7 +69,6 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
 };
 
 const getGlobalStyles = (props: any) => {
-  const {colors} = props;
   return StyleSheet.create({
     container: {
       marginBottom: 15,
@@ -83,7 +83,7 @@ const getGlobalStyles = (props: any) => {
       color: 'red',
     },
     input: {
-      ...commonFontStyle(700, 22, '#F4E2B8'),
+      ...commonFontStyle(700, 22, colors._1F1F1F),
       flex: 1,
     },
   });

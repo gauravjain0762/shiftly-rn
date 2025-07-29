@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -33,86 +34,88 @@ const CoJobDetails = () => {
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
-      <BackHeader
-        type="company"
-        isRight={false}
-        title={'Restaurant Manager'}
-        titleStyle={styles.title}
-        containerStyle={styles.header}
-        RightIcon={
-          <TouchableOpacity style={styles.iconButton}>
-            <Image
-              source={IMAGES.share}
-              resizeMode="contain"
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-        }
-      />
-
-      <View style={styles.bodyContainer}>
-        <Text style={styles.jobId}>{'Job ID: 2548'}</Text>
-
-        <Text style={styles.location}>{'Atlantis, The Palm, Dubai'}</Text>
-
-        <Text style={styles.description}>
-          {
-            'As the Resort Manager, you will primarily be focused on ensuring the Front Office and VIP Services are operated to the highest standards and guest service delivery standards and are nothing short of 5 stars for both guests and colleagues.'
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <BackHeader
+          type="company"
+          isRight={false}
+          title={'Restaurant Manager'}
+          titleStyle={styles.title}
+          containerStyle={styles.header}
+          RightIcon={
+            <TouchableOpacity style={styles.iconButton}>
+              <Image
+                source={IMAGES.share}
+                resizeMode="contain"
+                style={styles.icon}
+              />
+            </TouchableOpacity>
           }
-        </Text>
+        />
 
-        <View style={styles.jobDetailsContainer}>
-          <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
+        <View style={styles.bodyContainer}>
+          <Text style={styles.jobId}>{'Job ID: 2548'}</Text>
 
-          <FlatList
-            numColumns={3}
-            scrollEnabled={false}
-            data={keyValueArray}
-            style={styles.flatlist}
-            keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={styles.flatListContent}
-            renderItem={({item, index}) => {
-              const [key, value] = item;
+          <Text style={styles.location}>{'Atlantis, The Palm, Dubai'}</Text>
 
-              return (
-                <View key={index} style={styles.detailItem}>
-                  <Text style={styles.detailKey}>{key}</Text>
-                  <Text style={styles.detailValue}>{value}</Text>
-                </View>
-              );
-            }}
-          />
-        </View>
+          <Text style={styles.description}>
+            {
+              'As the Resort Manager, you will primarily be focused on ensuring the Front Office and VIP Services are operated to the highest standards and guest service delivery standards and are nothing short of 5 stars for both guests and colleagues.'
+            }
+          </Text>
 
-        <View style={styles.bottomContainer}>
-          <View style={styles.tabContainer}>
-            {Tabs.map((item, index) => (
-              <Pressable
-                key={index}
-                style={styles.tabItem}
-                onPress={() => setSelectedTabIndex(index)}>
-                <Text style={styles.tabText}>{item}</Text>
-                {selectedTabIndex === index && (
-                  <View style={styles.tabIndicator} />
-                )}
-              </Pressable>
-            ))}
+          <View style={styles.jobDetailsContainer}>
+            <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
+
+            <FlatList
+              numColumns={3}
+              scrollEnabled={false}
+              data={keyValueArray}
+              style={styles.flatlist}
+              keyExtractor={(_, index) => index.toString()}
+              contentContainerStyle={styles.flatListContent}
+              renderItem={({item, index}) => {
+                const [key, value] = item;
+
+                return (
+                  <View key={index} style={styles.detailItem}>
+                    <Text style={styles.detailKey}>{key}</Text>
+                    <Text style={styles.detailValue}>{value}</Text>
+                  </View>
+                );
+              }}
+            />
           </View>
 
-          <View style={styles.divider} />
+          <View style={styles.bottomContainer}>
+            <View style={styles.tabContainer}>
+              {Tabs.map((item, index) => (
+                <Pressable
+                  key={index}
+                  style={styles.tabItem}
+                  onPress={() => setSelectedTabIndex(index)}>
+                  <Text style={styles.tabText}>{item}</Text>
+                  {selectedTabIndex === index && (
+                    <View style={styles.tabIndicator} />
+                  )}
+                </Pressable>
+              ))}
+            </View>
 
-          {selectedTabIndex === 0 && <ApplicantCard />}
+            <View style={styles.divider} />
 
-          <GradientButton
-            type="Company"
-            style={styles.button}
-            title={t('Edit Post')}
-            onPress={() => {
-              // navigateTo(SCREENS.CoPost);
-            }}
-          />
+            {selectedTabIndex === 0 && <ApplicantCard />}
+
+            <GradientButton
+              type="Company"
+              style={styles.button}
+              title={t('Edit Post')}
+              onPress={() => {
+                // navigateTo(SCREENS.CoPost);
+              }}
+            />
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </LinearContainer>
   );
 };

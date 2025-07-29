@@ -19,6 +19,7 @@ export const API = {
   getCompanyPosts: '/company/getPosts',
   getCompanyJobs: '/company/getJobs',
   getSkills: '/company/getSkills',
+  getSuggestedEmployees: '/company/getSuggestedEmployees',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',

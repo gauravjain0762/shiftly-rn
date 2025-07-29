@@ -33,7 +33,7 @@ const FeedCard: FC<card> = ({
             Walk-in Interview · <Text style={{color: colors._A3A3A3}}>2h</Text>
           </Text>
         </View>
-        {isFollow ? (
+        {/* {isFollow ? (
           <TouchableOpacity style={styles.followBtn}>
             <Text style={styles.follow}>{'Follow'}</Text>
           </TouchableOpacity>
@@ -45,7 +45,7 @@ const FeedCard: FC<card> = ({
               style={styles.like}
             />
           </TouchableOpacity>
-        )}
+        )} */}
       </View>
 
       <Text style={styles.vacancy}>{item?.title}</Text>

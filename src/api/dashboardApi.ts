@@ -19,16 +19,46 @@ export const dashboardApi = createApi({
     'GetPost',
     'GetProfile',
     'CreateProfile',
+    'GetJobs',
+    'CreateJob',
+    'GetSuggestedEmployees',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
     // Get Explore challenges
-    getDashboard: builder.query<any, any>({
+    getCompanyJobs: builder.query<any, any>({
       query: () => ({
         url: API.getCompanyJobs,
-        method: HTTP_METHOD.POST,
+        method: HTTP_METHOD.GET,
       }),
-      providesTags: ['GetDashboard'],
+      providesTags: ['GetJobs'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'GetJobs >>> datadata');
+          // dispatch(setBusinessType(data?.data?.types));
+        } catch (error) {
+          console.log('GetJobs Error', error);
+        }
+      },
+    }),
+    getSuggestedEmployees: builder.query<any, any>({
+      query: skills => {
+        const queryParam = skills?.length ? `?skills=${skills.join(',')}` : '';
+        return {
+          url: `${API.getSuggestedEmployees}${queryParam}`,
+          method: HTTP_METHOD.GET,
+        };
+      },
+      providesTags: ['GetSuggestedEmployees'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'GetSuggestedEmployees >>> datadata');
+        } catch (error) {
+          console.log('GetJobs Error', error);
+        }
+      },
     }),
     getCompanyPosts: builder.query<any, any>({
       query: () => ({
@@ -43,7 +73,7 @@ export const dashboardApi = createApi({
           console.log(data, 'datadata');
           // dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
-          console.log('Guest Login Error', error);
+          console.log('getCompanyPosts Error', error);
         }
       },
     }),
@@ -163,7 +193,7 @@ export const dashboardApi = createApi({
 });
 
 export const {
-  useGetDashboardQuery,
+  useGetCompanyJobsQuery,
   useGetCompanyPostsQuery,
   useCreateCompanyPostMutation,
   useGetEmployeeProfileQuery,
@@ -171,4 +201,5 @@ export const {
   useCreateCompanyProfileMutation,
   useGetSkillsQuery,
   useGetBusinessTypesQuery,
+  useGetSuggestedEmployeesQuery,
 } = dashboardApi;

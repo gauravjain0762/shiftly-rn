@@ -1,12 +1,9 @@
 import Geolocation from '@react-native-community/geolocation';
 import {Alert, Linking, PermissionsAndroid, Platform} from 'react-native';
-import {
-  isLocationEnabled,
-  promptForEnableLocationIfNeeded,
-} from 'react-native-android-location-enabler';
 import {API} from './apiConstant';
 import {errorToast} from './commonFunction';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 
 // export const requestLocationPermission = async (
 //   onSucess: (res: any) => void,
@@ -135,18 +132,26 @@ const requestAndroidPermission = async (
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     );
+    console.log('🔥🔥🔥 ~ requestAndroidPermission ~ granted 1:', granted);
 
     if (GetForcefully) {
+      console.log('🔥🔥🔥 ~ requestAndroidPermission ~ granted 2:', granted);
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         console.log('Started requesting');
-        await promptForEnableLocationIfNeeded()
+        await RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 1000,
+          fastInterval: 1000,
+        })
           .then(() => getCurrentLocation(onSuccess))
           .catch(() => showEnableLocationAlert(onFail));
       } else {
         showPermissionDeniedAlert(onFail);
       }
     } else {
-      await promptForEnableLocationIfNeeded().then(() => {
+      await RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+        interval: 1000,
+        fastInterval: 1000,
+      }).then(() => {
         getCurrentLocation(onSuccess);
       });
     }

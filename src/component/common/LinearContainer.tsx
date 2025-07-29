@@ -34,7 +34,7 @@ const LinearContainer = ({
       <LinearGradient
         style={styles.linearView}
         colors={colors || ['#043379', '#041F50']}>
-        <SafeAreaView {...SafeAreaProps} style={[AppStyles.flex]}>
+        <SafeAreaView {...SafeAreaProps} style={[AppStyles.flex]} edges={['top']} >
           <View style={[styles.containerStyle, containerStyle]}>
             {children}
           </View>

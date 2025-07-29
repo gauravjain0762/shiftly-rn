@@ -18,16 +18,18 @@ import {setupListeners} from '@reduxjs/toolkit/query';
 // Persisted reducer from your slice
 import {persistedAuthReducer} from '../features/authSlice';
 import loaderReducer from '../features/loaderSlice';
+import companyReducer from '../features/companySlice';
 
 // Custom middleware
 import {loadingMiddleware} from './middleware/loadingMiddleware';
 import {authApi} from '../api/authApi';
-import { dashboardApi } from '../api/dashboardApi';
+import {dashboardApi} from '../api/dashboardApi';
 
 // 1) Root‐reducer, with a reset action handler
 const appReducer = combineReducers({
   auth: persistedAuthReducer, // ← use the persisted reducer here
   loader: loaderReducer,
+  company: companyReducer,
   [authApi.reducerPath]: authApi.reducer, // RTK Query for cached data all HTTP requests
   [dashboardApi.reducerPath]: dashboardApi.reducer, // RTK Query for cached data all HTTP requests
 
@@ -74,7 +76,6 @@ export const store = configureStore({
     })
       .concat(authApi.middleware) // RTK Query
       .concat(dashboardApi.middleware) // RTK Query
-     
 
       .concat(loadingMiddleware) // your loader counter
       .concat(analyticsMiddleware), // logging

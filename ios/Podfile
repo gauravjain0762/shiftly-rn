@@ -50,6 +50,7 @@ target 'Shiftly' do
 
   rn_maps_path = '../node_modules/react-native-maps'
   pod 'react-native-maps/Google', :path => rn_maps_path
+  use_frameworks! :linkage => :dynamic
 
   use_react_native!(
     :path => config[:reactNativePath],

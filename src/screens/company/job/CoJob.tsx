@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
+  FlatList,
   Image,
   Pressable,
   StyleSheet,
@@ -24,6 +25,8 @@ import {SCREENS} from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
 import Slider from '@react-native-community/slider';
 import {Dropdown} from 'react-native-element-dropdown';
+import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
+import {useFocusEffect} from '@react-navigation/native';
 
 const jobTypes = [
   {label: 'Full Time', value: 'fulltime'},
@@ -34,10 +37,24 @@ const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
 const CoJob = () => {
   const {t} = useTranslation();
+  const {refetch} = useGetCompanyJobsQuery({});
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
   const [sliderValue, setSliderValue] = useState<number>(0);
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState<any>(null);
+  const [latestJobList, setLatestJobList] = useState<any>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadJobs = async () => {
+        const result = await refetch();
+        if (result.data?.data?.jobs) {
+          setLatestJobList(result.data.data.jobs);
+        }
+      };
+      loadJobs();
+    }, []),
+  );
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -71,13 +88,33 @@ const CoJob = () => {
       />
 
       <View style={styles.outerContainer}>
-        <MyJobCard />
+        <FlatList
+          data={latestJobList}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: '20%'}}
+          renderItem={({item, index}) => {
+            return (
+              <>
+                <View key={index} style={{marginBottom: hp(10)}}>
+                  <MyJobCard
+                    title={item?.title}
+                    address={item.address}
+                    jobType={item.job_type}
+                    jobDescription={item.description}
+                    // totalApplicants={item.totalApplicants}
+                  />
+                </View>
+              </>
+            );
+          }}
+          keyExtractor={(_, index) => index.toString()}
+        />
       </View>
 
       {isFilterModalVisible && (
         <BottomModal
-          onClose={() => setIsFilterModalVisible(false)}
-          visible={isFilterModalVisible}>
+          visible={isFilterModalVisible}
+          onClose={() => setIsFilterModalVisible(false)}>
           <View style={styles.modalContent}>
             <View style={styles.filterHeader}>
               <Text style={styles.filterTitle}>{t('Filters')}</Text>

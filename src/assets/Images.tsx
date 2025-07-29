@@ -97,6 +97,7 @@ export const IMAGES = {
   hotel_cover: require('./image/hotel_cover.png'),
   chat: require('./image/chat.png'),
   current_location: require('./image/Current_Location.png'),
+  blank_circle: require('./image/blank_circle.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),
