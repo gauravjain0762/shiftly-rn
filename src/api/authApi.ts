@@ -162,6 +162,33 @@ export const authApi = createApi({
         }
       },
     }),
+    companyForgotPassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyForgotPassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            // if (data?.data?.auth_token) {
+            //   await setAsyncToken(data?.data?.auth_token);
+            //   dispatch(setAuthToken(data.data?.auth_token));
+            //   dispatch(setUserInfo(data.data?.company));
+            //   await setAsyncUserInfo(data.data?.company);
+            //   dispatch(setGuestLogin(false));
+            // }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
     CompanyLogout: builder.mutation<any, any>({
       query: credentials => ({
         url: API.CompanyLogout,
@@ -315,4 +342,5 @@ export const {
   useEmployeeLogoutMutation,
   useGetProfileQuery,
   useCreateJobMutation,
+  useCompanyForgotPasswordMutation
 } = authApi;

@@ -698,21 +698,6 @@ const CreateAccount = () => {
                   />
                 ))}
               </View>
-              {/* <SmoothPinCodeInput
-                password
-                // mask="﹡"
-                cellSize={71}
-                codeLength={4}
-                value={otp}
-                autoFocus
-                onTextChange={(password: any) => setOtp(password)}
-                cellStyle={styles.cellStyle1}
-                cellStyleFocused={styles.cellStyleFocused}
-                animationFocused={false}
-                textStyle={styles.textStyle1}
-                containerStyle={styles.pinconatiner1}
-                animated={false}
-              /> */}
               <>
                 {timer == 0 ? (
                   <Text

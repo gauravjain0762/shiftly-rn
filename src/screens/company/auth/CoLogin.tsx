@@ -1,6 +1,7 @@
 import {
   Image,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -58,52 +59,57 @@ const CoLogin = () => {
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
       colors={['#FFF8E6', '#F3E1B7']}>
-      <Image source={IMAGES.logo1} style={styles.logo} />
-      <View style={styles.logincontainer}>
-        <View style={styles.container}>
-          <Text style={styles.label}>{t('Company Email')}</Text>
-          <CustomTextInput
-            style={styles.input}
-            placeholder="smith@williamson.com"
-            placeholderTextColor={colors._7B7878}
-            value={authData?.email}
-            onChangeText={e => {
-              setAuthData({...authData, email: e});
-            }}
-          />
-          <Text style={styles.label}>{t('Password')}</Text>
-          <CustomTextInput
-            showRightIcon
-            style={styles.passinput}
-            containerStyle={styles.inputcontainer}
-            placeholderTextColor={colors._7B7878}
-            imgStyle={styles.eye}
-            placeholder="* * * * * * * * *"
-            onChangeText={e => {
-              setAuthData({...authData, password: e});
-            }}
-          />
-          <Text
-            onPress={() => navigateTo(SCREENS.ForgotPassword)}
-            style={styles.forgote}>
-            {t('Forgot your password?')}
-          </Text>
-        </View>
-        <View>
-          <GradientButton
-            type="Company"
-            onPress={handleLogin} //() => resetNavigation(SCREENS.CoTabNavigator)}
-            style={styles.button}
-            title="Login"
-          />
-          <Text style={styles.accoumt}>{t('Don’t have an account?')}</Text>
-          <TouchableOpacity onPress={() => navigateTo(SCREENS.CreateAccount)}>
-            <Text style={styles.createAccoumt}>
-              {t('Create Business Account')}
+      <ScrollView
+        style={{flex: 1}}
+        contentContainerStyle={{flexGrow: 1, paddingBottom: hp(30)}}
+        showsVerticalScrollIndicator={false}>
+        <Image source={IMAGES.newlogo1} style={styles.logo} />
+        <View style={styles.logincontainer}>
+          <View style={styles.container}>
+            <Text style={styles.label}>{t('Company Email')}</Text>
+            <CustomTextInput
+              style={styles.input}
+              placeholder="smith@williamson.com"
+              placeholderTextColor={colors._7B7878}
+              value={authData?.email}
+              onChangeText={e => {
+                setAuthData({...authData, email: e});
+              }}
+            />
+            <Text style={styles.label}>{t('Password')}</Text>
+            <CustomTextInput
+              showRightIcon
+              style={styles.passinput}
+              containerStyle={styles.inputcontainer}
+              placeholderTextColor={colors._7B7878}
+              imgStyle={styles.eye}
+              placeholder="* * * * * * * * *"
+              onChangeText={e => {
+                setAuthData({...authData, password: e});
+              }}
+            />
+            <Text
+              onPress={() => navigateTo(SCREENS.ForgotPassword)}
+              style={styles.forgote}>
+              {t('Forgot your password?')}
             </Text>
-          </TouchableOpacity>
+          </View>
+          <View>
+            <GradientButton
+              type="Company"
+              onPress={handleLogin} //() => resetNavigation(SCREENS.CoTabNavigator)}
+              style={styles.button}
+              title="Login"
+            />
+            <Text style={styles.accoumt}>{t('Don’t have an account?')}</Text>
+            <TouchableOpacity onPress={() => navigateTo(SCREENS.CreateAccount)}>
+              <Text style={styles.createAccoumt}>
+                {t('Create Business Account')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </LinearContainer>
   );
 };
@@ -112,13 +118,12 @@ export default CoLogin;
 
 const styles = StyleSheet.create({
   logo: {
+    marginTop: hp(50),
+    alignSelf: 'center',
     resizeMode: 'contain',
-    height: hp(60),
-    width: 'auto',
-    marginTop: hp(100),
   },
   container: {
-    marginTop: hp(50),
+    marginTop: hp(40),
   },
   input: {
     ...commonFontStyle(400, 18, colors._4A4A4A),
@@ -153,9 +158,9 @@ const styles = StyleSheet.create({
     marginTop: hp(20),
   },
   logincontainer: {
-    justifyContent: 'space-around',
     flex: 1,
     paddingHorizontal: wp(40),
+    justifyContent: 'space-around',
   },
   accoumt: {
     ...commonFontStyle(400, 18, colors._0D468C),

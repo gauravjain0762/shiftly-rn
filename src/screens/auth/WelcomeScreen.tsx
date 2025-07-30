@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, wp} from '../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
@@ -55,34 +56,39 @@ const WelcomeScreen = () => {
       colors={['#0D468C', '#041326']}>
       <StatusBar barStyle="light-content" backgroundColor="#00204A" />
       {/* <View> */}
-      <Onboarding
-        data={AppOnboardingData}
-        // onComplete={handleOnboardingComplete}
-      />
-      {/* </View> */}
+      <ScrollView
+        style={{flex: 1}}
+        contentContainerStyle={{flexGrow: 1, alignItems: 'center'}}
+        showsVerticalScrollIndicator={false}>
+        <Onboarding
+          data={AppOnboardingData}
+          // onComplete={handleOnboardingComplete}
+        />
+        {/* </View> */}
 
-      {/* Buttons */}
-      <View style={{width: '90%', alignItems: 'center', marginBottom: 20}}>
-        <TouchableOpacity
-          style={styles.emailButton}
-          onPress={() => {
-            onLogin();
-          }}>
-          {/* <Icon name="envelope" size={16} color="#000" /> */}
-          <Image source={IMAGES.e_icon} style={styles.icon} />
-          <Text style={styles.emailText}>{t('Continue with email')}</Text>
-        </TouchableOpacity>
+        {/* Buttons */}
+        <View style={{width: '90%', alignItems: 'center', marginBottom: hp(30)}}>
+          <TouchableOpacity
+            style={styles.emailButton}
+            onPress={() => {
+              onLogin();
+            }}>
+            {/* <Icon name="envelope" size={16} color="#000" /> */}
+            <Image source={IMAGES.e_icon} style={styles.icon} />
+            <Text style={styles.emailText}>{t('Continue with email')}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.whiteButton}>
-          <Image source={IMAGES.a_icon} style={styles.icon} />
-          <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.whiteButton}>
+            <Image source={IMAGES.a_icon} style={styles.icon} />
+            <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.whiteButton}>
-          <Image source={IMAGES.g_icon} style={styles.icon} />
-          <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.whiteButton}>
+            <Image source={IMAGES.g_icon} style={styles.icon} />
+            <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </LinearContainer>
   );
 };
@@ -90,8 +96,8 @@ const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   container1: {
     flex: 1,

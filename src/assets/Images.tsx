@@ -101,6 +101,7 @@ export const IMAGES = {
   login_bg1: require('./image/login_bg1.png'),
   login_bg2: require('./image/login_bg2.png'),
   newlogo: require('./image/newlogo.png'),
+  newlogo1: require('./image/newlogo1.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

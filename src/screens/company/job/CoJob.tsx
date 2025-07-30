@@ -81,7 +81,7 @@ const CoJob = () => {
             </LinearGradient>
 
             <Pressable onPress={() => setIsFilterModalVisible(true)}>
-              <Image source={IMAGES.post_filter} />
+              <Image source={IMAGES.post_filter} style={styles.filterLogo} />
             </Pressable>
           </View>
         }
@@ -302,5 +302,9 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginVertical: hp(40),
+  },
+  filterLogo: {
+    height: hp(28),
+    width: wp(28),
   },
 });

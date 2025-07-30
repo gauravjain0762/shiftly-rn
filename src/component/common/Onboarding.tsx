@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -95,7 +96,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
   };
 
   return (
-    <View style={[styles.container, {backgroundColor: colors.bgColor}]}>
+    <View style={[styles.container, {}]}>
       <Animated.FlatList
         ref={flatListRef}
         data={data}
@@ -143,69 +144,65 @@ const styles = StyleSheet.create({
   },
   slide: {
     alignItems: 'center',
-    // justifyContent: 'center',
     paddingHorizontal: wp(20),
   },
   description: {
     fontSize: 16,
+    lineHeight: 24,
     fontWeight: '400',
     textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 10,
-    // marginBottom: 64,
+    paddingHorizontal: hp(10),
   },
   paginationContainer: {
     // flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 39,
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: hp(40),
+    justifyContent: 'center',
   },
   paginationDot: {
-    height: 10,
-    width: 10,
-    borderRadius: 5,
-    marginHorizontal: 8,
+    width: wp(10),
+    height: hp(10),
+    borderRadius: hp(5),
+    marginHorizontal: wp(8),
   },
   nextButton: {
-    alignSelf: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 40,
     borderRadius: 30,
-    minWidth: width * 0.5,
+    alignSelf: 'center',
     alignItems: 'center',
+    minWidth: width * 0.5,
+    paddingVertical: hp(15),
+    paddingHorizontal: wp(40),
   },
   nextButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-
   logo: {
-    // height: hp(60),
+    marginBottom: hp(12),
     resizeMode: 'contain',
-    marginBottom: 12,
   },
   illustration: {
     width: '100%',
-    height: 220,
+    height: hp(220),
   },
   title: {
-    marginTop: 20,
+    marginTop: hp(20),
     ...commonFontStyle(500, 14, colors.white),
   },
   subtitle: {
     textAlign: 'center',
     lineHeight: 30,
-    marginTop: 29,
-    marginBottom: 10,
+    marginTop: hp(29),
+    marginBottom: hp(10),
     // marginHorizontal: wp(8),
     ...commonFontStyle(600, 17, colors._DADADA),
   },
 
   dots: {
     flexDirection: 'row',
-    marginVertical: 41,
+    marginVertical: hp(41),
   },
   dot: {
     width: 10,
