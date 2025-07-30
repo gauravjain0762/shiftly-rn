@@ -40,6 +40,7 @@ import CoPost from '../screens/company/post/CoPost';
 import CoHome from '../screens/company/home/CoHome';
 import CoJobDetails from '../screens/company/job/JobDetails';
 import LocationScreen from '../component/common/LocationScreen';
+import Onboarding from '../component/common/Onboarding';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -344,7 +345,7 @@ const StackNavigator: FC = () => {
 
   return (
     <Stack.Navigator
-      initialRouteName={SCREENS.SplashScreen}
+      initialRouteName={'WelcomeScreen'}
       screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
       <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />

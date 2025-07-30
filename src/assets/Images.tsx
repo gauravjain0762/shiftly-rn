@@ -98,6 +98,9 @@ export const IMAGES = {
   chat: require('./image/chat.png'),
   current_location: require('./image/Current_Location.png'),
   blank_circle: require('./image/blank_circle.png'),
+  login_bg1: require('./image/login_bg1.png'),
+  login_bg2: require('./image/login_bg2.png'),
+  newlogo: require('./image/newlogo.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

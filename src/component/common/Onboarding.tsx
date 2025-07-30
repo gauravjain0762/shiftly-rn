@@ -7,13 +7,14 @@ import {
   Dimensions,
   TouchableOpacity,
   Image,
+  ImageBackground,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
 import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, hp} from '../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import ScrollingPaginationDots from './ScrollingPaginationDots';
 
@@ -66,12 +67,24 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
   const renderItem = ({item}: {item: OnboardingDataItem}) => {
     return (
       <View style={[styles.slide, {width}]}>
-        <Image resizeMode="contain" source={IMAGES.logog} style={styles.logo} />
-        <Image
+        <Image resizeMode="contain" source={IMAGES.newlogo} style={styles.logo} />
+        <ImageBackground
           source={IMAGES.login_bg}
           style={styles.illustration}
-          resizeMode="contain"
-        />
+          resizeMode="contain">
+          <View
+            style={{
+              gap: '30%',
+              left: '22%',
+              bottom: '10%',
+              flexDirection: 'row',
+              alignItems: 'center',
+              position: 'absolute',
+            }}>
+            <Image source={IMAGES.login_bg1} />
+            <Image source={IMAGES.login_bg2} />
+          </View>
+        </ImageBackground>
         <Text style={styles.subtitle}>
           {
             "Find your next role in Dubai's top hotels, beach clubs, &restaurants.Let's get you hired! Start your Shiftly journey"
@@ -131,7 +144,7 @@ const styles = StyleSheet.create({
   slide: {
     alignItems: 'center',
     // justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: wp(20),
   },
   description: {
     fontSize: 16,
@@ -169,7 +182,7 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    height: 60,
+    // height: hp(60),
     resizeMode: 'contain',
     marginBottom: 12,
   },
@@ -186,7 +199,7 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginTop: 29,
     marginBottom: 10,
-    marginHorizontal: 28,
+    // marginHorizontal: wp(8),
     ...commonFontStyle(600, 17, colors._DADADA),
   },
 
