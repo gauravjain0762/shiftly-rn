@@ -59,14 +59,12 @@ const CoPost = () => {
   const nextStep = () => dispatch(setCoPostSteps(steps + 1));
 
   const prevStep = (num?: any) => {
-    if (num == 1) {
-      navigationRef.goBack();
-    }
     dispatch(setCoPostSteps(steps - 1));
   };
 
   const resetUploadImages = () => {
     updatePostForm({uploadedImages: []});
+    dispatch(setCoPostSteps(1));
   };
 
   const handleUploadPost = async () => {
@@ -119,9 +117,10 @@ const CoPost = () => {
     ];
     updatePostForm({uploadedImages: updated});
 
-    // Automatically proceed to next step
-    dispatch(setCoPostSteps(steps + 1));
-    setImageModal(false);
+    setTimeout(() => {
+      setImageModal(false);
+      nextStep();
+    }, 100);
   };
 
   const render = () => {
@@ -132,12 +131,6 @@ const CoPost = () => {
             <View>
               {uploadedImages.length === 0 && !uploadedImages[0]?.uri ? (
                 <View style={styles.headercontainer}>
-                  <BackHeader
-                    onBackPress={() => prevStep(steps)}
-                    type="company"
-                    title=""
-                    isRight={false}
-                  />
                   <Text style={styles.createPost}>{t('Create a post')}</Text>
                 </View>
               ) : (
@@ -175,7 +168,9 @@ const CoPost = () => {
                   style={styles.btn}
                   type="Company"
                   title={t('Continue')}
-                  onPress={() => nextStep()}
+                  onPress={() => {
+                    nextStep();
+                  }}
                 />
               </>
             ) : (
@@ -291,7 +286,10 @@ const CoPost = () => {
                   title=""
                   RightIcon={
                     <TouchableOpacity
-                      onPress={() => navigateTo(SCREENS.CoHome)}>
+                      onPress={() => {
+                        resetUploadImages();
+                        navigateTo(SCREENS.CoHome);
+                      }}>
                       <Image
                         source={IMAGES.close}
                         style={[styles.close, {marginVertical: hp(20)}]}

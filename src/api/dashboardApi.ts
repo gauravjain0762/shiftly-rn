@@ -128,6 +128,7 @@ export const dashboardApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
+            dispatch(setUserInfo(data?.data?.user))
           } else {
             errorToast(data?.message);
           }

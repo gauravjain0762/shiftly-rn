@@ -89,8 +89,9 @@ const SignUp = () => {
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
+    } else {
+      setStep(prev => prev - 1);
     }
-    setStep(prev => prev - 1);
   };
 
   const [password, setPassword] = useState(new Array(8).fill(''));

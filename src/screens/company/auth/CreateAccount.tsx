@@ -160,8 +160,9 @@ const CreateAccount = () => {
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
+    } else {
+      dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) - 1));
     }
-    dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) - 1));
     // setStep(prev => prev - 1);
   };
   const {t, i18n} = useTranslation();
@@ -893,10 +894,12 @@ const CreateAccount = () => {
                     'lng:',
                     position?.longitude,
                   );
-                  dispatch(setCompanyProfileData({
-                    lat: position?.latitude,
-                    lng: position?.longitude,
-                  }));
+                  dispatch(
+                    setCompanyProfileData({
+                      lat: position?.latitude,
+                      lng: position?.longitude,
+                    }),
+                  );
                   nextStep();
                 }}
               />

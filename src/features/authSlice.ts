@@ -22,6 +22,7 @@ interface AppState {
   services: any[];
   skills: any[];
   forgotPasswordSteps: number;
+  changePasswordSteps: number;
 }
 
 const initialState: AppState = {
@@ -64,6 +65,7 @@ const initialState: AppState = {
   services: [],
   skills: [],
   forgotPasswordSteps: 1,
+  changePasswordSteps: 1,
 };
 
 const authSlice = createSlice({
@@ -136,6 +138,9 @@ const authSlice = createSlice({
     setForgotPasswordSteps: (state, action: PayloadAction<number>) => {
       state.forgotPasswordSteps = action.payload;
     },
+    setChangePasswordSteps: (state, action: PayloadAction<number>) => {
+      state.changePasswordSteps = action.payload;
+    },
     logouts: () => initialState,
   },
 });
@@ -188,6 +193,7 @@ export const {
   setCompanyProfileAllData,
   setSkills,
   setForgotPasswordSteps,
+  setChangePasswordSteps
 } = authSlice.actions;
 
 export default authSlice.reducer;

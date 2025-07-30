@@ -11,17 +11,64 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useTranslation} from 'react-i18next';
+import {
+  useCompanyForgotPasswordMutation,
+} from '../../../api/authApi';
+import {RootState} from '../../../store';
+import {useSelector} from 'react-redux';
+import {
+  errorToast,
+  resetNavigation,
+  successToast,
+} from '../../../utils/commonFunction';
+import {setChangePasswordSteps, setUserInfo} from '../../../features/authSlice';
+import {useAppDispatch} from '../../../redux/hooks';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const ChangePassword = () => {
   const {t} = useTranslation();
-  const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
+  const dispatch = useAppDispatch();
+  const [email, setEmail] = useState(__DEV__ ? 'db@company.com' : '');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const {changePasswordSteps} = useSelector((state: RootState) => state.auth);
+  const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
+
+  const handleVerifyEmail = async () => {
+    if (!email.trim()) {
+      errorToast('Please enter a valid email');
+      return;
+    }
+    try {
+      const res = await companyForgotPassword({email}).unwrap();
+      if (res?.status) {
+        successToast('Email verified successfully');
+        dispatch(setUserInfo(res.data?.user));
+        nextStep();
+      } else {
+        errorToast(res?.message || 'Something went wrong');
+      }
+    } catch (error: any) {
+      errorToast(error?.data?.message || 'Failed to send OTP');
+    }
+  };
+
+  const handleChangePassword = async () => {};
+
+  const nextStep = () =>
+    dispatch(setChangePasswordSteps(changePasswordSteps + 1));
+
+  const prevStep = (num?: any) => {
+    if (num == 1) {
+      navigationRef.goBack();
+    } else {
+      dispatch(setChangePasswordSteps(changePasswordSteps - 1));
+    }
+  };
 
   const renderStepUI = () => {
-    switch (step) {
+    switch (changePasswordSteps) {
       case 1:
         return (
           <>
@@ -41,6 +88,12 @@ const ChangePassword = () => {
                 onChangeText={setEmail}
               />
             </View>
+            <GradientButton
+              type="Company"
+              title="Submit"
+              onPress={handleVerifyEmail}
+              style={passwordStyles.button}
+            />
           </>
         );
       case 2:
@@ -48,13 +101,13 @@ const ChangePassword = () => {
           <View style={passwordStyles.inputView}>
             <Text style={passwordStyles.label}>{t('Old Password')}</Text>
             <CustomTextInput
-              value={newPassword}
+              value={oldPassword}
               style={passwordStyles.emailText}
               placeholder="Enter old password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
               secureTextEntry
-              onChangeText={setNewPassword}
+              onChangeText={setOldPassword}
             />
             <Text style={passwordStyles.label}>{t('New Password')}</Text>
             <CustomTextInput
@@ -75,6 +128,12 @@ const ChangePassword = () => {
               containerStyle={passwordStyles.inputcontainer}
               secureTextEntry
               onChangeText={setConfirmPassword}
+            />
+            <GradientButton
+              type="Company"
+              title="Submit"
+              style={passwordStyles.button}
+              onPress={handleChangePassword}
             />
           </View>
         );
@@ -97,11 +156,7 @@ const ChangePassword = () => {
         style={passwordStyles.container}>
         <TouchableOpacity
           onPress={() => {
-            if (step === 1) {
-              navigationRef.goBack();
-            } else {
-              setStep(1);
-            }
+            prevStep(changePasswordSteps);
           }}
           hitSlop={8}
           style={[passwordStyles.backBtn]}>
@@ -114,29 +169,6 @@ const ChangePassword = () => {
         <Text style={passwordStyles.title}>{t('Change Password')}</Text>
 
         {renderStepUI()}
-
-        <GradientButton
-          type="Company"
-          onPress={() => {
-            if (step === 1) {
-              //   if (email.trim() !== '') {
-              setStep(2);
-              //   } else {
-              //   }
-            } else {
-              if (
-                newPassword &&
-                confirmPassword &&
-                newPassword === confirmPassword
-              ) {
-                console.log('Reset password with:', newPassword);
-              } else {
-              }
-            }
-          }}
-          style={passwordStyles.button}
-          title="Submit"
-        />
       </KeyboardAwareScrollView>
     </LinearContainer>
   );

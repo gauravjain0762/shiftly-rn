@@ -20,30 +20,40 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useTranslation} from 'react-i18next';
 import {passwordStyles} from './ChangePassword';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {errorToast, successToast} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  resetNavigation,
+  successToast,
+} from '../../../utils/commonFunction';
 import {useAppDispatch} from '../../../redux/hooks';
 import {RootState} from '../../../store';
 import {useSelector} from 'react-redux';
 import {
+  useCompanyChangePasswordMutation,
   useCompanyForgotPasswordMutation,
   useCompanyOTPVerifyMutation,
+  useCompanyResendOTPMutation,
 } from '../../../api/authApi';
-import { setForgotPasswordSteps } from '../../../features/authSlice';
+import {setForgotPasswordSteps, setUserInfo} from '../../../features/authSlice';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const ForgotPassword = () => {
-  const {fcmToken, userInfo, forgotPasswordSteps} = useSelector((state: RootState) => state.auth);
-  const [OtpVerify, {isLoading: otpVerifyLoading}] =
-    useCompanyOTPVerifyMutation();
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const [email, setEmail] = useState('');
+  const {fcmToken, userInfo, forgotPasswordSteps} = useSelector(
+    (state: RootState) => state.auth,
+  );
+  const [OtpVerify] = useCompanyOTPVerifyMutation();
+  const [companyChangePassword] = useCompanyChangePasswordMutation();
+  const [email, setEmail] = useState(__DEV__ ? 'db@company.com' : '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
   const [otp, setOtp] = useState(new Array(4).fill(''));
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(__DEV__ ? 5 : 30);
   const [start, setStart] = useState(false);
   const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
+  const [companyResendOTP] = useCompanyResendOTPMutation({});
 
   useEffect(() => {
     if (timer == 0) return;
@@ -55,6 +65,12 @@ const ForgotPassword = () => {
       return () => clearInterval(interval);
     }
   }, [timer, start]);
+
+  useEffect(() => {
+    if (forgotPasswordSteps == 2) {
+      setStart(true);
+    }
+  }, [forgotPasswordSteps]);
 
   const handleChangeOtp = (text: any, index: any) => {
     const newPass = [...otp];
@@ -84,9 +100,11 @@ const ForgotPassword = () => {
       const res = await companyForgotPassword({email}).unwrap();
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
-        setStart(true);
+        dispatch(setUserInfo(res.data?.user));
         setTimer(30);
-        nextStep();
+        if (forgotPasswordSteps === 1) {
+          nextStep();
+        }
       } else {
         errorToast(res?.message || 'Something went wrong');
       }
@@ -102,7 +120,7 @@ const ForgotPassword = () => {
       device_token: fcmToken ?? 'ddd',
       device_type: Platform.OS,
     };
-    console.log(data, 'data');
+    console.log(data, 'verifyOTP data');
 
     const response = await OtpVerify(data).unwrap();
     console.log(response, 'response----');
@@ -114,13 +132,57 @@ const ForgotPassword = () => {
     }
   };
 
-  const nextStep = () => dispatch(setForgotPasswordSteps(forgotPasswordSteps + 1))
+  const handleChangePassword = async () => {
+    if (!newPassword.trim() || !confirmPassword.trim()) {
+      errorToast('Please enter new password and confirm password');
+      return;
+    }
+
+    let data = {
+      company_id: userInfo?._id,
+      otp: otp.join('') || '1234',
+      password: newPassword,
+      confirm_password: confirmPassword,
+    };
+    console.log(data, 'handleChangePassword data');
+
+    const response = await companyChangePassword(data).unwrap();
+    console.log(response, 'companyChangePassword response----');
+    if (response?.status) {
+      successToast(response?.message);
+      dispatch(setUserInfo(response.data?.user));
+      resetNavigation(SCREENS.CoTabNavigator);
+    } else {
+      errorToast("New password and confirm password doesn't match");
+    }
+  };
+
+  const nextStep = () =>
+    dispatch(setForgotPasswordSteps(forgotPasswordSteps + 1));
 
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
+    } else if (num == 3) {
+      resetNavigation(SCREENS.CoLogin);
+      dispatch(setForgotPasswordSteps(1));
+    } else {
+      dispatch(setForgotPasswordSteps(forgotPasswordSteps - 1));
     }
-    dispatch(setForgotPasswordSteps(forgotPasswordSteps- 1))
+  };
+
+  const handleResendOTP = async () => {
+    try {
+      const res = await companyResendOTP({company_id: userInfo?._id}).unwrap();
+      if (res?.status) {
+        successToast(res?.message || 'OTP sent successfully');
+        setTimer(30);
+      } else {
+        errorToast(res?.message || 'Something went wrong');
+      }
+    } catch (error: any) {
+      errorToast(error?.data?.message || 'Failed to send OTP');
+    }
   };
 
   const renderStepUI = () => {
@@ -136,7 +198,7 @@ const ForgotPassword = () => {
             <View style={passwordStyles.inputView}>
               <Text style={passwordStyles.label}>{t('Your Email')}</Text>
               <CustomTextInput
-                value={email}
+                value={email || 'db@company.com'}
                 style={passwordStyles.emailText}
                 placeholder="Enter your email"
                 placeholderTextColor={colors._7B7878}
@@ -146,9 +208,9 @@ const ForgotPassword = () => {
             </View>
             <GradientButton
               type="Company"
-              onPress={handleSendOtpwithEmail}
               title="Submit"
               style={passwordStyles.button}
+              onPress={handleSendOtpwithEmail}
             />
           </>
         );
@@ -183,7 +245,7 @@ const ForgotPassword = () => {
                 {timer == 0 ? (
                   <Text
                     onPress={() => {
-                      setTimer(30);
+                      handleResendOTP();
                     }}
                     style={styles.resendText}>
                     {t('Resend')}
@@ -234,9 +296,7 @@ const ForgotPassword = () => {
             />
             <GradientButton
               type="Company"
-              onPress={() => {
-                nextStep();
-              }}
+              onPress={handleChangePassword}
               title="Submit"
               style={passwordStyles.button}
             />
@@ -260,11 +320,7 @@ const ForgotPassword = () => {
         contentContainerStyle={passwordStyles.scrollcontainer}
         style={passwordStyles.container}>
         <TouchableOpacity
-          onPress={() => {
-            if (forgotPasswordSteps === 1) {
-              navigationRef.goBack();
-            }
-          }}
+          onPress={() => prevStep(forgotPasswordSteps)}
           hitSlop={8}
           style={[passwordStyles.backBtn]}>
           <Image

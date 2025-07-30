@@ -345,7 +345,7 @@ const StackNavigator: FC = () => {
 
   return (
     <Stack.Navigator
-      initialRouteName={'WelcomeScreen'}
+      initialRouteName={SCREENS.SplashScreen}
       screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
       <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />

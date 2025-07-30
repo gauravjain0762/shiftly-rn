@@ -135,6 +135,31 @@ export const authApi = createApi({
     //   },
     // }),
 
+    companyForgotPassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyForgotPassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            await setAsyncToken(data?.data?.auth_token);
+            dispatch(setAuthToken(data.data?.auth_token));
+            dispatch(setUserInfo(data.data?.user));
+            await setAsyncUserInfo(data.data?.user);
+            dispatch(setGuestLogin(false));
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
     companyOTPVerify: builder.mutation<any, any>({
       query: credentials => ({
         url: API.companyOTPVerify,
@@ -148,6 +173,7 @@ export const authApi = createApi({
           const {data} = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
+              console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
               await setAsyncToken(data?.data?.auth_token);
               dispatch(setAuthToken(data.data?.auth_token));
               dispatch(setUserInfo(data.data?.company));
@@ -162,9 +188,9 @@ export const authApi = createApi({
         }
       },
     }),
-    companyForgotPassword: builder.mutation<any, any>({
+    CompanyResendOTP: builder.mutation<any, any>({
       query: credentials => ({
-        url: API.companyForgotPassword,
+        url: API.CompanyResendOTP,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
@@ -174,13 +200,13 @@ export const authApi = createApi({
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
-            // if (data?.data?.auth_token) {
-            //   await setAsyncToken(data?.data?.auth_token);
-            //   dispatch(setAuthToken(data.data?.auth_token));
-            //   dispatch(setUserInfo(data.data?.company));
-            //   await setAsyncUserInfo(data.data?.company);
-            //   dispatch(setGuestLogin(false));
-            // }
+            if (data?.data?.auth_token) {
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.user));
+              await setAsyncUserInfo(data.data?.user);
+              dispatch(setGuestLogin(false));
+            }
           } else {
             errorToast(data?.message);
           }
@@ -189,6 +215,35 @@ export const authApi = createApi({
         }
       },
     }),
+    companyChangePassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyResetPassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.user));
+              await setAsyncUserInfo(data.data?.user);
+              dispatch(setGuestLogin(false));
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Verify OTP Error', error);
+        }
+      },
+    }),
+
     CompanyLogout: builder.mutation<any, any>({
       query: credentials => ({
         url: API.CompanyLogout,
@@ -342,5 +397,7 @@ export const {
   useEmployeeLogoutMutation,
   useGetProfileQuery,
   useCreateJobMutation,
-  useCompanyForgotPasswordMutation
+  useCompanyForgotPasswordMutation,
+  useCompanyChangePasswordMutation,
+  useCompanyResendOTPMutation,
 } = authApi;

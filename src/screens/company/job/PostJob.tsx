@@ -341,8 +341,9 @@ const PostJob = () => {
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
+    } else {
+      dispatch(setCoPostJobSteps(steps - 1));
     }
-    dispatch(setCoPostJobSteps(steps - 1));
   };
 
   const resetToFirstStep = () => dispatch(setCoPostJobSteps(0));
@@ -1069,8 +1070,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(23),
   },
   scrollContainer: {
-    paddingHorizontal: wp(30),
     flexGrow: 1,
+    paddingBottom: hp(20),
+    paddingHorizontal: wp(30),
     justifyContent: 'space-between',
   },
   dropdown: {
