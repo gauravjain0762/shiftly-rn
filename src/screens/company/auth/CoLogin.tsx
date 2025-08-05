@@ -45,12 +45,13 @@ const CoLogin = () => {
       errorToast(t('Please enter password'));
     } else {
       let data = {
-        email: authData?.email.trim().toLowerCase(),
+        email: authData?.email.trim(),
         password: authData?.password.trim(),
-        language: language,
-        deviceToken: fcmToken ?? 'ddd',
-        deviceType: Platform.OS,
+        // language: language,
+        // deviceToken: fcmToken ?? 'ddd',
+        // deviceType: Platform.OS,
       };
+      console.log("🔥🔥 ~ handleLogin ~ data:", data)
       const response = await companyLogin(data).unwrap();
       // console.log(response, 'response----');
     }

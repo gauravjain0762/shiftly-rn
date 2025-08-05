@@ -12,12 +12,16 @@ import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import CustomPopup from '../../../component/common/CustomPopup';
 import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
-import {useCompanyLogoutMutation} from '../../../api/authApi';
+import {
+  useCompanyDeleteAccountMutation,
+  useCompanyLogoutMutation,
+} from '../../../api/authApi';
 import {clearAsync} from '../../../utils/asyncStorage';
 import {
   errorToast,
   navigateTo,
   resetNavigation,
+  successToast,
 } from '../../../utils/commonFunction';
 import {logouts} from '../../../features/authSlice';
 import {persistor} from '../../../store';
@@ -31,6 +35,7 @@ const CoProfile = () => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [companyLogout, {isLoading: logoutLoading}] =
     useCompanyLogoutMutation();
+  const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
 
   const settingsData = [
     {
@@ -49,7 +54,11 @@ const CoProfile = () => {
     {
       section: 'Security',
       items: [
-        {label: 'Change Password', icon: IMAGES.ChangePassword, onPress: () => navigateTo(SCREENS.ChangePassword)},
+        {
+          label: 'Change Password',
+          icon: IMAGES.ChangePassword,
+          onPress: () => navigateTo(SCREENS.ChangePassword),
+        },
         {label: 'Security', icon: IMAGES.Security},
       ],
     },
@@ -76,7 +85,7 @@ const CoProfile = () => {
         {
           label: 'Delete Account',
           icon: IMAGES.deleteAccount,
-          onPress: () => {},
+          onPress: () => handleDeleteAccount(),
         },
       ],
     },
@@ -108,6 +117,25 @@ const CoProfile = () => {
       signOutIfLoggedIn();
     } else {
       errorToast(response?.message);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    console.log('delete run');
+    try {
+      const res = await companyDeleteAccount({}).unwrap();
+      if (res?.status) {
+        successToast(res?.message);
+        clearAsync();
+        dispatch({type: 'RESET_STORE'});
+        resetNavigation(SCREEN_NAMES.WelcomeScreen);
+        dispatch(logouts());
+        persistor.purge();
+        // signOutIfLoggedIn();
+      }
+    } catch (error) {
+      console.error('Error deleting account: ', error);
+      errorToast('Something went wrong');
     }
   };
 

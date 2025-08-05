@@ -56,7 +56,7 @@ const initialState: AppState = {
     about: '',
     mission: '',
     values: '',
-    services: '',
+    services: [],
     logo: {},
     cover_images: {},
   },
@@ -193,7 +193,7 @@ export const {
   setCompanyProfileAllData,
   setSkills,
   setForgotPasswordSteps,
-  setChangePasswordSteps
+  setChangePasswordSteps,
 } = authSlice.actions;
 
 export default authSlice.reducer;

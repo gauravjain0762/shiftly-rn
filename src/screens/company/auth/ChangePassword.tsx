@@ -13,6 +13,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useTranslation} from 'react-i18next';
 import {
   useCompanyForgotPasswordMutation,
+  useCompanyResetPasswordMutation,
 } from '../../../api/authApi';
 import {RootState} from '../../../store';
 import {useSelector} from 'react-redux';
@@ -34,6 +35,7 @@ const ChangePassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const {changePasswordSteps} = useSelector((state: RootState) => state.auth);
   const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
+  const [companyChangedPassword] = useCompanyResetPasswordMutation({});
 
   const handleVerifyEmail = async () => {
     if (!email.trim()) {
@@ -54,7 +56,28 @@ const ChangePassword = () => {
     }
   };
 
-  const handleChangePassword = async () => {};
+  const handleChangePassword = async () => {
+    if (!newPassword.trim() || !confirmPassword.trim()) {
+      errorToast('Please enter new password and confirm password');
+      return;
+    }
+    try {
+      const res = await companyChangedPassword({
+        old_password: oldPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      }).unwrap();
+      if (res?.status) {
+        successToast(res?.message);
+        dispatch(setUserInfo(res.data?.user));
+        resetNavigation(SCREENS.CoTabNavigator);
+      } else {
+        errorToast(res?.message || 'Something went wrong');
+      }
+    } catch (error: any) {
+      errorToast(error?.data?.message || 'Failed to send OTP');
+    }
+  };
 
   const nextStep = () =>
     dispatch(setChangePasswordSteps(changePasswordSteps + 1));

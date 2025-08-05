@@ -12,6 +12,7 @@ export const API = {
   companyForgotPassword: '/company/forgotPassword',
   companyResetPassword: '/company/resetPassword',
   companyChangePassword: '/company/changePassword',
+  companyDeleteAccount: '/company/deleteAccount',
 
   // Dashboard
   getBusinessTypes: '/company/getBusinessTypes',
@@ -20,6 +21,7 @@ export const API = {
   getCompanyJobs: '/company/getJobs',
   getSkills: '/company/getSkills',
   getSuggestedEmployees: '/company/getSuggestedEmployees',
+  getFacilities: '/company/getFacilities',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',

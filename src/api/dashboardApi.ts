@@ -22,6 +22,7 @@ export const dashboardApi = createApi({
     'GetJobs',
     'CreateJob',
     'GetSuggestedEmployees',
+    'GetFacilities',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -94,6 +95,23 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getFacilities: builder.query<any, any>({
+      query: () => ({
+        url: API.getFacilities,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['GetFacilities'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'getFacilities');
+          // dispatch(setBusinessType(data?.data?.types));
+        } catch (error) {
+          console.log('getFacilities Error', error);
+        }
+      },
+    }),
     createCompanyPost: builder.mutation<any, any>({
       query: credentials => ({
         url: API.createCompanyPost,
@@ -128,7 +146,7 @@ export const dashboardApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
-            dispatch(setUserInfo(data?.data?.user))
+            // dispatch(setUserInfo(data?.data?.user))
           } else {
             errorToast(data?.message);
           }
@@ -203,4 +221,5 @@ export const {
   useGetSkillsQuery,
   useGetBusinessTypesQuery,
   useGetSuggestedEmployeesQuery,
+  useGetFacilitiesQuery,
 } = dashboardApi;

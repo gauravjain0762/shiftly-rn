@@ -1383,9 +1383,9 @@ PODS:
     - React
   - react-native-get-random-values (1.11.0):
     - React-Core
-  - react-native-maps (1.24.13):
-    - react-native-maps/Maps (= 1.24.13)
-  - react-native-maps/Generated (1.24.13):
+  - react-native-maps (1.24.5):
+    - react-native-maps/Maps (= 1.24.5)
+  - react-native-maps/Generated (1.24.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1409,7 +1409,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-maps/Google (1.24.13):
+  - react-native-maps/Google (1.24.5):
     - DoubleConversion
     - glog
     - Google-Maps-iOS-Utils (= 6.1.0)
@@ -1437,7 +1437,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-maps/Maps (1.24.13):
+  - react-native-maps/Maps (1.24.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1934,7 +1934,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNDateTimePicker (8.4.3):
+  - RNDateTimePicker (8.4.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1962,7 +1962,7 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNGestureHandler (2.27.2):
+  - RNGestureHandler (2.27.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1995,7 +1995,7 @@ PODS:
     - React-Core
     - React-RCTImage
     - TOCropViewController (~> 2.7.4)
-  - RNPermissions (5.4.2):
+  - RNPermissions (5.4.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2019,7 +2019,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNReanimated (3.19.0):
+  - RNReanimated (3.18.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2042,10 +2042,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 3.19.0)
-    - RNReanimated/worklets (= 3.19.0)
+    - RNReanimated/reanimated (= 3.18.0)
+    - RNReanimated/worklets (= 3.18.0)
     - Yoga
-  - RNReanimated/reanimated (3.19.0):
+  - RNReanimated/reanimated (3.18.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2068,58 +2068,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 3.19.0)
+    - RNReanimated/reanimated/apple (= 3.18.0)
     - Yoga
-  - RNReanimated/reanimated/apple (3.19.0):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2024.11.18.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-hermes
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
-  - RNReanimated/worklets (3.19.0):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2024.11.18.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-hermes
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - RNReanimated/worklets/apple (= 3.19.0)
-    - Yoga
-  - RNReanimated/worklets/apple (3.19.0):
+  - RNReanimated/reanimated/apple (3.18.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2143,7 +2094,56 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (4.13.1):
+  - RNReanimated/worklets (3.18.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNReanimated/worklets/apple (= 3.18.0)
+    - Yoga
+  - RNReanimated/worklets/apple (3.18.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNScreens (4.12.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2167,9 +2167,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.13.1)
+    - RNScreens/common (= 4.12.0)
     - Yoga
-  - RNScreens/common (4.13.1):
+  - RNScreens/common (4.12.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2582,7 +2582,7 @@ SPEC CHECKSUMS:
   react-native-geolocation: d43962eb0be1b0056ba5c1f95e94fb7907494268
   react-native-geolocation-service: 32b2c2a3b91e70ce2a8d0c684801aaeb0a07e0ec
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
-  react-native-maps: 6e4a37b6256b5bc6e523b77099b69b9624a2bbcc
+  react-native-maps: 1df14795015cae551fa9738ed9673960e33b0693
   react-native-safe-area-context: 7e926a200d4bc9c56562275743705c6b56176455
   react-native-slider: bbaef403486de7d0ecb35ea7d4f3f236609c15c7
   react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594
@@ -2618,13 +2618,13 @@ SPEC CHECKSUMS:
   ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
   RNCAsyncStorage: 39c42c1e478e1f5166d1db52b5055e090e85ad66
-  RNDateTimePicker: 9eacd6be3672493ffd7852036e1e073fc291f939
+  RNDateTimePicker: 76170c3e1545fa4abe11253758f76ed401541012
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
-  RNGestureHandler: 9205e0a9649ef6fcfd71e86992ecfb21eefab3d3
+  RNGestureHandler: e9dfbf95010aa6aa3212dcdefb0d38a42006cbab
   RNImageCropPicker: b0afedeefd8655254a15c34103718455fde6ce59
-  RNPermissions: 25814571a531cb5a9583c74a8ec3443f5d944794
-  RNReanimated: ac0cfc5da50d769ec1e3c6ccb362c1bf7d08ac87
-  RNScreens: 7e56b051227a1a11c3068849d1a9a5dd457537df
+  RNPermissions: 046e405c87952b9d67b27292f24c89048b503aa7
+  RNReanimated: 722d67dfde539bfe29b572878f4bc805f727726b
+  RNScreens: d8f03344886bd566bba24b9e02dbd28979631d3e
   RNSVG: 8a1054afe490b5d63b9792d7ae3c1fde8c05cdd0
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d

@@ -1,4 +1,5 @@
 import {
+  FlatList,
   Image,
   Platform,
   Pressable,
@@ -68,20 +69,6 @@ const rules = [
   },
 ];
 
-const services = [
-  'Hospitality',
-  'Lodging',
-  'Restaurants',
-  'Events',
-  'Food & Beverage',
-  'Resort & Leisure',
-  'Nightlife',
-  'Entertainment',
-  'Water Parks',
-  'Retail Housekeeping Services',
-  'Others',
-];
-
 const CreateAccount = () => {
   const {
     businessType = [],
@@ -94,12 +81,15 @@ const CreateAccount = () => {
     companyProfileData,
     companyServices = [],
   } = useSelector((state: RootState) => state.auth);
+  const {services = []} = useSelector(
+    (state: RootState) => state.auth.companyProfileData || {},
+  );
   const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
     {},
   );
-  const {} = useGetServicesQuery({});
+  const {data: servicesData} = useGetServicesQuery({});
+  const serviceList = servicesData?.data?.services;
   const dispatch = useAppDispatch();
-  const [step, setStep] = useState(1);
   const [companySignUp, {isLoading: signupLoading}] =
     useCompanySignUpMutation();
   const [OtpVerify, {isLoading: otpVerifyLoading}] =
@@ -112,12 +102,7 @@ const CreateAccount = () => {
 
   const [selected, setSelected] = useState('0 - 50');
   const [timer, setTimer] = useState(30);
-  const [web, setWeb] = useState('');
-  const [address, setAddress] = useState('');
-  const [comIntro, setcomIntro] = useState('');
-  const [mission, setMission] = useState('');
-  const [values, setValues] = useState('');
-  const [searviceSelect, setServiceSelect] = useState('Hospitality');
+  const [serviceSelect, setServiceSelect] = useState<string[]>([]);
   const [imageModal, setImageModal] = useState(false);
   const [position, setPosition] = useState<any>(undefined);
   const mapRef = useRef<any>(null);
@@ -130,7 +115,8 @@ const CreateAccount = () => {
 
   useEffect(() => {
     onCurrentLocation();
-  }, []);
+    // dispatch(setCompanyRegistrationStep(1));
+  }, [companyRegistrationStep]);
 
   const inputRefsOtp = useRef<any>([]);
   const [otp, setOtp] = useState(new Array(4).fill(''));
@@ -330,6 +316,7 @@ const CreateAccount = () => {
   };
 
   const handleCreateProfile = async () => {
+    console.log('handleCreateProfile this called');
     let data = {
       website: companyProfileData?.website,
       company_size: companyProfileData?.company_size,
@@ -339,12 +326,14 @@ const CreateAccount = () => {
       about: companyProfileData?.about,
       mission: companyProfileData?.mission,
       values: companyProfileData?.values,
-      services: companyProfileData?.services,
+      services: companyProfileData?.services?.join(','),
       logo: companyProfileData?.logo,
       cover_images: companyProfileData?.cover_images,
       company_name: companyRegisterData?.company_name,
     };
+    console.log('🔥 ~ handleCreateProfile ~ data:', data);
     const response = await companyProfile(data).unwrap();
+    console.log("🔥🔥 ~ handleCreateProfile ~ response:", response)
     console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
@@ -1002,14 +991,11 @@ const CreateAccount = () => {
               <Pressable
                 style={[styles.dateRow, {marginTop: hp(10)}]}
                 onPress={() => {}}>
-                <Text style={styles.dateText}>{searviceSelect}</Text>
+                <Text style={styles.dateText}>{serviceSelect.join(', ')}</Text>
               </Pressable>
               <View style={styles.underline} />
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{flexGrow: 1}}
-                style={{maxHeight: hp(300)}}>
-                {companyServices?.map((option, index) => {
+
+              {/* {companyServices?.map((option, index) => {
                   const isSelected = option?.title === searviceSelect;
                   return (
                     <TouchableOpacity
@@ -1046,8 +1032,62 @@ const CreateAccount = () => {
                       )}
                     </TouchableOpacity>
                   );
-                })}
-              </ScrollView>
+                })} */}
+              <FlatList
+                data={serviceList}
+                style={{maxHeight: hp(300)}}
+                contentContainerStyle={{flexGrow: 1}}
+                keyExtractor={(_, index) => index.toString()}
+                renderItem={({item, index}: any) => {
+                  const isSelected = serviceSelect.includes(item?.title);
+
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.optionContainer,
+                        isSelected && styles.selectedOptionContainer,
+                      ]}
+                      onPress={() => {
+                        dispatch(
+                          setCompanyProfileData({
+                            services: services.includes(item?._id)
+                              ? services?.filter((i: any) => i !== item?._id)
+                              : [...services, item?._id],
+                          }),
+                        );
+                        if (serviceSelect?.includes(item?.title)) {
+                          setServiceSelect(
+                            serviceSelect?.filter(
+                              (i: any) => i !== item?.title,
+                            ),
+                          );
+                        } else {
+                          setServiceSelect(prev => [...prev, item?.title]);
+                        }
+                      }}>
+                      <Text
+                        style={[
+                          styles.optionText,
+                          isSelected && styles.selectedText,
+                        ]}>
+                        {item?.title}
+                      </Text>
+                      {isSelected && (
+                        <Image
+                          source={IMAGES.mark}
+                          style={{
+                            width: 25,
+                            height: 22,
+                            resizeMode: 'contain',
+                            tintColor: colors._4A4A4A,
+                          }}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                }}
+              />
             </View>
             <GradientButton
               style={styles.btn}

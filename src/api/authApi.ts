@@ -243,7 +243,54 @@ export const authApi = createApi({
         }
       },
     }),
-
+    companyResetPassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyChangePassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.user));
+              await setAsyncUserInfo(data.data?.user);
+              dispatch(setGuestLogin(false));
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('companyResetPassword Error', error);
+        }
+      },
+    }),
+    companyDeleteAccount: builder.mutation<any, any>({
+      query: () => ({
+        url: API.companyDeleteAccount,
+        method: HTTP_METHOD.POST,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('companyDeleteAccount Error', error);
+        }
+      },
+    }),
     CompanyLogout: builder.mutation<any, any>({
       query: credentials => ({
         url: API.CompanyLogout,
@@ -261,7 +308,7 @@ export const authApi = createApi({
             errorToast(data?.message);
           }
         } catch (error) {
-          console.log('Verify OTP Error', error);
+          console.log('CompanyLogout Error', error);
         }
       },
     }),
@@ -400,4 +447,6 @@ export const {
   useCompanyForgotPasswordMutation,
   useCompanyChangePasswordMutation,
   useCompanyResendOTPMutation,
+  useCompanyResetPasswordMutation,
+  useCompanyDeleteAccountMutation,
 } = authApi;

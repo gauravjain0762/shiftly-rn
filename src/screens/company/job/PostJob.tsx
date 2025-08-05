@@ -45,7 +45,7 @@ import {useCreateJobMutation} from '../../../api/authApi';
 import {getAsyncUserLocation} from '../../../utils/asyncStorage';
 import {
   useGetBusinessTypesQuery,
-  useGetServicesQuery,
+  useGetFacilitiesQuery,
   useGetSkillsQuery,
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
@@ -212,11 +212,13 @@ const PostJob = () => {
     isSuccessModalVisible,
     isModalVisible,
     canApply,
-  } = useAppSelector(selectJobForm);
+  } = useAppSelector((state: any) => selectJobForm(state));
   const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
-  const {data: servicesData} = useGetServicesQuery({});
-  const services = servicesData?.data?.services;
+  // const {data: servicesData} = useGetServicesQuery({});
+  // const services = servicesData?.data?.services;
+  const {data: facilitiesData} = useGetFacilitiesQuery({});
+  const facilities = facilitiesData?.data?.facilities;
   const {data: skillsData} = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
   const {data: businessTypesData} = useGetBusinessTypesQuery({});
@@ -290,6 +292,8 @@ const PostJob = () => {
       setLocation(res);
     }
   };
+
+  console.log('facilities:', selected?.map((item: any) => item._id).join(','));
 
   const handleCreateJob = async () => {
     const params = {
@@ -644,7 +648,7 @@ const PostJob = () => {
                   {t('You will Provide')}
                 </Text>
                 <FlatList
-                  data={services}
+                  data={facilities}
                   keyExtractor={(_, index) => index.toString()}
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({item, index}) => {
