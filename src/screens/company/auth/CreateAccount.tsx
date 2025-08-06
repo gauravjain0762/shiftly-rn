@@ -333,7 +333,7 @@ const CreateAccount = () => {
     };
     console.log('🔥 ~ handleCreateProfile ~ data:', data);
     const response = await companyProfile(data).unwrap();
-    console.log("🔥🔥 ~ handleCreateProfile ~ response:", response)
+    console.log('🔥🔥 ~ handleCreateProfile ~ response:', response);
     console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {

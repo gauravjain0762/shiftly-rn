@@ -20,13 +20,13 @@ import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import MyJobCard from '../../../component/common/MyJobCard';
-import {navigateTo} from '../../../utils/commonFunction';
+import {errorToast, navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
-import Slider from '@react-native-community/slider';
 import {Dropdown} from 'react-native-element-dropdown';
 import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
 import {useFocusEffect} from '@react-navigation/native';
+import RangeSlider from '../../../component/common/RangeSlider';
 
 const jobTypes = [
   {label: 'Full Time', value: 'fulltime'},
@@ -37,24 +37,47 @@ const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
 const CoJob = () => {
   const {t} = useTranslation();
-  const {refetch} = useGetCompanyJobsQuery({});
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
-  const [sliderValue, setSliderValue] = useState<number>(0);
+  const [range, setRange] = useState<number[]>([1000, 20000]);
   const [value, setValue] = useState<any>(null);
+  const [location, setLocation] = useState<string>('');
   const [latestJobList, setLatestJobList] = useState<any>([]);
+  const [filters, setFilters] = useState({
+    job_types: '',
+    salary_from: 0,
+    salary_to: 0,
+    location: '',
+  });
+  const {refetch} = useGetCompanyJobsQuery(filters);
 
   useFocusEffect(
     useCallback(() => {
       const loadJobs = async () => {
         const result = await refetch();
         if (result.data?.data?.jobs) {
-          setLatestJobList(result.data.data.jobs);
+          setLatestJobList(result.data?.data?.jobs);
         }
       };
       loadJobs();
     }, []),
   );
+
+  const handleApplyFilter = async () => {
+    try {
+      setFilters({
+        job_types: value,
+        salary_from: range[0],
+        salary_to: range[1],
+        location: location,
+      });
+      setIsFilterModalVisible(false);
+      await refetch();
+    } catch (error) {
+      console.error('Error applying filter:', error);
+      errorToast('Failed to apply filter');
+    }
+  };
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -97,10 +120,8 @@ const CoJob = () => {
               <>
                 <View key={index} style={{marginBottom: hp(10)}}>
                   <MyJobCard
-                    title={item?.title}
-                    address={item.address}
-                    jobType={item.job_type}
-                    jobDescription={item.description}
+                    item={item}
+                    onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
                     // totalApplicants={item.totalApplicants}
                   />
                 </View>
@@ -125,6 +146,8 @@ const CoJob = () => {
 
             <View style={styles.inputWrapper}>
               <CustomTextInput
+                value={location}
+                onChangeText={setLocation}
                 placeholder={t('Location')}
                 inputStyle={styles.locationInput}
               />
@@ -133,29 +156,7 @@ const CoJob = () => {
 
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
-              <View style={styles.sliderWrapper}>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={20000}
-                  value={sliderValue}
-                  onValueChange={value => setSliderValue(value)}
-                  minimumTrackTintColor={colors._7B7878}
-                  maximumTrackTintColor={colors._7B7878}
-                  thumbTintColor={colors.white}
-                />
-                <View style={styles.sliderTextWrapper}>
-                  <Text
-                    style={[
-                      styles.sliderValueText,
-                      {
-                        left: (sliderValue / 20000) * SLIDER_WIDTH - 35,
-                      },
-                    ]}>
-                    ₹{Math.round(sliderValue)}
-                  </Text>
-                </View>
-              </View>
+              <RangeSlider range={range} setRange={setRange} />
             </View>
 
             <Dropdown
@@ -177,7 +178,7 @@ const CoJob = () => {
               style={styles.btn}
               type="Company"
               title={t('Apply')}
-              onPress={() => setIsFilterModalVisible(false)}
+              onPress={() => handleApplyFilter()}
             />
           </View>
         </BottomModal>

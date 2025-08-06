@@ -5,6 +5,7 @@ import {errorToast} from '../utils/commonFunction';
 import {setAsyncUserInfo} from '../utils/asyncStorage';
 import {
   setBusinessType,
+  setCompanyProfileAllData,
   setCompanyServices,
   setSkills,
   setUserInfo,
@@ -28,16 +29,16 @@ export const dashboardApi = createApi({
     //  -------   Company    --------
     // Get Explore challenges
     getCompanyJobs: builder.query<any, any>({
-      query: () => ({
+      query: params => ({
         url: API.getCompanyJobs,
         method: HTTP_METHOD.GET,
+        params: params,
       }),
       providesTags: ['GetJobs'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'GetJobs >>> datadata');
-          // dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
           console.log('GetJobs Error', error);
         }
@@ -146,7 +147,7 @@ export const dashboardApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
-            // dispatch(setUserInfo(data?.data?.user))
+            dispatch(setCompanyProfileAllData(data?.data?.company));
           } else {
             errorToast(data?.message);
           }

@@ -41,7 +41,11 @@ const CoProfile = () => {
     {
       section: 'Personal Information',
       items: [
-        {label: 'Account Info', icon: IMAGES.account},
+        {
+          label: 'Account Info',
+          icon: IMAGES.account,
+          onPress: () => navigateTo(SCREENS.CompanyProfile),
+        },
         {
           label: 'Profile',
           icon: IMAGES.Profile,

@@ -6,33 +6,24 @@ import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
 type JobCardProps = {
-  address: string;
-  onPressShare?: () => void;
-  jobDescription: string;
+  item?: any;
   totalApplicants?: number;
-  jobType: string;
-  title: string;
+  onPressCard?: () => void;
+  onPressShare?: () => void;
 };
 
 const MyJobCard = (props: JobCardProps) => {
-  const {
-    address,
-    onPressShare,
-    jobDescription,
-    totalApplicants,
-    jobType,
-    title,
-  } = props;
+  const {onPressShare, totalApplicants, onPressCard, item} = props;
 
   return (
-    <View style={styles.card}>
+    <Pressable onPress={onPressCard} style={styles.card}>
       <View style={styles.headerRow}>
-        <View style={{ width: '85%'}}>
+        <View style={{width: '85%'}}>
           <Text style={styles.locationText}>{`${
-            address || 'Palm Jumairah, dubai UAE'
+            item?.address || 'Palm Jumairah, dubai UAE'
           }`}</Text>
           <Text style={styles.titleText}>{`${
-            title || 'Restaurant Manager'
+            item?.title || 'Restaurant Manager'
           }`}</Text>
         </View>
 
@@ -43,7 +34,7 @@ const MyJobCard = (props: JobCardProps) => {
 
       <Text numberOfLines={2} style={styles.description}>
         {`${
-          jobDescription ||
+          item?.description ||
           'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumairah...'
         } `}
       </Text>
@@ -53,10 +44,12 @@ const MyJobCard = (props: JobCardProps) => {
           totalApplicants || 52
         }  Applicants`}</Text>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{`${jobType || 'Full Time'}`}</Text>
+          <Text style={styles.badgeText}>{`${
+            item?.job_type || 'Full Time'
+          }`}</Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

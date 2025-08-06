@@ -29,6 +29,8 @@ import {useAppDispatch} from '../../../redux/hooks';
 import {setCompanyProfileAllData} from '../../../features/authSlice';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
+import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
+import { navigationRef } from '../../../navigation/RootContainer';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
@@ -69,14 +71,8 @@ const CompanyProfile = () => {
   const {companyProfileData, companyProfileAllData} = useSelector(
     (state: RootState) => state.auth,
   );
-  console.log(
-    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
-    companyProfileData,
-  );
-  console.log(
-    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileAllData:',
-    companyProfileAllData,
-  );
+  const {data: getPost, isLoading: Loading} = useGetCompanyPostsQuery({});
+  const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
   const {t, i18n} = useTranslation();
@@ -94,7 +90,7 @@ const CompanyProfile = () => {
       imagePath={{uri: companyProfileData?.cover_images?.uri}}
       ImageChildren={
         <TouchableOpacity
-          onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+          onPress={() => navigationRef.goBack()}
           style={styles.backButton}>
           <Image source={IMAGES.backArrow} style={styles.backArrow} />
         </TouchableOpacity>
@@ -186,7 +182,7 @@ const CompanyProfile = () => {
             numColumns={2}
             style={{marginTop: hp(10)}}
             keyExtractor={item => item.id.toString()}
-            data={StaticPosts}
+            data={allPosts}
             columnWrapperStyle={{justifyContent: 'space-between'}}
             renderItem={({item}) => (
               <CustomPostCard title={item?.title} image={item?.image} />

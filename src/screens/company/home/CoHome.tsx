@@ -59,7 +59,7 @@ const CoHome = () => {
           <FeedCard
             item={item}
             isFollow
-            onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
+            // onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
           />
         )}
         onEndReached={handleLoadMore}

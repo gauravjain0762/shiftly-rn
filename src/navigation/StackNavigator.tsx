@@ -41,6 +41,7 @@ import CoHome from '../screens/company/home/CoHome';
 import CoJobDetails from '../screens/company/job/JobDetails';
 import LocationScreen from '../component/common/LocationScreen';
 import Onboarding from '../component/common/Onboarding';
+import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -338,6 +339,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoHome}
           component={CoHome}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoEditMyProfile}
+          component={CoEditMyProfile}
         />
       </Stack.Navigator>
     );
