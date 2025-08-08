@@ -70,6 +70,7 @@ const LoginScreen = () => {
             placeholder="Email"
             placeholderTextColor={colors._F4E2B8}
             value={authData?.email}
+            inputStyle={{color: colors._F4E2B8}}
             onChangeText={e => {
               setAuthData({...authData, email: e});
             }}
@@ -82,6 +83,7 @@ const LoginScreen = () => {
             placeholder="Password"
             placeholderTextColor={colors._F4E2B8}
             showRightIcon={true}
+            inputStyle={{color: colors._F4E2B8}}
             value={authData?.password}
             onChangeText={e => {
               setAuthData({...authData, password: e});

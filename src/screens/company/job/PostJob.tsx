@@ -157,41 +157,6 @@ const benefitsOptions = [
 const PostJob = () => {
   const {t} = useTranslation();
   const dispatch = useDispatch();
-  // const [title, setTitle] = useState('');
-  // const [type, setType] = useState({label: 'Full-time', value: 'full_time'});
-  // const [area, setArea] = useState({
-  //   label: 'Dubai Marina',
-  //   value: 'dubai_marina',
-  // });
-  // const [duration, setDuration] = useState({
-  //   label: '1 Month',
-  //   value: '1_month',
-  // });
-  // const [job, setJob] = useState({label: 'Hospitality', value: 'hospitality'});
-  // const [startDate, setStartDate] = useState({
-  //   label: 'Immediately',
-  //   value: 'immediately',
-  // });
-  // const [contract, setContract] = useState({
-  //   label: 'Full-time experience',
-  //   value: 'full_time',
-  // });
-  // const [salary, setSalary] = useState({
-  //   label: '2,000 - 5,000',
-  //   value: '2000-5000',
-  // });
-  // const [currency, setCurrency] = useState({label: 'AED', value: 'aed'});
-  // const [position, setPosition] = useState({label: '1', value: '1'});
-  // const [describe, setDescribe] = useState('');
-  // const [selected, setSelected] = useState<any>([]);
-  // const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  // const [isSuccessModalVisible, setIsSuccessModalVisible] =
-  //   useState<boolean>(false);
-  // const [jobSkills, setJobSkills] = useState<string[]>([]);
-  // const [skillId, setSkillId] = useState<string | any>([]);
-  // const [requirements, setRequirements] = useState<string[]>([]);
-  // const [requirementText, setRequirementText] = useState<string>('');
-  // const [isSelected, setIsSelected] = useState<boolean>(false);
   const {
     title,
     type,
@@ -788,6 +753,10 @@ const PostJob = () => {
           titleStyle={styles.title}
           title={t('Post your job')}
           containerStyle={styles.header}
+          onBackPress={() => {
+            dispatch(resetJobFormState());
+            navigationRef?.goBack();
+          }}
         />
       )}
       <KeyboardAwareScrollView

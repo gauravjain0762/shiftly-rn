@@ -19,11 +19,11 @@ type props = {
 const JobCard: FC<props> = ({item, onPress = () => {}}) => {
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
-      <ImageBackground source={{uri: item?.image}} style={styles.jobImage}>
+      <ImageBackground source={{uri: item?.company_id?.logo}} style={styles.jobImage}>
         <View style={styles.logo}>
           <Image
             resizeMode="contain"
-            source={{uri: item?.logo}}
+            source={{uri: item?.company_id?.logo}}
             style={styles.companyLogo}
           />
         </View>
@@ -90,9 +90,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   companyLogo: {
-    resizeMode: 'contain',
-    height: hp(34),
-    width: '100%',
+    width: wp(80),
+    height: hp(80),
+    borderRadius: hp(80),
   },
   companyName: {
     ...commonFontStyle(400, 12, colors.black),
@@ -138,11 +138,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: 100,
     marginHorizontal: wp(20),
-    marginBottom: hp(13),
+    // marginBottom: hp(13),
     position: 'absolute',
     bottom: 0,
-    width: wp(75),
-    height: wp(75),
+    width: wp(85),
+    height: wp(85),
     justifyContent: 'center',
     alignItems: 'center',
   },

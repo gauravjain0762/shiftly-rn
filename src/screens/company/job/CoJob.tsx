@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -25,15 +25,16 @@ import {SCREENS} from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
 import {Dropdown} from 'react-native-element-dropdown';
 import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
-import {useFocusEffect} from '@react-navigation/native';
 import RangeSlider from '../../../component/common/RangeSlider';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 
 const jobTypes = [
   {label: 'Full Time', value: 'fulltime'},
   {label: 'Part Time', value: 'parttime'},
   {label: 'Internship', value: 'internship'},
 ];
-const SLIDER_WIDTH = SCREEN_WIDTH - 70;
+export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
 const CoJob = () => {
   const {t} = useTranslation();
@@ -42,26 +43,20 @@ const CoJob = () => {
   const [range, setRange] = useState<number[]>([1000, 20000]);
   const [value, setValue] = useState<any>(null);
   const [location, setLocation] = useState<string>('');
-  const [latestJobList, setLatestJobList] = useState<any>([]);
   const [filters, setFilters] = useState({
     job_types: '',
     salary_from: 0,
     salary_to: 0,
     location: '',
   });
-  const {refetch} = useGetCompanyJobsQuery(filters);
+  const {data, refetch, isLoading} = useGetCompanyJobsQuery(filters);
+  // const [isLoading] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      const loadJobs = async () => {
-        const result = await refetch();
-        if (result.data?.data?.jobs) {
-          setLatestJobList(result.data?.data?.jobs);
-        }
-      };
-      loadJobs();
-    }, []),
-  );
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  const latestJobList = data?.data?.jobs ?? [];
 
   const handleApplyFilter = async () => {
     try {
@@ -110,27 +105,31 @@ const CoJob = () => {
         }
       />
 
-      <View style={styles.outerContainer}>
-        <FlatList
-          data={latestJobList}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: '20%'}}
-          renderItem={({item, index}) => {
-            return (
-              <>
-                <View key={index} style={{marginBottom: hp(10)}}>
-                  <MyJobCard
-                    item={item}
-                    onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
-                    // totalApplicants={item.totalApplicants}
-                  />
-                </View>
-              </>
-            );
-          }}
-          keyExtractor={(_, index) => index.toString()}
-        />
-      </View>
+      {isLoading ? (
+        <MyJobsSkeleton />
+      ) : (
+        <View style={styles.outerContainer}>
+          <FlatList
+            data={latestJobList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{paddingBottom: '20%'}}
+            renderItem={({item, index}) => {
+              return (
+                <>
+                  <View key={index} style={{marginBottom: hp(10)}}>
+                    <MyJobCard
+                      item={item}
+                      onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+                      // totalApplicants={item.totalApplicants}
+                    />
+                  </View>
+                </>
+              );
+            }}
+            keyExtractor={(_, index) => index.toString()}
+          />
+        </View>
+      )}
 
       {isFilterModalVisible && (
         <BottomModal

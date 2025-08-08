@@ -24,6 +24,8 @@ export const dashboardApi = createApi({
     'CreateJob',
     'GetSuggestedEmployees',
     'GetFacilities',
+    'GetEmployeeJobs',
+    'GetEmployeeJobDetails',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -209,6 +211,41 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getEmployeeJobs: builder.query<any, any>({
+      query: () => ({
+        url: API.getEmployeeJobs,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['GetEmployeeJobs'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'GetEmployeeJobs datadata >>>>>>>');
+        } catch (error) {
+          console.log('Guest Login Error', error);
+        }
+      },
+    }),
+    getEmployeeJobDetails: builder.query<any, any>({
+      query: job_id => {
+        const queryParam = job_id ? `?job_id=${job_id}` : '';
+        return {
+          url: `${API.getEmployeeJobDetails}${queryParam}`,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+      providesTags: ['GetEmployeeJobDetails'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'GetEmployeeJobDetails datadata >>>>>>>');
+        } catch (error) {
+          console.log('Guest Login Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -223,4 +260,6 @@ export const {
   useGetBusinessTypesQuery,
   useGetSuggestedEmployeesQuery,
   useGetFacilitiesQuery,
+  useGetEmployeeJobsQuery,
+  useGetEmployeeJobDetailsQuery,
 } = dashboardApi;

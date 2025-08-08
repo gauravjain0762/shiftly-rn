@@ -18,14 +18,12 @@ import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {navigationRef} from '../../../navigation/RootContainer';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {AppStyles} from '../../../theme/appStyles';
 import {
   errorToast,
   navigateTo,
   resetNavigation,
-  successToast,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useCreateCompanyPostMutation} from '../../../api/dashboardApi';
@@ -45,13 +43,6 @@ const CoPost = () => {
     useCreateCompanyPostMutation();
   const steps = useAppSelector((state: any) => state.company.coPostSteps);
   const [imageModal, setImageModal] = useState(false);
-  // const [step, setStep] = useState(1);
-  // const [uploadedImages, setUploadedImages] = useState<any>([]);
-  // const [createPostData, setCreatePostData] = useState({
-  //   title: '',
-  //   description: '',
-  // });
-  // const [isPostModalVisible, setIsPostModalVisible] = useState<boolean>(false);
   const {description, isPostModalVisible, uploadedImages, title} =
     useAppSelector(selectPostForm);
   const {updatePostForm} = usePostFormUpdater();

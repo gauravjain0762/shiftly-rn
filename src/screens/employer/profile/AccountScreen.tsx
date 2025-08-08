@@ -17,8 +17,13 @@ import {IMAGES} from '../../../assets/Images';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {SCREENS} from '../../../navigation/screenNames';
 import CustomPopup from '../../../component/common/CustomPopup';
+import {resetNavigation} from '../../../utils/commonFunction';
+import {setAuthToken} from '../../../features/authSlice';
+import {useDispatch} from 'react-redux';
+import {clearAsync} from '../../../utils/asyncStorage';
 
 const AccountScreen = () => {
+  const disptach = useDispatch();
   const [popupVisible, setPopupVisible] = useState(false);
 
   const settingsData = [
@@ -134,9 +139,11 @@ const AccountScreen = () => {
         title={'Are you sure you want to log out?'}
         leftButton={'Cancel'}
         rightButton={'Log Out'}
-        onPressRight={() => {
-          navigationRef.navigate(SCREENS.WelcomeScreen);
-          setPopupVisible(false)
+        onPressRight={async() => {
+          resetNavigation(SCREENS.WelcomeScreen);
+          disptach(setAuthToken(''));
+          await clearAsync();
+          setPopupVisible(false);
         }}
       />
     </LinearContainer>

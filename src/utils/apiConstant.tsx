@@ -47,7 +47,9 @@ export const API = {
 
   // Dashboard
   getPosts: '/company/getPosts',
-  getJobs: '/jobs/list',
+  // getJobs: '/jobs/list',
+  getEmployeeJobs: '/getJobs',
+  getEmployeeJobDetails: '/getJobDetails',
 
   // UserDetails
   getProfile: '/getProfile',

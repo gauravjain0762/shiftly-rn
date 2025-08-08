@@ -2,7 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {API, HTTP_METHOD} from '../utils/apiConstant';
 import {axiosBaseQuery} from '../services/api/baseQuery';
 import {setAsyncToken, setAsyncUserInfo} from '../utils/asyncStorage';
-import {errorToast, navigateTo} from '../utils/commonFunction';
+import {errorToast, navigateTo, resetNavigation} from '../utils/commonFunction';
 import {
   setAuthToken,
   setBusinessType,
@@ -349,7 +349,7 @@ export const authApi = createApi({
               dispatch(setUserInfo(data.data?.user));
               await setAsyncUserInfo(data.data?.user);
               dispatch(setGuestLogin(false));
-              navigateTo(SCREENS.TabNavigator);
+              resetNavigation(SCREENS.TabNavigator);
             }
           } else {
             errorToast(data?.message);

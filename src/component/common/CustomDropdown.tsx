@@ -76,6 +76,11 @@ const CustomDropdown = ({
   RightIconStyle,
   ...props
 }: Props) => {
+  const handleChange = (item: any) => {
+    // set?.(item.value);
+    onChange(item);
+  };
+
   return (
     <>
       <View style={container}>

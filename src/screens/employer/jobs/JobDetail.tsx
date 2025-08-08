@@ -17,20 +17,26 @@ import {useTranslation} from 'react-i18next';
 import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
-import {useRoute} from '@react-navigation/native';
+import {RouteProp, useRoute} from '@react-navigation/native';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useGetEmployeeJobDetailsQuery } from '../../../api/dashboardApi';
 
 const JobDetail = () => {
   const {t, i18n} = useTranslation();
-  const {params} = useRoute();
+  const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.data;
   const [modal, setModal] = useState(false);
+  const {bottom} = useSafeAreaInsets();
+  const {data: jobDetail} = useGetEmployeeJobDetailsQuery("6888d404377fe4a171510be5")
+  // console.log("🔥🔥 ~ JobDetail ~ jobDetail:", jobDetail)
 
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['bottom', 'top']}}
-      colors={['#0D468C', '#041326']}>
+      containerStyle={{paddingBottom: bottom}}
+      colors={['#1958a7ff', '#041326']}>
       <BackHeader
         title={t('Job Detail')}
         containerStyle={styles.headerContainer}
@@ -50,7 +56,7 @@ const JobDetail = () => {
       <Image
         style={styles.banner}
         resizeMode="cover"
-        source={{uri: data?.image}}
+        source={{uri: data?.company_id?.logo}}
       />
       <ScrollView style={styles.container}>
         {/* Header Section */}
@@ -59,7 +65,7 @@ const JobDetail = () => {
             <Image
               resizeMode="contain"
               source={{
-                uri: data?.logo,
+                uri: data?.company_id?.logo,
               }}
               style={styles.logo}
             />

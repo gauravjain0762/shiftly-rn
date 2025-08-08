@@ -12,6 +12,7 @@ import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import {useRoute} from '@react-navigation/native';
 import {navigationRef} from '../../../navigation/RootContainer';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const documents = [
   {id: 'cv', label: 'CV', icon: IMAGES.CV},
@@ -26,15 +27,17 @@ const documents = [
 const ApplyJob = () => {
   const {t, i18n} = useTranslation();
   const [selected, setSelected] = useState('cv');
-  const {params} = useRoute();
-  const data = params?.data;
+  const {params} = useRoute<any>();
+  const data = params?.data as any;
   const [visible, setVisible] = useState(false);
+  const {bottom} = useSafeAreaInsets();
 
   return (
     <>
       <LinearContainer
         SafeAreaProps={{edges: ['bottom', 'top']}}
-        colors={['#0D468C', '#041326']}>
+        colors={['#0D468C', '#041326']}
+        containerStyle={[{paddingBottom: bottom}]}>
         <BackHeader title={t('Apply Job')} containerStyle={styles.header} />
         <View style={styles.container}>
           {/* Job Card */}

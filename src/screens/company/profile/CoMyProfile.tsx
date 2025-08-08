@@ -8,16 +8,11 @@ import {useGetProfileQuery} from '../../../api/authApi';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useFocusEffect} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
-import { RootState } from '../../../store';
 
 const CoMyProfile = () => {
   const {t} = useTranslation();
   const {data, refetch} = useGetProfileQuery();
   const companyProfile = data?.data?.company;
-  console.log('🔥🔥🔥 ~ CoMyProfile ~ companyProfile:', companyProfile);
-  const {companyProfileData} = useSelector((state: RootState) => state.auth);
-  console.log('🔥🔥🔥 ~ CoMyProfile ~ companyProfileData:', companyProfileData);
 
   useFocusEffect(
     useCallback(() => {
@@ -36,15 +31,13 @@ const CoMyProfile = () => {
           containerStyle={styles.header}
         />
 
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: wp(15)}}>
+        <View style={styles.profileRow}>
           <Image
             source={{uri: companyProfile?.logo}}
-            style={{height: hp(90), width: wp(90), borderRadius: wp(90)}}
+            style={styles.profileImage}
           />
           <View>
-            <Text style={styles.coTitle}>
-              {companyProfile?.company_name || 'Marriott'}
-            </Text>
+            <Text style={styles.coTitle}>{companyProfile?.company_name}</Text>
             <Text style={styles.typeText}>{'Restaurant & Hospital'}</Text>
           </View>
         </View>
@@ -54,7 +47,7 @@ const CoMyProfile = () => {
             'Dubai is a city of grand visions and endless wonders, where towering skyscrapers & luxurious malls meet the ancient allure of desert dunes & vibrant souks.'}
         </Text>
 
-        <View style={{marginTop: hp(18), gap: hp(35)}}>
+        <View style={styles.infoContainer}>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Email')}</Text>
             <Text style={styles.labelDesc}>
@@ -63,19 +56,16 @@ const CoMyProfile = () => {
           </View>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Phone')}</Text>
-            <Text
-              style={
-                styles.labelDesc
-              }>{`🇦🇪 +${companyProfile?.phone_code} ${companyProfile?.phone}`}</Text>
+            <Text style={styles.labelDesc}>
+              {`🇦🇪 +${companyProfile?.phone_code} ${companyProfile?.phone}`}
+            </Text>
           </View>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Location')}</Text>
             <Text style={styles.labelDesc}>
-              {`${
-                companyProfile?.address ||
+              {companyProfile?.address ||
                 companyProfile?.location ||
-                ' JLT Dubai, United Arab Emirates'
-              }`}
+                ' JLT Dubai, United Arab Emirates'}
             </Text>
           </View>
         </View>
@@ -106,6 +96,16 @@ const styles = StyleSheet.create({
   title: {
     right: '60%',
   },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(15),
+  },
+  profileImage: {
+    height: hp(90),
+    width: wp(90),
+    borderRadius: wp(90),
+  },
   coTitle: {
     ...commonFontStyle(600, 25, colors._0B3970),
   },
@@ -115,6 +115,10 @@ const styles = StyleSheet.create({
   descText: {
     marginVertical: hp(18),
     ...commonFontStyle(400, 15, colors._656464),
+  },
+  infoContainer: {
+    marginTop: hp(18),
+    gap: hp(35),
   },
   labelText: {
     ...commonFontStyle(600, 20, colors._0B3970),
