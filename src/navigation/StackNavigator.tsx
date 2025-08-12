@@ -40,8 +40,9 @@ import CoPost from '../screens/company/post/CoPost';
 import CoHome from '../screens/company/home/CoHome';
 import CoJobDetails from '../screens/company/job/JobDetails';
 import LocationScreen from '../component/common/LocationScreen';
-import Onboarding from '../component/common/Onboarding';
 import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
+import EmpChangePassword from '../screens/employer/auth/EmpChangePassword';
+import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -252,6 +253,16 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.ViewProfileScreen}
           component={ViewProfileScreen}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.EmpChangePassword}
+          component={EmpChangePassword}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.EmpForgotPassword}
+          component={EmpForgotPassword}
         />
         {/* Seeker */}
       </Stack.Navigator>

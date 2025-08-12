@@ -19,6 +19,7 @@ import {setupListeners} from '@reduxjs/toolkit/query';
 import {persistedAuthReducer} from '../features/authSlice';
 import loaderReducer from '../features/loaderSlice';
 import companyReducer from '../features/companySlice';
+import employeeReducer from '../features/employeeSlice';
 
 // Custom middleware
 import {loadingMiddleware} from './middleware/loadingMiddleware';
@@ -30,6 +31,7 @@ const appReducer = combineReducers({
   auth: persistedAuthReducer, // ← use the persisted reducer here
   loader: loaderReducer,
   company: companyReducer,
+  employee: employeeReducer,
   [authApi.reducerPath]: authApi.reducer, // RTK Query for cached data all HTTP requests
   [dashboardApi.reducerPath]: dashboardApi.reducer, // RTK Query for cached data all HTTP requests
 

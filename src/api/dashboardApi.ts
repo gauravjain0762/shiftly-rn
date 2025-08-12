@@ -26,6 +26,8 @@ export const dashboardApi = createApi({
     'GetFacilities',
     'GetEmployeeJobs',
     'GetEmployeeJobDetails',
+    'GetEmployeeSkills',
+    'EmployeeApplyJob',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -211,12 +213,29 @@ export const dashboardApi = createApi({
         }
       },
     }),
-    getEmployeeJobs: builder.query<any, any>({
-      query: () => ({
-        url: API.getEmployeeJobs,
-        method: HTTP_METHOD.GET,
-        skipLoader: true,
-      }),
+    getEmployeeJobs: builder.query<
+      any,
+      {
+        job_types?: string;
+        salary_from?: number;
+        salary_to?: number;
+        location?: string;
+      }
+    >({
+      query: ({job_types, salary_from, salary_to, location}) => {
+        const params = new URLSearchParams();
+
+        if (job_types) params.append('job_types', job_types);
+        if (salary_from) params.append('salary_from', salary_from.toString());
+        if (salary_to) params.append('salary_to', salary_to.toString());
+        if (location) params.append('location', location);
+
+        return {
+          url: `${API.getEmployeeJobs}?${params.toString()}`,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
       providesTags: ['GetEmployeeJobs'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
@@ -246,6 +265,46 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getEmployeeSkills: builder.query<any, any>({
+      query: () => {
+        console.log('GET Employee Skills URL >>>>>>.:', API.getEmployeeSkills);
+        return {
+          url: API.getEmployeeSkills,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+          headers: {},
+        };
+      },
+      providesTags: ['GetEmployeeSkills'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'getEmployeeSkills datadata >>>>>>>');
+        } catch (error) {
+          console.log('getEmployeeSkills Error', error);
+        }
+      },
+    }),
+    employeeApplyJob: builder.mutation<any, any>({
+      query: credentials => {
+        console.log('GET Employee Skills URL >>>>>>.:', API.getEmployeeSkills);
+        return {
+          url: API.employeeApplyJob,
+          method: HTTP_METHOD.POST,
+          skipLoader: true,
+          data: credentials,
+        };
+      },
+      invalidatesTags: ['EmployeeApplyJob'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'employeeApplyJob datadata >>>>>>>');
+        } catch (error) {
+          console.error('employeeApplyJob Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -260,6 +319,8 @@ export const {
   useGetBusinessTypesQuery,
   useGetSuggestedEmployeesQuery,
   useGetFacilitiesQuery,
-  useGetEmployeeJobsQuery,
+  useLazyGetEmployeeJobsQuery,
   useGetEmployeeJobDetailsQuery,
+  useGetEmployeeSkillsQuery,
+  useEmployeeApplyJobMutation,
 } = dashboardApi;

@@ -19,6 +19,9 @@ import CustomDropdownMulti from '../common/CustomDropdownMulti';
 import CustomSwitch from '../common/CustomSwitch';
 import CustomInput from '../common/CustomInput';
 import {MultiSelect} from 'react-native-element-dropdown';
+import {useGetEmployeeSkillsQuery} from '../../api/dashboardApi';
+import {useDispatch, useSelector} from 'react-redux';
+import {selectEmployeeState} from '../../features/employeeSlice';
 
 type MessageItem = {
   id: string;
@@ -84,6 +87,10 @@ const AboutMeList: FC<Props> = ({
   addNewEducation,
   onNextPress,
 }: any) => {
+  const dispatch = useDispatch();
+  const {data} = useGetEmployeeSkillsQuery({});
+  const empSkills = data?.data?.skills;
+
   return (
     <View style={{paddingHorizontal: 29}}>
       <Text style={styles.headerText}>About Me</Text>
@@ -123,16 +130,15 @@ const AboutMeList: FC<Props> = ({
 
       <Text style={styles.headerText}>Select your skills</Text>
       <CustomDropdownMulti
-        data={[
-          {label: 'Guest Welcoming', value: 'gw'},
-          {label: 'Staff Management', value: 'sm'},
-          {label: 'Inventory Reporting', value: 'ir'},
-          {label: 'Emergency Management', value: 'em'},
-          {label: 'Customer Service', value: 'cs'},
-        ]}
-        placeholder={'Select more than one'}
+        data={
+          empSkills?.map((skill: { title: any; _id: any; }) => ({
+            label: skill.title,
+            value: skill._id,
+          })) || []
+        }
+        placeholder="Select more than one"
         value={educationListEdit.selectOne}
-         selectedStyle={styles.selectedStyle}
+        selectedStyle={styles.selectedStyle}
         container={{marginBottom: 15}}
         disable={false}
         onChange={selectedItem => {
@@ -142,6 +148,7 @@ const AboutMeList: FC<Props> = ({
           });
         }}
       />
+
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <CustomSwitch
           setIsOn={item => {
@@ -209,7 +216,7 @@ const AboutMeList: FC<Props> = ({
         label="Location"
         placeholder={'Enter Location'}
         value={educationListEdit.location}
-        onChange={text => {
+        onChange={(text: any) => {
           setEducationListEdit({
             ...educationListEdit,
             location: text,
@@ -222,7 +229,7 @@ const AboutMeList: FC<Props> = ({
         label="Key Responsibilities "
         placeholder={'Key Responsibilities '}
         value={educationListEdit.responsibilities}
-         container={{marginBottom: 20}}
+        container={{marginBottom: 20}}
         disable={false}
         onChange={selectedItem => {
           setEducationListEdit({
@@ -270,7 +277,7 @@ const AboutMeList: FC<Props> = ({
         <>
           <Text style={styles.subTitle}>Proficiency Levels</Text>
 
-          {educationListEdit.selectedLanguages.map(lang => (
+          {educationListEdit.selectedLanguages.map((lang: boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | React.Key | null | undefined) => (
             <View style={styles.row} key={lang}>
               <Text style={styles.language}>{lang}</Text>
               {proficiencyLevels.map(level => (

@@ -427,7 +427,70 @@ export const authApi = createApi({
             errorToast(data?.message);
           }
         } catch (error) {
-          console.log('Verify OTP Error', error);
+          console.log('employeeLogout Error', error);
+        }
+      },
+    }),
+    employeeChangePassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeChangePassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeChangePassword Error', error);
+        }
+      },
+    }),
+    employeeDeleteAccount: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeDeleteAccount,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeDeleteAccount Error', error);
+        }
+      },
+    }),
+    employeeForgotPassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeForgotPassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeForgotPassword Error', error);
         }
       },
     }),
@@ -449,4 +512,8 @@ export const {
   useCompanyResendOTPMutation,
   useCompanyResetPasswordMutation,
   useCompanyDeleteAccountMutation,
+  useEmployeeChangePasswordMutation,
+  useEmployeeDeleteAccountMutation,
+  useEmployeeForgotPasswordMutation,
+  useEmployeeOTPVerifyMutation,
 } = authApi;

@@ -21,15 +21,18 @@ import {RouteProp, useRoute} from '@react-navigation/native';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import { useGetEmployeeJobDetailsQuery } from '../../../api/dashboardApi';
+import {useGetEmployeeJobDetailsQuery} from '../../../api/dashboardApi';
 
 const JobDetail = () => {
   const {t, i18n} = useTranslation();
   const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.data;
+  console.log("🔥 ~ JobDetail ~ data:", data)
   const [modal, setModal] = useState(false);
   const {bottom} = useSafeAreaInsets();
-  const {data: jobDetail} = useGetEmployeeJobDetailsQuery("6888d404377fe4a171510be5")
+  const {data: jobDetail} = useGetEmployeeJobDetailsQuery(
+    '6888d404377fe4a171510be5',
+  );
   // console.log("🔥🔥 ~ JobDetail ~ jobDetail:", jobDetail)
 
   return (
@@ -84,11 +87,8 @@ const JobDetail = () => {
 
         {/* Description */}
         <Text style={styles.description}>
-          Atlantis Collection is a diverse group of luxury hotels with a fresh
-          focus, offering guests a more authentic and thoughtful way to travel.
-          We've created a collection brand that gives guests & colleagues an
-          inspiring new choice. One that puts people at the heart of everything
-          we do, to reframe luxury hospitality for the better.
+          {data?.description ||
+            `Atlantis Collection is a diverse group of luxury hotels with a fresh focus, offering guests a more authentic and thoughtful way to travel. We've created a collection brand that gives guests & colleagues an inspiring new choice. One that puts people at the heart of everything we do, to reframe luxury hospitality for the better.`}
         </Text>
 
         {/* Requirements */}

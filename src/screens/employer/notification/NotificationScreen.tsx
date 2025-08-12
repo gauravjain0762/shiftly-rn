@@ -4,7 +4,7 @@ import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import NotificationCard from '../../../component/employe/NotificationCard';
 
 const notifications = [
@@ -67,24 +67,26 @@ const notifications = [
 ];
 const NotificationScreen = () => {
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}  SafeAreaProps={{edges: ['bottom', 'top']}}>
-      <View style={styles.topConrainer}>
-        <BackHeader
-          containerStyle={styles.header}
-          isRight={true}
-          title={'Notifications'}
-          RightIcon={<View style={{width: 20}} />}
+    <LinearContainer colors={['#0D468C', '#041326']}>
+      <SafeAreaView style={{flex: 1}} edges={['bottom']} >
+        <View style={styles.topConrainer}>
+          <BackHeader
+            containerStyle={styles.header}
+            isRight={true}
+            title={'Notifications'}
+            RightIcon={<View style={{width: 20}} />}
+          />
+        </View>
+        <FlatList
+          data={notifications}
+          style={AppStyles.flex}
+          keyExtractor={item => item.id}
+          renderItem={(item: any) => <NotificationCard {...item} />}
+          contentContainerStyle={styles.scrollContainer}
+          ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
+          showsVerticalScrollIndicator={false}
         />
-      </View>
-      <FlatList
-        data={notifications}
-        style={AppStyles.flex}
-        keyExtractor={item => item.id}
-        renderItem={(item: any) => <NotificationCard {...item} />}
-        contentContainerStyle={styles.scrollContainer}
-        ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
-        showsVerticalScrollIndicator={false}
-      />
+      </SafeAreaView>
     </LinearContainer>
   );
 };
@@ -113,9 +115,9 @@ const styles = StyleSheet.create({
   },
   header: {
     // paddingLeft: wp(13),
-     marginBottom: hp(1),
+    marginBottom: hp(1),
   },
- 
+
   scrollContainer: {
     // paddingVertical: hp(22),
     paddingHorizontal: wp(25),

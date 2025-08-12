@@ -55,7 +55,7 @@ const JobCard: FC<props> = ({item, onPress = () => {}}) => {
         <View style={styles.titleRow}>
           <Text style={styles.jobTitle}>{item?.title}</Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>Full Time</Text>
+            <Text style={styles.badgeText}>{item?.job_type}</Text>
           </View>
         </View>
         <Text style={styles.jobDescription}>{item?.description}</Text>

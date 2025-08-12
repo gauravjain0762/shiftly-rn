@@ -45,6 +45,9 @@ export const SCREENS = {
   CoJobDetails: 'CoJobDetails',
   LocationScreen: 'LocationScreen',
   CoEditMyProfile: 'CoEditMyProfile',
+  EmpChangePassword: 'EmpChangePassword',
+  EmpProfile: 'EmpProfile',
+  EmpForgotPassword: 'EmpForgotPassword',
 };
 
 export interface ScreenNames {
@@ -68,6 +71,9 @@ export interface ScreenNames {
   EditProfileScreen: string;
   Chat: string;
   ViewProfileScreen: string;
+  EmpChangePassword: string;
+  EmpProfile: string;
+  EmpForgotPassword: string;
 
   //company
   CoLogin: string;

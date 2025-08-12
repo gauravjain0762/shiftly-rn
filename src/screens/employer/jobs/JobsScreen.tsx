@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -19,15 +19,13 @@ import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {AppStyles} from '../../../theme/appStyles';
 import Carousel from 'react-native-reanimated-carousel';
-import {errorToast, navigateTo} from '../../../utils/commonFunction';
+import {navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {useTranslation} from 'react-i18next';
-import {useGetEmployeeJobsQuery} from '../../../api/dashboardApi';
+import {useLazyGetEmployeeJobsQuery} from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
 import RangeSlider from '../../../component/common/RangeSlider';
-import {Dropdown} from 'react-native-element-dropdown';
 import {SLIDER_WIDTH} from '../../company/job/CoJob';
-import CustomBtn from '../../../component/common/CustomBtn';
 
 const carouselImages = [
   'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
@@ -35,47 +33,82 @@ const carouselImages = [
   'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
 ];
 
-const jobTypes: string[] = [
-  'Full Time',
-  'Part Time',
-  'Temporary',
-  'Internship',
+const jobTypes: object[] = [
+  {type: 'Full-time', value: 'Full Time'},
+  {type: 'Part-time', value: 'Part Time'},
+  {type: 'Temporary', value: 'Temporary'},
+  {type: 'Internship', value: 'Internship'},
+  {type: 'Freelance', value: 'Freelance'},
 ];
 
 const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
 
 const JobsScreen = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
-  const {data} = useGetEmployeeJobsQuery({});
-  const jobList = data?.data?.jobs;
-  const [isFilterModalVisible, setIsFilterModalVisible] =
-    useState<boolean>(false);
-  const [filters, setFilters] = useState<{}>({
+
+  const [filters, setFilters] = useState<{
+    departments: string[];
+    job_types: string[];
+    salary_from: number;
+    salary_to: number;
+    location: string;
+  }>({
     departments: [],
     job_types: [],
     salary_from: 0,
     salary_to: 0,
     location: '',
-    employer_type: '',
   });
 
-  const [location, setLocation] = useState<string>('');
-  const [range, setRange] = useState<number[]>([1000, 20000]);
+  const [range, setRange] = useState<number[]>([0, 50000]);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
-  const handleApplyFilter = async () => {
-    try {
-      setFilters(prev => ({
-        ...prev,
-        salary_from: range[0],
-        salary_to: range[1],
-      }));
-      setIsFilterModalVisible(false);
-      // await refetch();
-    } catch (error) {
-      console.error('Error applying filter:', error);
-      errorToast('Failed to apply filter');
-    }
+  const queryParams = {
+    job_types: filters.job_types.length
+      ? filters.job_types.join(',')
+      : undefined,
+    salary_from: filters.salary_from || undefined,
+    salary_to: filters.salary_to || undefined,
+    location: filters.location || undefined,
+    departments: filters.departments.length
+      ? filters.departments.join(',')
+      : undefined,
+  };
+
+  const [trigger, {data}] = useLazyGetEmployeeJobsQuery();
+  const jobList = data?.data?.jobs;
+
+  useEffect(() => {
+    trigger({});
+  }, [trigger]);
+
+  const handleApplyFilter = () => {
+    const newFilters = {
+      ...filters,
+      salary_from: range[0],
+      salary_to: range[1],
+    };
+    setFilters(newFilters);
+    setIsFilterModalVisible(false);
+    trigger({
+      ...queryParams,
+      job_types: newFilters.job_types.join(','),
+    });
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      departments: [],
+      job_types: [],
+      salary_from: 0,
+      salary_to: 0,
+      location: '',
+      // employer_type: '',
+    });
+    setRange([0, 100000]);
+    setIsFilterModalVisible(false);
+    trigger({});
   };
 
   return (
@@ -121,11 +154,8 @@ const JobsScreen = () => {
           <View
             key={index}
             style={{
+              ...styles.carouselDot,
               width: index === activeIndex ? 17 : 6,
-              height: 6,
-              borderRadius: 5,
-              backgroundColor: colors.white,
-              marginHorizontal: 4,
             }}
           />
         ))}
@@ -149,7 +179,6 @@ const JobsScreen = () => {
         contentContainerStyle={styles.scrollContainer}
       />
 
-      {/* Filter Modal */}
       <BottomModal
         visible={isFilterModalVisible}
         backgroundColor={colors._FBE7BD}
@@ -200,18 +229,18 @@ const JobsScreen = () => {
 
           <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
           <View style={styles.pillRow}>
-            {jobTypes.map(type => {
-              const isSelected = filters.job_types.includes(type);
+            {jobTypes.map((job: any) => {
+              const isSelected = filters.job_types.includes(job.type);
               return (
                 <Pressable
-                  key={type}
+                  key={job.type}
                   style={[styles.pill, isSelected && styles.pillSelected]}
                   onPress={() => {
                     setFilters(prev => ({
                       ...prev,
                       job_types: isSelected
-                        ? prev.job_types.filter(j => j !== type)
-                        : [...prev.job_types, type],
+                        ? prev.job_types.filter(j => j !== job.type)
+                        : [...prev.job_types, job.type],
                     }));
                   }}>
                   <Text
@@ -219,21 +248,19 @@ const JobsScreen = () => {
                       styles.pillText,
                       isSelected && styles.pillTextSelected,
                     ]}>
-                    {type}
+                    {job.value}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
 
-          {/* Salary Range */}
           <View style={styles.salarySection}>
             <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
             <RangeSlider range={range} setRange={setRange} />
           </View>
 
-          {/* Employer Type */}
-          <View style={styles.inputWrapper}>
+          {/* <View style={styles.inputWrapper}>
             <CustomTextInput
               value={filters.employer_type}
               onChangeText={txt =>
@@ -244,32 +271,10 @@ const JobsScreen = () => {
               inputStyle={styles.locationInput}
             />
             <View style={styles.underline} />
-          </View>
+          </View> */}
 
-          <View
-            style={{
-              gap: wp(12),
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginVertical: hp(40),
-            }}>
-            <Pressable
-              onPress={() =>
-                setFilters({
-                  departments: [],
-                  job_types: [],
-                  location: '',
-                  employer_type: '',
-                })
-              }
-              style={{
-                borderWidth: hp(1),
-                borderRadius: hp(30),
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingHorizontal: wp(28),
-                paddingVertical: hp(18),
-              }}>
+          <View style={styles.buttonContainer}>
+            <Pressable onPress={clearFilters} style={styles.clearContainer}>
               <Text>{'Clear'}</Text>
             </Pressable>
             <GradientButton
@@ -437,5 +442,25 @@ const styles = StyleSheet.create({
   },
   pillTextSelected: {
     color: colors.white,
+  },
+  clearContainer: {
+    borderWidth: hp(1),
+    borderRadius: hp(30),
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(28),
+    paddingVertical: hp(18),
+  },
+  buttonContainer: {
+    gap: wp(12),
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: hp(40),
+  },
+  carouselDot: {
+    height: 6,
+    borderRadius: 5,
+    marginHorizontal: 4,
+    backgroundColor: colors.white,
   },
 });

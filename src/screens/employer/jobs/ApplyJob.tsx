@@ -13,6 +13,7 @@ import {colors} from '../../../theme/colors';
 import {useRoute} from '@react-navigation/native';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
 
 const documents = [
   {id: 'cv', label: 'CV', icon: IMAGES.CV},
@@ -31,6 +32,18 @@ const ApplyJob = () => {
   const data = params?.data as any;
   const [visible, setVisible] = useState(false);
   const {bottom} = useSafeAreaInsets();
+  const [applyJob] = useEmployeeApplyJobMutation();
+
+  const handleApplyJob = async () => {
+    try {
+      const res = await applyJob({job_id: data?._id}).unwrap();
+      // console.log('🔥🔥🔥 ~ handleApplyJob ~ res?.data:', res?.data);
+    } catch (error) {
+      console.error('Error applying job:', error);
+    } finally {
+      setVisible(prev => !prev);
+    }
+  };
 
   return (
     <>
@@ -87,7 +100,9 @@ const ApplyJob = () => {
           </View>
           <GradientButton
             style={styles.btn}
-            onPress={() => setVisible(!visible)}
+            onPress={() => {
+              handleApplyJob();
+            }}
             title={t('Apply Now')}
           />
         </View>

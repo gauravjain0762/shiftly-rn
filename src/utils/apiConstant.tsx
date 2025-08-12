@@ -41,15 +41,18 @@ export const API = {
   employeeSignup: '/register',
   employeeOTPVerify: '/verifyOTP',
   employeeSendOTP: '/sendOTP',
-  // employeeForgotPassword: '/company/forgotPassword',
-  // employeeResetPassword: '/company/resetPassword',
-  // employeeChangePassword: '/company/changePassword',
+  employeeForgotPassword: '/forgotPassword',
+  // employeeResetPassword: '/resetPassword',
+  employeeChangePassword: '/changePassword',
+  employeeDeleteAccount: '/deleteAccount',
+  employeeApplyJob: "/applyJob",
 
   // Dashboard
   getPosts: '/company/getPosts',
   // getJobs: '/jobs/list',
   getEmployeeJobs: '/getJobs',
   getEmployeeJobDetails: '/getJobDetails',
+  getEmployeeSkills: '/getSkills',
 
   // UserDetails
   getProfile: '/getProfile',

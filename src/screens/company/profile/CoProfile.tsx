@@ -33,7 +33,8 @@ const CoProfile = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const [popupVisible, setPopupVisible] = useState(false);
-  const [companyLogout, {isLoading: logoutLoading}] =
+  const [deletepopupVisible, setdeletePopupVisible] = useState(false);
+  const [companyLogout] =
     useCompanyLogoutMutation();
   const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
 
@@ -89,7 +90,7 @@ const CoProfile = () => {
         {
           label: 'Delete Account',
           icon: IMAGES.deleteAccount,
-          onPress: () => handleDeleteAccount(),
+          onPress: () => setdeletePopupVisible(true),
         },
       ],
     },
@@ -115,7 +116,7 @@ const CoProfile = () => {
     if (response?.status) {
       clearAsync();
       dispatch({type: 'RESET_STORE'});
-      resetNavigation(SCREEN_NAMES.WelcomeScreen);
+      resetNavigation(SCREEN_NAMES.SelectRollScreen);
       dispatch(logouts());
       persistor.purge();
       signOutIfLoggedIn();
@@ -125,7 +126,6 @@ const CoProfile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    console.log('delete run');
     try {
       const res = await companyDeleteAccount({}).unwrap();
       if (res?.status) {
@@ -228,6 +228,18 @@ const CoProfile = () => {
             // navigationRef.navigate(SCREENS.WelcomeScreen);
             onLogout();
             setPopupVisible(false);
+          }}
+        />
+        <CustomPopup
+          onCloseModal={() => setdeletePopupVisible(false)}
+          isVisible={deletepopupVisible}
+          title={'Are you sure you want to delete your account?'}
+          leftButton={'Cancel'}
+          rightButton={'Delete'}
+          onPressRight={() => {
+            // navigationRef.navigate(SCREENS.WelcomeScreen);
+            handleDeleteAccount();
+            setdeletePopupVisible(false);
           }}
         />
       </ScrollView>

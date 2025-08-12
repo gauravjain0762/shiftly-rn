@@ -1,5 +1,5 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {FC, useState} from 'react';
+import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import GradientButton from '../common/GradientButton';
@@ -7,16 +7,7 @@ import CustomDropdown from '../common/CustomDropdown';
 import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
-
-type MessageItem = {
-  id: string;
-  logo: string;
-  title: string;
-  sender: string;
-  preview: string;
-  date: string;
-  unreadCount?: number;
-};
+import {EducationItem} from '../../features/employeeSlice';
 
 const educationOptions = [
   {label: 'High School', value: 'high_school'},
@@ -27,32 +18,28 @@ const educationOptions = [
 ];
 
 type Props = {
-  onPressMessage: (item: MessageItem) => void;
-  item: MessageItem[];
+  educationListEdit: EducationItem;
+  setEducationListEdit: (item: EducationItem) => void;
+  addNewEducation: () => void;
+  onNextPress: () => void;
 };
 
 const EducationList: FC<Props> = ({
-  onPressMessage = () => {},
   educationListEdit,
   setEducationListEdit,
-  updateField,
-  index,
   addNewEducation,
   onNextPress,
-}: any) => {
-  console.log('====================================');
-  console.log('educationListEdit.startDate', educationListEdit.startDate);
-  console.log('====================================');
+}) => {
   return (
     <View style={{paddingHorizontal: 29}}>
       <CustomDropdown
         data={educationOptions}
         label="Degree"
-        placeholder={'Select Degree'}
+        placeholder="Select Degree"
         value={educationListEdit.degree}
         container={{marginBottom: 15}}
         disable={false}
-        onChange={selectedItem => {
+        onChange={(selectedItem: any) => {
           setEducationListEdit({
             ...educationListEdit,
             degree: selectedItem?.value,
@@ -62,11 +49,11 @@ const EducationList: FC<Props> = ({
       <CustomDropdown
         data={educationOptions}
         label="University"
-        placeholder={'Select University'}
+        placeholder="Select University"
         value={educationListEdit.university}
         container={{marginBottom: 15}}
         disable={false}
-        onChange={selectedItem => {
+        onChange={(selectedItem: any) => {
           setEducationListEdit({
             ...educationListEdit,
             university: selectedItem?.value,
@@ -82,11 +69,11 @@ const EducationList: FC<Props> = ({
               ? moment(educationListEdit.startDate).format('DD-MM-YYYY')
               : ''
           }
-          minimumDate={new Date()} // today
-          onChange={date => {
+          minimumDate={new Date()}
+          onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              startDate: date, // store raw Date
+              startDate: date,
             });
           }}
         />
@@ -98,11 +85,11 @@ const EducationList: FC<Props> = ({
               ? moment(educationListEdit.endDate).format('DD-MM-YYYY')
               : ''
           }
-          minimumDate={educationListEdit.startDate || new Date()} // prevent Invalid Date
-          onChange={date => {
+          minimumDate={educationListEdit.startDate || new Date()}
+          onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              endDate: date, // store raw Date
+              endDate: date,
             });
           }}
         />
@@ -117,8 +104,8 @@ const EducationList: FC<Props> = ({
         <CustomDropdown
           data={educationOptions}
           label="Country"
-          placeholder={'Country'}
-          value={educationListEdit?.country}
+          placeholder="Country"
+          value={educationListEdit.country}
           container={{marginBottom: 15, flex: 1}}
           disable={false}
           onChange={selectedItem => {
@@ -131,8 +118,8 @@ const EducationList: FC<Props> = ({
         <CustomDropdown
           data={educationOptions}
           label="Province"
-          placeholder={'Province'}
-          value={educationListEdit?.province}
+          placeholder="Province"
+          value={educationListEdit.province}
           container={{marginBottom: 15, flex: 1}}
           disable={false}
           onChange={selectedItem => {
@@ -143,11 +130,7 @@ const EducationList: FC<Props> = ({
           }}
         />
       </View>
-      <TouchableOpacity
-        onPress={() => {
-          addNewEducation();
-        }}
-        style={styles.btnRow}>
+      <TouchableOpacity onPress={addNewEducation} style={styles.btnRow}>
         <Image
           source={IMAGES.close1}
           style={{width: 22, height: 22, resizeMode: 'contain'}}
@@ -155,13 +138,7 @@ const EducationList: FC<Props> = ({
         <Text style={styles.addEduText}>Add Another Education</Text>
       </TouchableOpacity>
 
-      <GradientButton
-        style={styles.btn}
-        title={'Next'}
-        onPress={() => {
-          onNextPress();
-        }}
-      />
+      <GradientButton style={styles.btn} title="Next" onPress={onNextPress} />
     </View>
   );
 };
@@ -194,8 +171,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(25),
     paddingTop: hp(18),
     paddingBottom: hp(5),
-    // borderBottomWidth: 1,
-    // borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   btnRow: {
     flexDirection: 'row',

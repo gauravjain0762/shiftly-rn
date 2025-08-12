@@ -15,29 +15,54 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import NotificationCard from '../../../component/employe/NotificationCard';
 import {IMAGES} from '../../../assets/Images';
 import {navigationRef} from '../../../navigation/RootContainer';
-import {SCREENS} from '../../../navigation/screenNames';
+import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import CustomPopup from '../../../component/common/CustomPopup';
-import {resetNavigation} from '../../../utils/commonFunction';
-import {setAuthToken} from '../../../features/authSlice';
+import {
+  errorToast,
+  navigateTo,
+  resetNavigation,
+  successToast,
+} from '../../../utils/commonFunction';
+import {logouts, setAuthToken} from '../../../features/authSlice';
 import {useDispatch} from 'react-redux';
 import {clearAsync} from '../../../utils/asyncStorage';
+import {
+  useEmployeeDeleteAccountMutation,
+  useEmployeeLogoutMutation,
+} from '../../../api/authApi';
+import {persistor} from '../../../store';
 
 const AccountScreen = () => {
-  const disptach = useDispatch();
+  const dispatch = useDispatch();
+  const [empLogout] = useEmployeeLogoutMutation({});
   const [popupVisible, setPopupVisible] = useState(false);
+  const [employeeDeleteAccount] = useEmployeeDeleteAccountMutation({});
+  const [deletepopupVisible, setdeletePopupVisible] = useState(false);
 
   const settingsData = [
     {
       section: 'Personal Information',
       items: [
         {label: 'Account Info', icon: IMAGES.account},
-        {label: 'Profile', icon: IMAGES.Profile},
+        {
+          label: 'Profile',
+          icon: IMAGES.Profile,
+          onPress: () => {
+            // navigateTo(SCREENS.EmpProfile);
+          },
+        },
       ],
     },
     {
       section: 'Security',
       items: [
-        {label: 'Change Password', icon: IMAGES.ChangePassword},
+        {
+          label: 'Change Password',
+          icon: IMAGES.ChangePassword,
+          onPress: () => {
+            navigateTo(SCREENS.EmpChangePassword);
+          },
+        },
         {label: 'Security', icon: IMAGES.Security},
       ],
     },
@@ -61,9 +86,42 @@ const AccountScreen = () => {
             setPopupVisible(true);
           },
         },
+        {
+          label: 'Delete Account',
+          icon: IMAGES.deleteAccount,
+          onPress: () => setdeletePopupVisible(true),
+        },
       ],
     },
   ];
+
+  const handleLogout = async () => {
+    const res = await empLogout({}).unwrap();
+    if (res.status) {
+      successToast(res.message);
+      resetNavigation(SCREENS.SelectRollScreen);
+      dispatch(setAuthToken(''));
+      await clearAsync();
+      setPopupVisible(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const res = await employeeDeleteAccount({}).unwrap();
+      if (res?.status) {
+        successToast(res?.message);
+        clearAsync();
+        dispatch({type: 'RESET_STORE'});
+        resetNavigation(SCREEN_NAMES.WelcomeScreen);
+        dispatch(logouts());
+        persistor.purge();
+      }
+    } catch (error) {
+      console.error('Error deleting account: ', error);
+      errorToast('Something went wrong');
+    }
+  };
 
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
@@ -139,11 +197,19 @@ const AccountScreen = () => {
         title={'Are you sure you want to log out?'}
         leftButton={'Cancel'}
         rightButton={'Log Out'}
-        onPressRight={async() => {
-          resetNavigation(SCREENS.WelcomeScreen);
-          disptach(setAuthToken(''));
-          await clearAsync();
-          setPopupVisible(false);
+        onPressRight={async () => {
+          handleLogout();
+        }}
+      />
+      <CustomPopup
+        onCloseModal={() => setdeletePopupVisible(false)}
+        isVisible={deletepopupVisible}
+        title={'Are you sure you want to delete your account?'}
+        leftButton={'Cancel'}
+        rightButton={'Delete'}
+        onPressRight={() => {
+          handleDeleteAccount();
+          setdeletePopupVisible(false);
         }}
       />
     </LinearContainer>

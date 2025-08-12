@@ -15,8 +15,8 @@ const RangeSlider = ({range, setRange}: Props) => {
     <View style={styles.container}>
       <MultiSlider
         values={range}
-        min={5000}
-        max={20000}
+        min={0}
+        max={50000}
         step={100}
         sliderLength={SCREEN_WIDTH - wp(70)}
         onValuesChange={setRange}
