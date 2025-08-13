@@ -83,7 +83,7 @@ const CoLogin = () => {
               style={styles.passinput}
               containerStyle={styles.inputcontainer}
               placeholderTextColor={colors._7B7878}
-              imgStyle={styles.eye}
+              imgStyle={styles.eye} 
               placeholder="* * * * * * * * *"
               onChangeText={e => {
                 setAuthData({...authData, password: e});

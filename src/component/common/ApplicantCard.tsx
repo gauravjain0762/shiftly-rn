@@ -6,19 +6,26 @@ import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
-const ApplicantCard = () => {
+type Props = {
+  item: any;
+};
+
+const ApplicantCard = ({item}: Props) => {
   const {t} = useTranslation();
 
   return (
     <View style={styles.cardContainer}>
       <View style={styles.row}>
-        <Image source={IMAGES.avatar} style={styles.avatar} />
+        <Image
+          source={item?.picture ? {uri: item?.picture} : IMAGES.avatar}
+          style={styles.avatar}
+        />
         <View style={styles.infoContainer}>
           <Text numberOfLines={1} style={styles.name}>
-            Tafnol Theresa
+            {item?.name || 'Tafnol Theresa'}
           </Text>
           <Text numberOfLines={1} style={styles.field} ellipsizeMode="tail">
-            Hotel Management
+            {item?.responsibility || 'Hotel Management'}
           </Text>
           <Text
             ellipsizeMode="tail"

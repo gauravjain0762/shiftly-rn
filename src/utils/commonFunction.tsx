@@ -96,3 +96,19 @@ export const getImageUrl = (imagePath: string | null): string | null => {
 
 export const IMAGE_URL =
   'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D';
+
+export const getTimeAgo = (createdAt: string): string => {
+  const createdDate = new Date(createdAt);
+  const now = new Date();
+
+  const diffMs = now.getTime() - createdDate.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) return `${diffDays}d`;
+  if (diffHours > 0) return `${diffHours}h`;
+  if (diffMinutes > 0) return `${diffMinutes}m`;
+  return `${diffSeconds}s`;
+};

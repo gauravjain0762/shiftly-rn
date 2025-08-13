@@ -2,6 +2,8 @@ export const colors = {
   black: '#000000',
   white: '#ffffff',
   mainColor: 'orange',
+  coPrimary: '#F4E2B8',
+  empPrimary: '#0B3B75',
   _DADADA: '#DADADA',
   _FBE7BD: '#FBE7BD',
   _0B3970: '#0B3970',
@@ -44,7 +46,7 @@ export const colors = {
   _555555: '#555555',
   _4D4D4D: '#4D4D4D',
   _3C3C3C: '#3C3C3C',
-  _C9C9C9: "#C9C9C9",
+  _C9C9C9: '#C9C9C9',
 
   _25201a: '#25201a',
   greyOpacity: 'rgba(0,0,0,0.5)',

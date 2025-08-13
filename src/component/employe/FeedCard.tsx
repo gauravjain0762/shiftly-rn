@@ -3,7 +3,7 @@ import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
-import {getImageUrl} from '../../utils/commonFunction';
+import {getImageUrl, getTimeAgo} from '../../utils/commonFunction';
 
 type card = {
   onPressCard?: () => void;
@@ -16,8 +16,6 @@ const FeedCard: FC<card> = ({
   item,
   isFollow = false,
 }) => {
-  console.log(item, 'item');
-
   return (
     <TouchableOpacity onPress={() => onPressCard()} style={styles.card}>
       <View style={styles.cardHeader}>
@@ -30,7 +28,7 @@ const FeedCard: FC<card> = ({
         <View>
           <Text style={styles.hotelName}>{item?.company_id?.company_name}</Text>
           <Text style={styles.walkIn}>
-            Walk-in Interview · <Text style={{color: colors._A3A3A3}}>2h</Text>
+            Walk-in Interview · <Text style={{color: colors._A3A3A3}}>{getTimeAgo(item?.createdAt)}</Text>
           </Text>
         </View>
         {/* {isFollow ? (

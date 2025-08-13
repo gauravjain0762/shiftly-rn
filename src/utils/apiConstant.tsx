@@ -22,6 +22,7 @@ export const API = {
   getSkills: '/company/getSkills',
   getSuggestedEmployees: '/company/getSuggestedEmployees',
   getFacilities: '/company/getFacilities',
+  getCompanyJobDetails: '/company/getJobDetails',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',
@@ -42,13 +43,13 @@ export const API = {
   employeeOTPVerify: '/verifyOTP',
   employeeSendOTP: '/sendOTP',
   employeeForgotPassword: '/forgotPassword',
-  // employeeResetPassword: '/resetPassword',
+  employeeResetPassword: '/resetPassword',
   employeeChangePassword: '/changePassword',
   employeeDeleteAccount: '/deleteAccount',
   employeeApplyJob: "/applyJob",
 
   // Dashboard
-  getPosts: '/company/getPosts',
+  getEmployeePosts: '/getPosts',
   // getJobs: '/jobs/list',
   getEmployeeJobs: '/getJobs',
   getEmployeeJobDetails: '/getJobDetails',

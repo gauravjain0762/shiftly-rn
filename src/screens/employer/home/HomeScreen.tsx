@@ -1,15 +1,18 @@
-import {FlatList, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {FlatList, StyleSheet, View} from 'react-native';
+
 import {HomeHeader, LinearContainer} from '../../../component';
 import {hp, wp} from '../../../theme/fonts';
 import FeedCard from '../../../component/employe/FeedCard';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useGetEmployeePostsQuery} from '../../../api/dashboardApi';
 
 const HomeScreen = () => {
   // const {data: getProfile, isLoading: profileLoading} = useGetEmployeeProfileQuery({});
+  const {data} = useGetEmployeePostsQuery({});
+  const postList = data?.data?.posts;
 
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
@@ -19,12 +22,14 @@ const HomeScreen = () => {
         />
       </View>
       <FlatList
+        data={postList}
         style={AppStyles.flex}
         showsVerticalScrollIndicator={false}
+        renderItem={({item, index}: {item: any; index: number}) => (
+          <FeedCard item={item} key={index} />
+        )}
         contentContainerStyle={styles.scrollcontainer}
         ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
-        data={[1, 2]}
-        renderItem={(item: any) => <FeedCard />}
       />
     </LinearContainer>
   );

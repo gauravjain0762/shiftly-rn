@@ -28,12 +28,10 @@ import {useAppDispatch} from '../../../redux/hooks';
 import {RootState} from '../../../store';
 import {useSelector} from 'react-redux';
 import {
-  useCompanyChangePasswordMutation,
-  useCompanyForgotPasswordMutation,
-  useCompanyOTPVerifyMutation,
-  useCompanyResendOTPMutation,
   useEmployeeForgotPasswordMutation,
   useEmployeeOTPVerifyMutation,
+  useEmployeeResendOTPMutation,
+  useEmployeeResetPasswordMutation,
 } from '../../../api/authApi';
 import {setForgotPasswordSteps, setUserInfo} from '../../../features/authSlice';
 import {SCREENS} from '../../../navigation/screenNames';
@@ -45,17 +43,18 @@ const EmpForgotPassword = () => {
   const {fcmToken, userInfo, forgotPasswordSteps} = useSelector(
     (state: RootState) => state.auth,
   );
-  const [OtpVerify] = useEmployeeOTPVerifyMutation();
-  const [companyChangePassword] = useCompanyChangePasswordMutation();
+  console.log('🔥🔥🔥 ~ EmpForgotPassword ~ userInfo:', userInfo);
   const [email, setEmail] = useState(__DEV__ ? 'bilal@devicebee.com' : '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
   const [otp, setOtp] = useState(new Array(6).fill(''));
-  const [timer, setTimer] = useState(__DEV__ ? 5 : 30);
+  const [timer, setTimer] = useState(__DEV__ ? 30 : 30);
   const [start, setStart] = useState(false);
+  const [OtpVerify] = useEmployeeOTPVerifyMutation();
   const [employeeForgotPassword] = useEmployeeForgotPasswordMutation({});
-  const [companyResendOTP] = useCompanyResendOTPMutation({});
+  const [employeeResendOTP] = useEmployeeResendOTPMutation({});
+  const [employeeResetPassword] = useEmployeeResetPasswordMutation();
 
   useEffect(() => {
     if (timer == 0) return;
@@ -101,7 +100,7 @@ const EmpForgotPassword = () => {
     try {
       const res = await employeeForgotPassword({email}).unwrap();
       if (res?.status) {
-        successToast(res?.message || 'OTP sent successfully');
+        successToast(res?.message);
         dispatch(setUserInfo(res.data?.user));
         setTimer(30);
         if (forgotPasswordSteps === 1) {
@@ -127,6 +126,7 @@ const EmpForgotPassword = () => {
     const response = await OtpVerify(data).unwrap();
     console.log(response, 'response----');
     if (response?.status) {
+      dispatch(setUserInfo(response.data?.user));
       successToast(response?.message);
       nextStep();
     } else {
@@ -146,14 +146,14 @@ const EmpForgotPassword = () => {
       password: newPassword,
       confirm_password: confirmPassword,
     };
-    console.log(data, 'handleChangePassword data');
+    console.log(data, 'handle ResetPassword data');
 
-    const response = await companyChangePassword(data).unwrap();
+    const response = await employeeResetPassword(data).unwrap();
     console.log(response, 'companyChangePassword response----');
     if (response?.status) {
       successToast(response?.message);
       dispatch(setUserInfo(response.data?.user));
-      resetNavigation(SCREENS.CoTabNavigator);
+      resetNavigation(SCREENS.TabNavigator);
     } else {
       errorToast("New password and confirm password doesn't match");
     }
@@ -166,7 +166,7 @@ const EmpForgotPassword = () => {
     if (num == 1) {
       navigationRef.goBack();
     } else if (num == 3) {
-      resetNavigation(SCREENS.CoLogin);
+      resetNavigation(SCREENS.LoginScreen);
       dispatch(setForgotPasswordSteps(1));
     } else {
       dispatch(setForgotPasswordSteps(forgotPasswordSteps - 1));
@@ -175,7 +175,7 @@ const EmpForgotPassword = () => {
 
   const handleResendOTP = async () => {
     try {
-      const res = await companyResendOTP({user_id: userInfo?._id}).unwrap();
+      const res = await employeeResendOTP({user_id: userInfo?._id}).unwrap();
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         setTimer(30);
@@ -278,26 +278,28 @@ const EmpForgotPassword = () => {
           <View style={passwordStyles.inputView}>
             <Text style={passwordStyles.label}>{t('New Password')}</Text>
             <CustomTextInput
+              showRightIcon
               value={newPassword}
               style={passwordStyles.emailText}
               placeholder="Enter new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
+              // secureTextEntry
               onChangeText={setNewPassword}
             />
             <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
             <CustomTextInput
+              showRightIcon
               value={confirmPassword}
               style={passwordStyles.emailText}
               placeholder="Confirm new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
+              // secureTextEntry
               onChangeText={setConfirmPassword}
             />
             <GradientButton
-              type="Company"
+              type="Employee"
               onPress={handleChangePassword}
               title="Submit"
               style={passwordStyles.button}

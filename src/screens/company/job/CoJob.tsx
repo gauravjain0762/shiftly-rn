@@ -26,7 +26,6 @@ import BottomModal from '../../../component/common/BottomModal';
 import {Dropdown} from 'react-native-element-dropdown';
 import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
 import RangeSlider from '../../../component/common/RangeSlider';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 
 const jobTypes = [
@@ -126,6 +125,15 @@ const CoJob = () => {
                 </>
               );
             }}
+            ListEmptyComponent={() => (
+              <Text
+                style={{
+                  textAlign: 'center',
+                  ...commonFontStyle(500, 18, colors.black),
+                }}>
+                {'No Jobs Found'}
+              </Text>
+            )}
             keyExtractor={(_, index) => index.toString()}
           />
         </View>

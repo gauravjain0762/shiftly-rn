@@ -28,6 +28,8 @@ export const dashboardApi = createApi({
     'GetEmployeeJobDetails',
     'GetEmployeeSkills',
     'EmployeeApplyJob',
+    'GetEmployeePost',
+    'GetCompanyJobDetails',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -176,6 +178,25 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getCompanyJobDetails: builder.query<any, any>({
+      query: job_id => {
+        const jobId = job_id ? `?job_id=${job_id}` : '';
+
+        return {
+          url: `${API.getCompanyJobDetails}${jobId}`,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getCompanyJobDetails Error', error);
+        }
+      },
+    }),
     getSkills: builder.query<any, any>({
       query: () => ({
         url: API.getSkills,
@@ -305,6 +326,22 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getEmployeePosts: builder.query<any, any>({
+      query: () => ({
+        url: API.getEmployeePosts,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['GetEmployeePost'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getEmployeePosts Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -323,4 +360,6 @@ export const {
   useGetEmployeeJobDetailsQuery,
   useGetEmployeeSkillsQuery,
   useEmployeeApplyJobMutation,
+  useGetEmployeePostsQuery,
+  useGetCompanyJobDetailsQuery,
 } = dashboardApi;

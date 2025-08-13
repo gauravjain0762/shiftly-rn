@@ -22,6 +22,7 @@ export const SCREENS = {
   EditProfileScreen: 'EditProfileScreen',
   Chat: 'Chat',
   ViewProfileScreen: 'ViewProfileScreen',
+  WebviewScreen: 'WebviewScreen',
 
   //company
   CoLogin: 'CoLogin',

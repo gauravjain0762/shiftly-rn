@@ -43,6 +43,7 @@ import LocationScreen from '../component/common/LocationScreen';
 import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
 import EmpChangePassword from '../screens/employer/auth/EmpChangePassword';
 import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
+import WebviewScreen from '../screens/others/WebviewScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -378,6 +379,7 @@ const StackNavigator: FC = () => {
       <Stack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
       <Stack.Screen name={SCREENS.LocationScreen} component={LocationScreen} />
+      <Stack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
     </Stack.Navigator>
   );
 };

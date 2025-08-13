@@ -10,11 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   CustomTextInput,
   GradientButton,
   LinearContainer,
+  LocationContainer,
 } from '../../../component';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
@@ -27,6 +28,7 @@ import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {
   errorToast,
+  navigateTo,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
@@ -55,6 +57,9 @@ import {
   useCreateCompanyProfileMutation,
   useGetServicesQuery,
 } from '../../../api/dashboardApi';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
 
 const size = ['0 - 50', '50 - 100', '100 - 500', '500 - 1,000', '1,000+'];
 
@@ -112,6 +117,37 @@ const CreateAccount = () => {
   const [model, setModel] = useState(false);
   const [visible, setVisible] = useState(false);
   const [start, setStart] = useState(false);
+  const [userAddress, setUserAddress] = useState<
+    | {
+        address: string;
+        lat: number;
+        lng: number;
+        state: string;
+        country: string;
+      }
+    | undefined
+  >();
+
+  const getUserLocation = async () => {
+    try {
+      const locationString = await AsyncStorage.getItem('user_location');
+      if (locationString !== null) {
+        const location = JSON.parse(locationString);
+        setUserAddress(location);
+        console.log('Retrieved location:', location);
+        return location;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve user location:', error);
+    }
+    return null;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getUserLocation();
+    }, []),
+  );
 
   useEffect(() => {
     onCurrentLocation();
@@ -316,7 +352,6 @@ const CreateAccount = () => {
   };
 
   const handleCreateProfile = async () => {
-    console.log('handleCreateProfile this called');
     let data = {
       website: companyProfileData?.website,
       company_size: companyProfileData?.company_size,
@@ -331,9 +366,7 @@ const CreateAccount = () => {
       cover_images: companyProfileData?.cover_images,
       company_name: companyRegisterData?.company_name,
     };
-    console.log('🔥 ~ handleCreateProfile ~ data:', data);
     const response = await companyProfile(data).unwrap();
-    console.log('🔥🔥 ~ handleCreateProfile ~ response:', response);
     console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
@@ -456,13 +489,13 @@ const CreateAccount = () => {
                   containerStyle={styles.Inputcontainer}
                   numberOfLines={1}
                 />
-                <TouchableOpacity onPress={() => setModel(!model)} hitSlop={10}>
+                {/* <TouchableOpacity onPress={() => setModel(!model)} hitSlop={10}>
                   <Image
                     source={IMAGES.info}
                     resizeMode="contain"
                     style={styles.info}
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
               {model && (
                 <View style={styles.infomodel}>
@@ -598,10 +631,10 @@ const CreateAccount = () => {
                   />
                   <Text style={styles.passRule}>{t('Password Rule')}</Text>
                 </View>
-                {rules?.map((item: any) => {
+                {rules?.map((item: any, index: number) => {
                   const passed = item?.test(companyRegisterData?.password);
                   return (
-                    <View style={styles.rules}>
+                    <View key={index} style={styles.rules}>
                       {passed ? (
                         <Image source={IMAGES.check} style={styles.check} />
                       ) : (
@@ -814,7 +847,7 @@ const CreateAccount = () => {
               </Text>
               <View style={[styles.inputIconLabel, {marginTop: hp(60)}]}>
                 <Text style={styles.label}>{t('Address')}</Text>
-                <Image style={styles.info} source={IMAGES.info} />
+                {/* <Image style={styles.info} source={IMAGES.info} /> */}
               </View>
               <View style={[styles.row, {marginTop: hp(15)}]}>
                 <CustomTextInput
@@ -842,32 +875,26 @@ const CreateAccount = () => {
               <Text style={styles.maplable}>
                 {t('Choose your map location')}
               </Text>
-              <View style={styles.map}>
-                <MapView
-                  region={{
-                    latitude: position?.latitude,
-                    longitude: position?.longitude,
-                    latitudeDelta: position?.latitudeDelta,
-                    longitudeDelta: position?.longitudeDelta,
-                  }}
-                  ref={mapRef}
-                  key={Config?.MAP_KEY}
-                  style={styles.map}>
-                  <Marker
-                    coordinate={{
-                      latitude: position?.latitude,
-                      longitude: position?.longitude,
-                    }}>
-                    <Image
-                      source={IMAGES.location_marker}
-                      style={styles.marker}
-                    />
-                  </Marker>
-                </MapView>
-              </View>
+              <LocationContainer
+                address={userAddress?.address}
+                onPressMap={() => {
+                  navigateTo(SCREENS.LocationScreen, {
+                    userAddress: userAddress,
+                  });
+                }}
+                containerStyle={styles.map}
+                lat={userAddress?.lat}
+                lng={userAddress?.lng}
+              />
             </View>
             <View>
-              <TouchableOpacity style={styles.diffButton}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.LocationScreen, {
+                    userAddress: userAddress,
+                  });
+                }}
+                style={styles.diffButton}>
                 <Text style={styles.btnTitle}>
                   {t('Choose a different location')}
                 </Text>
@@ -885,8 +912,9 @@ const CreateAccount = () => {
                   );
                   dispatch(
                     setCompanyProfileData({
-                      lat: position?.latitude,
-                      lng: position?.longitude,
+                      lat: userAddress?.lat,
+                      lng: userAddress?.lng,
+                      address: userAddress?.address,
                     }),
                   );
                   nextStep();
@@ -907,10 +935,10 @@ const CreateAccount = () => {
                     {t('Description')}
                   </Text>
                 </Text>
-                <Image
+                {/* <Image
                   style={[styles.info, {marginLeft: 0}]}
                   source={IMAGES.info}
-                />
+                /> */}
               </View>
               <View>
                 <CustomTextInput
@@ -1177,32 +1205,35 @@ const CreateAccount = () => {
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
       colors={['#FFF8E6', '#F3E1B7']}>
-      <KeyboardAwareScrollView
-        enableAutomaticScroll
-        // scrollEnabled={false}
-        automaticallyAdjustContentInsets
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollcontainer}
-        style={styles.container}>
-        <View style={styles.rowView}>
-          <TouchableOpacity
-            onPress={() => {
-              companyRegistrationStep == 8
-                ? navigationRef.goBack()
-                : prevStep(companyRegistrationStep);
-            }}
-            hitSlop={8}
-            style={[styles.backBtn, {flex: 1}]}>
-            <Image
-              resizeMode="contain"
-              source={IMAGES.leftSide}
-              style={styles.back}
-            />
-          </TouchableOpacity>
-        </View>
-        {renderStep()}
-      </KeyboardAwareScrollView>
+      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+        <KeyboardAwareScrollView
+          enableAutomaticScroll
+          // scrollEnabled={false}
+          automaticallyAdjustContentInsets
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollcontainer}
+          style={styles.container}>
+          <View style={styles.rowView}>
+            <TouchableOpacity
+              onPress={() => {
+                companyRegistrationStep == 8
+                  ? navigationRef.goBack()
+                  : prevStep(companyRegistrationStep);
+              }}
+              hitSlop={8}
+              style={[styles.backBtn, {flex: 1}]}>
+              <Image
+                resizeMode="contain"
+                source={IMAGES.leftSide}
+                style={styles.back}
+              />
+            </TouchableOpacity>
+          </View>
+          {renderStep()}
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
+
       {registerSuccessModal && (
         <WelcomeModal
           name={t('Aboard!')}
@@ -1468,10 +1499,10 @@ const styles = StyleSheet.create({
     paddingVertical: hp(20),
   },
   map: {
-    height: hp(150),
-    flex: 1,
-    borderRadius: 15,
-    overflow: 'hidden',
+    // flex: 1,
+    // height: hp(150),
+    // borderRadius: 15,
+    // overflow: 'hidden',
   },
   diffButton: {
     borderRadius: 100,

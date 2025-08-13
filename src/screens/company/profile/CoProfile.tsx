@@ -24,19 +24,23 @@ import {
   successToast,
 } from '../../../utils/commonFunction';
 import {logouts} from '../../../features/authSlice';
-import {persistor} from '../../../store';
+import {persistor, RootState} from '../../../store';
 import {useAppDispatch} from '../../../redux/hooks';
 import {colors} from '../../../theme/colors';
 import {useTranslation} from 'react-i18next';
+import LanguageModal from '../../../component/common/LanguageModel';
+import {useSelector} from 'react-redux';
 
 const CoProfile = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const [popupVisible, setPopupVisible] = useState(false);
   const [deletepopupVisible, setdeletePopupVisible] = useState(false);
-  const [companyLogout] =
-    useCompanyLogoutMutation();
+  const [companyLogout] = useCompanyLogoutMutation();
   const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
+  const [isLanguageModalVisible, setLanguageModalVisible] =
+    useState<boolean>(false);
+  const {userInfo} = useSelector((state: RootState) => state.auth);
 
   const settingsData = [
     {
@@ -70,16 +74,38 @@ const CoProfile = () => {
     {
       section: 'General',
       items: [
-        {label: 'Language', icon: IMAGES.Language},
+        {
+          label: 'Language',
+          icon: IMAGES.Language,
+          onPress: () => setLanguageModalVisible(true),
+        },
         {label: 'Notifications', icon: IMAGES.Notifications},
       ],
     },
     {
       section: 'About',
       items: [
-        {label: 'Privacy Policy', icon: IMAGES.PrivacyPolicy},
-        {label: 'Terms of Use', icon: IMAGES.TermsUse},
-        {label: 'Help & Support', icon: IMAGES.HelpSupport},
+        {
+          label: 'Privacy Policy',
+          icon: IMAGES.PrivacyPolicy,
+          onPress: () => {
+            navigateTo(SCREENS.WebviewScreen, {link: ''});
+          },
+        },
+        {
+          label: 'Terms of Use',
+          icon: IMAGES.TermsUse,
+          onPress: () => {
+            navigateTo(SCREENS.WebviewScreen, {link: ''});
+          },
+        },
+        {
+          label: 'Help & Support',
+          icon: IMAGES.HelpSupport,
+          onPress: () => {
+            navigateTo(SCREENS.WebviewScreen, {link: ''});
+          },
+        },
         {
           label: 'Logout',
           icon: IMAGES.logout,
@@ -155,7 +181,7 @@ const CoProfile = () => {
           RightIcon={
             <View style={{}}>
               <Image
-                source={IMAGES.avatar}
+                source={userInfo?.logo ? {uri: userInfo?.logo} : IMAGES.avatar}
                 style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
               />
             </View>
@@ -172,17 +198,7 @@ const CoProfile = () => {
                 }}
                 style={styles.row}>
                 {item.label == 'Logout' ? (
-                  <Image
-                    source={item.icon}
-                    style={{
-                      width: 18,
-                      height: 18,
-                      resizeMode: 'contain',
-                      marginRight: 14,
-                      tintColor: 'red',
-                      marginLeft: 5,
-                    }}
-                  />
+                  <Image source={item.icon} style={styles.logout} />
                 ) : (
                   <Image
                     source={item.icon}
@@ -207,11 +223,7 @@ const CoProfile = () => {
                   <Image
                     source={IMAGES.right_icon}
                     tintColor={colors._555555}
-                    style={{
-                      width: wp(12),
-                      height: hp(12),
-                      resizeMode: 'contain',
-                    }}
+                    style={styles.logo}
                   />
                 )}
               </TouchableOpacity>
@@ -241,6 +253,12 @@ const CoProfile = () => {
             handleDeleteAccount();
             setdeletePopupVisible(false);
           }}
+        />
+        <LanguageModal
+          type={'Company'}
+          visible={isLanguageModalVisible}
+          onClose={() => setLanguageModalVisible(false)}
+          onLanguageSelect={() => setLanguageModalVisible(false)}
         />
       </ScrollView>
     </LinearContainer>
@@ -274,5 +292,18 @@ const styles = StyleSheet.create({
   label: {
     flex: 1,
     ...commonFontStyle(400, 18, colors._555555),
+  },
+  logout: {
+    width: wp(18),
+    height: hp(18),
+    tintColor: 'red',
+    marginLeft: wp(5),
+    marginRight: wp(14),
+    resizeMode: 'contain',
+  },
+  logo: {
+    width: wp(12),
+    height: hp(12),
+    resizeMode: 'contain',
   },
 });

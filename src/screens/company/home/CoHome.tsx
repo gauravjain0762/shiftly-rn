@@ -1,42 +1,46 @@
-import {FlatList, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {FlatList, StyleSheet, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import {HomeHeader, LinearContainer} from '../../../component';
 import {AppStyles} from '../../../theme/appStyles';
 import FeedCard from '../../../component/employe/FeedCard';
 import {hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useTranslation} from 'react-i18next';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
+import PostSkeleton from '../../../component/skeletons/PostSkeleton';
+
+const PER_PAGE = 20;
 
 const CoHome = () => {
-  const {t} = useTranslation();
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const {data: getPost, isLoading: Loading} = useGetCompanyPostsQuery({});
+  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [allPosts, setAllPosts] = React.useState([]);
   console.log(allPosts, 'getPost');
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (getPost) {
       const newData = getPost.data.posts;
       setAllPosts(prev =>
         currentPage === 1 ? newData : [...prev, ...newData],
       );
+      if (newData?.length < PER_PAGE) {
+        setIsLoading(false);
+      }
     }
   }, [getPost, currentPage]);
 
   const handleLoadMore = () => {
-    // Check if there are more pages to load
     if (
-      getPost &&
-      getPost.data?.pagination?.current_page <
-        getPost.data?.pagination?.total_pages &&
-      !Loading
+      !isLoading &&
+      getPost?.data?.pagination?.current_page <
+        getPost?.data?.pagination?.total_pages
     ) {
-      const nextPage = currentPage + 1;
-      setCurrentPage(nextPage);
+      setIsLoading(true);
+      setCurrentPage(prev => prev + 1);
     }
   };
 
@@ -44,26 +48,33 @@ const CoHome = () => {
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <View style={styles.header}>
         <HomeHeader
-          onPressAvatar={() => navigateTo(SCREENS.CoMessage)}
           type="company"
+          onPressAvatar={() => navigateTo(SCREENS.CoMessage)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />
       </View>
-      <FlatList
-        style={AppStyles.flex}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollcontainer}
-        ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
-        data={allPosts}
-        renderItem={({item}: any) => (
-          <FeedCard
-            item={item}
-            isFollow
-            // onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
-          />
-        )}
-        onEndReached={handleLoadMore}
-      />
+
+      {Loading ? (
+        <PostSkeleton />
+      ) : (
+        <FlatList
+          style={AppStyles.flex}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollcontainer}
+          ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
+          data={allPosts}
+          renderItem={({item, index}: any) => (
+            <FeedCard
+              key={index}
+              item={item}
+              isFollow
+              // onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
+            />
+          )}
+          onEndReachedThreshold={0.5}
+          onEndReached={handleLoadMore}
+        />
+      )}
     </LinearContainer>
   );
 };

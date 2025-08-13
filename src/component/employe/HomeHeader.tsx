@@ -20,17 +20,16 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
 }) => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log('🔥🔥🔥 ~ HomeHeader ~ userInfo:', userInfo);
 
   return (
     <View style={styles.header}>
       <View style={styles.row}>
         <TouchableOpacity onPress={() => onPressAvatar && onPressAvatar()}>
           <Image
-            source={
-              userInfo?.picture ? {uri: userInfo?.picture} : IMAGES.avatar
-            } // Replace with actual image
-            style={styles.avatar}
             resizeMode="cover"
+            style={styles.avatar}
+            source={userInfo?.logo ? {uri: userInfo?.logo} : IMAGES.avatar}
           />
         </TouchableOpacity>
         <View style={styles.info}>

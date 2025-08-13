@@ -230,7 +230,7 @@ const ForgotPassword = () => {
                 {otp?.map((val, idx) => (
                   <TextInput
                     key={idx}
-                    ref={el => (inputRefsOtp.current[idx] = el)}
+                    ref={(el: any) => (inputRefsOtp.current[idx] = el)}
                     value={val ? '*' : ''}
                     onChangeText={text => handleChangeOtp(text, idx)}
                     onKeyPress={e => handleKeyPressOtp(e, idx)}
@@ -281,8 +281,10 @@ const ForgotPassword = () => {
               placeholder="Enter new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
+              // secureTextEntry
               onChangeText={setNewPassword}
+              showRightIcon
+              imgStyle={passwordStyles.eye}
             />
             <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
             <CustomTextInput
@@ -291,8 +293,10 @@ const ForgotPassword = () => {
               placeholder="Confirm new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
+              // secureTextEntry
               onChangeText={setConfirmPassword}
+              showRightIcon
+              imgStyle={passwordStyles.eye}
             />
             <GradientButton
               type="Company"

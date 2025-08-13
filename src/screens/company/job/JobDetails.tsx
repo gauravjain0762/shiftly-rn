@@ -15,22 +15,28 @@ import {IMAGES} from '../../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
 import ApplicantCard from '../../../component/common/ApplicantCard';
-
-const JobDetails = {
-  'Job Type': 'Full Time',
-  Vacancy: 2,
-  'Expiry Date': '31 July',
-  Duration: '12 Month',
-  'Job Industry': 'Hospitality',
-  Salary: '10,000',
-};
+import {useGetCompanyJobDetailsQuery} from '../../../api/dashboardApi';
+import {useRoute} from '@react-navigation/native';
 
 const Tabs = ['Applicants', 'Invited', 'Shortlisted'];
 
 const CoJobDetails = () => {
   const {t} = useTranslation();
-  const keyValueArray = Object.entries(JobDetails);
-  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const {params} = useRoute<any>();
+  const job_id = params?._id as any;
+  const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+  const {data} = useGetCompanyJobDetailsQuery('689b160b3f2e282e35e9e06b');
+  const jobDetail = data?.data;
+  console.log('🔥🔥🔥 ~ CoJobDetails ~ jobDetail:', jobDetail);
+  const JobDetailsArr = {
+    'Job Type': jobDetail?.job_type,
+    Vacancy: jobDetail?.no_positions,
+    'Expiry Date': '31 July',
+    Duration: jobDetail?.duration,
+    'Job Industry': jobDetail?.job_sector,
+    Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
+  };
+  const keyValueArray = Object.entries(JobDetailsArr);
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -38,7 +44,7 @@ const CoJobDetails = () => {
         <BackHeader
           type="company"
           isRight={false}
-          title={'Restaurant Manager'}
+          title={jobDetail?.title || 'Restaurant Manager'}
           titleStyle={styles.title}
           containerStyle={styles.header}
           RightIcon={
@@ -53,14 +59,15 @@ const CoJobDetails = () => {
         />
 
         <View style={styles.bodyContainer}>
-          <Text style={styles.jobId}>{'Job ID: 2548'}</Text>
+          <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id}`}</Text>
 
-          <Text style={styles.location}>{'Atlantis, The Palm, Dubai'}</Text>
+          <Text style={styles.location}>
+            {jobDetail?.address || 'Atlantis, The Palm, Dubai'}
+          </Text>
 
           <Text style={styles.description}>
-            {
-              'As the Resort Manager, you will primarily be focused on ensuring the Front Office and VIP Services are operated to the highest standards and guest service delivery standards and are nothing short of 5 stars for both guests and colleagues.'
-            }
+            {jobDetail?.description ||
+              'As the Resort Manager, you will primarily be focused on ensuring the Front Office and VIP Services are operated to the highest standards and guest service delivery standards and are nothing short of 5 stars for both guests and colleagues.'}
           </Text>
 
           <View style={styles.jobDetailsContainer}>
@@ -103,7 +110,19 @@ const CoJobDetails = () => {
 
             <View style={styles.divider} />
 
-            {selectedTabIndex === 0 && <ApplicantCard />}
+            {selectedTabIndex === 0 &&
+              jobDetail?.applicants?.map((item: any, index: number) => (
+                <ApplicantCard key={index} item={item} />
+              ))}
+
+            {selectedTabIndex === 1 &&
+              jobDetail?.invited_users?.map((item: any, index: number) => {
+                if (item) {
+                  return <ApplicantCard key={index} item={item} />;
+                } else {
+                  return null;
+                }
+              })}
 
             <GradientButton
               type="Company"
@@ -125,11 +144,11 @@ export default CoJobDetails;
 const styles = StyleSheet.create({
   header: {
     paddingTop: hp(26),
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(22),
   },
   title: {
     right: '22%',
-    marginLeft: wp(((SCREEN_WIDTH - 70) / 2) * 0.5),
+    marginLeft: '5%',
   },
   iconButton: {
     width: wp(32),
@@ -148,8 +167,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(23),
   },
   jobId: {
+    flex: 1,
     bottom: hp(10),
-    marginLeft: '15%',
+    marginLeft: '10%',
     ...commonFontStyle(400, 18, colors.black),
   },
   location: {

@@ -377,13 +377,13 @@ const PostJob = () => {
                   <Text style={styles.inputLabel}>
                     {t('Describe the role')}
                   </Text>
-                  <TouchableOpacity hitSlop={10}>
+                  {/* <TouchableOpacity hitSlop={10}>
                     <Image
                       source={IMAGES.info}
                       resizeMode="contain"
                       style={styles.info}
                     />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
                 <CustomTextInput
                   value={describe}

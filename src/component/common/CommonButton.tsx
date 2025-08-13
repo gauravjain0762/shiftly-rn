@@ -3,6 +3,7 @@ import {
   ImageStyle,
   StyleSheet,
   Text,
+  TextProps,
   TextStyle,
   TouchableOpacity,
   ViewStyle,
@@ -11,19 +12,19 @@ import React from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {useTheme} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
-import { colors } from '../../theme/colors';
+import {colors} from '../../theme/colors';
 
 type Props = {
   title: any;
   onPress?: () => void;
   btnStyle?: ViewStyle;
   leftImg?: any;
-  textStyle?: TextStyle;
+  textStyle?: TextStyle | any;
   imageStyle?: ImageStyle;
   disabled?: boolean;
   rightImgStyle?: ImageStyle;
   rightImg?: any;
-};
+} & TextProps;
 
 const CommonButton = ({
   title,
@@ -36,7 +37,6 @@ const CommonButton = ({
   rightImg,
   rightImgStyle,
 }: Props) => {
-
   return (
     <TouchableOpacity
       onPress={() => onPress()}
@@ -64,22 +64,20 @@ const CommonButton = ({
 
 export default CommonButton;
 
-
-
 const styles = StyleSheet.create({
   buttonStyle: {
-      height: hp(52),
-      backgroundColor: colors._F4E2B8,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 13,
-      gap: wp(20),
-    },
-    text: {
-      ...commonFontStyle(700, 21, '#000000',),
-    },
-    imageStyle: {
-      width: wp(20),
-      height: wp(20),
-    },
+    height: hp(52),
+    backgroundColor: colors._F4E2B8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 13,
+    gap: wp(20),
+  },
+  text: {
+    ...commonFontStyle(700, 21, '#000000'),
+  },
+  imageStyle: {
+    width: wp(20),
+    height: wp(20),
+  },
 });

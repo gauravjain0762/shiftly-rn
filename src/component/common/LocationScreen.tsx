@@ -25,21 +25,22 @@ import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete'
 import {API} from '../../utils/apiConstant';
 import GradientButton from './GradientButton';
 import {navigationRef} from '../../navigation/RootContainer';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
 import {getAsyncUserLocation} from '../../utils/asyncStorage';
 
 const LocationScreen = () => {
+  const {params} = useRoute<any>();
+  const {userAddress} = params;
   const {t} = useTranslation();
   const mapRef = useRef<any | null>(null);
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(userAddress?.address || '');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
-  // console.log('🔥🔥🔥 ~ LocationScreen ~ markerPosition:', markerPosition);
   const [position, setPosition] = useState({
     latitude: 0,
     longitude: 0,
@@ -48,6 +49,13 @@ const LocationScreen = () => {
   });
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const ref = useRef<any | null>(null);
+
+  useEffect(() => {
+    if (userAddress?.address) {
+      setSearch(userAddress.address);
+      ref.current?.setAddressText(userAddress.address);
+    }
+  }, [userAddress]);
 
   const getUserLocation = async () => {
     try {
@@ -90,10 +98,6 @@ const LocationScreen = () => {
   );
 
   useEffect(() => {
-    ref.current?.setAddressText('');
-  }, []);
-
-  useEffect(() => {
     const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () =>
       setKeyboardVisible(true),
     );
@@ -106,36 +110,36 @@ const LocationScreen = () => {
     };
   }, []);
 
-  const handlePlaceSelect = async (item: any) => {
-    setSearch(item.description);
+  // const handlePlaceSelect = async (item: any) => {
+  //   setSearch(item.description);
 
-    const region = {
-      latitude: item.geometry.location.lat,
-      longitude: item.geometry.location.lng,
-    };
+  //   const region = {
+  //     latitude: item.geometry.location.lat,
+  //     longitude: item.geometry.location.lng,
+  //   };
 
-    getAddress(
-      region,
-      async (response: any) => {
-        const formatted =
-          response?.results?.[0]?.formatted_address || item.description;
-        setSearch(formatted);
-        setPosition({
-          latitude: region.latitude,
-          longitude: region.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-        mapRef.current?.animateToRegion({
-          ...region,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-        await AsyncStorage.setItem('user_location', formatted);
-      },
-      (error: any) => console.log('Address fetch error:', error),
-    );
-  };
+  //   getAddress(
+  //     region,
+  //     async (response: any) => {
+  //       const formatted =
+  //         response?.results?.[0]?.formatted_address || item.description;
+  //       setSearch(formatted);
+  //       setPosition({
+  //         latitude: region.latitude,
+  //         longitude: region.longitude,
+  //         latitudeDelta: 0.05,
+  //         longitudeDelta: 0.05,
+  //       });
+  //       mapRef.current?.animateToRegion({
+  //         ...region,
+  //         latitudeDelta: 0.05,
+  //         longitudeDelta: 0.05,
+  //       });
+  //       await AsyncStorage.setItem('user_location', formatted);
+  //     },
+  //     (error: any) => console.log('Address fetch error:', error),
+  //   );
+  // };
 
   const handleMapPress = (e: any) => {
     const coords = e.nativeEvent.coordinate;
@@ -169,10 +173,6 @@ const LocationScreen = () => {
 
       const state = stateObj?.long_name || '';
       const country = countryObj?.long_name || '';
-
-      console.log('🔥🔥🔥 ~ moveMarker ~ address:', address);
-      console.log('🔥🔥🔥 ~ moveMarker ~ state:', state);
-      console.log('🔥🔥🔥 ~ moveMarker ~ country:', country);
 
       if (address) {
         setSearch(address);
@@ -254,8 +254,6 @@ const LocationScreen = () => {
           ref={ref}
           placeholder="Search Location"
           onPress={async (data, details = null) => {
-            console.log('🔥🔥🔥 ~ async ~ details:', details);
-            console.log('🔥🔥🔥 ~ async ~ data:', data);
             if (!details) return;
 
             const {lat, lng} = details.geometry.location;

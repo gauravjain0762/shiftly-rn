@@ -193,7 +193,7 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               <View style={styles.info_row}>
-                <Image source={IMAGES.info} style={styles.info} />
+                {/* <Image source={IMAGES.info} style={styles.info} /> */}
                 <Text style={styles.infotext}>
                   {
                     'Password must include at least 8 characters, one uppercase letter, one number, and one symbol.'

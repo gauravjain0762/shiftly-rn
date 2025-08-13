@@ -13,6 +13,7 @@ const CoMyProfile = () => {
   const {t} = useTranslation();
   const {data, refetch} = useGetProfileQuery();
   const companyProfile = data?.data?.company;
+  console.log("🔥🔥🔥 ~ CoMyProfile ~ companyProfile:", companyProfile)
 
   useFocusEffect(
     useCallback(() => {
@@ -42,10 +43,13 @@ const CoMyProfile = () => {
           </View>
         </View>
 
-        <Text style={styles.descText}>
-          {companyProfile?.about ||
-            'Dubai is a city of grand visions and endless wonders, where towering skyscrapers & luxurious malls meet the ancient allure of desert dunes & vibrant souks.'}
-        </Text>
+        <View style={{marginVertical: hp(18)}}>
+          <Text style={styles.labelText}>{t('Description')}</Text>
+          <Text style={styles.descText}>
+            {companyProfile?.about ||
+              'Dubai is a city of grand visions and endless wonders, where towering skyscrapers & luxurious malls meet the ancient allure of desert dunes & vibrant souks.'}
+          </Text>
+        </View>
 
         <View style={styles.infoContainer}>
           <View style={styles.space}>
@@ -113,7 +117,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 20, colors._4D4D4D),
   },
   descText: {
-    marginVertical: hp(18),
+    marginTop: hp(10),
     ...commonFontStyle(400, 15, colors._656464),
   },
   infoContainer: {

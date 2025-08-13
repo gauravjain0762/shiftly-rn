@@ -30,14 +30,17 @@ import {
   useEmployeeDeleteAccountMutation,
   useEmployeeLogoutMutation,
 } from '../../../api/authApi';
-import {persistor} from '../../../store';
+import {AppDispatch, persistor} from '../../../store';
+import LanguageModal from '../../../component/common/LanguageModel';
 
 const AccountScreen = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [empLogout] = useEmployeeLogoutMutation({});
-  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [employeeDeleteAccount] = useEmployeeDeleteAccountMutation({});
-  const [deletepopupVisible, setdeletePopupVisible] = useState(false);
+  const [deletepopupVisible, setdeletePopupVisible] = useState<boolean>(false);
+  const [isLanguageModalVisible, setLanguageModalVisible] =
+    useState<boolean>(false);
 
   const settingsData = [
     {
@@ -69,16 +72,40 @@ const AccountScreen = () => {
     {
       section: 'General',
       items: [
-        {label: 'Language', icon: IMAGES.Language},
+        {
+          label: 'Language',
+          icon: IMAGES.Language,
+          onPress: () => {
+            setLanguageModalVisible(true);
+          },
+        },
         {label: 'Notifications', icon: IMAGES.Notifications},
       ],
     },
     {
       section: 'About',
       items: [
-        {label: 'Privacy Policy', icon: IMAGES.PrivacyPolicy},
-        {label: 'Terms of Use', icon: IMAGES.TermsUse},
-        {label: 'Help & Support', icon: IMAGES.HelpSupport},
+        {
+          label: 'Privacy Policy',
+          icon: IMAGES.PrivacyPolicy,
+          onPress: () => {
+            navigateTo(SCREENS.WebviewScreen, {link: ''});
+          },
+        },
+        {
+          label: 'Terms of Use',
+          icon: IMAGES.TermsUse,
+          onPress: () => {
+            navigateTo(SCREENS.WebviewScreen, {link: ''});
+          },
+        },
+        {
+          label: 'Help & Support',
+          icon: IMAGES.HelpSupport,
+          onPress: () => {
+            navigateTo(SCREENS.WebviewScreen, {link: ''});
+          },
+        },
         {
           label: 'Logout',
           icon: IMAGES.logout,
@@ -192,6 +219,7 @@ const AccountScreen = () => {
       ))}
 
       <CustomPopup
+        type="Employee"
         onCloseModal={() => setPopupVisible(false)}
         isVisible={popupVisible}
         title={'Are you sure you want to log out?'}
@@ -211,6 +239,13 @@ const AccountScreen = () => {
           handleDeleteAccount();
           setdeletePopupVisible(false);
         }}
+      />
+
+      <LanguageModal
+        type={'Employee'}
+        visible={isLanguageModalVisible}
+        onClose={() => setLanguageModalVisible(false)}
+        onLanguageSelect={() => setLanguageModalVisible(false)}
       />
     </LinearContainer>
   );

@@ -1,7 +1,13 @@
 // components/BottomModal.tsx
 
 import React from 'react';
-import {View, StyleSheet, KeyboardAvoidingView, Platform} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ViewStyle,
+} from 'react-native';
 
 import {hp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
@@ -9,6 +15,7 @@ import Modal from 'react-native-modal';
 
 type BottomModalProps = {
   visible: boolean;
+  style?: ViewStyle;
   onClose: () => void;
   children: React.ReactNode;
   backgroundColor?: string;
@@ -18,6 +25,7 @@ const BottomModal = ({
   visible,
   onClose,
   children,
+  style,
   backgroundColor = '#fff',
 }: BottomModalProps) => {
   return (
@@ -29,7 +37,7 @@ const BottomModal = ({
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoiding}>
-        <View style={[styles.container, {backgroundColor}]}>{children}</View>
+        <View style={[styles.container, {backgroundColor}, style]}>{children}</View>
       </KeyboardAvoidingView>
     </Modal>
   );

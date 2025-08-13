@@ -398,8 +398,8 @@ export const authApi = createApi({
             if (data?.data?.auth_token) {
               await setAsyncToken(data?.data?.auth_token);
               dispatch(setAuthToken(data.data?.auth_token));
-              dispatch(setUserInfo(data.data?.company));
-              await setAsyncUserInfo(data.data?.company);
+              dispatch(setUserInfo(data.data?.user));
+              await setAsyncUserInfo(data.data?.user);
               dispatch(setGuestLogin(false));
             }
           } else {
@@ -494,6 +494,54 @@ export const authApi = createApi({
         }
       },
     }),
+    employeeResendOTP: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeResendOTP,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeResendOTP Error', error);
+        }
+      },
+    }),
+    employeeResetPassword: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeResetPassword,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+            if (data?.data?.auth_token) {
+              console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
+              await setAsyncToken(data?.data?.auth_token);
+              dispatch(setAuthToken(data.data?.auth_token));
+              dispatch(setUserInfo(data.data?.user));
+              await setAsyncUserInfo(data.data?.user);
+              dispatch(setGuestLogin(false));
+            }
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeResetPassword Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -516,4 +564,6 @@ export const {
   useEmployeeDeleteAccountMutation,
   useEmployeeForgotPasswordMutation,
   useEmployeeOTPVerifyMutation,
+  useEmployeeResendOTPMutation,
+  useEmployeeResetPasswordMutation,
 } = authApi;

@@ -91,80 +91,43 @@ const ChangePassword = () => {
     }
   };
 
-  const renderStepUI = () => {
-    switch (changePasswordSteps) {
-      case 1:
-        return (
-          <>
-            <Text style={passwordStyles.description}>
-              {t(
-                'Enter the email associated with your account and we’ll send an email instructions to reset your password.',
-              )}
-            </Text>
-            <View style={passwordStyles.inputView}>
-              <Text style={passwordStyles.label}>{t('Your Email')}</Text>
-              <CustomTextInput
-                value={email}
-                style={passwordStyles.emailText}
-                placeholder="Enter your email"
-                placeholderTextColor={colors._7B7878}
-                containerStyle={passwordStyles.inputcontainer}
-                onChangeText={setEmail}
-              />
-            </View>
-            <GradientButton
-              type="Employee"
-              title="Submit"
-              onPress={handleVerifyEmail}
-              style={passwordStyles.button}
-            />
-          </>
-        );
-      case 2:
-        return (
-          <View style={passwordStyles.inputView}>
-            <Text style={passwordStyles.label}>{t('Old Password')}</Text>
-            <CustomTextInput
-              value={oldPassword}
-              style={passwordStyles.emailText}
-              placeholder="Enter old password"
-              placeholderTextColor={colors._7B7878}
-              containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
-              onChangeText={setOldPassword}
-            />
-            <Text style={passwordStyles.label}>{t('New Password')}</Text>
-            <CustomTextInput
-              value={newPassword}
-              style={passwordStyles.emailText}
-              placeholder="Enter new password"
-              placeholderTextColor={colors._7B7878}
-              containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
-              onChangeText={setNewPassword}
-            />
-            <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
-            <CustomTextInput
-              value={confirmPassword}
-              style={passwordStyles.emailText}
-              placeholder="Confirm new password"
-              placeholderTextColor={colors._7B7878}
-              containerStyle={passwordStyles.inputcontainer}
-              secureTextEntry
-              onChangeText={setConfirmPassword}
-            />
-            <GradientButton
-              type="Employee"
-              title="Submit"
-              style={passwordStyles.button}
-              onPress={handleChangePassword}
-            />
-          </View>
-        );
-      default:
-        return null;
-    }
-  };
+  // const renderStepUI = () => {
+  //   switch (changePasswordSteps) {
+  //     case 1:
+  //       return (
+  //         <>
+  //           <Text style={passwordStyles.description}>
+  //             {t(
+  //               'Enter the email associated with your account and we’ll send an email instructions to reset your password.',
+  //             )}
+  //           </Text>
+  //           <View style={passwordStyles.inputView}>
+  //             <Text style={passwordStyles.label}>{t('Your Email')}</Text>
+  //             <CustomTextInput
+  //               value={email}
+  //               style={passwordStyles.emailText}
+  //               placeholder="Enter your email"
+  //               placeholderTextColor={colors._7B7878}
+  //               containerStyle={passwordStyles.inputcontainer}
+  //               onChangeText={setEmail}
+  //             />
+  //           </View>
+  //           <GradientButton
+  //             type="Employee"
+  //             title="Submit"
+  //             onPress={handleVerifyEmail}
+  //             style={passwordStyles.button}
+  //           />
+  //         </>
+  //       );
+  //     case 2:
+  //       return (
+
+  //       );
+  //     default:
+  //       return null;
+  //   }
+  // };
 
   return (
     <LinearContainer
@@ -192,7 +155,45 @@ const ChangePassword = () => {
         </TouchableOpacity>
         <Text style={passwordStyles.title}>{t('Change Password')}</Text>
 
-        {renderStepUI()}
+        {/* {renderStepUI()} */}
+        <View style={passwordStyles.inputView}>
+          <Text style={passwordStyles.label}>{t('Old Password')}</Text>
+          <CustomTextInput
+            showRightIcon
+            value={oldPassword}
+            style={passwordStyles.emailText}
+            placeholder="Enter old password"
+            placeholderTextColor={colors._7B7878}
+            containerStyle={passwordStyles.inputcontainer}
+            onChangeText={setOldPassword}
+          />
+          <Text style={passwordStyles.label}>{t('New Password')}</Text>
+          <CustomTextInput
+            showRightIcon
+            value={newPassword}
+            style={passwordStyles.emailText}
+            placeholder="Enter new password"
+            placeholderTextColor={colors._7B7878}
+            containerStyle={passwordStyles.inputcontainer}
+            onChangeText={setNewPassword}
+          />
+          <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
+          <CustomTextInput
+            showRightIcon
+            value={confirmPassword}
+            style={passwordStyles.emailText}
+            placeholder="Confirm new password"
+            placeholderTextColor={colors._7B7878}
+            containerStyle={passwordStyles.inputcontainer}
+            onChangeText={setConfirmPassword}
+          />
+          <GradientButton
+            type="Employee"
+            title="Submit"
+            style={passwordStyles.button}
+            onPress={handleChangePassword}
+          />
+        </View>
       </KeyboardAwareScrollView>
     </LinearContainer>
   );

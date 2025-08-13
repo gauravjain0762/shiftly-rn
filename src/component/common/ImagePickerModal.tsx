@@ -3,15 +3,10 @@ import {View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {colors} from '../../theme/colors';
+import {hp, wp} from '../../theme/fonts';
 
-const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
-  const [image, setimage] = useState(undefined);
-
-  const handleSelect = action => {
-    console.log(`User selected: ${action}`);
-    setActionSheet(false);
-    // Add your logic here (e.g., open camera or image picker)
-  };
+const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}: any) => {
+  const [image, setImage] = useState<any>(undefined);
 
   const closeActionSheet = () => setActionSheet(false);
 
@@ -20,69 +15,61 @@ const ImagePickerModal = ({actionSheet, setActionSheet, onUpdate}) => {
       mediaType: 'photo',
       cropping: true,
     }).then(image => {
-      if (Platform.OS == 'android') {
+      if (Platform.OS === 'android') {
         image.sourceURL = image.path;
-      } else {
-        if (image.sourceURL == null) {
-          image.sourceURL = image.path;
-        }
+      } else if (image.sourceURL == null) {
+        image.sourceURL = image.path;
       }
-      let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
-      setimage(temp);
+      const temp = {
+        ...image,
+        name: 'image_' + new Date().getTime() + '.png',
+      };
+      setImage(temp);
       closeActionSheet();
       onUpdate(temp);
     });
   };
+
   const openGallery = () => {
     ImageCropPicker.openPicker({
       mediaType: 'photo',
       cropping: true,
     }).then(image => {
-      if (Platform.OS == 'android') {
+      if (Platform.OS === 'android') {
         image.sourceURL = image.path;
-      } else {
-        if (image.sourceURL == null) {
-          image.sourceURL = image.path;
-        }
+      } else if (image.sourceURL == null) {
+        image.sourceURL = image.path;
       }
-      let temp = {...image, name: image.path.split('/').pop()};
-      setimage(temp);
+      const temp = {...image, name: image.path.split('/').pop()};
+      setImage(temp);
       closeActionSheet();
       onUpdate(temp);
     });
   };
 
   return (
-    <>
-      <Modal
-        isVisible={actionSheet}
-        onBackdropPress={() => setActionSheet(false)}
-        style={styles.modal}>
-        <View style={styles.container}>
-          <View style={styles.option1}>
-            <TouchableOpacity
-              style={styles.option2}
-              onPress={() => openGallery('library')}>
-              <Text style={styles.text}>Select From Library</Text>
-            </TouchableOpacity>
-            <View
-              style={{borderWidth: 0.5, width: '100%', borderColor: '#041428'}}
-            />
-            <TouchableOpacity
-              style={styles.option2}
-              onPress={() => openPicker('camera')}>
-              <Text style={styles.text}>Take a photo</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.option, styles.cancel]}
-            onPress={() => setActionSheet(false)}>
-            <Text style={[styles.text, {fontWeight: '600'}]}>Cancel</Text>
+    <Modal
+      isVisible={actionSheet}
+      onBackdropPress={closeActionSheet}
+      style={styles.modal}>
+      <View style={styles.container}>
+        <View style={styles.optionGroup}>
+          <TouchableOpacity style={styles.optionButton} onPress={openGallery}>
+            <Text style={styles.text}>Select From Library</Text>
+          </TouchableOpacity>
+          <View style={styles.separator} />
+          <TouchableOpacity style={styles.optionButton} onPress={openPicker}>
+            <Text style={styles.text}>Take a Photo</Text>
           </TouchableOpacity>
         </View>
-      </Modal>
-    </>
+
+        <TouchableOpacity
+          style={[styles.cancelButton]}
+          onPress={closeActionSheet}>
+          <Text style={[styles.text, styles.cancelText]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
   );
 };
 
@@ -92,32 +79,38 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   container: {
-    padding: 16,
+    padding: wp(16),
   },
-  option1: {
-    backgroundColor: '#FAEED2',
+  optionGroup: {
+    backgroundColor: colors._FAEED2 || '#FAEED2',
     alignItems: 'center',
-    borderRadius: 16,
-    marginBottom: 12,
+    borderRadius: wp(16),
+    marginBottom: hp(12),
+    overflow: 'hidden',
   },
-  option2: {
-    backgroundColor: '#FAEED2',
-    paddingVertical: 21,
+  optionButton: {
+    paddingVertical: hp(20),
     alignItems: 'center',
+    width: '100%',
   },
-  option: {
-    backgroundColor: '#FAEED2',
-    paddingVertical: 18,
+  separator: {
+    height: 1,
+    backgroundColor: colors._050505,
+    width: '100%',
+  },
+  cancelButton: {
+    backgroundColor: colors._FAEED2 || '#FAEED2',
+    paddingVertical: hp(18),
     alignItems: 'center',
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-  cancel: {
-    marginTop: 8,
-    backgroundColor: '#FAEED2',
+    borderRadius: wp(16),
+    marginTop: hp(8),
   },
   text: {
-    color: '#000000',
+    color: colors.black || '#000000',
+    fontSize: wp(16),
+  },
+  cancelText: {
+    fontWeight: '600',
   },
 });
 
