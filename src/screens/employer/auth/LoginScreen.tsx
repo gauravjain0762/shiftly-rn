@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {commonFontStyle, hp} from '../../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -61,7 +61,7 @@ const LoginScreen = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[AppStyles.flexGrow, {}]}
         showsVerticalScrollIndicator={false}>
-        <Image source={IMAGES.logog} style={styles.logo} />
+        <Image source={IMAGES.logoText} style={styles.logo} />
 
         <View style={[styles.inputWrapper, {marginBottom: hp(67)}]}>
           <Text style={styles.labelText}>Enter your email to login</Text>
@@ -91,7 +91,9 @@ const LoginScreen = () => {
           />
         </View>
 
-        <TouchableOpacity activeOpacity={0.5} onPress={() => navigateTo(SCREENS.EmpForgotPassword)}>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={() => navigateTo(SCREENS.EmpForgotPassword)}>
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
 
@@ -122,7 +124,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     alignSelf: 'center',
-    height: 60,
+    height: hp(110),
+    width: wp(110),
     resizeMode: 'contain',
     marginBottom: hp(84),
     marginTop: hp(100),

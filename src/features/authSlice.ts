@@ -23,6 +23,29 @@ interface AppState {
   skills: any[];
   forgotPasswordSteps: number;
   changePasswordSteps: number;
+  createEmployeeAccount: {
+    step: number;
+    name: string;
+    email: string;
+    pin: string;
+    timer: number;
+    showModal: boolean;
+    imageModal: boolean;
+    selected: string;
+    selected1: string;
+    selected2: string;
+    selected3: string;
+    dob: string;
+    isPickerVisible: boolean;
+    open: boolean;
+    password: string[];
+    full_password: string;
+    full_otp: string;
+    phone: string | undefined;
+    phone_code: string | undefined;
+    describe: string;
+    picture: string;
+  };
 }
 
 const initialState: AppState = {
@@ -66,6 +89,29 @@ const initialState: AppState = {
   skills: [],
   forgotPasswordSteps: 1,
   changePasswordSteps: 1,
+  createEmployeeAccount: {
+    step: 1,
+    name: '',
+    email: '',
+    pin: '',
+    timer: 30,
+    showModal: false,
+    imageModal: false,
+    selected: "I'm a job seeker",
+    selected1: 'Male',
+    selected2: 'United State America',
+    selected3: 'United State America',
+    dob: new Date().toLocaleDateString('en-CA'),
+    isPickerVisible: false,
+    open: false,
+    password: new Array(8).fill(''),
+    full_password: '',
+    full_otp: '',
+    phone: '',
+    phone_code: '971',
+    describe: "I'm a job seeker",
+    picture: 'https://sky.devicebee.com/Shiftly/public/uploads//blank.png',
+  },
 };
 
 const authSlice = createSlice({
@@ -142,6 +188,22 @@ const authSlice = createSlice({
       state.changePasswordSteps = action.payload;
     },
     logouts: () => initialState,
+    setCreateEmployeeAccount: (
+      state,
+      action: PayloadAction<Partial<AppState['createEmployeeAccount']>>,
+    ) => {
+      state.createEmployeeAccount = {
+        ...state.createEmployeeAccount,
+        ...action.payload,
+      };
+    },
+    clearEmployeeAccount: state => {
+      const savedSteps = state?.createEmployeeAccount?.step;
+      return {
+        ...initialState,
+        steps: savedSteps,
+      };
+    },
   },
 });
 
@@ -194,6 +256,8 @@ export const {
   setSkills,
   setForgotPasswordSteps,
   setChangePasswordSteps,
+  setCreateEmployeeAccount,
+  clearEmployeeAccount,
 } = authSlice.actions;
 
 export default authSlice.reducer;

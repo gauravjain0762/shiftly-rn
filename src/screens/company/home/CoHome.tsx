@@ -1,47 +1,53 @@
-import {FlatList, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
+import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
 import {HomeHeader, LinearContainer} from '../../../component';
 import {AppStyles} from '../../../theme/appStyles';
 import FeedCard from '../../../component/employe/FeedCard';
 import {hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
 import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
-
-const PER_PAGE = 20;
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const CoHome = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  const {data: getPost, isLoading: Loading} = useGetCompanyPostsQuery({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [allPosts, setAllPosts] = React.useState([]);
-  console.log(allPosts, 'getPost');
+  console.log("🔥🔥🔥 ~ CoHome ~ userInfo:", userInfo)
+
+  const {
+    data: getPost,
+    isLoading,
+    isFetching,
+  } = useGetCompanyPostsQuery({page: currentPage});
+
+  const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
+  const posts = getPost?.data?.posts ?? [];
 
   useEffect(() => {
-    if (getPost) {
-      const newData = getPost.data.posts;
-      setAllPosts(prev =>
-        currentPage === 1 ? newData : [...prev, ...newData],
-      );
-      if (newData?.length < PER_PAGE) {
-        setIsLoading(false);
-      }
+    if (!getPost) return;
+
+    if (currentPage === 1) {
+      setAllPosts(posts);
+    } else {
+      setAllPosts(prev => [...prev, ...posts]);
     }
-  }, [getPost, currentPage]);
+    setIsLoadingMore(false);
+  }, [getPost, posts, currentPage]);
 
   const handleLoadMore = () => {
-    if (
-      !isLoading &&
-      getPost?.data?.pagination?.current_page <
-        getPost?.data?.pagination?.total_pages
-    ) {
-      setIsLoading(true);
+    if (!isFetching && !isLoadingMore && currentPage < totalPages) {
+      setIsLoadingMore(true);
       setCurrentPage(prev => prev + 1);
     }
+  };
+
+  const handleRefresh = () => {
+    setCurrentPage(1);
+    setAllPosts([]);
   };
 
   return (
@@ -54,25 +60,29 @@ const CoHome = () => {
         />
       </View>
 
-      {Loading ? (
+      {isLoading && currentPage === 1 ? (
         <PostSkeleton />
       ) : (
         <FlatList
+          data={allPosts}
           style={AppStyles.flex}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollcontainer}
           ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
-          data={allPosts}
-          renderItem={({item, index}: any) => (
-            <FeedCard
-              key={index}
-              item={item}
-              isFollow
-              // onPressCard={() => navigateTo(SCREENS.CompanyProfile)}
-            />
-          )}
+          renderItem={({item}) => <FeedCard item={item} isFollow />}
           onEndReachedThreshold={0.5}
           onEndReached={handleLoadMore}
+          refreshing={isLoading && currentPage === 1}
+          onRefresh={handleRefresh}
+          keyExtractor={(_, index) => index.toString()}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <ActivityIndicator
+                size="large"
+                style={{marginVertical: hp(10)}}
+              />
+            ) : null
+          }
         />
       )}
     </LinearContainer>

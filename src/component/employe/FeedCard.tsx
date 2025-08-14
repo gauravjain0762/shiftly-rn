@@ -16,19 +16,23 @@ const FeedCard: FC<card> = ({
   item,
   isFollow = false,
 }) => {
+  console.log("🔥🔥🔥 ~ FeedCard ~ item:", item)
   return (
     <TouchableOpacity onPress={() => onPressCard()} style={styles.card}>
       <View style={styles.cardHeader}>
         <Image
           source={
             item?.company_id?.logo ? {uri: item?.company_id?.logo} : IMAGES.logo
-          } // Replace with hotel logo
+          }
           style={styles.logo}
         />
         <View>
           <Text style={styles.hotelName}>{item?.company_id?.company_name}</Text>
           <Text style={styles.walkIn}>
-            Walk-in Interview · <Text style={{color: colors._A3A3A3}}>{getTimeAgo(item?.createdAt)}</Text>
+            Walk-in Interview ·{' '}
+            <Text style={{color: colors._A3A3A3}}>
+              {getTimeAgo(item?.createdAt)}
+            </Text>
           </Text>
         </View>
         {/* {isFollow ? (

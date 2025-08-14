@@ -20,8 +20,8 @@ type picker = {
   downIcon?: ImageStyle;
   callingCode?: string;
   phone?: string;
-  setPhone?: any;
-  setCallingCode?: any;
+  onPhoneChange?: any;
+  onCallingCodeChange?: any;
 };
 
 const PhoneInput: FC<picker> = ({
@@ -29,18 +29,18 @@ const PhoneInput: FC<picker> = ({
   downIcon,
   callingCode,
   phone,
-  setPhone,
-  setCallingCode,
+  onPhoneChange,
+  onCallingCodeChange,
 }) => {
   // const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('AE');
+  const [countryCode, setCountryCode] = useState<any>('AE');
   const [showModal, setShowModal] = useState(false);
   // const [callingCode, setCallingCode] = useState('971');
   const [valid, setValid] = useState(true);
   const {t, i18n} = useTranslation();
   const handlePhoneChange = (text: string) => {
-    setPhone(text);
-    setValid(/^[2-9]\d{6,9}$/.test(text.replace(/\s/g, ''))); // basic validation
+    onPhoneChange?.(text);
+    setValid(/^[2-9]\d{6,9}$/.test(text.replace(/\s/g, '')));
   };
 
   return (
@@ -54,7 +54,7 @@ const PhoneInput: FC<picker> = ({
           flagSize={50}
           onSelect={country => {
             setCountryCode(country.cca2);
-            setCallingCode(country.callingCode[0]);
+            onCallingCodeChange?.(country.callingCode[0]);
           }}
           onClose={() => {
             setShowModal(false);
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   input: {
-    ...commonFontStyle(400, 22, colors._4A4A4A),
+    ...commonFontStyle(400, 22, colors._FBE7BD),
     flex: 1,
     marginLeft: 24,
   },

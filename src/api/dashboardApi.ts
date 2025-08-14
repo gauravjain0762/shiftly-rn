@@ -30,6 +30,7 @@ export const dashboardApi = createApi({
     'EmployeeApplyJob',
     'GetEmployeePost',
     'GetCompanyJobDetails',
+    'AddUpdateEducation',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -342,6 +343,23 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    addUpdateEducation: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.addUpdateEducation,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: true,
+      }),
+      invalidatesTags: ['AddUpdateEducation'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('AddUpdateEducation Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -362,4 +380,5 @@ export const {
   useEmployeeApplyJobMutation,
   useGetEmployeePostsQuery,
   useGetCompanyJobDetailsQuery,
+  useAddUpdateEducationMutation,
 } = dashboardApi;

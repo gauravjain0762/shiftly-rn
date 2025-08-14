@@ -662,27 +662,16 @@ const CreateAccount = () => {
                 {t('What is your phone number?')}
               </Text>
               <PhoneInput
-                callingCodeStyle={{
-                  ...commonFontStyle(400, 22, colors._4A4A4A),
-                }}
                 callingCode={companyRegisterData?.phone_code}
                 phone={companyRegisterData?.phone}
                 downIcon={{
                   tintColor: colors._4A4A4A,
                 }}
-                setPhone={(e: any) =>
-                  dispatch(
-                    setCompanyRegisterData({
-                      phone: e,
-                    }),
-                  )
+                onPhoneChange={(e: any) =>
+                  dispatch(setCompanyRegisterData({phone: e}))
                 }
-                setCallingCode={(e: any) =>
-                  dispatch(
-                    setCompanyRegisterData({
-                      phone_code: e,
-                    }),
-                  )
+                onCallingCodeChange={(e: any) =>
+                  dispatch(setCompanyRegisterData({phone_code: e}))
                 }
               />
             </View>

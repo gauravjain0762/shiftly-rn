@@ -24,16 +24,12 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useGetEmployeeJobDetailsQuery} from '../../../api/dashboardApi';
 
 const JobDetail = () => {
-  const {t, i18n} = useTranslation();
-  const {params} = useRoute<RouteProp<any, any>>();
-  const data = params?.data;
-  console.log("🔥 ~ JobDetail ~ data:", data)
-  const [modal, setModal] = useState(false);
+  const {t} = useTranslation();
   const {bottom} = useSafeAreaInsets();
-  const {data: jobDetail} = useGetEmployeeJobDetailsQuery(
-    '6888d404377fe4a171510be5',
-  );
-  // console.log("🔥🔥 ~ JobDetail ~ jobDetail:", jobDetail)
+  const [modal, setModal] = useState(false);
+  const {params} = useRoute<RouteProp<any, any>>();
+  const data = params?.item;
+  // const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
 
   return (
     <LinearContainer

@@ -32,8 +32,14 @@ const LocationContainer: FC<map> = ({
   useEffect(() => {
     getLocation();
   }, []);
-  const [location, setLocation] = useState(undefined);
-  console.log('🔥🔥🔥 ~ LocationContainer ~ location:', location);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  }>({
+    latitude: 0,
+    longitude: 0,
+  });
+  // console.log('🔥🔥🔥 ~ LocationContainer ~ location:', location);
   const getLocation = async () => {
     const res = await getAsyncUserLocation();
     if (res) {
@@ -121,7 +127,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors._0B3970,
     paddingHorizontal: wp(22),
     paddingVertical: hp(12),
-    borderRadius: 15,
   },
   mapImage: {
     height: hp(130),

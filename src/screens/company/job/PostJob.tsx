@@ -210,7 +210,7 @@ const PostJob = () => {
       }
     | undefined
   >();
-  console.log('🔥 ~ PostJob ~ userAddress:', userAddress);
+  // console.log('🔥 ~ PostJob ~ userAddress:', userAddress);
 
   const getUserLocation = async () => {
     try {
@@ -812,7 +812,7 @@ const PostJob = () => {
               <LocationContainer
                 address={userAddress?.address}
                 onPressMap={() => {
-                  navigateTo(SCREENS.LocationScreen);
+                  navigateTo(SCREENS.LocationScreen, {userAddress});
                 }}
                 containerStyle={styles.map}
                 lat={userAddress?.lat}

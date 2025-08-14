@@ -1,16 +1,15 @@
 import {
   Dimensions,
   Image,
-  Keyboard,
-  KeyboardAvoidingView,
+  NativeSyntheticEvent,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TextInputKeyPressEventData,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
@@ -18,7 +17,6 @@ import {
   CustomTextInput,
   GradientButton,
   LinearContainer,
-  PinCodeInputs,
 } from '../../../component';
 import * as Progress from 'react-native-progress';
 import {SCREEN_WIDTH, commonFontStyle, wp} from '../../../theme/fonts';
@@ -32,29 +30,66 @@ import {navigationRef} from '../../../navigation/RootContainer';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import moment from 'moment';
-import {navigateTo} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  navigateTo,
+  successToast,
+} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  clearEmployeeAccount,
+  setCreateEmployeeAccount,
+  setUserInfo,
+} from '../../../features/authSlice';
+import {
+  useEmployeeOTPVerifyMutation,
+  useEmployeeResendOTPMutation,
+  useEmployeeSignUpMutation,
+  useEmpUpdateProfileMutation,
+  useUpdateProfileMutation,
+} from '../../../api/authApi';
+import {RootState} from '../../../store';
 const {width} = Dimensions.get('window');
 
-const PIN_LENGTH = 8;
 const SignUp = () => {
-  const [step, setStep] = useState(1);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [pin, setPin] = useState('');
-  const {t, i18n} = useTranslation();
-  const [timer, setTimer] = useState(30);
-  const [showModal, setShowModal] = useState(false);
-  const [imageModal, setImageModal] = useState(false);
-  const [selected, setSelected] = useState("I'm a job seeker");
-  const [selected1, setSelected1] = useState('Male');
-  const [selected2, setSelected2] = useState('United State America');
-  const [selected3, setSelected3] = useState('United State America');
-  const [date, setDate] = useState(new Date('2001-02-10'));
-  const [isPickerVisible, setPickerVisible] = useState(false);
-  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch<any>();
+  const {t} = useTranslation<any>();
+  const {fcmToken, userInfo} = useSelector((state: RootState) => state.auth);
+  const signupData = useSelector(
+    (state: any) => state.auth.createEmployeeAccount,
+  );
+
+  const {
+    step,
+    name,
+    email,
+    timer,
+    showModal,
+    imageModal,
+    selected,
+    selected1,
+    selected2,
+    selected3,
+    dob,
+    open,
+    full_password,
+    phone,
+    phone_code,
+    describe,
+    picture,
+  } = signupData;
+
+  const [password, setPassword] = useState(new Array(8).fill(''));
+  const [otp, setOtp] = useState(new Array(6).fill(''));
+  const inputRefs = useRef<any>([]);
+  const inputRefsOtp = useRef<any>([]);
+  const [empSignUp] = useEmployeeSignUpMutation({});
+  const [empOTPVerify] = useEmployeeOTPVerifyMutation({});
+  const [employeeResendOTP] = useEmployeeResendOTPMutation({});
+  const [empUpdateProfile] = useEmpUpdateProfileMutation({});
 
   const options = [
     "I'm currently working in hospitality",
@@ -68,48 +103,177 @@ const SignUp = () => {
     'United Kindom',
   ];
 
+  // Update Redux state helper
+  const updateSignupData = (
+    updates: Partial<{
+      step: number;
+      name: string;
+      email: string;
+      pin: string;
+      timer: number;
+      showModal: boolean;
+      imageModal: boolean;
+      selected: string;
+      selected1: string;
+      selected2: string;
+      selected3: string;
+      dob: string;
+      isPickerVisible: boolean;
+      open: boolean;
+      full_password: string | undefined;
+      full_otp: string | undefined;
+      phone: string;
+      phone_code: string;
+      describe: string;
+      picture: string;
+    }>,
+  ) => {
+    dispatch(setCreateEmployeeAccount(updates));
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setStep(1);
-    }, 400);
-    return () => clearTimeout(timer);
+    if (signupData.step === undefined) {
+      updateSignupData({step: 1});
+    }
   }, []);
 
   // Countdown timer
   useEffect(() => {
     if (timer === 0) return;
     const interval = setInterval(() => {
-      setTimer(prev => prev - 1);
+      updateSignupData({timer: timer - 1});
     }, 1000);
     return () => clearInterval(interval);
   }, [timer]);
 
-  const nextStep = () => setStep(prev => prev + 1);
+  const handleRegister = async () => {
+    try {
+      const response = await empSignUp({
+        name: name,
+        email: email,
+        password: full_password,
+        phone_code: phone_code,
+        phone: phone,
+      }).unwrap();
+      // console.log('🔥 ~ handleRegister ~ response?.data:', response?.data);
 
-  const prevStep = (num?: any) => {
-    if (num == 1) {
-      navigationRef.goBack();
-    } else {
-      setStep(prev => prev - 1);
+      if (response?.status) {
+        successToast(response?.message);
+        dispatch(setUserInfo(response?.data?.user));
+        nextStep();
+      } else {
+        errorToast(response?.message);
+      }
+    } catch (error) {
+      console.error('Error registering user:', error);
     }
   };
 
-  const [password, setPassword] = useState(new Array(8).fill(''));
-  const [otp, setOtp] = useState(new Array(4).fill(''));
-  const inputRefs = useRef([]);
-  const inputRefsOtp = useRef([]);
+  const handleOTPVerify = async () => {
+    const verifyData = {
+      otp: otp.join(''),
+      user_id: userInfo?._id,
+      device_token: fcmToken ?? 'ddd',
+      device_type: Platform.OS,
+    };
+    console.log(' ~ handleOTPVerify ~ verifyData:', verifyData);
+    try {
+      const response = await empOTPVerify(verifyData).unwrap();
+      console.log('🔥 ~ handleOTPVerify ~ response?.data:', response?.data);
+      if (response?.status) {
+        successToast(response?.message);
+        dispatch(setUserInfo(response?.data?.user));
+        dispatch(clearEmployeeAccount());
+        nextStep();
+        updateSignupData({showModal: true});
+      } else {
+        errorToast(response?.message);
+      }
+    } catch (error) {
+      console.error('Error registering user:', error);
+    }
+  };
 
-  const handleChange = (text: any, index: any) => {
+  const handleResendOTP = async () => {
+    try {
+      const response = await employeeResendOTP({
+        user_id: userInfo?._id,
+      }).unwrap();
+
+      if (response?.status) {
+        successToast(response?.message);
+        dispatch(setUserInfo(response?.data?.user));
+        updateSignupData({timer: 30});
+        dispatch(clearEmployeeAccount());
+      } else {
+        errorToast(response?.message || 'Something went wrong');
+      }
+    } catch (error) {
+      console.error('Error handleResendOTP user:', error);
+    }
+  };
+
+  // console.log('🔥🔥🔥 ~ handleFinishSetup ~ updateData:', updateData);
+  const handleFinishSetup = async () => {
+    const updateData = {
+      about: 'describe',
+      dob: '09-10-2025',
+      gender: 'selected1',
+      nationality: 'selected2',
+      country: 'selected3',
+    };
+    try {
+      // const res = await empUpdateProfile(updateData).unwrap();
+      // console.log('🔥🔥 ~ handleFinishSetup ~ res:', res?.data);
+      // if (res?.status) {
+      //   successToast(res?.message);
+      //   dispatch(setUserInfo(res?.data?.user));
+        nextStep();
+      // } else {
+      //   errorToast(res?.message);
+      // }
+    } catch (error) {
+      console.error('Error handleFinishSetup user:', error);
+    }
+  };
+
+  const nextStep = () => {
+    dispatch(
+      setCreateEmployeeAccount({
+        step: signupData.step + 1,
+      }),
+    );
+  };
+  const prevStep = (num: number) => {
+    if (num == 1) {
+      navigationRef.goBack();
+    } else {
+      updateSignupData({step: step - 1});
+    }
+  };
+
+  const handleChange = (text: string, index: number) => {
     const newPass = [...password];
     newPass[index] = text;
     setPassword(newPass);
+
+    if (newPass.every(val => val !== '')) {
+      dispatch(
+        setCreateEmployeeAccount({
+          full_password: newPass.join(''),
+        }),
+      );
+    }
 
     if (text && index < 7) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyPress = (e: any, index: any) => {
+  const handleKeyPress = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    index: number,
+  ) => {
     if (
       e.nativeEvent.key === 'Backspace' &&
       password[index] === '' &&
@@ -118,25 +282,37 @@ const SignUp = () => {
       const newPass = [...password];
       newPass[index - 1] = '';
       setPassword(newPass);
+
+      dispatch(
+        setCreateEmployeeAccount({
+          full_password: newPass.join(''),
+        }),
+      );
+
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  const handleChangeOtp = (text: any, index: any) => {
-    const newPass = [...otp];
-    newPass[index] = text;
-    setOtp(newPass);
+  const handleChangeOtp = (text: string, index: number) => {
+    const newOtp = [...otp];
+    newOtp[index] = text;
+    setOtp(newOtp);
+    // updateSignupData({otp: newOtp});
 
     if (text && index < 7) {
       inputRefsOtp.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyPressOtp = (e: any, index: any) => {
+  const handleKeyPressOtp = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    index: number,
+  ) => {
     if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
-      const newPass = [...otp];
-      newPass[index - 1] = '';
-      setOtp(newPass);
+      const newOtp = [...otp];
+      newOtp[index - 1] = '';
+      setOtp(newOtp);
+      // updateSignupData({otp: newOtp});
       inputRefsOtp.current[index - 1]?.focus();
     }
   };
@@ -147,11 +323,11 @@ const SignUp = () => {
         return (
           <View style={styles.innerConrainer}>
             <View>
-              <Text style={styles.title}>{t('What’s your full name?')}</Text>
+              <Text style={styles.title}>{t(`What's your full name?`)}</Text>
               <CustomTextInput
                 placeholder={t('Type your name here...')}
                 placeholderTextColor={colors._F4E2B8}
-                onChangeText={(e: any) => setName(e)}
+                onChangeText={text => updateSignupData({name: text})}
                 value={name}
                 style={styles.input}
               />
@@ -159,7 +335,7 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={nextStep}
             />
           </View>
         );
@@ -174,7 +350,7 @@ const SignUp = () => {
               <CustomTextInput
                 placeholder={t('Type your email here...')}
                 placeholderTextColor={colors._F4E2B8}
-                onChangeText={(e: any) => setEmail(e)}
+                onChangeText={text => updateSignupData({email: text})}
                 value={email}
                 style={styles.input}
               />
@@ -182,7 +358,7 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={nextStep}
             />
           </View>
         );
@@ -193,54 +369,32 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               <View style={styles.info_row}>
-                {/* <Image source={IMAGES.info} style={styles.info} /> */}
                 <Text style={styles.infotext}>
                   {
                     'Password must include at least 8 characters, one uppercase letter, one number, and one symbol.'
                   }
                 </Text>
               </View>
-              {/* OTP Input */}
               <View style={styles.otpContainer}>
                 {password.map((val, idx) => (
                   <TextInput
                     key={idx}
-                    ref={el => (inputRefs.current[idx] = el)}
+                    ref={(el: any) => (inputRefs.current[idx] = el)}
                     value={val ? '*' : ''}
                     onChangeText={text => handleChange(text, idx)}
                     onKeyPress={e => handleKeyPress(e, idx)}
                     maxLength={1}
                     style={styles.otpBox}
                     keyboardType="decimal-pad"
-                    // secureTextEntry
                     autoFocus={idx === 0}
                   />
                 ))}
               </View>
-              {/* <SmoothPinCodeInput
-                ref={pinInput}
-                password
-                // mask="﹡"
-                cellSize={34}
-                codeLength={8}
-                value={pin}
-                autoFocus
-                onTextChange={(password: any) => setPin(password)}
-                cellStyle={styles.cellStyle}
-                cellStyleFocused={styles.cellStyleFocused}
-                // animationFocused={false}
-                textStyle={styles.textStyle}
-                containerStyle={styles.pinconatiner}
-                // onFulfill={code => {
-                //   Keyboard.dismiss(); // or pinInput.current?.blur()
-                // }}
-                // animated={false}
-              /> */}
             </View>
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={nextStep}
             />
           </View>
         );
@@ -252,12 +406,21 @@ const SignUp = () => {
               <Text style={styles.title}>
                 {t('What is your phone number?')}
               </Text>
-              <PhoneInput />
+              <PhoneInput
+                phone={phone}
+                callingCode={phone_code}
+                onPhoneChange={(e: any) => updateSignupData({phone: e})}
+                onCallingCodeChange={(e: any) =>
+                  updateSignupData({phone_code: e})
+                }
+              />
             </View>
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={() => {
+                handleRegister();
+              }}
             />
           </View>
         );
@@ -275,41 +438,26 @@ const SignUp = () => {
                 </View>
               )}
               <View style={styles.otpContainer}>
-                {otp.map((val, idx) => (
-                  <TextInput
-                    key={idx}
-                    ref={el => (inputRefsOtp.current[idx] = el)}
-                    value={val ? '*' : ''}
-                    onChangeText={text => handleChangeOtp(text, idx)}
-                    onKeyPress={e => handleKeyPressOtp(e, idx)}
-                    maxLength={1}
-                    style={styles.otpBox1}
-                    keyboardType="decimal-pad"
-                    autoFocus={idx === 0}
-                  />
-                ))}
+                {otp.map(
+                  (val: any, idx: React.Key | null | undefined | any) => (
+                    <TextInput
+                      key={idx}
+                      ref={(el: any) => (inputRefsOtp.current[idx] = el)}
+                      value={val ? '*' : ''}
+                      onChangeText={text => handleChangeOtp(text, idx)}
+                      onKeyPress={e => handleKeyPressOtp(e, idx)}
+                      maxLength={1}
+                      style={styles.otpBox1}
+                      keyboardType="decimal-pad"
+                      autoFocus={idx === 0}
+                    />
+                  ),
+                )}
               </View>
-              {/* <SmoothPinCodeInput
-                password
-                // mask="﹡"
-                cellSize={71}
-                codeLength={4}
-                value={otp}
-                autoFocus
-                onTextChange={(password: any) => setOtp(password)}
-                cellStyle={styles.cellStyle1}
-                cellStyleFocused={styles.cellStyleFocused}
-                animationFocused={false}
-                textStyle={styles.textStyle1}
-                containerStyle={styles.pinconatiner1}
-                animated={false}
-              /> */}
               <>
                 {timer == 0 ? (
                   <Text
-                    onPress={() => {
-                      setTimer(30);
-                    }}
+                    onPress={() => handleResendOTP()}
                     style={styles.resendText}>
                     {t('Resend')}
                   </Text>
@@ -322,15 +470,6 @@ const SignUp = () => {
                       {t("Didn't receive the code? Resend in")} {timer}
                       {'s'}
                     </Text>
-                    {/* {true && (
-                      <View style={styles.errorRow}>
-                        <Image
-                          source={IMAGES.error_icon}
-                          style={{width: 31, height: 28, resizeMode: 'contain'}}
-                        />
-                        <Text style={styles.errorText}>{t('Invalid OTP')}</Text>
-                      </View>
-                    )} */}
                   </View>
                 )}
               </>
@@ -338,7 +477,9 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={t('Next')}
-              onPress={() => setShowModal(true)}
+              onPress={() => {
+                handleOTPVerify();
+              }}
             />
           </View>
         );
@@ -349,10 +490,10 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t('Which best describes you?')}</Text>
               <CustomTextInput
-                placeholder={t('I’m a job seeker')}
+                placeholder={t(`I'm a job seeker`)}
                 placeholderTextColor={colors._F4E2B8}
-                onChangeText={(e: any) => setName(e)}
-                value={name}
+                onChangeText={text => updateSignupData({describe: text})}
+                value={describe}
                 style={styles.input1}
               />
               {options.map((option, index) => {
@@ -360,11 +501,11 @@ const SignUp = () => {
                 return (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.optionContainer,
-                      // isSelected && styles.selectedOptionContainer,
-                    ]}
-                    onPress={() => setSelected(option)}>
+                    style={[styles.optionContainer]}
+                    onPress={() => {
+                      updateSignupData({describe: option});
+                      updateSignupData({selected: option});
+                    }}>
                     <Text
                       style={[
                         styles.optionText,
@@ -385,7 +526,7 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={nextStep}
             />
           </View>
         );
@@ -399,36 +540,36 @@ const SignUp = () => {
               </Text>
               <Pressable
                 style={styles.dateRow}
-                onPress={() => {
-                  setOpen(true);
-                }}>
+                onPress={() => updateSignupData({open: true})}>
                 <Image
                   source={IMAGES.cake}
                   style={{width: 24, height: 24, resizeMode: 'contain'}}
                 />
                 <Text style={styles.dateText}>
-                  {moment(date).format('DD/MM/YYYY')}
+                  {dob
+                    ? moment(dob).format('YYYY-MM-DD')
+                    : moment().format('YYYY-MM-DD')}
                 </Text>
               </Pressable>
 
               <DateTimePicker
-                value={new Date(date)}
+                value={dob ? new Date(dob) : new Date()}
                 display={Platform.OS == 'ios' ? 'spinner' : 'default'}
                 isVisible={open}
                 maximumDate={new Date()}
                 onConfirm={dates => {
-                  setOpen(false);
-
-                  if (dates) setDate(dates);
+                  updateSignupData({
+                    open: false,
+                    dob: moment(dates).format('YYYY-MM-DD'),
+                  });
                 }}
-                onCancel={() => setOpen(false)}
+                onCancel={() => updateSignupData({open: false})}
               />
 
               <View style={styles.underline} />
               <Text style={[styles.title, {marginTop: 40}]}>
                 {t('What is your gender?')}
               </Text>
-              {/* <CustomCalendar /> */}
               <Pressable style={styles.dateRow} onPress={() => {}}>
                 <Text style={styles.dateText}>{selected1}</Text>
               </Pressable>
@@ -438,11 +579,8 @@ const SignUp = () => {
                 return (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.optionContainer,
-                      // isSelected && styles.selectedOptionContainer,
-                    ]}
-                    onPress={() => setSelected1(option)}>
+                    style={[styles.optionContainer]}
+                    onPress={() => updateSignupData({selected1: option})}>
                     <Text
                       style={[
                         styles.optionText,
@@ -463,7 +601,7 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={nextStep}
             />
           </View>
         );
@@ -474,7 +612,7 @@ const SignUp = () => {
             <ScrollView
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}>
-              <Text style={styles.title}>{t('Select your nationality ')}</Text>
+              <Text style={styles.title}>{t('Select your nationality ')}</Text>
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center'}]}
                 onPress={() => {}}>
@@ -496,11 +634,8 @@ const SignUp = () => {
                 return (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.optionContainer,
-                      // isSelected && styles.selectedOptionContainer,
-                    ]}
-                    onPress={() => setSelected2(option)}>
+                    style={[styles.optionContainer]}
+                    onPress={() => updateSignupData({selected2: option})}>
                     <Image
                       source={IMAGES.flag}
                       style={{
@@ -529,7 +664,6 @@ const SignUp = () => {
               <Text style={[styles.title, {marginTop: 27}]}>
                 {t('Where are you currently residing?')}
               </Text>
-              {/* <CustomCalendar /> */}
               <Pressable
                 style={[styles.dateRow, {alignItems: 'center', marginTop: 27}]}
                 onPress={() => {}}>
@@ -551,11 +685,8 @@ const SignUp = () => {
                 return (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.optionContainer,
-                      // isSelected && styles.selectedOptionContainer,
-                    ]}
-                    onPress={() => setSelected3(option)}>
+                    style={[styles.optionContainer]}
+                    onPress={() => updateSignupData({selected3: option})}>
                     <Image
                       source={IMAGES.flag}
                       style={{
@@ -586,7 +717,7 @@ const SignUp = () => {
             <GradientButton
               style={[styles.btn]}
               title={'Next'}
-              onPress={() => nextStep()}
+              onPress={nextStep}
             />
           </View>
         );
@@ -605,14 +736,17 @@ const SignUp = () => {
               </Text>
 
               <TouchableOpacity
-                onPress={() => {
-                  setImageModal(true);
-                }}
+                onPress={() => updateSignupData({imageModal: true})}
                 style={styles.uploadBox}>
                 <View style={styles.imagePlaceholder}>
                   <Image
-                    source={IMAGES.user} // Replace with your own image
-                    style={{width: 91, height: 100, top: 15}}
+                    source={picture ? {uri: picture?.path} : IMAGES.user}
+                    style={{
+                      width: wp(120),
+                      height: hp(120),
+                      resizeMode: 'contain',
+                      borderRadius: hp(100),
+                    }}
                     resizeMode="cover"
                   />
                 </View>
@@ -624,7 +758,7 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={t('Finish Setup')}
-              onPress={() => nextStep()}
+              onPress={handleFinishSetup}
             />
           </View>
         );
@@ -642,7 +776,6 @@ const SignUp = () => {
             </View>
             <View>
               <CustomBtn
-                // style={styles.btn}
                 label={t('Complete My Profile')}
                 onPress={() => navigateTo(SCREENS.CreateProfileScreen)}
                 outline={true}
@@ -680,9 +813,7 @@ const SignUp = () => {
         style={styles.container}>
         <View style={styles.rowView}>
           <TouchableOpacity
-            onPress={() => {
-              prevStep(step);
-            }}
+            onPress={() => prevStep(step)}
             hitSlop={8}
             style={[styles.backBtn, {flex: 1}]}>
             <Image
@@ -692,11 +823,7 @@ const SignUp = () => {
             />
           </TouchableOpacity>
           {step == 9 && (
-            <TouchableOpacity
-              onPress={() => {
-                nextStep();
-              }}
-              style={styles.skipBtn}>
+            <TouchableOpacity onPress={nextStep} style={styles.skipBtn}>
               <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
           )}
@@ -706,20 +833,17 @@ const SignUp = () => {
       <WelcomeModal
         visible={showModal}
         onClose={() => {
-          setShowModal(false);
-          nextStep();
+          updateSignupData({showModal: false});
         }}
       />
       <ImagePickerModal
         actionSheet={imageModal}
-        setActionSheet={() => {
-          setImageModal(false);
-        }}
+        setActionSheet={() => updateSignupData({imageModal: false})}
+        onUpdate={(image: any) => updateSignupData({picture: image})}
       />
     </LinearContainer>
   );
 };
-
 export default SignUp;
 
 const styles = StyleSheet.create({
@@ -908,8 +1032,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   otpBox1: {
-    width: 70,
-    height: 50,
+    width: wp(40),
+    height: hp(50),
     borderBottomWidth: 2,
     borderColor: '#ffeecf',
     textAlign: 'center',

@@ -24,18 +24,19 @@ import {
   successToast,
 } from '../../../utils/commonFunction';
 import {logouts, setAuthToken} from '../../../features/authSlice';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {clearAsync} from '../../../utils/asyncStorage';
 import {
   useEmployeeDeleteAccountMutation,
   useEmployeeLogoutMutation,
 } from '../../../api/authApi';
-import {AppDispatch, persistor} from '../../../store';
+import {AppDispatch, persistor, RootState} from '../../../store';
 import LanguageModal from '../../../component/common/LanguageModel';
 
 const AccountScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [empLogout] = useEmployeeLogoutMutation({});
+  const {userInfo} = useSelector((state: RootState) => state.auth);
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [employeeDeleteAccount] = useEmployeeDeleteAccountMutation({});
   const [deletepopupVisible, setdeletePopupVisible] = useState<boolean>(false);
@@ -159,7 +160,11 @@ const AccountScreen = () => {
           title={'Account'}
           RightIcon={
             <Image
-              source={{uri: 'https://randomuser.me/api/portraits/women/44.jpg'}}
+              source={
+                userInfo?.picture
+                  ? {uri: userInfo?.picture}
+                  : {uri: 'https://randomuser.me/api/portraits/women/44.jpg'}
+              }
               style={styles.avatar}
             />
           }

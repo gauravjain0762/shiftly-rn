@@ -26,6 +26,7 @@ import {useLazyGetEmployeeJobsQuery} from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
 import RangeSlider from '../../../component/common/RangeSlider';
 import {SLIDER_WIDTH} from '../../company/job/CoJob';
+import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 
 const carouselImages = [
   'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
@@ -76,7 +77,7 @@ const JobsScreen = () => {
       : undefined,
   };
 
-  const [trigger, {data}] = useLazyGetEmployeeJobsQuery();
+  const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
 
   useEffect(() => {
@@ -161,23 +162,27 @@ const JobsScreen = () => {
         ))}
       </View>
       <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
-      <FlatList
-        data={jobList}
-        style={AppStyles.flex}
-        showsVerticalScrollIndicator={false}
-        renderItem={(item: any, index: number) => (
-          <JobCard
-            key={index}
-            onPress={() =>
-              navigateTo(SCREEN_NAMES.JobDetail, {data: item?.item})
-            }
-            {...item}
-          />
-        )}
-        keyExtractor={item => item.id}
-        ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
-        contentContainerStyle={styles.scrollContainer}
-      />
+      {isLoading ? (
+        <MyJobsSkeleton />
+      ) : (
+        <FlatList
+          data={jobList}
+          style={AppStyles.flex}
+          showsVerticalScrollIndicator={false}
+          renderItem={({item, index}: any) => (
+            <JobCard
+              key={index}
+              item={item}
+              onPress={() =>
+                navigateTo(SCREEN_NAMES.JobDetail, {item: item})
+              }
+            />
+          )}
+          keyExtractor={(_, index) => index.toString()}
+          ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
+          contentContainerStyle={styles.scrollContainer}
+        />
+      )}
 
       <BottomModal
         visible={isFilterModalVisible}

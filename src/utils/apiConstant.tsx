@@ -57,7 +57,8 @@ export const API = {
 
   // UserDetails
   getProfile: '/getProfile',
-  updateProfile: '/updateProfile',
+  empUpdateProfile: '/updateProfile',
+  addUpdateEducation: '/addUpdateEducation',
 
   // google Map API
   GOOGLE_MAP_API_KEY: 'AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E',

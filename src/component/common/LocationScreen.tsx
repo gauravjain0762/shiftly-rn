@@ -31,7 +31,8 @@ import {getAsyncUserLocation} from '../../utils/asyncStorage';
 
 const LocationScreen = () => {
   const {params} = useRoute<any>();
-  const {userAddress} = params;
+  const userAddress = params?.userAddress;
+  // console.log("🔥🔥🔥 ~ LocationScreen ~ userAddress:", userAddress)
   const {t} = useTranslation();
   const mapRef = useRef<any | null>(null);
 

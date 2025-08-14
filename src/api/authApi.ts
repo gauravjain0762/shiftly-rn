@@ -384,12 +384,15 @@ export const authApi = createApi({
       },
     }),
     employeeOTPVerify: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.employeeOTPVerify,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-      }),
+      query: credentials => {
+        console.log("API.employeeOTPVerify", API.employeeOTPVerify)
+        return {
+          url: API.employeeOTPVerify,
+          method: HTTP_METHOD.POST,
+          data: credentials,
+          skipLoader: false,
+        };
+      },
       invalidatesTags: ['Auth'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
@@ -542,6 +545,30 @@ export const authApi = createApi({
         }
       },
     }),
+    empUpdateProfile: builder.mutation<any, any>({
+      query: credentials => {
+        console.log('credentials', credentials);
+        console.log('API.updateProfile', API.empUpdateProfile);
+        return {
+          url: API.empUpdateProfile,
+          method: HTTP_METHOD.POST,
+          data: credentials,
+          skipLoader: false,
+        };
+      },
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('updateProfile Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -566,4 +593,6 @@ export const {
   useEmployeeOTPVerifyMutation,
   useEmployeeResendOTPMutation,
   useEmployeeResetPasswordMutation,
+  useEmployeeSignUpMutation,
+  useEmpUpdateProfileMutation,
 } = authApi;

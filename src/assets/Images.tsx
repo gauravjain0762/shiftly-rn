@@ -103,6 +103,7 @@ export const IMAGES = {
   newlogo: require('./image/newlogo.png'),
   newlogo1: require('./image/newlogo1.png'),
   flag2: require('./image/flag2.png'),
+  splash_image: require('./image/splash_image.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

@@ -91,7 +91,7 @@ const CoPost = () => {
           // }, 300);
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('handleUploadPost error', e);
       errorToast(e?.data?.message);
     } finally {

@@ -20,7 +20,6 @@ import AboutMeList from '../../../component/employe/AboutMeList';
 import SuccessffullyModal from '../../../component/employe/SuccessffullyModal';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  selectEmployeeState,
   setActiveStep,
   setEducationList,
   setEducationListEdit,
@@ -29,10 +28,13 @@ import {
   setAboutEdit,
   setShowModal,
 } from '../../../features/employeeSlice';
-import { RootState } from '../../../store';
+import {RootState} from '../../../store';
+import {useAddUpdateEducationMutation} from '../../../api/dashboardApi';
+import {errorToast} from '../../../utils/commonFunction';
 
 const CreateProfileScreen = () => {
   const dispatch = useDispatch();
+  const [addUpdateEducation] = useAddUpdateEducationMutation({});
 
   const {
     educationList,
@@ -84,6 +86,30 @@ const CreateProfileScreen = () => {
     dispatch(setExperienceList(updatedList));
   };
 
+  console.log("educationListEdit >>>>>", educationListEdit)
+  const handleAddEducation = async () => {
+    try {
+      const response = await addUpdateEducation({
+        degree: educationListEdit.degree,
+        university: educationListEdit.university,
+        country: educationListEdit.country,
+        province: educationListEdit.province,
+        start_date: educationListEdit.startDate,
+        end_date: educationListEdit.endDate,
+      }).unwrap();
+      console.log('🔥🔥🔥 ~ handleAddEducation ~ response:', response);
+
+      if (!response?.status) {
+        errorToast(response?.message);
+        return;
+      }
+
+      // dispatch(setActiveStep(2))
+    } catch (error) {
+      console.error('Error adding education:', error);
+    }
+  };
+
   return (
     <SafeAreaView edges={[]} style={{flex: 1, backgroundColor: colors._0D468C}}>
       <LinearContainer
@@ -132,7 +158,9 @@ const CreateProfileScreen = () => {
                     }),
                   );
                 }}
-                onNextPress={() => dispatch(setActiveStep(2))}
+                onNextPress={() => {
+                  handleAddEducation();
+                }}
               />
             </>
           )}

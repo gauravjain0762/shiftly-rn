@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -39,7 +40,7 @@ const CoJob = () => {
   const {t} = useTranslation();
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
-  const [range, setRange] = useState<number[]>([1000, 20000]);
+  const [range, setRange] = useState<number[]>([1000, 50000]);
   const [value, setValue] = useState<any>(null);
   const [location, setLocation] = useState<string>('');
   const [filters, setFilters] = useState({
@@ -47,15 +48,21 @@ const CoJob = () => {
     salary_from: 0,
     salary_to: 0,
     location: '',
+    page: 1,
   });
-  const {data, refetch, isLoading} = useGetCompanyJobsQuery(filters);
-  // const [isLoading] = useState(true);
+  const {data, isLoading, isFetching} = useGetCompanyJobsQuery(filters);
+  const [jobs, setJobs] = useState<any[]>([]);
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    if (filters.page === 1) {
+      setJobs(data?.data?.jobs ?? []);
+    } else if (filters.page > 1) {
+      setJobs(prev => [...prev, ...(data?.data?.jobs ?? [])]);
+    }
+  }, [data]);
 
-  const latestJobList = data?.data?.jobs ?? [];
+  const latestJobList = jobs;
+  const totalPages = data?.data?.pagination?.total_pages ?? 1;
 
   const handleApplyFilter = async () => {
     try {
@@ -63,13 +70,22 @@ const CoJob = () => {
         job_types: value,
         salary_from: range[0],
         salary_to: range[1],
-        location: location,
+        location,
+        page: 1,
       });
       setIsFilterModalVisible(false);
-      await refetch();
     } catch (error) {
       console.error('Error applying filter:', error);
       errorToast('Failed to apply filter');
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!isFetching && filters.page < totalPages) {
+      setFilters(prev => ({
+        ...prev,
+        page: prev.page + 1,
+      }));
     }
   };
 
@@ -119,7 +135,6 @@ const CoJob = () => {
                     <MyJobCard
                       item={item}
                       onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
-                      // totalApplicants={item.totalApplicants}
                     />
                   </View>
                 </>
@@ -134,6 +149,16 @@ const CoJob = () => {
                 {'No Jobs Found'}
               </Text>
             )}
+            ListFooterComponent={
+              isFetching ? (
+                <ActivityIndicator
+                size={'large'}
+                  style={{marginVertical: 10}}
+                />
+              ) : null
+            }
+            onEndReachedThreshold={0.5}
+            onEndReached={handleLoadMore}
             keyExtractor={(_, index) => index.toString()}
           />
         </View>

@@ -13,14 +13,17 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import Slider from '@react-native-community/slider';
-
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
 
 const ProfileScreen = () => {
-  const [range, setRange] = useState('');
+  const [range, setRange] = useState<string>('');
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log("🔥🔥🔥 ~ ProfileScreen ~ userInfo:", userInfo)
   const HeaderWithAdd = useCallback(
-    ({title}) => (
+    ({title}: any) => (
       <View style={styles.headerRow}>
         <Text style={styles.title}>{title}</Text>
       </View>
@@ -29,7 +32,7 @@ const ProfileScreen = () => {
   );
 
   const Section = useCallback(
-    ({title, content, onPress}) => (
+    ({title, content, onPress}: any) => (
       <View style={styles.card}>
         <TouchableOpacity
           onPress={() => {
@@ -54,13 +57,21 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <Image
-            source={{uri: 'https://randomuser.me/api/portraits/women/44.jpg'}}
+            source={
+              userInfo?.picture
+                ? {uri: userInfo?.picture}
+                : {uri: 'https://randomuser.me/api/portraits/women/44.jpg'}
+            }
             style={styles.avatar}
           />
-          <Text style={styles.name}>Smith Williamson</Text>
+          <Text style={styles.name}>
+            {userInfo?.name || 'Smith Williamson'}
+          </Text>
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} />
-            <Text style={styles.location}>Dubai Marina, Dubai - U.A.E</Text>
+            <Text style={styles.location}>
+              {userInfo?.address || 'Dubai Marina, Dubai - U.A.E'}
+            </Text>
           </View>
 
           <TouchableOpacity
@@ -138,12 +149,12 @@ const ProfileScreen = () => {
             <Text style={styles.languageText}>English</Text>
             <Slider
               style={{width: '100%', height: 40}}
-              value={range}
+              value={range as any}
               minimumValue={0}
               maximumValue={100}
               minimumTrackTintColor={'#F4E2B8'}
               maximumTrackTintColor={'#17457D'}
-              onValueChange={value => setRange(value)}
+              onValueChange={(value: any) => setRange(value)}
             />
           </View>
 

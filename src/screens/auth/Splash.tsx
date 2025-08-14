@@ -153,9 +153,9 @@ const Splash = (props: Props) => {
   return (
     <View style={styles.container}>
       <Image
-        source={IMAGES.launch_screen}
-        style={styles.backgroundImage}
         resizeMode="cover"
+        source={IMAGES.splash_image}
+        style={styles.backgroundImage}
       />
     </View>
   );
