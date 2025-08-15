@@ -385,7 +385,7 @@ export const authApi = createApi({
     }),
     employeeOTPVerify: builder.mutation<any, any>({
       query: credentials => {
-        console.log("API.employeeOTPVerify", API.employeeOTPVerify)
+        console.log('API.employeeOTPVerify', API.employeeOTPVerify);
         return {
           url: API.employeeOTPVerify,
           method: HTTP_METHOD.POST,
@@ -554,6 +554,10 @@ export const authApi = createApi({
           method: HTTP_METHOD.POST,
           data: credentials,
           skipLoader: false,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Content-Type': 'multipart/form-data',
+          },
         };
       },
       invalidatesTags: ['Auth'],

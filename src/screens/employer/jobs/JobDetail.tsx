@@ -29,7 +29,8 @@ const JobDetail = () => {
   const [modal, setModal] = useState(false);
   const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.item;
-  // const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
+  const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
+  const resumeList = jobDetail?.data?.resumes
 
   return (
     <LinearContainer
@@ -113,7 +114,7 @@ const JobDetail = () => {
         </Text>
         <View style={{height: hp(10)}} />
         <GradientButton
-          onPress={() => navigateTo(SCREEN_NAMES.ApplyJob, {data: data})}
+          onPress={() => navigateTo(SCREEN_NAMES.ApplyJob, {data: data, resumeList: resumeList})}
           title={t('Apply Job')}
         />
       </ScrollView>

@@ -19,14 +19,25 @@ import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {AppStyles} from '../../../theme/appStyles';
 import Carousel from 'react-native-reanimated-carousel';
-import {navigateTo} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  navigateTo,
+  successToast,
+} from '../../../utils/commonFunction';
 import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {useTranslation} from 'react-i18next';
-import {useLazyGetEmployeeJobsQuery} from '../../../api/dashboardApi';
+import {
+  useAddRemoveFavouriteMutation,
+  useGetFavouritesJobQuery,
+  useLazyGetEmployeeJobsQuery,
+} from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
 import RangeSlider from '../../../component/common/RangeSlider';
 import {SLIDER_WIDTH} from '../../company/job/CoJob';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {setFavoriteJobs} from '../../../features/employeeSlice';
 
 const carouselImages = [
   'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
@@ -46,7 +57,14 @@ const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
 
 const JobsScreen = () => {
   const {t} = useTranslation();
+  const dispatch = useDispatch<any>();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
+  const {favoriteJobs} = useSelector((state: RootState) => state.employee);
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const {data: getFavoriteJobs} = useGetFavouritesJobQuery({});
+  const favJobList = getFavoriteJobs?.data?.jobs;
+  console.log('🔥🔥🔥 ~ JobsScreen ~ favJobList:', favJobList);
 
   const [filters, setFilters] = useState<{
     departments: string[];
@@ -78,7 +96,10 @@ const JobsScreen = () => {
   };
 
   const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
+  console.log("🔥🔥🔥 ~ JobsScreen ~ data:", data)
   const jobList = data?.data?.jobs;
+  const resumeList = data?.data?.resumes
+  console.log("🔥🔥🔥 ~ JobsScreen ~ resumeList:", resumeList)
 
   useEffect(() => {
     trigger({});
@@ -110,6 +131,23 @@ const JobsScreen = () => {
     setRange([0, 100000]);
     setIsFilterModalVisible(false);
     trigger({});
+  };
+
+  const handleAddRemoveFavoriteJob = async (item: any) => {
+    try {
+      const res = await addRemoveFavoriteJob({
+        job_id: item?._id,
+        user_id: userInfo?.user_id,
+      }).unwrap();
+
+      if (res?.status) {
+        successToast(res?.message);
+      } else {
+        errorToast(res?.message);
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   return (
@@ -169,15 +207,23 @@ const JobsScreen = () => {
           data={jobList}
           style={AppStyles.flex}
           showsVerticalScrollIndicator={false}
-          renderItem={({item, index}: any) => (
-            <JobCard
-              key={index}
-              item={item}
-              onPress={() =>
-                navigateTo(SCREEN_NAMES.JobDetail, {item: item})
-              }
-            />
-          )}
+          renderItem={({item, index}: any) => {
+            const isFavorite = favJobList?.some((fav: any) => fav._id === item?._id);
+            console.log('🔥🔥🔥 ~ isfavorite:', isFavorite);
+            return (
+              <JobCard
+                key={index}
+                item={item}
+                heartImage={
+                  favJobList?.includes(item?._id)
+                    ? IMAGES.ic_favorite
+                    : IMAGES.hart
+                }
+                onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
+                onPress={() => navigateTo(SCREEN_NAMES.JobDetail, {item: item, resumeList: resumeList})}
+              />
+            );
+          }}
           keyExtractor={(_, index) => index.toString()}
           ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
           contentContainerStyle={styles.scrollContainer}

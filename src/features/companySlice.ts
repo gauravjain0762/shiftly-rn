@@ -31,6 +31,7 @@ interface PostFormState {
   description: string;
   isPostModalVisible: boolean;
   uploadedImages: any[];
+  isPostUploading: false;
 }
 
 interface CompanyState {
@@ -71,6 +72,7 @@ const initialState: CompanyState = {
     description: '',
     isPostModalVisible: false,
     uploadedImages: [],
+    isPostUploading: false,
   },
 };
 

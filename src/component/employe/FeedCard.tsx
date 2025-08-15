@@ -16,7 +16,6 @@ const FeedCard: FC<card> = ({
   item,
   isFollow = false,
 }) => {
-  console.log("🔥🔥🔥 ~ FeedCard ~ item:", item)
   return (
     <TouchableOpacity onPress={() => onPressCard()} style={styles.card}>
       <View style={styles.cardHeader}>
@@ -56,9 +55,7 @@ const FeedCard: FC<card> = ({
       <View style={styles.banner}>
         <Image
           source={
-            item?.images?.length > 0
-              ? {uri: getImageUrl(item?.images[0])}
-              : IMAGES.post
+            item?.images?.length > 0 ? {uri: item?.images[0]} : IMAGES.post
           }
           resizeMode="cover"
           style={styles.post}

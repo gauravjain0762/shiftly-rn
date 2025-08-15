@@ -1,5 +1,5 @@
 import React from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
@@ -8,9 +8,11 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
 type Props = {
   item: any;
+  showShortListButton?: boolean;
+  handleShortListEmployee?: () => void;
 };
 
-const ApplicantCard = ({item}: Props) => {
+const ApplicantCard = ({item, showShortListButton = true, handleShortListEmployee}: Props) => {
   const {t} = useTranslation();
 
   return (
@@ -38,9 +40,11 @@ const ApplicantCard = ({item}: Props) => {
           <View style={styles.chatButton}>
             <Image source={IMAGES.chat} />
           </View>
-          <View style={styles.actionButton}>
-            <Text style={styles.actionText}>{t('Shortlist')}</Text>
-          </View>
+          {showShortListButton && (
+            <TouchableOpacity activeOpacity={0.5} onPress={handleShortListEmployee} style={styles.actionButton}>
+              <Text style={styles.actionText}>{t('Shortlist')}</Text>
+            </TouchableOpacity>
+          )}
           <View
             style={[
               styles.actionButton,

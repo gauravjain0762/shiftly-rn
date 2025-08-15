@@ -5,8 +5,8 @@ import {RootState} from '../store';
 export interface EducationItem {
   degree: string;
   university: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   country: string;
   province: string;
 }
@@ -17,9 +17,10 @@ export interface ExperienceItem {
   company: string;
   department: string;
   country: string;
-  month: string;
-  year: string;
-  checkEnd: boolean;
+  job_start: string;
+  job_end: string;
+  still_working: boolean;
+  experience_type: string;
 }
 
 export interface AboutMe {
@@ -41,6 +42,7 @@ export interface EmployeeState {
   educationListEdit: EducationItem;
   experienceListEdit: ExperienceItem;
   aboutEdit: AboutMe;
+  favoriteJobs: any[];
 }
 
 const initialState: EmployeeState = {
@@ -62,9 +64,10 @@ const initialState: EmployeeState = {
     company: '',
     department: '',
     country: '',
-    month: '',
-    year: '',
-    checkEnd: false,
+    job_start: '',
+    job_end: '',
+    still_working: false,
+    experience_type: '',
   },
   aboutEdit: {
     aboutMe: '',
@@ -76,6 +79,7 @@ const initialState: EmployeeState = {
     proficiency: '',
     checkEnd: false,
   },
+  favoriteJobs: [],
 };
 
 const employeeSlice = createSlice({
@@ -119,6 +123,9 @@ const employeeSlice = createSlice({
     setAboutEdit: (state, action: PayloadAction<AboutMe>) => {
       state.aboutEdit = action.payload;
     },
+    setFavoriteJobs: (state, action: PayloadAction<string[]>) => {
+      state.favoriteJobs = action.payload;
+    },
     resetEmployeeState: () => initialState,
   },
 });
@@ -136,6 +143,7 @@ export const {
   setExperienceListEdit,
   setAboutEdit,
   resetEmployeeState,
+  setFavoriteJobs,
 } = employeeSlice.actions;
 
 export const selectEmployeeState = (state: RootState): EmployeeState =>

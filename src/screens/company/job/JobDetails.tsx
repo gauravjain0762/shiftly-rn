@@ -15,8 +15,12 @@ import {IMAGES} from '../../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
 import ApplicantCard from '../../../component/common/ApplicantCard';
-import {useGetCompanyJobDetailsQuery} from '../../../api/dashboardApi';
+import {
+  useAddShortlistEmployeeMutation,
+  useGetCompanyJobDetailsQuery,
+} from '../../../api/dashboardApi';
 import {useRoute} from '@react-navigation/native';
+import {errorToast, successToast} from '../../../utils/commonFunction';
 
 const Tabs = ['Applicants', 'Invited', 'Shortlisted'];
 
@@ -26,8 +30,8 @@ const CoJobDetails = () => {
   const job_id = params?._id as any;
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   const {data} = useGetCompanyJobDetailsQuery('689b160b3f2e282e35e9e06b');
+  const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const jobDetail = data?.data;
-  console.log('🔥🔥🔥 ~ CoJobDetails ~ jobDetail:', jobDetail);
   const JobDetailsArr = {
     'Job Type': jobDetail?.job_type,
     Vacancy: jobDetail?.no_positions,
@@ -37,6 +41,23 @@ const CoJobDetails = () => {
     Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
   };
   const keyValueArray = Object.entries(JobDetailsArr);
+
+  const handleShortListEmployee = async (item: any) => {
+    try {
+      const res = await addShortListEmployee({
+        applicant_id: item?._id,
+        job_id: job_id,
+      }).unwrap();
+
+      if (res?.status) {
+        successToast(res?.message);
+      } else {
+        errorToast(res?.message);
+      }
+    } catch (error) {
+      console.error('Error shortlisting employee:', error);
+    }
+  };
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -118,7 +139,30 @@ const CoJobDetails = () => {
             {selectedTabIndex === 1 &&
               jobDetail?.invited_users?.map((item: any, index: number) => {
                 if (item) {
-                  return <ApplicantCard key={index} item={item} />;
+                  return (
+                    <ApplicantCard
+                      key={index}
+                      item={item}
+                      handleShortListEmployee={() => {
+                        handleShortListEmployee(item);
+                      }}
+                    />
+                  );
+                } else {
+                  return null;
+                }
+              })}
+
+            {selectedTabIndex === 2 &&
+              jobDetail?.shortlisted?.map((item: any, index: number) => {
+                if (item) {
+                  return (
+                    <ApplicantCard
+                      key={index}
+                      item={item}
+                      showShortListButton={false}
+                    />
+                  );
                 } else {
                   return null;
                 }

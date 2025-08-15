@@ -29,12 +29,16 @@ import {
   setShowModal,
 } from '../../../features/employeeSlice';
 import {RootState} from '../../../store';
-import {useAddUpdateEducationMutation} from '../../../api/dashboardApi';
-import {errorToast} from '../../../utils/commonFunction';
+import {
+  useAddUpdateEducationMutation,
+  useAddUpdateExperienceMutation,
+} from '../../../api/dashboardApi';
+import {errorToast, successToast} from '../../../utils/commonFunction';
 
 const CreateProfileScreen = () => {
   const dispatch = useDispatch();
   const [addUpdateEducation] = useAddUpdateEducationMutation({});
+  const [addUpdateExperience] = useAddUpdateExperienceMutation({});
 
   const {
     educationList,
@@ -69,9 +73,10 @@ const CreateProfileScreen = () => {
         company: '',
         department: '',
         country: '',
-        month: '',
-        year: '',
-        checkEnd: false,
+        job_start: '',
+        job_end: '',
+        still_working: false,
+        experience_type: '',
       }),
     );
   };
@@ -86,7 +91,6 @@ const CreateProfileScreen = () => {
     dispatch(setExperienceList(updatedList));
   };
 
-  console.log("educationListEdit >>>>>", educationListEdit)
   const handleAddEducation = async () => {
     try {
       const response = await addUpdateEducation({
@@ -97,21 +101,46 @@ const CreateProfileScreen = () => {
         start_date: educationListEdit.startDate,
         end_date: educationListEdit.endDate,
       }).unwrap();
-      console.log('🔥🔥🔥 ~ handleAddEducation ~ response:', response);
 
-      if (!response?.status) {
+      if (response?.status) {
+        successToast(response?.message);
+        dispatch(setActiveStep(2));
+      } else {
         errorToast(response?.message);
-        return;
       }
-
-      // dispatch(setActiveStep(2))
     } catch (error) {
       console.error('Error adding education:', error);
     }
   };
 
+  const handleAddUExperience = async () => {
+    try {
+      const response = await addUpdateExperience({
+        title: experienceListEdit.title,
+        company: experienceListEdit.company,
+        department: experienceListEdit.department,
+        country: experienceListEdit.country,
+        // job_start: experienceListEdit.job_start,
+        // job_end: experienceListEdit.job_end,
+        still_working: experienceListEdit.still_working,
+        experience_type: experienceListEdit.experience_type,
+      }).unwrap();
+
+      if (response?.status) {
+        successToast(response?.message);
+        dispatch(setActiveStep(3));
+      } else {
+        errorToast(response?.message);
+      }
+    } catch (error) {
+      console.error('Error adding experience:', error);
+    }
+  };
+
   return (
-    <SafeAreaView edges={[]} style={{flex: 1, backgroundColor: colors._0D468C}}>
+    <SafeAreaView
+      edges={['bottom']}
+      style={{flex: 1, backgroundColor: colors._041326}}>
       <LinearContainer
         SafeAreaProps={{edges: ['bottom', 'top']}}
         colors={['#0D468C', '#041326']}>
@@ -181,7 +210,7 @@ const CreateProfileScreen = () => {
                   dispatch(setExperienceListEdit(val))
                 }
                 addNewEducation={() => addExperience(experienceListEdit)}
-                onNextPress={() => dispatch(setActiveStep(3))}
+                onNextPress={() => handleAddUExperience()}
               />
             </>
           )}

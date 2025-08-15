@@ -6,6 +6,7 @@ import {
   Text,
   TextStyle,
   TouchableOpacity,
+  TouchableOpacityProps,
   View,
   ViewStyle,
 } from 'react-native';
@@ -13,7 +14,7 @@ import {commonFontStyle, hp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {Defs, RadialGradient, Rect, Stop, Svg} from 'react-native-svg';
 
-interface DiamondGradientButtonProps {
+interface DiamondGradientButtonProps extends TouchableOpacityProps {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
   style?: ViewStyle;

@@ -213,25 +213,31 @@ const SignUp = () => {
     }
   };
 
-  // console.log('🔥🔥🔥 ~ handleFinishSetup ~ updateData:', updateData);
   const handleFinishSetup = async () => {
     const updateData = {
-      about: 'describe',
-      dob: '09-10-2025',
-      gender: 'selected1',
-      nationality: 'selected2',
-      country: 'selected3',
+      about: describe,
+      dob: dob,
+      gender: selected1,
+      nationality: selected2,
+      country: selected3,
+      picture: picture?.path?.split('/').pop(),
     };
+
+    const form = new FormData();
+    Object.entries(updateData).forEach(([key, value]) => {
+      form.append(key, value);
+    });
+
     try {
-      // const res = await empUpdateProfile(updateData).unwrap();
-      // console.log('🔥🔥 ~ handleFinishSetup ~ res:', res?.data);
-      // if (res?.status) {
-      //   successToast(res?.message);
-      //   dispatch(setUserInfo(res?.data?.user));
+      const res = await empUpdateProfile(form).unwrap();
+      console.log('🔥🔥 ~ handleFinishSetup ~ res:', res?.data);
+      if (res?.status) {
+        successToast(res?.message);
+        dispatch(setUserInfo(res?.data?.user));
         nextStep();
-      // } else {
-      //   errorToast(res?.message);
-      // }
+      } else {
+        errorToast(res?.message);
+      }
     } catch (error) {
       console.error('Error handleFinishSetup user:', error);
     }

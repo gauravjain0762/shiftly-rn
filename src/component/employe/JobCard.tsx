@@ -13,10 +13,12 @@ import {IMAGES} from '../../assets/Images';
 
 type props = {
   item?: any;
+  heartImage?: any;
   onPress?: () => void;
+  onPressFavorite?: () => void;
 };
 
-const JobCard: FC<props> = ({item, onPress = () => {}}) => {
+const JobCard: FC<props> = ({item, onPress = () => {}, onPressFavorite, heartImage}) => {
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <ImageBackground source={{uri: item?.company_id?.logo}} style={styles.jobImage}>
@@ -35,9 +37,9 @@ const JobCard: FC<props> = ({item, onPress = () => {}}) => {
               style={styles.icon}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity onPress={onPressFavorite} style={styles.iconButton}>
             <Image
-              source={IMAGES.hart}
+              source={heartImage || IMAGES.hart}
               resizeMode="contain"
               style={styles.icon}
             />

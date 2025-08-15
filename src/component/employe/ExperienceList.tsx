@@ -1,6 +1,7 @@
 import {
   Image,
   ImageBackground,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -158,7 +159,13 @@ const ExperienceList: FC<Props> = ({
       </View>
 
       <Text style={styles.headerText}>When did it end?</Text>
-      <View
+      <Pressable
+        onPress={() => {
+          setEducationListEdit({
+            ...educationListEdit,
+            still_working: !educationListEdit?.still_working,
+          });
+        }}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -169,7 +176,7 @@ const ExperienceList: FC<Props> = ({
           onPress={() => {
             setEducationListEdit({
               ...educationListEdit,
-              checkEnd: !educationListEdit?.checkEnd,
+              still_working: !educationListEdit?.still_working,
             });
           }}>
           <ImageBackground
@@ -181,7 +188,7 @@ const ExperienceList: FC<Props> = ({
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-            {educationListEdit?.checkEnd && (
+            {educationListEdit?.still_working && (
               <Image
                 source={IMAGES.check}
                 style={{
@@ -198,13 +205,13 @@ const ExperienceList: FC<Props> = ({
           onPress={() => {
             setEducationListEdit({
               ...educationListEdit,
-              checkEnd: !educationListEdit?.checkEnd,
+              still_working: !educationListEdit?.still_working,
             });
           }}
           style={styles.stillText}>
           Still working here
         </Text>
-      </View>
+      </Pressable>
       <CustomDropdown
         data={educationOptions}
         label="What type of experience"
@@ -215,7 +222,7 @@ const ExperienceList: FC<Props> = ({
         onChange={selectedItem => {
           setEducationListEdit({
             ...educationListEdit,
-            province: selectedItem?.value,
+            experience_type: selectedItem?.value,
           });
         }}
       />

@@ -24,6 +24,7 @@ import {
   errorToast,
   navigateTo,
   resetNavigation,
+  successToast,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useCreateCompanyPostMutation} from '../../../api/dashboardApi';
@@ -39,17 +40,21 @@ import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
 const CoPost = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const [companyPost, {isLoading: postLoading}] =
-    useCreateCompanyPostMutation();
+  const [companyPost] = useCreateCompanyPostMutation();
   const steps = useAppSelector((state: any) => state.company.coPostSteps);
   const [imageModal, setImageModal] = useState(false);
-  const {description, isPostModalVisible, uploadedImages, title} =
-    useAppSelector(selectPostForm);
+  const {
+    description,
+    isPostModalVisible,
+    uploadedImages,
+    title,
+    isPostUploading,
+  } = useAppSelector(selectPostForm);
   const {updatePostForm} = usePostFormUpdater();
 
   const nextStep = () => dispatch(setCoPostSteps(steps + 1));
 
-  const prevStep = (num?: any) => {
+  const prevStep = () => {
     dispatch(setCoPostSteps(steps - 1));
   };
 
@@ -68,24 +73,31 @@ const CoPost = () => {
         let data = {
           title: title.trim(),
           description: description.trim(),
-          images: uploadedImages,
+          images: uploadedImages?.map((item: any) =>
+            item?.uri?.split('/').pop(),
+          ),
         };
-        console.log(data, 'datadatadata');
-        // const formData = new FormData();
-        // formData.append('title', createPostData?.title.trim());
-        // formData.append('description', createPostData?.description.trim());
-        // if (uploadedImages?.length > 0) {
-        //   formData.append('images', uploadedImages);
-        // }
+        console.log(data, 'handleUploadPost datadatadata >>>>>>>>');
 
-        const response = await companyPost(data).unwrap();
+        updatePostForm({isPostUploading: true});
+
+        const formData = new FormData();
+        formData.append('title', title.trim());
+        formData.append('description', description.trim());
+        uploadedImages?.forEach(item => {
+          formData.append('images', {
+            uri: item.uri,
+            type: item.type || 'image/jpeg',
+            name: item.uri.split('/').pop(),
+          });
+        });
+
+        const response = await companyPost(formData).unwrap();
         console.log(response, 'response----companyPost');
         if (response?.status) {
-          // successToast(response?.message);
+          successToast(response?.message);
           updatePostForm({isPostModalVisible: true});
-          // resetNavigation(SCREENS.CoTabNavigator);
           // setTimeout(() => {
-          //   dispatch(setCoPostSteps(0));
           //   setUploadedImages([]);
           //   setCreatePostData({title: '', description: ''});
           // }, 300);
@@ -95,6 +107,7 @@ const CoPost = () => {
       console.error('handleUploadPost error', e);
       errorToast(e?.data?.message);
     } finally {
+      updatePostForm({isPostUploading: false});
     }
   };
 
@@ -181,7 +194,7 @@ const CoPost = () => {
             <View>
               <View style={styles.headercontainer}>
                 <BackHeader
-                  onBackPress={() => prevStep(steps)}
+                  onBackPress={() => prevStep()}
                   type="company"
                   title=""
                   isRight={false}
@@ -222,7 +235,7 @@ const CoPost = () => {
             <View>
               <View style={styles.headercontainer}>
                 <BackHeader
-                  onBackPress={() => prevStep(steps)}
+                  onBackPress={() => prevStep()}
                   type="company"
                   title=""
                   // isRight={false}
@@ -272,7 +285,7 @@ const CoPost = () => {
             <View>
               <View style={styles.headercontainer}>
                 <BackHeader
-                  onBackPress={() => prevStep(steps)}
+                  onBackPress={() => prevStep()}
                   type="company"
                   title=""
                   RightIcon={
@@ -306,7 +319,8 @@ const CoPost = () => {
             <GradientButton
               type="Company"
               style={styles.btn}
-              title={t('Create Post')}
+              disabled={isPostUploading}
+              title={t(isPostUploading ? 'Creating...' : 'Create Post')}
               onPress={handleUploadPost}
             />
           </View>
@@ -375,7 +389,12 @@ const CoPost = () => {
           onPress={() => {
             dispatch(setCoPostSteps(0));
             resetPostFormState();
-            updatePostForm({isPostModalVisible: false, uploadedImages: []});
+            updatePostForm({
+              isPostModalVisible: false,
+              uploadedImages: [],
+              title: '',
+              description: '',
+            });
             resetNavigation(SCREENS.CoTabNavigator);
           }}
         />

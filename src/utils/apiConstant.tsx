@@ -23,6 +23,7 @@ export const API = {
   getSuggestedEmployees: '/company/getSuggestedEmployees',
   getFacilities: '/company/getFacilities',
   getCompanyJobDetails: '/company/getJobDetails',
+  addShortlistEmployee:'/company/shortlistEmployee',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',
@@ -54,11 +55,14 @@ export const API = {
   getEmployeeJobs: '/getJobs',
   getEmployeeJobDetails: '/getJobDetails',
   getEmployeeSkills: '/getSkills',
+  addRemoveFavourite: '/addRemoveFavourite',
+  getFavouritesJob: "/getFavourites",
 
   // UserDetails
   getProfile: '/getProfile',
   empUpdateProfile: '/updateProfile',
   addUpdateEducation: '/addUpdateEducation',
+  addUpdateExperience: '/addUpdateExperience',
 
   // google Map API
   GOOGLE_MAP_API_KEY: 'AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E',

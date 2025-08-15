@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import {
   ApplicationSuccessModal,
@@ -14,6 +21,7 @@ import {useRoute} from '@react-navigation/native';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
+import CustomBtn from '../../../component/common/CustomBtn';
 
 const documents = [
   {id: 'cv', label: 'CV', icon: IMAGES.CV},
@@ -30,6 +38,7 @@ const ApplyJob = () => {
   const [selected, setSelected] = useState('cv');
   const {params} = useRoute<any>();
   const data = params?.data as any;
+  const resumeList = params?.resumeList as any;
   const [visible, setVisible] = useState(false);
   const {bottom} = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation();
@@ -81,7 +90,7 @@ const ApplyJob = () => {
             <Text style={styles.heading}>{t('Choose documents to apply')}</Text>
 
             {/* Document List */}
-            {documents?.map(doc => (
+            {resumeList?.map((doc: any) => (
               <TouchableOpacity
                 key={doc.id}
                 style={styles.docRow}
@@ -93,10 +102,19 @@ const ApplyJob = () => {
                     </View>
                   )}
                 </View>
-                <Text style={styles.docLabel}>{doc.label}</Text>
-                <Image source={doc.icon} style={styles.docIcon} />
+                <Text style={styles.docLabel}>{doc.file_name}</Text>
+                <Image source={{uri: doc.file}} style={styles.docIcon} />
               </TouchableOpacity>
             ))}
+
+            <Pressable style={styles.uploadButton}>
+              <Text
+                style={{
+                  ...commonFontStyle(400, 22, colors._F4E2B8),
+                }}>
+                {'Upload CV'}
+              </Text>
+            </Pressable>
           </View>
           <GradientButton
             style={styles.btn}
@@ -200,7 +218,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   docIcon: {
-    width: wp(31),
+    width: wp(37),
     height: hp(37),
     resizeMode: 'contain',
   },
@@ -218,5 +236,16 @@ const styles = StyleSheet.create({
     width: wp(73),
     height: wp(73),
     justifyContent: 'center',
+  },
+  uploadButton: {
+    width: '90%',
+    height: hp(55),
+    marginTop: hp(30),
+    borderWidth: hp(2),
+    alignSelf: 'center',
+    alignItems: 'center',
+    borderRadius: hp(50),
+    justifyContent: 'center',
+    borderColor: colors._F4E2B8,
   },
 });

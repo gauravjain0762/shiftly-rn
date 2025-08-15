@@ -31,6 +31,9 @@ export const dashboardApi = createApi({
     'GetEmployeePost',
     'GetCompanyJobDetails',
     'AddUpdateEducation',
+    'AddUpdateExperience',
+    'AddRemoveFavourite',
+    'GetFavouriteJob',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -126,6 +129,10 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
       }),
       invalidatesTags: ['CreatePost', 'GetPost'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
@@ -211,6 +218,22 @@ export const dashboardApi = createApi({
           dispatch(setSkills(data?.data?.skills));
         } catch (error) {
           console.log('Guest Login Error', error);
+        }
+      },
+    }),
+    addShortlistEmployee: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.addShortlistEmployee,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+        data: credentials,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('addShortlistEmployee Error', error);
         }
       },
     }),
@@ -360,6 +383,56 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    addUpdateExperience: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.addUpdateExperience,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: true,
+      }),
+      invalidatesTags: ['AddUpdateExperience'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('AddUpdateExperience Error', error);
+        }
+      },
+    }),
+    addRemoveFavourite: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.addRemoveFavourite,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: true,
+      }),
+      invalidatesTags: ['AddRemoveFavourite'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('AddRemoveFavourite Error', error);
+        }
+      },
+    }),
+    getFavouritesJob: builder.query<any, any>({
+      query: () => ({
+        url: API.getFavouritesJob,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['GetFavouriteJob'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('GetFavouriteJob Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -381,4 +454,8 @@ export const {
   useGetEmployeePostsQuery,
   useGetCompanyJobDetailsQuery,
   useAddUpdateEducationMutation,
+  useAddUpdateExperienceMutation,
+  useAddRemoveFavouriteMutation,
+  useGetFavouritesJobQuery,
+  useAddShortlistEmployeeMutation,
 } = dashboardApi;
