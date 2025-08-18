@@ -1,50 +1,20 @@
+import React from 'react';
 import {
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
 import {LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
-import Slider from '@react-native-community/slider';
-
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 
 const ViewProfileScreen = () => {
-  const [range, setRange] = useState('');
-  const HeaderWithAdd = useCallback(
-    ({title}) => (
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>{title}</Text>
-      </View>
-    ),
-    [],
-  );
-
-  const Section = useCallback(
-    ({title, content, onPress}) => (
-      <View style={styles.card}>
-        <TouchableOpacity
-          onPress={() => {
-            onPress && onPress();
-          }}
-          style={styles.addButton}>
-          <Image source={IMAGES.pluse} style={styles.plus} />
-        </TouchableOpacity>
-        <HeaderWithAdd title={title} />
-        <Text style={styles.content}>{content}</Text>
-      </View>
-    ),
-    [],
-  );
-
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top']}}
@@ -71,7 +41,7 @@ const ViewProfileScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                navigateTo(SCREENS.AccountScreen);
+                navigateTo(SCREENS.ProfileScreen);
               }}
               style={styles.editButton}>
               <Text style={styles.editButtonText}>View Profile</Text>

@@ -1,3 +1,4 @@
+import React, {useState} from 'react';
 import {
   Image,
   ScrollView,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+
 import {
   BackHeader,
   GradientButton,
@@ -18,10 +19,21 @@ import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {navigateTo} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  navigateTo,
+  successToast,
+} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useGetEmployeeJobDetailsQuery} from '../../../api/dashboardApi';
+import {
+  useAddRemoveFavouriteMutation,
+  useGetEmployeeJobDetailsQuery,
+  useGetFavouritesJobQuery,
+} from '../../../api/dashboardApi';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {API} from '../../../utils/apiConstant';
 
 const JobDetail = () => {
   const {t} = useTranslation();
@@ -30,7 +42,33 @@ const JobDetail = () => {
   const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.item;
   const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
-  const resumeList = jobDetail?.data?.resumes
+  const curr_jobdetails = jobDetail?.data?.job;
+  console.log('🔥🔥🔥 ~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
+  const resumeList = jobDetail?.data?.resumes;
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
+  const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
+  const favJobList = getFavoriteJobs?.data?.jobs;
+
+  const handleAddRemoveFavoriteJob = async (item: any) => {
+    try {
+      const res = await addRemoveFavoriteJob({
+        job_id: item?._id,
+        user_id: userInfo?.user_id,
+      }).unwrap();
+
+      if (res?.status) {
+        successToast(res?.message);
+        await refetch();
+      } else {
+        errorToast(res?.message);
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const isFavorite = favJobList?.some((fav: any) => fav._id === data?._id);
 
   return (
     <LinearContainer
@@ -54,10 +92,15 @@ const JobDetail = () => {
         leftStyle={styles.lefticon}
       />
       <Image
-        style={styles.banner}
         resizeMode="cover"
-        source={{uri: data?.company_id?.logo}}
+        style={styles.banner}
+        source={
+          curr_jobdetails?.company_id?.cover_images?.length
+            ? {uri: API.BASE_URL + curr_jobdetails.company_id.cover_images[0]}
+            : data?.company_id?.logo
+        }
       />
+
       <ScrollView style={styles.container}>
         {/* Header Section */}
         <View style={styles.header}>
@@ -73,12 +116,17 @@ const JobDetail = () => {
           <View style={styles.locationTitle}>
             <View style={styles.row}>
               <Image source={IMAGES.location} style={styles.location} />
-              <Text style={styles.locationText}>{data?.company}</Text>
+              <Text style={styles.locationText}>{data?.address}</Text>
             </View>
             <Text style={styles.jobTitle}>{data?.title}</Text>
           </View>
-          <TouchableOpacity style={styles.like}>
-            <Image source={IMAGES.like} style={styles.heart} />
+          <TouchableOpacity
+            onPress={() => handleAddRemoveFavoriteJob(data)}
+            style={[styles.like, {padding: isFavorite ? hp(4) : hp(8)}]}>
+            <Image
+              style={isFavorite ? styles.filledHeart : styles.heart}
+              source={isFavorite ? IMAGES.ic_favorite : IMAGES.like}
+            />
           </TouchableOpacity>
         </View>
 
@@ -114,7 +162,12 @@ const JobDetail = () => {
         </Text>
         <View style={{height: hp(10)}} />
         <GradientButton
-          onPress={() => navigateTo(SCREEN_NAMES.ApplyJob, {data: data, resumeList: resumeList})}
+          onPress={() =>
+            navigateTo(SCREEN_NAMES.ApplyJob, {
+              data: data,
+              resumeList: resumeList,
+            })
+          }
           title={t('Apply Job')}
         />
       </ScrollView>
@@ -214,5 +267,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: wp(4),
+  },
+  filledHeart: {
+    width: wp(30),
+    height: hp(30),
   },
 });

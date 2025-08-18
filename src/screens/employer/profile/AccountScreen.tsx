@@ -1,6 +1,7 @@
 import {
   FlatList,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -47,12 +48,18 @@ const AccountScreen = () => {
     {
       section: 'Personal Information',
       items: [
-        {label: 'Account Info', icon: IMAGES.account},
+        {
+          label: 'Account Info',
+          icon: IMAGES.account,
+          onPress: () => {
+            navigateTo(SCREENS.ViewProfileScreen);
+          },
+        },
         {
           label: 'Profile',
           icon: IMAGES.Profile,
           onPress: () => {
-            // navigateTo(SCREENS.EmpProfile);
+            navigateTo(SCREENS.ProfileScreen);
           },
         },
       ],
@@ -170,88 +177,91 @@ const AccountScreen = () => {
           }
         />
       </View>
-      {settingsData.map((section, index) => (
-        <View key={index} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.section}</Text>
-          {section.items.map((item, idx) => (
-            <TouchableOpacity
-              key={idx}
-              onPress={() => {
-                item?.onPress && item?.onPress();
-              }}
-              style={styles.row}>
-              {item.label == 'Logout' ? (
-                <Image
-                  source={item.icon}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    resizeMode: 'contain',
-                    marginRight: 14,
-                    tintColor: 'red',
-                    marginLeft: 5,
-                  }}
-                />
-              ) : (
-                <Image
-                  source={item.icon}
-                  style={{
-                    width: 22,
-                    height: 22,
-                    resizeMode: 'contain',
-                    marginRight: 14,
-                    tintColor: '#D6D6D6',
-                  }}
-                />
-              )}
-              {/* <Icon name={item.icon} size={20} color={colors.lightText} style={styles.icon} /> */}
-              <Text
-                style={[
-                  styles.label,
-                  item.label == 'Logout' ? {color: 'red'} : {},
-                ]}>
-                {item.label}
-              </Text>
-              {item.label !== 'Logout' && (
-                <Image
-                  source={IMAGES.right_icon}
-                  style={{width: 12, height: 12, resizeMode: 'contain'}}
-                />
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-      ))}
 
-      <CustomPopup
-        type="Employee"
-        onCloseModal={() => setPopupVisible(false)}
-        isVisible={popupVisible}
-        title={'Are you sure you want to log out?'}
-        leftButton={'Cancel'}
-        rightButton={'Log Out'}
-        onPressRight={async () => {
-          handleLogout();
-        }}
-      />
-      <CustomPopup
-        onCloseModal={() => setdeletePopupVisible(false)}
-        isVisible={deletepopupVisible}
-        title={'Are you sure you want to delete your account?'}
-        leftButton={'Cancel'}
-        rightButton={'Delete'}
-        onPressRight={() => {
-          handleDeleteAccount();
-          setdeletePopupVisible(false);
-        }}
-      />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {settingsData.map((section, index) => (
+          <View key={index} style={styles.section}>
+            <Text style={styles.sectionTitle}>{section.section}</Text>
+            {section.items.map((item, idx) => (
+              <TouchableOpacity
+                key={idx}
+                onPress={() => {
+                  item?.onPress && item?.onPress();
+                }}
+                style={styles.row}>
+                {item.label == 'Logout' ? (
+                  <Image
+                    source={item.icon}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      resizeMode: 'contain',
+                      marginRight: 14,
+                      tintColor: 'red',
+                      marginLeft: 5,
+                    }}
+                  />
+                ) : (
+                  <Image
+                    source={item.icon}
+                    style={{
+                      width: 22,
+                      height: 22,
+                      resizeMode: 'contain',
+                      marginRight: 14,
+                      tintColor: '#D6D6D6',
+                    }}
+                  />
+                )}
+                {/* <Icon name={item.icon} size={20} color={colors.lightText} style={styles.icon} /> */}
+                <Text
+                  style={[
+                    styles.label,
+                    item.label == 'Logout' ? {color: 'red'} : {},
+                  ]}>
+                  {item.label}
+                </Text>
+                {item.label !== 'Logout' && (
+                  <Image
+                    source={IMAGES.right_icon}
+                    style={{width: 12, height: 12, resizeMode: 'contain'}}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))}
 
-      <LanguageModal
-        type={'Employee'}
-        visible={isLanguageModalVisible}
-        onClose={() => setLanguageModalVisible(false)}
-        onLanguageSelect={() => setLanguageModalVisible(false)}
-      />
+        <CustomPopup
+          type="Employee"
+          onCloseModal={() => setPopupVisible(false)}
+          isVisible={popupVisible}
+          title={'Are you sure you want to log out?'}
+          leftButton={'Cancel'}
+          rightButton={'Log Out'}
+          onPressRight={async () => {
+            handleLogout();
+          }}
+        />
+        <CustomPopup
+          onCloseModal={() => setdeletePopupVisible(false)}
+          isVisible={deletepopupVisible}
+          title={'Are you sure you want to delete your account?'}
+          leftButton={'Cancel'}
+          rightButton={'Delete'}
+          onPressRight={() => {
+            handleDeleteAccount();
+            setdeletePopupVisible(false);
+          }}
+        />
+
+        <LanguageModal
+          type={'Employee'}
+          visible={isLanguageModalVisible}
+          onClose={() => setLanguageModalVisible(false)}
+          onLanguageSelect={() => setLanguageModalVisible(false)}
+        />
+      </ScrollView>
     </LinearContainer>
   );
 };

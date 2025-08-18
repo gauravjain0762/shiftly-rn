@@ -4,10 +4,10 @@ import {RootState} from '../store';
 
 interface JobFormState {
   title: string;
-  type: {label: string; value: string};
+  job_type: {label: string; value: string};
   area: {label: string; value: string};
   duration: {label: string; value: string};
-  job: {label: string; value: string};
+  job_sector: {label: string; value: string};
   startDate: {label: string; value: string};
   contract: {label: string; value: string};
   salary: {label: string; value: string};
@@ -24,6 +24,9 @@ interface JobFormState {
   isModalVisible: boolean;
   selectedEmp: [];
   canApply: boolean;
+  editMode: boolean;
+  job_id: string;
+  invite_users: string[];
 }
 
 interface PostFormState {
@@ -46,14 +49,14 @@ const initialState: CompanyState = {
   coPostSteps: 0,
   jobForm: {
     title: '',
-    type: {label: 'Full-time', value: 'full_time'},
-    area: {label: 'Dubai Marina', value: 'dubai_marina'},
-    duration: {label: '1 Month', value: '1_month'},
-    job: {label: 'Hospitality', value: 'hospitality'},
-    startDate: {label: 'Immediately', value: 'immediately'},
-    contract: {label: 'Full-time experience', value: 'full_time'},
-    salary: {label: '2,000 - 5,000', value: '2000-5000'},
-    currency: {label: 'AED', value: 'aed'},
+    job_type: {label: 'Full Time', value: 'Full Time'},
+    area: {label: 'Dubai Marina', value: 'Dubai Marina'},
+    duration: {label: '1 Month', value: '1 Month'},
+    job_sector: {label: 'Hospitality', value: 'Hospitality'},
+    startDate: {label: 'Immediately', value: 'Immediately'},
+    contract: {label: 'Full-time experience', value: 'Full-time experience'},
+    salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},
+    currency: {label: 'AED', value: 'AED'},
     position: {label: '1', value: '1'},
     describe: '',
     selected: [],
@@ -66,6 +69,9 @@ const initialState: CompanyState = {
     isModalVisible: false,
     selectedEmp: [],
     canApply: true,
+    editMode: false,
+    job_id: '',
+    invite_users: [],
   },
   postForm: {
     title: '',

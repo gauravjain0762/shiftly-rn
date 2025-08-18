@@ -1,25 +1,16 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  Image,
-} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {IMAGES} from '../assets/Images';
 import FastImage from 'react-native-fast-image';
-import {colors} from '../theme/colors';
 import {commonFontStyle, hp, wp} from '../theme/fonts';
 import {SCREENS} from './screenNames';
-import {useAppSelector} from '../redux/hooks';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import JobsScreen from '../screens/employer/jobs/JobsScreen';
-import ProfileScreen from '../screens/employer/profile/ProfileScreen';
 import HomeScreen from '../screens/employer/home/HomeScreen';
 import ActivityScreen from '../screens/employer/activity/ActivityScreen';
+import AccountScreen from '../screens/employer/profile/AccountScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -43,7 +34,7 @@ const CustomTabBar = ({state, navigation}: any) => {
             case SCREENS.ActivityScreen:
               iconName = isFocused ? IMAGES.Activity_on : IMAGES.Activity_off;
               break;
-            case SCREENS.ProfileScreen:
+            case SCREENS.AccountScreen:
               iconName = isFocused ? IMAGES.user_on : IMAGES.user_off;
               break;
             default:
@@ -62,7 +53,7 @@ const CustomTabBar = ({state, navigation}: any) => {
             case SCREENS.ActivityScreen:
               labelName = 'Activity';
               break;
-            case SCREENS.ProfileScreen:
+            case SCREENS.AccountScreen:
               labelName = 'Profile';
               break;
             default:
@@ -116,7 +107,7 @@ export default function TabNavigator() {
       <Tab.Screen name={SCREENS.HomeScreen} component={HomeScreen} />
       <Tab.Screen name={SCREENS.JobsScreen} component={JobsScreen} />
       <Tab.Screen name={SCREENS.ActivityScreen} component={ActivityScreen} />
-      <Tab.Screen name={SCREENS.ProfileScreen} component={ProfileScreen} />
+      <Tab.Screen name={SCREENS.AccountScreen} component={AccountScreen} />
     </Tab.Navigator>
   );
 }
@@ -140,7 +131,7 @@ const styles = StyleSheet.create({
     // paddingVertical: Platform.OS == 'ios' ? 0 : hp(0),
     width: '100%',
     paddingVertical: 12,
-    paddingBottom:16
+    paddingBottom: 16,
   },
   tabButton: {
     width: wp(65),

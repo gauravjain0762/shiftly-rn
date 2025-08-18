@@ -24,6 +24,7 @@ export const API = {
   getFacilities: '/company/getFacilities',
   getCompanyJobDetails: '/company/getJobDetails',
   addShortlistEmployee:'/company/shortlistEmployee',
+  editCompanyJob: '/company/editJob',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',

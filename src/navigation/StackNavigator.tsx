@@ -44,6 +44,7 @@ import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
 import EmpChangePassword from '../screens/employer/auth/EmpChangePassword';
 import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
 import WebviewScreen from '../screens/others/WebviewScreen';
+import ProfileScreen from '../screens/employer/profile/ProfileScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -190,6 +191,12 @@ const StackNavigator: FC = () => {
 
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.TabNavigator}
+          component={TabNavigator}
+        />
+
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
           name={SCREENS.LoginScreen}
           component={LoginScreen}
         />
@@ -205,11 +212,6 @@ const StackNavigator: FC = () => {
           component={SignUp}
         />
 
-        <Stack.Screen
-          options={({navigation}) => ({headerShown: false})}
-          name={SCREENS.TabNavigator}
-          component={TabNavigator}
-        />
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.JobDetail}
@@ -264,6 +266,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.EmpForgotPassword}
           component={EmpForgotPassword}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.ProfileScreen}
+          component={ProfileScreen}
         />
         {/* Seeker */}
       </Stack.Navigator>
@@ -381,6 +388,11 @@ const StackNavigator: FC = () => {
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
       <Stack.Screen name={SCREENS.LocationScreen} component={LocationScreen} />
       <Stack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.PostJob}
+        component={PostJob}
+      />
     </Stack.Navigator>
   );
 };

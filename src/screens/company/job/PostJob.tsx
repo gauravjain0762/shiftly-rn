@@ -44,13 +44,14 @@ import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
 import {useCreateJobMutation} from '../../../api/authApi';
 import {getAsyncUserLocation} from '../../../utils/asyncStorage';
 import {
+  useEditCompanyJobMutation,
   useGetBusinessTypesQuery,
   useGetFacilitiesQuery,
   useGetSkillsQuery,
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 import {useAppSelector} from '../../../redux/hooks';
 import {
@@ -61,50 +62,41 @@ import {
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 
 const jobTypeData = [
-  {label: 'Full-time', value: 'full_time'},
-  {label: 'Part-time', value: 'part_time'},
-  {label: 'Freelance', value: 'freelance'},
-  {label: 'Internship', value: 'internship'},
-  {label: 'Temporary', value: 'temporary'},
+  {label: 'Full Time', value: 'Full Time'},
+  {label: 'Part Time', value: 'Part Time'},
+  {label: 'Freelance', value: 'Freelance'},
+  {label: 'Internship', value: 'Internship'},
+  {label: 'Temporary', value: 'Temporary'},
 ];
 
 const jobAreaData = [
-  {label: 'Dubai Marina', value: 'dubai_marina'},
-  {label: 'Business Bay', value: 'business_bay'},
-  {label: 'Downtown Dubai', value: 'downtown_dubai'},
-  {label: 'Jumeirah', value: 'jumeirah'},
-  {label: 'Al Barsha', value: 'al_barsha'},
+  {label: 'Dubai Marina', value: 'Dubai Marina'},
+  {label: 'Business Bay', value: 'Business Bay'},
+  {label: 'Downtown Dubai', value: 'Downtown Dubai'},
+  {label: 'Jumeirah', value: 'Jumeirah'},
+  {label: 'Al Barsha', value: 'Al Barsha'},
 ];
 
 const durationData = [
-  {label: '1 Month', value: '1_month'},
-  {label: '3 Months', value: '3_months'},
-  {label: '6 Months', value: '6_months'},
-  {label: '12 Months', value: '12_months'},
-  {label: 'Permanent', value: 'permanent'},
+  {label: '1 Month', value: '1 Month'},
+  {label: '3 Months', value: '3 Months'},
+  {label: '6 Months', value: '6 Months'},
+  {label: '12 Months', value: '12 Months'},
+  {label: 'Permanent', value: 'Permanent'},
 ];
 
-// const jobSectorData = [
-//   {label: 'Hospitality', value: 'hospitality'},
-//   {label: 'Construction', value: 'construction'},
-//   {label: 'Retail', value: 'retail'},
-//   {label: 'Healthcare', value: 'healthcare'},
-//   {label: 'Education', value: 'education'},
-//   {label: 'IT & Technology', value: 'it_technology'},
-// ];
-
 const startDateData = [
-  {label: 'Immediately', value: 'immediately'},
-  {label: 'Within 3 Days', value: 'within_3_days'},
-  {label: 'Within a Week', value: 'within_week'},
-  {label: 'Next Month', value: 'next_month'},
+  {label: 'Immediately', value: 'Immediately'},
+  {label: 'Within 3 Days', value: 'Within 3 Days'},
+  {label: 'Within a Week', value: 'Within a Week'},
+  {label: 'Next Month', value: 'Next Month'},
 ];
 
 const contractTypeData = [
-  {label: 'Full-time experience', value: 'full_time'},
-  {label: 'Part-time experience', value: 'part_time'},
-  {label: 'Contractual', value: 'contractual'},
-  {label: 'Probation Period', value: 'probation'},
+  {label: 'Full-time experience', value: 'Full-time experience'},
+  {label: 'Part-time experience', value: 'Part-time experience'},
+  {label: 'Contractual', value: 'Contractual'},
+  {label: 'Probation Period', value: 'Probation Period'},
 ];
 
 const numberOfPositionsData = [
@@ -112,57 +104,34 @@ const numberOfPositionsData = [
   {label: '2', value: '2'},
   {label: '3', value: '3'},
   {label: '4', value: '4'},
-  {label: '5+', value: '5_plus'},
+  {label: '5+', value: '5+'},
 ];
 
 const salaryRangeData = [
-  {label: '2,000 - 5,000', value: '2000-5000'},
-  {label: '5,000 - 10,000', value: '5000-10000'},
-  {label: '10,000 - 15,000', value: '10000-15000'},
-  {label: '15,000 - 20,000', value: '15000-20000'},
-  {label: '20,000+', value: '20000plus'},
+  {label: '2,000 - 5,000', value: '2,000 - 5,000'},
+  {label: '5,000 - 10,000', value: '5,000 - 10,000'},
+  {label: '10,000 - 15,000', value: '10,000 - 15,000'},
+  {label: '15,000 - 20,000', value: '15,000 - 20,000'},
+  {label: '20,000+', value: '20,000+'},
 ];
 
 const currencyData = [
-  {label: 'AED', value: 'aed'},
-  {label: 'USD', value: 'usd'},
-  {label: 'EUR', value: 'eur'},
-  {label: 'INR', value: 'inr'},
-  {label: 'GBP', value: 'gbp'},
+  {label: 'AED', value: 'AED'},
+  {label: 'USD', value: 'USD'},
+  {label: 'EUR', value: 'EUR'},
+  {label: 'INR', value: 'INR'},
+  {label: 'GBP', value: 'GBP'},
 ];
-
-const benefitsOptions = [
-  'Accommodation',
-  'Flight Ticket',
-  'Insurance',
-  'Transportation',
-  'Meals',
-  'Commission',
-  'Service Charge',
-  'Tips',
-  'Visa',
-  'Career progression',
-  'Training & development',
-];
-
-// const requirements = [
-//   'Experienced in figma or Sketch.',
-//   'Able to work in large or small team.',
-//   'At least 1 year of working experience in agancy. freelance, or start-up.',
-//   'Able to keep up with the lastest trends.',
-//   'Have relevant experience for at least 3 years with diploma on institute.',
-//   'Able to keep up with the lastest trends.',
-// ];
 
 const PostJob = () => {
-  const {t} = useTranslation();
-  const dispatch = useDispatch();
+  const {t} = useTranslation<any>();
+  const dispatch = useDispatch<any>();
   const {
     title,
-    type,
+    job_type,
     area,
     duration,
-    job,
+    job_sector,
     startDate,
     contract,
     salary,
@@ -177,9 +146,14 @@ const PostJob = () => {
     isSuccessModalVisible,
     isModalVisible,
     canApply,
+    editMode,
+    job_id,
   } = useAppSelector((state: any) => selectJobForm(state));
+  console.log('🔥🔥🔥 ~ PostJob ~ editMode:', editMode);
+  const formData = useAppSelector((state: any) => state.company.jobForm);
   const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
+  const [editJob] = useEditCompanyJobMutation();
   // const {data: servicesData} = useGetServicesQuery({});
   // const services = servicesData?.data?.services;
   const {data: facilitiesData} = useGetFacilitiesQuery({});
@@ -190,16 +164,16 @@ const PostJob = () => {
   const businessTypes = businessTypesData?.data?.types as any[];
   const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
   const shouldSkip = !(steps === 5 && skillId.length > 0);
-  const {data: suggestedData, isLoading: isSuggestedLoading} =
-    useGetSuggestedEmployeesQuery(skillId, {skip: shouldSkip});
+  const {data: suggestedData} = useGetSuggestedEmployeesQuery(skillId, {
+    skip: shouldSkip,
+  });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
-
+  console.log('🔥🔥🔥 ~ PostJob ~ selectedEmployeeIds:', selectedEmployeeIds);
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
     value: item._id,
   }));
-
   const [userAddress, setUserAddress] = useState<
     | {
         address: string;
@@ -210,7 +184,6 @@ const PostJob = () => {
       }
     | undefined
   >();
-  // console.log('🔥 ~ PostJob ~ userAddress:', userAddress);
 
   const getUserLocation = async () => {
     try {
@@ -235,7 +208,7 @@ const PostJob = () => {
 
   useEffect(() => {
     if (dropdownBusinessTypesOptions?.length) {
-      updateJobForm({job: dropdownBusinessTypesOptions[0]});
+      updateJobForm({job_sector: dropdownBusinessTypesOptions[0]});
     }
   }, [businessTypes]);
 
@@ -258,49 +231,61 @@ const PostJob = () => {
     }
   };
 
-  console.log('facilities:', selected?.map((item: any) => item._id).join(','));
+  const [from, to] = salary?.value.split('-') || [];
 
   const handleCreateJob = async () => {
     const params = {
       title: title,
-      description: describe,
-      job_type: type?.label,
+      job_type: job_type?.label,
       area: area?.value,
-      address: userAddress?.address,
+      description: describe,
+      address: userAddress?.address || 'UAE, Dubai',
       lat: location?.latitude,
       lng: location?.longitude,
       people_anywhere: canApply,
       duration: duration?.value,
-      job_sector: job?.value,
+      job_sector: job_sector?.value,
       start_date: startDate?.value,
       contract_type: contract?.value,
-      monthly_salary_from: salary?.value.split('-')[0],
-      monthly_salary_to: salary?.value.split('-')[1],
+      monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
+      monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
       no_positions: position?.value,
       skills: skillId?.join(','),
       facilities: selected?.map((item: any) => item._id).join(','),
       requirements: requirements?.join(','),
-      invite_users: selectedEmployeeIds?.map((item: any) => item._id).join(','),
+      invite_users: selectedEmployeeIds?.join(','),
     };
+    console.log(' ~ handleCreateJob ~ params:', params);
 
     try {
-      const response = await createJob(params).unwrap();
-      if (response?.status) {
-        // dispatch(setCoPostJobSteps(0));
-        successToast(response?.message);
+      let response;
+
+      if (editMode) {
+        response = await editJob({job_id: job_id, ...params}).unwrap();
+        console.log('Job updated:', response?.data);
+      } else {
+        response = await createJob(params).unwrap();
+        console.log('Job created:', response?.data);
       }
-      console.log('Job created:', response);
+
+      if (response?.status) {
+        successToast(response?.message);
+      } else {
+        errorToast(response?.message);
+      }
     } catch (err) {
-      console.error('Failed to create job:', err);
+      console.error('Failed to submit job:', err);
+      errorToast('Something went wrong!');
     } finally {
-      updateJobForm({isSuccessModalVisible: true});
+      updateJobForm({ isSuccessModalVisible: true });
     }
   };
 
   const toggleItem = (item: any) => {
-    const updatedList = selected.includes(item)
-      ? selected.filter((i: any) => i !== item)
-      : [...selected, item];
+    const isAlreadySelected = selected?.some((i: any) => i?._id === item?._id);
+    const updatedList = isAlreadySelected
+      ? selected.filter((i: any) => i?._id !== item?._id)
+      : [...(selected || []), item];
 
     updateJobForm({selected: updatedList});
   };
@@ -377,13 +362,6 @@ const PostJob = () => {
                   <Text style={styles.inputLabel}>
                     {t('Describe the role')}
                   </Text>
-                  {/* <TouchableOpacity hitSlop={10}>
-                    <Image
-                      source={IMAGES.info}
-                      resizeMode="contain"
-                      style={styles.info}
-                    />
-                  </TouchableOpacity> */}
                 </View>
                 <CustomTextInput
                   value={describe}
@@ -617,7 +595,9 @@ const PostJob = () => {
                   keyExtractor={(_, index) => index.toString()}
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({item, index}) => {
-                    const isChecked = selected.includes(item);
+                    const isChecked = selected?.some(
+                      (i: any) => i?._id === item?._id,
+                    );
                     return (
                       <Pressable
                         key={index}
@@ -673,7 +653,7 @@ const PostJob = () => {
                     <View style={styles.empRow}>
                       <Text style={styles.location}>
                         {`${userAddress?.state}, ${userAddress?.country} - ${
-                          type?.label || 'Full-Time'
+                          job_type?.label || 'Full-Time'
                         }`}
                       </Text>
                       <Text style={styles.salary}>{`AED ${
@@ -783,9 +763,9 @@ const PostJob = () => {
                   data={jobTypeData}
                   labelField="label"
                   valueField="value"
-                  value={type}
+                  value={job_type}
                   onChange={(e: any) => {
-                    updateJobForm({type: e});
+                    updateJobForm({job_type: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -853,9 +833,9 @@ const PostJob = () => {
                   data={dropdownBusinessTypesOptions}
                   labelField="label"
                   valueField="value"
-                  value={job}
+                  value={job_sector}
                   onChange={(e: any) => {
-                    updateJobForm({job: e});
+                    updateJobForm({job_sector: e});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -1034,13 +1014,13 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors._0B3970),
   },
   input: {
-    borderWidth: 2,
-    borderColor: colors._234F86,
-    borderRadius: 10,
     flex: 1,
-    ...commonFontStyle(400, 18, colors._7B7878),
+    borderWidth: 2,
+    borderRadius: 10,
     paddingVertical: hp(16),
-    paddingHorizontal: wp(23),
+    paddingHorizontal: wp(13),
+    borderColor: colors._234F86,
+    ...commonFontStyle(400, 18, colors._7B7878),
   },
   scrollContainer: {
     flexGrow: 1,

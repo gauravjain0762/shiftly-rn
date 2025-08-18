@@ -39,11 +39,11 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setFavoriteJobs} from '../../../features/employeeSlice';
 
-const carouselImages = [
-  'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-  'https://images.unsplash.com/photo-1551598305-fe1be9fe579e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
-];
+// const carouselImages = [
+//   'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+//   'https://images.unsplash.com/photo-1551598305-fe1be9fe579e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
+//   'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
+// ];
 
 const jobTypes: object[] = [
   {type: 'Full-time', value: 'Full Time'},
@@ -57,14 +57,17 @@ const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
 
 const JobsScreen = () => {
   const {t} = useTranslation();
-  const dispatch = useDispatch<any>();
   const [activeIndex, setActiveIndex] = useState(0);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
-  const {favoriteJobs} = useSelector((state: RootState) => state.employee);
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  const {data: getFavoriteJobs} = useGetFavouritesJobQuery({});
+  const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
-  console.log('🔥🔥🔥 ~ JobsScreen ~ favJobList:', favJobList);
+  const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
+  console.log('🔥🔥🔥 ~ JobsScreen ~ data:', data);
+  const jobList = data?.data?.jobs;
+  const resumeList = data?.data?.resumes;
+  const carouselImages = data?.data?.banners;
+  console.log('🔥🔥🔥 ~ JobsScreen ~ carouselImages:', carouselImages);
 
   const [filters, setFilters] = useState<{
     departments: string[];
@@ -94,12 +97,6 @@ const JobsScreen = () => {
       ? filters.departments.join(',')
       : undefined,
   };
-
-  const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
-  console.log("🔥🔥🔥 ~ JobsScreen ~ data:", data)
-  const jobList = data?.data?.jobs;
-  const resumeList = data?.data?.resumes
-  console.log("🔥🔥🔥 ~ JobsScreen ~ resumeList:", resumeList)
 
   useEffect(() => {
     trigger({});
@@ -142,6 +139,7 @@ const JobsScreen = () => {
 
       if (res?.status) {
         successToast(res?.message);
+        await refetch();
       } else {
         errorToast(res?.message);
       }
@@ -177,9 +175,9 @@ const JobsScreen = () => {
           data={carouselImages}
           scrollAnimationDuration={2500}
           onSnapToItem={index => setActiveIndex(index)}
-          renderItem={({item}) => (
+          renderItem={({item}: any) => (
             <Image
-              source={{uri: item}}
+              source={{uri: item?.image}}
               style={styles.carouselImage}
               resizeMode="cover"
             />
@@ -189,7 +187,7 @@ const JobsScreen = () => {
 
       <View
         style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10}}>
-        {carouselImages?.map((_, index) => (
+        {carouselImages?.map((_: any, index: number) => (
           <View
             key={index}
             style={{
@@ -208,19 +206,21 @@ const JobsScreen = () => {
           style={AppStyles.flex}
           showsVerticalScrollIndicator={false}
           renderItem={({item, index}: any) => {
-            const isFavorite = favJobList?.some((fav: any) => fav._id === item?._id);
-            console.log('🔥🔥🔥 ~ isfavorite:', isFavorite);
+            const isFavorite = favJobList?.some(
+              (fav: any) => fav._id === item?._id,
+            );
             return (
               <JobCard
                 key={index}
                 item={item}
-                heartImage={
-                  favJobList?.includes(item?._id)
-                    ? IMAGES.ic_favorite
-                    : IMAGES.hart
-                }
+                heartImage={isFavorite ? IMAGES.ic_favorite : null}
                 onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
-                onPress={() => navigateTo(SCREEN_NAMES.JobDetail, {item: item, resumeList: resumeList})}
+                onPress={() =>
+                  navigateTo(SCREEN_NAMES.JobDetail, {
+                    item: item,
+                    resumeList: resumeList,
+                  })
+                }
               />
             );
           }}

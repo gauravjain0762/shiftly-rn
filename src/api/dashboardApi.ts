@@ -217,13 +217,13 @@ export const dashboardApi = createApi({
           console.log(data, 'datadata');
           dispatch(setSkills(data?.data?.skills));
         } catch (error) {
-          console.log('Guest Login Error', error);
+          console.log('getSkills Error', error);
         }
       },
     }),
-    addShortlistEmployee: builder.mutation<any, any>({
+    editCompanyJob: builder.mutation<any, any>({
       query: credentials => ({
-        url: API.addShortlistEmployee,
+        url: API.editCompanyJob,
         method: HTTP_METHOD.POST,
         skipLoader: true,
         data: credentials,
@@ -233,7 +233,7 @@ export const dashboardApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
-          console.log('addShortlistEmployee Error', error);
+          console.log('EditCompanyJob Error', error);
         }
       },
     }),
@@ -258,15 +258,7 @@ export const dashboardApi = createApi({
         }
       },
     }),
-    getEmployeeJobs: builder.query<
-      any,
-      {
-        job_types?: string;
-        salary_from?: number;
-        salary_to?: number;
-        location?: string;
-      }
-    >({
+    getEmployeeJobs: builder.query<any, any>({
       query: ({job_types, salary_from, salary_to, location}) => {
         const params = new URLSearchParams();
 
@@ -332,12 +324,15 @@ export const dashboardApi = createApi({
     }),
     employeeApplyJob: builder.mutation<any, any>({
       query: credentials => {
-        console.log('GET Employee Skills URL >>>>>>.:', API.getEmployeeSkills);
         return {
           url: API.employeeApplyJob,
           method: HTTP_METHOD.POST,
           skipLoader: true,
           data: credentials,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Content-Type': 'multipart/form-data',
+          },
         };
       },
       invalidatesTags: ['EmployeeApplyJob'],
@@ -433,6 +428,22 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    addShortlistEmployee: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.addShortlistEmployee,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+        data: credentials,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('addShortlistEmployee Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -458,4 +469,5 @@ export const {
   useAddRemoveFavouriteMutation,
   useGetFavouritesJobQuery,
   useAddShortlistEmployeeMutation,
+  useEditCompanyJobMutation,
 } = dashboardApi;

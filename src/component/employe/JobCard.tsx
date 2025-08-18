@@ -18,15 +18,22 @@ type props = {
   onPressFavorite?: () => void;
 };
 
-const JobCard: FC<props> = ({item, onPress = () => {}, onPressFavorite, heartImage}) => {
+const JobCard: FC<props> = ({
+  item,
+  onPress = () => {},
+  onPressFavorite,
+  heartImage,
+}) => {
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
-      <ImageBackground source={{uri: item?.company_id?.logo}} style={styles.jobImage}>
+      <ImageBackground
+        source={{uri: item?.company_id?.logo}}
+        style={styles.jobImage}>
         <View style={styles.logo}>
           <Image
             resizeMode="contain"
-            source={{uri: item?.company_id?.logo}}
             style={styles.companyLogo}
+            source={{uri: item?.company_id?.logo}}
           />
         </View>
         <View style={styles.actions}>
@@ -39,9 +46,9 @@ const JobCard: FC<props> = ({item, onPress = () => {}, onPressFavorite, heartIma
           </TouchableOpacity>
           <TouchableOpacity onPress={onPressFavorite} style={styles.iconButton}>
             <Image
-              source={heartImage || IMAGES.hart}
               resizeMode="contain"
-              style={styles.icon}
+              source={heartImage ? heartImage : IMAGES.hart}
+              style={heartImage ? styles.filledHeart : styles.icon}
             />
           </TouchableOpacity>
         </View>
@@ -154,7 +161,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   icon: {
-    width: wp(18),
-    height: wp(18),
+    width: wp(24),
+    height: wp(24),
+  },
+  filledHeart: {
+    width: wp(32),
+    height: hp(32),
   },
 });

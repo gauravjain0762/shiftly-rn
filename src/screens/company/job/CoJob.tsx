@@ -28,6 +28,8 @@ import {Dropdown} from 'react-native-element-dropdown';
 import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
 import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
+import {useDispatch} from 'react-redux';
+import {resetJobFormState} from '../../../features/companySlice';
 
 const jobTypes = [
   {label: 'Full Time', value: 'fulltime'},
@@ -37,7 +39,8 @@ const jobTypes = [
 export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
 const CoJob = () => {
-  const {t} = useTranslation();
+  const {t} = useTranslation<any>();
+  const dispatch = useDispatch<any>();
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
   const [range, setRange] = useState<number[]>([1000, 50000]);
@@ -50,7 +53,10 @@ const CoJob = () => {
     location: '',
     page: 1,
   });
-  const {data, isLoading, isFetching} = useGetCompanyJobsQuery(filters);
+  const {data, isLoading, isFetching, refetch} = useGetCompanyJobsQuery({
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   const [jobs, setJobs] = useState<any[]>([]);
 
   useEffect(() => {
@@ -104,7 +110,10 @@ const CoJob = () => {
               style={styles.gradient}>
               <TouchableOpacity
                 activeOpacity={0.5}
-                onPress={() => navigateTo(SCREENS.PostJob)}
+                onPress={() => {
+                  dispatch(resetJobFormState());
+                  navigateTo(SCREENS.PostJob);
+                }}
                 style={styles.postJobButton}>
                 <View style={styles.plusIconContainer}>
                   <Image source={IMAGES.pluse} style={styles.plusIcon} />
@@ -130,14 +139,12 @@ const CoJob = () => {
             contentContainerStyle={{paddingBottom: '20%'}}
             renderItem={({item, index}) => {
               return (
-                <>
-                  <View key={index} style={{marginBottom: hp(10)}}>
-                    <MyJobCard
-                      item={item}
-                      onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
-                    />
-                  </View>
-                </>
+                <View key={index} style={{marginBottom: hp(10)}}>
+                  <MyJobCard
+                    item={item}
+                    onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+                  />
+                </View>
               );
             }}
             ListEmptyComponent={() => (
@@ -152,7 +159,7 @@ const CoJob = () => {
             ListFooterComponent={
               isFetching ? (
                 <ActivityIndicator
-                size={'large'}
+                  size={'large'}
                   style={{marginVertical: 10}}
                 />
               ) : null
@@ -261,6 +268,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 12, colors.white),
   },
   outerContainer: {
+    flex: 1,
     marginTop: hp(14),
     paddingHorizontal: wp(21),
   },

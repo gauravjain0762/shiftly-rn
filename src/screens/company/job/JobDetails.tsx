@@ -20,22 +20,31 @@ import {
   useGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
 import {useRoute} from '@react-navigation/native';
-import {errorToast, successToast} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  navigateTo,
+  successToast,
+} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import {useDispatch} from 'react-redux';
+import {setJobFormState} from '../../../features/companySlice';
 
 const Tabs = ['Applicants', 'Invited', 'Shortlisted'];
 
 const CoJobDetails = () => {
   const {t} = useTranslation();
   const {params} = useRoute<any>();
+  const dispatch = useDispatch();
   const job_id = params?._id as any;
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  const {data} = useGetCompanyJobDetailsQuery('689b160b3f2e282e35e9e06b');
+  const {data} = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const jobDetail = data?.data;
+  console.log('🔥🔥🔥 ~ CoJobDetails ~ jobDetail:', jobDetail);
   const JobDetailsArr = {
     'Job Type': jobDetail?.job_type,
     Vacancy: jobDetail?.no_positions,
-    'Expiry Date': '31 July',
+    'Expiry Date': jobDetail?.expiry_date,
     Duration: jobDetail?.duration,
     'Job Industry': jobDetail?.job_sector,
     Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
@@ -80,7 +89,7 @@ const CoJobDetails = () => {
         />
 
         <View style={styles.bodyContainer}>
-          <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id}`}</Text>
+          <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id || '-'}`}</Text>
 
           <Text style={styles.location}>
             {jobDetail?.address || 'Atlantis, The Palm, Dubai'}
@@ -107,7 +116,7 @@ const CoJobDetails = () => {
                 return (
                   <View key={index} style={styles.detailItem}>
                     <Text style={styles.detailKey}>{key}</Text>
-                    <Text style={styles.detailValue}>{value}</Text>
+                    <Text style={styles.detailValue}>{value || '-'}</Text>
                   </View>
                 );
               }}
@@ -171,9 +180,61 @@ const CoJobDetails = () => {
             <GradientButton
               type="Company"
               style={styles.button}
-              title={t('Edit Post')}
+              title={t('Edit Job')}
               onPress={() => {
-                // navigateTo(SCREENS.CoPost);
+                dispatch(
+                  setJobFormState({
+                    job_id: job_id,
+                    title: jobDetail?.title,
+                    job_type: {
+                      label: jobDetail?.job_type,
+                      value: jobDetail?.job_type,
+                    },
+                    area: {label: jobDetail?.area, value: jobDetail?.area},
+                    duration: {
+                      label: jobDetail?.duration,
+                      value: jobDetail?.duration,
+                    },
+                    job_sector: {
+                      label: jobDetail?.job_sector,
+                      value: jobDetail?.job_sector,
+                    },
+                    startDate: {
+                      label: jobDetail?.start_date,
+                      value: jobDetail?.start_date,
+                    },
+                    contract: {
+                      label: jobDetail?.contract_type,
+                      value: jobDetail?.contract_type,
+                    },
+                    salary: {
+                      label: `${Number(
+                        jobDetail?.monthly_salary_from,
+                      ).toLocaleString()} - ${Number(
+                        jobDetail?.monthly_salary_to,
+                      ).toLocaleString()}`,
+                      value: `${Number(
+                        jobDetail?.monthly_salary_from,
+                      ).toLocaleString()} - ${Number(
+                        jobDetail?.monthly_salary_to,
+                      ).toLocaleString()}`,
+                    },
+                    position: {
+                      label: String(jobDetail?.no_positions),
+                      value: String(jobDetail?.no_positions),
+                    },
+                    describe: jobDetail?.description,
+                    selected: jobDetail?.facilities || [],
+                    jobSkills: jobDetail?.skills?.map((s: any) => s.title) || [],
+                    skillId: jobDetail?.skills?.map((s: any) => s._id) || [],
+                    requirements: jobDetail?.requirements || [],
+                    invite_users:
+                      jobDetail?.invited_users?.map((u: any) => u?._id) || [],
+                    canApply: jobDetail?.people_anywhere,
+                    editMode: true,
+                  }),
+                );
+                navigateTo(SCREENS.PostJob);
               }}
             />
           </View>
@@ -191,8 +252,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(22),
   },
   title: {
-    right: '22%',
-    marginLeft: '5%',
+    width: '75%',
   },
   iconButton: {
     width: wp(32),
@@ -244,6 +304,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 17, colors._0B3970),
   },
   detailValue: {
+    // textAlign: 'center',
     ...commonFontStyle(400, 16, colors.black),
   },
   bottomContainer: {

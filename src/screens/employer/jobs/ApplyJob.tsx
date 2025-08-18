@@ -22,6 +22,8 @@ import {navigationRef} from '../../../navigation/RootContainer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
 import CustomBtn from '../../../component/common/CustomBtn';
+import {errorToast, successToast} from '../../../utils/commonFunction';
+import ImagePickerModal from '../../../component/common/ImagePickerModal';
 
 const documents = [
   {id: 'cv', label: 'CV', icon: IMAGES.CV},
@@ -35,22 +37,38 @@ const documents = [
 
 const ApplyJob = () => {
   const {t, i18n} = useTranslation();
-  const [selected, setSelected] = useState('cv');
+  const [imageModal, setImageModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<any>([]);
   const {params} = useRoute<any>();
   const data = params?.data as any;
   const resumeList = params?.resumeList as any;
   const [visible, setVisible] = useState(false);
   const {bottom} = useSafeAreaInsets();
-  const [applyJob] = useEmployeeApplyJobMutation();
+  const [applyJob] = useEmployeeApplyJobMutation({});
+  const [resumes, setResumes] = useState<any[]>(resumeList || []);
 
   const handleApplyJob = async () => {
+    if (!selectedDoc) {
+      errorToast('Please select or upload a resume');
+      return;
+    }
+
+    const applyJobParams = {
+      job_id: data?._id,
+      resume_id: selectedDoc,
+    };
+
     try {
-      const res = await applyJob({job_id: data?._id}).unwrap();
-      // console.log('🔥🔥🔥 ~ handleApplyJob ~ res?.data:', res?.data);
+      const res = await applyJob(applyJobParams).unwrap();
+
+      if (res?.status) {
+        successToast(res?.message);
+        setVisible(true);
+      } else {
+        errorToast(res?.message);
+      }
     } catch (error) {
       console.error('Error applying job:', error);
-    } finally {
-      setVisible(prev => !prev);
     }
   };
 
@@ -74,10 +92,16 @@ const ApplyJob = () => {
             </View>
             <View style={{flex: 1}}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
-              <Text style={styles.location}>{data?.company}</Text>
+              <Text style={styles.location}>{data?.address}</Text>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text style={styles.meta}>Dubai, UAE - Full Time</Text>
-                <Text style={styles.salary}>AED 10k</Text>
+                <Text
+                  style={
+                    styles.meta
+                  }>{`${data?.area} - ${data?.job_type}`}</Text>
+                <Text
+                  style={
+                    styles.salary
+                  }>{`AED ${data?.monthly_salary_from} - ${data?.monthly_salary_to}`}</Text>
               </View>
             </View>
           </View>
@@ -90,24 +114,28 @@ const ApplyJob = () => {
             <Text style={styles.heading}>{t('Choose documents to apply')}</Text>
 
             {/* Document List */}
-            {resumeList?.map((doc: any) => (
-              <TouchableOpacity
-                key={doc.id}
-                style={styles.docRow}
-                onPress={() => setSelected(doc.id)}>
-                <View style={styles.radioCircle}>
-                  {selected === doc.id && (
-                    <View style={styles.check}>
-                      <Image source={IMAGES.check} style={styles.checked} />
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.docLabel}>{doc.file_name}</Text>
-                <Image source={{uri: doc.file}} style={styles.docIcon} />
-              </TouchableOpacity>
-            ))}
+            {resumes?.map((doc: any, index: number) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.docRow}
+                  onPress={() => setSelectedDoc(doc._id)}>
+                  <View style={styles.radioCircle}>
+                    {selectedDoc === doc._id && (
+                      <View style={styles.check}>
+                        <Image source={IMAGES.check} style={styles.checked} />
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.docLabel}>{doc.file_name}</Text>
+                  <Image source={{uri: doc.file}} style={styles.docIcon} />
+                </TouchableOpacity>
+              );
+            })}
 
-            <Pressable style={styles.uploadButton}>
+            <Pressable
+              onPress={() => setImageModal(true)}
+              style={styles.uploadButton}>
               <Text
                 style={{
                   ...commonFontStyle(400, 22, colors._F4E2B8),
@@ -115,6 +143,15 @@ const ApplyJob = () => {
                 {'Upload CV'}
               </Text>
             </Pressable>
+
+            <Text
+              style={{
+                marginTop: hp(8),
+                paddingHorizontal: wp(20),
+                ...commonFontStyle(400, 12, colors.white),
+              }}>
+              {'PDF or word document up to 5MB'}
+            </Text>
           </View>
           <GradientButton
             style={styles.btn}
@@ -131,6 +168,24 @@ const ApplyJob = () => {
         onJobList={() => {
           navigationRef.goBack();
           setVisible(false);
+        }}
+      />
+
+      <ImagePickerModal
+        actionSheet={imageModal}
+        setActionSheet={setImageModal}
+        onUpdate={(image: any) => {
+          setImageModal(false);
+
+          const newResume = {
+            _id: Date.now().toString(),
+            file_name: image.filename || 'Uploaded CV',
+            file: image.path,
+            isLocal: true,
+          };
+
+          setResumes([newResume]);
+          setSelectedDoc(newResume._id);
         }}
       />
     </>

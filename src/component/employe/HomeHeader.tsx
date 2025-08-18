@@ -20,7 +20,6 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
 }) => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥🔥🔥 ~ HomeHeader ~ userInfo:', userInfo);
 
   return (
     <View style={styles.header}>

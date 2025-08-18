@@ -16,7 +16,6 @@ const CoHome = () => {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log("🔥🔥🔥 ~ CoHome ~ userInfo:", userInfo)
 
   const {
     data: getPost,
