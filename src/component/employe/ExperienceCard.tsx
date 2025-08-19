@@ -1,42 +1,43 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ImageBackground,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground} from 'react-native';
 import {commonFontStyle, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
 
-const EducationCard = ({item,onRemove,onEdit}) => {
-  const startYear = item?.startDate && moment(item?.startDate).isValid()
-    ? moment(item?.startDate).format('YYYY')
+type Props = {
+  item: any;
+  onRemove: () => void;
+  onEdit: () => void;
+};
+
+const ExperienceCard = ({item, onRemove, onEdit}: Props) => {
+  const start = item?.job_start
+    ? moment(item?.job_start).format('YYYY')
     : '';
-  const endYear = item?.endDate && moment(item?.endDate).isValid()
-    ? moment(item?.endDate).format('YYYY')
+  const end = item?.still_working
+    ? 'Present'
+    : item?.job_end
+    ? moment(item?.job_end).format('YYYY')
     : '';
 
   return (
     <View style={styles.card}>
       <View style={styles.rowSpaceBetween}>
-        <Text style={styles.degree}>{item?.degree}</Text>
-        <Text style={styles.duration}>{startYear}{startYear || endYear ? ' - ' : ''}{endYear}</Text>
+        <Text style={styles.degree}>{item?.title}</Text>
+        <Text style={styles.duration}>{start}{start || end ? ' - ' : ''}{end}</Text>
       </View>
 
       <View style={styles.rowSpaceBetween}>
         <View>
-          <Text style={styles.university}>{item?.university}</Text>
-          <Text style={styles.location}>{item?.country} {item?.province}</Text>
+          <Text style={styles.university}>{item?.company}</Text>
+          <Text style={styles.location}>
+            {item?.department}{item?.country ? ` • ${item?.country}` : ''}
+          </Text>
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity onPress={()=>{
-            onRemove()
-          }}>
+          <TouchableOpacity onPress={onRemove}>
             <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
               <Image
                 source={IMAGES.close_icon}
@@ -44,9 +45,7 @@ const EducationCard = ({item,onRemove,onEdit}) => {
               />
             </ImageBackground>
           </TouchableOpacity>
-          <TouchableOpacity onPress={()=>{
-            onEdit()
-          }}>
+          <TouchableOpacity onPress={onEdit}>
             <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
               <Image
                 source={IMAGES.edit_icon}
@@ -62,10 +61,10 @@ const EducationCard = ({item,onRemove,onEdit}) => {
   );
 };
 
+export default ExperienceCard;
+
 const styles = StyleSheet.create({
   card: {
-    // backgroundColor: '#003366', // Match your background color
-    // padding: 16,
     borderRadius: 6,
     position: 'relative',
     marginHorizontal: wp(25),
@@ -90,9 +89,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   actions: {
-    // position: 'absolute',
-    // right: 16,
-    // top: 45,
     flexDirection: 'row',
     gap: 10,
   },
@@ -102,10 +98,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  icon: {
-    color: 'white',
-    fontSize: 14,
-  },
   underline: {
     marginVertical: 12,
     borderBottomWidth: 1,
@@ -113,4 +105,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EducationCard;
+

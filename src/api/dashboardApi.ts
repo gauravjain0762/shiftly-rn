@@ -228,6 +228,7 @@ export const dashboardApi = createApi({
         skipLoader: true,
         data: credentials,
       }),
+      invalidatesTags: ['GetJobs'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -444,6 +445,52 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    updateAboutMe: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.updateAboutMe,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+        data: credentials,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('updateAboutMe Error', error);
+        }
+      },
+    }),
+    getEducations: builder.query<any, any>({
+      query: () => ({
+        url: API.getEducations,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getEducations Error', error);
+        }
+      },
+    }),
+    getExperiences: builder.query<any, any>({
+      query: () => ({
+        url: API.getExperiences,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getExperiences Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -470,4 +517,8 @@ export const {
   useGetFavouritesJobQuery,
   useAddShortlistEmployeeMutation,
   useEditCompanyJobMutation,
+  useUpdateAboutMeMutation,
+  useGetEmployeeJobsQuery,
+  useGetEducationsQuery,
+  useGetExperiencesQuery,
 } = dashboardApi;

@@ -1,6 +1,7 @@
 import {
   FlatList,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -32,6 +33,7 @@ import {RootState} from '../../../store';
 import {
   useAddUpdateEducationMutation,
   useAddUpdateExperienceMutation,
+  useUpdateAboutMeMutation,
 } from '../../../api/dashboardApi';
 import {errorToast, successToast} from '../../../utils/commonFunction';
 
@@ -39,6 +41,7 @@ const CreateProfileScreen = () => {
   const dispatch = useDispatch();
   const [addUpdateEducation] = useAddUpdateEducationMutation({});
   const [addUpdateExperience] = useAddUpdateExperienceMutation({});
+  const [updateAboutMe] = useUpdateAboutMeMutation({});
 
   const {
     educationList,
@@ -49,6 +52,10 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
+  console.log(
+    '🔥 ~ CreateProfileScreen ~ educationListEdit:',
+    educationListEdit,
+  );
 
   const addEducation = (item: any) => {
     dispatch(setEducationList([...educationList, item]));
@@ -137,98 +144,123 @@ const CreateProfileScreen = () => {
     }
   };
 
+  const handleAddAboutMe = async () => {
+    const params = {
+      open_for_job: aboutEdit?.open_for_jobs ? true : false,
+      location: aboutEdit?.location,
+      responsibility: aboutEdit?.responsibilities,
+      languages: aboutEdit?.selectedLanguages?.map((lang: any) => ({
+        name: lang.name,
+        level: lang.level,
+      })),
+    };
+    try {
+      const res = await updateAboutMe(params).unwrap();
+      if (res?.status) {
+        successToast(res?.message);
+        dispatch(setShowModal(true));
+      } else {
+        errorToast(res?.message);
+      }
+    } catch (error) {
+      console.error('Error adding about me:', error);
+    }
+  };
+
   return (
     <SafeAreaView
       edges={['bottom']}
       style={{flex: 1, backgroundColor: colors._041326}}>
-      <LinearContainer
-        SafeAreaProps={{edges: ['bottom', 'top']}}
-        colors={['#0D468C', '#041326']}>
-        <View style={styles.topConrainer}>
-          <BackHeader
-            containerStyle={{}}
-            isRight={true}
-            title={'Create Your Profile'}
-            RightIcon={<View />}
-          />
-        </View>
-
-        <Stepper
-          activeStep={activeStep}
-          setActiveStep={(step: number) => dispatch(setActiveStep(step))}
-        />
-
-        <KeyboardAwareScrollView style={{marginTop: 20}}>
-          {activeStep === 1 && (
-            <>
-              {educationList?.map((item, index) => (
-                <EducationCard
-                  key={index}
-                  item={item}
-                  onRemove={() => removeEducation(index)}
-                  onEdit={() => dispatch(setEducationListEdit(item))}
-                />
-              ))}
-              <EducationList
-                educationListEdit={educationListEdit}
-                setEducationListEdit={val =>
-                  dispatch(setEducationListEdit(val))
-                }
-                addNewEducation={() => {
-                  dispatch(addEducation(educationListEdit));
-                  dispatch(
-                    setEducationListEdit({
-                      degree: '',
-                      university: '',
-                      startDate: '',
-                      endDate: '',
-                      country: '',
-                      province: '',
-                    }),
-                  );
-                }}
-                onNextPress={() => {
-                  handleAddEducation();
-                }}
-              />
-            </>
-          )}
-
-          {activeStep === 2 && (
-            <>
-              {experienceList?.map((item, index) => (
-                <EducationCard
-                  key={index}
-                  item={item}
-                  onRemove={() => removeExperience(index)}
-                  onEdit={() => dispatch(setExperienceListEdit(item))}
-                />
-              ))}
-              <ExperienceList
-                educationListEdit={experienceListEdit}
-                setEducationListEdit={(val: any) =>
-                  dispatch(setExperienceListEdit(val))
-                }
-                addNewEducation={() => addExperience(experienceListEdit)}
-                onNextPress={() => handleAddUExperience()}
-              />
-            </>
-          )}
-
-          {activeStep === 3 && (
-            <AboutMeList
-              educationListEdit={aboutEdit}
-              setEducationListEdit={(val: any) => dispatch(setAboutEdit(val))}
-              onNextPress={() => dispatch(setShowModal(true))}
+      <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: hp(50)}}>
+        <LinearContainer
+          SafeAreaProps={{edges: ['bottom', 'top']}}
+          colors={['#0D468C', '#041326']}>
+          <View style={styles.topConrainer}>
+            <BackHeader
+              containerStyle={{}}
+              isRight={true}
+              title={'Create Your Profile'}
+              RightIcon={<View />}
             />
-          )}
+          </View>
 
-          <SuccessffullyModal
-            visible={showModal}
-            onClose={() => dispatch(setShowModal(false))}
+          <Stepper
+            activeStep={activeStep}
+            setActiveStep={(step: number) => dispatch(setActiveStep(step))}
           />
-        </KeyboardAwareScrollView>
-      </LinearContainer>
+
+          <KeyboardAwareScrollView style={{marginTop: 20}}>
+            {activeStep === 1 && (
+              <>
+                {educationList?.map((item, index) => (
+                  <EducationCard
+                    key={index}
+                    item={item}
+                    onRemove={() => removeEducation(index)}
+                    onEdit={() => dispatch(setEducationListEdit(item))}
+                  />
+                ))}
+                <EducationList
+                  educationListEdit={educationListEdit}
+                  setEducationListEdit={val =>
+                    dispatch(setEducationListEdit(val))
+                  }
+                  addNewEducation={() => {
+                    dispatch(addEducation(educationListEdit));
+                    dispatch(
+                      setEducationListEdit({
+                        degree: '',
+                        university: '',
+                        startDate: '',
+                        endDate: '',
+                        country: '',
+                        province: '',
+                      }),
+                    );
+                  }}
+                  onNextPress={() => {
+                    handleAddEducation();
+                  }}
+                />
+              </>
+            )}
+
+            {activeStep === 2 && (
+              <>
+                {experienceList?.map((item, index) => (
+                  <EducationCard
+                    key={index}
+                    item={item}
+                    onRemove={() => removeExperience(index)}
+                    onEdit={() => dispatch(setExperienceListEdit(item))}
+                  />
+                ))}
+                <ExperienceList
+                  educationListEdit={experienceListEdit}
+                  setEducationListEdit={(val: any) =>
+                    dispatch(setExperienceListEdit(val))
+                  }
+                  addNewEducation={() => addExperience(experienceListEdit)}
+                  onNextPress={() => handleAddUExperience()}
+                />
+              </>
+            )}
+
+            {activeStep === 3 && (
+              <AboutMeList
+                educationListEdit={aboutEdit}
+                setEducationListEdit={(val: any) => dispatch(setAboutEdit(val))}
+                onNextPress={() => handleAddAboutMe()}
+              />
+            )}
+
+            <SuccessffullyModal
+              visible={showModal}
+              onClose={() => dispatch(setShowModal(false))}
+            />
+          </KeyboardAwareScrollView>
+        </LinearContainer>
+      </ScrollView>
     </SafeAreaView>
   );
 };

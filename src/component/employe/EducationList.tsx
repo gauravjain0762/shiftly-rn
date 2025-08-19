@@ -3,25 +3,19 @@ import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import GradientButton from '../common/GradientButton';
-import CustomDropdown from '../common/CustomDropdown';
 import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
 import {EducationItem} from '../../features/employeeSlice';
-
-const educationOptions = [
-  {label: 'High School', value: 'high_school'},
-  {label: 'Diploma', value: 'diploma'},
-  {label: "Bachelor's Degree", value: 'bachelor'},
-  {label: "Master's Degree", value: 'master'},
-  {label: 'PhD', value: 'phd'},
-];
+import CustomInput from '../common/CustomInput';
 
 type Props = {
   educationListEdit: EducationItem;
   setEducationListEdit: (item: EducationItem) => void;
   addNewEducation: () => void;
   onNextPress: () => void;
+  isEditing?: boolean;
+  onSaveEducation?: () => void;
 };
 
 const EducationList: FC<Props> = ({
@@ -29,36 +23,28 @@ const EducationList: FC<Props> = ({
   setEducationListEdit,
   addNewEducation,
   onNextPress,
+  isEditing,
+  onSaveEducation,
 }) => {
+  console.log('🔥🔥 ~ educationListEdit:', educationListEdit);
+
   return (
     <View style={{paddingHorizontal: 29}}>
-      <CustomDropdown
-        data={educationOptions}
+      <CustomInput
         label="Degree"
-        placeholder="Select Degree"
-        value={educationListEdit.degree}
-        container={{marginBottom: 15}}
-        disable={false}
-        onChange={(selectedItem: any) => {
-          setEducationListEdit({
-            ...educationListEdit,
-            degree: selectedItem?.value,
-          });
-        }}
+        placeholder="Enter Degree"
+        value={educationListEdit?.degree}
+        onChange={text =>
+          setEducationListEdit({...educationListEdit, degree: text})
+        }
       />
-      <CustomDropdown
-        data={educationOptions}
+      <CustomInput
         label="University"
-        placeholder="Select University"
-        value={educationListEdit.university}
-        container={{marginBottom: 15}}
-        disable={false}
-        onChange={(selectedItem: any) => {
-          setEducationListEdit({
-            ...educationListEdit,
-            university: selectedItem?.value,
-          });
-        }}
+        placeholder="Enter University"
+        value={educationListEdit?.university}
+        onChange={text =>
+          setEducationListEdit({...educationListEdit, university: text})
+        }
       />
       {/* Start & End Date */}
       <View style={{flexDirection: 'row', marginBottom: 20, gap: 10}}>
@@ -69,11 +55,11 @@ const EducationList: FC<Props> = ({
               ? moment(educationListEdit.startDate).format('DD-MM-YYYY')
               : ''
           }
-          minimumDate={new Date()}
+          maximumDate={new Date()}
           onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              startDate: date,
+              startDate: moment(date).toISOString(),
             });
           }}
         />
@@ -85,11 +71,16 @@ const EducationList: FC<Props> = ({
               ? moment(educationListEdit.endDate).format('DD-MM-YYYY')
               : ''
           }
-          minimumDate={educationListEdit.startDate || new Date()}
+          minimumDate={
+            educationListEdit.startDate
+              ? new Date(educationListEdit.startDate)
+              : undefined
+          }
+          maximumDate={new Date()}
           onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              endDate: date,
+              endDate: moment(date).toISOString(),
             });
           }}
         />
@@ -101,41 +92,35 @@ const EducationList: FC<Props> = ({
           marginBottom: 20,
           gap: 10,
         }}>
-        <CustomDropdown
-          data={educationOptions}
+        <CustomInput
           label="Country"
-          placeholder="Country"
-          value={educationListEdit.country}
-          container={{marginBottom: 15, flex: 1}}
-          disable={false}
-          onChange={selectedItem => {
-            setEducationListEdit({
-              ...educationListEdit,
-              country: selectedItem?.value,
-            });
-          }}
+          placeholder="Enter Country"
+          value={educationListEdit?.country}
+          onChange={text =>
+            setEducationListEdit({...educationListEdit, country: text})
+          }
+          containerStyle={{flex: 1}}
         />
-        <CustomDropdown
-          data={educationOptions}
+        <CustomInput
           label="Province"
-          placeholder="Province"
-          value={educationListEdit.province}
-          container={{marginBottom: 15, flex: 1}}
-          disable={false}
-          onChange={selectedItem => {
-            setEducationListEdit({
-              ...educationListEdit,
-              province: selectedItem?.value,
-            });
-          }}
+          placeholder="Enter Province"
+          value={educationListEdit?.province}
+          onChange={text =>
+            setEducationListEdit({...educationListEdit, province: text})
+          }
+          containerStyle={{flex: 1}}
         />
       </View>
-      <TouchableOpacity onPress={addNewEducation} style={styles.btnRow}>
+      <TouchableOpacity
+        onPress={isEditing ? onSaveEducation : addNewEducation}
+        style={styles.btnRow}>
         <Image
           source={IMAGES.close1}
           style={{width: 22, height: 22, resizeMode: 'contain'}}
         />
-        <Text style={styles.addEduText}>Add Another Education</Text>
+        <Text style={styles.addEduText}>
+          {isEditing ? 'Save Education' : 'Add Another Education'}
+        </Text>
       </TouchableOpacity>
 
       <GradientButton style={styles.btn} title="Next" onPress={onNextPress} />

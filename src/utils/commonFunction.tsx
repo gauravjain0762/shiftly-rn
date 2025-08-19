@@ -53,6 +53,10 @@ export const navigateTo = (name: string, params?: any | undefined) => {
   navigationRef.navigate(name, params);
 };
 
+export const goBack = () => {
+  navigationRef.goBack();
+};
+
 type ImagePickerProps = {
   params?: object;
   onSucess: (params: object) => void;

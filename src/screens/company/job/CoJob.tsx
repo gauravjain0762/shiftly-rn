@@ -30,6 +30,7 @@ import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import {useDispatch} from 'react-redux';
 import {resetJobFormState} from '../../../features/companySlice';
+import {useFocusEffect} from '@react-navigation/native';
 
 const jobTypes = [
   {label: 'Full Time', value: 'fulltime'},
@@ -58,6 +59,12 @@ const CoJob = () => {
     refetchOnReconnect: true,
   });
   const [jobs, setJobs] = useState<any[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, []),
+  );
 
   useEffect(() => {
     if (filters.page === 1) {

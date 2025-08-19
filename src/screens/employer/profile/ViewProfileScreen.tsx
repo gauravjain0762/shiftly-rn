@@ -1,58 +1,130 @@
 import React from 'react';
 import {
+  FlatList,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {LinearContainer} from '../../../component';
+import {BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
-import {navigateTo} from '../../../utils/commonFunction';
+import {goBack, navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {useGetEmployeeProfileQuery} from '../../../api/dashboardApi';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Flag} from 'react-native-country-picker-modal';
+import {callingCodeToCountryCode} from '../../../utils/countryFlags';
 
 const ViewProfileScreen = () => {
+  const {data: getProfile} = useGetEmployeeProfileQuery({});
+  const userInfo = getProfile?.data?.user;
+
+  const countryCode = userInfo?.phone_code || 'AE';
+
+  const callingCodeToCountry = (callingCode: any) => {
+    const cleanCode = callingCode
+      ?.toString()
+      ?.replace('+', '') as keyof typeof callingCodeToCountryCode;
+    return callingCodeToCountryCode[cleanCode] || 'AE';
+  };
+
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top']}}
       colors={['#0D468C', '#041326']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <Image
-            source={{uri: 'https://randomuser.me/api/portraits/women/44.jpg'}}
-            style={styles.avatar}
-          />
-          <Text style={styles.name}>Smith Williamson</Text>
-          <View style={styles.locationRow}>
-            <Image source={IMAGES.marker} style={styles.locationicon} />
-            <Text style={styles.location}>Dubai Marina, Dubai - U.A.E</Text>
-          </View>
+      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Pressable
+            onPress={() => goBack()}
+            style={{padding: wp(23), paddingBottom: 0}}>
+            <Image
+              source={IMAGES.backArrow}
+              style={{height: hp(20), width: wp(24)}}
+            />
+          </Pressable>
+          <View style={styles.container}>
+            <Image
+              style={styles.avatar}
+              source={{
+                uri: userInfo?.picture,
+              }}
+            />
+            <Text style={styles.name}>{userInfo?.name}</Text>
+            <View style={styles.locationRow}>
+              <Image source={IMAGES.marker} style={styles.locationicon} />
+              <Text style={styles.location}>{userInfo?.location}</Text>
+            </View>
 
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo(SCREENS.AccountScreen);
-              }}
-              style={styles.editButton}>
-              <Text style={styles.editButtonText}>Open to Work</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo(SCREENS.ProfileScreen);
-              }}
-              style={styles.editButton}>
-              <Text style={styles.editButtonText}>View Profile</Text>
-            </TouchableOpacity>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.AccountScreen);
+                }}
+                style={styles.editButton}>
+                <Text style={styles.editButtonText}>Open to Work</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.ProfileScreen);
+                }}
+                style={styles.editButton}>
+                <Text style={styles.editButtonText}>View Profile</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.decText}>
+              {userInfo?.about_desc ||
+                'Sed ut perspiciatis unde omns iste natus error site voluptatem accusantum dolorem queitters lipsum lipslaudantiuml ipsum text.'}
+            </Text>
           </View>
-          <Text style={styles.decText}>
-            Sed ut perspiciatis unde omns iste natus error site voluptatem
-            accusantum dolorem queitters lipsum lipslaudantiuml ipsum text.
-          </Text>
-        </View>
-      </ScrollView>
+          <View style={styles.detailsContainer}>
+            <FlatList
+              data={[
+                {label: 'Profession', value: userInfo?.responsibility},
+                {
+                  label: 'Nationality',
+                  value: userInfo?.nationality,
+                  showFlag: true,
+                },
+                {label: 'Email', value: userInfo?.email},
+                {
+                  label: 'Phone',
+                  value: `+971 ${userInfo?.phone}`,
+                  showFlag: true,
+                },
+                {label: 'Experience', value: userInfo?.experience?.title},
+                {label: 'Education', value: userInfo?.education?.degree},
+              ]}
+              keyExtractor={(_, index) => index.toString()}
+              contentContainerStyle={{gap: hp(23)}}
+              renderItem={({item}) => (
+                <View style={{gap: hp(2)}}>
+                  <Text style={{...commonFontStyle(600, 20, colors.white)}}>
+                    {item.label}
+                  </Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    {item?.showFlag && (
+                      <Flag
+                        withEmoji
+                        flagSize={40}
+                        withFlagButton
+                        countryCode={callingCodeToCountry(countryCode) as any}
+                      />
+                    )}
+                    <Text style={{...commonFontStyle(400, 18, colors._F4E2B8)}}>
+                      {item.value || '-'}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </LinearContainer>
   );
 };
@@ -66,8 +138,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   avatar: {
-    width: wp(130),
-    height: wp(130),
+    width: wp(115),
+    height: wp(115),
     borderRadius: 100,
   },
   name: {
@@ -98,10 +170,15 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginTop: 32,
   },
-
   locationicon: {
     width: wp(24),
     height: wp(24),
     resizeMode: 'contain',
+  },
+  detailsContainer: {
+    gap: hp(23),
+    marginVertical: hp(20),
+    alignItems: 'flex-start',
+    paddingHorizontal: wp(23),
   },
 });

@@ -7,7 +7,7 @@ interface JobFormState {
   job_type: {label: string; value: string};
   area: {label: string; value: string};
   duration: {label: string; value: string};
-  job_sector: {label: string; value: string};
+  job_sector: {label: string; value: string} | null;
   startDate: {label: string; value: string};
   contract: {label: string; value: string};
   salary: {label: string; value: string};
@@ -52,7 +52,7 @@ const initialState: CompanyState = {
     job_type: {label: 'Full Time', value: 'Full Time'},
     area: {label: 'Dubai Marina', value: 'Dubai Marina'},
     duration: {label: '1 Month', value: '1 Month'},
-    job_sector: {label: 'Hospitality', value: 'Hospitality'},
+    job_sector: null,
     startDate: {label: 'Immediately', value: 'Immediately'},
     contract: {label: 'Full-time experience', value: 'Full-time experience'},
     salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},

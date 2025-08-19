@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -38,6 +38,7 @@ import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setFavoriteJobs} from '../../../features/employeeSlice';
+import { useFocusEffect } from '@react-navigation/native';
 
 // const carouselImages = [
 //   'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
@@ -67,7 +68,6 @@ const JobsScreen = () => {
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
-  console.log('🔥🔥🔥 ~ JobsScreen ~ carouselImages:', carouselImages);
 
   const [filters, setFilters] = useState<{
     departments: string[];
@@ -177,9 +177,9 @@ const JobsScreen = () => {
           onSnapToItem={index => setActiveIndex(index)}
           renderItem={({item}: any) => (
             <Image
+              resizeMode="cover"
               source={{uri: item?.image}}
               style={styles.carouselImage}
-              resizeMode="cover"
             />
           )}
         />

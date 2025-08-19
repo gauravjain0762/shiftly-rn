@@ -3,6 +3,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
 
 export interface EducationItem {
+  education_id?: string;
   degree: string;
   university: string;
   startDate: string | null;
@@ -32,6 +33,7 @@ export interface AboutMe {
   selectedLanguages: string[];
   proficiency: string;
   checkEnd: boolean;
+  open_for_jobs: boolean;
 }
 
 export interface EmployeeState {
@@ -57,6 +59,7 @@ const initialState: EmployeeState = {
     endDate: '',
     country: '',
     province: '',
+    education_id: '',
   },
   experienceListEdit: {
     preferred: '',
@@ -78,6 +81,7 @@ const initialState: EmployeeState = {
     selectedLanguages: [],
     proficiency: '',
     checkEnd: false,
+    open_for_jobs: false,
   },
   favoriteJobs: [],
 };

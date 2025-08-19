@@ -10,6 +10,7 @@ import {
   setUserInfo,
 } from '../features/authSlice';
 import {SCREENS} from '../navigation/screenNames';
+import {dashboardApi} from './dashboardApi';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -106,6 +107,13 @@ export const authApi = createApi({
           if (data?.status) {
             if (data?.data) {
               console.log('Create Job Data', data);
+              // Invalidate company jobs so lists refetch instantly
+              dispatch(
+                dashboardApi.util.invalidateTags([
+                  'GetJobs',
+                  'GetEmployeeJobs',
+                ]),
+              );
             }
           } else {
             errorToast(data?.message);

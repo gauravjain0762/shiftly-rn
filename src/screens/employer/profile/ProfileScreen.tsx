@@ -13,15 +13,93 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import Slider from '@react-native-community/slider';
-import {navigateTo} from '../../../utils/commonFunction';
+import {goBack, navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import moment from 'moment';
+import {
+  useGetEducationsQuery,
+  useGetExperiencesQuery,
+} from '../../../api/dashboardApi';
+import {
+  setEducationList,
+  setEducationListEdit,
+  setExperienceList,
+  setExperienceListEdit,
+  setAboutEdit,
+} from '../../../features/employeeSlice';
 
 const ProfileScreen = () => {
-  const [range, setRange] = useState<string>('');
+  const dispatch = useDispatch<any>();
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log("🔥🔥🔥 ~ ProfileScreen ~ userInfo:", userInfo)
+  const {data: getEducation} = useGetEducationsQuery({});
+  const {data: getExperiences} = useGetExperiencesQuery({});
+  const educationData = getEducation?.data?.educations;
+  const experienceData = getExperiences?.data?.experiences;
+
+  const handleEditProfile = async () => {
+    const mappedEducations = (educationData || []).map((e: any) => ({
+      degree: e?.degree || '',
+      university: e?.university || '',
+      startDate: e?.start_date || '',
+      endDate: e?.end_date || '',
+      country: e?.country || '',
+      province: e?.province || '',
+      education_id: e?.education_id || '',
+    }));
+
+    dispatch(setEducationList(mappedEducations));
+
+    const parseToISO = (input: any) => {
+      if (!input) return '';
+      const parsedStrict = moment(input, 'MMMM YYYY', true);
+      if (parsedStrict.isValid()) return parsedStrict.toISOString();
+      const flexible = moment(input);
+      return flexible.isValid() ? flexible.toISOString() : '';
+    };
+
+    const mappedExperiences = (experienceData || []).map((e: any) => ({
+      preferred: e?.preferred || '',
+      title: e?.title || '',
+      company: e?.company || '',
+      department: e?.department || '',
+      country: e?.country || '',
+      job_start: parseToISO(e?.job_start),
+      job_end: parseToISO(e?.job_end),
+      still_working: !!e?.still_working,
+      experience_type: e?.experience_type || '',
+      _id: e?._id,
+    }));
+
+    dispatch(setExperienceList(mappedExperiences));
+
+    if (mappedEducations?.length > 0) {
+      dispatch(setEducationListEdit(mappedEducations[0]));
+    }
+    if (mappedExperiences?.length > 0) {
+      dispatch(setExperienceListEdit(mappedExperiences[0] as any));
+    }
+
+    const mappedLanguages = (userInfo?.languages || []).map((l: any) => l?.name).filter(Boolean);
+    dispatch(
+      setAboutEdit({
+        aboutMe: '',
+        responsibilities: userInfo?.responsibility || '',
+        selectOne: [],
+        isOn: false,
+        location: userInfo?.location || '',
+        selectedLanguages: mappedLanguages,
+        proficiency: '',
+        checkEnd: false,
+        open_for_jobs: false,
+      }),
+    );
+
+    navigateTo(SCREENS.EditProfileScreen);
+  };
+
   const HeaderWithAdd = useCallback(
     ({title}: any) => (
       <View style={styles.headerRow}>
@@ -32,15 +110,8 @@ const ProfileScreen = () => {
   );
 
   const Section = useCallback(
-    ({title, content, onPress}: any) => (
+    ({title, content}: any) => (
       <View style={styles.card}>
-        <TouchableOpacity
-          onPress={() => {
-            onPress && onPress();
-          }}
-          style={styles.addButton}>
-          <Image source={IMAGES.pluse} style={styles.plus} />
-        </TouchableOpacity>
         <HeaderWithAdd title={title} />
         <Text style={styles.content}>{content}</Text>
       </View>
@@ -49,13 +120,19 @@ const ProfileScreen = () => {
   );
 
   return (
-    <LinearContainer
-      SafeAreaProps={{edges: ['top']}}
-      colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={['#0D468C', '#041326']}>
       <ScrollView
         contentContainerStyle={styles.scrollContiner}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
+        <Pressable
+          onPress={() => goBack()}
+          style={{padding: wp(23), paddingBottom: 0}}>
+          <Image
+            source={IMAGES.backArrow}
+            style={{height: hp(20), width: wp(24)}}
+          />
+        </Pressable>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
           <Image
             source={
               userInfo?.picture
@@ -75,9 +152,7 @@ const ProfileScreen = () => {
           </View>
 
           <TouchableOpacity
-            onPress={() => {
-              navigateTo(SCREENS.AccountScreen);
-            }}
+            onPress={handleEditProfile}
             style={styles.editButton}>
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
@@ -127,27 +202,37 @@ const ProfileScreen = () => {
           {/* Section: About Me */}
           <Section
             title="About me"
-            onPress={() => {
-              navigateTo(SCREENS.EditProfileScreen);
-            }}
-            content="Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text."
+            content={
+              userInfo?.about ||
+              'Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.'
+            }
           />
 
           {/* Section: Professional Experience */}
           <Section
             title="Professional Experience"
-            content="Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text."
+            content={
+              userInfo?.responsibility ||
+              'Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.'
+            }
           />
 
           {/* Section: My Languages */}
 
           <View style={[styles.card, {width: '90%'}]}>
-            <TouchableOpacity style={styles.addButton}>
+            {/* <TouchableOpacity style={styles.addButton}>
               <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <HeaderWithAdd title="My Languages" />
-            <Text style={styles.languageText}>English</Text>
-            <Slider
+            <View
+              style={{flexDirection: 'row', alignItems: 'center', gap: wp(8)}}>
+              {userInfo?.languages?.map((item: any, index: number) => (
+                <View key={index} style={[styles.skillBadge]}>
+                  <Text style={styles.skillText}>{item?.name}</Text>
+                </View>
+              ))}
+            </View>
+            {/* <Slider
               style={{width: '100%', height: 40}}
               value={range as any}
               minimumValue={0}
@@ -155,7 +240,7 @@ const ProfileScreen = () => {
               minimumTrackTintColor={'#F4E2B8'}
               maximumTrackTintColor={'#17457D'}
               onValueChange={(value: any) => setRange(value)}
-            />
+            /> */}
           </View>
 
           {/* Section: Education */}
@@ -164,15 +249,18 @@ const ProfileScreen = () => {
             onPress={() => {
               navigateTo(SCREENS.CreateProfileScreen);
             }}
-            content="Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text."
+            content={
+              userInfo?.education?.degree ||
+              'Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.'
+            }
           />
 
           {/* Section: Skills */}
           <View style={styles.card}>
             <HeaderWithAdd title="Skills" />
-            <TouchableOpacity style={styles.addButton}>
+            {/* <TouchableOpacity style={styles.addButton}>
               <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <View style={styles.skillContainer}>
               {[
                 'All Job',
@@ -191,9 +279,9 @@ const ProfileScreen = () => {
 
           {/* Section: Additional Info */}
           <View style={styles.card}>
-            <TouchableOpacity style={styles.addButton}>
+            {/* <TouchableOpacity style={styles.addButton}>
               <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <HeaderWithAdd title="Additional Information" />
             <Text style={styles.subtitle}>Highlight your achievements</Text>
             <Text style={styles.content}>
@@ -204,21 +292,18 @@ const ProfileScreen = () => {
 
           {/* Section: Achievements */}
           <View style={styles.card}>
-            <TouchableOpacity style={styles.addButton}>
-              <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity>
             <HeaderWithAdd title={'Achievements \nand Certifications'} />
             <View style={styles.certRow}>
               {[1, 2, 3, 4].map(item => (
                 <Image
                   key={item}
-                  source={IMAGES.Maskgroup} // Replace with actual images
+                  source={IMAGES.Maskgroup}
                   style={styles.certImage}
                 />
               ))}
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </ScrollView>
     </LinearContainer>
   );
@@ -350,6 +435,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   card: {
+    width: '90%',
     backgroundColor: '#0B3970',
     borderRadius: 20,
     paddingHorizontal: wp(18),

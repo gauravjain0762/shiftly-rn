@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   BackHeader,
   CustomDropdown,
@@ -149,7 +149,7 @@ const PostJob = () => {
     editMode,
     job_id,
   } = useAppSelector((state: any) => selectJobForm(state));
-  console.log('🔥🔥🔥 ~ PostJob ~ editMode:', editMode);
+  console.log('🔥🔥🔥 ~ PostJob ~ job_sector:', job_sector);
   const formData = useAppSelector((state: any) => state.company.jobForm);
   const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
@@ -169,7 +169,6 @@ const PostJob = () => {
   });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
-  console.log('🔥🔥🔥 ~ PostJob ~ selectedEmployeeIds:', selectedEmployeeIds);
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
     value: item._id,
@@ -206,11 +205,18 @@ const PostJob = () => {
     }, []),
   );
 
+  const hasInitializedJobSectorRef = useRef<boolean>(false);
+
   useEffect(() => {
-    if (dropdownBusinessTypesOptions?.length) {
+    if (
+      !hasInitializedJobSectorRef.current &&
+      dropdownBusinessTypesOptions?.length > 0 &&
+      !job_sector
+    ) {
       updateJobForm({job_sector: dropdownBusinessTypesOptions[0]});
+      hasInitializedJobSectorRef.current = true;
     }
-  }, [businessTypes]);
+  }, [dropdownBusinessTypesOptions, job_sector, updateJobForm]);
 
   const [location, setLocation] = useState<
     | {
@@ -233,6 +239,8 @@ const PostJob = () => {
 
   const [from, to] = salary?.value.split('-') || [];
 
+  console.log('job_sector?.label', job_sector?.label);
+
   const handleCreateJob = async () => {
     const params = {
       title: title,
@@ -244,7 +252,7 @@ const PostJob = () => {
       lng: location?.longitude,
       people_anywhere: canApply,
       duration: duration?.value,
-      job_sector: job_sector?.value,
+      job_sector: job_sector?.label,
       start_date: startDate?.value,
       contract_type: contract?.value,
       monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
@@ -255,7 +263,7 @@ const PostJob = () => {
       requirements: requirements?.join(','),
       invite_users: selectedEmployeeIds?.join(','),
     };
-    console.log(' ~ handleCreateJob ~ params:', params);
+    console.log('~ >>>> handleCreateJob ~ params:', params);
 
     try {
       let response;
@@ -277,7 +285,7 @@ const PostJob = () => {
       console.error('Failed to submit job:', err);
       errorToast('Something went wrong!');
     } finally {
-      updateJobForm({ isSuccessModalVisible: true });
+      updateJobForm({isSuccessModalVisible: true});
     }
   };
 

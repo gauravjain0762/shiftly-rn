@@ -373,7 +373,7 @@ const StackNavigator: FC = () => {
       initialRouteName={SCREENS.SplashScreen}
       screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
-      {/* <Stack.Screen name={SCREENS.CreateProfileScreen} component={CreateProfileScreen} /> */}
+      <Stack.Screen name={SCREENS.CreateProfileScreen} component={CreateProfileScreen} />
       <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />
       <Stack.Screen
         name={SCREENS.SelectRollScreen}

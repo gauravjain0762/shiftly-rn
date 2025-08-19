@@ -3,7 +3,6 @@ import {
   ImageBackground,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -11,17 +10,11 @@ import React, {FC, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import GradientButton from '../common/GradientButton';
-import CustomDropdown from '../common/CustomDropdown';
-import CustomDatePicker from '../common/CustomDatePicker';
-import {IMAGES} from '../../assets/Images';
-import moment from 'moment';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
-import CustomSwitch from '../common/CustomSwitch';
 import CustomInput from '../common/CustomInput';
-import {MultiSelect} from 'react-native-element-dropdown';
+import {IMAGES} from '../../assets/Images';
 import {useGetEmployeeSkillsQuery} from '../../api/dashboardApi';
-import {useDispatch, useSelector} from 'react-redux';
-import {selectEmployeeState} from '../../features/employeeSlice';
+import {useDispatch} from 'react-redux';
 
 type MessageItem = {
   id: string;
@@ -32,14 +25,6 @@ type MessageItem = {
   date: string;
   unreadCount?: number;
 };
-
-const educationOptions = [
-  {label: 'High School', value: 'high_school'},
-  {label: 'Diploma', value: 'diploma'},
-  {label: "Bachelor's Degree", value: 'bachelor'},
-  {label: "Master's Degree", value: 'master'},
-  {label: 'PhD', value: 'phd'},
-];
 
 const languages = [
   'English',
@@ -56,23 +41,6 @@ const languages = [
   'Japanese',
 ];
 
-const getDotColor = (level: string) => {
-  switch (level) {
-    case 'Native':
-      return '#F4E2B8';
-    case 'Fluent':
-      return '#CBC194';
-    case 'Intermediate':
-      return '#7390B1';
-    case 'Basic':
-      return '#024AA1';
-    default:
-      return '#999';
-  }
-};
-
-const proficiencyLevels = ['Native', 'Fluent', 'Intermediate', 'Basic'];
-
 type Props = {
   onPressMessage: (item: MessageItem) => void;
   item: MessageItem[];
@@ -82,246 +50,105 @@ const AboutMeList: FC<Props> = ({
   onPressMessage = () => {},
   educationListEdit,
   setEducationListEdit,
-  updateField,
-  index,
-  addNewEducation,
   onNextPress,
 }: any) => {
-  const dispatch = useDispatch();
-  const {data} = useGetEmployeeSkillsQuery({});
-  const empSkills = data?.data?.skills;
-
   return (
-    <View style={{paddingHorizontal: 29}}>
-      <Text style={styles.headerText}>About Me</Text>
-      <TextInput
-        style={styles.dropdown}
-        multiline
-        value={educationListEdit.aboutMe}
-        onChangeText={text => {
-          setEducationListEdit({
-            ...educationListEdit,
-            aboutMe: text,
-          });
-        }}
-        maxLength={400}
-        textAlignVertical="top"
-        placeholderTextColor={'rgba(231, 231, 231, 0.8)'}
-        placeholder="If an employer visited your profile right now, what would you want them to know about you first?"
-      />
-      <Text
-        style={
-          styles.countText
-        }>{`${educationListEdit.aboutMe?.length}/400`}</Text>
-      <CustomDropdown
-        data={educationOptions}
-        label="Key Responsibilities "
-        placeholder={'Key Responsibilities '}
-        value={educationListEdit.responsibilities}
-        container={{marginBottom: 25}}
-        disable={false}
-        onChange={selectedItem => {
-          setEducationListEdit({
-            ...educationListEdit,
-            responsibilities: selectedItem?.value,
-          });
-        }}
-      />
+    <View style={styles.containerWrapper}>
+      <Text style={styles.headerTitle}>Front Desk Manager</Text>
 
-      <Text style={styles.headerText}>Select your skills</Text>
-      <CustomDropdownMulti
-        data={
-          empSkills?.map((skill: { title: any; _id: any; }) => ({
-            label: skill.title,
-            value: skill._id,
-          })) || []
-        }
-        placeholder="Select more than one"
-        value={educationListEdit.selectOne}
-        selectedStyle={styles.selectedStyle}
-        container={{marginBottom: 15}}
-        disable={false}
-        onChange={selectedItem => {
-          setEducationListEdit({
-            ...educationListEdit,
-            selectOne: selectedItem,
-          });
-        }}
-      />
-
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <CustomSwitch
-          setIsOn={item => {
-            setEducationListEdit({
-              ...educationListEdit,
-              isOn: item,
-            });
-          }}
-          isOn={educationListEdit.isOn}
-        />
-        <Text style={styles.stillText}>
-          Yes, I’m open to better opportunities
-        </Text>
-      </View>
-
-      <Text style={[styles.headerText, {marginTop: 30, marginBottom: 12}]}>
-        Front Desk Manager
-      </Text>
-
-      <View
-        style={{
-          gap: 11,
-          borderBottomWidth: 1,
-          paddingBottom: 28,
-          borderBottomColor: '#FFF8E6',
-        }}>
+      <View style={styles.optionWrapper}>
         <TouchableOpacity
-          style={{flexDirection: 'row', alignItems: 'center', gap: 10}}
-          onPress={() => {}}>
-          <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
-            <Image
-              source={IMAGES.check}
-              style={{
-                width: 18,
-                height: 16,
-                resizeMode: 'contain',
-                tintColor: colors._F4E2B8,
-              }}
-            />
-          </ImageBackground>
+          style={styles.optionItem}
+          onPress={() => {
+            setEducationListEdit({...educationListEdit, open_for_jobs: true});
+          }}>
+          <View
+            style={[
+              styles.iconContainer,
+              {
+                borderColor:
+                  educationListEdit?.open_for_jobs === true
+                    ? colors.coPrimary
+                    : colors._104686,
+              },
+            ]}>
+            <Image source={IMAGES.check} style={styles.checkIcon} />
+          </View>
           <Text style={styles.iconWrapperText}>
             Yes, I’m open to better opportunities
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-          style={{flexDirection: 'row', alignItems: 'center', gap: 10}}
-          onPress={() => {}}>
-          <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
-            <Image
-              source={IMAGES.close}
-              style={{
-                width: 15,
-                height: 13,
-                resizeMode: 'contain',
-                tintColor: colors._F4E2B8,
-              }}
-            />
-          </ImageBackground>
+          style={styles.optionItem}
+          onPress={() => {
+            setEducationListEdit({...educationListEdit, open_for_jobs: false});
+          }}>
+          <View
+            style={[
+              styles.iconContainer,
+              {
+                borderColor:
+                  educationListEdit?.open_for_jobs === false
+                    ? colors.coPrimary
+                    : colors._104686,
+              },
+            ]}>
+            <Image source={IMAGES.close} style={styles.closeIcon} />
+          </View>
           <Text style={styles.iconWrapperText}>
             No, I’m not currently looking
           </Text>
         </TouchableOpacity>
       </View>
+
       <CustomInput
         label="Location"
         placeholder={'Enter Location'}
         value={educationListEdit.location}
         onChange={(text: any) => {
-          setEducationListEdit({
-            ...educationListEdit,
-            location: text,
-          });
+          setEducationListEdit({...educationListEdit, location: text});
         }}
       />
 
-      <CustomDropdown
-        data={educationOptions}
-        label="Key Responsibilities "
-        placeholder={'Key Responsibilities '}
+      <CustomInput
+        label="Key Responsibilities"
+        placeholder={'Enter Key Responsibilities'}
         value={educationListEdit.responsibilities}
-        container={{marginBottom: 20}}
-        disable={false}
-        onChange={selectedItem => {
-          setEducationListEdit({
-            ...educationListEdit,
-            responsibilities: selectedItem?.value,
-          });
-        }}
+        onChange={(text: any) =>
+          setEducationListEdit({...educationListEdit, responsibilities: text})
+        }
       />
 
       <Text style={styles.headerText}>Select your language</Text>
-      {/* <MultiSelect
-        style={styles.dropdown1}
-        data={languages.map(lang => ({label: lang, value: lang}))}
-        labelField="label"
-        valueField="value"
-        placeholder="Select more than one"
-        placeholderStyle={styles.placeholderStyle}
-        value={educationListEdit.selectedLanguages}
-        onChange={(val: any[]) => {
-          setEducationListEdit({
-            ...educationListEdit,
-            selectedLanguages: val,
-          });
-        }}
-        selectedStyle={styles.selectedStyle}
-      /> */}
 
       <CustomDropdownMulti
         data={languages.map(lang => ({label: lang, value: lang}))}
         placeholder={'Select more than one'}
         value={educationListEdit.selectedLanguages}
-        container={{marginBottom: 15}}
+        container={styles.multiDropdownContainer}
         disable={false}
         placeholderStyle={styles.placeholderStyle}
         selectedStyle={styles.selectedStyle}
-        onChange={selectedItem => {
+        onChange={(selectedItems: any) => {
           setEducationListEdit({
             ...educationListEdit,
-            selectedLanguages: selectedItem,
+            selectedLanguages: selectedItems,
           });
         }}
       />
 
-      {educationListEdit.selectedLanguages.length > 0 && (
-        <>
-          <Text style={styles.subTitle}>Proficiency Levels</Text>
-
-          {educationListEdit.selectedLanguages.map((lang: boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | React.Key | null | undefined) => (
-            <View style={styles.row} key={lang}>
-              <Text style={styles.language}>{lang}</Text>
-              {proficiencyLevels.map(level => (
-                <TouchableOpacity
-                  key={level}
-                  style={[
-                    styles.dot,
-                    educationListEdit.proficiency[lang] === level &&
-                      styles.selectedDot,
-                    {backgroundColor: getDotColor(level)},
-                  ]}
-                  onPress={() => {
-                    setEducationListEdit({
-                      ...educationListEdit,
-                      proficiency: {
-                        ...educationListEdit.proficiency,
-                        [lang]: level,
-                      },
-                    });
-                  }}
-                />
-              ))}
+      {!!educationListEdit.selectedLanguages?.length && (
+        <View style={styles.languageListContainer}>
+          {educationListEdit.selectedLanguages.map((name: string) => (
+            <View key={name} style={styles.languageChip}>
+              <Text style={styles.languageChipText}>{name}</Text>
             </View>
           ))}
-
-          <View style={styles.legend}>
-            {proficiencyLevels.map(level => (
-              <View style={styles.legendItem} key={level}>
-                <View
-                  style={[styles.dot, {backgroundColor: getDotColor(level)}]}
-                />
-                <Text style={styles.legendText}>{level}</Text>
-              </View>
-            ))}
-          </View>
-        </>
+        </View>
       )}
-      <GradientButton
-        style={styles.btn}
-        title={'Next'}
-        onPress={() => {
-          onNextPress();
-        }}
-      />
+
+      <GradientButton style={styles.btn} title={'Update'} onPress={onNextPress} />
     </View>
   );
 };
@@ -329,50 +156,70 @@ const AboutMeList: FC<Props> = ({
 export default AboutMeList;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  containerWrapper: {
+    paddingHorizontal: 29,
   },
-  dropdown: {
-    paddingHorizontal: wp(16),
-    borderRadius: 10,
-    minHeight: 200,
-    maxHeight: 200,
-    borderWidth: 1.5,
-    borderColor: '#225797',
+  headerTitle: {
+    ...commonFontStyle(700, 18, '#F4E2B8'),
+    marginTop: hp(15),
+    marginBottom: hp(12),
+  },
+  optionWrapper: {
+    gap: 11,
+    borderBottomWidth: 1,
+    paddingBottom: 28,
+    borderBottomColor: '#FFF8E6',
+  },
+  optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    ...commonFontStyle(400, 15, '#F4E2B8'),
+    gap: 10,
   },
-  headerText: {
-    ...commonFontStyle(700, 18, '#F4E2B8'),
-    marginBottom: 8,
-  },
-  countText: {
-    ...commonFontStyle(400, 12, 'rgba(231, 231, 231, 1)'),
-    textAlign: 'right',
-    marginTop: 10,
-    marginRight: 3,
-  },
-  btn: {
-    marginHorizontal: wp(4),
-    marginTop: 40,
-  },
-  stillText: {
-    ...commonFontStyle(400, 18, '#DADADA'),
-    marginLeft: 12,
-    textAlign: 'center',
-  },
-  iconWrapperText: {
-    ...commonFontStyle(400, 18, '#DADADA'),
-  },
-
   iconWrapper: {
     width: 38,
     height: 38,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
+  iconContainer: {
+    width: wp(40),
+    height: hp(40),
+    borderWidth: hp(1.5),
+    borderRadius: hp(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkIcon: {
+    width: 18,
+    height: 16,
+    resizeMode: 'contain',
+    tintColor: colors._F4E2B8,
+  },
+  closeIcon: {
+    width: 15,
+    height: 13,
+    resizeMode: 'contain',
+    tintColor: colors._F4E2B8,
+  },
+  iconWrapperText: {
+    ...commonFontStyle(400, 18, '#DADADA'),
+  },
+  dropdownContainer: {
+    marginBottom: 20,
+  },
+  multiDropdownContainer: {
+    marginBottom: 15,
+  },
+  headerText: {
+    ...commonFontStyle(700, 18, '#F4E2B8'),
+    marginBottom: 8,
+    marginTop: 20,
+  },
+  subTitle: {
+    ...commonFontStyle(700, 18, '#F4E2B8'),
+    marginBottom: 10,
+    marginTop: 20,
+  },
   selectedStyle: {
     height: 0,
     opacity: 0,
@@ -382,22 +229,24 @@ const styles = StyleSheet.create({
   placeholderStyle: {
     ...commonFontStyle(400, 18, '#F4E2B8'),
   },
-
-  dropdown1: {
-    paddingHorizontal: wp(16),
-    borderRadius: 20,
-    height: 59,
-    borderWidth: 1.5,
-    borderColor: '#225797',
+  languageListContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    ...commonFontStyle(400, 18, '#F4E2B8'),
-  },
-
-  subTitle: {
-    ...commonFontStyle(700, 18, '#F4E2B8'),
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 10,
     marginBottom: 10,
-    marginTop: 20,
+  },
+  languageChip: {
+    borderWidth: 1,
+    borderColor: '#FBE7BD',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  languageChipText: {
+    ...commonFontStyle(400, 14, '#F4E2B8'),
   },
   row: {
     flexDirection: 'row',
@@ -430,5 +279,9 @@ const styles = StyleSheet.create({
   legendText: {
     ...commonFontStyle(400, 13, '#DADADA'),
     marginTop: 6,
+  },
+  btn: {
+    marginHorizontal: wp(4),
+    marginTop: 40,
   },
 });

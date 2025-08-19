@@ -64,6 +64,9 @@ export const API = {
   empUpdateProfile: '/updateProfile',
   addUpdateEducation: '/addUpdateEducation',
   addUpdateExperience: '/addUpdateExperience',
+  updateAboutMe: '/updateAboutMe',
+  getEducations: '/getEducations',
+  getExperiences: '/getExperiences',
 
   // google Map API
   GOOGLE_MAP_API_KEY: 'AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E',

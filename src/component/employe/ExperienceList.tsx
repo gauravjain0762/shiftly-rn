@@ -48,6 +48,8 @@ const ExperienceList: FC<Props> = ({
   index,
   addNewEducation,
   onNextPress,
+  isEditing,
+  onSaveExperience,
 }: any) => {
   return (
     <View style={{paddingHorizontal: 29}}>
@@ -128,31 +130,38 @@ const ExperienceList: FC<Props> = ({
           // marginBottom: 20,
           gap: 10,
         }}>
-        <CustomDropdown
-          data={educationOptions}
-          label="Month"
-          placeholder={'Month'}
-          value={educationListEdit?.month}
-          container={{marginBottom: 15, flex: 1}}
-          disable={false}
-          onChange={selectedItem => {
+        <CustomDatePicker
+          label="Start Date"
+          value={
+            educationListEdit?.job_start
+              ? moment(educationListEdit?.job_start).format('DD-MM-YYYY')
+              : ''
+          }
+          maximumDate={new Date()}
+          onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              month: selectedItem?.value,
+              job_start: moment(date).toISOString(),
             });
           }}
         />
-        <CustomDropdown
-          data={educationOptions}
-          label="Year"
-          placeholder={'Year'}
-          value={educationListEdit?.year}
-          container={{marginBottom: 15, flex: 1}}
-          disable={false}
-          onChange={selectedItem => {
+        <CustomDatePicker
+          label="End Date"
+          value={
+            educationListEdit?.job_end
+              ? moment(educationListEdit?.job_end).format('DD-MM-YYYY')
+              : ''
+          }
+          minimumDate={
+            educationListEdit?.job_start
+              ? new Date(educationListEdit?.job_start)
+              : undefined
+          }
+          maximumDate={new Date()}
+          onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              year: selectedItem?.value,
+              job_end: moment(date).toISOString(),
             });
           }}
         />
@@ -216,7 +225,7 @@ const ExperienceList: FC<Props> = ({
         data={educationOptions}
         label="What type of experience"
         placeholder={'What type of experience'}
-        value={educationListEdit?.province}
+        value={educationListEdit?.experience_type}
         container={{marginBottom: 15}}
         disable={false}
         onChange={selectedItem => {
@@ -229,14 +238,16 @@ const ExperienceList: FC<Props> = ({
 
       <TouchableOpacity
         onPress={() => {
-          addNewEducation();
+          isEditing ? onSaveExperience?.() : addNewEducation();
         }}
         style={styles.btnRow}>
         <Image
           source={IMAGES.close1}
           style={{width: 22, height: 22, resizeMode: 'contain'}}
         />
-        <Text style={styles.addEduText}>Add Another Experience</Text>
+        <Text style={styles.addEduText}>
+          {isEditing ? 'Save Experience' : 'Add Another Experience'}
+        </Text>
       </TouchableOpacity>
 
       <GradientButton
