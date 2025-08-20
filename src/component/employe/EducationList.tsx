@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
@@ -8,6 +15,7 @@ import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
 import {EducationItem} from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
+import {errorToast} from '../../utils/commonFunction';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -63,7 +71,6 @@ const EducationList: FC<Props> = ({
             });
           }}
         />
-
         <CustomDatePicker
           label="End Date"
           value={
@@ -76,8 +83,14 @@ const EducationList: FC<Props> = ({
               ? new Date(educationListEdit.startDate)
               : undefined
           }
-          maximumDate={new Date()}
           onChange={(date: any) => {
+            if (
+              educationListEdit.startDate &&
+              moment(date).isBefore(moment(educationListEdit.startDate))
+            ) {
+              errorToast('End Date cannot be before Start Date');
+              return;
+            }
             setEducationListEdit({
               ...educationListEdit,
               endDate: moment(date).toISOString(),

@@ -15,7 +15,7 @@ type MessageItem = {
 
 type Props = {
   onPressMessage: (item: MessageItem) => void;
-  item: MessageItem[];
+  item: MessageItem[] | any;
   type?: 'company' | 'employe';
 };
 
@@ -29,7 +29,7 @@ const MessageList: FC<Props> = ({
       style={styles.itemContainer}
       onPress={() => onPressMessage(item)}>
       <View style={styles.logoBg}>
-        <Image source={{uri: item?.logo}} style={styles.logo} />
+        <Image source={{uri: item?.company_id?.logo}} style={styles.logo} />
       </View>
       <View style={styles.textContainer}>
         <Text
@@ -37,14 +37,14 @@ const MessageList: FC<Props> = ({
             styles.title,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.title}
+          {item?.company_id?.company_name || "Test Chat"}
         </Text>
         <Text
           style={[
             styles.sender,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.sender}
+          {item?.last_message || "last message"}
         </Text>
         <Text
           style={[

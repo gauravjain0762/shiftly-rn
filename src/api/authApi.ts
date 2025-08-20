@@ -37,13 +37,69 @@ export const authApi = createApi({
               dispatch(setUserInfo(data.data?.company));
               await setAsyncUserInfo(data.data?.company);
               dispatch(setGuestLogin(false));
-              navigateTo(SCREENS.CoTabNavigator);
+              resetNavigation(SCREENS.CoTabNavigator);
             }
           } else {
             errorToast(data?.message);
           }
         } catch (error) {
-          console.log('Verify OTP Error', error);
+          console.log('company login Error', error);
+        }
+      },
+    }),
+    companyGoogleSignIn: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyGoogleSignIn,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+
+          if (data?.status) {
+            await setAsyncToken(data?.data?.auth_token);
+            dispatch(setAuthToken(data.data?.auth_token));
+            dispatch(setUserInfo(data.data?.company));
+            await setAsyncUserInfo(data.data?.company);
+            dispatch(setGuestLogin(false));
+            navigateTo(SCREENS.CoTabNavigator);
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('companyGoogleSignIn Error', error);
+        }
+      },
+    }),
+    companyAppleSignIn: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.companyAppleSignIn,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+
+          if (data?.data?.company?.status) {
+            await setAsyncToken(data?.data?.auth_token);
+            dispatch(setAuthToken(data.data?.auth_token));
+            dispatch(setUserInfo(data.data?.company));
+            await setAsyncUserInfo(data.data?.company);
+            dispatch(setGuestLogin(false));
+            resetNavigation(SCREENS.CoTabNavigator);
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('companyAppleSignIn Error', error);
         }
       },
     }),
@@ -93,7 +149,6 @@ export const authApi = createApi({
     }),
     createJob: builder.mutation<any, any>({
       query: params => {
-        console.log('🔥🔥🔥 ~ params:', params);
         return {
           url: API.createCompanyJob,
           method: HTTP_METHOD.POST,
@@ -367,6 +422,60 @@ export const authApi = createApi({
         }
       },
     }),
+    employeeGoogleSignIn: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeGoogleSignIn,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.status) {
+            await setAsyncToken(data?.data?.auth_token);
+            dispatch(setAuthToken(data.data?.auth_token));
+            dispatch(setUserInfo(data.data?.user));
+            await setAsyncUserInfo(data.data?.user);
+            dispatch(setGuestLogin(false));
+            resetNavigation(SCREENS.TabNavigator);
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeGoogleSignIn Error', error);
+        }
+      },
+    }),
+    employeeAppleSignIn: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeAppleSignIn,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.data?.user?.status) {
+            await setAsyncToken(data?.data?.auth_token);
+            dispatch(setAuthToken(data.data?.auth_token));
+            dispatch(setUserInfo(data.data?.user));
+            await setAsyncUserInfo(data.data?.user);
+            dispatch(setGuestLogin(false));
+            resetNavigation(SCREENS.TabNavigator);
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeAppleSignIn Error', error);
+        }
+      },
+    }),
     employeeSignUp: builder.mutation<any, any>({
       query: credentials => ({
         url: API.employeeSignup,
@@ -607,4 +716,8 @@ export const {
   useEmployeeResetPasswordMutation,
   useEmployeeSignUpMutation,
   useEmpUpdateProfileMutation,
+  useCompanyGoogleSignInMutation,
+  useEmployeeGoogleSignInMutation,
+  useCompanyAppleSignInMutation,
+  useEmployeeAppleSignInMutation,
 } = authApi;

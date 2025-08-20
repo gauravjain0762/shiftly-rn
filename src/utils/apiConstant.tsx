@@ -13,6 +13,8 @@ export const API = {
   companyResetPassword: '/company/resetPassword',
   companyChangePassword: '/company/changePassword',
   companyDeleteAccount: '/company/deleteAccount',
+  companyGoogleSignIn: '/company/googleSignIn',
+  companyAppleSignIn: '/company/appleSignin',
 
   // Dashboard
   getBusinessTypes: '/company/getBusinessTypes',
@@ -49,6 +51,8 @@ export const API = {
   employeeChangePassword: '/changePassword',
   employeeDeleteAccount: '/deleteAccount',
   employeeApplyJob: "/applyJob",
+  employeeGoogleSignIn: "/googleSignin",
+  employeeAppleSignIn: "/appleSignin",
 
   // Dashboard
   getEmployeePosts: '/getPosts',
@@ -67,6 +71,11 @@ export const API = {
   updateAboutMe: '/updateAboutMe',
   getEducations: '/getEducations',
   getExperiences: '/getExperiences',
+
+  // Chats
+  employeeGetChats: '/getChats',
+  employeeGetChatMessages: '/getChatMessages',
+  employeeSendMessage: '/sendMessage',
 
   // google Map API
   GOOGLE_MAP_API_KEY: 'AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E',

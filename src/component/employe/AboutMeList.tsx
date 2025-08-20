@@ -46,6 +46,23 @@ type Props = {
   item: MessageItem[];
 };
 
+const getDotColor = (level: string) => {
+  switch (level) {
+    case 'Native':
+      return '#F4E2B8';
+    case 'Fluent':
+      return '#CBC194';
+    case 'Intermediate':
+      return '#7390B1';
+    case 'Basic':
+      return '#024AA1';
+    default:
+      return '#999';
+  }
+};
+
+const proficiencyLevels = ['Native', 'Fluent', 'Intermediate', 'Basic'];
+
 const AboutMeList: FC<Props> = ({
   onPressMessage = () => {},
   educationListEdit,
@@ -138,7 +155,7 @@ const AboutMeList: FC<Props> = ({
         }}
       />
 
-      {!!educationListEdit.selectedLanguages?.length && (
+      {/* {!!educationListEdit.selectedLanguages?.length && (
         <View style={styles.languageListContainer}>
           {educationListEdit.selectedLanguages.map((name: string) => (
             <View key={name} style={styles.languageChip}>
@@ -146,9 +163,39 @@ const AboutMeList: FC<Props> = ({
             </View>
           ))}
         </View>
-      )}
+      )} */}
 
-      <GradientButton style={styles.btn} title={'Update'} onPress={onNextPress} />
+      {educationListEdit.selectedLanguages.map((lang: any) => (
+        <View style={styles.row} key={lang}>
+          <Text style={styles.language}>{lang}</Text>
+          {proficiencyLevels.map(level => (
+            <TouchableOpacity
+              key={level}
+              style={[
+                styles.dot,
+                educationListEdit.proficiency[lang] === level &&
+                  styles.selectedDot,
+                {backgroundColor: getDotColor(level)},
+              ]}
+              onPress={() => {
+                setEducationListEdit({
+                  ...educationListEdit,
+                  proficiency: {
+                    ...educationListEdit.proficiency,
+                    [lang]: level,
+                  },
+                });
+              }}
+            />
+          ))}
+        </View>
+      ))}
+
+      <GradientButton
+        style={styles.btn}
+        title={'Update'}
+        onPress={onNextPress}
+      />
     </View>
   );
 };

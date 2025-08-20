@@ -491,6 +491,59 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    employeeGetChats: builder.query<any, any>({
+      query: () => ({
+        url: API.employeeGetChats,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('employeeGetChats Error', error);
+        }
+      },
+    }),
+    employeeGetChatMessages: builder.query<any, any>({
+      query: chatId => {
+        const queryParam = chatId ? `?chat_id=${chatId}` : '';
+        return {
+          url: `${API.employeeGetChatMessages}${queryParam}`,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('employeeGetChatMessages Error', error);
+        }
+      },
+    }),
+    employeeSendMessage: builder.mutation<any, any>({
+      query: (credentials) => ({
+        url: API.employeeSendMessage,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+        data: credentials,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('employeeSendMessage Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -521,4 +574,7 @@ export const {
   useGetEmployeeJobsQuery,
   useGetEducationsQuery,
   useGetExperiencesQuery,
+  useEmployeeGetChatsQuery,
+  useEmployeeGetChatMessagesQuery,
+  useEmployeeSendMessageMutation,
 } = dashboardApi;

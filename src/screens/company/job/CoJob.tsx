@@ -33,9 +33,9 @@ import {resetJobFormState} from '../../../features/companySlice';
 import {useFocusEffect} from '@react-navigation/native';
 
 const jobTypes = [
-  {label: 'Full Time', value: 'fulltime'},
-  {label: 'Part Time', value: 'parttime'},
-  {label: 'Internship', value: 'internship'},
+  {label: 'Full Time', value: 'Full-time'},
+  {label: 'Part Time', value: 'Part-time'},
+  {label: 'Internship', value: 'Internship'},
 ];
 export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
@@ -54,10 +54,7 @@ const CoJob = () => {
     location: '',
     page: 1,
   });
-  const {data, isLoading, isFetching, refetch} = useGetCompanyJobsQuery({
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
-  });
+  const {data, isLoading, isFetching, refetch} = useGetCompanyJobsQuery({});
   const [jobs, setJobs] = useState<any[]>([]);
 
   useFocusEffect(
@@ -86,6 +83,7 @@ const CoJob = () => {
         location,
         page: 1,
       });
+      await refetch()
       setIsFilterModalVisible(false);
     } catch (error) {
       console.error('Error applying filter:', error);
@@ -100,6 +98,20 @@ const CoJob = () => {
         page: prev.page + 1,
       }));
     }
+  };
+
+  const resetFilters = () => {
+    setValue(null);
+    setLocation('');
+    setRange([1000, 50000]);
+    setFilters({
+      job_types: '',
+      salary_from: 0,
+      salary_to: 0,
+      location: '',
+      page: 1,
+    });
+    setIsFilterModalVisible(false);
   };
 
   return (
@@ -189,7 +201,6 @@ const CoJob = () => {
                 <Image source={IMAGES.close} style={styles.closeIcon} />
               </Pressable>
             </View>
-
             <View style={styles.inputWrapper}>
               <CustomTextInput
                 value={location}
@@ -199,12 +210,10 @@ const CoJob = () => {
               />
               <View style={styles.underline} />
             </View>
-
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
               <RangeSlider range={range} setRange={setRange} />
             </View>
-
             <Dropdown
               data={jobTypes}
               labelField="label"
@@ -219,13 +228,19 @@ const CoJob = () => {
                 <Image source={IMAGES.dropdown} style={styles.dropdownIcon} />
               )}
             />
-
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Apply')}
               onPress={() => handleApplyFilter()}
             />
+            <Pressable
+              style={styles.resetButton}
+              onPress={() => resetFilters()}>
+              <Text style={{...commonFontStyle(600, 18, colors._4D4D4D)}}>
+                {'Reset Filters'}
+              </Text>
+            </Pressable>
           </View>
         </BottomModal>
       )}
@@ -349,10 +364,19 @@ const styles = StyleSheet.create({
     tintColor: colors._7B7878,
   },
   btn: {
-    marginVertical: hp(40),
+    marginTop: hp(40),
   },
   filterLogo: {
-    height: hp(28),
     width: wp(28),
+    height: hp(28),
+  },
+  resetButton: {
+    marginTop: hp(20),
+    borderWidth: hp(1),
+    borderRadius: hp(50),
+    alignItems: 'center',
+    paddingVertical: hp(12),
+    justifyContent: 'center',
+    borderColor: colors._4D4D4D,
   },
 });

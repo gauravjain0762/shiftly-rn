@@ -16,6 +16,7 @@ import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
 import CustomInput from '../common/CustomInput';
+import {errorToast} from '../../utils/commonFunction';
 
 type MessageItem = {
   id: string;
@@ -33,6 +34,14 @@ const educationOptions = [
   {label: "Bachelor's Degree", value: 'bachelor'},
   {label: "Master's Degree", value: 'master'},
   {label: 'PhD', value: 'phd'},
+];
+
+const experienceOptions = [
+  {label: "Internship", value: "internship"},
+  {label: "Part-time", value: "part_time"},
+  {label: "Full-time", value: "full_time"},
+  {label: "Freelance", value: "freelance"},
+  {label: "Contract", value: "contract"},
 ];
 
 type Props = {
@@ -127,7 +136,6 @@ const ExperienceList: FC<Props> = ({
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          // marginBottom: 20,
           gap: 10,
         }}>
         <CustomDatePicker
@@ -145,26 +153,36 @@ const ExperienceList: FC<Props> = ({
             });
           }}
         />
-        <CustomDatePicker
-          label="End Date"
-          value={
-            educationListEdit?.job_end
-              ? moment(educationListEdit?.job_end).format('DD-MM-YYYY')
-              : ''
-          }
-          minimumDate={
-            educationListEdit?.job_start
-              ? new Date(educationListEdit?.job_start)
-              : undefined
-          }
-          maximumDate={new Date()}
-          onChange={(date: any) => {
-            setEducationListEdit({
-              ...educationListEdit,
-              job_end: moment(date).toISOString(),
-            });
-          }}
-        />
+
+        {/* Hide End Date if still_working is true */}
+        {!educationListEdit?.still_working && (
+          <CustomDatePicker
+            label="End Date"
+            value={
+              educationListEdit?.job_end
+                ? moment(educationListEdit?.job_end).format('DD-MM-YYYY')
+                : ''
+            }
+            minimumDate={
+              educationListEdit?.job_start
+                ? new Date(educationListEdit?.job_start)
+                : undefined
+            }
+            onChange={(date: any) => {
+              if (
+                educationListEdit.job_start &&
+                moment(date).isBefore(moment(educationListEdit.job_start))
+              ) {
+                errorToast('End Date cannot be before Start Date');
+                return;
+              }
+              setEducationListEdit({
+                ...educationListEdit,
+                job_end: moment(date).toISOString(),
+              });
+            }}
+          />
+        )}
       </View>
 
       <Text style={styles.headerText}>When did it end?</Text>
@@ -173,6 +191,9 @@ const ExperienceList: FC<Props> = ({
           setEducationListEdit({
             ...educationListEdit,
             still_working: !educationListEdit?.still_working,
+            job_end: !educationListEdit?.still_working
+              ? null // clear end date when selecting still working
+              : educationListEdit?.job_end,
           });
         }}
         style={{
@@ -186,6 +207,9 @@ const ExperienceList: FC<Props> = ({
             setEducationListEdit({
               ...educationListEdit,
               still_working: !educationListEdit?.still_working,
+              job_end: !educationListEdit?.still_working
+                ? null
+                : educationListEdit?.job_end,
             });
           }}>
           <ImageBackground
@@ -215,14 +239,18 @@ const ExperienceList: FC<Props> = ({
             setEducationListEdit({
               ...educationListEdit,
               still_working: !educationListEdit?.still_working,
+              job_end: !educationListEdit?.still_working
+                ? null
+                : educationListEdit?.job_end,
             });
           }}
           style={styles.stillText}>
           Still working here
         </Text>
       </Pressable>
+
       <CustomDropdown
-        data={educationOptions}
+        data={experienceOptions}
         label="What type of experience"
         placeholder={'What type of experience'}
         value={educationListEdit?.experience_type}

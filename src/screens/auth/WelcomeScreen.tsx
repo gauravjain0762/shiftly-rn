@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,17 +8,38 @@ import {
   StatusBar,
   SafeAreaView,
   ScrollView,
+  Platform,
 } from 'react-native';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
-import {navigateTo, resetNavigation} from '../../utils/commonFunction';
+import {
+  errorToast,
+  navigateTo,
+  resetNavigation,
+  successToast,
+} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
 import Onboarding from '../../component/common/Onboarding';
 import {LinearContainer} from '../../component';
 import useRole from '../../hooks/useRole';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {
+  useCompanyAppleSignInMutation,
+  useCompanyGoogleSignInMutation,
+  useEmployeeAppleSignInMutation,
+  useEmployeeGoogleSignInMutation,
+} from '../../api/authApi';
+import {navigationRef} from '../../navigation/RootContainer';
+import {CommonActions} from '@react-navigation/native';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
+import {jwtDecode} from 'jwt-decode';
+import auth from '@react-native-firebase/auth';
 
 const AppOnboardingData = [
   {
@@ -43,6 +64,25 @@ const AppOnboardingData = [
 const WelcomeScreen = () => {
   const {t, i18n} = useTranslation();
   const {role} = useRole();
+  console.log("🔥🔥🔥 ~ WelcomeScreen ~ role:", role)
+  const [loading, setLoading] = useState<boolean>(false);
+  const [companyGoogleSignIn] = useCompanyGoogleSignInMutation({});
+  const [employeeGoogleSignIn] = useEmployeeGoogleSignInMutation({});
+  const [companyAppleSignIn] = useCompanyAppleSignInMutation({});
+  const [employeeAppleSignIn] = useEmployeeAppleSignInMutation({});
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((user: any) => {
+      if (user) {
+        resetNavigation(
+          role === 'company' ? SCREENS.CoStack : SCREENS.EmployeeStack,
+        );
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
   const onLogin = () => {
     if (role === 'company') {
       resetNavigation(SCREENS.CoStack);
@@ -50,6 +90,74 @@ const WelcomeScreen = () => {
       resetNavigation(SCREENS.EmployeeStack);
     }
   };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const {data}: any = userInfo;
+      const {idToken} = data;
+      if (idToken) {
+        const params = {
+          name: data.user.name,
+          email: data.user.email,
+          googleId: idToken,
+          device_type: Platform.OS,
+        };
+
+        let res;
+        if (role === 'company') {
+          res = await companyGoogleSignIn(params);
+        } else {
+          res = await employeeGoogleSignIn(params);
+        }
+      }
+    } catch (error) {
+      console.error('Google Sign-In failed:', error);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      setLoading(true);
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+
+      if (!appleAuthRequestResponse.identityToken) {
+        throw new Error('Apple Sign-In failed - no identify token returned');
+      }
+      const {identityToken, fullName, email} = appleAuthRequestResponse;
+
+      if (identityToken) {
+        const decoded: any = jwtDecode(identityToken);
+
+        var str = decoded?.email || '';
+        str = str.split('@');
+        let data = {
+          name: fullName?.givenName || str[0],
+          email: email || decoded?.email,
+          appleId: appleAuthRequestResponse.user,
+          device_type: Platform.OS,
+        };
+
+        let response;
+        if (role === 'company') {
+          response = await companyAppleSignIn(data).unwrap();
+        } else {
+          response = await employeeAppleSignIn(data).unwrap();
+        }
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.log('onAppleButtonPress => error => ', error);
+      errorToast(
+        error?.message || error?.data?.message || 'Apple Sign-In failed',
+      );
+    }
+  };
+
   return (
     <LinearContainer
       containerStyle={styles.gradient}
@@ -67,7 +175,8 @@ const WelcomeScreen = () => {
         {/* </View> */}
 
         {/* Buttons */}
-        <View style={{width: '90%', alignItems: 'center', marginBottom: hp(30)}}>
+        <View
+          style={{width: '90%', alignItems: 'center', marginBottom: hp(30)}}>
           <TouchableOpacity
             style={styles.emailButton}
             onPress={() => {
@@ -78,12 +187,16 @@ const WelcomeScreen = () => {
             <Text style={styles.emailText}>{t('Continue with email')}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.whiteButton}>
+          <TouchableOpacity
+            onPress={() => handleAppleSignIn()}
+            style={styles.whiteButton}>
             <Image source={IMAGES.a_icon} style={styles.icon} />
             <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.whiteButton}>
+          <TouchableOpacity
+            onPress={() => handleGoogleSignIn()}
+            style={styles.whiteButton}>
             <Image source={IMAGES.g_icon} style={styles.icon} />
             <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
           </TouchableOpacity>

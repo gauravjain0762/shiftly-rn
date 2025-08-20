@@ -52,10 +52,6 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
-  console.log(
-    '🔥 ~ CreateProfileScreen ~ educationListEdit:',
-    educationListEdit,
-  );
 
   const addEducation = (item: any) => {
     dispatch(setEducationList([...educationList, item]));

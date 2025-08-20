@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "469951772536",
+    "project_id": "shiftly-bef6f",
+    "storage_bucket": "shiftly-bef6f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:469951772536:android:32a3eb63ba31eba686ba8d",
+        "android_client_info": {
+          "package_name": "com.shiftly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "469951772536-djodilivnia3lg1v4pbovo4fdktna76c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzgSkSBuY7-4RufndhDvHCMLPi5nrVnqg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "469951772536-djodilivnia3lg1v4pbovo4fdktna76c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "469951772536-8ol7o647gh9r8u0bl19a7a6ahctbkopp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shiftly.myapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

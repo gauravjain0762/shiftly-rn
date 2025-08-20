@@ -2,83 +2,89 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {LinearContainer} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {useRoute} from '@react-navigation/native';
 import {colors} from '../../../theme/colors';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import { navigationRef } from '../../../navigation/RootContainer';
-
-const messages = [
-  {
-    id: '1',
-    sender: 'Marriott',
-    time: '09:45 AM',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: false,
-  },
-  {
-    id: '2',
-    sender: 'user',
-    time: '',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: true,
-  },
-  {
-    id: '3',
-    sender: 'user',
-    time: '',
-    text: 'omnis iste natus',
-    isUser: true,
-  },
-  {
-    id: '4',
-    sender: 'Marriott',
-    time: '09:49 AM',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: false,
-  },
-  {
-    id: '5',
-    sender: 'user',
-    time: '',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: true,
-  },
-];
+import {navigationRef} from '../../../navigation/RootContainer';
+import {
+  useEmployeeGetChatMessagesQuery,
+  useEmployeeSendMessageMutation,
+} from '../../../api/dashboardApi';
+import moment from 'moment';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ImagePickerModal from '../../../component/common/ImagePickerModal';
+import {errorToast, successToast} from '../../../utils/commonFunction';
 
 const Chat = () => {
-  const {params} = useRoute();
+  const {params} = useRoute<any>();
   const data = params?.data;
+  const chatId = data?._id;
 
-  const renderMessage = ({item, index}) => {
-    const showAvatar = !item.isUser;
+  const [isImagePickerVisible, setImagePickerVisible] =
+    useState<boolean>(false);
+  const [message, setMessage] = useState<string | number | any>('');
+  const [sendMessage] = useEmployeeSendMessageMutation();
+  const {data: chats, refetch} = useEmployeeGetChatMessagesQuery(chatId);
+  const recipientDetails = chats?.data?.chat || {};
+  const allChats = chats?.data?.messages || [];
+  const [logo, setLogo] = useState<any | {}>();
+
+  const handleSendChat = async () => {
+    if (!message || !logo) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('message', message);
+    formData.append('file', logo);
+    try {
+      const res = await sendMessage(formData).unwrap();
+      if (res?.status) {
+        setMessage('');
+        // successToast(res?.message);
+        await refetch();
+        console.log('res message', res);
+      } else {
+        errorToast(res?.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error Sending message', error);
+    }
+  };
+
+  const renderMessage = ({item, index}: any) => {
     return (
-      <View style={[styles.messageContainer]}>
-        {!item.isUser && (
+      <View key={index} style={[styles.messageContainer]}>
+        {item.sender === 'company' && (
           <View style={{flexDirection: 'row'}}>
             <View style={styles.avatarContainer}>
               <Image
                 source={{
                   uri: 'https://content.presspage.com/templates/658/2042/729924/royal-atlantis-logo.png',
-                }} // Replace with your actual logo
+                }}
                 style={styles.avatar}
               />
             </View>
-            {!item.isUser && (
-              <View>
-                <Text style={styles.senderName}>Marriott Banvoy Hotels</Text>
-                <Text style={styles.timeText}>{item.time}</Text>
-              </View>
-            )}
+            <View>
+              <Text style={styles.senderName}>
+                {recipientDetails?.user_id?.name || 'Test User'}
+              </Text>
+              <Text style={styles.timeText}>
+                {moment(item?.time).format('hh:mm A')}
+              </Text>
+            </View>
           </View>
         )}
 
@@ -86,81 +92,150 @@ const Chat = () => {
           <View
             style={[
               styles.bubble,
-              item.isUser ? styles.userBubble : styles.otherBubble,
+              item?.sender !== 'company'
+                ? styles.userBubble
+                : styles.otherBubble,
             ]}>
             <Text
               style={[
                 styles.messageText,
-                item.isUser ? styles.userText : styles.otherText,
+                item?.sender !== 'company' ? styles.userText : styles.otherText,
               ]}>
-              {item.text}
+              {item?.message}
             </Text>
           </View>
+          {item?.file_type === 'image' &&
+          item?.file_type !== null &&
+          item?.file !== null ? (
+            <Image source={{uri: item?.file}} style={styles.attachment} />
+          ) : null}
         </View>
       </View>
     );
   };
 
+  const handleImageSelected = (e: any) => {
+    const uri = e?.sourceURL || e?.path || e?.uri;
+    if (!uri) return;
+
+    const newLogo = {
+      name: e?.filename || e?.name || 'logo.jpg',
+      uri,
+      type: e?.mime || 'image/jpeg',
+    };
+
+    setLogo(newLogo);
+  };
+
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
-      <KeyboardAwareScrollView
-        extraHeight={20}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{flexGrow: 1}}>
+      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <View style={styles.container}>
           <View style={styles.headerRow}>
-            <TouchableOpacity onPress={()=>{
-              navigationRef.goBack()
-            }}>
-
-            <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
+            <TouchableOpacity
+              onPress={() => {
+                navigationRef.goBack();
+              }}>
+              <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
             </TouchableOpacity>
             <View style={{flex: 1}}>
-              <Text style={styles.company}>Marriott Banvoy Hotels</Text>
-              <Text style={styles.hrText}>Bilal Izhar HR Admin</Text>
+              <Text style={styles.company}>
+                {recipientDetails?.company_id?.company_name || 'Test User'}
+              </Text>
+              {/* <Text style={styles.hrText}>Bilal Izhar HR Admin</Text> */}
             </View>
             <Image source={IMAGES.dots} style={styles.arrowIcon1} />
           </View>
         </View>
+        <KeyboardAwareScrollView
+          extraHeight={20}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{flexGrow: 1}}>
+          <View style={styles.card}>
+            <Text style={styles.dateText}>
+              You applied to this position on 18 October 2024.
+            </Text>
+            <Text style={styles.jobTitle}>Restaurant Manager - Full Time</Text>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>View Job</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.card}>
-          <Text style={styles.dateText}>
-            You applied to this position on 18 October 2024.
-          </Text>
-          <Text style={styles.jobTitle}>Restaurant Manager - Full Time</Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>View Job</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={messages}
-          renderItem={renderMessage}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.chatContent}
-          showsVerticalScrollIndicator={false}
-        />
-
-        {/* ✅ Moved inside ScrollView and fixed */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Write your message..."
-            placeholderTextColor="#fff"
-            style={styles.input}
+          <FlatList
+            data={allChats}
+            renderItem={renderMessage}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.chatContent}
+            keyExtractor={(_, index) => index.toString()}
           />
-          <TouchableOpacity onPress={() => {}} style={{marginRight: 10}}>
-            <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
-              <Image
-                source={IMAGES.pin}
-                style={{width: 18, height: 18, resizeMode: 'contain'}}
+
+          <View style={styles.inputContainer}>
+            {logo && (
+              <View style={{}}>
+                <Pressable
+                  onPress={() => setLogo(null)}
+                  style={{
+                    zIndex: 9999,
+                    left: wp(40),
+                    bottom: hp(40),
+                    overflow: 'visible',
+                    borderRadius: hp(50),
+                    position: 'absolute',
+                    backgroundColor: colors.white,
+                  }}>
+                  <Image
+                    tintColor={'red'}
+                    source={IMAGES.close_icon}
+                    style={{
+                      width: wp(22),
+                      height: hp(22),
+                    }}
+                  />
+                </Pressable>
+                <Image
+                  source={{uri: logo.uri}}
+                  style={{height: hp(55), width: wp(55)}}
+                />
+              </View>
+            )}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TextInput
+                value={message}
+                style={styles.input}
+                onChangeText={setMessage}
+                placeholderTextColor="#fff"
+                placeholder="Write your message..."
               />
-            </ImageBackground>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Image source={IMAGES.send} style={styles.sendIcon} />
-          </TouchableOpacity>
-        </View>
-      </KeyboardAwareScrollView>
+              <TouchableOpacity
+                onPress={() => {
+                  setImagePickerVisible(true);
+                }}
+                style={{marginRight: 10}}>
+                <ImageBackground
+                  source={IMAGES.btnBg1}
+                  style={styles.iconWrapper}>
+                  <Image
+                    source={IMAGES.pin}
+                    style={{width: 18, height: 18, resizeMode: 'contain'}}
+                  />
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleSendChat()}>
+                <Image source={IMAGES.send} style={styles.sendIcon} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAwareScrollView>
+        <ImagePickerModal
+          actionSheet={isImagePickerVisible}
+          setActionSheet={() => setImagePickerVisible(false)}
+          onUpdate={(image: any) => handleImageSelected(image)}
+        />
+      </SafeAreaView>
     </LinearContainer>
   );
 };
@@ -170,14 +245,13 @@ export default Chat;
 const styles = StyleSheet.create({
   container: {
     // flex: 1,
-     paddingTop: hp(18),
+    paddingTop: hp(18),
     paddingHorizontal: wp(22),
   },
   back: {
     width: wp(21),
     height: wp(21),
     resizeMode: 'contain',
-   
   },
   headerRow: {
     flexDirection: 'row',
@@ -193,7 +267,7 @@ const styles = StyleSheet.create({
   arrowIcon1: {
     width: 3,
     height: 15,
-     alignSelf:'center'
+    alignSelf: 'center',
   },
   company: {
     alignSelf: 'flex-start',
@@ -296,10 +370,8 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: wp(14),
-    paddingVertical: hp(30),
+    paddingVertical: hp(15),
     // position: 'absolute',
     // bottom: 0,
     // width: '100%',
@@ -309,7 +381,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#fff',
     ...commonFontStyle(400, 14, '#fff'),
     marginRight: 4,
   },
@@ -323,5 +394,11 @@ const styles = StyleSheet.create({
     width: 47,
     height: 47,
     marginLeft: wp(2),
+  },
+  attachment: {
+    width: wp(120),
+    height: hp(120),
+    marginTop: hp(10),
+    alignSelf: 'flex-end',
   },
 });
