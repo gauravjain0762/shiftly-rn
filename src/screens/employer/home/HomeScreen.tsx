@@ -43,13 +43,18 @@ const HomeScreen = () => {
     setAllPosts([]);
   };
 
-  return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+  const renderheader = () => {
+    return (
       <View style={styles.header}>
         <HomeHeader
           onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
         />
       </View>
+    );
+  };
+
+  return (
+    <LinearContainer colors={['#0D468C', '#041326']}>
       {isLoading && currentPage === 1 ? (
         <PostSkeleton />
       ) : (
@@ -67,6 +72,7 @@ const HomeScreen = () => {
           )}
           contentContainerStyle={styles.scrollcontainer}
           ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
+          ListHeaderComponent={renderheader}
           ListFooterComponent={
             isLoadingMore ? (
               <ActivityIndicator
@@ -88,12 +94,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: wp(25),
     marginTop: hp(20),
     paddingBottom: hp(21),
   },
   scrollcontainer: {
-    paddingHorizontal: wp(25),
     paddingBottom: hp(21),
+    paddingHorizontal: wp(25),
   },
 });

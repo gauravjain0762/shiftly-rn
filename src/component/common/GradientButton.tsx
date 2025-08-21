@@ -44,14 +44,16 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
   ry = '',
   type = 'Employee',
   textContainerStyle,
+  ...rest
 }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
+      {...rest}
       style={[
         styles.wrapper,
         style,
-        {borderWidth: type == 'Employee' ? 2.5 : 0},
+        {borderWidth: type == 'Employee' ? 2.5 : 0, opacity: rest.disabled ? 0.6 : 1},
       ]}>
       {type == 'Employee' ? (
         <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>

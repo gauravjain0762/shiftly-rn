@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   headerContainer: {
+    paddingTop: hp(15),
     paddingHorizontal: wp(16),
   },
   banner: {

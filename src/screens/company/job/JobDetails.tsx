@@ -37,7 +37,7 @@ const CoJobDetails = () => {
   const dispatch = useDispatch();
   const job_id = params?._id as any;
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  const {data} = useGetCompanyJobDetailsQuery(job_id);
+  const {data} = useGetCompanyJobDetailsQuery("689b160b3f2e282e35e9e06b" || job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const jobDetail = data?.data;
   console.log('🔥🔥🔥 ~ CoJobDetails ~ jobDetail:', jobDetail);

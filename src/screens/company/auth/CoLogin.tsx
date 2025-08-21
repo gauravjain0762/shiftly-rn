@@ -88,6 +88,7 @@ const CoLogin = () => {
               onChangeText={e => {
                 setAuthData({...authData, password: e});
               }}
+              isPassword
             />
             <Text
               onPress={() => navigateTo(SCREENS.ForgotPassword)}

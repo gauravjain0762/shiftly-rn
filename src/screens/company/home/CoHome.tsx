@@ -14,8 +14,6 @@ import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
 import {colors} from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
 
@@ -23,7 +21,6 @@ const CoHome = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const {userInfo} = useSelector((state: RootState) => state.auth);
 
   const {
     data: getPost,
@@ -57,16 +54,21 @@ const CoHome = () => {
     setAllPosts([]);
   };
 
-  return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+  const renderHeader = () => {
+    return (
       <View style={styles.header}>
         <HomeHeader
           type="company"
+
           onPressAvatar={() => navigateTo(SCREENS.CoMessage)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />
       </View>
+    );
+  };
 
+  return (
+    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       {isLoading && currentPage === 1 ? (
         <PostSkeleton />
       ) : (
@@ -82,6 +84,7 @@ const CoHome = () => {
           refreshing={isLoading && currentPage === 1}
           onRefresh={handleRefresh}
           keyExtractor={(_, index) => index.toString()}
+          ListHeaderComponent={renderHeader}
           ListEmptyComponent={() => {
             return (
               <View>
@@ -113,7 +116,6 @@ export default CoHome;
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: wp(25),
     marginTop: hp(20),
     paddingBottom: hp(21),
   },

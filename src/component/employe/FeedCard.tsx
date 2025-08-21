@@ -17,7 +17,7 @@ const FeedCard: FC<card> = ({
   isFollow = false,
 }) => {
   return (
-    <TouchableOpacity onPress={() => onPressCard()} style={styles.card}>
+    <TouchableOpacity activeOpacity={1} onPress={() => onPressCard()} style={styles.card}>
       <View style={styles.cardHeader}>
         <Image
           source={

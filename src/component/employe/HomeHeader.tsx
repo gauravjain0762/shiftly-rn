@@ -28,7 +28,7 @@ const HomeHeader: FC<props> = ({
           <Image
             resizeMode="cover"
             style={styles.avatar}
-            source={userInfo?.picture ? {uri: userInfo?.picture} : IMAGES.avatar}
+            source={userInfo?.logo ? {uri: userInfo?.logo} : IMAGES.avatar}
           />
         </TouchableOpacity>
         <View style={styles.info}>

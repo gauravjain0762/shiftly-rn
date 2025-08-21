@@ -21,6 +21,7 @@ interface CustomTextInputProps extends TextInputProps {
   showRightIcon?: boolean;
   containerStyle?: ViewStyle | any;
   imgStyle?: ImageStyle;
+  isPassword?: boolean;
   inputStyle?: ViewStyle | any;
   onShow?: (e: boolean) => void;
 }
@@ -32,6 +33,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   containerStyle,
   imgStyle,
   inputStyle,
+  isPassword = false,
   onShow = () => {},
   ...rest
 }) => {
@@ -43,7 +45,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
     <View style={[styles.container, containerStyle]}>
       <TextInput
         style={[styles.input, inputStyle]}
-        secureTextEntry={showPassword}
+        secureTextEntry={isPassword && !showPassword}
         // placeholderTextColor={colors._F4E2B8}
         {...rest}
       />

@@ -250,6 +250,7 @@ const EditProfileScreen = () => {
                 dispatch(setAboutEdit(val))
               }
               onNextPress={() => {
+                dispatch(setActiveStep(1));
                 resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
               }}
             />

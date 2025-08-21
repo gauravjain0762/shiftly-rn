@@ -125,7 +125,7 @@ const CustomTabBar = ({state, navigation}: any) => {
 export default function CoTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={{headerShown: false}}
+      screenOptions={{headerShown: false, tabBarHideOnKeyboard: true}}
       initialRouteName={SCREENS.CoHome}
       tabBar={(props: any) => <CustomTabBar {...props} />}>
       <Tab.Screen name={SCREENS.CoHome} component={CoHome} />

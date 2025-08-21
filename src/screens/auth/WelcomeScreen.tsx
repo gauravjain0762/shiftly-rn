@@ -202,12 +202,14 @@ const WelcomeScreen = () => {
             <Text style={styles.emailText}>{t('Continue with email')}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => handleAppleSignIn()}
-            style={styles.whiteButton}>
-            <Image source={IMAGES.a_icon} style={styles.icon} />
-            <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
-          </TouchableOpacity>
+          {Platform.OS == 'ios' && (
+            <TouchableOpacity
+              onPress={() => handleAppleSignIn()}
+              style={styles.whiteButton}>
+              <Image source={IMAGES.a_icon} style={styles.icon} />
+              <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             onPress={() => handleGoogleSignIn()}

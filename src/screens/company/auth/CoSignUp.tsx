@@ -47,6 +47,7 @@ const CoSignUp = () => {
               imgStyle={styles.eye}
               placeholder="* * * * * * * *"
               placeholderTextColor={colors._7B7878}
+              isPassword
             />
             <View style={styles.switchComponents}>
               <CustomSwitch

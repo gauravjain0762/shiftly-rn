@@ -62,9 +62,9 @@ const ViewProfileScreen = () => {
 
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
               <TouchableOpacity
-                onPress={() => {
-                  navigateTo(SCREENS.AccountScreen);
-                }}
+                // onPress={() => {
+                //   navigateTo(SCREENS.AccountScreen);
+                // }}
                 style={styles.editButton}>
                 <Text style={styles.editButtonText}>Open to Work</Text>
               </TouchableOpacity>

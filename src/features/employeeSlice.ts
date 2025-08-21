@@ -45,6 +45,7 @@ export interface EmployeeState {
   experienceListEdit: ExperienceItem;
   aboutEdit: AboutMe;
   favoriteJobs: any[];
+  isBannerLoaded: boolean;
 }
 
 const initialState: EmployeeState = {
@@ -84,6 +85,7 @@ const initialState: EmployeeState = {
     open_for_jobs: false,
   },
   favoriteJobs: [],
+  isBannerLoaded: false,
 };
 
 const employeeSlice = createSlice({
@@ -130,6 +132,9 @@ const employeeSlice = createSlice({
     setFavoriteJobs: (state, action: PayloadAction<string[]>) => {
       state.favoriteJobs = action.payload;
     },
+    setIsBannerLoaded: (state, action: PayloadAction<boolean>) => {
+      state.isBannerLoaded = action.payload;
+    },
     resetEmployeeState: () => initialState,
   },
 });
@@ -148,6 +153,7 @@ export const {
   setAboutEdit,
   resetEmployeeState,
   setFavoriteJobs,
+  setIsBannerLoaded,
 } = employeeSlice.actions;
 
 export const selectEmployeeState = (state: RootState): EmployeeState =>

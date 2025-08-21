@@ -39,6 +39,7 @@ const ApplyJob = () => {
   const {t, i18n} = useTranslation();
   const [imageModal, setImageModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<any>([]);
+  console.log('🔥🔥🔥 ~ ApplyJob ~ selectedDoc:', selectedDoc);
   const {params} = useRoute<any>();
   const data = params?.data as any;
   const resumeList = params?.resumeList as any;
@@ -48,7 +49,7 @@ const ApplyJob = () => {
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
 
   const handleApplyJob = async () => {
-    if (!selectedDoc) {
+    if (!selectedDoc?.length) {
       errorToast('Please select or upload a resume');
       return;
     }
@@ -119,7 +120,13 @@ const ApplyJob = () => {
                 <TouchableOpacity
                   key={index}
                   style={styles.docRow}
-                  onPress={() => setSelectedDoc(doc._id)}>
+                  onPress={() => {
+                    if (selectedDoc === doc._id) {
+                      setSelectedDoc(null);
+                    } else {
+                      setSelectedDoc(doc._id);
+                    }
+                  }}>
                   <View style={styles.radioCircle}>
                     {selectedDoc === doc._id && (
                       <View style={styles.check}>

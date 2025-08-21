@@ -46,7 +46,7 @@ const RootContainer: FC = () => {
     <NavigationContainer theme={DefaultThemeColor} ref={navigationRef}>
       {/* <StatusBar barStyle={'dark-content'} backgroundColor={colors.white} /> */}
       <StackNavigator />
-      {/* {isLoading && <Loader />} */}
+      {isLoading && <Loader />}
     </NavigationContainer>
   );
 };

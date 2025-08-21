@@ -127,11 +127,19 @@ const CoPost = () => {
     }, 100);
   };
 
+  const postInputContainer = React.useMemo(
+    () => ({
+      marginTop: hp(65),
+      marginHorizontal: wp(35),
+    }),
+    [],
+  );
+
   const render = () => {
     switch (steps || 1) {
       case 1:
         return (
-          <View style={styles.container}>
+          <View style={{flex: 1}}>
             <View>
               {uploadedImages.length === 0 && !uploadedImages[0]?.uri ? (
                 <View style={styles.headercontainer}>
@@ -139,7 +147,7 @@ const CoPost = () => {
                 </View>
               ) : (
                 <TouchableOpacity onPress={resetUploadImages}>
-                  <Image source={IMAGES.close} style={styles.close} />
+                  <Image source={IMAGES.close} style={[styles.close, {marginVertical: hp(30)}]} />
                 </TouchableOpacity>
               )}
               {uploadedImages.length > 0 &&
@@ -179,7 +187,12 @@ const CoPost = () => {
               </>
             ) : (
               <GradientButton
-                style={styles.btn}
+                style={[
+                  styles.btn,
+                  {
+                    marginTop: '50%',
+                  },
+                ]}
                 type="Company"
                 title={t('Upload Image')}
                 onPress={() => setImageModal(!imageModal)}
@@ -204,16 +217,15 @@ const CoPost = () => {
                 </Text>
               </View>
               <CustomTextInput
-                placeholder={t('Walk-in Interview')}
+                placeholder={t('Enter the Post Title')}
                 placeholderTextColor={colors._4A4A4A}
                 onChangeText={(e: any) => updatePostForm({title: e})}
                 value={title}
                 style={styles.input1}
                 containerStyle={[
                   styles.Inputcontainer,
-                  {marginTop: hp(65), marginHorizontal: wp(35)},
+                  postInputContainer
                 ]}
-                numberOfLines={1}
               />
             </View>
             <GradientButton
@@ -408,6 +420,7 @@ export default CoPost;
 const styles = StyleSheet.create({
   headercontainer: {
     gap: hp(10),
+    marginTop: hp(15),
     paddingHorizontal: wp(35),
   },
   createPost: {
@@ -440,14 +453,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   btn: {
-    marginVertical: hp(40),
+    marginVertical: hp(30),
     marginHorizontal: wp(42),
   },
   close: {
     width: wp(18),
     height: wp(18),
     marginLeft: wp(42),
-    marginVertical: hp(44),
     tintColor: colors._0B3970,
   },
   uploadImg: {
@@ -465,7 +477,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: wp(42),
-    marginBottom: hp(30),
+    marginTop: '20%',
   },
   Inputcontainer: {
     flex: 1,

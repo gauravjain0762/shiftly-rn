@@ -88,6 +88,7 @@ const LoginScreen = () => {
             onChangeText={e => {
               setAuthData({...authData, password: e});
             }}
+            isPassword
           />
         </View>
 

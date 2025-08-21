@@ -18,6 +18,7 @@ import {
   LocationContainer,
 } from '../../../component';
 import {useTranslation} from 'react-i18next';
+import AnimatedSwitcher from '../../../component/common/AnimatedSwitcher';
 import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
@@ -60,6 +61,7 @@ import {
   setCoPostJobSteps,
 } from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
+import {setRegisterSuccessModal} from '../../../features/authSlice';
 
 const jobTypeData = [
   {label: 'Full Time', value: 'Full Time'},
@@ -277,6 +279,11 @@ const PostJob = () => {
       }
 
       if (response?.status) {
+        setTimeout(() => {
+          if (!isSuccessModalVisible) {
+            updateJobForm({isSuccessModalVisible: true});
+          }
+        }, 150);
         successToast(response?.message);
       } else {
         errorToast(response?.message);
@@ -285,7 +292,6 @@ const PostJob = () => {
       console.error('Failed to submit job:', err);
       errorToast('Something went wrong!');
     } finally {
-      updateJobForm({isSuccessModalVisible: true});
     }
   };
 
@@ -751,6 +757,7 @@ const PostJob = () => {
         showsVerticalScrollIndicator={false}
         style={AppStyles.flex}
         contentContainerStyle={styles.scrollContainer}>
+        <AnimatedSwitcher index={steps}>
         {steps == 0 && (
           <>
             <View>
@@ -949,12 +956,15 @@ const PostJob = () => {
             />
           </>
         )}
-        {render()}
+        {steps !== 0 && render()}
+        </AnimatedSwitcher>
       </KeyboardAwareScrollView>
       <BottomModal
         visible={isSuccessModalVisible}
         backgroundColor={colors._FAEED2}
-        onClose={() => {}}>
+        onClose={() => {
+          updateJobForm({isSuccessModalVisible: false});
+        }}>
         <View style={styles.modalIconWrapper}>
           <Image
             source={IMAGES.check}
@@ -1252,7 +1262,7 @@ const styles = StyleSheet.create({
     borderColor: colors._D5D5D5,
   },
   modalInputStyle: {
-    ...commonFontStyle(400, 18, '#8F8D8D'),
+    ...commonFontStyle(400, 18, colors._4D4D4D),
     alignSelf: 'baseline',
   },
   empContainer: {

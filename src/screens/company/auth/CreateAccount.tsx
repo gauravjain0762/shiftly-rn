@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  CustomDropdown,
   CustomTextInput,
   GradientButton,
   LinearContainer,
@@ -91,6 +92,10 @@ const CreateAccount = () => {
   );
   const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
     {},
+  );
+  console.log(
+    '🔥🔥🔥 ~ CreateAccount ~ businessTypes:',
+    businessTypes?.data?.types,
   );
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
@@ -176,8 +181,11 @@ const CreateAccount = () => {
     );
   };
 
-  const nextStep = () =>
-    dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) + 1)); //setStep(prev => prev + 1);
+  const nextStep = () => {
+    setTimeout(() => {
+      dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) + 1));
+    }, 100);
+  };
 
   const prevStep = (num?: any) => {
     if (num == 1) {
@@ -401,51 +409,35 @@ const CreateAccount = () => {
               <Text style={styles.title}>
                 {t('What type of business are you?')}
               </Text>
-              <Pressable style={styles.dateRow} onPress={() => {}}>
+              {/* <Pressable style={styles.dateRow} onPress={() => {}}>
                 <Text style={styles.dateText}>{selected1}</Text>
-              </Pressable>
-              <View style={styles.underline} />
+              </Pressable> */}
+              {/* <View style={styles.underline} /> */}
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{maxHeight: hp(300)}}>
-                {businessType.map((option, index) => {
-                  const isSelected = option.title === selected1;
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.optionContainer,
-                        // isSelected && styles.selectedOptionContainer,
-                      ]}
-                      onPress={() => {
-                        setSelected1(option?.title);
-                        dispatch(
-                          setCompanyRegisterData({
-                            business_type_id: option?._id,
-                          }),
-                        );
-                      }}>
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.selectedText,
-                        ]}>
-                        {option?.title}
-                      </Text>
-                      {isSelected && (
-                        <Image
-                          source={IMAGES.mark}
-                          style={{
-                            width: 25,
-                            height: 22,
-                            resizeMode: 'contain',
-                            tintColor: colors._4A4A4A,
-                          }}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
+                style={{maxHeight: hp(350), marginTop: hp(15)}}>
+                <CustomDropdown
+                  data={
+                    businessTypes?.data?.types?.map((item: any) => ({
+                      label: item.title,
+                      value: item._id,
+                    })) || []
+                  }
+                  labelField="label"
+                  valueField="value"
+                  value={companyRegisterData?.business_type_id}
+                  onChange={(e: any) => {
+                    dispatch(
+                      setCompanyRegisterData({
+                        business_type_id: e?.value,
+                      }),
+                    );
+                  }}
+                  dropdownStyle={styles.dropdown}
+                  renderRightIcon={IMAGES.ic_down}
+                  RightIconStyle={styles.rightIcon}
+                  selectedTextStyle={styles.selectedTextStyle}
+                />
               </ScrollView>
             </View>
             <GradientButton
@@ -618,6 +610,7 @@ const CreateAccount = () => {
                 secureTextEntry={!visible}
                 style={[styles.input1, AppStyles.flex]}
                 showRightIcon
+                isPassword
                 imgStyle={{tintColor: '#1C1B1F'}}
                 containerStyle={styles.passwordContiner}
                 onShow={e => setVisible(e)}
@@ -662,6 +655,8 @@ const CreateAccount = () => {
                 {t('What is your phone number?')}
               </Text>
               <PhoneInput
+                phoneStyle={{color: colors._0B3970}}
+                callingCodeStyle={{color: colors._0B3970}}
                 callingCode={companyRegisterData?.phone_code}
                 phone={companyRegisterData?.phone}
                 downIcon={{
@@ -1585,5 +1580,16 @@ const styles = StyleSheet.create({
     height: wp(12),
     resizeMode: 'contain',
     tintColor: colors._0B3970,
+  },
+  dropdown: {
+    borderRadius: hp(10),
+  },
+  rightIcon: {
+    width: wp(16),
+    height: hp(13),
+    tintColor: colors._0B3970,
+  },
+  selectedTextStyle: {
+    ...commonFontStyle(400, 18, colors._7B7878),
   },
 });

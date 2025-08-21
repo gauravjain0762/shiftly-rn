@@ -90,7 +90,7 @@ const CompanyProfile = () => {
       imagePath={{uri: companyProfileData?.cover_images?.uri}}
       ImageChildren={
         <TouchableOpacity
-          onPress={() => navigationRef.goBack()}
+          onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
           style={styles.backButton}>
           <Image source={IMAGES.backArrow} style={styles.backArrow} />
         </TouchableOpacity>

@@ -37,25 +37,6 @@ const ChangePassword = () => {
   const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
   const [companyChangedPassword] = useCompanyResetPasswordMutation({});
 
-  const handleVerifyEmail = async () => {
-    if (!email.trim()) {
-      errorToast('Please enter a valid email');
-      return;
-    }
-    try {
-      const res = await companyForgotPassword({email}).unwrap();
-      if (res?.status) {
-        successToast('Email verified successfully');
-        dispatch(setUserInfo(res.data?.user));
-        nextStep();
-      } else {
-        errorToast(res?.message || 'Something went wrong');
-      }
-    } catch (error: any) {
-      errorToast(error?.data?.message || 'Failed to send OTP');
-    }
-  };
-
   const handleChangePassword = async () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
       errorToast('Please enter new password and confirm password');
@@ -79,9 +60,6 @@ const ChangePassword = () => {
     }
   };
 
-  const nextStep = () =>
-    dispatch(setChangePasswordSteps(changePasswordSteps + 1));
-
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
@@ -89,44 +67,6 @@ const ChangePassword = () => {
       dispatch(setChangePasswordSteps(changePasswordSteps - 1));
     }
   };
-
-  // const renderStepUI = () => {
-  //   switch (changePasswordSteps) {
-  //     // case 1:
-  //     //   return (
-  //     //     <>
-  //     //       <Text style={passwordStyles.description}>
-  //     //         {t(
-  //     //           'Enter the email associated with your account and we’ll send an email instructions to reset your password.',
-  //     //         )}
-  //     //       </Text>
-  //     //       <View style={passwordStyles.inputView}>
-  //     //         <Text style={passwordStyles.label}>{t('Your Email')}</Text>
-  //     //         <CustomTextInput
-  //     //           value={email}
-  //     //           style={passwordStyles.emailText}
-  //     //           placeholder="Enter your email"
-  //     //           placeholderTextColor={colors._7B7878}
-  //     //           containerStyle={passwordStyles.inputcontainer}
-  //     //           onChangeText={setEmail}
-  //     //         />
-  //     //       </View>
-  //     //       <GradientButton
-  //     //         type="Company"
-  //     //         title="Submit"
-  //     //         onPress={handleVerifyEmail}
-  //     //         style={passwordStyles.button}
-  //     //       />
-  //     //     </>
-  //     //   );
-  //     case 1:
-  //       return (
-         
-  //       );
-  //     default:
-  //       return null;
-  //   }
-  // };
 
   return (
     <LinearContainer
@@ -155,50 +95,50 @@ const ChangePassword = () => {
         <Text style={passwordStyles.title}>{t('Change Password')}</Text>
 
         {/* {renderStepUI()} */}
-         <View style={passwordStyles.inputView}>
-            <Text style={passwordStyles.label}>{t('Old Password')}</Text>
-            <CustomTextInput
-              showRightIcon
-              imgStyle={passwordStyles.eye}
-              value={oldPassword}
-              style={passwordStyles.emailText}
-              placeholder="Enter old password"
-              placeholderTextColor={colors._7B7878}
-              containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
-              onChangeText={setOldPassword}
-            />
-            <Text style={passwordStyles.label}>{t('New Password')}</Text>
-            <CustomTextInput
-              showRightIcon
-              imgStyle={passwordStyles.eye}
-              value={newPassword}
-              style={passwordStyles.emailText}
-              placeholder="Enter new password"
-              placeholderTextColor={colors._7B7878}
-              containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
-              onChangeText={setNewPassword}
-            />
-            <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
-            <CustomTextInput
-              showRightIcon
-              imgStyle={passwordStyles.eye}
-              value={confirmPassword}
-              style={passwordStyles.emailText}
-              placeholder="Confirm new password"
-              placeholderTextColor={colors._7B7878}
-              containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
-              onChangeText={setConfirmPassword}
-            />
-            <GradientButton
-              type="Company"
-              title="Submit"
-              style={passwordStyles.button}
-              onPress={handleChangePassword}
-            />
-          </View>
+        <View style={passwordStyles.inputView}>
+          <Text style={passwordStyles.label}>{t('Old Password')}</Text>
+          <CustomTextInput
+            showRightIcon
+            imgStyle={passwordStyles.eye}
+            value={oldPassword}
+            style={passwordStyles.emailText}
+            placeholder="Enter old password"
+            placeholderTextColor={colors._7B7878}
+            containerStyle={passwordStyles.inputcontainer}
+            onChangeText={setOldPassword}
+            isPassword
+          />
+          <Text style={passwordStyles.label}>{t('New Password')}</Text>
+          <CustomTextInput
+            showRightIcon
+            imgStyle={passwordStyles.eye}
+            value={newPassword}
+            style={passwordStyles.emailText}
+            placeholder="Enter new password"
+            placeholderTextColor={colors._7B7878}
+            containerStyle={passwordStyles.inputcontainer}
+            onChangeText={setNewPassword}
+            isPassword
+          />
+          <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
+          <CustomTextInput
+            showRightIcon
+            imgStyle={passwordStyles.eye}
+            value={confirmPassword}
+            style={passwordStyles.emailText}
+            placeholder="Confirm new password"
+            placeholderTextColor={colors._7B7878}
+            containerStyle={passwordStyles.inputcontainer}
+            onChangeText={setConfirmPassword}
+            isPassword
+          />
+          <GradientButton
+            type="Company"
+            title="Submit"
+            style={passwordStyles.button}
+            onPress={handleChangePassword}
+          />
+        </View>
       </KeyboardAwareScrollView>
     </LinearContainer>
   );
@@ -252,7 +192,9 @@ export const passwordStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   emailText: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    flex: 1,
+    paddingRight: wp(10),
+    ...commonFontStyle(400, 18, colors._3D3D3D),
   },
   button: {
     marginTop: hp(50),

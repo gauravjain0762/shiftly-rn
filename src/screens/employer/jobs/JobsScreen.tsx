@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   CustomTextInput,
   GradientButton,
   JobCard,
   LinearContainer,
+  ShareModal,
 } from '../../../component';
 import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
@@ -37,14 +38,8 @@ import {SLIDER_WIDTH} from '../../company/job/CoJob';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
-import {setFavoriteJobs} from '../../../features/employeeSlice';
-import { useFocusEffect } from '@react-navigation/native';
-
-// const carouselImages = [
-//   'https://images.unsplash.com/photo-1636137628585-db2f13cad125?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-//   'https://images.unsplash.com/photo-1551598305-fe1be9fe579e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGxhbmRzY2FwZSUyMGhvdGVsc3xlbnwwfHwwfHx8MA%3D%3D',
-//   'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
-// ];
+import {setIsBannerLoaded} from '../../../features/employeeSlice';
+import BaseText from '../../../component/common/BaseText';
 
 const jobTypes: object[] = [
   {type: 'Full-time', value: 'Full Time'},
@@ -58,13 +53,15 @@ const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
 
 const JobsScreen = () => {
   const {t} = useTranslation();
+  const dispatch = useDispatch<any>();
+  const [modal, setModal] = useState<boolean>(false);
+  const {isBannerLoaded} = useSelector((state: any) => state.employee);
   const [activeIndex, setActiveIndex] = useState(0);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
-  console.log('🔥🔥🔥 ~ JobsScreen ~ data:', data);
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
@@ -148,6 +145,20 @@ const JobsScreen = () => {
     }
   };
 
+  const BannerItem = ({item, index}: any) => (
+    <Image
+      key={index}
+      resizeMode="cover"
+      source={{uri: item?.image}}
+      style={styles.carouselImage}
+      onLoadEnd={() => {
+        console.log('Banner Loaded >>>>>>>>.');
+        dispatch(setIsBannerLoaded(true));
+      }}
+      onError={() => dispatch(setIsBannerLoaded(false))}
+    />
+  );
+
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <View style={styles.header}>
@@ -167,22 +178,22 @@ const JobsScreen = () => {
       </View>
 
       <View style={styles.carouselWrapper}>
+        {/* {isBannerLoaded ? (
+          <SkeletonPlaceholder>
+            <View style={styles.skeletonBox} />
+          </SkeletonPlaceholder>
+        ) : ( */}
         <Carousel
           loop
-          width={SCREEN_WIDTH - 32}
+          autoPlay
           height={180}
-          autoPlay={true}
           data={carouselImages}
+          renderItem={BannerItem}
+          width={SCREEN_WIDTH - 32}
           scrollAnimationDuration={2500}
           onSnapToItem={index => setActiveIndex(index)}
-          renderItem={({item}: any) => (
-            <Image
-              resizeMode="cover"
-              source={{uri: item?.image}}
-              style={styles.carouselImage}
-            />
-          )}
         />
+        {/* )} */}
       </View>
 
       <View
@@ -213,6 +224,9 @@ const JobsScreen = () => {
               <JobCard
                 key={index}
                 item={item}
+                onPressShare={() => {
+                  setModal(true);
+                }}
                 heartImage={isFavorite ? IMAGES.ic_favorite : null}
                 onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
                 onPress={() =>
@@ -227,6 +241,15 @@ const JobsScreen = () => {
           keyExtractor={(_, index) => index.toString()}
           ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
           contentContainerStyle={styles.scrollContainer}
+          ListEmptyComponent={
+            <BaseText
+              style={{
+                ...commonFontStyle(500, 17, colors.white),
+                textAlign: 'center',
+              }}>
+              {t('No jobs found')}
+            </BaseText>
+          }
         />
       )}
 
@@ -311,19 +334,6 @@ const JobsScreen = () => {
             <RangeSlider range={range} setRange={setRange} />
           </View>
 
-          {/* <View style={styles.inputWrapper}>
-            <CustomTextInput
-              value={filters.employer_type}
-              onChangeText={txt =>
-                setFilters(prev => ({...prev, employer_type: txt}))
-              }
-              placeholder={t('Employer Type')}
-              placeholderTextColor={colors.black}
-              inputStyle={styles.locationInput}
-            />
-            <View style={styles.underline} />
-          </View> */}
-
           <View style={styles.buttonContainer}>
             <Pressable onPress={clearFilters} style={styles.clearContainer}>
               <Text>{'Clear'}</Text>
@@ -337,6 +347,7 @@ const JobsScreen = () => {
           </View>
         </View>
       </BottomModal>
+      <ShareModal visible={modal} onClose={() => setModal(!modal)} />
     </LinearContainer>
   );
 };
@@ -387,9 +398,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
   },
+  // carouselImage: {
+  //   width: '100%',
+  //   height: 180,
+  // },
   carouselImage: {
-    width: '100%',
+    height: hp(180),
+    borderRadius: 12,
+    width: SCREEN_WIDTH - wp(32),
+  },
+  skeletonBox: {
     height: 180,
+    borderRadius: 12,
+    alignSelf: 'center',
+    width: SCREEN_WIDTH - wp(32),
   },
   inputWrapper: {
     marginTop: hp(30),

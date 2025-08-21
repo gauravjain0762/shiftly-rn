@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ViewStyle,
   ImageStyle,
+  TextProps,
+  TextStyle,
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {commonFontStyle, hp} from '../../theme/fonts';
@@ -16,13 +18,14 @@ import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 
 type picker = {
-  callingCodeStyle?: ViewStyle;
+  callingCodeStyle?: TextStyle;
   downIcon?: ImageStyle;
   callingCode?: string;
   phone?: string;
   onPhoneChange?: any;
+  phoneStyle?: TextStyle;
   onCallingCodeChange?: any;
-};
+} & TextProps;
 
 const PhoneInput: FC<picker> = ({
   callingCodeStyle,
@@ -31,6 +34,7 @@ const PhoneInput: FC<picker> = ({
   phone,
   onPhoneChange,
   onCallingCodeChange,
+  phoneStyle
 }) => {
   // const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState<any>('AE');
@@ -75,7 +79,7 @@ const PhoneInput: FC<picker> = ({
           />
         </TouchableOpacity>
         <TextInput
-          style={styles.input}
+          style={[styles.input, phoneStyle]}
           value={phone}
           onChangeText={handlePhoneChange}
           placeholder="28 364 12"

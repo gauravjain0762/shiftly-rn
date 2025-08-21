@@ -166,6 +166,7 @@ const ChangePassword = () => {
             placeholderTextColor={colors._7B7878}
             containerStyle={passwordStyles.inputcontainer}
             onChangeText={setOldPassword}
+            isPassword
           />
           <Text style={passwordStyles.label}>{t('New Password')}</Text>
           <CustomTextInput
@@ -176,6 +177,7 @@ const ChangePassword = () => {
             placeholderTextColor={colors._7B7878}
             containerStyle={passwordStyles.inputcontainer}
             onChangeText={setNewPassword}
+            isPassword
           />
           <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
           <CustomTextInput
@@ -186,6 +188,7 @@ const ChangePassword = () => {
             placeholderTextColor={colors._7B7878}
             containerStyle={passwordStyles.inputcontainer}
             onChangeText={setConfirmPassword}
+            isPassword
           />
           <GradientButton
             type="Employee"
@@ -247,6 +250,7 @@ export const passwordStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   emailText: {
+    flex: 1,
     ...commonFontStyle(400, 18, colors._FBE7BD),
   },
   button: {

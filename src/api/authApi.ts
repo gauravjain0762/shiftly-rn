@@ -165,12 +165,12 @@ export const authApi = createApi({
             if (data?.data) {
               console.log('Create Job Data', data);
               // Invalidate company jobs so lists refetch instantly
-              dispatch(
-                dashboardApi.util.invalidateTags([
-                  'GetJobs',
-                  'GetEmployeeJobs',
-                ]),
-              );
+              // dispatch(
+              //   dashboardApi.util.invalidateTags([
+              //     'GetJobs',
+              //     'GetEmployeeJobs',
+              //   ]),
+              // );
             }
           } else {
             errorToast(data?.message);

@@ -152,6 +152,7 @@ const ForgotPassword = () => {
       successToast(response?.message);
       dispatch(setUserInfo(response.data?.user));
       resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
+      dispatch(setForgotPasswordSteps(1));
     } else {
       errorToast("New password and confirm password doesn't match");
     }
@@ -198,12 +199,13 @@ const ForgotPassword = () => {
             <View style={passwordStyles.inputView}>
               <Text style={passwordStyles.label}>{t('Your Email')}</Text>
               <CustomTextInput
-                value={email || 'db@company.com'}
+                value={email}
                 style={passwordStyles.emailText}
                 placeholder="Enter your email"
                 placeholderTextColor={colors._7B7878}
                 containerStyle={passwordStyles.inputcontainer}
                 onChangeText={setEmail}
+                secureTextEntry={false}
               />
             </View>
             <GradientButton
@@ -281,7 +283,7 @@ const ForgotPassword = () => {
               placeholder="Enter new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
+              isPassword
               onChangeText={setNewPassword}
               showRightIcon
               imgStyle={passwordStyles.eye}
@@ -293,7 +295,7 @@ const ForgotPassword = () => {
               placeholder="Confirm new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
+              isPassword
               onChangeText={setConfirmPassword}
               showRightIcon
               imgStyle={passwordStyles.eye}

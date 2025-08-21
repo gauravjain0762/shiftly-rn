@@ -154,6 +154,7 @@ const EmpForgotPassword = () => {
       successToast(response?.message);
       dispatch(setUserInfo(response.data?.user));
       resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
+      dispatch(setForgotPasswordSteps(1));
     } else {
       errorToast("New password and confirm password doesn't match");
     }
@@ -284,8 +285,8 @@ const EmpForgotPassword = () => {
               placeholder="Enter new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
               onChangeText={setNewPassword}
+              isPassword
             />
             <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
             <CustomTextInput
@@ -295,7 +296,7 @@ const EmpForgotPassword = () => {
               placeholder="Confirm new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
-              // secureTextEntry
+              isPassword
               onChangeText={setConfirmPassword}
             />
             <GradientButton

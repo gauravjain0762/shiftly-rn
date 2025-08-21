@@ -15,6 +15,7 @@ type props = {
   item?: any;
   heartImage?: any;
   onPress?: () => void;
+  onPressShare?: () => void;
   onPressFavorite?: () => void;
 };
 
@@ -23,6 +24,7 @@ const JobCard: FC<props> = ({
   onPress = () => {},
   onPressFavorite,
   heartImage,
+  onPressShare = () => {},
 }) => {
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
@@ -37,7 +39,7 @@ const JobCard: FC<props> = ({
           />
         </View>
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity onPress={onPressShare} style={styles.iconButton}>
             <Image
               source={IMAGES.share}
               resizeMode="contain"
@@ -48,7 +50,7 @@ const JobCard: FC<props> = ({
             <Image
               resizeMode="contain"
               source={heartImage ? heartImage : IMAGES.hart}
-              style={heartImage ? styles.filledHeart : styles.icon}
+              style={heartImage ? styles.iconFilled : styles.icon}
             />
           </TouchableOpacity>
         </View>
@@ -140,8 +142,11 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     backgroundColor: colors.white,
-    padding: hp(8),
+    width: wp(40),
+    height: wp(40),
     borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logo: {
     backgroundColor: colors.white,
@@ -164,8 +169,8 @@ const styles = StyleSheet.create({
     width: wp(24),
     height: wp(24),
   },
-  filledHeart: {
-    width: wp(32),
-    height: hp(32),
+  iconFilled: {
+    width: wp(28),
+    height: wp(28),
   },
 });
