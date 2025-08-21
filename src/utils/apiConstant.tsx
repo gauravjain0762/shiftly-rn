@@ -36,6 +36,11 @@ export const API = {
   createCompanyPost: '/company/createPost',
   createCompanyJob: '/company/createJob',
 
+  //Chats
+  getCompanyChats: '/company/getChats',
+  getCompanyChatMessages: '/company/getChatMessages',
+  sendCompanyMessage: '/company/sendMessage',
+
   // CompanyLogin: '',
 
   //  -------   Employee    --------

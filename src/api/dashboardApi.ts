@@ -238,6 +238,60 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getCompanyChats: builder.query<any, any>({
+      query: () => ({
+        url: API.getCompanyChats,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'getCompanyChats datadata');
+        } catch (error) {
+          console.log('getCompanyChats Error', error);
+        }
+      },
+    }),
+    getCompanyChatMessages: builder.query<any, any>({
+      query: (chatId) => {
+        const queryParam = chatId ? `?chat_id=${chatId}` : '';
+
+        return {
+          url: `${API.getCompanyChatMessages}${queryParam}`,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getCompanyChatMessages Error', error);
+        }
+      },
+    }),
+    sendCompanyMessage: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.sendCompanyMessage,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: true,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('sendCompanyMessage Error', error);
+        }
+      },
+    }),
 
     //  -------   Employee   --------
     // getEmployeeDashboard
@@ -525,7 +579,7 @@ export const dashboardApi = createApi({
       },
     }),
     employeeSendMessage: builder.mutation<any, any>({
-      query: (credentials) => ({
+      query: credentials => ({
         url: API.employeeSendMessage,
         method: HTTP_METHOD.POST,
         skipLoader: true,
@@ -577,4 +631,7 @@ export const {
   useEmployeeGetChatsQuery,
   useEmployeeGetChatMessagesQuery,
   useEmployeeSendMessageMutation,
+  useGetCompanyChatsQuery,
+  useGetCompanyChatMessagesQuery,
+  useSendCompanyMessageMutation,
 } = dashboardApi;

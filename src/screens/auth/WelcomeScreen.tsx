@@ -64,7 +64,6 @@ const AppOnboardingData = [
 const WelcomeScreen = () => {
   const {t, i18n} = useTranslation();
   const {role} = useRole();
-  console.log("🔥🔥🔥 ~ WelcomeScreen ~ role:", role)
   const [loading, setLoading] = useState<boolean>(false);
   const [companyGoogleSignIn] = useCompanyGoogleSignInMutation({});
   const [employeeGoogleSignIn] = useEmployeeGoogleSignInMutation({});
@@ -76,6 +75,7 @@ const WelcomeScreen = () => {
       if (user) {
         resetNavigation(
           role === 'company' ? SCREENS.CoStack : SCREENS.EmployeeStack,
+          role === 'company' ? SCREENS.CoTabNavigator : SCREENS.TabNavigator,
         );
       }
     });
@@ -85,14 +85,15 @@ const WelcomeScreen = () => {
 
   const onLogin = () => {
     if (role === 'company') {
-      resetNavigation(SCREENS.CoStack);
+      resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
     } else {
-      resetNavigation(SCREENS.EmployeeStack);
+      resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
+      setLoading(true);
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const {data}: any = userInfo;
@@ -105,15 +106,29 @@ const WelcomeScreen = () => {
           device_type: Platform.OS,
         };
 
-        let res;
         if (role === 'company') {
-          res = await companyGoogleSignIn(params);
-        } else {
-          res = await employeeGoogleSignIn(params);
+          const res = await companyGoogleSignIn(params).unwrap();
+          if (res?.status) {
+            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
+          }
+        }
+
+        if (role === 'employee') {
+          await employeeGoogleSignIn(params).unwrap();
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      setLoading(false);
       console.error('Google Sign-In failed:', error);
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('User cancelled the sign-in flow');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign-in is already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Play services not available');
+      } else {
+        errorToast('Google Sign-In failed. Please try again.');
+      }
     }
   };
 

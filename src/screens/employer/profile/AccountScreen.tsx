@@ -147,10 +147,8 @@ const AccountScreen = () => {
       if (res?.status) {
         successToast(res?.message);
         clearAsync();
-        dispatch({type: 'RESET_STORE'});
         resetNavigation(SCREEN_NAMES.WelcomeScreen);
         dispatch(logouts());
-        persistor.purge();
       }
     } catch (error) {
       console.error('Error deleting account: ', error);

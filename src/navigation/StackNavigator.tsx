@@ -45,6 +45,7 @@ import EmpChangePassword from '../screens/employer/auth/EmpChangePassword';
 import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
 import WebviewScreen from '../screens/others/WebviewScreen';
 import ProfileScreen from '../screens/employer/profile/ProfileScreen';
+import CoProfile from '../screens/company/profile/CoProfile';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -62,10 +63,6 @@ const headerStyleTransparent = {
   // ...TransitionPresets.SlideFromRightIOS,
 };
 const Stack = createStackNavigator<ScreenNames>();
-
-const LogoHeader = () => {
-  return <Text>hi</Text>;
-};
 
 const StackNavigator: FC = () => {
   const dispatch = useAppDispatch();
@@ -286,6 +283,11 @@ const StackNavigator: FC = () => {
       <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CoTabNavigator}
+          component={CoTabNavigator}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoLogin}
           component={CoLogin}
         />
@@ -313,11 +315,6 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoChat}
           component={CoChat}
-        />
-        <Stack.Screen
-          options={({navigation}) => ({headerShown: false})}
-          name={SCREENS.CoTabNavigator}
-          component={CoTabNavigator}
         />
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
@@ -373,7 +370,10 @@ const StackNavigator: FC = () => {
       initialRouteName={SCREENS.SplashScreen}
       screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
-      <Stack.Screen name={SCREENS.CreateProfileScreen} component={CreateProfileScreen} />
+      <Stack.Screen
+        name={SCREENS.CreateProfileScreen}
+        component={CreateProfileScreen}
+      />
       <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />
       <Stack.Screen
         name={SCREENS.SelectRollScreen}

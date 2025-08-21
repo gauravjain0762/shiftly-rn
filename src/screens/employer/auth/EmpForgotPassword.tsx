@@ -153,7 +153,7 @@ const EmpForgotPassword = () => {
     if (response?.status) {
       successToast(response?.message);
       dispatch(setUserInfo(response.data?.user));
-      resetNavigation(SCREENS.TabNavigator);
+      resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
     } else {
       errorToast("New password and confirm password doesn't match");
     }
@@ -166,7 +166,7 @@ const EmpForgotPassword = () => {
     if (num == 1) {
       navigationRef.goBack();
     } else if (num == 3) {
-      resetNavigation(SCREENS.LoginScreen);
+      resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
       dispatch(setForgotPasswordSteps(1));
     } else {
       dispatch(setForgotPasswordSteps(forgotPasswordSteps - 1));

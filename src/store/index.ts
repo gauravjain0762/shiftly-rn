@@ -97,4 +97,5 @@ export type AppDispatch = typeof store.dispatch;
 export const resetStore = () => {
   persistor.purge();
   store.dispatch({type: 'RESET_STORE'});
+  persistor.persist();
 };

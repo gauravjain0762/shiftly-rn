@@ -395,7 +395,7 @@ const CoPost = () => {
               title: '',
               description: '',
             });
-            resetNavigation(SCREENS.CoTabNavigator);
+            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
           }}
         />
       </BottomModal>

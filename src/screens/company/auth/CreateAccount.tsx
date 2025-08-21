@@ -370,7 +370,7 @@ const CreateAccount = () => {
     console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
-      resetNavigation(SCREENS.CompanyProfile);
+      resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile);
       dispatch(
         setCompanyRegisterData({
           website: '',

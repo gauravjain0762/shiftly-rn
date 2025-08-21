@@ -988,7 +988,7 @@ const PostJob = () => {
             dispatch(resetJobFormState());
             dispatch(setCoPostJobSteps(0));
             updateJobForm({isSuccessModalVisible: false});
-            resetNavigation(SCREENS.CoTabNavigator);
+            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
           }}
           style={styles.modalHomeText}>
           {'Home'}

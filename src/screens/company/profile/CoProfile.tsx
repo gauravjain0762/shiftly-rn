@@ -24,7 +24,7 @@ import {
   successToast,
 } from '../../../utils/commonFunction';
 import {logouts} from '../../../features/authSlice';
-import {persistor, RootState} from '../../../store';
+import {persistor, resetStore, RootState} from '../../../store';
 import {useAppDispatch} from '../../../redux/hooks';
 import {colors} from '../../../theme/colors';
 import {useTranslation} from 'react-i18next';
@@ -141,10 +141,9 @@ const CoProfile = () => {
     response = await companyLogout({}).unwrap();
     if (response?.status) {
       clearAsync();
-      dispatch({type: 'RESET_STORE'});
       resetNavigation(SCREEN_NAMES.SelectRollScreen);
       dispatch(logouts());
-      persistor.purge();
+      resetStore();
       signOutIfLoggedIn();
     } else {
       errorToast(response?.message);
@@ -157,10 +156,9 @@ const CoProfile = () => {
       if (res?.status) {
         successToast(res?.message);
         clearAsync();
-        dispatch({type: 'RESET_STORE'});
         resetNavigation(SCREEN_NAMES.WelcomeScreen);
         dispatch(logouts());
-        persistor.purge();
+        resetStore();
         // signOutIfLoggedIn();
       }
     } catch (error) {

@@ -11,6 +11,8 @@ import {
 } from '../features/authSlice';
 import {SCREENS} from '../navigation/screenNames';
 import {dashboardApi} from './dashboardApi';
+import {navigationRef} from '../navigation/RootContainer';
+import {CommonActions} from '@react-navigation/native';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -37,7 +39,7 @@ export const authApi = createApi({
               dispatch(setUserInfo(data.data?.company));
               await setAsyncUserInfo(data.data?.company);
               dispatch(setGuestLogin(false));
-              resetNavigation(SCREENS.CoTabNavigator);
+              resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
             }
           } else {
             errorToast(data?.message);
@@ -58,15 +60,15 @@ export const authApi = createApi({
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
-          console.log(data, 'datadatadatadatadata');
+          // console.log(data, 'datadatadatadatadata');
 
           if (data?.status) {
-            await setAsyncToken(data?.data?.auth_token);
+            console.log('data?.data?.authtoken >>>>>>', data?.data?.auth_token);
+            // await setAsyncToken(data?.data?.auth_token);
             dispatch(setAuthToken(data.data?.auth_token));
             dispatch(setUserInfo(data.data?.company));
             await setAsyncUserInfo(data.data?.company);
             dispatch(setGuestLogin(false));
-            navigateTo(SCREENS.CoTabNavigator);
           } else {
             errorToast(data?.message);
           }
@@ -94,7 +96,7 @@ export const authApi = createApi({
             dispatch(setUserInfo(data.data?.company));
             await setAsyncUserInfo(data.data?.company);
             dispatch(setGuestLogin(false));
-            resetNavigation(SCREENS.CoTabNavigator);
+            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
           } else {
             errorToast(data?.message);
           }
@@ -412,7 +414,7 @@ export const authApi = createApi({
               dispatch(setUserInfo(data.data?.user));
               await setAsyncUserInfo(data.data?.user);
               dispatch(setGuestLogin(false));
-              resetNavigation(SCREENS.TabNavigator);
+              resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
             }
           } else {
             errorToast(data?.message);
@@ -440,7 +442,20 @@ export const authApi = createApi({
             dispatch(setUserInfo(data.data?.user));
             await setAsyncUserInfo(data.data?.user);
             dispatch(setGuestLogin(false));
-            resetNavigation(SCREENS.TabNavigator);
+            navigationRef.current?.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: SCREENS.EmployeeStack,
+                    state: {
+                      index: 0,
+                      routes: [{name: SCREENS.TabNavigator}],
+                    },
+                  },
+                ],
+              }),
+            );
           } else {
             errorToast(data?.message);
           }
@@ -467,7 +482,20 @@ export const authApi = createApi({
             dispatch(setUserInfo(data.data?.user));
             await setAsyncUserInfo(data.data?.user);
             dispatch(setGuestLogin(false));
-            resetNavigation(SCREENS.TabNavigator);
+            navigationRef.current?.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: SCREENS.EmployeeStack,
+                    state: {
+                      index: 0,
+                      routes: [{name: SCREENS.TabNavigator}],
+                    },
+                  },
+                ],
+              }),
+            );
           } else {
             errorToast(data?.message);
           }

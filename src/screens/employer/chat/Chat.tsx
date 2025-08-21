@@ -41,7 +41,7 @@ const Chat = () => {
   const [logo, setLogo] = useState<any | {}>();
 
   const handleSendChat = async () => {
-    if (!message || !logo) {
+    if (!message?.trim()) {
       return;
     }
 
@@ -53,6 +53,7 @@ const Chat = () => {
       const res = await sendMessage(formData).unwrap();
       if (res?.status) {
         setMessage('');
+        setLogo(null);
         // successToast(res?.message);
         await refetch();
         console.log('res message', res);
@@ -171,31 +172,17 @@ const Chat = () => {
 
           <View style={styles.inputContainer}>
             {logo && (
-              <View style={{}}>
+              <View>
                 <Pressable
                   onPress={() => setLogo(null)}
-                  style={{
-                    zIndex: 9999,
-                    left: wp(40),
-                    bottom: hp(40),
-                    overflow: 'visible',
-                    borderRadius: hp(50),
-                    position: 'absolute',
-                    backgroundColor: colors.white,
-                  }}>
+                  style={styles.closeContainer}>
                   <Image
                     tintColor={'red'}
                     source={IMAGES.close_icon}
-                    style={{
-                      width: wp(22),
-                      height: hp(22),
-                    }}
+                    style={styles.close}
                   />
                 </Pressable>
-                <Image
-                  source={{uri: logo.uri}}
-                  style={{height: hp(55), width: wp(55)}}
-                />
+                <Image source={{uri: logo.uri}} style={styles.logo} />
               </View>
             )}
             <View
@@ -401,4 +388,18 @@ const styles = StyleSheet.create({
     marginTop: hp(10),
     alignSelf: 'flex-end',
   },
+  closeContainer: {
+    zIndex: 9999,
+    left: wp(40),
+    bottom: hp(40),
+    overflow: 'visible',
+    borderRadius: hp(50),
+    position: 'absolute',
+    backgroundColor: colors.white,
+  },
+  close: {
+    width: wp(22),
+    height: hp(22),
+  },
+  logo: {height: hp(55), width: wp(55)},
 });

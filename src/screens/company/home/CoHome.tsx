@@ -1,15 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {HomeHeader, LinearContainer} from '../../../component';
 import {AppStyles} from '../../../theme/appStyles';
 import FeedCard from '../../../component/employe/FeedCard';
-import {hp, wp} from '../../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {colors} from '../../../theme/colors';
+import BaseText from '../../../component/common/BaseText';
 
 const CoHome = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,6 +82,19 @@ const CoHome = () => {
           refreshing={isLoading && currentPage === 1}
           onRefresh={handleRefresh}
           keyExtractor={(_, index) => index.toString()}
+          ListEmptyComponent={() => {
+            return (
+              <View>
+                <BaseText
+                  style={{
+                    textAlign: 'center',
+                    ...commonFontStyle(500, 18, colors.black),
+                  }}>
+                  {'No posts available'}
+                </BaseText>
+              </View>
+            );
+          }}
           ListFooterComponent={
             isLoadingMore ? (
               <ActivityIndicator

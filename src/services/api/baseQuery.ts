@@ -10,7 +10,7 @@ import {clearAsync} from '../../utils/asyncStorage';
 import {logouts} from '../../features/authSlice';
 import {persistor} from '../../store';
 
-import { SCREENS } from '../../navigation/screenNames';
+import {SCREENS} from '../../navigation/screenNames';
 
 export interface BaseQueryArgs {
   url: string;
@@ -39,8 +39,9 @@ export const axiosBaseQuery: BaseQueryFn<
   const authHeaders = token ? {Authorization: `Bearer ${token}`} : {};
 
   console.log('getState()', getState());
-  console.log('authHeaders', authHeaders);
+  // console.log('authHeaders', authHeaders);
   console.log('params', params);
+  console.log(url, 'url');
 
   try {
     const result = await axiosInstance.request({
@@ -54,19 +55,17 @@ export const axiosBaseQuery: BaseQueryFn<
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     } as AxiosRequestConfig);
-    console.log(url, 'url');
 
     return {data: result.data};
   } catch (rawError) {
     const error = rawError as AxiosError;
-    console.log(error, 'errorerror', rawError);
+    console.log('error', rawError);
     if (error.response?.status === 401) {
       console.log('401 Unauthorized error detected. Redirecting to login...');
 
       setTimeout(() => {
         clearAsync();
-        
-        
+
         dispatch({type: 'RESET_STORE'});
         dispatch(logouts());
         persistor.purge();
