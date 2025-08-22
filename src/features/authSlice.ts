@@ -160,6 +160,9 @@ const authSlice = createSlice({
         ...action.payload,
       };
     },
+    clearCompanyRegisterData: state => {
+      state.companyRegisterData = initialState.companyRegisterData;
+    },
     setRegisterSuccessModal: (state, action: PayloadAction<boolean>) => {
       state.registerSuccessModal = action.payload;
     },
@@ -222,7 +225,6 @@ const authPersistConfig = {
     'businessType',
     'companyRegisterForm',
     'companyRegistrationStep',
-    'companyRegisterData',
     'registerSuccessModal',
     'companyProfileData',
     'companyServices',
@@ -258,6 +260,7 @@ export const {
   setChangePasswordSteps,
   setCreateEmployeeAccount,
   clearEmployeeAccount,
+  clearCompanyRegisterData,
 } = authSlice.actions;
 
 export default authSlice.reducer;

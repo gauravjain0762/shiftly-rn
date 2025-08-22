@@ -27,6 +27,7 @@ import {SCREENS} from '../../../navigation/screenNames';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {useCompanyLoginMutation} from '../../../api/authApi';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const CoLogin = () => {
   const {t, i18n} = useTranslation();
@@ -51,7 +52,7 @@ const CoLogin = () => {
         // deviceToken: fcmToken ?? 'ddd',
         // deviceType: Platform.OS,
       };
-      console.log("🔥🔥 ~ handleLogin ~ data:", data)
+      console.log('🔥🔥 ~ handleLogin ~ data:', data);
       const response = await companyLogin(data).unwrap();
       // console.log(response, 'response----');
     }
@@ -60,8 +61,9 @@ const CoLogin = () => {
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
       colors={['#FFF8E6', '#F3E1B7']}>
-      <ScrollView
+      <KeyboardAwareScrollView
         style={{flex: 1}}
+        enableOnAndroid={true}
         contentContainerStyle={{flexGrow: 1, paddingBottom: hp(30)}}
         showsVerticalScrollIndicator={false}>
         <Image source={IMAGES.newlogo1} style={styles.logo} />
@@ -69,8 +71,8 @@ const CoLogin = () => {
           <View style={styles.container}>
             <Text style={styles.label}>{t('Company Email')}</Text>
             <CustomTextInput
-              style={styles.input}
-              placeholder="smith@williamson.com"
+              inputStyle={styles.input}
+              placeholder="Enter your email"
               placeholderTextColor={colors._7B7878}
               value={authData?.email}
               onChangeText={e => {
@@ -80,10 +82,10 @@ const CoLogin = () => {
             <Text style={styles.label}>{t('Password')}</Text>
             <CustomTextInput
               showRightIcon
-              style={styles.passinput}
+              inputStyle={styles.passinput}
               containerStyle={styles.inputcontainer}
               placeholderTextColor={colors._7B7878}
-              imgStyle={styles.eye} 
+              imgStyle={styles.eye}
               placeholder="* * * * * * * * *"
               onChangeText={e => {
                 setAuthData({...authData, password: e});
@@ -111,7 +113,7 @@ const CoLogin = () => {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </LinearContainer>
   );
 };
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     marginTop: hp(40),
   },
   input: {
-    ...commonFontStyle(400, 18, colors._4A4A4A),
+    ...commonFontStyle(400, 18, colors._181818),
     borderWidth: 2,
     borderColor: colors._234F86,
     borderRadius: 10,
@@ -149,7 +151,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   passinput: {
-    ...commonFontStyle(400, 18, colors._4A4A4A),
+    flex: 1,
+    paddingRight: wp(10),
+    ...commonFontStyle(400, 18, colors._181818),
   },
   eye: {
     tintColor: '#CDB682',

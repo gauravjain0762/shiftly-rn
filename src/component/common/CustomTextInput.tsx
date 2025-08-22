@@ -51,6 +51,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
       />
       {showRightIcon && (
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => (
             setShowPassword(!showPassword), onShow(!showPassword)
           )}>

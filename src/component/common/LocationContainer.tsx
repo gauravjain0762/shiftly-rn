@@ -20,6 +20,7 @@ type map = {
   lng?: number | undefined;
   onPressMap?: () => void;
   address?: string | undefined;
+  showAddressCard?: boolean;
 };
 
 const LocationContainer: FC<map> = ({
@@ -28,6 +29,7 @@ const LocationContainer: FC<map> = ({
   lng,
   onPressMap,
   address,
+  showAddressCard = true,
 }) => {
   useEffect(() => {
     getLocation();
@@ -39,7 +41,6 @@ const LocationContainer: FC<map> = ({
     latitude: 0,
     longitude: 0,
   });
-  // console.log('🔥🔥🔥 ~ LocationContainer ~ location:', location);
   const getLocation = async () => {
     const res = await getAsyncUserLocation();
     if (res) {
@@ -48,17 +49,19 @@ const LocationContainer: FC<map> = ({
   };
   return (
     <View style={[styles.map, containerStyle]}>
-      <View style={styles.locationCard}>
-        <View style={styles.row}>
-          <Text style={styles.locationLabel}>Locations</Text>
-          <View style={styles.primaryTag}>
-            <Text style={styles.primary}>{'Primary'}</Text>
+      {showAddressCard && (
+        <View style={styles.locationCard}>
+          <View style={styles.row}>
+            <Text style={styles.locationLabel}>Locations</Text>
+            <View style={styles.primaryTag}>
+              <Text style={styles.primary}>{'Primary'}</Text>
+            </View>
           </View>
+          <Text style={styles.locationText}>
+            {address || `Crescent Road, The Palm Jumeirah, Dubai, 211222, AE`}
+          </Text>
         </View>
-        <Text style={styles.locationText}>
-          {address || `Crescent Road, The Palm Jumeirah, Dubai, 211222, AE`}
-        </Text>
-      </View>
+      )}
       <Pressable onPress={onPressMap}>
         <MapView
           region={{
@@ -69,6 +72,7 @@ const LocationContainer: FC<map> = ({
           }}
           zoomEnabled={false}
           scrollEnabled={false}
+          provider="google"
           key={Config?.MAP_KEY}
           style={styles.mapImage}>
           <Marker

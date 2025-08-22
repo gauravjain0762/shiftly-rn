@@ -29,20 +29,20 @@ const CoSignUp = () => {
           <View style={styles.container}>
             <Text style={styles.label}>{t('Full Name')}</Text>
             <CustomTextInput
-              style={styles.input}
+              inputStyle={styles.input}
               placeholder="Smith Williamson"
               placeholderTextColor={colors._7B7878}
             />
             <Text style={styles.label}>{t('Company Email')}</Text>
             <CustomTextInput
-              style={styles.input}
+              inputStyle={styles.input}
               placeholder="smith@williamson.com"
               placeholderTextColor={colors._7B7878}
             />
             <Text style={styles.label}>{t('Password')}</Text>
             <CustomTextInput
               showRightIcon
-              style={styles.passinput}
+              inputStyle={styles.passinput}
               containerStyle={styles.inputcontainer}
               imgStyle={styles.eye}
               placeholder="* * * * * * * *"

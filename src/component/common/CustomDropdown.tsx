@@ -135,7 +135,7 @@ const CustomDropdown = ({
                 <Text
                   style={[
                     styles.inputStyle,
-                    {color: res?.value == value ? '#F4E2B8' : '#DADADA'},
+                    {color: res?.value == value ? '#C9B68B' : '#DADADA'},
                   ]}>
                   {res?.label}
                 </Text>

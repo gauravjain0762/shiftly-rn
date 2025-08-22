@@ -113,17 +113,18 @@ const CoPost = () => {
 
   const addImage = (newImage: any) => {
     const updated = [
+      ...uploadedImages,
       {
         uri: newImage?.sourceURL,
         type: newImage?.mime,
         name: newImage?.sourceURL.split('/').pop(),
       },
     ];
+
     updatePostForm({uploadedImages: updated});
 
     setTimeout(() => {
       setImageModal(false);
-      nextStep();
     }, 100);
   };
 
@@ -140,6 +141,17 @@ const CoPost = () => {
       case 1:
         return (
           <View style={{flex: 1}}>
+            {!uploadedImages.length && (
+              <BackHeader
+                onBackPress={() => {
+                  resetNavigation(SCREENS.CoTabNavigator);
+                }}
+                type="company"
+                title=""
+                isRight={false}
+                containerStyle={{paddingHorizontal: wp(33), marginTop: hp(15)}}
+              />
+            )}
             <View>
               {uploadedImages.length === 0 && !uploadedImages[0]?.uri ? (
                 <View style={styles.headercontainer}>
@@ -147,7 +159,10 @@ const CoPost = () => {
                 </View>
               ) : (
                 <TouchableOpacity onPress={resetUploadImages}>
-                  <Image source={IMAGES.close} style={[styles.close, {marginVertical: hp(30)}]} />
+                  <Image
+                    source={IMAGES.close}
+                    style={[styles.close, {marginVertical: hp(30)}]}
+                  />
                 </TouchableOpacity>
               )}
               {uploadedImages.length > 0 &&
@@ -187,12 +202,7 @@ const CoPost = () => {
               </>
             ) : (
               <GradientButton
-                style={[
-                  styles.btn,
-                  {
-                    marginTop: '50%',
-                  },
-                ]}
+                style={[styles.btn, {}]}
                 type="Company"
                 title={t('Upload Image')}
                 onPress={() => setImageModal(!imageModal)}
@@ -221,11 +231,8 @@ const CoPost = () => {
                 placeholderTextColor={colors._4A4A4A}
                 onChangeText={(e: any) => updatePostForm({title: e})}
                 value={title}
-                style={styles.input1}
-                containerStyle={[
-                  styles.Inputcontainer,
-                  postInputContainer
-                ]}
+                inputStyle={styles.input1}
+                containerStyle={[styles.Inputcontainer, postInputContainer]}
               />
             </View>
             <GradientButton
@@ -269,7 +276,7 @@ const CoPost = () => {
                 placeholderTextColor={colors._4A4A4A}
                 onChangeText={(e: any) => updatePostForm({description: e})}
                 value={description}
-                style={[styles.input1, {maxHeight: 200}]}
+                inputStyle={[styles.input1, {maxHeight: 200}]}
                 multiline
                 containerStyle={[
                   styles.Inputcontainer,
@@ -427,12 +434,13 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 25, colors._0B3970),
   },
   uploadContainer: {
-    borderWidth: 1,
-    borderColor: '#7B78784D',
     marginTop: hp(16),
+    borderWidth: hp(1),
+    borderColor: colors._7B7878,
     justifyContent: 'center',
     alignItems: 'center',
-    height: hp(417),
+    height: '70%',
+    marginHorizontal: wp(2),
   },
   upload: {
     width: wp(70),

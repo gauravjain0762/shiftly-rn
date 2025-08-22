@@ -101,7 +101,7 @@ const ChangePassword = () => {
             showRightIcon
             imgStyle={passwordStyles.eye}
             value={oldPassword}
-            style={passwordStyles.emailText}
+            inputStyle={passwordStyles.emailText}
             placeholder="Enter old password"
             placeholderTextColor={colors._7B7878}
             containerStyle={passwordStyles.inputcontainer}
@@ -113,7 +113,7 @@ const ChangePassword = () => {
             showRightIcon
             imgStyle={passwordStyles.eye}
             value={newPassword}
-            style={passwordStyles.emailText}
+            inputStyle={passwordStyles.emailText}
             placeholder="Enter new password"
             placeholderTextColor={colors._7B7878}
             containerStyle={passwordStyles.inputcontainer}
@@ -125,7 +125,7 @@ const ChangePassword = () => {
             showRightIcon
             imgStyle={passwordStyles.eye}
             value={confirmPassword}
-            style={passwordStyles.emailText}
+            inputStyle={passwordStyles.emailText}
             placeholder="Confirm new password"
             placeholderTextColor={colors._7B7878}
             containerStyle={passwordStyles.inputcontainer}

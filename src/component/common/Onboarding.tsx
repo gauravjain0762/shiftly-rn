@@ -31,8 +31,8 @@ export type OnboardingDataItem = {
 
 // Define the props for the reusable component
 type OnboardingProps = {
-  data: OnboardingDataItem[];
-  onComplete: () => void;
+  data?: OnboardingDataItem[];
+  onComplete?: () => void;
 };
 
 const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
@@ -68,7 +68,11 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
   const renderItem = ({item}: {item: OnboardingDataItem}) => {
     return (
       <View style={[styles.slide, {width}]}>
-        <Image resizeMode="contain" source={IMAGES.newlogo} style={styles.logo} />
+        <Image
+          resizeMode="contain"
+          source={IMAGES.newlogo}
+          style={styles.logo}
+        />
         <ImageBackground
           source={IMAGES.login_bg}
           style={styles.illustration}
@@ -107,7 +111,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
         showsHorizontalScrollIndicator={false}
         bounces={false}
         onScroll={scrollHandler}
-        scrollEventThrottle={16} // Standard throttle for reanimated
+        scrollEventThrottle={16}
         onViewableItemsChanged={viewableItemsChanged}
         viewabilityConfig={viewConfig}
       />
@@ -126,12 +130,6 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
           maxVisibleDots={5}
           dotStyle={styles.activeDot}
         />
-        {/* Dots */}
-        {/* <View style={styles.dots}>
-          <View style={[styles.dot, styles.activeDot]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View> */}
       </View>
     </View>
   );
@@ -140,7 +138,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: hp(20),
+    marginTop: hp(24),
   },
   slide: {
     alignItems: 'center',
@@ -154,11 +152,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: hp(10),
   },
   paginationContainer: {
-    // flex: 1,
+    flex: 1,
+    bottom: '10%',
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: hp(40),
     justifyContent: 'center',
   },
   paginationDot: {
@@ -185,7 +183,7 @@ const styles = StyleSheet.create({
   },
   illustration: {
     width: '100%',
-    height: hp(220),
+    height: hp(200),
   },
   title: {
     marginTop: hp(20),
@@ -196,13 +194,12 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginTop: hp(29),
     marginBottom: hp(10),
-    // marginHorizontal: wp(8),
     ...commonFontStyle(600, 17, colors._DADADA),
   },
 
   dots: {
     flexDirection: 'row',
-    marginVertical: hp(41),
+    marginVertical: hp(34),
   },
   dot: {
     width: 10,

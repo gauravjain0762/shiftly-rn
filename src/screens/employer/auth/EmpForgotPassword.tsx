@@ -202,7 +202,7 @@ const EmpForgotPassword = () => {
               <Text style={passwordStyles.label}>{t('Your Email')}</Text>
               <CustomTextInput
                 value={email}
-                style={passwordStyles.emailText}
+                inputStyle={passwordStyles.emailText}
                 placeholder="Enter your email"
                 placeholderTextColor={colors._7B7878}
                 containerStyle={passwordStyles.inputcontainer}
@@ -281,7 +281,7 @@ const EmpForgotPassword = () => {
             <CustomTextInput
               showRightIcon
               value={newPassword}
-              style={passwordStyles.emailText}
+              inputStyle={passwordStyles.emailText}
               placeholder="Enter new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
@@ -292,7 +292,7 @@ const EmpForgotPassword = () => {
             <CustomTextInput
               showRightIcon
               value={confirmPassword}
-              style={passwordStyles.emailText}
+              inputStyle={passwordStyles.emailText}
               placeholder="Confirm new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}

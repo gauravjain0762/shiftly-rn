@@ -2057,6 +2057,11 @@
   resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-4.5.7.tgz#523178779f302aa162b0d57211842f81522e8ece"
   integrity sha512-WMDDZjNF2Bd8M8TrSqKf5xhM9ikdfCHtSPur64Ow3bB/OVrKufUQZ59NmYdNZNeGPvcHHTsafuYTY8zfZfbchQ==
 
+"@react-native-documents/picker@^10.1.5":
+  version "10.1.5"
+  resolved "https://registry.npmjs.org/@react-native-documents/picker/-/picker-10.1.5.tgz#3b9cd338210e70602a30d739f2c3ee919177c6a9"
+  integrity sha512-ajn55rNyxUqbQbz5gmm9gYFI1ifHBmMLH4jVWViA7IFqk1EiEM+pJcpoHizWr5hetR6tzQsaoI4vzCNv/WyA7w==
+
 "@react-native-firebase/app@^23.1.0":
   version "23.1.0"
   resolved "https://registry.npmjs.org/@react-native-firebase/app/-/app-23.1.0.tgz#48590fcf92196a74d84beeb6014e5662b6cc05b9"

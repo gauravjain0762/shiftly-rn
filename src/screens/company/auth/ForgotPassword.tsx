@@ -50,7 +50,7 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
   const [otp, setOtp] = useState(new Array(4).fill(''));
-  const [timer, setTimer] = useState(__DEV__ ? 5 : 30);
+  const [timer, setTimer] = useState(30);
   const [start, setStart] = useState(false);
   const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
   const [companyResendOTP] = useCompanyResendOTPMutation({});
@@ -200,7 +200,7 @@ const ForgotPassword = () => {
               <Text style={passwordStyles.label}>{t('Your Email')}</Text>
               <CustomTextInput
                 value={email}
-                style={passwordStyles.emailText}
+                inputStyle={passwordStyles.emailText}
                 placeholder="Enter your email"
                 placeholderTextColor={colors._7B7878}
                 containerStyle={passwordStyles.inputcontainer}
@@ -279,7 +279,7 @@ const ForgotPassword = () => {
             <Text style={passwordStyles.label}>{t('New Password')}</Text>
             <CustomTextInput
               value={newPassword}
-              style={passwordStyles.emailText}
+              inputStyle={passwordStyles.emailText}
               placeholder="Enter new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}
@@ -291,7 +291,7 @@ const ForgotPassword = () => {
             <Text style={passwordStyles.label}>{t('Confirm Password')}</Text>
             <CustomTextInput
               value={confirmPassword}
-              style={passwordStyles.emailText}
+              inputStyle={passwordStyles.emailText}
               placeholder="Confirm new password"
               placeholderTextColor={colors._7B7878}
               containerStyle={passwordStyles.inputcontainer}

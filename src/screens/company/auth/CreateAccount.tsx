@@ -19,7 +19,7 @@ import {
   LocationContainer,
 } from '../../../component';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {useTranslation} from 'react-i18next';
@@ -29,6 +29,7 @@ import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {
   errorToast,
+  goBack,
   navigateTo,
   resetNavigation,
   successToast,
@@ -47,6 +48,7 @@ import {
   useGetBusinessTypesQuery,
 } from '../../../api/authApi';
 import {
+  clearCompanyRegisterData,
   setCompanyProfileAllData,
   setCompanyProfileData,
   setCompanyRegisterData,
@@ -60,9 +62,15 @@ import {
 } from '../../../api/dashboardApi';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
-const size = ['0 - 50', '50 - 100', '100 - 500', '500 - 1,000', '1,000+'];
+const size = [
+  {label: '0 - 50', value: '0 - 50'},
+  {label: '50 - 100', value: '50 - 100'},
+  {label: '100 - 500', value: '100 - 500'},
+  {label: '500 - 1,000', value: '500 - 1,000'},
+  {label: '1,000+', value: '1,000+'},
+];
 
 const rules = [
   {label: 'Minimum 8 characters', test: pw => pw.length >= 8},
@@ -76,6 +84,7 @@ const rules = [
 ];
 
 const CreateAccount = () => {
+  const navigation = useNavigation<any>();
   const {
     businessType = [],
     fcmToken,
@@ -92,10 +101,6 @@ const CreateAccount = () => {
   );
   const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
     {},
-  );
-  console.log(
-    '🔥🔥🔥 ~ CreateAccount ~ businessTypes:',
-    businessTypes?.data?.types,
   );
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
@@ -117,6 +122,7 @@ const CreateAccount = () => {
   const [position, setPosition] = useState<any>(undefined);
   const mapRef = useRef<any>(null);
   const [logo, setLogo] = useState({});
+  const [coverImages, setCoverImages] = useState<any[]>([]);
   const [cover, setCover] = useState({});
   const [type, setType] = useState<'logo' | 'cover'>('logo');
   const [model, setModel] = useState(false);
@@ -132,6 +138,13 @@ const CreateAccount = () => {
       }
     | undefined
   >();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      dispatch(clearCompanyRegisterData());
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const getUserLocation = async () => {
     try {
@@ -181,6 +194,20 @@ const CreateAccount = () => {
     );
   };
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timer]);
+
   const nextStep = () => {
     setTimeout(() => {
       dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) + 1));
@@ -228,15 +255,23 @@ const CreateAccount = () => {
   };
 
   const UploadPhoto = (e: any) => {
-    if (type == 'cover') {
-      setCover(e);
+    if (type === 'cover') {
+      setCoverImages((prev: any) => [...prev, e]);
+
       dispatch(
         setCompanyProfileData({
-          cover_images: {
-            name: e?.name,
-            uri: e?.sourceURL,
-            type: e?.mime,
-          },
+          cover_images: [
+            ...coverImages.map(img => ({
+              name: img?.name,
+              uri: img?.sourceURL,
+              type: img?.mime,
+            })),
+            {
+              name: e?.name,
+              uri: e?.sourceURL,
+              type: e?.mime,
+            },
+          ],
         }),
       );
     } else {
@@ -281,6 +316,7 @@ const CreateAccount = () => {
     console.log(response, response?.status, 'response----handleSignup');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
+      successToast(response?.message);
       setStart(prev => !prev);
       nextStep();
       dispatch(
@@ -294,7 +330,6 @@ const CreateAccount = () => {
           phone: '',
         }),
       );
-      successToast(response?.message);
     } else {
       errorToast(response?.message);
     }
@@ -334,8 +369,6 @@ const CreateAccount = () => {
       errorToast(
         error?.data?.message || 'Something went wrong. Please try again.',
       );
-    } finally {
-      // setEmailLoading(false);
     }
   };
 
@@ -409,10 +442,6 @@ const CreateAccount = () => {
               <Text style={styles.title}>
                 {t('What type of business are you?')}
               </Text>
-              {/* <Pressable style={styles.dateRow} onPress={() => {}}>
-                <Text style={styles.dateText}>{selected1}</Text>
-              </Pressable> */}
-              {/* <View style={styles.underline} /> */}
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={{maxHeight: hp(350), marginTop: hp(15)}}>
@@ -425,6 +454,7 @@ const CreateAccount = () => {
                   }
                   labelField="label"
                   valueField="value"
+                  placeholder={'Please select a business type'}
                   value={companyRegisterData?.business_type_id}
                   onChange={(e: any) => {
                     dispatch(
@@ -445,6 +475,10 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
+                if (!companyRegisterData?.business_type_id) {
+                  errorToast('Please select business type');
+                  return;
+                }
                 dispatch(
                   setCompanyRegisterData({
                     business_type_id:
@@ -467,17 +501,17 @@ const CreateAccount = () => {
               </Text>
               <View style={styles.row}>
                 <CustomTextInput
-                  placeholder={t('Enter Business / Organi...')}
-                  placeholderTextColor={colors._4A4A4A}
-                  onChangeText={(e: any) =>
+                  placeholder={t('Enter Business / Organiization name')}
+                  placeholderTextColor={colors._7B7878}
+                  onChangeText={(e: any) => {
                     dispatch(
                       setCompanyRegisterData({
                         company_name: e,
                       }),
-                    )
-                  }
+                    );
+                  }}
                   value={companyRegisterData?.company_name}
-                  style={styles.input1}
+                  inputStyle={styles.input1}
                   containerStyle={styles.Inputcontainer}
                   numberOfLines={1}
                 />
@@ -515,7 +549,13 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                if (!companyRegisterData?.company_name) {
+                  errorToast('Please enter business name');
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -532,7 +572,7 @@ const CreateAccount = () => {
                 />
                 <CustomTextInput
                   placeholder={t('Enter Name')}
-                  placeholderTextColor={colors._4A4A4A}
+                  placeholderTextColor={colors._7B7878}
                   onChangeText={(e: any) =>
                     dispatch(
                       setCompanyRegisterData({
@@ -541,7 +581,7 @@ const CreateAccount = () => {
                     )
                   }
                   value={companyRegisterData?.name}
-                  style={styles.input1}
+                  inputStyle={styles.input1}
                   containerStyle={styles.Inputcontainer}
                 />
               </View>
@@ -550,7 +590,13 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                if (!companyRegisterData?.name) {
+                  errorToast('Please enter your name');
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -568,8 +614,8 @@ const CreateAccount = () => {
                   style={styles.mail}
                 />
                 <CustomTextInput
-                  placeholder={t('Enter Email')}
-                  placeholderTextColor={colors._4A4A4A}
+                  placeholder={t('Enter your email')}
+                  placeholderTextColor={colors._7B7878}
                   onChangeText={(e: any) =>
                     dispatch(
                       setCompanyRegisterData({
@@ -578,7 +624,7 @@ const CreateAccount = () => {
                     )
                   }
                   value={companyRegisterData?.email}
-                  style={styles.input1}
+                  inputStyle={styles.input1}
                   containerStyle={styles.Inputcontainer}
                 />
               </View>
@@ -598,7 +644,7 @@ const CreateAccount = () => {
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               <CustomTextInput
                 placeholder={t('Enter Password')}
-                placeholderTextColor={colors._4A4A4A}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={(e: any) =>
                   dispatch(
                     setCompanyRegisterData({
@@ -608,7 +654,7 @@ const CreateAccount = () => {
                 }
                 value={companyRegisterData?.password}
                 secureTextEntry={!visible}
-                style={[styles.input1, AppStyles.flex]}
+                inputStyle={[styles.input1, AppStyles.flex]}
                 showRightIcon
                 isPassword
                 imgStyle={{tintColor: '#1C1B1F'}}
@@ -643,7 +689,19 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                if (!companyRegisterData?.password) {
+                  errorToast('Please enter your password');
+                  return;
+                }
+                if (
+                  !rules.every(rule => rule.test(companyRegisterData?.password))
+                ) {
+                  errorToast('Password does not meet all the requirements');
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -655,9 +713,11 @@ const CreateAccount = () => {
                 {t('What is your phone number?')}
               </Text>
               <PhoneInput
+                placeholder={t('Enter your phone number')}
                 phoneStyle={{color: colors._0B3970}}
                 callingCodeStyle={{color: colors._0B3970}}
                 callingCode={companyRegisterData?.phone_code}
+                placeholderTextColor={colors._7B7878}
                 phone={companyRegisterData?.phone}
                 downIcon={{
                   tintColor: colors._4A4A4A,
@@ -668,13 +728,24 @@ const CreateAccount = () => {
                 onCallingCodeChange={(e: any) =>
                   dispatch(setCompanyRegisterData({phone_code: e}))
                 }
+                maxLength={10}
               />
             </View>
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => handleSignup()}
+              onPress={() => {
+                if (!companyRegisterData?.phone) {
+                  errorToast('Please enter your phone number');
+                  return;
+                }
+                if (companyRegisterData?.phone.length < 9) {
+                  errorToast('Please enter a valid phone number');
+                  return;
+                }
+                handleSignup();
+              }}
             />
           </View>
         );
@@ -740,7 +811,13 @@ const CreateAccount = () => {
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => verifyOTP()}
+              onPress={() => {
+                if (!otp.length) {
+                  errorToast('Please enter OTP');
+                  return;
+                }
+                verifyOTP();
+              }}
             />
           </View>
         );
@@ -754,7 +831,7 @@ const CreateAccount = () => {
               </Text>
               <CustomTextInput
                 placeholder={t('Enter website')}
-                placeholderTextColor={colors._4A4A4A}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={(e: any) =>
                   dispatch(
                     setCompanyProfileData({
@@ -763,62 +840,61 @@ const CreateAccount = () => {
                   )
                 }
                 value={companyProfileData?.website}
-                style={styles.input}
+                inputStyle={styles.input}
                 containerStyle={[styles.Inputcontainer, {marginTop: hp(20)}]}
               />
-              <Text style={styles.title}>
-                {t('Company size')}{' '}
-                <Text style={{fontSize: 15}}>{t('(Employees)')}</Text>
-              </Text>
-              <Pressable style={styles.dateRow} onPress={() => {}}>
-                <Text style={styles.dateText}>{selected}</Text>
-              </Pressable>
-              <View
-                style={[styles.underline, {backgroundColor: colors._7B7878}]}
-              />
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                style={{maxHeight: hp(300)}}>
-                {size.map((option, index) => {
-                  const isSelected = option === selected;
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.optionContainer,
-                        // isSelected && styles.selectedOptionContainer,
-                      ]}
-                      onPress={() => {
-                        dispatch(
-                          setCompanyProfileData({
-                            company_size: option,
-                          }),
-                        );
-                        setSelected(option);
-                      }}>
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.selectedText,
-                        ]}>
-                        {option}
-                      </Text>
-                      {isSelected && (
-                        <Image
-                          source={IMAGES.mark}
-                          style={{width: 25, height: 22, resizeMode: 'contain'}}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
+
+              <View style={{marginTop: hp(50)}}>
+                <Text style={styles.title}>
+                  {t('Company size')}{' '}
+                  <Text style={{fontSize: 15}}>{t('(Employees)')}</Text>
+                </Text>
+                {/* <Pressable style={styles.dateRow} onPress={() => {}}>
+                  <Text style={styles.dateText}>{selected}</Text>
+                </Pressable>
+                <View
+                  style={[styles.underline, {backgroundColor: colors._7B7878}]}
+                /> */}
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  style={{maxHeight: hp(300), marginTop: hp(25)}}>
+                  <CustomDropdown
+                    data={size || []}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={'Please select company size'}
+                    value={companyRegisterData?.company_size}
+                    onChange={(e: any) => {
+                      dispatch(
+                        setCompanyProfileData({
+                          company_size: e?.value,
+                        }),
+                      );
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                  />
+                </ScrollView>
+              </View>
             </View>
+
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                if (!companyProfileData?.website.length) {
+                  errorToast('Please enter your company website');
+                  return;
+                }
+                if (!companyProfileData?.company_size) {
+                  errorToast('Please select your company size');
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -835,18 +911,18 @@ const CreateAccount = () => {
               </View>
               <View style={[styles.row, {marginTop: hp(15)}]}>
                 <CustomTextInput
-                  placeholder={t('Enter Address')}
-                  placeholderTextColor={colors._4A4A4A}
+                  placeholderTextColor={colors._7B7878}
                   onChangeText={(e: any) => {
                     dispatch(
                       setCompanyProfileData({
-                        address: e,
+                        address: userAddress?.address,
                       }),
                     );
                   }}
-                  value={companyProfileData?.address}
-                  style={styles.addressInput}
+                  value={userAddress?.address}
+                  inputStyle={styles.addressInput}
                   multiline
+                  editable={false}
                   textAlignVertical="top"
                   containerStyle={styles.Inputcontainer}
                 />
@@ -869,6 +945,7 @@ const CreateAccount = () => {
                 containerStyle={styles.map}
                 lat={userAddress?.lat}
                 lng={userAddress?.lng}
+                showAddressCard={false}
               />
             </View>
             <View>
@@ -927,7 +1004,7 @@ const CreateAccount = () => {
               <View>
                 <CustomTextInput
                   placeholder={t('Introduce your company in few lines')}
-                  placeholderTextColor={'#4A4A4A80'}
+                  placeholderTextColor={colors._7B7878}
                   onChangeText={(e: any) => {
                     dispatch(
                       setCompanyProfileData({
@@ -936,17 +1013,20 @@ const CreateAccount = () => {
                     );
                   }}
                   value={companyProfileData?.about}
-                  style={styles.coIntroInput}
+                  inputStyle={styles.coIntroInput}
                   multiline
                   containerStyle={styles.Inputcontainer}
                   textAlignVertical="top"
+                  maxLength={500}
                 />
-                <Text style={styles.characterlanght}>{'500 Characters'}</Text>
+                <Text style={styles.characterlanght}>{`${
+                  companyProfileData?.about.length || 0
+                }/500 Characters`}</Text>
               </View>
               <View>
                 <Text style={styles.title}>{t('Mission')}</Text>
                 <CustomTextInput
-                  placeholderTextColor={'#4A4A4A80'}
+                  placeholderTextColor={colors._7B7878}
                   onChangeText={(e: any) => {
                     dispatch(
                       setCompanyProfileData({
@@ -955,17 +1035,20 @@ const CreateAccount = () => {
                     );
                   }}
                   value={companyProfileData?.mission}
-                  style={[styles.coIntroInput, {height: hp(80)}]}
+                  inputStyle={[styles.coIntroInput, {height: hp(80)}]}
                   multiline
                   containerStyle={styles.Inputcontainer}
                   textAlignVertical="top"
+                  maxLength={100}
                 />
-                <Text style={styles.characterlanght}>{'100 Characters'}</Text>
+                <Text style={styles.characterlanght}>{`${
+                  companyProfileData?.mission.length || 0
+                }/100 Characters`}</Text>
               </View>
               <View>
                 <Text style={styles.title}>{t('Values')}</Text>
                 <CustomTextInput
-                  placeholderTextColor={'#4A4A4A80'}
+                  placeholderTextColor={colors._7B7878}
                   onChangeText={(e: any) => {
                     dispatch(
                       setCompanyProfileData({
@@ -974,12 +1057,15 @@ const CreateAccount = () => {
                     );
                   }}
                   value={companyProfileData?.values}
-                  style={[styles.coIntroInput]}
+                  inputStyle={[styles.coIntroInput]}
                   multiline
                   containerStyle={styles.Inputcontainer}
                   textAlignVertical="top"
+                  maxLength={100}
                 />
-                <Text style={styles.characterlanght}>{'100 Characters'}</Text>
+                <Text style={styles.characterlanght}>{`${
+                  companyProfileData?.values.length || 0
+                }/100 Characters`}</Text>
               </View>
             </View>
             <GradientButton
@@ -1003,48 +1089,18 @@ const CreateAccount = () => {
               <Pressable
                 style={[styles.dateRow, {marginTop: hp(10)}]}
                 onPress={() => {}}>
-                <Text style={styles.dateText}>{serviceSelect.join(', ')}</Text>
+                {serviceSelect?.length ? (
+                  <Text style={styles.dateText}>
+                    {serviceSelect.join(', ')}
+                  </Text>
+                ) : (
+                  <Text style={{...commonFontStyle(400, 20, colors._7B7878)}}>
+                    {'Please select services below'}
+                  </Text>
+                )}
               </Pressable>
               <View style={styles.underline} />
 
-              {/* {companyServices?.map((option, index) => {
-                  const isSelected = option?.title === searviceSelect;
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.optionContainer,
-                        // isSelected && styles.selectedOptionContainer,
-                      ]}
-                      onPress={() => {
-                        dispatch(
-                          setCompanyProfileData({
-                            services: option?._id,
-                          }),
-                        );
-                        setServiceSelect(option?.title);
-                      }}>
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.selectedText,
-                        ]}>
-                        {option?.title}
-                      </Text>
-                      {isSelected && (
-                        <Image
-                          source={IMAGES.mark}
-                          style={{
-                            width: 25,
-                            height: 22,
-                            resizeMode: 'contain',
-                            tintColor: colors._4A4A4A,
-                          }}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })} */}
               <FlatList
                 data={serviceList}
                 style={{maxHeight: hp(300)}}
@@ -1128,41 +1184,67 @@ const CreateAccount = () => {
                   style={
                     Object.keys(logo)?.length
                       ? {
-                          resizeMode: 'contain',
-                          height: hp(100),
                           width: '100%',
+                          height: '100%',
+                          resizeMode: 'cover',
                           marginVertical: hp(22),
                         }
                       : styles.logoImg
                   }
                 />
               </TouchableOpacity>
+              {Object.keys(logo)?.length && (
+                <Pressable
+                  onPress={() => setLogo('')}
+                  style={styles.closeContainer}>
+                  <Image
+                    tintColor={'red'}
+                    style={styles.close}
+                    source={IMAGES.close_icon}
+                  />
+                </Pressable>
+              )}
               <Text style={styles.logolabel}>
                 {t(
                   'Your logo helps job seekers recognise and trust your brand.',
                 )}
               </Text>
-              <TouchableOpacity
-                onPress={() => (setType('cover'), setImageModal(!imageModal))}
-                style={styles.logoConatiner}>
-                <Image
-                  source={
-                    Object.keys(cover)?.length
-                      ? {uri: cover?.path}
-                      : IMAGES.uploadImg
-                  }
-                  style={
-                    Object.keys(cover)?.length
-                      ? {
-                          resizeMode: 'cover',
-                          height: hp(200),
-                          width: '100%',
-                          marginVertical: hp(22),
-                        }
-                      : styles.uploadImg
-                  }
-                />
-              </TouchableOpacity>
+              <View style={styles.coverContainer}>
+                {/* Static upload placeholder */}
+                <TouchableOpacity
+                  onPress={() => (setType('cover'), setImageModal(!imageModal))}
+                  style={styles.uploadPlaceholder}>
+                  <Image
+                    source={IMAGES.uploadImg}
+                    style={{width: wp(72), height: hp(72)}}
+                  />
+                </TouchableOpacity>
+
+                <View style={styles.coverGrid}>
+                  {coverImages.map((img, index) => (
+                    <View key={index} style={styles.coverImageWrapper}>
+                      <Image
+                        source={{uri: img?.path || img?.sourceURL}}
+                        style={styles.coverImage}
+                      />
+                      <TouchableOpacity
+                        style={styles.closeIcon}
+                        onPress={() =>
+                          setCoverImages(prev =>
+                            prev.filter((_, i) => i !== index),
+                          )
+                        }>
+                        <Image
+                          tintColor={'red'}
+                          style={styles.close}
+                          source={IMAGES.close_icon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
               <Text style={styles.logolabel}>
                 {t('Your cover image showcases your workplace or atmosphere')}
               </Text>
@@ -1201,6 +1283,9 @@ const CreateAccount = () => {
           <View style={styles.rowView}>
             <TouchableOpacity
               onPress={() => {
+                // if (companyRegistrationStep === 6) {
+                //   resetNavigation(SCREENS.CoLogin);
+                // }
                 companyRegistrationStep == 8
                   ? navigationRef.goBack()
                   : prevStep(companyRegistrationStep);
@@ -1236,8 +1321,8 @@ const CreateAccount = () => {
                 type="Company"
                 title={t('Complete Profile')}
                 onPress={() => {
-                  dispatch(setRegisterSuccessModal(false));
                   nextStep();
+                  dispatch(setRegisterSuccessModal(false));
                 }}
               />
               <TouchableOpacity
@@ -1301,9 +1386,8 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
-    // alignItems: 'center',
     marginBottom: 10,
-    marginTop: hp(67),
+    marginTop: hp(25),
   },
   dateText: {
     ...commonFontStyle(400, 22, colors._4A4A4A),
@@ -1313,11 +1397,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
     borderBottomColor: 'transparent',
   },
   selectedOptionContainer: {
-    borderBottomColor: colors._F4E2B8,
+    borderBottomColor: colors._E8CE92,
   },
   optionText: {
     ...commonFontStyle(400, 22, colors._4A4A4A),
@@ -1332,7 +1416,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input1: {
-    ...commonFontStyle(400, 22, colors._4A4A4A),
+    ...commonFontStyle(400, 20, colors._181818),
   },
   info: {
     width: wp(22),
@@ -1457,7 +1541,7 @@ const styles = StyleSheet.create({
   },
   input: {
     ...commonFontStyle(400, 22, colors._4A4A4A),
-    paddingBottom: hp(16),
+    paddingBottom: hp(10),
     borderBottomWidth: 1,
     flex: 1,
     borderBottomColor: colors._7B7878,
@@ -1476,11 +1560,11 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   addressInput: {
-    ...commonFontStyle(700, 22, colors._4A4A4A),
+    ...commonFontStyle(700, 20, colors._4A4A4A),
   },
   maplable: {
+    marginTop: hp(24),
     ...commonFontStyle(400, 22, colors._4A4A4A),
-    paddingVertical: hp(20),
   },
   map: {
     // flex: 1,
@@ -1508,8 +1592,8 @@ const styles = StyleSheet.create({
     marginBottom: hp(16),
   },
   coIntroInput: {
-    ...commonFontStyle(400, 20, '#4A4A4A80'),
-    height: hp(180),
+    ...commonFontStyle(400, 20, colors._4A4A4A),
+    height: hp(150),
     borderBottomWidth: 2,
     borderColor: '#7B7878',
     flex: 1,
@@ -1520,14 +1604,16 @@ const styles = StyleSheet.create({
     paddingVertical: hp(15),
   },
   logoConatiner: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: colors._EBDCB8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    height: hp(150),
     marginTop: hp(33),
     overflow: 'hidden',
+    borderWidth: hp(1),
+    borderRadius: hp(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors._EBDCB8,
+    backgroundColor: colors.white,
   },
   logoImg: {
     width: wp(113),
@@ -1538,6 +1624,19 @@ const styles = StyleSheet.create({
   logolabel: {
     marginVertical: hp(14),
     ...commonFontStyle(400, 15, colors._050505),
+  },
+  closeContainer: {
+    top: '17%',
+    right: wp(-5),
+    zIndex: 9999,
+    overflow: 'visible',
+    borderRadius: hp(100),
+    position: 'absolute',
+    backgroundColor: colors.white,
+  },
+  close: {
+    width: wp(26),
+    height: hp(26),
   },
   uploadImg: {
     width: wp(70),
@@ -1590,6 +1689,52 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   selectedTextStyle: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._181818),
+  },
+  coverContainer: {
+    backgroundColor: '#fff',
+    padding: wp(10),
+    borderRadius: 8,
+  },
+  uploadPlaceholder: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: hp(35),
+    justifyContent: 'center',
+  },
+  coverGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    gap: wp(10),
+  },
+  coverImage: {
+    width: SCREEN_WIDTH / 4.5,
+    height: hp(100),
+    borderRadius: 8,
+    marginBottom: hp(10),
+    resizeMode: 'cover',
+  },
+  coverImageWrapper: {
+    position: 'relative',
+    marginBottom: hp(10),
+  },
+  closeIcon: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: wp(20),
+    height: wp(20),
+    borderRadius: wp(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+  },
+  closeIconText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 });

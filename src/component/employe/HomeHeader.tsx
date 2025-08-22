@@ -20,6 +20,7 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
 }) => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log('🔥🔥🔥 ~ HomeHeader ~ userInfo:', userInfo);
 
   return (
     <View style={styles.header}>
@@ -28,7 +29,13 @@ const HomeHeader: FC<props> = ({
           <Image
             resizeMode="cover"
             style={styles.avatar}
-            source={userInfo?.logo ? {uri: userInfo?.logo} : IMAGES.avatar}
+            source={
+              userInfo?.logo
+                ? {uri: userInfo?.logo}
+                : userInfo?.picture
+                ? {uri: userInfo?.picture}
+                : IMAGES.avatar
+            }
           />
         </TouchableOpacity>
         <View style={styles.info}>

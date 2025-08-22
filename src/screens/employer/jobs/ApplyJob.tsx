@@ -21,19 +21,8 @@ import {useRoute} from '@react-navigation/native';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
-import CustomBtn from '../../../component/common/CustomBtn';
 import {errorToast, successToast} from '../../../utils/commonFunction';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-
-const documents = [
-  {id: 'cv', label: 'CV', icon: IMAGES.CV},
-  {id: 'coverLetter', label: 'Cover Letter', icon: IMAGES.coverlatter},
-  {
-    id: 'recommendation',
-    label: 'Recommendation Letter',
-    icon: IMAGES.reccomandlatter,
-  },
-];
 
 const ApplyJob = () => {
   const {t, i18n} = useTranslation();
@@ -190,10 +179,10 @@ const ApplyJob = () => {
             file: image.path,
             isLocal: true,
           };
-
           setResumes([newResume]);
           setSelectedDoc(newResume._id);
         }}
+        allowDocument={true}
       />
     </>
   );

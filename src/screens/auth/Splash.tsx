@@ -20,15 +20,12 @@ import {
   setUserInfo,
 } from '../../features/authSlice';
 import {useAppDispatch} from '../../redux/hooks';
-import {useGetBusinessTypesQuery} from '../../api/authApi';
 
 type Props = {};
 
 const Splash = (props: Props) => {
   const dispatch = useAppDispatch();
   const {role, setRole, loading} = useRole();
-  const navigation = useNavigation();
-  const {data: businessType, isLoading: Loading} = useGetBusinessTypesQuery({});
 
   useEffect(() => {
     // Wait for role to load before initializing app
@@ -120,12 +117,12 @@ const Splash = (props: Props) => {
     } else {
       // User is not logged in, navigate to auth screens
       switch (userRole) {
-        case 'company':
-          resetNavigation(SCREENS.CoStack);
-          break;
-        case 'employee':
-          resetNavigation(SCREENS.EmployeeStack);
-          break;
+        // case 'company':
+        //   resetNavigation(SCREENS.CoStack);
+        //   break;
+        // case 'employee':
+        //   resetNavigation(SCREENS.EmployeeStack);
+        //   break;
         default:
           // No role selected, go to role selection
           resetNavigation(SCREENS.SelectRollScreen);

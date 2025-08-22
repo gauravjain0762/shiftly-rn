@@ -335,7 +335,7 @@ const SignUp = () => {
                 placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({name: text})}
                 value={name}
-                style={styles.input}
+                inputStyle={styles.input}
               />
             </View>
             <GradientButton
@@ -358,7 +358,7 @@ const SignUp = () => {
                 placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({email: text})}
                 value={email}
-                style={styles.input}
+                inputStyle={styles.input}
               />
             </View>
             <GradientButton
@@ -500,7 +500,7 @@ const SignUp = () => {
                 placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({describe: text})}
                 value={describe}
-                style={styles.input1}
+                inputStyle={styles.input1}
               />
               {options.map((option, index) => {
                 const isSelected = option === selected;

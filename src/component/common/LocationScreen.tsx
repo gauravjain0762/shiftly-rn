@@ -1,7 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -9,8 +7,6 @@ import {
   Pressable,
   StatusBar,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
@@ -30,10 +26,9 @@ import {IMAGES} from '../../assets/Images';
 import {getAsyncUserLocation} from '../../utils/asyncStorage';
 
 const LocationScreen = () => {
+  const {t} = useTranslation();
   const {params} = useRoute<any>();
   const userAddress = params?.userAddress;
-  // console.log("🔥🔥🔥 ~ LocationScreen ~ userAddress:", userAddress)
-  const {t} = useTranslation();
   const mapRef = useRef<any | null>(null);
 
   const [search, setSearch] = useState(userAddress?.address || '');
@@ -45,8 +40,8 @@ const LocationScreen = () => {
   const [position, setPosition] = useState({
     latitude: 0,
     longitude: 0,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
   });
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const ref = useRef<any | null>(null);
@@ -150,16 +145,20 @@ const LocationScreen = () => {
   const handlePoiClick = (e: any) => {
     const coords = e.nativeEvent.coordinate;
     moveMarker(coords);
+    
   };
 
   const moveMarker = (coords: any) => {
     setPosition(prev => ({...prev, ...coords}));
     setMarkerPosition(coords);
-    mapRef.current?.animateToRegion({
-      ...coords,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
-    });
+    mapRef.current?.animateToRegion(
+      {
+        ...coords,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      },
+      500,
+    );
 
     getAddress(coords, (data: any) => {
       const address = data?.results?.[0]?.formatted_address;
@@ -227,20 +226,28 @@ const LocationScreen = () => {
       setPosition({
         latitude: location?.latitude,
         longitude: location?.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
       });
       setMarkerPosition({
         latitude: location?.latitude,
         longitude: location?.longitude,
       });
-      mapRef.current?.animateToRegion({
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
+      mapRef.current?.animateToRegion(
+        {
+          latitude: location?.latitude,
+          longitude: location?.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500,
+      );
     }
+  };
+
+  const handleMarkerDrag = (e: any) => {
+    const coords = e.nativeEvent.coordinate;
+    setMarkerPosition(coords);
   };
 
   return (
@@ -254,7 +261,9 @@ const LocationScreen = () => {
         <GooglePlacesAutocomplete
           ref={ref}
           placeholder="Search Location"
+          keyboardShouldPersistTaps="handled"
           onPress={async (data, details = null) => {
+            Keyboard.dismiss();
             if (!details) return;
 
             const {lat, lng} = details.geometry.location;
@@ -270,7 +279,7 @@ const LocationScreen = () => {
             setSearch(address);
             setPosition(region);
             setMarkerPosition({latitude: lat, longitude: lng});
-            mapRef.current?.animateToRegion(region);
+            mapRef.current?.animateToRegion(region, 500);
             await AsyncStorage.setItem(
               'user_location',
               JSON.stringify({
@@ -312,10 +321,61 @@ const LocationScreen = () => {
                 region={position}
                 onPress={handleMapPress}
                 onPoiClick={handlePoiClick}
+                onMarkerDrag={handleMarkerDrag}
                 onMapReady={() => setIsMapLoaded(true)}
                 onMapLoaded={() => setIsMapLoaded(true)}
                 style={styles.mapStyle}>
                 <Marker
+                  draggable
+                  onDrag={e => {
+                    console.log('Marker moving:', e.nativeEvent.coordinate);
+                  }}
+                  onDragEnd={e => {
+                    const {latitude, longitude} = e.nativeEvent.coordinate;
+                    console.log('Final position:', latitude, longitude);
+
+                    // Update position
+                    setPosition({
+                      latitude,
+                      longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    });
+
+                    setMarkerPosition({latitude, longitude});
+
+                    // Fetch address from coordinates and update placeholder
+                    getAddress({latitude, longitude}, (data: any) => {
+                      const address = data?.results?.[0]?.formatted_address;
+                      const components =
+                        data?.results?.[0]?.address_components || [];
+
+                      const stateObj = components.find((c: any) =>
+                        c.types.includes('administrative_area_level_1'),
+                      );
+                      const countryObj = components.find((c: any) =>
+                        c.types.includes('country'),
+                      );
+
+                      const state = stateObj?.long_name || '';
+                      const country = countryObj?.long_name || '';
+
+                      if (address) {
+                        setSearch(address);
+                        ref.current?.setAddressText(address);
+                        AsyncStorage.setItem(
+                          'user_location',
+                          JSON.stringify({
+                            address,
+                            lat: latitude,
+                            lng: longitude,
+                            state,
+                            country,
+                          }),
+                        );
+                      }
+                    });
+                  }}
                   coordinate={{
                     latitude: position.latitude,
                     longitude: position.longitude,

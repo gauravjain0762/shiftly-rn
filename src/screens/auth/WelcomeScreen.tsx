@@ -181,23 +181,25 @@ const WelcomeScreen = () => {
       {/* <View> */}
       <ScrollView
         style={{flex: 1}}
+        bounces={false}
         contentContainerStyle={{flexGrow: 1, alignItems: 'center'}}
         showsVerticalScrollIndicator={false}>
         <Onboarding
           data={AppOnboardingData}
-          // onComplete={handleOnboardingComplete}
+          // onComplete={}
         />
-        {/* </View> */}
 
-        {/* Buttons */}
         <View
-          style={{width: '90%', alignItems: 'center', marginBottom: hp(30)}}>
+          style={{
+            width: '90%',
+            bottom: '5%',
+            alignItems: 'center',
+          }}>
           <TouchableOpacity
             style={styles.emailButton}
             onPress={() => {
               onLogin();
             }}>
-            {/* <Icon name="envelope" size={16} color="#000" /> */}
             <Image source={IMAGES.e_icon} style={styles.icon} />
             <Text style={styles.emailText}>{t('Continue with email')}</Text>
           </TouchableOpacity>
@@ -250,13 +252,13 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     lineHeight: 30,
-    marginTop: 31,
+    marginTop: hp(31),
     ...commonFontStyle(600, 17, colors._DADADA),
-    marginHorizontal: 28,
+    marginHorizontal: hp(28),
   },
   dots: {
     flexDirection: 'row',
-    marginVertical: 41,
+    marginVertical: hp(35),
   },
   dot: {
     width: 10,
@@ -273,11 +275,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingVertical: 16,
-    borderRadius: 30,
+    paddingVertical: hp(16),
+    borderRadius: hp(30),
     width: '90%',
-    marginBottom: 30,
-    paddingHorizontal: 49,
+    marginBottom: hp(15),
+    paddingHorizontal: hp(49),
     gap: wp(14),
   },
   emailText: {
@@ -288,11 +290,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingVertical: 16,
-    borderRadius: 30,
+    paddingVertical: hp(16),
+    borderRadius: hp(30),
     width: '90%',
-    marginBottom: 30,
-    paddingHorizontal: 49,
+    marginBottom: hp(15),
+    paddingHorizontal: wp(49),
     gap: wp(14),
   },
   whiteText: {

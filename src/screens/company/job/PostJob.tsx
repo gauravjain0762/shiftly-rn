@@ -151,6 +151,7 @@ const PostJob = () => {
     editMode,
     job_id,
   } = useAppSelector((state: any) => selectJobForm(state));
+    console.log("🔥🔥🔥 ~ PostJob ~ requirements:", requirements)
   console.log('🔥🔥🔥 ~ PostJob ~ job_sector:', job_sector);
   const formData = useAppSelector((state: any) => state.company.jobForm);
   const {updateJobForm} = useJobFormUpdater();
@@ -318,7 +319,7 @@ const PostJob = () => {
 
   const handleAddRequirements = () => {
     // Keyboard.dismiss();
-    if (!requirementText) {
+    if (!requirementText.trim()) {
       return;
     }
     updateJobForm({requirementText: '', isModalVisible: false});
@@ -381,7 +382,7 @@ const PostJob = () => {
                   value={describe}
                   onChangeText={e => updateJobForm({describe: e})}
                   placeholder={'Describe'}
-                  style={styles.input1}
+                  inputStyle={styles.input1}
                   multiline
                   maxLength={1000}
                   placeholderTextColor={colors._7B7878}
@@ -767,7 +768,7 @@ const PostJob = () => {
                   value={title}
                   onChangeText={e => updateJobForm({title: e})}
                   placeholder={'Job Title'}
-                  style={styles.input}
+                  inputStyle={styles.input}
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
                 />

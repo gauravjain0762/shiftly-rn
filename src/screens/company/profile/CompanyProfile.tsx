@@ -199,7 +199,7 @@ const CompanyProfile = () => {
         <GradientButton
           type="Company"
           style={styles.button}
-          title={t('Post A Job')}
+          title={t('Create a Post')}
           onPress={() => {
             navigateTo(SCREENS.CoPost);
           }}

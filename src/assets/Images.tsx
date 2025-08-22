@@ -23,6 +23,7 @@ export const IMAGES = {
   logoImg: require('./image/logoImg.png'),
   uploadImg: require('./image/uploadImg.png'),
   web: require('./image/web.png'),
+  currency: require('./image/currency.png'),
 
   logog: require('./image/logog.png'),
   logo1: require('./image/logo.png'),

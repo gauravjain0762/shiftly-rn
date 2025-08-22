@@ -2,6 +2,8 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -9,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {LinearContainer} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {navigationRef} from '../../../navigation/RootContainer';
@@ -27,44 +29,6 @@ import moment from 'moment';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-const messages = [
-  {
-    id: '1',
-    sender: 'Marriott',
-    time: '09:45 AM',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: false,
-  },
-  {
-    id: '2',
-    sender: 'user',
-    time: '',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: true,
-  },
-  {
-    id: '3',
-    sender: 'user',
-    time: '',
-    text: 'omnis iste natus',
-    isUser: true,
-  },
-  {
-    id: '4',
-    sender: 'Marriott',
-    time: '09:49 AM',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: false,
-  },
-  {
-    id: '5',
-    sender: 'user',
-    time: '',
-    text: 'Sed ut perspiciatis unde omnis iste natus dolim voluptatem accusantium.',
-    isUser: true,
-  },
-];
-
 const CoChat = () => {
   const {params} = useRoute<any>();
   const data = params?.data;
@@ -81,6 +45,15 @@ const CoChat = () => {
   const recipientDetails = chats?.data?.chat || {};
   const allChats = chats?.data?.messages || [];
   const [logo, setLogo] = useState<any | {}>();
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (allChats.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({animated: true});
+      }, 100);
+    }
+  }, [allChats]);
 
   const handleSendChat = async () => {
     if (!message?.trim()) {
@@ -98,6 +71,9 @@ const CoChat = () => {
         setMessage('');
         setLogo(null);
         await refetch();
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({animated: true});
+        }, 150);
         console.log('res message', res);
       } else {
         errorToast(res?.message || 'Failed to send message');
@@ -171,44 +147,60 @@ const CoChat = () => {
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
-        <View style={styles.container}>
-          <View style={styles.headerRow}>
-            <TouchableOpacity
-              onPress={() => {
-                navigationRef.goBack();
-              }}>
-              <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
-            </TouchableOpacity>
-            <View style={{flex: 1}}>
-              <Text style={styles.company}>
-                {recipientDetails?.company_id?.company_name || 'Test User'}
-              </Text>
-              {/* <Text style={styles.hrText}>Bilal Izhar HR Admin</Text> */}
+        <KeyboardAvoidingView
+          style={{flex: 1}}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust header height if needed
+        >
+          {/* HEADER */}
+          <View style={styles.container}>
+            <View style={styles.headerRow}>
+              <TouchableOpacity onPress={() => navigationRef.goBack()}>
+                <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
+              </TouchableOpacity>
+              <View style={{flex: 1}}>
+                <Text style={styles.company}>
+                  {recipientDetails?.company_id?.company_name || 'Test User'}
+                </Text>
+              </View>
+              <Image source={IMAGES.dots} style={styles.arrowIcon1} />
             </View>
-            <Image source={IMAGES.dots} style={styles.arrowIcon1} />
-          </View>
-        </View>
-        <KeyboardAwareScrollView
-          extraHeight={20}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{flexGrow: 1}}>
-          <View style={styles.card}>
-            <Text style={styles.dateText}>
-              You applied to this position on 18 October 2024.
-            </Text>
-            <Text style={styles.jobTitle}>Restaurant Manager - Full Time</Text>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>View Job</Text>
-            </TouchableOpacity>
           </View>
 
-          <FlatList
-            data={allChats}
-            renderItem={renderMessage}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.chatContent}
-            showsVerticalScrollIndicator={false}
-          />
+          {/* BODY */}
+          <View style={{flex: 1}}>
+            {/* Job card */}
+            <View style={styles.card}>
+              <Text style={styles.dateText}>
+                You applied to this position on 18 October 2024.
+              </Text>
+              <Text style={styles.jobTitle}>
+                Restaurant Manager - Full Time
+              </Text>
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.buttonText}>View Job</Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              ref={flatListRef}
+              data={allChats}
+              renderItem={renderMessage}
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.chatContent}
+              showsVerticalScrollIndicator={false}
+              onContentSizeChange={() => {
+                if (allChats.length > 0) {
+                  flatListRef.current?.scrollToEnd({animated: true});
+                }
+              }}
+              onLayout={() => {
+                if (allChats.length > 0) {
+                  flatListRef.current?.scrollToEnd({animated: true});
+                }
+              }}
+            />
+          </View>
 
           <View style={styles.inputContainer}>
             {logo && (
@@ -225,11 +217,7 @@ const CoChat = () => {
                 <Image source={{uri: logo.uri}} style={styles.logo} />
               </View>
             )}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 placeholder="Write your message..."
                 placeholderTextColor={colors.black}
@@ -238,9 +226,7 @@ const CoChat = () => {
                 onChangeText={setMessage}
               />
               <TouchableOpacity
-                onPress={() => {
-                  setImagePickerVisible(true);
-                }}
+                onPress={() => setImagePickerVisible(true)}
                 style={{marginRight: 10}}>
                 <ImageBackground
                   source={IMAGES.btnBg1}
@@ -251,16 +237,17 @@ const CoChat = () => {
                   />
                 </ImageBackground>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleSendChat()}>
+              <TouchableOpacity onPress={handleSendChat}>
                 <Image source={IMAGES.send} style={styles.sendIcon} />
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAwareScrollView>
+        </KeyboardAvoidingView>
+
         <ImagePickerModal
           actionSheet={isImagePickerVisible}
           setActionSheet={() => setImagePickerVisible(false)}
-          onUpdate={(image: any) => handleImageSelected(image)}
+          onUpdate={handleImageSelected}
         />
       </SafeAreaView>
     </LinearContainer>
@@ -399,7 +386,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     paddingHorizontal: wp(14),
-    paddingVertical: hp(30),
+    paddingVertical: hp(10),
     borderTopWidth: 1,
     borderTopColor: 'rgba(0, 0, 0, 0.1)',
   },

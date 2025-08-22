@@ -10,6 +10,7 @@ import {
   ImageStyle,
   TextProps,
   TextStyle,
+  TextInputProps,
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {commonFontStyle, hp} from '../../theme/fonts';
@@ -25,7 +26,8 @@ type picker = {
   onPhoneChange?: any;
   phoneStyle?: TextStyle;
   onCallingCodeChange?: any;
-} & TextProps;
+  placeholder?: string;
+} & TextProps & TextInputProps;
 
 const PhoneInput: FC<picker> = ({
   callingCodeStyle,
@@ -34,7 +36,9 @@ const PhoneInput: FC<picker> = ({
   phone,
   onPhoneChange,
   onCallingCodeChange,
-  phoneStyle
+  phoneStyle,
+  placeholder,
+  ...TextInputProps
 }) => {
   // const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState<any>('AE');
@@ -55,6 +59,7 @@ const PhoneInput: FC<picker> = ({
           countryCode={countryCode}
           withFilter
           withFlag
+          withCallingCode
           flagSize={50}
           onSelect={country => {
             setCountryCode(country.cca2);
@@ -82,12 +87,13 @@ const PhoneInput: FC<picker> = ({
           style={[styles.input, phoneStyle]}
           value={phone}
           onChangeText={handlePhoneChange}
-          placeholder="28 364 12"
+          placeholder={placeholder || "28 364 12"}
           keyboardType="phone-pad"
+          {...TextInputProps}
         />
         {valid && phone?.length > 8 && (
           <Image
-            source={IMAGES.right}
+            source={IMAGES.welcome_icon}
             style={{width: 22, height: 22, resizeMode: 'contain'}}
           />
         )}
@@ -147,7 +153,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginLeft: 6,
-    ...commonFontStyle(400, 18, colors.white),
+    ...commonFontStyle(400, 18, colors._3D3D3D),
   },
 });
 
