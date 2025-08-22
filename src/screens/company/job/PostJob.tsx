@@ -758,7 +758,7 @@ const PostJob = () => {
         showsVerticalScrollIndicator={false}
         style={AppStyles.flex}
         contentContainerStyle={styles.scrollContainer}>
-        <AnimatedSwitcher index={steps}>
+        {/* <AnimatedSwitcher index={steps}> */}
         {steps == 0 && (
           <>
             <View>
@@ -958,7 +958,7 @@ const PostJob = () => {
           </>
         )}
         {steps !== 0 && render()}
-        </AnimatedSwitcher>
+        {/* </AnimatedSwitcher> */}
       </KeyboardAwareScrollView>
       <BottomModal
         visible={isSuccessModalVisible}

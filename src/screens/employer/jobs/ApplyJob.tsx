@@ -21,8 +21,9 @@ import {useRoute} from '@react-navigation/native';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
-import {errorToast, successToast} from '../../../utils/commonFunction';
+import {errorToast, resetNavigation, successToast} from '../../../utils/commonFunction';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
+import { SCREENS } from '../../../navigation/screenNames';
 
 const ApplyJob = () => {
   const {t, i18n} = useTranslation();
@@ -162,7 +163,7 @@ const ApplyJob = () => {
         visible={visible}
         onClose={() => setVisible(!visible)}
         onJobList={() => {
-          navigationRef.goBack();
+          resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen)
           setVisible(false);
         }}
       />

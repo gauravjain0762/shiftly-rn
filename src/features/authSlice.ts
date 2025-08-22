@@ -81,7 +81,7 @@ const initialState: AppState = {
     values: '',
     services: [],
     logo: {},
-    cover_images: {},
+    cover_images: []
   },
   companyServices: [],
   companyProfileAllData: [],

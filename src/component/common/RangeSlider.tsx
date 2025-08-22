@@ -7,7 +7,7 @@ import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../theme/fonts';
 
 type Props = {
   range?: number[] | any;
-  setRange?: React.Dispatch<React.SetStateAction<number[]>>;
+  setRange: React.Dispatch<React.SetStateAction<number[]>>;
 };
 
 const RangeSlider = ({range, setRange}: Props) => {
@@ -19,7 +19,7 @@ const RangeSlider = ({range, setRange}: Props) => {
         max={50000}
         step={100}
         sliderLength={SCREEN_WIDTH - wp(70)}
-        onValuesChange={setRange}
+        onValuesChange={(values: number[]) => setRange(values)}
         trackStyle={{height: hp(2), borderRadius: hp(1)}}
         containerStyle={{}}
         selectedStyle={{backgroundColor: colors._7B7878}}

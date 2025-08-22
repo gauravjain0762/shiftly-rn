@@ -26,11 +26,13 @@ import {useTranslation} from 'react-i18next';
 import {RootState} from '../../../store';
 import {useGetProfileQuery} from '../../../api/authApi';
 import {useAppDispatch} from '../../../redux/hooks';
-import {setCompanyProfileAllData} from '../../../features/authSlice';
+import {
+  setCompanyProfileAllData,
+  setCompanyProfileData,
+} from '../../../features/authSlice';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
 import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
-import { navigationRef } from '../../../navigation/RootContainer';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
@@ -71,7 +73,11 @@ const CompanyProfile = () => {
   const {companyProfileData, companyProfileAllData} = useSelector(
     (state: RootState) => state.auth,
   );
-  const {data: getPost, isLoading: Loading} = useGetCompanyPostsQuery({});
+  console.log(
+    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
+    companyProfileData,
+  );
+  const {data: getPost} = useGetCompanyPostsQuery({});
   const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
@@ -82,18 +88,23 @@ const CompanyProfile = () => {
   useEffect(() => {
     if (data?.status && data.data?.company) {
       dispatch(setCompanyProfileAllData(data.data.company));
+      dispatch(setCompanyProfileData(data.data.company));
     }
   }, [data]);
 
   return (
     <ParallaxContainer
-      imagePath={{uri: companyProfileData?.cover_images?.uri}}
+      imagePath={companyProfileData?.cover_images?.map((img: any) => ({
+        uri: img,
+      }))}
       ImageChildren={
-        <TouchableOpacity
-          onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
-          style={styles.backButton}>
-          <Image source={IMAGES.backArrow} style={styles.backArrow} />
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity
+            onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+            style={styles.backButton}>
+            <Image source={IMAGES.backArrow} style={styles.backArrow} />
+          </TouchableOpacity>
+        </>
       }
       ContainerStyle={styles.container}>
       <LinearContainer
@@ -101,10 +112,7 @@ const CompanyProfile = () => {
         containerStyle={styles.linearContainer}
         colors={['#FFF8E6', '#F3E1B7']}>
         <View style={styles.profileHeader}>
-          <Image
-            style={styles.logo}
-            source={{uri: companyProfileData?.logo?.uri}}
-          />
+          <Image style={styles.logo} source={{uri: companyProfileData?.logo}} />
           <View style={styles.titleTextContainer}>
             <Text style={styles.companyName}>
               {companyProfileAllData?.company_name || 'N/A'}
@@ -116,8 +124,8 @@ const CompanyProfile = () => {
           </View>
         </View>
 
-        <Text style={styles.description}>{companyProfileAllData?.about}</Text>
-        <Text style={styles.description}>{companyProfileAllData?.values}</Text>
+        <Text style={styles.description}>{companyProfileData?.about}</Text>
+        <Text style={styles.description}>{companyProfileData?.values}</Text>
 
         <View style={styles.tabRow}>
           {ProfileTabs.map((item, index) => (
@@ -139,14 +147,18 @@ const CompanyProfile = () => {
           <>
             <View style={styles.infoRow}>
               <View style={AppStyles.flex}>
-                <Text style={styles.infoTitle}>
+                {/* <Text style={styles.infoTitle}>
                   {companyProfileAllData?.address}
-                </Text>
-                <View style={styles.row}>
-                  <Image source={IMAGES.web} style={styles.web} />
-                  <Text style={styles.infoValue}>
-                    {companyProfileData?.website}
-                  </Text>
+                </Text> */}
+
+                <View>
+                  <Text style={styles.infoTitle}>{'Website'}</Text>
+                  <View style={styles.row}>
+                    <Image source={IMAGES.web} style={styles.web} />
+                    <Text style={styles.infoValue}>
+                      {companyProfileData?.website}
+                    </Text>
+                  </View>
                 </View>
               </View>
               <View style={AppStyles.flex}>
@@ -158,7 +170,7 @@ const CompanyProfile = () => {
             <View style={styles.infoSection}>
               <Text style={styles.infoTitle}>Company size</Text>
               <Text style={styles.infoValue}>
-                {companyProfileAllData?.company_size}
+                {companyProfileData?.company_size}
               </Text>
             </View>
 
@@ -173,6 +185,7 @@ const CompanyProfile = () => {
               containerStyle={styles.map}
               lat={companyProfileAllData?.lat}
               lng={companyProfileAllData?.lng}
+              address={companyProfileAllData?.address}
             />
           </>
         )}
@@ -228,7 +241,7 @@ const styles = StyleSheet.create({
   backArrow: {
     width: wp(21),
     height: wp(21),
-    tintColor: colors.black,
+    tintColor: colors.white,
   },
   profileHeader: {
     flexDirection: 'row',
@@ -262,7 +275,7 @@ const styles = StyleSheet.create({
   },
   tabRow: {
     flexDirection: 'row',
-    marginTop: hp(30),
+    // marginTop: hp(10),
   },
   tabItem: {
     flex: 1,

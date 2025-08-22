@@ -41,7 +41,7 @@ const MyJobCard = (props: JobCardProps) => {
 
       <View style={styles.footerRow}>
         <Text style={styles.applicantsText}>{`${
-          totalApplicants || 52
+          item?.applicants?.length || 52
         }  Applicants`}</Text>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{`${

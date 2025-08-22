@@ -34,6 +34,7 @@ import {
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {API} from '../../../utils/apiConstant';
+import BaseText from '../../../component/common/BaseText';
 
 const JobDetail = () => {
   const {t} = useTranslation();
@@ -43,7 +44,6 @@ const JobDetail = () => {
   const data = params?.item;
   const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
   const curr_jobdetails = jobDetail?.data?.job;
-  console.log('🔥🔥🔥 ~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
   const resumeList = jobDetail?.data?.resumes;
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
@@ -153,13 +153,13 @@ const JobDetail = () => {
 
         {/* Offer */}
         <Text style={styles.sectionTitle}>What we offer</Text>
-        <Text style={styles.description}>
-          We give our people everything they need to succeed. From a competitive
-          salary that rewards all your hard work to a wide range of benefits
-          designed to help you live your best work life. We welcome everyone and
-          create inclusive teams where we celebrate difference and encourage
-          colleagues to bring their whole selves to work.
-        </Text>
+        {data?.requirements?.map((item: any, index: number) => {
+          return (
+            <View key={index}>
+              <BaseText style={styles.description}>{item}</BaseText>
+            </View>
+          );
+        })}
         <View style={{height: hp(10)}} />
         <GradientButton
           onPress={() =>
@@ -168,7 +168,7 @@ const JobDetail = () => {
               resumeList: resumeList,
             })
           }
-          title={t('Apply Job')}
+          title={t(data?.is_applied ? 'Applied' : 'Apply Job')}
         />
       </ScrollView>
       <ShareModal visible={modal} onClose={() => setModal(!modal)} />
@@ -230,8 +230,8 @@ const styles = StyleSheet.create({
   },
   description: {
     ...commonFontStyle(400, 14, colors.white),
-    lineHeight: 25,
-    marginBottom: hp(20),
+    lineHeight: 20,
+    marginBottom: hp(12),
   },
   sectionTitle: {
     ...commonFontStyle(600, 18, colors.white),

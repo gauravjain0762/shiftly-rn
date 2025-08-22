@@ -42,6 +42,14 @@ interface CompanyState {
   jobForm: JobFormState;
   coPostJobSteps: number;
   postForm: PostFormState;
+  filters: FiltersState;
+}
+
+interface FiltersState {
+  job_types: string | null;
+  salary_from: number;
+  salary_to: number;
+  location: string;
 }
 
 const initialState: CompanyState = {
@@ -80,6 +88,12 @@ const initialState: CompanyState = {
     uploadedImages: [],
     isPostUploading: false,
   },
+  filters: {
+    job_types: null,
+    salary_from: 1000,
+    salary_to: 50000,
+    location: '',
+  },
 };
 
 const companySlice = createSlice({
@@ -107,6 +121,12 @@ const companySlice = createSlice({
     resetPostFormState: state => {
       state.postForm = initialState.postForm;
     },
+    setFilters: (state, action: PayloadAction<Partial<FiltersState>>) => {
+      state.filters = {...state.filters, ...action.payload};
+    },
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
+    },
   },
 });
 
@@ -117,6 +137,8 @@ export const {
   setCoPostJobSteps,
   resetJobFormState,
   resetPostFormState,
+  resetFilters,
+  setFilters,
 } = companySlice.actions;
 
 export const selectCoPostJobSteps = (state: RootState) =>

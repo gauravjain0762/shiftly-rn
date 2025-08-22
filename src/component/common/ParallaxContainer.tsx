@@ -5,8 +5,9 @@ import {
   Text,
   View,
   ViewStyle,
+  FlatList,
 } from 'react-native';
-import React, {FC, ReactNode, useCallback, useMemo} from 'react';
+import React, {FC, ReactNode, useMemo} from 'react';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -18,7 +19,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {SCREEN_WIDTH} from '../../theme/fonts';
 
 type container = {
-  imagePath?: {} | string;
+  imagePath?: string | {uri: string} | (string | {uri: string})[];
   ContainerStyle?: ViewStyle;
   ChildrenStyle?: ViewStyle;
   IMG_HEIGHT?: number;
@@ -71,6 +72,9 @@ const ParallaxContainer: FC<container> = ({
     };
   });
 
+  // Normalize to always be an array
+  const images = Array.isArray(imagePath) ? imagePath : [imagePath];
+
   return (
     <View style={[styles.container, ContainerStyle]}>
       <Animated.View
@@ -80,16 +84,27 @@ const ParallaxContainer: FC<container> = ({
         showsVerticalScrollIndicator={false}
         ref={scrollRef}
         scrollEventThrottle={16}>
-        <ImageBackGround
-          source={
-            imagePath || {
-              uri: 'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D',
-            }
-          }
-          resizeMode={'cover'}
-          style={[styles.image, imageAnimatedStyle]}>
-          {ImageChildren}
-        </ImageBackGround>
+        <FlatList
+          data={Array.isArray(imagePath) ? imagePath : [imagePath]}
+          horizontal
+          pagingEnabled
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, idx) => idx.toString()}
+          renderItem={({item}) => (
+            <ImageBackGround
+              source={
+                item || {
+                  uri: 'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900',
+                }
+              }
+              resizeMode={'cover'}
+              style={[styles.image, imageAnimatedStyle]}>
+              {ImageChildren}
+            </ImageBackGround>
+          )}
+        />
+
         <View style={[styles.container, ChildrenStyle]}>{children}</View>
       </Animated.ScrollView>
     </View>

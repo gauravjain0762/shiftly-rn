@@ -96,34 +96,30 @@ const CreateAccount = () => {
     companyProfileData,
     companyServices = [],
   } = useSelector((state: RootState) => state.auth);
-  const {services = []} = useSelector(
-    (state: RootState) => state.auth.companyProfileData || {},
-  );
+  const {
+    services = [],
+    logo,
+    cover_images,
+  } = useSelector((state: RootState) => state.auth.companyProfileData || {});
+  console.log('🔥🔥🔥 ~ CreateAccount ~ cover_images:', cover_images);
+  console.log('🔥🔥🔥 ~ CreateAccount ~ companyProfileData:', companyProfileData);
   const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
     {},
   );
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
   const dispatch = useAppDispatch();
-  const [companySignUp, {isLoading: signupLoading}] =
-    useCompanySignUpMutation();
-  const [OtpVerify, {isLoading: otpVerifyLoading}] =
-    useCompanyOTPVerifyMutation();
+  const [companySignUp] = useCompanySignUpMutation();
+  const [OtpVerify] = useCompanyOTPVerifyMutation();
+  const [companyProfile] = useCreateCompanyProfileMutation();
 
-  const [companyProfile, {isLoading: profileLoading}] =
-    useCreateCompanyProfileMutation();
-
-  const [selected1, setSelected1] = useState(businessType[0]?.title);
-
-  const [selected, setSelected] = useState('0 - 50');
   const [timer, setTimer] = useState(30);
   const [serviceSelect, setServiceSelect] = useState<string[]>([]);
   const [imageModal, setImageModal] = useState(false);
   const [position, setPosition] = useState<any>(undefined);
   const mapRef = useRef<any>(null);
-  const [logo, setLogo] = useState({});
+  // const [logo, setLogo] = useState({});
   const [coverImages, setCoverImages] = useState<any[]>([]);
-  const [cover, setCover] = useState({});
   const [type, setType] = useState<'logo' | 'cover'>('logo');
   const [model, setModel] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -255,64 +251,98 @@ const CreateAccount = () => {
   };
 
   const UploadPhoto = (e: any) => {
+    console.log('🔥🔥🔥 ~ UploadPhoto ~ e:', e);
+    console.log('🔥🔥🔥 ~ UploadPhoto ~ type:', type);
+    
     if (type === 'cover') {
-      setCoverImages((prev: any) => [...prev, e]);
-
+      const newImage = {
+        name: e?.filename || e?.name || 'cover.jpg',
+        uri: e?.sourceURL || e?.uri || e?.path,
+        type: e?.mime || 'image/jpeg',
+      };
+      console.log('🔥🔥🔥 ~ UploadPhoto ~ newImage:', newImage);
+      console.log('🔥🔥🔥 ~ UploadPhoto ~ current cover_images:', cover_images);
+      
+      // want to upload multiple images
       dispatch(
         setCompanyProfileData({
-          cover_images: [
-            ...coverImages.map(img => ({
-              name: img?.name,
-              uri: img?.sourceURL,
-              type: img?.mime,
-            })),
-            {
-              name: e?.name,
-              uri: e?.sourceURL,
-              type: e?.mime,
-            },
-          ],
+          cover_images: [...(cover_images || []), newImage],
         }),
       );
     } else {
-      setLogo(e);
+      const newLogo = {
+        name: e?.filename ?? e?.name,
+        uri: e?.sourceURL,
+        type: e?.mime,
+      };
+
       dispatch(
         setCompanyProfileData({
-          logo: {
-            name: e?.name,
-            uri: e?.sourceURL,
-            type: e?.mime,
-          },
+          logo: newLogo,
         }),
       );
     }
   };
 
+  const handleRemoveCoverImage = (index: number) => {
+    dispatch(
+      setCompanyProfileData({
+        cover_images: cover_images.filter((_: any, i: number) => i !== index),
+      }),
+    );
+  };
+
   const handleSignup = async () => {
-    let data = {
-      website: companyProfileData?.website,
-      company_size: companyProfileData?.company_size,
-      address: companyProfileData?.address,
-      lat: companyProfileData?.lat,
-      lng: companyProfileData?.lng,
-      about: companyProfileData?.about,
-      mission: companyProfileData?.mission,
-      values: companyProfileData?.values,
-      services: companyProfileData?.services,
-      logo: companyProfileData?.logo,
-      cover_images: companyProfileData?.cover_images,
-      business_type_id: companyRegisterData?.business_type_id,
-      company_name: companyRegisterData?.company_name,
-      name: companyRegisterData?.name,
-      email: companyRegisterData?.email,
-      password: companyRegisterData?.password,
-      phone_code: companyRegisterData?.phone_code,
-      phone: companyRegisterData?.phone,
-      language: language,
-      deviceToken: fcmToken ?? 'ddd',
-      deviceType: Platform.OS,
-    };
-    const response = await companySignUp(data).unwrap();
+    const formData = new FormData();
+    
+    // Add regular fields
+    formData.append('website', companyProfileData?.website || '');
+    formData.append('company_size', companyProfileData?.company_size || '');
+    formData.append('address', companyProfileData?.address || '');
+    formData.append('lat', companyProfileData?.lat?.toString() || '0');
+    formData.append('lng', companyProfileData?.lng?.toString() || '0');
+    formData.append('about', companyProfileData?.about || '');
+    formData.append('mission', companyProfileData?.mission || '');
+    formData.append('values', companyProfileData?.values || '');
+    formData.append('services', companyProfileData?.services?.join(',') || '');
+    formData.append('business_type_id', companyRegisterData?.business_type_id || '');
+    formData.append('company_name', companyRegisterData?.company_name || '');
+    formData.append('name', companyRegisterData?.name || '');
+    formData.append('email', companyRegisterData?.email || '');
+    formData.append('password', companyRegisterData?.password || '');
+    formData.append('phone_code', companyRegisterData?.phone_code || '971');
+    formData.append('phone', companyRegisterData?.phone || '');
+    formData.append('language', language || 'en');
+    formData.append('deviceToken', fcmToken ?? 'ddd');
+    formData.append('deviceType', Platform.OS);
+    
+    // Add logo if exists
+    if (companyProfileData?.logo?.uri) {
+      formData.append('logo', {
+        uri: companyProfileData.logo.uri,
+        type: companyProfileData.logo.type || 'image/jpeg',
+        name: companyProfileData.logo.name || 'logo.jpg',
+      });
+    }
+    
+    // Add cover_images if exists
+    console.log('🔥🔥🔥 ~ handleSignup ~ companyProfileData.cover_images:', companyProfileData?.cover_images);
+    if (companyProfileData?.cover_images && companyProfileData.cover_images.length > 0) {
+      companyProfileData.cover_images.forEach((image: any, index: number) => {
+        console.log('🔥🔥🔥 ~ handleSignup ~ processing image:', image);
+        if (image?.uri) {
+          const imageData = {
+            uri: image.uri,
+            type: image.type || 'image/jpeg',
+            name: image.name || `cover_${index}.jpg`,
+          };
+          console.log('🔥🔥🔥 ~ handleSignup ~ appending imageData:', imageData);
+          formData.append('cover_images', imageData);
+        }
+      });
+    }
+    
+    const response = await companySignUp(formData).unwrap();
     console.log(response, response?.status, 'response----handleSignup');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
@@ -393,21 +423,47 @@ const CreateAccount = () => {
   };
 
   const handleCreateProfile = async () => {
-    let data = {
-      website: companyProfileData?.website,
-      company_size: companyProfileData?.company_size,
-      address: companyProfileData?.address,
-      lat: companyProfileData?.lat,
-      lng: companyProfileData?.lng,
-      about: companyProfileData?.about,
-      mission: companyProfileData?.mission,
-      values: companyProfileData?.values,
-      services: companyProfileData?.services?.join(','),
-      logo: companyProfileData?.logo,
-      cover_images: companyProfileData?.cover_images,
-      company_name: companyRegisterData?.company_name,
-    };
-    const response = await companyProfile(data).unwrap();
+    const formData = new FormData();
+    
+    // Add regular fields
+    formData.append('website', companyProfileData?.website || '');
+    formData.append('company_size', companyProfileData?.company_size || '');
+    formData.append('address', companyProfileData?.address || '');
+    formData.append('lat', companyProfileData?.lat?.toString() || '0');
+    formData.append('lng', companyProfileData?.lng?.toString() || '0');
+    formData.append('about', companyProfileData?.about || '');
+    formData.append('mission', companyProfileData?.mission || '');
+    formData.append('values', companyProfileData?.values || '');
+    formData.append('services', companyProfileData?.services?.join(',') || '');
+    formData.append('company_name', companyRegisterData?.company_name || '');
+    
+    // Add logo if exists
+    if (companyProfileData?.logo?.uri) {
+      formData.append('logo', {
+        uri: companyProfileData.logo.uri,
+        type: companyProfileData.logo.type || 'image/jpeg',
+        name: companyProfileData.logo.name || 'logo.jpg',
+      });
+    }
+    
+    // Add cover_images if exists
+    console.log('🔥🔥🔥 ~ handleCreateProfile ~ companyProfileData.cover_images:', companyProfileData?.cover_images);
+    if (companyProfileData?.cover_images && companyProfileData.cover_images.length > 0) {
+      companyProfileData.cover_images.forEach((image: any, index: number) => {
+        console.log('🔥🔥🔥 ~ handleCreateProfile ~ processing image:', image);
+        if (image?.uri) {
+          const imageData = {
+            uri: image.uri,
+            type: image.type || 'image/jpeg',
+            name: image.name || `cover_${index}.jpg`,
+          };
+          console.log('🔥🔥🔥 ~ handleCreateProfile ~ appending imageData:', imageData);
+          formData.append('cover_images', imageData);
+        }
+      });
+    }
+    
+    const response = await companyProfile(formData).unwrap();
     console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
@@ -1178,7 +1234,7 @@ const CreateAccount = () => {
                 <Image
                   source={
                     Object.keys(logo)?.length
-                      ? {uri: logo?.path}
+                      ? {uri: logo?.uri}
                       : IMAGES.logoImg
                   }
                   style={
@@ -1195,7 +1251,9 @@ const CreateAccount = () => {
               </TouchableOpacity>
               {Object.keys(logo)?.length && (
                 <Pressable
-                  onPress={() => setLogo('')}
+                  onPress={() => {
+                    dispatch(setCompanyProfileData({logo: {}}));
+                  }}
                   style={styles.closeContainer}>
                   <Image
                     tintColor={'red'}
@@ -1212,7 +1270,7 @@ const CreateAccount = () => {
               <View style={styles.coverContainer}>
                 {/* Static upload placeholder */}
                 <TouchableOpacity
-                  onPress={() => (setType('cover'), setImageModal(!imageModal))}
+                  onPress={() => (setType('cover'), setImageModal(true))}
                   style={styles.uploadPlaceholder}>
                   <Image
                     source={IMAGES.uploadImg}
@@ -1221,19 +1279,15 @@ const CreateAccount = () => {
                 </TouchableOpacity>
 
                 <View style={styles.coverGrid}>
-                  {coverImages.map((img, index) => (
+                  {cover_images?.map((img: any, index: number) => (
                     <View key={index} style={styles.coverImageWrapper}>
                       <Image
-                        source={{uri: img?.path || img?.sourceURL}}
+                        source={{uri: img?.uri}}
                         style={styles.coverImage}
                       />
                       <TouchableOpacity
                         style={styles.closeIcon}
-                        onPress={() =>
-                          setCoverImages(prev =>
-                            prev.filter((_, i) => i !== index),
-                          )
-                        }>
+                        onPress={() => handleRemoveCoverImage(index)}>
                         <Image
                           tintColor={'red'}
                           style={styles.close}
@@ -1248,6 +1302,23 @@ const CreateAccount = () => {
               <Text style={styles.logolabel}>
                 {t('Your cover image showcases your workplace or atmosphere')}
               </Text>
+              
+              {/* Debug button - remove in production */}
+              <TouchableOpacity
+                onPress={() => {
+                  console.log('🔥🔥🔥 ~ Debug ~ cover_images:', cover_images);
+                  console.log('🔥🔥🔥 ~ Debug ~ companyProfileData:', companyProfileData);
+                }}
+                style={{
+                  backgroundColor: 'red',
+                  padding: 10,
+                  margin: 10,
+                  borderRadius: 5,
+                }}>
+                <Text style={{color: 'white', textAlign: 'center'}}>
+                  Debug: Log Cover Images
+                </Text>
+              </TouchableOpacity>
             </View>
             <View>
               <GradientButton
@@ -1342,7 +1413,7 @@ const CreateAccount = () => {
         setActionSheet={() => {
           setImageModal(false);
         }}
-        onUpdate={e => UploadPhoto(e)}
+        onUpdate={(e: any) => UploadPhoto(e)}
       />
     </LinearContainer>
   );

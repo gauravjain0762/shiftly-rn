@@ -35,7 +35,7 @@ const CoLogin = () => {
 
   const [companyLogin, {isLoading: loginLoading}] = useCompanyLoginMutation();
   const [authData, setAuthData] = React.useState({
-    email: __DEV__ ? 'db98@company.com' : '',
+    email: __DEV__ ? 'db@company.com' : '',
     password: __DEV__ ? '123456' : '',
   });
 

@@ -111,6 +111,10 @@ export const authApi = createApi({
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
       }),
       invalidatesTags: ['Auth'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {

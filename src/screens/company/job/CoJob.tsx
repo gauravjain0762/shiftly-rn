@@ -28,13 +28,17 @@ import {Dropdown} from 'react-native-element-dropdown';
 import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
 import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
-import {useDispatch} from 'react-redux';
-import {resetJobFormState} from '../../../features/companySlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  resetJobFormState,
+  setFilters,
+  resetFilters,
+} from '../../../features/companySlice';
 import {useFocusEffect} from '@react-navigation/native';
 
 const jobTypes = [
-  {label: 'Full Time', value: 'Full-time'},
-  {label: 'Part Time', value: 'Part-time'},
+  {label: 'Full Time', value: 'Full Time'},
+  {label: 'Part Time', value: 'Part Time'},
   {label: 'Internship', value: 'Internship'},
 ];
 export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
@@ -42,75 +46,63 @@ export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 const CoJob = () => {
   const {t} = useTranslation<any>();
   const dispatch = useDispatch<any>();
+  const filters = useSelector((state: any) => state.company.filters);
+  console.log('🔥🔥🔥 ~ CoJob ~ filters:', filters);
+
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
-  const [range, setRange] = useState<number[]>([1000, 50000]);
-  const [value, setValue] = useState<any>(null);
-  const [location, setLocation] = useState<string>('');
-  const [filters, setFilters] = useState({
-    job_types: '',
-    salary_from: 0,
-    salary_to: 0,
-    location: '',
-    page: 1,
-  });
-  const {data, isLoading, isFetching, refetch} = useGetCompanyJobsQuery({});
+
+  const [range, setRange] = useState<number[]>([
+    filters.salary_from,
+    filters.salary_to,
+  ]);
+  const [value, setValue] = useState<any>(filters.job_types || null);
+  console.log('🔥🔥🔥 ~ CoJob ~ value:', value);
+  const [location, setLocation] = useState<string>(filters.location || '');
+
+  // Update local state when filters change
+  useEffect(() => {
+    setRange([filters.salary_from, filters.salary_to]);
+    setValue(filters.job_types || null);
+    setLocation(filters.location || '');
+  }, [filters]);
+
+  const {data, isLoading, refetch} = useGetCompanyJobsQuery(filters);
   const [jobs, setJobs] = useState<any[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, []),
+    }, [filters]),
   );
 
   useEffect(() => {
-    if (filters.page === 1) {
-      setJobs(data?.data?.jobs ?? []);
-    } else if (filters.page > 1) {
-      setJobs(prev => [...prev, ...(data?.data?.jobs ?? [])]);
-    }
+    setJobs(data?.data?.jobs ?? []);
   }, [data]);
 
   const latestJobList = jobs;
-  const totalPages = data?.data?.pagination?.total_pages ?? 1;
 
   const handleApplyFilter = async () => {
     try {
-      setFilters({
+      // Apply all the local state values to Redux filters
+      dispatch(setFilters({
+        location: location,
         job_types: value,
         salary_from: range[0],
         salary_to: range[1],
-        location,
-        page: 1,
-      });
-      await refetch()
+      }));
       setIsFilterModalVisible(false);
     } catch (error) {
-      console.error('Error applying filter:', error);
       errorToast('Failed to apply filter');
     }
   };
 
-  const handleLoadMore = () => {
-    if (!isFetching && filters.page < totalPages) {
-      setFilters(prev => ({
-        ...prev,
-        page: prev.page + 1,
-      }));
-    }
-  };
-
-  const resetFilters = () => {
-    setValue(null);
+  const handleResetFilters = () => {
+    dispatch(resetFilters());
+    // Reset local state to match the reset filters
     setLocation('');
+    setValue(null);
     setRange([1000, 50000]);
-    setFilters({
-      job_types: '',
-      salary_from: 0,
-      salary_to: 0,
-      location: '',
-      page: 1,
-    });
     setIsFilterModalVisible(false);
   };
 
@@ -141,7 +133,17 @@ const CoJob = () => {
               </TouchableOpacity>
             </LinearGradient>
 
-            <Pressable onPress={() => setIsFilterModalVisible(true)}>
+            <Pressable
+              onPress={() => {
+                // Initialize local state with current filter values
+                setValue(filters.job_types || null);
+                setLocation(filters.location || '');
+                setRange([
+                  filters.salary_from || 1000,
+                  filters.salary_to || 50000,
+                ]);
+                setIsFilterModalVisible(true);
+              }}>
               <Image source={IMAGES.post_filter} style={styles.filterLogo} />
             </Pressable>
           </View>
@@ -156,16 +158,14 @@ const CoJob = () => {
             data={latestJobList}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: '20%'}}
-            renderItem={({item, index}) => {
-              return (
-                <View key={index} style={{marginBottom: hp(10)}}>
-                  <MyJobCard
-                    item={item}
-                    onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
-                  />
-                </View>
-              );
-            }}
+            renderItem={({item, index}) => (
+              <View key={index} style={{marginBottom: hp(10)}}>
+                <MyJobCard
+                  item={item}
+                  onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+                />
+              </View>
+            )}
             ListEmptyComponent={() => (
               <Text
                 style={{
@@ -175,16 +175,6 @@ const CoJob = () => {
                 {'No Jobs Found'}
               </Text>
             )}
-            ListFooterComponent={
-              isFetching ? (
-                <ActivityIndicator
-                  size={'large'}
-                  style={{marginVertical: 10}}
-                />
-              ) : null
-            }
-            onEndReachedThreshold={0.5}
-            onEndReached={handleLoadMore}
             keyExtractor={(_, index) => index.toString()}
           />
         </View>
@@ -204,7 +194,7 @@ const CoJob = () => {
             <View style={styles.inputWrapper}>
               <CustomTextInput
                 value={location}
-                onChangeText={setLocation}
+                onChangeText={text => setLocation(text)}
                 placeholder={t('Location')}
                 inputStyle={styles.locationInput}
               />
@@ -212,7 +202,10 @@ const CoJob = () => {
             </View>
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
-              <RangeSlider range={range} setRange={setRange} />
+              <RangeSlider
+                range={range}
+                setRange={setRange}
+              />
             </View>
             <Dropdown
               data={jobTypes}
@@ -232,11 +225,9 @@ const CoJob = () => {
               style={styles.btn}
               type="Company"
               title={t('Apply')}
-              onPress={() => handleApplyFilter()}
+              onPress={handleApplyFilter}
             />
-            <Pressable
-              style={styles.resetButton}
-              onPress={() => resetFilters()}>
+            <Pressable style={styles.resetButton} onPress={handleResetFilters}>
               <Text style={{...commonFontStyle(600, 18, colors._4D4D4D)}}>
                 {'Reset Filters'}
               </Text>
@@ -250,6 +241,7 @@ const CoJob = () => {
 
 export default CoJob;
 
+// styles unchanged
 const styles = StyleSheet.create({
   header: {
     paddingTop: hp(26),
@@ -314,7 +306,7 @@ const styles = StyleSheet.create({
     marginTop: hp(30),
   },
   locationInput: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._181818),
   },
   underline: {
     height: hp(1.5),
@@ -324,7 +316,7 @@ const styles = StyleSheet.create({
     marginTop: hp(35),
   },
   salaryLabel: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._181818),
   },
   sliderWrapper: {
     width: SLIDER_WIDTH,
@@ -338,9 +330,9 @@ const styles = StyleSheet.create({
     height: hp(20),
   },
   sliderValueText: {
-    position: 'absolute',
     marginTop: hp(8),
     textAlign: 'center',
+    position: 'absolute',
     ...commonFontStyle(600, 18, colors._0A0A0A),
   },
   dropdown: {
@@ -350,12 +342,10 @@ const styles = StyleSheet.create({
     borderColor: colors._7B7878,
   },
   placeholderStyle: {
-    fontSize: hp(14),
-    color: colors._7B7878,
+    ...commonFontStyle(400, 18, colors._181818),
   },
   selectedTextStyle: {
-    fontSize: hp(14),
-    color: colors.black,
+    ...commonFontStyle(400, 18, colors._181818),
   },
   dropdownIcon: {
     width: wp(16),

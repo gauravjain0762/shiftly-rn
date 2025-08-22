@@ -154,6 +154,10 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
       }),
       invalidatesTags: ['CreateProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
