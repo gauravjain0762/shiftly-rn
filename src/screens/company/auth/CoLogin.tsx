@@ -35,7 +35,7 @@ const CoLogin = () => {
 
   const [companyLogin, {isLoading: loginLoading}] = useCompanyLoginMutation();
   const [authData, setAuthData] = React.useState({
-    email: __DEV__ ? 'db@company.com' : '',
+    email: __DEV__ ? 'Testerdb06@gmail.com' : '',
     password: __DEV__ ? '123456' : '',
   });
 
@@ -144,11 +144,12 @@ const styles = StyleSheet.create({
   },
   inputcontainer: {
     borderWidth: 2,
-    borderColor: colors._234F86,
     borderRadius: 10,
+    textAlign: 'center',
     paddingHorizontal: wp(23),
-    paddingVertical: hp(16),
+    borderColor: colors._234F86,
     justifyContent: 'space-between',
+    paddingVertical: Platform.OS === 'ios' ? hp(16) : hp(8),
   },
   passinput: {
     flex: 1,

@@ -96,7 +96,7 @@ const JobDetail = () => {
         style={styles.banner}
         source={
           curr_jobdetails?.company_id?.cover_images?.length
-            ? {uri: API.BASE_URL + curr_jobdetails.company_id.cover_images[0]}
+            ? {uri: curr_jobdetails.company_id.cover_images[0]}
             : data?.company_id?.logo
         }
       />
@@ -139,35 +139,43 @@ const JobDetail = () => {
         {/* Requirements */}
         <Text style={styles.sectionTitle}>What we need from you</Text>
         <View style={styles.bulletList}>
-          <Text style={styles.bullet}>
-            • Bachelor's degree / higher education qualification / equivalent in
-            Hotel Management/ Business Administration
-          </Text>
-          <Text style={styles.bullet}>
-            • 3 years of Front Office/Guest Service experience including
-            management experience
-          </Text>
-          <Text style={styles.bullet}>• Must speak fluent English</Text>
-          <Text style={styles.bullet}>• Other languages preferred</Text>
+          {data?.requirements?.map((item: any, index: number) => {
+            if (item?.length) {
+              return (
+                <View key={index}>
+                  <BaseText style={styles.description}>{`• ${item}`}</BaseText>
+                </View>
+              );
+            }
+          })}
         </View>
 
         {/* Offer */}
         <Text style={styles.sectionTitle}>What we offer</Text>
-        {data?.requirements?.map((item: any, index: number) => {
-          return (
-            <View key={index}>
-              <BaseText style={styles.description}>{item}</BaseText>
-            </View>
-          );
-        })}
+        <View style={styles.bulletList}>
+          {data?.facilities?.map((item: any, index: number) => {
+            if (item?.length) {
+              return (
+                <View key={index}>
+                  <BaseText style={styles.description}>{`• ${item}`}</BaseText>
+                </View>
+              );
+            }
+          })}
+        </View>
+
         <View style={{height: hp(10)}} />
         <GradientButton
-          onPress={() =>
+          onPress={() => {
+            if (data?.is_applied) {
+              errorToast('You already applied for this job.');
+              return;
+            }
             navigateTo(SCREEN_NAMES.ApplyJob, {
               data: data,
               resumeList: resumeList,
-            })
-          }
+            });
+          }}
           title={t(data?.is_applied ? 'Applied' : 'Apply Job')}
         />
       </ScrollView>

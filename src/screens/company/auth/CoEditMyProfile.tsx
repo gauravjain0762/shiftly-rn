@@ -1,5 +1,6 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -28,13 +29,14 @@ import {SCREENS} from '../../../navigation/screenNames';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import ImageWithLoader from '../../../component/common/ImageWithLoader';
 
 const CoEditMyProfile = () => {
   const {t} = useTranslation();
   const {data} = useGetProfileQuery();
   const dispatch = useAppDispatch();
   const companyProfile = data?.data?.company;
-  console.log("🔥🔥🔥 ~ CoEditMyProfile ~ companyProfile:", companyProfile)
+  console.log('🔥🔥🔥 ~ CoEditMyProfile ~ companyProfile:', companyProfile);
   const [updateCompanyProfile] = useCreateCompanyProfileMutation();
 
   const [companyName, setCompanyName] = useState(
@@ -82,6 +84,20 @@ const CoEditMyProfile = () => {
     }, []),
   );
 
+  const hasChanges = useMemo(() => {
+    if (!companyProfile) return false;
+
+    const logoChanged =
+      (logo && typeof logo === 'object') || logo !== companyProfile.logo;
+    const aboutChanged = about !== (companyProfile.about || '');
+    const locationChanged =
+      location !== (companyProfile.location || companyProfile.address || '');
+    const companyNameChanged =
+      companyName !== (companyProfile.company_name || '');
+
+    return logoChanged || aboutChanged || locationChanged || companyNameChanged;
+  }, [logo, about, location, companyName, companyProfile]);
+
   const UploadPhoto = (e: any) => {
     const uri = e?.sourceURL || e?.path || e?.uri;
     if (!uri) return;
@@ -102,13 +118,24 @@ const CoEditMyProfile = () => {
   };
 
   const handleUpdateProfile = async () => {
-    const data = {
-      logo: logo,
-      about: about,
-      address: userAddress?.address || location,
-    };
     try {
-      const res = await updateCompanyProfile(data).unwrap();
+      const formData = new FormData();
+
+      if (logo && typeof logo === 'object' && logo.uri) {
+        formData.append('logo', {
+          uri: logo.uri,
+          type: logo.type || 'image/jpeg',
+          name: logo.name || 'logo.jpg',
+        } as any);
+      }
+
+      if (about) {
+        formData.append('about', about);
+      }
+
+      formData.append('address', userAddress?.address || location);
+
+      const res = await updateCompanyProfile(formData).unwrap();
       const resData = res?.data?.company;
       if (res?.status) {
         dispatch(
@@ -142,7 +169,7 @@ const CoEditMyProfile = () => {
           <View style={styles.logoSection}>
             <TouchableOpacity onPress={() => setImageModal(true)}>
               <View>
-                <Image
+                <ImageWithLoader
                   source={
                     logo?.uri
                       ? {uri: logo?.uri}
@@ -150,8 +177,14 @@ const CoEditMyProfile = () => {
                       ? {uri: companyProfile.logo}
                       : IMAGES.hotel_cover
                   }
+                  loaderSize="small"
                   style={styles.logoImage}
-                  resizeMode="cover"
+                  loaderColor={colors._0B3970}
+                  placeholder={
+                    <View style={styles.loaderContainer}>
+                      <ActivityIndicator size="small" color={colors._0B3970} />
+                    </View>
+                  }
                 />
                 {/* Edit Icon */}
                 <TouchableOpacity
@@ -215,7 +248,6 @@ const CoEditMyProfile = () => {
                 onChangeText={setLocation}
                 placeholder="Company address"
                 style={[styles.inputText, styles.locationInput]}
-                s
                 placeholderTextColor={colors._555555}
                 multiline
               />
@@ -242,6 +274,7 @@ const CoEditMyProfile = () => {
             type="Company"
             title={t('Save Changes')}
             onPress={handleUpdateProfile}
+            disabled={!hasChanges}
           />
         </ScrollView>
 
@@ -292,6 +325,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors._C9C9C9,
     backgroundColor: colors.white,
+  },
+  loaderContainer: {
+    width: wp(100),
+    height: hp(100),
+    borderRadius: hp(100),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
   },
   editIconWrapper: {
     position: 'absolute',

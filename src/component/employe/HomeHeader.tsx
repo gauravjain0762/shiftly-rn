@@ -1,12 +1,19 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {IMAGES} from '../../assets/Images';
-import {navigateTo} from '../../utils/commonFunction';
-import {SCREENS} from '../../navigation/screenNames';
-import {colors} from '../../theme/colors';
-import {useSelector} from 'react-redux';
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
 import {RootState} from '../../store';
+import {useSelector} from 'react-redux';
+import {colors} from '../../theme/colors';
+import {IMAGES} from '../../assets/Images';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import ImageWithLoader from '../common/ImageWithLoader';
 
 type props = {
   onPressNotifi?: () => void;
@@ -20,24 +27,40 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
 }) => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥🔥🔥 ~ HomeHeader ~ userInfo:', userInfo);
 
   return (
     <View style={styles.header}>
       <View style={styles.row}>
-        <TouchableOpacity onPress={() => onPressAvatar && onPressAvatar()}>
-          <Image
-            resizeMode="cover"
-            style={styles.avatar}
-            source={
-              userInfo?.logo
-                ? {uri: userInfo?.logo}
-                : userInfo?.picture
-                ? {uri: userInfo?.picture}
-                : IMAGES.avatar
-            }
-          />
+        <TouchableOpacity onPress={onPressAvatar}>
+          {userInfo?.logo ? (
+            <ImageWithLoader
+              source={{uri: userInfo.logo}}
+              style={styles.avatar}
+              loaderSize="small"
+              loaderColor={colors._0B3970}
+              placeholder={
+                <View style={styles.avatarPlaceholder}>
+                  <ActivityIndicator size="small" color={colors._0B3970} />
+                </View>
+              }
+            />
+          ) : userInfo?.picture ? (
+            <ImageWithLoader
+              source={{uri: userInfo.picture}}
+              style={styles.avatar}
+              loaderSize="small"
+              loaderColor={colors._0B3970}
+              placeholder={
+                <View style={styles.avatarPlaceholder}>
+                  <ActivityIndicator size="small" color={colors._0B3970} />
+                </View>
+              }
+            />
+          ) : (
+            <Image source={IMAGES.avatar} style={styles.avatar} />
+          )}
         </TouchableOpacity>
+
         <View style={styles.info}>
           <Text
             style={[
@@ -104,5 +127,13 @@ const styles = StyleSheet.create({
   },
   info: {
     gap: hp(4),
+  },
+  avatarPlaceholder: {
+    width: wp(60),
+    height: wp(60),
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
   },
 });

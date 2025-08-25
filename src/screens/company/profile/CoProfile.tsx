@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -30,6 +31,7 @@ import {colors} from '../../../theme/colors';
 import {useTranslation} from 'react-i18next';
 import LanguageModal from '../../../component/common/LanguageModel';
 import {useSelector} from 'react-redux';
+import ImageWithLoader from '../../../component/common/ImageWithLoader';
 
 const CoProfile = () => {
   const {t} = useTranslation();
@@ -159,7 +161,6 @@ const CoProfile = () => {
         resetNavigation(SCREEN_NAMES.WelcomeScreen);
         dispatch(logouts());
         resetStore();
-        // signOutIfLoggedIn();
       }
     } catch (error) {
       console.error('Error deleting account: ', error);
@@ -177,14 +178,29 @@ const CoProfile = () => {
           titleStyle={styles.title}
           containerStyle={styles.header}
           RightIcon={
-            <View style={{}}>
-              <Image
-                source={userInfo?.logo ? {uri: userInfo?.logo} : IMAGES.avatar}
-                style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
-              />
+            <View>
+              {userInfo?.logo ? (
+                <ImageWithLoader
+                  source={{uri: userInfo.logo}}
+                  style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
+                  loaderSize="small"
+                  loaderColor={colors._0B3970}
+                  placeholder={
+                    <View style={styles.loaderContainer}>
+                      <ActivityIndicator size="small" color={colors._0B3970} />
+                    </View>
+                  }
+                />
+              ) : (
+                <Image
+                  source={IMAGES.avatar}
+                  style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
+                />
+              )}
             </View>
           }
         />
+
         {settingsData.map((section, index) => (
           <View key={index} style={styles.section}>
             <Text style={styles.sectionTitle}>{section?.section}</Text>
@@ -303,5 +319,13 @@ const styles = StyleSheet.create({
     width: wp(12),
     height: hp(12),
     resizeMode: 'contain',
+  },
+  loaderContainer: {
+    width: wp(51),
+    height: hp(51),
+    borderRadius: hp(51),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
   },
 });

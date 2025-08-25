@@ -86,8 +86,8 @@ const getGlobalStyles = (props: any) => {
       color: 'red',
     },
     input: {
-      ...commonFontStyle(700, 22, colors._1F1F1F),
       flex: 1,
+      ...commonFontStyle(700, 22, colors._1F1F1F),
     },
   });
 };

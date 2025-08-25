@@ -7,13 +7,12 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
 type JobCardProps = {
   item?: any;
-  totalApplicants?: number;
   onPressCard?: () => void;
   onPressShare?: () => void;
 };
 
 const MyJobCard = (props: JobCardProps) => {
-  const {onPressShare, totalApplicants, onPressCard, item} = props;
+  const {onPressShare, onPressCard, item} = props;
 
   return (
     <Pressable onPress={onPressCard} style={styles.card}>
@@ -40,9 +39,12 @@ const MyJobCard = (props: JobCardProps) => {
       </Text>
 
       <View style={styles.footerRow}>
-        <Text style={styles.applicantsText}>{`${
-          item?.applicants?.length || 52
-        }  Applicants`}</Text>
+        {item?.applicants?.length && (
+          <Text
+            style={
+              styles.applicantsText
+            }>{`${item?.applicants?.length}  Applicants`}</Text>
+        )}
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{`${
             item?.job_type || 'Full Time'
@@ -100,6 +102,7 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   badge: {
+    alignSelf: 'flex-end',
     borderRadius: hp(20),
     paddingVertical: hp(7),
     paddingHorizontal: wp(10),

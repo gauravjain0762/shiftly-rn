@@ -36,7 +36,6 @@ const EmplyoeeCard = ({
             <Text style={styles.subtitle}>{`${
               responsibility || 'Hotel Management'
             }`}</Text>
-            {/* <Text style={styles.location}>{'5y Experience'}</Text> */}
           </View>
         </View>
 
@@ -60,7 +59,8 @@ const styles = StyleSheet.create({
   },
   employeeCard: {
     gap: wp(15),
-    padding: hp(7),
+    paddingVertical: hp(7),
+    paddingHorizontal: wp(12),
     flexDirection: 'row',
     borderRadius: wp(20),
     borderWidth: wp(1.5),
@@ -69,19 +69,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   employeeLeft: {
+    gap: wp(12),
     flexDirection: 'row',
     alignItems: 'center',
-    gap: wp(17),
   },
   employeeTextWrapper: {
-    gap: hp(10),
-  },
-  checkImg: {
-    width: wp(24),
-    height: wp(24),
-    marginRight: wp(10),
-    resizeMode: 'contain',
-    tintColor: colors._4A4A4A,
+    gap: hp(6),
+    width: '50%',
   },
   location: {
     ...commonFontStyle(400, 15, colors._939393),
@@ -100,11 +94,16 @@ const styles = StyleSheet.create({
     height: hp(100),
     borderRadius: wp(10),
   },
+  checkImg: {
+    width: wp(24),
+    height: wp(24),
+    resizeMode: 'contain',
+    tintColor: colors._4A4A4A,
+  },
   unselectedCircle: {
     width: wp(24),
     height: wp(24),
     borderWidth: wp(2),
-    marginRight: wp(10),
     borderRadius: wp(12),
     borderColor: colors._4A4A4A,
   },

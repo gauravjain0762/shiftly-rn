@@ -47,7 +47,6 @@ const CoJob = () => {
   const {t} = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
-  console.log('🔥🔥🔥 ~ CoJob ~ filters:', filters);
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
@@ -57,10 +56,8 @@ const CoJob = () => {
     filters.salary_to,
   ]);
   const [value, setValue] = useState<any>(filters.job_types || null);
-  console.log('🔥🔥🔥 ~ CoJob ~ value:', value);
   const [location, setLocation] = useState<string>(filters.location || '');
 
-  // Update local state when filters change
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
     setValue(filters.job_types || null);

@@ -45,7 +45,7 @@ const ForgotPassword = () => {
   );
   const [OtpVerify] = useCompanyOTPVerifyMutation();
   const [companyChangePassword] = useCompanyChangePasswordMutation();
-  const [email, setEmail] = useState(__DEV__ ? 'db@company.com' : '');
+  const [email, setEmail] = useState(__DEV__ ? 'Testerdb06@gmail.com' : '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);

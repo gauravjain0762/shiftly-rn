@@ -59,7 +59,6 @@ const CoHome = () => {
       <View style={styles.header}>
         <HomeHeader
           type="company"
-
           onPressAvatar={() => navigateTo(SCREENS.CoMessage)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />

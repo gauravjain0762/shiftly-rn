@@ -151,8 +151,7 @@ const PostJob = () => {
     editMode,
     job_id,
   } = useAppSelector((state: any) => selectJobForm(state));
-    console.log("🔥🔥🔥 ~ PostJob ~ requirements:", requirements)
-  console.log('🔥🔥🔥 ~ PostJob ~ job_sector:', job_sector);
+    console.log("🔥🔥🔥 ~ PostJob ~ selected:", selected)
   const formData = useAppSelector((state: any) => state.company.jobForm);
   const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
@@ -1324,7 +1323,8 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: hp(22),
+    marginTop: hp(22),
+    marginBottom: hp(16),
     justifyContent: 'space-between',
   },
   sectionTitle: {

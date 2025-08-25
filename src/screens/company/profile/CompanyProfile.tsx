@@ -7,8 +7,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState, useCallback} from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
   GradientButton,
@@ -32,57 +33,29 @@ import {
 } from '../../../features/authSlice';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
-import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
+import {
+  useGetCompanyJobsQuery,
+  useGetCompanyPostsQuery,
+} from '../../../api/dashboardApi';
+import CoAboutTab from '../../../component/common/CoAboutTab';
+import ImageWithLoader from '../../../component/common/ImageWithLoader';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
-const StaticPosts = [
-  {
-    id: 1,
-    title: 'Hotel Receptionist Job',
-    image: IMAGES.staticpost1,
-  },
-  {
-    id: 2,
-    title: 'Hotel & Restaurant Manager',
-    image: IMAGES.staticpost2,
-  },
-  {
-    id: 3,
-    title: 'Hotel Room Services Staff',
-    image: IMAGES.staticpost3,
-  },
-  {
-    id: 4,
-    title: 'Restaurant Chef Job',
-    image: IMAGES.staticpost4,
-  },
-  {
-    id: 5,
-    title: 'Hotel Room Services Staff',
-    image: IMAGES.staticpost3,
-  },
-  {
-    id: 6,
-    title: 'Restaurant Chef Job',
-    image: IMAGES.staticpost4,
-  },
-];
-
 const CompanyProfile = () => {
+  const {data: JobData} = useGetCompanyJobsQuery({});
+  const jobsList = JobData?.data?.jobs;
+
   const {companyProfileData, companyProfileAllData} = useSelector(
     (state: RootState) => state.auth,
   );
-  console.log(
-    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
-    companyProfileData,
-  );
+
   const {data: getPost} = useGetCompanyPostsQuery({});
   const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
-  const {t, i18n} = useTranslation();
-  const {data, isLoading} = useGetProfileQuery();
+  const {t} = useTranslation();
+  const {data} = useGetProfileQuery();
   const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -90,32 +63,114 @@ const CompanyProfile = () => {
       dispatch(setCompanyProfileAllData(data.data.company));
       dispatch(setCompanyProfileData(data.data.company));
     }
-  }, [data]);
+  }, [data, dispatch]);
+
+  // Memoize cover images to prevent recreation on tab changes
+  const coverImages = useMemo(() => {
+    if (!companyProfileData?.cover_images?.length) return [];
+    return companyProfileData.cover_images
+      .filter((img: any) => img && img.trim() !== '') // Filter out empty/null images
+      .map((img: any) => ({uri: img}));
+  }, [companyProfileData?.cover_images]);
+
+  // Check if we should show loader based on actual cover images
+  const shouldShowCoverLoader = useMemo(() => {
+    return coverImages.length > 0;
+  }, [coverImages]);
+
+  // Memoize the back button handler
+  const handleBackPress = useCallback(() => {
+    resetNavigation(SCREENS.CoTabNavigator);
+  }, []);
+
+  // Memoize the create post handler
+  const handleCreatePost = useCallback(() => {
+    navigateTo(SCREENS.CoPost);
+  }, []);
+
+  // Memoize tab press handler
+  const handleTabPress = useCallback((index: number) => {
+    setSelectedTabIndex(index);
+  }, []);
+
+  // Memoize the image children component
+  const imageChildren = useMemo(
+    () => (
+      <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <Image source={IMAGES.backArrow} style={styles.backArrow} />
+      </TouchableOpacity>
+    ),
+    [handleBackPress],
+  );
+
+  // Memoize post render item
+  const renderPostItem = useCallback(
+    ({item}: {item: any}) => (
+      <CustomPostCard title={item?.title} image={item?.image} />
+    ),
+    [],
+  );
+
+  // Memoize job render
+  const renderJobs = useMemo(() => {
+    if (selectedTanIndex !== 2) return null;
+
+    return jobsList?.map((item: any, index: number) => (
+      <View key={`job-${item.id || index}`}>
+        <MyJobCard item={item} />
+      </View>
+    ));
+  }, [selectedTanIndex, jobsList]);
+
+  // Custom logo placeholder
+  const logoPlaceholder = useMemo(
+    () => (
+      <View style={styles.logoPlaceholder}>
+        <ActivityIndicator size="small" color={colors._0B3970} />
+      </View>
+    ),
+    [],
+  );
+
+  const hasValidLogo = useMemo(
+    () =>
+      !!companyProfileData?.logo &&
+      typeof companyProfileData.logo === 'string' &&
+      companyProfileData.logo.trim() !== '',
+    [companyProfileData?.logo],
+  );
 
   return (
     <ParallaxContainer
-      imagePath={companyProfileData?.cover_images?.map((img: any) => ({
-        uri: img,
-      }))}
-      ImageChildren={
-        <>
-          <TouchableOpacity
-            onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
-            style={styles.backButton}>
-            <Image source={IMAGES.backArrow} style={styles.backArrow} />
-          </TouchableOpacity>
-        </>
-      }
-      ContainerStyle={styles.container}>
+      imagePath={coverImages}
+      ImageChildren={imageChildren}
+      ContainerStyle={styles.container}
+      showLoader={shouldShowCoverLoader}
+      loaderColor={colors._0B3970}>
       <LinearContainer
         SafeAreaProps={{edges: ['bottom']}}
         containerStyle={styles.linearContainer}
         colors={['#FFF8E6', '#F3E1B7']}>
         <View style={styles.profileHeader}>
-          <Image style={styles.logo} source={{uri: companyProfileData?.logo}} />
+          {/* Logo with conditional loader */}
+          {hasValidLogo ? (
+            <ImageWithLoader
+              source={{uri: companyProfileData?.logo}}
+              style={styles.logo}
+              containerStyle={styles.logoContainer}
+              loaderSize="small"
+              loaderColor={colors._0B3970}
+              placeholder={logoPlaceholder}
+            />
+          ) : (
+            <View style={styles.logoPlaceholder}>
+              <Text style={styles.noLogoText}>No Logo</Text>
+            </View>
+          )}
+
           <View style={styles.titleTextContainer}>
             <Text style={styles.companyName}>
-              {companyProfileAllData?.company_name || 'N/A'}
+              {companyProfileData?.company_name || 'N/A'}
             </Text>
             <Text style={styles.tagline}>
               Experience a world away from your everyday
@@ -131,7 +186,7 @@ const CompanyProfile = () => {
           {ProfileTabs.map((item, index) => (
             <Pressable
               key={item}
-              onPress={() => setSelectedTabIndex(index)}
+              onPress={() => handleTabPress(index)}
               style={styles.tabItem}>
               <Text style={styles.tabText}>{item}</Text>
               {selectedTanIndex === index && (
@@ -143,79 +198,31 @@ const CompanyProfile = () => {
 
         <View style={styles.divider} />
 
-        {selectedTanIndex == 0 && (
-          <>
-            <View style={styles.infoRow}>
-              <View style={AppStyles.flex}>
-                {/* <Text style={styles.infoTitle}>
-                  {companyProfileAllData?.address}
-                </Text> */}
-
-                <View>
-                  <Text style={styles.infoTitle}>{'Website'}</Text>
-                  <View style={styles.row}>
-                    <Image source={IMAGES.web} style={styles.web} />
-                    <Text style={styles.infoValue}>
-                      {companyProfileData?.website}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <View style={AppStyles.flex}>
-                <Text style={styles.infoTitle}>Type</Text>
-                <Text style={styles.infoValue}>Hotel</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoSection}>
-              <Text style={styles.infoTitle}>Company size</Text>
-              <Text style={styles.infoValue}>
-                {companyProfileData?.company_size}
-              </Text>
-            </View>
-
-            <View style={styles.infoSection}>
-              <Text style={styles.infoTitle}>Sectors/industry</Text>
-              <Text style={styles.infoValue}>
-                Industry Sectors or Specializations
-              </Text>
-            </View>
-
-            <LocationContainer
-              containerStyle={styles.map}
-              lat={companyProfileAllData?.lat}
-              lng={companyProfileAllData?.lng}
-              address={companyProfileAllData?.address}
-            />
-          </>
+        {selectedTanIndex === 0 && (
+          <CoAboutTab
+            companyProfileData={companyProfileData}
+            companyProfileAllData={companyProfileAllData}
+          />
         )}
 
         {selectedTanIndex === 1 && (
           <FlatList
             numColumns={2}
             style={{marginTop: hp(10)}}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={item => `post-${item.id}`}
             data={allPosts}
             columnWrapperStyle={{justifyContent: 'space-between'}}
-            renderItem={({item}) => (
-              <CustomPostCard title={item?.title} image={item?.image} />
-            )}
+            renderItem={renderPostItem}
           />
         )}
 
-        {selectedTanIndex === 2 && (
-          <View>
-            <MyJobCard />
-          </View>
-        )}
+        {renderJobs}
 
         <GradientButton
           type="Company"
           style={styles.button}
           title={t('Create a Post')}
-          onPress={() => {
-            navigateTo(SCREENS.CoPost);
-          }}
+          onPress={handleCreatePost}
         />
       </LinearContainer>
     </ParallaxContainer>
@@ -249,10 +256,28 @@ const styles = StyleSheet.create({
     paddingVertical: hp(20),
     alignItems: 'center',
   },
+  logoContainer: {
+    width: wp(82),
+    height: wp(82),
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
   logo: {
     width: wp(82),
     height: wp(82),
     borderRadius: 100,
+  },
+  logoPlaceholder: {
+    width: wp(82),
+    height: wp(82),
+    borderRadius: 100,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noLogoText: {
+    ...commonFontStyle(400, 12, colors._3D3D3D),
+    textAlign: 'center',
   },
   titleTextContainer: {
     flex: 1,
@@ -275,7 +300,6 @@ const styles = StyleSheet.create({
   },
   tabRow: {
     flexDirection: 'row',
-    // marginTop: hp(10),
   },
   tabItem: {
     flex: 1,
@@ -299,36 +323,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: hp(16),
     backgroundColor: '#D9D9D9',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  infoSection: {
-    marginTop: 14,
-  },
-  infoTitle: {
-    ...commonFontStyle(400, 18, colors._0B3970),
-    marginBottom: hp(10),
-  },
-  infoValue: {
-    ...commonFontStyle(400, 16, colors._434343),
-  },
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: wp(5),
-  },
-  web: {
-    width: wp(19),
-    height: wp(19),
-    resizeMode: 'contain',
-  },
-  map: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    marginTop: hp(30),
   },
   button: {
     marginVertical: hp(26),

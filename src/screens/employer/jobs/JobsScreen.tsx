@@ -42,8 +42,8 @@ import {setIsBannerLoaded} from '../../../features/employeeSlice';
 import BaseText from '../../../component/common/BaseText';
 
 const jobTypes: object[] = [
-  {type: 'Full-time', value: 'Full Time'},
-  {type: 'Part-time', value: 'Part Time'},
+  {type: 'Full Time', value: 'Full Time'},
+  {type: 'Part Time', value: 'Part Time'},
   {type: 'Temporary', value: 'Temporary'},
   {type: 'Internship', value: 'Internship'},
   {type: 'Freelance', value: 'Freelance'},

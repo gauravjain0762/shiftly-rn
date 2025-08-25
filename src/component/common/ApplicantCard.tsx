@@ -26,15 +26,15 @@ const ApplicantCard = ({item, showShortListButton = true, handleShortListEmploye
           <Text numberOfLines={1} style={styles.name}>
             {item?.name || 'Tafnol Theresa'}
           </Text>
-          <Text numberOfLines={1} style={styles.field} ellipsizeMode="tail">
+          <Text numberOfLines={2} style={styles.field} ellipsizeMode="tail">
             {item?.responsibility || 'Hotel Management'}
           </Text>
-          <Text
+          {/* <Text
             ellipsizeMode="tail"
             numberOfLines={1}
             style={styles.experience}>
             5y Experience
-          </Text>
+          </Text> */}
         </View>
         <View style={styles.actionContainer}>
           <View style={styles.chatButton}>

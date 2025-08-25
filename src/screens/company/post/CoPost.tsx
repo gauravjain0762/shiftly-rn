@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   uploadImg: {
-    height: hp(417),
+    height: hp(390),
     resizeMode: 'cover',
   },
   retake: {

@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, Image, StyleSheet, Text, View} from 'react-native';
 import {BackHeader, GradientButton, LinearContainer} from '../../../component';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
@@ -8,12 +8,14 @@ import {useGetProfileQuery} from '../../../api/authApi';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useFocusEffect} from '@react-navigation/native';
+import {IMAGES} from '../../../assets/Images';
+import ImageWithLoader from '../../../component/common/ImageWithLoader';
 
 const CoMyProfile = () => {
   const {t} = useTranslation();
   const {data, refetch} = useGetProfileQuery();
   const companyProfile = data?.data?.company;
-  console.log("🔥🔥🔥 ~ CoMyProfile ~ companyProfile:", companyProfile)
+  console.log('🔥🔥🔥 ~ CoMyProfile ~ companyProfile:', companyProfile);
 
   useFocusEffect(
     useCallback(() => {
@@ -33,13 +35,29 @@ const CoMyProfile = () => {
         />
 
         <View style={styles.profileRow}>
-          <Image
-            source={{uri: companyProfile?.logo}}
-            style={styles.profileImage}
-          />
+          {companyProfile?.logo ? (
+            <ImageWithLoader
+              source={{uri: companyProfile.logo}}
+              style={styles.profileImage}
+              loaderSize="small"
+              loaderColor={colors._0B3970}
+              placeholder={
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator size="small" color={colors._0B3970} />
+                </View>
+              }
+            />
+          ) : (
+            <Image
+              source={IMAGES.avatar}
+              style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
+            />
+          )}
           <View>
             <Text style={styles.coTitle}>{companyProfile?.company_name}</Text>
-            <Text style={styles.typeText}>{'Restaurant & Hospital'}</Text>
+            <Text style={styles.typeText}>
+              {companyProfile?.name || 'Restaurant & Hospital'}
+            </Text>
           </View>
         </View>
 
@@ -135,5 +153,13 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginTop: hp(40),
+  },
+  loaderContainer: {
+    width: wp(90),
+    height: hp(90),
+    borderRadius: hp(90),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
   },
 });

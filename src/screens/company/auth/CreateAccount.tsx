@@ -102,7 +102,10 @@ const CreateAccount = () => {
     cover_images,
   } = useSelector((state: RootState) => state.auth.companyProfileData || {});
   console.log('🔥🔥🔥 ~ CreateAccount ~ cover_images:', cover_images);
-  console.log('🔥🔥🔥 ~ CreateAccount ~ companyProfileData:', companyProfileData);
+  console.log(
+    '🔥🔥🔥 ~ CreateAccount ~ companyProfileData:',
+    companyProfileData,
+  );
   const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
     {},
   );
@@ -253,7 +256,7 @@ const CreateAccount = () => {
   const UploadPhoto = (e: any) => {
     console.log('🔥🔥🔥 ~ UploadPhoto ~ e:', e);
     console.log('🔥🔥🔥 ~ UploadPhoto ~ type:', type);
-    
+
     if (type === 'cover') {
       const newImage = {
         name: e?.filename || e?.name || 'cover.jpg',
@@ -262,7 +265,7 @@ const CreateAccount = () => {
       };
       console.log('🔥🔥🔥 ~ UploadPhoto ~ newImage:', newImage);
       console.log('🔥🔥🔥 ~ UploadPhoto ~ current cover_images:', cover_images);
-      
+
       // want to upload multiple images
       dispatch(
         setCompanyProfileData({
@@ -294,7 +297,7 @@ const CreateAccount = () => {
 
   const handleSignup = async () => {
     const formData = new FormData();
-    
+
     // Add regular fields
     formData.append('website', companyProfileData?.website || '');
     formData.append('company_size', companyProfileData?.company_size || '');
@@ -305,7 +308,10 @@ const CreateAccount = () => {
     formData.append('mission', companyProfileData?.mission || '');
     formData.append('values', companyProfileData?.values || '');
     formData.append('services', companyProfileData?.services?.join(',') || '');
-    formData.append('business_type_id', companyRegisterData?.business_type_id || '');
+    formData.append(
+      'business_type_id',
+      companyRegisterData?.business_type_id || '',
+    );
     formData.append('company_name', companyRegisterData?.company_name || '');
     formData.append('name', companyRegisterData?.name || '');
     formData.append('email', companyRegisterData?.email || '');
@@ -315,7 +321,7 @@ const CreateAccount = () => {
     formData.append('language', language || 'en');
     formData.append('deviceToken', fcmToken ?? 'ddd');
     formData.append('deviceType', Platform.OS);
-    
+
     // Add logo if exists
     if (companyProfileData?.logo?.uri) {
       formData.append('logo', {
@@ -324,10 +330,16 @@ const CreateAccount = () => {
         name: companyProfileData.logo.name || 'logo.jpg',
       });
     }
-    
+
     // Add cover_images if exists
-    console.log('🔥🔥🔥 ~ handleSignup ~ companyProfileData.cover_images:', companyProfileData?.cover_images);
-    if (companyProfileData?.cover_images && companyProfileData.cover_images.length > 0) {
+    console.log(
+      '🔥🔥🔥 ~ handleSignup ~ companyProfileData.cover_images:',
+      companyProfileData?.cover_images,
+    );
+    if (
+      companyProfileData?.cover_images &&
+      companyProfileData.cover_images.length > 0
+    ) {
       companyProfileData.cover_images.forEach((image: any, index: number) => {
         console.log('🔥🔥🔥 ~ handleSignup ~ processing image:', image);
         if (image?.uri) {
@@ -336,12 +348,15 @@ const CreateAccount = () => {
             type: image.type || 'image/jpeg',
             name: image.name || `cover_${index}.jpg`,
           };
-          console.log('🔥🔥🔥 ~ handleSignup ~ appending imageData:', imageData);
+          console.log(
+            '🔥🔥🔥 ~ handleSignup ~ appending imageData:',
+            imageData,
+          );
           formData.append('cover_images', imageData);
         }
       });
     }
-    
+
     const response = await companySignUp(formData).unwrap();
     console.log(response, response?.status, 'response----handleSignup');
     dispatch(setCompanyProfileAllData(response?.data?.company));
@@ -424,7 +439,7 @@ const CreateAccount = () => {
 
   const handleCreateProfile = async () => {
     const formData = new FormData();
-    
+
     // Add regular fields
     formData.append('website', companyProfileData?.website || '');
     formData.append('company_size', companyProfileData?.company_size || '');
@@ -436,7 +451,7 @@ const CreateAccount = () => {
     formData.append('values', companyProfileData?.values || '');
     formData.append('services', companyProfileData?.services?.join(',') || '');
     formData.append('company_name', companyRegisterData?.company_name || '');
-    
+
     // Add logo if exists
     if (companyProfileData?.logo?.uri) {
       formData.append('logo', {
@@ -445,10 +460,16 @@ const CreateAccount = () => {
         name: companyProfileData.logo.name || 'logo.jpg',
       });
     }
-    
+
     // Add cover_images if exists
-    console.log('🔥🔥🔥 ~ handleCreateProfile ~ companyProfileData.cover_images:', companyProfileData?.cover_images);
-    if (companyProfileData?.cover_images && companyProfileData.cover_images.length > 0) {
+    console.log(
+      '🔥🔥🔥 ~ handleCreateProfile ~ companyProfileData.cover_images:',
+      companyProfileData?.cover_images,
+    );
+    if (
+      companyProfileData?.cover_images &&
+      companyProfileData.cover_images.length > 0
+    ) {
       companyProfileData.cover_images.forEach((image: any, index: number) => {
         console.log('🔥🔥🔥 ~ handleCreateProfile ~ processing image:', image);
         if (image?.uri) {
@@ -457,12 +478,15 @@ const CreateAccount = () => {
             type: image.type || 'image/jpeg',
             name: image.name || `cover_${index}.jpg`,
           };
-          console.log('🔥🔥🔥 ~ handleCreateProfile ~ appending imageData:', imageData);
+          console.log(
+            '🔥🔥🔥 ~ handleCreateProfile ~ appending imageData:',
+            imageData,
+          );
           formData.append('cover_images', imageData);
         }
       });
     }
-    
+
     const response = await companyProfile(formData).unwrap();
     console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
@@ -1161,6 +1185,7 @@ const CreateAccount = () => {
                 data={serviceList}
                 style={{maxHeight: hp(300)}}
                 contentContainerStyle={{flexGrow: 1}}
+                showsVerticalScrollIndicator={false}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={({item, index}: any) => {
                   const isSelected = serviceSelect.includes(item?.title);
@@ -1279,7 +1304,7 @@ const CreateAccount = () => {
                 </TouchableOpacity>
 
                 <View style={styles.coverGrid}>
-                  {cover_images?.map((img: any, index: number) => (
+                  {(cover_images || [])?.map((img: any, index: number) => (
                     <View key={index} style={styles.coverImageWrapper}>
                       <Image
                         source={{uri: img?.uri}}
@@ -1302,23 +1327,6 @@ const CreateAccount = () => {
               <Text style={styles.logolabel}>
                 {t('Your cover image showcases your workplace or atmosphere')}
               </Text>
-              
-              {/* Debug button - remove in production */}
-              <TouchableOpacity
-                onPress={() => {
-                  console.log('🔥🔥🔥 ~ Debug ~ cover_images:', cover_images);
-                  console.log('🔥🔥🔥 ~ Debug ~ companyProfileData:', companyProfileData);
-                }}
-                style={{
-                  backgroundColor: 'red',
-                  padding: 10,
-                  margin: 10,
-                  borderRadius: 5,
-                }}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
-                  Debug: Log Cover Images
-                </Text>
-              </TouchableOpacity>
             </View>
             <View>
               <GradientButton

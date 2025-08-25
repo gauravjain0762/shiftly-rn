@@ -29,7 +29,7 @@ const JobCard: FC<props> = ({
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <ImageBackground
-        source={{uri: item?.company_id?.logo}}
+        source={{uri: item?.company_id?.cover_images[0]}}
         style={styles.jobImage}>
         <View style={styles.logo}>
           <Image
@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   companyLogo: {
-    width: wp(80),
-    height: hp(80),
+    width: wp(75),
+    height: hp(75),
     borderRadius: hp(80),
   },
   companyName: {
@@ -149,16 +149,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    backgroundColor: colors.white,
-    borderRadius: 100,
-    marginHorizontal: wp(20),
-    // marginBottom: hp(13),
-    position: 'absolute',
     bottom: 0,
-    width: wp(85),
-    height: wp(85),
-    justifyContent: 'center',
+    width: wp(80),
+    height: wp(80),
+    borderRadius: 100,
+    position: 'absolute',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: wp(20),
+    backgroundColor: colors.white,
   },
   titleRow: {
     flexDirection: 'row',
