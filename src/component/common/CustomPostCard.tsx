@@ -20,7 +20,7 @@ const CustomPostCard = ({title, image}: Props) => {
         style={styles.image}
       />
       <View style={styles.textContainer}>
-        <Text style={styles.text}>{title || 'Hotel Receptionist Job'}</Text>
+        <Text style={styles.text}>{title}</Text>
       </View>
     </View>
   );

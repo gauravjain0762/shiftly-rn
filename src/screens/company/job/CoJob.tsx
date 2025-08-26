@@ -14,6 +14,7 @@ import {
   CustomTextInput,
   GradientButton,
   LinearContainer,
+  ShareModal,
 } from '../../../component';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../../theme/fonts';
@@ -39,7 +40,9 @@ import {useFocusEffect} from '@react-navigation/native';
 const jobTypes = [
   {label: 'Full Time', value: 'Full Time'},
   {label: 'Part Time', value: 'Part Time'},
+  {label: 'Freelance', value: 'Freelance'},
   {label: 'Internship', value: 'Internship'},
+  {label: 'Temporary', value: 'Temporary'},
 ];
 export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
@@ -47,7 +50,7 @@ const CoJob = () => {
   const {t} = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
-  console.log("🔥🔥🔥 ~ CoJob ~ filters:", filters)
+  console.log('🔥 ~ CoJob ~ filters:', filters);
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
@@ -58,6 +61,8 @@ const CoJob = () => {
   ]);
   const [value, setValue] = useState<any>(filters.job_types || null);
   const [location, setLocation] = useState<string>(filters.location || '');
+  const [isShareModalVisible, setIsShareModalVisible] =
+    useState<boolean>(false);
 
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
@@ -130,7 +135,7 @@ const CoJob = () => {
             <TouchableOpacity
               activeOpacity={0.5}
               onPress={() => {
-                // dispatch(resetJobFormState());
+                dispatch(resetJobFormState());
                 navigateTo(SCREENS.PostJob);
               }}
               style={styles.postJobButton}>
@@ -175,6 +180,7 @@ const CoJob = () => {
                 <MyJobCard
                   item={item}
                   onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+                  onPressShare={() => setIsShareModalVisible(true)}
                 />
               </View>
             )}
@@ -242,6 +248,10 @@ const CoJob = () => {
           </View>
         </BottomModal>
       )}
+      <ShareModal
+        visible={isShareModalVisible}
+        onClose={() => setIsShareModalVisible(false)}
+      />
     </LinearContainer>
   );
 };

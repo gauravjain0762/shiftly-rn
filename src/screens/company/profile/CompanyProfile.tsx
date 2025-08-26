@@ -16,6 +16,7 @@ import {
   LinearContainer,
   LocationContainer,
   ParallaxContainer,
+  ShareModal,
 } from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
@@ -54,17 +55,13 @@ const CompanyProfile = () => {
   const {companyProfileData, companyProfileAllData} = useSelector(
     (state: RootState) => state.auth,
   );
-  console.log(
-    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
-    companyProfileData,
-  );
 
   const {data: getPost} = useGetCompanyPostsQuery({});
   const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
-  const {t} = useTranslation();
   const {data} = useGetProfileQuery();
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -137,7 +134,7 @@ const CompanyProfile = () => {
 
   const renderPostItem = useCallback(
     ({item}: {item: any}) => (
-      <CustomPostCard title={item?.title} image={item?.image} />
+      <CustomPostCard title={item?.title} image={item?.images} />
     ),
     [],
   );
@@ -146,8 +143,11 @@ const CompanyProfile = () => {
     if (selectedTanIndex !== 2) return null;
 
     return jobsList?.map((item: any, index: number) => (
-      <View key={`job-${item.id || index}`}>
-        <MyJobCard item={item} />
+      <View style={{marginBottom: hp(15)}} key={`job-${item.id || index}`}>
+        <MyJobCard
+          item={item}
+          onPressShare={() => setIsShareModalVisible(true)}
+        />
       </View>
     ));
   }, [selectedTanIndex, jobsList]);
@@ -244,11 +244,11 @@ const CompanyProfile = () => {
         {selectedTanIndex === 1 && (
           <FlatList
             numColumns={2}
-            style={{marginTop: hp(10)}}
-            keyExtractor={item => `post-${item.id}`}
             data={allPosts}
-            columnWrapperStyle={{justifyContent: 'space-between'}}
+            style={{marginTop: hp(10)}}
             renderItem={renderPostItem}
+            keyExtractor={item => `post-${item.id}`}
+            columnWrapperStyle={{justifyContent: 'space-between'}}
           />
         )}
 
@@ -260,6 +260,11 @@ const CompanyProfile = () => {
           title={t('Create a Post')}
           onPress={handleCreatePost}
         /> */}
+
+        <ShareModal
+          visible={isShareModalVisible}
+          onClose={() => setIsShareModalVisible(false)}
+        />
       </LinearContainer>
     </ParallaxContainer>
   );

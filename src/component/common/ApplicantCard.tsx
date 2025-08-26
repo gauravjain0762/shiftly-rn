@@ -1,10 +1,19 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import {navigateTo} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
 
 type Props = {
   item: any;
@@ -12,22 +21,26 @@ type Props = {
   handleShortListEmployee?: () => void;
 };
 
-const ApplicantCard = ({item, showShortListButton = true, handleShortListEmployee}: Props) => {
+const ApplicantCard = ({
+  item,
+  showShortListButton = true,
+  handleShortListEmployee,
+}: Props) => {
   const {t} = useTranslation();
 
   return (
     <View style={styles.cardContainer}>
       <View style={styles.row}>
         <Image
-          source={item?.picture ? {uri: item?.picture} : IMAGES.avatar}
           style={styles.avatar}
+          source={item?.picture ? {uri: item?.picture} : IMAGES.avatar}
         />
         <View style={styles.infoContainer}>
           <Text numberOfLines={1} style={styles.name}>
-            {item?.name || 'Tafnol Theresa'}
+            {item?.name}
           </Text>
           <Text numberOfLines={2} style={styles.field} ellipsizeMode="tail">
-            {item?.responsibility || 'Hotel Management'}
+            {item?.responsibility}
           </Text>
           {/* <Text
             ellipsizeMode="tail"
@@ -37,11 +50,18 @@ const ApplicantCard = ({item, showShortListButton = true, handleShortListEmploye
           </Text> */}
         </View>
         <View style={styles.actionContainer}>
-          <View style={styles.chatButton}>
+          <Pressable
+            onPress={() => {
+              navigateTo(SCREENS.CoChat);
+            }}
+            style={styles.chatButton}>
             <Image source={IMAGES.chat} />
-          </View>
+          </Pressable>
           {showShortListButton && (
-            <TouchableOpacity activeOpacity={0.5} onPress={handleShortListEmployee} style={styles.actionButton}>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={handleShortListEmployee}
+              style={styles.actionButton}>
               <Text style={styles.actionText}>{t('Shortlist')}</Text>
             </TouchableOpacity>
           )}
@@ -72,17 +92,17 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatar: {
-    width: wp(100),
-    height: hp(100),
+    width: wp(90),
+    height: hp(90),
     borderRadius: hp(10),
-    flexWrap: 'wrap',
   },
   infoContainer: {
     gap: hp(10),
-    marginLeft: wp(10),
     width: '40%',
+    marginLeft: wp(10),
   },
   name: {
     ...commonFontStyle(600, 19, colors._0B3970),
@@ -94,7 +114,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 17, colors._4A4A4A),
   },
   actionContainer: {
-    marginLeft: wp(5),
+    marginRight: wp(5),
   },
   chatButton: {
     width: wp(35),
@@ -108,8 +128,8 @@ const styles = StyleSheet.create({
   actionButton: {
     marginTop: hp(13),
     borderRadius: hp(50),
-    paddingVertical: hp(7),
     alignItems: 'center',
+    paddingVertical: hp(7),
     justifyContent: 'center',
     paddingHorizontal: wp(20),
     backgroundColor: colors._0B3970,

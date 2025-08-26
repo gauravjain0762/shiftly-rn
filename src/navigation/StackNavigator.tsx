@@ -296,6 +296,7 @@ const StackNavigator: FC = () => {
           name={SCREENS.CoSignUp}
           component={CoSignUp}
         />
+
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CreateAccount}
@@ -375,6 +376,7 @@ const StackNavigator: FC = () => {
         component={CreateProfileScreen}
       />
       <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />
+      <Stack.Screen name={SCREENS.CoChat} component={CoChat} />
       <Stack.Screen
         name={SCREENS.SelectRollScreen}
         component={SelectRollScreen}

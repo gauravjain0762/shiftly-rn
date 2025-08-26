@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -9,7 +9,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {BackHeader, GradientButton, LinearContainer} from '../../../component';
+import {
+  BackHeader,
+  GradientButton,
+  LinearContainer,
+  ShareModal,
+} from '../../../component';
 import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {useTranslation} from 'react-i18next';
@@ -19,7 +24,7 @@ import {
   useAddShortlistEmployeeMutation,
   useGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
-import {useRoute} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {
   errorToast,
   navigateTo,
@@ -38,16 +43,29 @@ const CoJobDetails = () => {
   const {params} = useRoute<any>();
   const dispatch = useDispatch();
   const job_id = params?._id as any;
-  console.log("🔥🔥🔥 ~ CoJobDetails ~ job_id:", job_id)
+  console.log('🔥🔥 ~ CoJobDetails ~ job_id:', job_id);
+  const [isShareModalVisible, setIsShareModalVisible] =
+    useState<boolean>(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  const {data} = useGetCompanyJobDetailsQuery(job_id);
+  const {data, refetch} = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const jobDetail = data?.data;
+  console.log('🔥🔥🔥 ~ CoJobDetails ~ jobDetail:', jobDetail);
+  console.log('🔥 ~ CoJobDetails ~ jobDetail:', jobDetail?.invite_users);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const JobDetailsArr = {
     'Job Type': jobDetail?.job_type,
     Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
-    'Expiry Date': moment(jobDetail?.expiry_date).format('D MMMM'),
+    'Expiry Date':
+      jobDetail?.expiry_date !== null
+        ? moment(jobDetail?.expiry_date).format('D MMMM')
+        : '-',
     Duration: jobDetail?.duration,
     'Job Industry': jobDetail?.job_sector,
     Vacancy: jobDetail?.no_positions,
@@ -55,15 +73,17 @@ const CoJobDetails = () => {
   const keyValueArray = Object.entries(JobDetailsArr);
 
   const handleShortListEmployee = async (item: any) => {
+    console.log('🔥🔥🔥 ~ handleShortListEmployee ~ item:', item);
     const params = {
       applicant_id: item?._id,
       job_id: job_id,
-    }
-    console.log("🔥🔥🔥 ~ handleShortListEmployee ~ params:", params)
+    };
+    console.log('🔥🔥🔥 ~ handleShortListEmployee ~ params:', params);
     try {
       const res = await addShortListEmployee(params).unwrap();
+      console.log('🔥🔥🔥 ~ handleShortListEmployee ~ res:', res);
 
-      if (res?.status) {
+      if (res?.status === true) {
         successToast(res?.message);
       } else {
         errorToast(res?.message);
@@ -75,7 +95,7 @@ const CoJobDetails = () => {
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
         <BackHeader
           type="company"
           isRight={false}
@@ -83,7 +103,11 @@ const CoJobDetails = () => {
           titleStyle={styles.title}
           containerStyle={styles.header}
           RightIcon={
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity
+              onPress={() => {
+                setIsShareModalVisible(true);
+              }}
+              style={styles.iconButton}>
               <Image
                 source={IMAGES.share}
                 resizeMode="contain"
@@ -116,31 +140,13 @@ const CoJobDetails = () => {
               renderItem={({item, index}) => {
                 const [key, value] = item;
 
-                const isWide = key === 'Salary';
-
                 return (
-                  <View
-                    key={index}
-                    style={[
-                      styles.detailItem,
-                      // isWide && {flexBasis: '100%', maxWidth: '100%'},
-                    ]}>
+                  <View key={index} style={styles.detailItem}>
                     <Text style={styles.detailKey}>{key}</Text>
 
-                    <View
-                      style={{
-                        flexWrap: 'wrap',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                      }}>
+                    <View style={styles.valueWrapper}>
                       {key === 'Salary' && <Image source={IMAGES.currency} />}
-                      <Text
-                        style={[
-                          styles.detailValue,
-                          {flexShrink: 1, flexWrap: 'wrap'},
-                        ]}>
-                        {value || '-'}
-                      </Text>
+                      <Text style={styles.detailValue}>{value || '-'}</Text>
                     </View>
                   </View>
                 );
@@ -166,18 +172,22 @@ const CoJobDetails = () => {
             <View style={styles.divider} />
             {selectedTabIndex === 0 ? (
               jobDetail?.applicants?.length > 0 ? (
-                jobDetail?.applicants?.map((item: any, index: number) => (
-                  <ApplicantCard
-                    key={index}
-                    item={item}
-                    handleShortListEmployee={() => {
-                      handleShortListEmployee(item);
-                    }}
-                  />
-                ))
+                jobDetail?.applicants?.map((item: any, index: number) => {
+                  if (item === null) return null;
+                  return (
+                    <ApplicantCard
+                      key={index}
+                      item={item}
+                      handleShortListEmployee={() =>
+                        handleShortListEmployee(item)
+                      }
+                      showShortListButton={!item?.status}
+                    />
+                  );
+                })
               ) : (
-                <View style={{alignItems: 'center'}}>
-                  <BaseText>There is no applicants</BaseText>
+                <View style={styles.emptyState}>
+                  <BaseText>There are no applicants</BaseText>
                 </View>
               )
             ) : null}
@@ -185,35 +195,39 @@ const CoJobDetails = () => {
             {selectedTabIndex === 1 &&
               (jobDetail?.invited_users?.length > 0 ? (
                 jobDetail?.invited_users?.map((item: any, index: number) => {
-                  console.log("invited_users ~ item:", item)
+                  if (item === null) return null;
                   return (
                     <ApplicantCard
                       key={index}
                       item={item}
-                      handleShortListEmployee={() => {
-                        handleShortListEmployee(item);
-                      }}
+                      handleShortListEmployee={() =>
+                        handleShortListEmployee(item)
+                      }
+                      showShortListButton={!item?.status}
                     />
                   );
                 })
               ) : (
-                <View style={{alignItems: 'center'}}>
-                  <BaseText>{'There are no invited users'}</BaseText>
+                <View style={styles.emptyState}>
+                  <BaseText>There are no invited users</BaseText>
                 </View>
               ))}
 
             {selectedTabIndex === 2 &&
               (jobDetail?.shortlisted?.length > 0 ? (
-                jobDetail.shortlisted.map((item: any, index: number) => (
-                  <ApplicantCard
-                    key={index}
-                    item={item}
-                    showShortListButton={false}
-                  />
-                ))
+                jobDetail.shortlisted.map((item: any, index: number) => {
+                  if (item === null) return null;
+                  return (
+                    <ApplicantCard
+                      key={index}
+                      item={item}
+                      showShortListButton={false}
+                    />
+                  );
+                })
               ) : (
-                <View style={{alignItems: 'center'}}>
-                  <BaseText>{'No shortlisted applicants'}</BaseText>
+                <View style={styles.emptyState}>
+                  <BaseText>No shortlisted applicants</BaseText>
                 </View>
               ))}
 
@@ -222,43 +236,62 @@ const CoJobDetails = () => {
               style={styles.button}
               title={t('Edit Job')}
               onPress={() => {
+                console.log('job_type>>>>>.', jobDetail?.job_type);
                 dispatch(
                   setJobFormState({
                     job_id: job_id,
                     title: jobDetail?.title,
-                    // job_type: {
-                    //   label: jobDetail?.job_type,
-                    //   value: jobDetail?.job_type,
-                    // },
-                    // area: {label: jobDetail?.area, value: jobDetail?.area},
-                    duration: {
-                      label: jobDetail?.duration,
-                      value: jobDetail?.duration,
+                    job_type:
+                      typeof jobDetail?.job_type === 'string'
+                        ? {
+                            label: jobDetail?.job_type,
+                            value: jobDetail?.job_type,
+                          }
+                        : jobDetail?.job_type,
+                    area:
+                      typeof jobDetail?.area === 'string'
+                        ? {label: jobDetail?.area, value: jobDetail?.area}
+                        : jobDetail?.area,
+                    duration:
+                      typeof jobDetail?.duration === 'string'
+                        ? {
+                            label: jobDetail?.duration,
+                            value: jobDetail?.duration,
+                          }
+                        : jobDetail?.duration,
+                    job_sector:
+                      typeof jobDetail?.job_sector === 'string'
+                        ? {
+                            label: jobDetail?.job_sector,
+                            value: jobDetail?.job_sector,
+                          }
+                        : jobDetail?.job_sector,
+                    startDate:
+                      typeof jobDetail?.start_date === 'string'
+                        ? {
+                            label: jobDetail?.start_date,
+                            value: jobDetail?.start_date,
+                          }
+                        : jobDetail?.start_date,
+                    contract:
+                      typeof jobDetail?.contract_type === 'string'
+                        ? {
+                            label: jobDetail?.contract_type,
+                            value: jobDetail?.contract_type,
+                          }
+                        : jobDetail?.contract_type,
+                    salary: {
+                      label: `${Number(
+                        jobDetail?.monthly_salary_from,
+                      ).toLocaleString()} - ${Number(
+                        jobDetail?.monthly_salary_to,
+                      ).toLocaleString()}`,
+                      value: `${Number(
+                        jobDetail?.monthly_salary_from,
+                      ).toLocaleString()} - ${Number(
+                        jobDetail?.monthly_salary_to,
+                      ).toLocaleString()}`,
                     },
-                    // job_sector: {
-                    //   label: jobDetail?.job_sector,
-                    //   value: jobDetail?.job_sector,
-                    // },
-                    // startDate: {
-                    //   label: jobDetail?.start_date,
-                    //   value: jobDetail?.start_date,
-                    // },
-                    // contract: {
-                    //   label: jobDetail?.contract_type,
-                    //   value: jobDetail?.contract_type,
-                    // },
-                    // salary: {
-                    //   label: `${Number(
-                    //     jobDetail?.monthly_salary_from,
-                    //   ).toLocaleString()} - ${Number(
-                    //     jobDetail?.monthly_salary_to,
-                    //   ).toLocaleString()}`,
-                    //   value: `${Number(
-                    //     jobDetail?.monthly_salary_from,
-                    //   ).toLocaleString()} - ${Number(
-                    //     jobDetail?.monthly_salary_to,
-                    //   ).toLocaleString()}`,
-                    // },
                     position: {
                       label: String(jobDetail?.no_positions),
                       value: String(jobDetail?.no_positions),
@@ -281,6 +314,11 @@ const CoJobDetails = () => {
           </View>
         </View>
       </ScrollView>
+
+      <ShareModal
+        visible={isShareModalVisible}
+        onClose={() => setIsShareModalVisible(false)}
+      />
     </LinearContainer>
   );
 };
@@ -329,6 +367,7 @@ const styles = StyleSheet.create({
     tintColor: colors.black,
   },
   location: {
+    paddingRight: wp(15),
     ...commonFontStyle(400, 15, colors.black),
   },
   description: {
@@ -348,16 +387,26 @@ const styles = StyleSheet.create({
     gap: hp(34),
   },
   detailItem: {
-    gap: hp(15),
-    width: SCREEN_WIDTH / 3,
+    gap: hp(8),
+    width: '34%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // marginHorizontal: wp(10),
+    // width: SCREEN_WIDTH / 4.2,
+  },
+  valueWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // flexWrap: 'wrap',
   },
   detailKey: {
     ...commonFontStyle(600, 17, colors._0B3970),
+    textAlign: 'center',
   },
   detailValue: {
-    // textAlign: 'center',
-    // alignSelf: 'center',
     ...commonFontStyle(400, 16, colors.black),
+    textAlign: 'center',
   },
   bottomContainer: {
     marginTop: hp(48),
@@ -393,5 +442,14 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: hp(45),
+  },
+  emptyState: {
+    alignItems: 'center',
+    marginVertical: hp(20),
+  },
+  salaryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
   },
 });

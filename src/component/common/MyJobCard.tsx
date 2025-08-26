@@ -4,6 +4,7 @@ import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import ShareModal from '../employe/ShareModal';
 
 type JobCardProps = {
   item?: any;
@@ -15,43 +16,38 @@ const MyJobCard = (props: JobCardProps) => {
   const {onPressShare, onPressCard, item} = props;
 
   return (
-    <Pressable onPress={onPressCard} style={styles.card}>
-      <View style={styles.headerRow}>
-        <View style={{width: '85%'}}>
-          <Text style={styles.locationText}>{`${
-            item?.address || 'Palm Jumairah, dubai UAE'
-          }`}</Text>
-          <Text style={styles.titleText}>{`${
-            item?.title || 'Restaurant Manager'
-          }`}</Text>
+    <>
+      <Pressable onPress={onPressCard} style={styles.card}>
+        <View style={styles.headerRow}>
+          <View style={{width: '85%'}}>
+            <Text style={styles.locationText}>{`${item?.address}`}</Text>
+            <Text style={styles.titleText}>{`${item?.title}`}</Text>
+          </View>
+
+          <Pressable onPress={onPressShare} style={styles.shareButton}>
+            <Image source={IMAGES.share} style={styles.shareIcon} />
+          </Pressable>
         </View>
 
-        <Pressable onPress={onPressShare} style={styles.shareButton}>
-          <Image source={IMAGES.share} style={styles.shareIcon} />
-        </Pressable>
-      </View>
+        <Text numberOfLines={2} style={styles.description}>
+          {`${item?.description} `}
+        </Text>
 
-      <Text numberOfLines={2} style={styles.description}>
-        {`${
-          item?.description ||
-          'We are looking for experienced restaurant manager to manage our newly opened branch in Palm Jumairah...'
-        } `}
-      </Text>
-
-      <View style={styles.footerRow}>
-        {item?.applicants?.length && (
-          <Text
-            style={
-              styles.applicantsText
-            }>{`${item?.applicants?.length}  Applicants`}</Text>
-        )}
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{`${
-            item?.job_type || 'Full Time'
-          }`}</Text>
+        <View style={styles.footerRow}>
+          {item?.applicants?.length && (
+            <Text
+              style={
+                styles.applicantsText
+              }>{`${item?.applicants?.length}  Applicants`}</Text>
+          )}
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{`${
+              item?.job_type || 'Full Time'
+            }`}</Text>
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </>
   );
 };
 
