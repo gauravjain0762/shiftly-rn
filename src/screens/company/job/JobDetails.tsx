@@ -29,6 +29,7 @@ import {SCREENS} from '../../../navigation/screenNames';
 import {useDispatch} from 'react-redux';
 import {setJobFormState} from '../../../features/companySlice';
 import moment from 'moment';
+import BaseText from '../../../component/common/BaseText';
 
 const Tabs = ['Applicants', 'Invited', 'Shortlisted'];
 
@@ -37,28 +38,30 @@ const CoJobDetails = () => {
   const {params} = useRoute<any>();
   const dispatch = useDispatch();
   const job_id = params?._id as any;
+  console.log("🔥🔥🔥 ~ CoJobDetails ~ job_id:", job_id)
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  // "689b160b3f2e282e35e9e06b"
   const {data} = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const jobDetail = data?.data;
-  console.log("🔥🔥🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
+
   const JobDetailsArr = {
     'Job Type': jobDetail?.job_type,
-    Vacancy: jobDetail?.no_positions,
+    Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
     'Expiry Date': moment(jobDetail?.expiry_date).format('D MMMM'),
     Duration: jobDetail?.duration,
     'Job Industry': jobDetail?.job_sector,
-    Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
+    Vacancy: jobDetail?.no_positions,
   };
   const keyValueArray = Object.entries(JobDetailsArr);
 
   const handleShortListEmployee = async (item: any) => {
+    const params = {
+      applicant_id: item?._id,
+      job_id: job_id,
+    }
+    console.log("🔥🔥🔥 ~ handleShortListEmployee ~ params:", params)
     try {
-      const res = await addShortListEmployee({
-        applicant_id: item?._id,
-        job_id: job_id,
-      }).unwrap();
+      const res = await addShortListEmployee(params).unwrap();
 
       if (res?.status) {
         successToast(res?.message);
@@ -93,14 +96,12 @@ const CoJobDetails = () => {
         <View style={styles.bodyContainer}>
           <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id || '-'}`}</Text>
 
-          <Text style={styles.location}>
-            {jobDetail?.address || 'Atlantis, The Palm, Dubai'}
-          </Text>
+          <View style={styles.addressContainer}>
+            <Image source={IMAGES.location} style={styles.locationIcon} />
+            <Text style={styles.location}>{jobDetail?.address}</Text>
+          </View>
 
-          <Text style={styles.description}>
-            {jobDetail?.description ||
-              'As the Resort Manager, you will primarily be focused on ensuring the Front Office and VIP Services are operated to the highest standards and guest service delivery standards and are nothing short of 5 stars for both guests and colleagues.'}
-          </Text>
+          <Text style={styles.description}>{jobDetail?.description}</Text>
 
           <View style={styles.jobDetailsContainer}>
             <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
@@ -115,24 +116,24 @@ const CoJobDetails = () => {
               renderItem={({item, index}) => {
                 const [key, value] = item;
 
-                const isWide = key === 'Salary'; // 👈 make Salary full width
+                const isWide = key === 'Salary';
 
                 return (
                   <View
                     key={index}
                     style={[
                       styles.detailItem,
-                      isWide && {flexBasis: '100%', maxWidth: '100%'}, 
+                      // isWide && {flexBasis: '100%', maxWidth: '100%'},
                     ]}>
                     <Text style={styles.detailKey}>{key}</Text>
 
                     <View
                       style={{
+                        flexWrap: 'wrap',
                         flexDirection: 'row',
                         alignItems: 'center',
-                        flexWrap: 'wrap',
                       }}>
-                      {/* {key === 'Salary' && <Image source={IMAGES.currency} />} */}
+                      {key === 'Salary' && <Image source={IMAGES.currency} />}
                       <Text
                         style={[
                           styles.detailValue,
@@ -163,21 +164,28 @@ const CoJobDetails = () => {
             </View>
 
             <View style={styles.divider} />
-
-            {selectedTabIndex === 0 &&
-              jobDetail?.applicants?.map((item: any, index: number) => (
-                <ApplicantCard
-                  key={index}
-                  item={item}
-                  handleShortListEmployee={() => {
-                    handleShortListEmployee(item);
-                  }}
-                />
-              ))}
+            {selectedTabIndex === 0 ? (
+              jobDetail?.applicants?.length > 0 ? (
+                jobDetail?.applicants?.map((item: any, index: number) => (
+                  <ApplicantCard
+                    key={index}
+                    item={item}
+                    handleShortListEmployee={() => {
+                      handleShortListEmployee(item);
+                    }}
+                  />
+                ))
+              ) : (
+                <View style={{alignItems: 'center'}}>
+                  <BaseText>There is no applicants</BaseText>
+                </View>
+              )
+            ) : null}
 
             {selectedTabIndex === 1 &&
-              jobDetail?.invited_users?.map((item: any, index: number) => {
-                if (item) {
+              (jobDetail?.invited_users?.length > 0 ? (
+                jobDetail?.invited_users?.map((item: any, index: number) => {
+                  console.log("invited_users ~ item:", item)
                   return (
                     <ApplicantCard
                       key={index}
@@ -187,25 +195,27 @@ const CoJobDetails = () => {
                       }}
                     />
                   );
-                } else {
-                  return null;
-                }
-              })}
+                })
+              ) : (
+                <View style={{alignItems: 'center'}}>
+                  <BaseText>{'There are no invited users'}</BaseText>
+                </View>
+              ))}
 
             {selectedTabIndex === 2 &&
-              jobDetail?.shortlisted?.map((item: any, index: number) => {
-                if (item) {
-                  return (
-                    <ApplicantCard
-                      key={index}
-                      item={item}
-                      showShortListButton={false}
-                    />
-                  );
-                } else {
-                  return null;
-                }
-              })}
+              (jobDetail?.shortlisted?.length > 0 ? (
+                jobDetail.shortlisted.map((item: any, index: number) => (
+                  <ApplicantCard
+                    key={index}
+                    item={item}
+                    showShortListButton={false}
+                  />
+                ))
+              ) : (
+                <View style={{alignItems: 'center'}}>
+                  <BaseText>{'No shortlisted applicants'}</BaseText>
+                </View>
+              ))}
 
             <GradientButton
               type="Company"
@@ -307,8 +317,18 @@ const styles = StyleSheet.create({
     marginLeft: '10%',
     ...commonFontStyle(400, 18, colors.black),
   },
-  location: {
+  addressContainer: {
+    gap: wp(14),
     marginTop: hp(32),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationIcon: {
+    width: wp(20),
+    height: hp(20),
+    tintColor: colors.black,
+  },
+  location: {
     ...commonFontStyle(400, 15, colors.black),
   },
   description: {
@@ -336,6 +356,7 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     // textAlign: 'center',
+    // alignSelf: 'center',
     ...commonFontStyle(400, 16, colors.black),
   },
   bottomContainer: {

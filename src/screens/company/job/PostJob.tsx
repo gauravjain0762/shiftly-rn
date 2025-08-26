@@ -151,8 +151,8 @@ const PostJob = () => {
     editMode,
     job_id,
   } = useAppSelector((state: any) => selectJobForm(state));
-    console.log("🔥🔥🔥 ~ PostJob ~ selected:", selected)
-  const formData = useAppSelector((state: any) => state.company.jobForm);
+    console.log("🔥🔥🔥 ~ PostJob ~ currency:", currency)
+  console.log('🔥🔥🔥 ~ PostJob ~ selected:', selected);
   const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
@@ -173,7 +173,7 @@ const PostJob = () => {
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
-    value: item._id,
+    value: item.title,
   }));
   const [userAddress, setUserAddress] = useState<
     | {
@@ -239,9 +239,9 @@ const PostJob = () => {
     }
   };
 
-  const [from, to] = salary?.value.split('-') || [];
+  const [from, to] = salary?.value?.split('-') || [];
 
-  console.log('job_sector?.label', job_sector?.label);
+  console.log('job_sector', job_sector);
 
   const handleCreateJob = async () => {
     const params = {
@@ -254,7 +254,7 @@ const PostJob = () => {
       lng: location?.longitude,
       people_anywhere: canApply,
       duration: duration?.value,
-      job_sector: job_sector?.label,
+      job_sector: job_sector,
       start_date: startDate?.value,
       contract_type: contract?.value,
       monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
@@ -378,14 +378,14 @@ const PostJob = () => {
                   </Text>
                 </View>
                 <CustomTextInput
-                  value={describe}
-                  onChangeText={e => updateJobForm({describe: e})}
-                  placeholder={'Describe'}
-                  inputStyle={styles.input1}
                   multiline
+                  value={describe}
                   maxLength={1000}
+                  inputStyle={styles.input1}
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
+                  placeholder={t('Enter role description')}
+                  onChangeText={e => updateJobForm({describe: e})}
                 />
                 <Text
                   style={
@@ -660,20 +660,17 @@ const PostJob = () => {
                 <View style={styles.card}>
                   <Image source={{uri: IMAGE_URL}} style={styles.avatar} />
                   <View style={styles.textContainer}>
-                    <Text style={styles.empTitle}>{title || 'N/A'}</Text>
+                    <Text style={styles.empTitle}>{title}</Text>
                     <Text style={styles.empSubtitle}>
-                      {userAddress?.address || 'Atlantis, The Palm, Dubai'}
+                      {userAddress?.address}
                     </Text>
                     <View style={styles.empRow}>
                       <Text style={styles.location}>
-                        {`${userAddress?.state}, ${userAddress?.country} - ${
-                          job_type?.label || 'Full-Time'
-                        }`}
+                        {`${userAddress?.state}, ${userAddress?.country}`}
                       </Text>
-                      <Text style={styles.salary}>{`AED ${
-                        salary?.label?.split('-')[1]
-                      }`}</Text>
                     </View>
+                    <Text style={styles.location}>{job_type?.label}</Text>
+                    <Text style={styles.salary}>{`${currency} ${salary}`}</Text>
                   </View>
                 </View>
 
@@ -766,7 +763,7 @@ const PostJob = () => {
                 <CustomTextInput
                   value={title}
                   onChangeText={e => updateJobForm({title: e})}
-                  placeholder={'Job Title'}
+                  placeholder={'Enter job title'}
                   inputStyle={styles.input}
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
@@ -780,7 +777,7 @@ const PostJob = () => {
                   valueField="value"
                   value={job_type}
                   onChange={(e: any) => {
-                    updateJobForm({job_type: e});
+                    updateJobForm({job_type: e.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -796,7 +793,7 @@ const PostJob = () => {
                   valueField="value"
                   value={area}
                   onChange={(e: any) => {
-                    updateJobForm({area: e});
+                    updateJobForm({area: e.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -834,7 +831,7 @@ const PostJob = () => {
                   valueField="value"
                   value={duration}
                   onChange={(e: any) => {
-                    updateJobForm({duration: e});
+                    updateJobForm({duration: e.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -850,7 +847,7 @@ const PostJob = () => {
                   valueField="value"
                   value={job_sector}
                   onChange={(e: any) => {
-                    updateJobForm({job_sector: e});
+                    updateJobForm({job_sector: e?.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -866,7 +863,7 @@ const PostJob = () => {
                   valueField="value"
                   value={startDate}
                   onChange={(e: any) => {
-                    updateJobForm({startDate: e});
+                    updateJobForm({startDate: e?.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -882,7 +879,7 @@ const PostJob = () => {
                   valueField="value"
                   value={contract}
                   onChange={(e: any) => {
-                    updateJobForm({contract: e});
+                    updateJobForm({contract: e?.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -899,7 +896,7 @@ const PostJob = () => {
                     valueField="value"
                     value={salary}
                     onChange={(e: any) => {
-                      updateJobForm({salary: e});
+                      updateJobForm({salary: e?.value});
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
@@ -913,7 +910,7 @@ const PostJob = () => {
                     valueField="value"
                     value={currency}
                     onChange={(e: any) => {
-                      updateJobForm({currency: e});
+                      updateJobForm({currency: e?.value});
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
@@ -933,7 +930,7 @@ const PostJob = () => {
                   valueField="value"
                   value={position}
                   onChange={(e: any) => {
-                    updateJobForm({position: e});
+                    updateJobForm({position: e?.value});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -1038,7 +1035,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(16),
     paddingHorizontal: wp(13),
     borderColor: colors._234F86,
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._181818),
   },
   scrollContainer: {
     flexGrow: 1,
@@ -1055,7 +1052,7 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   selectedTextStyle: {
-    ...commonFontStyle(400, 18, colors._7B7878),
+    ...commonFontStyle(400, 18, colors._181818),
   },
   inputContainer: {
     marginBottom: hp(0),
@@ -1133,7 +1130,7 @@ const styles = StyleSheet.create({
   },
   input1: {
     maxHeight: hp(200),
-    ...commonFontStyle(400, 22, colors._7B7878),
+    ...commonFontStyle(400, 22, colors._181818),
     marginTop: hp(20),
     borderBottomWidth: 1,
     borderBottomColor: colors._7B7878,
@@ -1212,7 +1209,7 @@ const styles = StyleSheet.create({
   },
   requirementText: {
     width: '90%',
-    color: colors._4A4A4A,
+    color: colors._181818,
     fontSize: RFValue(16, SCREEN_HEIGHT),
   },
   addRequirementButton: {
@@ -1233,7 +1230,7 @@ const styles = StyleSheet.create({
   },
   addRequirementText: {
     textAlign: 'center',
-    color: colors._4A4A4A,
+    color: colors._181818,
     fontSize: RFValue(18, SCREEN_HEIGHT),
   },
   requirementsContainer: {
@@ -1262,8 +1259,8 @@ const styles = StyleSheet.create({
     borderColor: colors._D5D5D5,
   },
   modalInputStyle: {
-    ...commonFontStyle(400, 18, colors._4D4D4D),
     alignSelf: 'baseline',
+    ...commonFontStyle(400, 18, colors._181818),
   },
   empContainer: {
     flex: 1,

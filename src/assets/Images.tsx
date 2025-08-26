@@ -24,6 +24,7 @@ export const IMAGES = {
   uploadImg: require('./image/uploadImg.png'),
   web: require('./image/web.png'),
   currency: require('./image/currency.png'),
+  dummy_cover: require('./image/dummy_cover.png'),
 
   logog: require('./image/logog.png'),
   logo1: require('./image/logo.png'),

@@ -95,7 +95,7 @@ const CustomDropdown = ({
             Keyboard.dismiss();
           }}
           data={data}
-          value={value}
+          value={String(value)}
           onChange={item => onChange(item)}
           disable={disable}
           dropdownPosition={'bottom'}
@@ -130,12 +130,13 @@ const CustomDropdown = ({
             );
           }}
           renderItem={res => {
+            const isSelected = String(res?.value) === String(value);
             return (
               <View style={styles.rowStyle}>
                 <Text
                   style={[
                     styles.inputStyle,
-                    {color: res?.value == value ? '#C9B68B' : '#DADADA'},
+                    {color: isSelected ? '#C9B68B' : '#DADADA'},
                   ]}>
                   {res?.label}
                 </Text>

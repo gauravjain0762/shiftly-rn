@@ -22,6 +22,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {AppStyles} from '../../../theme/appStyles';
 import {
   errorToast,
+  goBack,
   navigateTo,
   resetNavigation,
   successToast,
@@ -30,12 +31,14 @@ import {SCREENS} from '../../../navigation/screenNames';
 import {useCreateCompanyPostMutation} from '../../../api/dashboardApi';
 import {useAppDispatch, useAppSelector} from '../../../redux/hooks';
 import {
+  incrementCoPostSteps,
   resetPostFormState,
   selectPostForm,
   setCoPostSteps,
 } from '../../../features/companySlice';
 import BottomModal from '../../../component/common/BottomModal';
 import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
+import ExpandableText from '../../../component/common/ExpandableText';
 
 const CoPost = () => {
   const {t} = useTranslation();
@@ -50,6 +53,7 @@ const CoPost = () => {
     title,
     isPostUploading,
   } = useAppSelector(selectPostForm);
+  console.log('🔥 ~ CoPost ~ uploadedImages:', uploadedImages);
   const {updatePostForm} = usePostFormUpdater();
 
   const nextStep = () => dispatch(setCoPostSteps(steps + 1));
@@ -73,8 +77,8 @@ const CoPost = () => {
         let data = {
           title: title.trim(),
           description: description.trim(),
-          images: uploadedImages?.map((item: any) =>
-            item?.uri?.split('/').pop(),
+          images: uploadedImages?.map(
+            (item: any) => item?.name || item?.uri?.split('/').pop(),
           ),
         };
         console.log(data, 'handleUploadPost datadatadata >>>>>>>>');
@@ -88,7 +92,7 @@ const CoPost = () => {
           formData.append('images', {
             uri: item.uri,
             type: item.type || 'image/jpeg',
-            name: item.uri.split('/').pop(),
+            name: item.name || item.uri.split('/').pop(),
           });
         });
 
@@ -97,10 +101,6 @@ const CoPost = () => {
         if (response?.status) {
           successToast(response?.message);
           updatePostForm({isPostModalVisible: true});
-          // setTimeout(() => {
-          //   setUploadedImages([]);
-          //   setCreatePostData({title: '', description: ''});
-          // }, 300);
         }
       }
     } catch (e: any) {
@@ -112,20 +112,27 @@ const CoPost = () => {
   };
 
   const addImage = (newImage: any) => {
-    const updated = [
-      ...uploadedImages,
-      {
-        uri: newImage?.sourceURL,
-        type: newImage?.mime,
-        name: newImage?.sourceURL.split('/').pop(),
-      },
-    ];
+    console.log('New image received:', newImage);
 
-    updatePostForm({uploadedImages: updated});
+    const imageObject = {
+      uri: newImage?.sourceURL || newImage?.path || newImage?.uri,
+      type: newImage?.mime || newImage?.type || 'image/jpeg',
+      name:
+        (newImage?.sourceURL || newImage?.path || newImage?.uri)
+          ?.split('/')
+          .pop() || `image_${Date.now()}.jpg`,
+    };
+
+    console.log('Formatted image object:', imageObject);
+
+    const updatedImages =
+      uploadedImages.length > 0 ? [imageObject] : [imageObject];
+
+    updatePostForm({uploadedImages: updatedImages});
 
     setTimeout(() => {
       setImageModal(false);
-    }, 100);
+    }, 200);
   };
 
   const postInputContainer = React.useMemo(
@@ -136,24 +143,27 @@ const CoPost = () => {
     [],
   );
 
+  const hasValidImage = () => {
+    return uploadedImages.length > 0 && uploadedImages[0]?.uri;
+  };
+
   const render = () => {
     switch (steps || 1) {
       case 1:
         return (
           <View style={{flex: 1}}>
-            {!uploadedImages.length && (
+            {uploadedImages?.length < 1 && (
               <BackHeader
-                onBackPress={() => {
-                  resetNavigation(SCREENS.CoTabNavigator);
-                }}
+                onBackPress={goBack}
                 type="company"
                 title=""
                 isRight={false}
                 containerStyle={{paddingHorizontal: wp(33), marginTop: hp(15)}}
               />
             )}
+
             <View>
-              {uploadedImages.length === 0 && !uploadedImages[0]?.uri ? (
+              {uploadedImages?.length < 1 ? (
                 <View style={styles.headercontainer}>
                   <Text style={styles.createPost}>{t('Create a post')}</Text>
                 </View>
@@ -165,8 +175,7 @@ const CoPost = () => {
                   />
                 </TouchableOpacity>
               )}
-              {uploadedImages.length > 0 &&
-              Object?.keys(uploadedImages[0])?.length ? (
+              {uploadedImages?.length > 0 ? (
                 <Image
                   source={{uri: uploadedImages[0]?.uri}}
                   style={styles.uploadImg}
@@ -181,22 +190,23 @@ const CoPost = () => {
                 </View>
               )}
             </View>
-            {uploadedImages.length > 0 &&
-            Object?.keys(uploadedImages[0])?.length ? (
+            {uploadedImages?.length > 0 ? (
               <>
                 <TouchableOpacity
                   onPress={() => {
-                    setImageModal(!imageModal);
+                    console.log('Retake button pressed');
+                    setImageModal(true);
                   }}
                   style={styles.retakeBtn}>
-                  <Text style={styles.retake}>{'Retake'}</Text>
+                  <Text style={styles.retake}>{t('Retake')}</Text>
                 </TouchableOpacity>
                 <GradientButton
                   style={styles.btn}
                   type="Company"
                   title={t('Continue')}
                   onPress={() => {
-                    nextStep();
+                    console.log('Tap one time >>>>>');
+                    dispatch(incrementCoPostSteps());
                   }}
                 />
               </>
@@ -205,12 +215,14 @@ const CoPost = () => {
                 style={[styles.btn, {}]}
                 type="Company"
                 title={t('Upload Image')}
-                onPress={() => setImageModal(!imageModal)}
+                onPress={() => {
+                  console.log('Upload Image button pressed');
+                  setImageModal(true);
+                }}
               />
             )}
           </View>
         );
-
       case 2:
         return (
           <View style={styles.container}>
@@ -227,7 +239,7 @@ const CoPost = () => {
                 </Text>
               </View>
               <CustomTextInput
-                placeholder={t('Enter the Post Title')}
+                placeholder={t('Enter the post title')}
                 placeholderTextColor={colors._4A4A4A}
                 onChangeText={(e: any) => updatePostForm({title: e})}
                 value={title}
@@ -257,11 +269,14 @@ const CoPost = () => {
                   onBackPress={() => prevStep()}
                   type="company"
                   title=""
-                  // isRight={false}
                   RightIcon={
                     <TouchableOpacity
                       onPress={() => {
-                        prevStep();
+                        resetUploadImages();
+                        updatePostForm({
+                          title: '',
+                          description: '',
+                        });
                       }}>
                       <Image source={IMAGES.close} style={styles.close} />
                     </TouchableOpacity>
@@ -272,17 +287,16 @@ const CoPost = () => {
                 </Text>
               </View>
               <CustomTextInput
-                placeholder={t('Enter Description')}
+                placeholder={t('Enter the description')}
                 placeholderTextColor={colors._4A4A4A}
                 onChangeText={(e: any) => updatePostForm({description: e})}
                 value={description}
-                inputStyle={[styles.input1, {maxHeight: 200}]}
+                inputStyle={[styles.input1, {maxHeight: hp(180)}]}
                 multiline
                 containerStyle={[
                   styles.Inputcontainer,
                   {marginTop: hp(65), marginHorizontal: wp(35)},
                 ]}
-                // numberOfLines={1}
               />
             </View>
             <GradientButton
@@ -322,25 +336,31 @@ const CoPost = () => {
                 />
                 <Text style={styles.post}>{title}</Text>
               </View>
-              <Image
-                source={{uri: uploadedImages[0]?.uri ?? ''}}
-                style={[styles.uploadImg, {marginTop: hp(20)}]}
-              />
-              <Text
-                numberOfLines={5}
+              {hasValidImage() && (
+                <Image
+                  source={{uri: uploadedImages[0]?.uri}}
+                  style={[styles.uploadImg, {marginTop: hp(20)}]}
+                />
+              )}
+              <ExpandableText
                 style={[
                   styles.post,
                   {paddingHorizontal: wp(26), marginTop: hp(20)},
-                ]}>
-                {description}
-              </Text>
+                ]}
+                description={description}
+                maxLines={5}
+                showStyle={{
+                  paddingVertical: hp(8),
+                  paddingHorizontal: wp(26),
+                }}
+              />
             </View>
             <GradientButton
               type="Company"
               style={styles.btn}
               disabled={isPostUploading}
-              title={t(isPostUploading ? 'Creating...' : 'Create Post')}
               onPress={handleUploadPost}
+              title={t(isPostUploading ? 'Creating...' : 'Create Post')}
             />
           </View>
         );
@@ -354,7 +374,6 @@ const CoPost = () => {
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
-        // scrollEnabled={false}
         automaticallyAdjustContentInsets
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -365,19 +384,12 @@ const CoPost = () => {
       <ImagePickerModal
         actionSheet={imageModal}
         setActionSheet={() => {
+          console.log('ImagePickerModal closing');
           setImageModal(false);
         }}
         onUpdate={(e: any) => {
+          console.log('ImagePickerModal onUpdate called with:', e);
           addImage(e);
-          // setUpload(e);
-          //   if (currentImageIndex !== null) {
-          //     // Replace existing image
-          //     replaceImage(currentImageIndex, e);
-          //   } else {
-          //     // Add new image
-          //     addImage(e);
-          //   }
-          //   setCurrentImageIndex(null);
         }}
       />
       <BottomModal
@@ -406,8 +418,7 @@ const CoPost = () => {
           type="Company"
           title={t('Home')}
           onPress={() => {
-            dispatch(setCoPostSteps(0));
-            resetPostFormState();
+            dispatch(setCoPostSteps(1)); // Reset to step 1 instead of 0
             updatePostForm({
               isPostModalVisible: false,
               uploadedImages: [],

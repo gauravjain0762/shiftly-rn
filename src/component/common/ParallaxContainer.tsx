@@ -15,7 +15,7 @@ import Animated, {
   useScrollViewOffset,
 } from 'react-native-reanimated';
 import {colors} from '../../theme/colors';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {SCREEN_WIDTH} from '../../theme/fonts';
 
 type container = {
@@ -201,7 +201,7 @@ const ParallaxContainer: FC<container> = ({
   }, []);
 
   return (
-    <View style={[staticStyles.container, ContainerStyle]}>
+    <SafeAreaView edges={['bottom']} style={[staticStyles.container, ContainerStyle]}>
       <Animated.View
         style={[staticStyles.header, {height: headerHeight?.top}, headerStyle]}
       />
@@ -222,7 +222,7 @@ const ParallaxContainer: FC<container> = ({
 
         <View style={[staticStyles.container, ChildrenStyle]}>{children}</View>
       </Animated.ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -16,11 +16,29 @@ import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
 import {colors} from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
+import {useTranslation} from 'react-i18next';
+import {useGetProfileQuery} from '../../../api/authApi';
+import {useAppDispatch} from '../../../redux/hooks';
+import {
+  setCompanyProfileAllData,
+  setCompanyProfileData,
+} from '../../../features/authSlice';
 
 const CoHome = () => {
+  const {t} = useTranslation();
+  const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const {data} = useGetProfileQuery();
+  const companyProfile = data?.data?.company;
+
+  useEffect(() => {
+    if (data?.status && data.data?.company) {
+      dispatch(setCompanyProfileAllData(data.data.company));
+      dispatch(setCompanyProfileData(data.data.company));
+    }
+  }, [data]);
 
   const {
     data: getPost,
@@ -59,7 +77,8 @@ const CoHome = () => {
       <View style={styles.header}>
         <HomeHeader
           type="company"
-          onPressAvatar={() => navigateTo(SCREENS.CoMessage)}
+          companyProfile={companyProfile}
+          onPressAvatar={() => navigateTo(SCREENS.CoMyProfile)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />
       </View>
@@ -80,19 +99,19 @@ const CoHome = () => {
           renderItem={({item}) => <FeedCard item={item} isFollow />}
           onEndReachedThreshold={0.5}
           onEndReached={handleLoadMore}
-          refreshing={isLoading && currentPage === 1}
-          onRefresh={handleRefresh}
+          // refreshing={isLoading && currentPage === 1}
+          // onRefresh={handleRefresh}
           keyExtractor={(_, index) => index.toString()}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={() => {
             return (
-              <View>
+              <View style={styles.emptyContainer}>
                 <BaseText
                   style={{
                     textAlign: 'center',
-                    ...commonFontStyle(500, 18, colors.black),
+                    ...commonFontStyle(400, 18, colors.black),
                   }}>
-                  {'No posts available'}
+                  {t('There is no post available')}
                 </BaseText>
               </View>
             );
@@ -119,7 +138,13 @@ const styles = StyleSheet.create({
     paddingBottom: hp(21),
   },
   scrollcontainer: {
-    paddingHorizontal: wp(25),
+    flexGrow: 1,
     paddingBottom: hp(21),
+    paddingHorizontal: wp(25),
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

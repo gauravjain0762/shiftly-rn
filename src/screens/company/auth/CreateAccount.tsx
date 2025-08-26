@@ -64,7 +64,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
-const size = [
+const companySize = [
   {label: '0 - 50', value: '0 - 50'},
   {label: '50 - 100', value: '50 - 100'},
   {label: '100 - 500', value: '100 - 500'},
@@ -73,13 +73,19 @@ const size = [
 ];
 
 const rules = [
-  {label: 'Minimum 8 characters', test: pw => pw.length >= 8},
-  {label: 'At least 1 uppercase letter', test: pw => /[A-Z]/.test(pw)},
-  {label: 'At least 1 lowercase letter', test: pw => /[a-z]/.test(pw)},
-  {label: 'At least 1 number', test: pw => /\d/.test(pw)},
+  {label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8},
+  {
+    label: 'At least 1 uppercase letter',
+    test: (pw: string) => /[A-Z]/.test(pw),
+  },
+  {
+    label: 'At least 1 lowercase letter',
+    test: (pw: string) => /[a-z]/.test(pw),
+  },
+  {label: 'At least 1 number', test: (pw: string) => /\d/.test(pw)},
   {
     label: 'At least 1 special character (e.g. @, #, $, !)',
-    test: pw => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
+    test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
   },
 ];
 
@@ -109,6 +115,7 @@ const CreateAccount = () => {
   const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
     {},
   );
+  console.log('🔥🔥🔥 ~ CreateAccount ~ businessTypes:', businessTypes);
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
   const dispatch = useAppDispatch();
@@ -144,6 +151,17 @@ const CreateAccount = () => {
     });
     return unsubscribe;
   }, [navigation]);
+
+  useEffect(() => {
+    if (!companyProfileData?.website || companyProfileData?.website === '') {
+      dispatch(
+        setCompanyProfileData({
+          ...companyProfileData,
+          website: 'https://',
+        }),
+      );
+    }
+  }, []);
 
   const getUserLocation = async () => {
     try {
@@ -192,6 +210,12 @@ const CreateAccount = () => {
       },
     );
   };
+
+  // useEffect(() => {
+  //   if (inputRefsOtp.current[0]) {
+  //     inputRefsOtp.current[0].focus();
+  //   }
+  // }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -461,27 +485,29 @@ const CreateAccount = () => {
       });
     }
 
-    // Add cover_images if exists
     console.log(
       '🔥🔥🔥 ~ handleCreateProfile ~ companyProfileData.cover_images:',
       companyProfileData?.cover_images,
     );
-    if (
-      companyProfileData?.cover_images &&
-      companyProfileData.cover_images.length > 0
-    ) {
+    if (companyProfileData?.cover_images?.length > 0) {
       companyProfileData.cover_images.forEach((image: any, index: number) => {
-        console.log('🔥🔥🔥 ~ handleCreateProfile ~ processing image:', image);
         if (image?.uri) {
+          const fileName =
+            image.fileName ||
+            image.name ||
+            `cover_${index}.${image.uri.split('.').pop() || 'jpg'}`;
+
+          const fileType =
+            image.type ||
+            (fileName.endsWith('.png') ? 'image/png' : 'image/jpeg');
+
           const imageData = {
             uri: image.uri,
-            type: image.type || 'image/jpeg',
-            name: image.name || `cover_${index}.jpg`,
+            type: fileType,
+            name: fileName,
           };
-          console.log(
-            '🔥🔥🔥 ~ handleCreateProfile ~ appending imageData:',
-            imageData,
-          );
+
+          console.log('📸 Appending imageData:', imageData);
           formData.append('cover_images', imageData);
         }
       });
@@ -630,7 +656,7 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
-                if (!companyRegisterData?.company_name) {
+                if (!companyRegisterData?.company_name?.trim()) {
                   errorToast('Please enter business name');
                   return;
                 }
@@ -671,7 +697,7 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
-                if (!companyRegisterData?.name) {
+                if (!companyRegisterData?.name?.trim()) {
                   errorToast('Please enter your name');
                   return;
                 }
@@ -816,7 +842,7 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
-                if (!companyRegisterData?.phone) {
+                if (!companyRegisterData?.phone?.trim()) {
                   errorToast('Please enter your phone number');
                   return;
                 }
@@ -845,14 +871,14 @@ const CreateAccount = () => {
                 {otp?.map((val, idx) => (
                   <TextInput
                     key={idx}
-                    ref={el => (inputRefsOtp.current[idx] = el)}
+                    ref={(el: any) => (inputRefsOtp.current[idx] = el)}
                     value={val ? '*' : ''}
                     onChangeText={text => handleChangeOtp(text, idx)}
                     onKeyPress={e => handleKeyPressOtp(e, idx)}
                     maxLength={1}
                     style={styles.otpBox1}
                     keyboardType="decimal-pad"
-                    autoFocus={idx === 0}
+                    // autoFocus={idx === 0 && otp.every(v => v === '')}
                   />
                 ))}
               </View>
@@ -912,18 +938,17 @@ const CreateAccount = () => {
               <CustomTextInput
                 placeholder={t('Enter website')}
                 placeholderTextColor={colors._7B7878}
-                onChangeText={(e: any) =>
+                onChangeText={(e: any) => {
                   dispatch(
                     setCompanyProfileData({
                       website: e,
                     }),
-                  )
-                }
+                  );
+                }}
                 value={companyProfileData?.website}
                 inputStyle={styles.input}
                 containerStyle={[styles.Inputcontainer, {marginTop: hp(20)}]}
               />
-
               <View style={{marginTop: hp(50)}}>
                 <Text style={styles.title}>
                   {t('Company size')}{' '}
@@ -939,11 +964,11 @@ const CreateAccount = () => {
                   showsVerticalScrollIndicator={false}
                   style={{maxHeight: hp(300), marginTop: hp(25)}}>
                   <CustomDropdown
-                    data={size || []}
+                    data={companySize || []}
                     labelField="label"
                     valueField="value"
                     placeholder={'Please select company size'}
-                    value={companyRegisterData?.company_size}
+                    value={companyProfileData?.company_size}
                     onChange={(e: any) => {
                       dispatch(
                         setCompanyProfileData({
@@ -954,7 +979,7 @@ const CreateAccount = () => {
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
                     RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
+                    selectedTextStyle={[styles.selectedTextStyle]}
                   />
                 </ScrollView>
               </View>
@@ -965,7 +990,7 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
-                if (!companyProfileData?.website.length) {
+                if (!companyProfileData?.website?.length) {
                   errorToast('Please enter your company website');
                   return;
                 }
@@ -1185,7 +1210,7 @@ const CreateAccount = () => {
                 data={serviceList}
                 style={{maxHeight: hp(300)}}
                 contentContainerStyle={{flexGrow: 1}}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 keyExtractor={(_, index) => index.toString()}
                 renderItem={({item, index}: any) => {
                   const isSelected = serviceSelect.includes(item?.title);
@@ -1362,8 +1387,9 @@ const CreateAccount = () => {
           <View style={styles.rowView}>
             <TouchableOpacity
               onPress={() => {
-                // if (companyRegistrationStep === 6) {
+                // if (companyRegistrationStep === 7) {
                 //   resetNavigation(SCREENS.CoLogin);
+                //   return;
                 // }
                 companyRegistrationStep == 8
                   ? navigationRef.goBack()
@@ -1475,7 +1501,8 @@ const styles = StyleSheet.create({
   optionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: hp(12),
+    paddingHorizontal: wp(14),
     // borderBottomWidth: 1,
     borderBottomColor: 'transparent',
   },
@@ -1597,7 +1624,7 @@ const styles = StyleSheet.create({
     marginVertical: hp(34),
   },
   secText1: {
-    ...commonFontStyle(400, 20, colors._0B3970),
+    ...commonFontStyle(400, 17, colors._0B3970),
   },
   resendText: {
     ...commonFontStyle(600, 20, colors._0B3970),
@@ -1705,8 +1732,8 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 15, colors._050505),
   },
   closeContainer: {
-    top: '17%',
-    right: wp(-5),
+    top: hp(95),
+    right: wp(-7),
     zIndex: 9999,
     overflow: 'visible',
     borderRadius: hp(100),
@@ -1802,8 +1829,8 @@ const styles = StyleSheet.create({
   },
   closeIcon: {
     position: 'absolute',
-    top: -5,
-    right: -5,
+    top: '-5%',
+    right: '-5%',
     width: wp(20),
     height: wp(20),
     borderRadius: wp(10),

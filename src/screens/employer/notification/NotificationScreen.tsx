@@ -68,7 +68,7 @@ const notifications = [
 const NotificationScreen = () => {
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
-      <SafeAreaView style={{flex: 1}} edges={['bottom']} >
+      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <View style={styles.topConrainer}>
           <BackHeader
             containerStyle={styles.header}
@@ -78,9 +78,9 @@ const NotificationScreen = () => {
           />
         </View>
         <FlatList
-          data={notifications}
+          data={[]} // notificaitons
           style={AppStyles.flex}
-          keyExtractor={item => item.id}
+          keyExtractor={(_, index) => index.toString()}
           renderItem={(item: any) => <NotificationCard {...item} />}
           contentContainerStyle={styles.scrollContainer}
           ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}

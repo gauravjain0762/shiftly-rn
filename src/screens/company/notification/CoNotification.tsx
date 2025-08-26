@@ -1,10 +1,18 @@
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React from 'react';
 import {BackHeader, LinearContainer} from '../../../component';
 import {useTranslation} from 'react-i18next';
 import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
+import BaseText from '../../../component/common/BaseText';
 
 const notifications = [
   {
@@ -56,6 +64,18 @@ const notifications = [
 const CoNotification = () => {
   const {t} = useTranslation();
 
+  const renderItem = ({item, index}: any) => (
+    <View key={index} style={styles.card}>
+      <View style={styles.cardContent}>
+        <Image source={item.icon} style={styles.icon} />
+        <View style={{flex: 1}}>
+          <Text style={styles.notificationTitle}>{item?.title}</Text>
+          <Text style={styles.time}>{item?.time}</Text>
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <BackHeader
@@ -65,21 +85,22 @@ const CoNotification = () => {
         isRight={false}
         titleStyle={styles.title}
       />
-      <ScrollView
+      <FlatList
+        data={[]}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}>
-        {notifications.map(item => (
-          <View key={item.id} style={styles.card}>
-            <View style={styles.cardContent}>
-              <Image source={item.icon} style={styles.icon} />
-              <View style={{flex: 1}}>
-                <Text style={styles.notificationTitle}>{item?.title}</Text>
-                <Text style={styles.time}>{item?.time}</Text>
-              </View>
+        contentContainerStyle={styles.scrollContainer}
+        ListEmptyComponent={() => {
+          return (
+            <View style={styles.emptyContainer}>
+              <BaseText style={styles.emptyText}>
+                {t('There is no notification available')}
+              </BaseText>
             </View>
-          </View>
-        ))}
-      </ScrollView>
+          );
+        }}
+      />
     </LinearContainer>
   );
 };
@@ -96,9 +117,10 @@ const styles = StyleSheet.create({
     marginLeft: wp(((SCREEN_WIDTH - 70) / 2) * 0.5),
   },
   scrollContainer: {
+    flexGrow: 1,
+    paddingTop: hp(10),
     paddingBottom: hp(20),
     paddingHorizontal: wp(26),
-    paddingTop: hp(10),
   },
   card: {
     borderRadius: 18,
@@ -123,5 +145,14 @@ const styles = StyleSheet.create({
   },
   time: {
     ...commonFontStyle(500, 16, colors._464646),
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    ...commonFontStyle(400, 18, colors.black),
   },
 });

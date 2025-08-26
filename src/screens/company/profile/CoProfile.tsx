@@ -16,6 +16,7 @@ import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {
   useCompanyDeleteAccountMutation,
   useCompanyLogoutMutation,
+  useGetProfileQuery,
 } from '../../../api/authApi';
 import {clearAsync} from '../../../utils/asyncStorage';
 import {
@@ -43,6 +44,9 @@ const CoProfile = () => {
   const [isLanguageModalVisible, setLanguageModalVisible] =
     useState<boolean>(false);
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log('🔥🔥🔥 ~ CoProfile ~ userInfo:', userInfo);
+  const {data} = useGetProfileQuery();
+  const companyProfile = data?.data?.company;
 
   const settingsData = [
     {
@@ -81,7 +85,11 @@ const CoProfile = () => {
           icon: IMAGES.Language,
           onPress: () => setLanguageModalVisible(true),
         },
-        {label: 'Notifications', icon: IMAGES.Notifications},
+        {
+          label: 'Notifications',
+          icon: IMAGES.Notifications,
+          onPress: () => navigateTo(SCREENS.CoNotification),
+        },
       ],
     },
     {
@@ -91,21 +99,30 @@ const CoProfile = () => {
           label: 'Privacy Policy',
           icon: IMAGES.PrivacyPolicy,
           onPress: () => {
-            navigateTo(SCREENS.WebviewScreen, {link: ''});
+            navigateTo(SCREENS.WebviewScreen, {
+              link: '',
+              title: 'Privacy Policy',
+            });
           },
         },
         {
           label: 'Terms of Use',
           icon: IMAGES.TermsUse,
           onPress: () => {
-            navigateTo(SCREENS.WebviewScreen, {link: ''});
+            navigateTo(SCREENS.WebviewScreen, {
+              link: '',
+              title: 'Terms of Use',
+            });
           },
         },
         {
           label: 'Help & Support',
           icon: IMAGES.HelpSupport,
           onPress: () => {
-            navigateTo(SCREENS.WebviewScreen, {link: ''});
+            navigateTo(SCREENS.WebviewScreen, {
+              link: '',
+              title: 'Help & Support',
+            });
           },
         },
         {
@@ -179,9 +196,9 @@ const CoProfile = () => {
           containerStyle={styles.header}
           RightIcon={
             <View>
-              {userInfo?.logo ? (
+              {companyProfile?.logo ? (
                 <ImageWithLoader
-                  source={{uri: userInfo.logo}}
+                  source={{uri: companyProfile?.logo}}
                   style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
                   loaderSize="small"
                   loaderColor={colors._0B3970}

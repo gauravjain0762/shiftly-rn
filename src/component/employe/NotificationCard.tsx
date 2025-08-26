@@ -15,7 +15,7 @@ const NotificationCard: FC<props> = ({onPress = () => {}, item}) => {
       <View style={[styles.iconWrapper, item.highlight && styles.starIcon]}>
         <Image
           source={item.highlight ? IMAGES.star : IMAGES.mark1}
-          style={{width1: 15, height: 12, resizeMode: 'contain'}}
+          style={{width: 15, height: 12, resizeMode: 'contain'}}
         />
       </View>
       <View style={styles.textWrapper}>

@@ -4,6 +4,7 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
 import {getImageUrl, getTimeAgo} from '../../utils/commonFunction';
+import ExpandableText from '../common/ExpandableText';
 
 type card = {
   onPressCard?: () => void;
@@ -17,7 +18,10 @@ const FeedCard: FC<card> = ({
   isFollow = false,
 }) => {
   return (
-    <TouchableOpacity activeOpacity={1} onPress={() => onPressCard()} style={styles.card}>
+    <TouchableOpacity
+      activeOpacity={1}
+      onPress={() => onPressCard()}
+      style={styles.card}>
       <View style={styles.cardHeader}>
         <Image
           source={
@@ -28,7 +32,7 @@ const FeedCard: FC<card> = ({
         <View>
           <Text style={styles.hotelName}>{item?.company_id?.company_name}</Text>
           <Text style={styles.walkIn}>
-            Walk-in Interview ·{' '}
+            {/* Walk-in Interview ·{' '} */}
             <Text style={{color: colors._A3A3A3}}>
               {getTimeAgo(item?.createdAt)}
             </Text>
@@ -62,9 +66,11 @@ const FeedCard: FC<card> = ({
         />
       </View>
 
-      <Text numberOfLines={3} style={styles.description}>
-        {item?.description}
-      </Text>
+      <ExpandableText
+        maxLines={3}
+        style={styles.description}
+        description={item?.description}
+      />
     </TouchableOpacity>
   );
 };
@@ -77,9 +83,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   description: {
-    ...commonFontStyle(400, 16, colors._6A6A6A),
     padding: wp(14),
-    lineHeight: hp(27),
+    lineHeight: hp(20),
+    paddingBottom: hp(8),
+    ...commonFontStyle(400, 16, colors._6A6A6A),
   },
   card: {
     backgroundColor: '#FFFFFF',

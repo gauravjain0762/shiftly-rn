@@ -1,5 +1,5 @@
 import React from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, Linking, StyleSheet, Text, View} from 'react-native';
 
 import {AppStyles} from '../../theme/appStyles';
 import {IMAGES} from '../../assets/Images';
@@ -16,18 +16,22 @@ const CoAboutTab = ({companyProfileData, companyProfileAllData}: Props) => {
   return (
     <View>
       <View style={styles.infoRow}>
-        <View style={AppStyles.flex}>
-          <View>
-            <Text style={styles.infoTitle}>{'Website'}</Text>
-            <View style={styles.row}>
-              <Image source={IMAGES.web} style={styles.web} />
-              <Text style={styles.infoValue}>
-                {companyProfileData?.website}
-              </Text>
-            </View>
+        <View style={[AppStyles.flex]}>
+          <Text style={styles.infoTitle}>{'Website'}</Text>
+          <View style={styles.row}>
+            <Image source={IMAGES.web} style={styles.web} />
+            <Text
+              onPress={async () => {
+                if (await Linking.canOpenURL(companyProfileData?.website)) {
+                  Linking.openURL(companyProfileData?.website);
+                }
+              }}
+              style={styles.infoValue}>
+              {companyProfileData?.website}
+            </Text>
           </View>
         </View>
-        <View style={AppStyles.flex}>
+        <View style={[AppStyles.flex, {paddingLeft: wp(30)}]}>
           <Text style={styles.infoTitle}>Type</Text>
           <Text style={styles.infoValue}>Hotel</Text>
         </View>
@@ -35,7 +39,7 @@ const CoAboutTab = ({companyProfileData, companyProfileAllData}: Props) => {
 
       <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>Company size</Text>
-        <Text style={styles.infoValue}>{companyProfileData?.company_size}</Text>
+        <Text style={styles.infoValue}>{companyProfileData?.company_size || "50 - 100"}</Text>
       </View>
 
       <View style={styles.infoSection}>

@@ -20,7 +20,11 @@ import {
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
-import {navigateTo, resetNavigation} from '../../../utils/commonFunction';
+import {
+  goBack,
+  navigateTo,
+  resetNavigation,
+} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useSelector} from 'react-redux';
 import {useTranslation} from 'react-i18next';
@@ -39,6 +43,7 @@ import {
 } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
 import ImageWithLoader from '../../../component/common/ImageWithLoader';
+import {useNavigation} from '@react-navigation/native';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
@@ -48,6 +53,10 @@ const CompanyProfile = () => {
 
   const {companyProfileData, companyProfileAllData} = useSelector(
     (state: RootState) => state.auth,
+  );
+  console.log(
+    '🔥🔥🔥 ~ CompanyProfile ~ companyProfileData:',
+    companyProfileData,
   );
 
   const {data: getPost} = useGetCompanyPostsQuery({});
@@ -63,37 +72,60 @@ const CompanyProfile = () => {
       dispatch(setCompanyProfileAllData(data.data.company));
       dispatch(setCompanyProfileData(data.data.company));
     }
-  }, [data, dispatch]);
+  }, [data]);
 
   // Memoize cover images to prevent recreation on tab changes
   const coverImages = useMemo(() => {
-    if (!companyProfileData?.cover_images?.length) return [];
+    if (!companyProfileData?.cover_images?.length) return [IMAGES.dummy_cover];
+
     return companyProfileData.cover_images
-      .filter((img: any) => img && img.trim() !== '') // Filter out empty/null images
-      .map((img: any) => ({uri: img}));
+      .filter((img: any) => {
+        if (!img) return false;
+
+        if (typeof img === 'string') {
+          return img.trim() !== '';
+        }
+
+        if (typeof img === 'object' && img.uri) {
+          return img.uri.trim() !== '';
+        }
+
+        return false;
+      })
+      .map((img: any) => {
+        if (typeof img === 'string') {
+          return {uri: img};
+        }
+        return img;
+      });
   }, [companyProfileData?.cover_images]);
 
-  // Check if we should show loader based on actual cover images
   const shouldShowCoverLoader = useMemo(() => {
     return coverImages.length > 0;
   }, [coverImages]);
 
-  // Memoize the back button handler
+  const navigation = useNavigation();
   const handleBackPress = useCallback(() => {
-    resetNavigation(SCREENS.CoTabNavigator);
-  }, []);
+    const state = navigation.getState() as any;
 
-  // Memoize the create post handler
+    const routes = state.routes;
+    const previousRoute = routes[routes.length - 2];
+
+    if (previousRoute?.name === SCREENS.CoProfile) {
+      navigation.goBack();
+    } else {
+      resetNavigation(SCREENS.CoTabNavigator);
+    }
+  }, [navigation]);
+
   const handleCreatePost = useCallback(() => {
     navigateTo(SCREENS.CoPost);
   }, []);
 
-  // Memoize tab press handler
   const handleTabPress = useCallback((index: number) => {
     setSelectedTabIndex(index);
   }, []);
 
-  // Memoize the image children component
   const imageChildren = useMemo(
     () => (
       <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
@@ -103,7 +135,6 @@ const CompanyProfile = () => {
     [handleBackPress],
   );
 
-  // Memoize post render item
   const renderPostItem = useCallback(
     ({item}: {item: any}) => (
       <CustomPostCard title={item?.title} image={item?.image} />
@@ -111,7 +142,6 @@ const CompanyProfile = () => {
     [],
   );
 
-  // Memoize job render
   const renderJobs = useMemo(() => {
     if (selectedTanIndex !== 2) return null;
 
@@ -122,7 +152,6 @@ const CompanyProfile = () => {
     ));
   }, [selectedTanIndex, jobsList]);
 
-  // Custom logo placeholder
   const logoPlaceholder = useMemo(
     () => (
       <View style={styles.logoPlaceholder}>
@@ -172,15 +201,22 @@ const CompanyProfile = () => {
             <Text style={styles.companyName}>
               {companyProfileData?.company_name || 'N/A'}
             </Text>
-            <Text style={styles.tagline}>
-              Experience a world away from your everyday
-            </Text>
-            <Text style={styles.industry}>Hospitality The Palm, Dubai</Text>
+            <Text style={styles.tagline}>{companyProfileData?.mission}</Text>
+            <Text style={styles.industry}>{companyProfileData?.address}</Text>
           </View>
         </View>
 
-        <Text style={styles.description}>{companyProfileData?.about}</Text>
-        <Text style={styles.description}>{companyProfileData?.values}</Text>
+        {companyProfileData?.about && (
+          <Text style={styles.description}>
+            {companyProfileData?.about || ''}
+          </Text>
+        )}
+
+        {companyProfileData?.values && (
+          <Text style={styles.description}>
+            {companyProfileData?.values || ''}
+          </Text>
+        )}
 
         <View style={styles.tabRow}>
           {ProfileTabs.map((item, index) => (
@@ -218,12 +254,12 @@ const CompanyProfile = () => {
 
         {renderJobs}
 
-        <GradientButton
+        {/* <GradientButton
           type="Company"
           style={styles.button}
           title={t('Create a Post')}
           onPress={handleCreatePost}
-        />
+        /> */}
       </LinearContainer>
     </ParallaxContainer>
   );
@@ -253,7 +289,7 @@ const styles = StyleSheet.create({
   profileHeader: {
     flexDirection: 'row',
     gap: 12,
-    paddingVertical: hp(20),
+    // paddingVertical: hp(20),
     alignItems: 'center',
   },
   logoContainer: {
@@ -299,6 +335,7 @@ const styles = StyleSheet.create({
     lineHeight: hp(25),
   },
   tabRow: {
+    marginTop: hp(25),
     flexDirection: 'row',
   },
   tabItem: {

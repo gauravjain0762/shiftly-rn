@@ -21,7 +21,7 @@ import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import MyJobCard from '../../../component/common/MyJobCard';
-import {errorToast, navigateTo} from '../../../utils/commonFunction';
+import {errorToast, goBack, navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
 import {Dropdown} from 'react-native-element-dropdown';
@@ -47,6 +47,7 @@ const CoJob = () => {
   const {t} = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
+  console.log("🔥🔥🔥 ~ CoJob ~ filters:", filters)
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
@@ -74,20 +75,22 @@ const CoJob = () => {
   );
 
   useEffect(() => {
-    setJobs(data?.data?.jobs ?? []);
+    const jobData = data?.data?.jobs;
+    setJobs(jobData ?? []);
   }, [data]);
 
   const latestJobList = jobs;
 
   const handleApplyFilter = async () => {
     try {
-      // Apply all the local state values to Redux filters
-      dispatch(setFilters({
-        location: location,
-        job_types: value,
-        salary_from: range[0],
-        salary_to: range[1],
-      }));
+      dispatch(
+        setFilters({
+          location: location,
+          job_types: value,
+          salary_from: range[0],
+          salary_to: range[1],
+        }),
+      );
       setIsFilterModalVisible(false);
     } catch (error) {
       errorToast('Failed to apply filter');
@@ -105,34 +108,42 @@ const CoJob = () => {
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
-      <BackHeader
-        type="company"
-        isRight={false}
-        title={t('My Jobs')}
-        titleStyle={styles.title}
-        containerStyle={styles.header}
-        RightIcon={
-          <View style={styles.rightSection}>
-            <LinearGradient
-              colors={['#024AA1', '#041428']}
-              style={styles.gradient}>
-              <TouchableOpacity
-                activeOpacity={0.5}
-                onPress={() => {
-                  dispatch(resetJobFormState());
-                  navigateTo(SCREENS.PostJob);
-                }}
-                style={styles.postJobButton}>
-                <View style={styles.plusIconContainer}>
-                  <Image source={IMAGES.pluse} style={styles.plusIcon} />
-                </View>
-                <Text style={styles.postJobText}>{t('Post Job')}</Text>
-              </TouchableOpacity>
-            </LinearGradient>
+      <View style={styles.header}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            onPress={() => goBack()}
+            style={styles.backButton}
+            activeOpacity={0.6}>
+            <Image
+              source={IMAGES.backArrow}
+              tintColor={colors._0B3970}
+              style={styles.backIcon}
+            />
+          </TouchableOpacity>
+          <Text style={styles.title}>{'My Jobs'}</Text>
+        </View>
 
+        <View style={styles.rightSection}>
+          <LinearGradient
+            colors={['#024AA1', '#041428']}
+            style={styles.gradient}>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={() => {
+                // dispatch(resetJobFormState());
+                navigateTo(SCREENS.PostJob);
+              }}
+              style={styles.postJobButton}>
+              <View style={styles.plusIconContainer}>
+                <Image source={IMAGES.pluse} style={styles.plusIcon} />
+              </View>
+              <Text style={styles.postJobText}>{t('Post Job')}</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+          {data && (
             <Pressable
               onPress={() => {
-                // Initialize local state with current filter values
                 setValue(filters.job_types || null);
                 setLocation(filters.location || '');
                 setRange([
@@ -143,9 +154,9 @@ const CoJob = () => {
               }}>
               <Image source={IMAGES.post_filter} style={styles.filterLogo} />
             </Pressable>
-          </View>
-        }
-      />
+          )}
+        </View>
+      </View>
 
       {isLoading ? (
         <MyJobsSkeleton />
@@ -154,7 +165,11 @@ const CoJob = () => {
           <FlatList
             data={latestJobList}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{paddingBottom: '20%'}}
+            contentContainerStyle={{
+              flexGrow: 1,
+              marginTop: hp(12),
+              paddingBottom: '20%',
+            }}
             renderItem={({item, index}) => (
               <View key={index} style={{marginBottom: hp(10)}}>
                 <MyJobCard
@@ -164,13 +179,11 @@ const CoJob = () => {
               </View>
             )}
             ListEmptyComponent={() => (
-              <Text
-                style={{
-                  textAlign: 'center',
-                  ...commonFontStyle(500, 18, colors.black),
-                }}>
-                {'No Jobs Found'}
-              </Text>
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  {'There is no job posted yet'}
+                </Text>
+              </View>
             )}
             keyExtractor={(_, index) => index.toString()}
           />
@@ -199,10 +212,7 @@ const CoJob = () => {
             </View>
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
-              <RangeSlider
-                range={range}
-                setRange={setRange}
-              />
+              <RangeSlider range={range} setRange={setRange} />
             </View>
             <Dropdown
               data={jobTypes}
@@ -238,15 +248,28 @@ const CoJob = () => {
 
 export default CoJob;
 
-// styles unchanged
 const styles = StyleSheet.create({
   header: {
     paddingTop: hp(26),
     paddingHorizontal: wp(35),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: wp(10),
+  },
+  backIcon: {
+    width: wp(24),
+    height: hp(24),
+    resizeMode: 'contain',
   },
   title: {
-    right: '22%',
-    marginLeft: wp(((SCREEN_WIDTH - 70) / 2) * 0.5),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
   rightSection: {
     flexDirection: 'row',
@@ -365,5 +388,14 @@ const styles = StyleSheet.create({
     paddingVertical: hp(12),
     justifyContent: 'center',
     borderColor: colors._4D4D4D,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    ...commonFontStyle(500, 18, colors.black),
   },
 });

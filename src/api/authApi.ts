@@ -143,8 +143,8 @@ export const authApi = createApi({
         try {
           const {data} = await queryFulfilled;
           if (data?.status && data.data?.company) {
-            dispatch(setUserInfo(data.data.company));
-            await setAsyncUserInfo(data.data.company);
+            // dispatch(setUserInfo(data.data.company));
+            // await setAsyncUserInfo(data.data.company);
           } else {
             errorToast(data?.message || 'Something went wrong.');
           }

@@ -19,22 +19,25 @@ type props = {
   onPressNotifi?: () => void;
   type?: 'company' | 'employe';
   onPressAvatar?: () => void;
+  companyProfile?: any;
 };
 
 const HomeHeader: FC<props> = ({
   onPressNotifi = () => {},
   type = 'employe',
   onPressAvatar,
+  companyProfile,
 }) => {
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  // const {companyProfile} = useSelector((state: RootState) => state.auth);
+  // console.log("🔥🔥🔥 ~ HomeHeader ~ companyProfile:", companyProfile)
 
   return (
     <View style={styles.header}>
       <View style={styles.row}>
         <TouchableOpacity onPress={onPressAvatar}>
-          {userInfo?.logo ? (
+          {companyProfile?.logo ? (
             <ImageWithLoader
-              source={{uri: userInfo.logo}}
+              source={{uri: companyProfile.logo}}
               style={styles.avatar}
               loaderSize="small"
               loaderColor={colors._0B3970}
@@ -44,9 +47,9 @@ const HomeHeader: FC<props> = ({
                 </View>
               }
             />
-          ) : userInfo?.picture ? (
+          ) : companyProfile?.picture ? (
             <ImageWithLoader
-              source={{uri: userInfo.picture}}
+              source={{uri: companyProfile.picture}}
               style={styles.avatar}
               loaderSize="small"
               loaderColor={colors._0B3970}
@@ -67,14 +70,14 @@ const HomeHeader: FC<props> = ({
               styles.name,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            {userInfo?.name ?? 'Faf Tinna Thomas'}
+            {companyProfile?.name || ''}
           </Text>
           <Text
             style={[
               styles.location,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            {userInfo?.country ?? 'Dubai, UAE'}
+            {companyProfile?.address}
           </Text>
         </View>
       </View>
@@ -122,11 +125,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: wp(17),
   },
   info: {
     gap: hp(4),
+    width: '70%',
   },
   avatarPlaceholder: {
     width: wp(60),

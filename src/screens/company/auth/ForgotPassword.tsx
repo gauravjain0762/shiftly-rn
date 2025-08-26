@@ -36,6 +36,7 @@ import {
 } from '../../../api/authApi';
 import {setForgotPasswordSteps, setUserInfo} from '../../../features/authSlice';
 import {SCREENS} from '../../../navigation/screenNames';
+import {setAuthData} from '../../../features/companySlice';
 
 const ForgotPassword = () => {
   const {t} = useTranslation();
@@ -45,7 +46,7 @@ const ForgotPassword = () => {
   );
   const [OtpVerify] = useCompanyOTPVerifyMutation();
   const [companyChangePassword] = useCompanyChangePasswordMutation();
-  const [email, setEmail] = useState(__DEV__ ? 'Testerdb06@gmail.com' : '');
+  const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
@@ -54,6 +55,7 @@ const ForgotPassword = () => {
   const [start, setStart] = useState(false);
   const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
   const [companyResendOTP] = useCompanyResendOTPMutation({});
+  const {auth} = useSelector((state: RootState) => state.company);
 
   useEffect(() => {
     if (timer == 0) return;
@@ -92,12 +94,12 @@ const ForgotPassword = () => {
   };
 
   const handleSendOtpwithEmail = async () => {
-    if (!email.trim()) {
+    if (!auth?.email.trim()) {
       errorToast('Please enter a valid email');
       return;
     }
     try {
-      const res = await companyForgotPassword({email}).unwrap();
+      const res = await companyForgotPassword(auth?.email).unwrap();
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         dispatch(setUserInfo(res.data?.user));
@@ -199,12 +201,12 @@ const ForgotPassword = () => {
             <View style={passwordStyles.inputView}>
               <Text style={passwordStyles.label}>{t('Your Email')}</Text>
               <CustomTextInput
-                value={email}
+                value={auth?.email}
                 inputStyle={passwordStyles.emailText}
                 placeholder="Enter your email"
                 placeholderTextColor={colors._7B7878}
                 containerStyle={passwordStyles.inputcontainer}
-                onChangeText={setEmail}
+                onChangeText={e => dispatch(setAuthData({email: e}))}
                 secureTextEntry={false}
               />
             </View>

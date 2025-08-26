@@ -37,12 +37,18 @@ interface PostFormState {
   isPostUploading: false;
 }
 
+interface AuthState {
+  email: string;
+  password: string;
+}
+
 interface CompanyState {
   coPostSteps: number;
   jobForm: JobFormState;
   coPostJobSteps: number;
   postForm: PostFormState;
   filters: FiltersState;
+  auth: AuthState;
 }
 
 interface FiltersState {
@@ -60,7 +66,7 @@ const initialState: CompanyState = {
     job_type: {label: 'Full Time', value: 'Full Time'},
     area: {label: 'Dubai Marina', value: 'Dubai Marina'},
     duration: {label: '1 Month', value: '1 Month'},
-    job_sector: null,
+    job_sector: {label: 'Hotel/Resort', value: 'Hotel/Resort'},
     startDate: {label: 'Immediately', value: 'Immediately'},
     contract: {label: 'Full-time experience', value: 'Full-time experience'},
     salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},
@@ -94,6 +100,10 @@ const initialState: CompanyState = {
     salary_to: 50000,
     location: '',
   },
+  auth: {
+    email: '',
+    password: '',
+  },
 };
 
 const companySlice = createSlice({
@@ -109,8 +119,17 @@ const companySlice = createSlice({
     resetJobFormState: state => {
       state.jobForm = initialState.jobForm;
     },
-    setCoPostSteps: (state, action: PayloadAction<number>) => {
-      state.coPostSteps = action.payload;
+    setCoPostSteps: (
+      state,
+      action: PayloadAction<number | ((prev: number) => number)>,
+    ) => {
+      if (typeof action.payload === 'function') {
+        state.coPostSteps = (action.payload as (prev: number) => number)(
+          state.coPostSteps,
+        );
+      } else {
+        state.coPostSteps = action.payload;
+      }
     },
     setPostFormState: (
       state,
@@ -118,14 +137,23 @@ const companySlice = createSlice({
     ) => {
       state.postForm = {...state.postForm, ...action.payload};
     },
+    incrementCoPostSteps: state => {
+      state.coPostSteps += 1;
+    },
     resetPostFormState: state => {
       state.postForm = initialState.postForm;
     },
     setFilters: (state, action: PayloadAction<Partial<FiltersState>>) => {
       state.filters = {...state.filters, ...action.payload};
     },
-    resetFilters: (state) => {
+    resetFilters: state => {
       state.filters = initialState.filters;
+    },
+    setAuthData: (state, action: PayloadAction<Partial<AuthState>>) => {
+      state.auth = {
+        ...state.auth,
+        ...action.payload,
+      };
     },
   },
 });
@@ -137,7 +165,9 @@ export const {
   setCoPostJobSteps,
   resetJobFormState,
   resetPostFormState,
+  incrementCoPostSteps,
   resetFilters,
+  setAuthData,
   setFilters,
 } = companySlice.actions;
 

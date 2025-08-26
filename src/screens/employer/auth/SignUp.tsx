@@ -341,7 +341,13 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={nextStep}
+              onPress={() => {
+                if (!name?.trim()) {
+                  errorToast(t('Name is required'));
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -364,7 +370,13 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={nextStep}
+              onPress={() => {
+                if (!email?.trim()) {
+                  errorToast(t('Email is required'));
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -400,7 +412,18 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={nextStep}
+              onPress={() => {
+                const enteredPassword = password.join('').trim();
+                if (!enteredPassword) {
+                  errorToast(t('Password is required'));
+                  return;
+                }
+                if (enteredPassword?.length < 8) {
+                  errorToast(t('Password must be at least 8 characters'));
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -425,6 +448,14 @@ const SignUp = () => {
               style={styles.btn}
               title={'Next'}
               onPress={() => {
+                if (!phone?.trim()) {
+                  errorToast(t('Phone number is required'));
+                  return;
+                }
+                if (phone?.length < 9) {
+                  errorToast('Please enter a valid phone number');
+                  return;
+                }
                 handleRegister();
               }}
             />

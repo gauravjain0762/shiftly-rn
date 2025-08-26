@@ -1,7 +1,6 @@
 import {
   Image,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,42 +20,48 @@ import {
   emailCheck,
   errorToast,
   navigateTo,
-  resetNavigation,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
 import {useCompanyLoginMutation} from '../../../api/authApi';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {RootState} from '../../../store';
+import {useDispatch, useSelector} from 'react-redux';
+import {setAuthData} from '../../../features/companySlice';
 
 const CoLogin = () => {
-  const {t, i18n} = useTranslation();
-  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
-
-  const [companyLogin, {isLoading: loginLoading}] = useCompanyLoginMutation();
-  const [authData, setAuthData] = React.useState({
-    email: __DEV__ ? 'Testerdb06@gmail.com' : '',
-    password: __DEV__ ? '123456' : '',
-  });
+  const {t} = useTranslation();
+  // const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const [companyLogin] = useCompanyLoginMutation();
+  const {auth} = useSelector((state: RootState) => state.company);
+  const {email, password} = auth;
 
   const handleLogin = async () => {
-    if (!emailCheck(authData?.email)) {
+    if (!emailCheck(email)) {
       errorToast(t('Please enter a valid email'));
-    } else if (authData?.password === '') {
+    } else if (!password) {
       errorToast(t('Please enter password'));
     } else {
-      let data = {
-        email: authData?.email.trim(),
-        password: authData?.password.trim(),
-        // language: language,
-        // deviceToken: fcmToken ?? 'ddd',
-        // deviceType: Platform.OS,
+      const data = {
+        email: email.trim(),
+        password: password.trim(),
       };
-      console.log('🔥🔥 ~ handleLogin ~ data:', data);
-      const response = await companyLogin(data).unwrap();
-      // console.log(response, 'response----');
+
+      try {
+        const response = await companyLogin(data).unwrap();
+
+        if (response?.status) {
+          console.log('✅ Login success:', response);
+          dispatch(setAuthData({email: '', password: ''}));
+        } else {
+          errorToast(t(response?.message));
+        }
+      } catch (err: any) {
+        console.log('❌ Login failed:', err);
+      }
     }
   };
+
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
@@ -74,21 +79,22 @@ const CoLogin = () => {
               inputStyle={styles.input}
               placeholder="Enter your email"
               placeholderTextColor={colors._7B7878}
-              value={authData?.email}
+              value={email}
               onChangeText={e => {
-                setAuthData({...authData, email: e});
+                dispatch(setAuthData({email: e, password}));
               }}
             />
             <Text style={styles.label}>{t('Password')}</Text>
             <CustomTextInput
               showRightIcon
+              value={password}
               inputStyle={styles.passinput}
               containerStyle={styles.inputcontainer}
               placeholderTextColor={colors._7B7878}
               imgStyle={styles.eye}
               placeholder="* * * * * * * * *"
               onChangeText={e => {
-                setAuthData({...authData, password: e});
+                dispatch(setAuthData({email, password: e}));
               }}
               isPassword
             />
@@ -101,7 +107,7 @@ const CoLogin = () => {
           <View>
             <GradientButton
               type="Company"
-              onPress={handleLogin} //() => resetNavigation(SCREENS.CoTabNavigator)}
+              onPress={handleLogin}
               style={styles.button}
               title="Login"
             />
@@ -136,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     flex: 1,
     paddingHorizontal: wp(23),
-    paddingVertical: hp(20),
+    paddingVertical: hp(18),
   },
   label: {
     ...commonFontStyle(400, 18, colors._0B3970),

@@ -15,7 +15,7 @@ const CoMyProfile = () => {
   const {t} = useTranslation();
   const {data, refetch} = useGetProfileQuery();
   const companyProfile = data?.data?.company;
-  console.log('🔥🔥🔥 ~ CoMyProfile ~ companyProfile:', companyProfile);
+  console.log('🔥 ~ CoMyProfile ~ companyProfile:', companyProfile);
 
   useFocusEffect(
     useCallback(() => {
