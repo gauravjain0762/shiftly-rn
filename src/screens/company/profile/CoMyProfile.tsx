@@ -6,15 +6,18 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useFocusEffect} from '@react-navigation/native';
 import {IMAGES} from '../../../assets/Images';
 import ImageWithLoader from '../../../component/common/ImageWithLoader';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {Flag} from 'react-native-country-picker-modal';
+import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
 
 const CoMyProfile = () => {
   const {t} = useTranslation();
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  const countryCode = userInfo?.phone_code || 'AE';
+
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <View style={styles.main}>
@@ -70,9 +73,18 @@ const CoMyProfile = () => {
           </View>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Phone')}</Text>
-            <Text style={styles.labelDesc}>
-              {`🇦🇪 +${userInfo?.phone_code} ${userInfo?.phone}`}
-            </Text>
+
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Flag
+                withEmoji
+                flagSize={40}
+                withFlagButton
+                countryCode={callingCodeToCountry(countryCode) as any}
+              />
+              <Text style={styles.labelDesc}>
+                {`+${countryCode} ${userInfo?.phone}`}
+              </Text>
+            </View>
           </View>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Location')}</Text>

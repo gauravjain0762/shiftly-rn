@@ -12,7 +12,7 @@ type Props = {
   companyProfileAllData?: any;
 };
 
-const CoAboutTab = ({companyProfileData, companyProfileAllData}: Props) => {
+const CoAboutTab = ({companyProfileData}: Props) => {
   return (
     <View>
       <View style={styles.infoRow}>
@@ -33,19 +33,23 @@ const CoAboutTab = ({companyProfileData, companyProfileAllData}: Props) => {
         </View>
         <View style={[AppStyles.flex, {paddingLeft: wp(30)}]}>
           <Text style={styles.infoTitle}>Type</Text>
-          <Text style={styles.infoValue}>Hotel</Text>
+          <Text style={styles.infoValue}>
+            {companyProfileData?.business_type_id}
+          </Text>
         </View>
       </View>
 
       <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>Company size</Text>
-        <Text style={styles.infoValue}>{companyProfileData?.company_size || "50 - 100"}</Text>
+        <Text style={styles.infoValue}>
+          {companyProfileData?.company_size || '50 - 100'}
+        </Text>
       </View>
 
       <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>Sectors/industry</Text>
         <Text style={styles.infoValue}>
-          Industry Sectors or Specializations
+          {companyProfileData?.business_type_id}
         </Text>
       </View>
 

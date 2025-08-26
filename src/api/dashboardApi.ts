@@ -79,7 +79,7 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      providesTags: ['GetPost','GetCompanyProfile'],
+      providesTags: ['GetPost', 'GetCompanyProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -160,7 +160,7 @@ export const dashboardApi = createApi({
           'Content-Type': 'multipart/form-data',
         },
       }),
-      invalidatesTags: ['CreateProfile','GetCompanyProfile'],
+      invalidatesTags: ['CreateProfile', 'GetCompanyProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -175,19 +175,18 @@ export const dashboardApi = createApi({
         }
       },
     }),
-      getProfile: builder.query<any, void>({
+    getProfile: builder.query<any, void>({
       query: () => ({
         url: API.getCompanyProfile,
         method: HTTP_METHOD.GET,
         skipLoader: false,
       }),
-      providesTags:['GetCompanyProfile'],
+      providesTags: ['GetCompanyProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status && data.data?.company) {
-            console.log(data,'datadatadatadata');
-            
+            console.log(data, 'datadatadatadata');
             dispatch(setUserInfo(data.data.company));
             await setAsyncUserInfo(data.data.company);
           } else {
@@ -282,7 +281,7 @@ export const dashboardApi = createApi({
       },
     }),
     getCompanyChatMessages: builder.query<any, any>({
-      query: (chatId) => {
+      query: chatId => {
         const queryParam = chatId ? `?chat_id=${chatId}` : '';
 
         return {
@@ -662,5 +661,5 @@ export const {
   useGetCompanyChatsQuery,
   useGetCompanyChatMessagesQuery,
   useSendCompanyMessageMutation,
-  useGetProfileQuery
+  useGetProfileQuery,
 } = dashboardApi;

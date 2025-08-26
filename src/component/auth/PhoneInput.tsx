@@ -6,14 +6,13 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ViewStyle,
   ImageStyle,
   TextProps,
   TextStyle,
   TextInputProps,
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
-import {commonFontStyle, hp} from '../../theme/fonts';
+import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
@@ -43,7 +42,6 @@ const PhoneInput: FC<picker> = ({
   // const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState<any>('AE');
   const [showModal, setShowModal] = useState(false);
-  // const [callingCode, setCallingCode] = useState('971');
   const [valid, setValid] = useState(true);
   const {t, i18n} = useTranslation();
   const handlePhoneChange = (text: string) => {

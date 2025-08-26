@@ -499,11 +499,12 @@ const PostJob = () => {
               <Text style={styles.inputLabelLarge}>{t('Requirements')}</Text>
 
               <View
-                style={{}
+                style={
+                  {}
                   // requirements?.length
-                  //   ? 
+                  //   ?
                   //   styles.requirementWrapper
-                  //   : 
+                  //   :
                   //   {flexGrow: 1}
                 }>
                 {requirements?.length ? (
@@ -543,11 +544,13 @@ const PostJob = () => {
               </View>
 
               <View
-                style={{
-                  // width: '100%',
-                  // bottom: hp(0),
-                  // position: 'absolute',
-                }}>
+                style={
+                  {
+                    // width: '100%',
+                    // bottom: hp(0),
+                    // position: 'absolute',
+                  }
+                }>
                 <Pressable
                   onPress={() => updateJobForm({isModalVisible: true})}
                   style={styles.addRequirementButton}>
@@ -1265,8 +1268,9 @@ const styles = StyleSheet.create({
   },
   emptyReqContainer: {
     flex: 1,
+    marginTop: hp(20),
     alignItems: 'center',
-    marginBottom: hp(120),
+    marginBottom: hp(50),
     justifyContent: 'center',
   },
   closeIcon: {

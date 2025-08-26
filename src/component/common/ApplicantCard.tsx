@@ -57,14 +57,14 @@ const ApplicantCard = ({
             style={styles.chatButton}>
             <Image source={IMAGES.chat} />
           </Pressable>
-          {showShortListButton && (
-            <TouchableOpacity
-              activeOpacity={0.5}
-              onPress={handleShortListEmployee}
-              style={styles.actionButton}>
-              <Text style={styles.actionText}>{t('Shortlist')}</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={handleShortListEmployee}
+            style={styles.actionButton}>
+            <Text style={styles.actionText}>
+              {t(!showShortListButton ? 'Shortlisted' : 'Shortlist')}
+            </Text>
+          </TouchableOpacity>
           <View
             style={[
               styles.actionButton,
@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
     borderRadius: hp(20),
     borderWidth: hp(1.5),
     borderColor: colors._C9B68B,
+    marginBottom: hp(10),
   },
   row: {
     flexDirection: 'row',

@@ -14,6 +14,7 @@ import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {
   useGetCompanyPostsQuery,
+  useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
 import {colors} from '../../../theme/colors';
@@ -23,6 +24,7 @@ import {useAppDispatch} from '../../../redux/hooks';
 import {
   setCompanyProfileAllData,
   setCompanyProfileData,
+  setUserInfo,
 } from '../../../features/authSlice';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
@@ -30,6 +32,8 @@ import {RootState} from '../../../store';
 const CoHome = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
+  const {data: profileData} = useGetProfileQuery();
+  const userdata = profileData?.data?.comnpany;
   const {userInfo}: any = useSelector((state: RootState) => state.auth);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,11 +41,12 @@ const CoHome = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
-    if (userInfo) {
-      dispatch(setCompanyProfileAllData(userInfo));
-      dispatch(setCompanyProfileData(userInfo));
+    if (userdata) {
+      dispatch(setCompanyProfileAllData(userdata));
+      dispatch(setCompanyProfileData(userdata));
+      dispatch(setUserInfo(userdata));
     }
-  }, [userInfo]);
+  }, [userdata]);
 
   const {
     data: getPost,

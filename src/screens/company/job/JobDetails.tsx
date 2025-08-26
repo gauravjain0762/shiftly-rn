@@ -200,9 +200,11 @@ const CoJobDetails = () => {
                     <ApplicantCard
                       key={index}
                       item={item}
-                      handleShortListEmployee={() =>
-                        handleShortListEmployee(item)
-                      }
+                      handleShortListEmployee={() => {
+                        if (!item?.status) {
+                          handleShortListEmployee(item);
+                        }
+                      }}
                       showShortListButton={!item?.status}
                     />
                   );

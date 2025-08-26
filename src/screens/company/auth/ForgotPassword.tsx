@@ -98,8 +98,10 @@ const ForgotPassword = () => {
       errorToast('Please enter a valid email');
       return;
     }
+    console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ auth:', auth);
     try {
-      const res = await companyForgotPassword(auth?.email).unwrap();
+      const res = await companyForgotPassword({email: auth?.email}).unwrap();
+      console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ res:', res);
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         dispatch(setUserInfo(res.data?.user));
@@ -389,7 +391,7 @@ const styles = StyleSheet.create({
     marginVertical: hp(34),
   },
   secText1: {
-    ...commonFontStyle(400, 20, colors._0B3970),
+    ...commonFontStyle(400, 17, colors._0B3970),
   },
   resendText: {
     marginTop: hp(74),

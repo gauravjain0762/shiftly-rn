@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -16,8 +16,11 @@ import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {useAppDispatch} from '../../../redux/hooks';
-import {setCompanyProfileData} from '../../../features/authSlice';
-import {useCreateCompanyProfileMutation} from '../../../api/dashboardApi';
+import {setCompanyProfileData, setUserInfo} from '../../../features/authSlice';
+import {
+  useCreateCompanyProfileMutation,
+  useGetProfileQuery,
+} from '../../../api/dashboardApi';
 import {
   errorToast,
   navigateTo,
@@ -29,18 +32,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ImageWithLoader from '../../../component/common/ImageWithLoader';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
+import {Flag} from 'react-native-country-picker-modal';
 
 const CoEditMyProfile = () => {
   const {t} = useTranslation();
-  const {userInfo} = useSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
+  const {userInfo} = useSelector((state: RootState) => state.auth);
   const [updateCompanyProfile] = useCreateCompanyProfileMutation();
+  const {data: profileData} = useGetProfileQuery();
 
-  const [companyName, setCompanyName] = useState(
-    userInfo?.company_name || '',
-  );
+  const [companyName, setCompanyName] = useState(userInfo?.company_name || '');
   const [about, setAbout] = useState(userInfo?.about || '');
   const [email, setEmail] = useState(userInfo?.email || '');
   const [location, setLocation] = useState(
@@ -48,7 +52,6 @@ const CoEditMyProfile = () => {
   );
   const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
   const [imageModal, setImageModal] = useState(false);
-
   const [userAddress, setUserAddress] = useState<
     | {
         address: string;
@@ -59,7 +62,10 @@ const CoEditMyProfile = () => {
       }
     | undefined
   >();
-  console.log('🔥 ~ PostJob ~ userAddress:', userAddress);
+
+  useEffect(() => {
+    dispatch(setUserInfo(profileData?.data?.company));
+  }, [dispatch, profileData]);
 
   const getUserLocation = async () => {
     try {
@@ -91,8 +97,7 @@ const CoEditMyProfile = () => {
     const aboutChanged = about !== (userInfo.about || '');
     const locationChanged =
       location !== (userInfo.location || userInfo.address || '');
-    const companyNameChanged =
-      companyName !== (userInfo.company_name || '');
+    const companyNameChanged = companyName !== (userInfo.company_name || '');
 
     return logoChanged || aboutChanged || locationChanged || companyNameChanged;
   }, [logo, about, location, companyName, userInfo]);
@@ -210,11 +215,11 @@ const CoEditMyProfile = () => {
 
           <Text style={styles.labelText}>{t('Description')}</Text>
           <TextInput
+            multiline
             value={about}
             onChangeText={setAbout}
-            multiline
-            placeholder={t('About Company')}
             style={styles.inputAbout}
+            placeholder={t('About Company')}
             placeholderTextColor={colors._656464}
           />
 
@@ -235,9 +240,20 @@ const CoEditMyProfile = () => {
 
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Phone')}</Text>
-              <Text style={styles.labelDesc}>{`🇦🇪 +${
-                userInfo?.phone_code || ''
-              } ${userInfo?.phone || ''}`}</Text>
+
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Flag
+                  withEmoji
+                  flagSize={hp(26)}
+                  withFlagButton
+                  countryCode={
+                    callingCodeToCountry(userInfo?.phone_code) as any
+                  }
+                />
+                <Text style={styles.labelDesc}>{`+${
+                  userInfo?.phone_code || ''
+                } ${userInfo?.phone || ''}`}</Text>
+              </View>
             </View>
 
             <View style={styles.space}>
@@ -303,7 +319,7 @@ const styles = StyleSheet.create({
     right: '60%',
   },
   inputAbout: {
-    marginVertical: hp(18),
+    marginVertical: hp(12),
     ...commonFontStyle(400, 15, colors._656464),
     borderWidth: 1,
     borderColor: colors._C9C9C9,
@@ -311,17 +327,18 @@ const styles = StyleSheet.create({
     padding: wp(10),
     textAlignVertical: 'top',
     minHeight: hp(100),
+    maxHeight: hp(130),
   },
   logoSection: {
     alignItems: 'center',
-    marginTop: hp(10),
-    marginBottom: hp(25),
+    marginTop: hp(8),
+    marginBottom: hp(14),
   },
   logoImage: {
-    width: wp(100),
-    height: wp(100),
-    borderRadius: wp(100),
+    width: wp(95),
+    height: wp(95),
     borderWidth: 1,
+    borderRadius: wp(95),
     borderColor: colors._C9C9C9,
     backgroundColor: colors.white,
   },
@@ -353,7 +370,7 @@ const styles = StyleSheet.create({
     paddingBottom: hp(4),
   },
   fieldsWrapper: {
-    gap: hp(25),
+    gap: hp(20),
   },
   labelText: {
     ...commonFontStyle(600, 20, colors._0B3970),
@@ -374,7 +391,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-end',
-    marginTop: hp(8),
+    // marginTop: hp(2),
     paddingHorizontal: wp(12),
     paddingVertical: hp(12),
     backgroundColor: colors._0B3970,
@@ -384,10 +401,10 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 14, colors.white),
   },
   btn: {
-    marginTop: hp(40),
+    marginTop: hp(24),
   },
   locationInput: {
-    height: hp(60),
+    height: hp(56),
     borderWidth: hp(1),
     borderRadius: hp(8),
     paddingHorizontal: wp(10),

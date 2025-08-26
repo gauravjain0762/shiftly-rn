@@ -43,7 +43,6 @@ const CoProfile = () => {
   const [isLanguageModalVisible, setLanguageModalVisible] =
     useState<boolean>(false);
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥🔥🔥 ~ CoProfile ~ userInfo:', userInfo);
 
   const settingsData = [
     {

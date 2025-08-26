@@ -99,6 +99,7 @@ const EmpForgotPassword = () => {
     }
     try {
       const res = await employeeForgotPassword({email}).unwrap();
+      // console.log("🔥 ~ handleSendOtpwithEmail ~ res:", res)
       if (res?.status) {
         successToast(res?.message);
         dispatch(setUserInfo(res.data?.user));
@@ -301,9 +302,9 @@ const EmpForgotPassword = () => {
             />
             <GradientButton
               type="Employee"
-              onPress={handleChangePassword}
               title="Submit"
               style={passwordStyles.button}
+              onPress={handleChangePassword}
             />
           </View>
         );

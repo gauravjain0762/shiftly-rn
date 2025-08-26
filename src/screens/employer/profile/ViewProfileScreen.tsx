@@ -20,18 +20,18 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {Flag} from 'react-native-country-picker-modal';
 import {callingCodeToCountryCode} from '../../../utils/countryFlags';
 
+export const callingCodeToCountry = (callingCode: any) => {
+  const cleanCode = callingCode
+    ?.toString()
+    ?.replace('+', '') as keyof typeof callingCodeToCountryCode;
+  return callingCodeToCountryCode[cleanCode] || 'AE';
+};
+
 const ViewProfileScreen = () => {
   const {data: getProfile} = useGetEmployeeProfileQuery({});
   const userInfo = getProfile?.data?.user;
 
   const countryCode = userInfo?.phone_code || 'AE';
-
-  const callingCodeToCountry = (callingCode: any) => {
-    const cleanCode = callingCode
-      ?.toString()
-      ?.replace('+', '') as keyof typeof callingCodeToCountryCode;
-    return callingCodeToCountryCode[cleanCode] || 'AE';
-  };
 
   return (
     <LinearContainer

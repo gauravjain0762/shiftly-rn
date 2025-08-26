@@ -319,6 +319,10 @@ const CreateAccount = () => {
     );
   };
 
+  console.log(
+    '🔥 ~ handleSignup ~ companyRegisterData:',
+    companyRegisterData?.phone_code,
+  );
   const handleSignup = async () => {
     const formData = new FormData();
 
@@ -340,7 +344,7 @@ const CreateAccount = () => {
     formData.append('name', companyRegisterData?.name || '');
     formData.append('email', companyRegisterData?.email || '');
     formData.append('password', companyRegisterData?.password || '');
-    formData.append('phone_code', companyRegisterData?.phone_code || '971');
+    formData.append('phone_code', companyRegisterData?.phone_code);
     formData.append('phone', companyRegisterData?.phone || '');
     formData.append('language', language || 'en');
     formData.append('deviceToken', fcmToken ?? 'ddd');
@@ -355,31 +359,23 @@ const CreateAccount = () => {
       });
     }
 
-    // Add cover_images if exists
-    console.log(
-      '🔥🔥🔥 ~ handleSignup ~ companyProfileData.cover_images:',
-      companyProfileData?.cover_images,
-    );
     if (
       companyProfileData?.cover_images &&
       companyProfileData.cover_images.length > 0
     ) {
       companyProfileData.cover_images.forEach((image: any, index: number) => {
-        console.log('🔥🔥🔥 ~ handleSignup ~ processing image:', image);
         if (image?.uri) {
           const imageData = {
             uri: image.uri,
             type: image.type || 'image/jpeg',
             name: image.name || `cover_${index}.jpg`,
           };
-          console.log(
-            '🔥🔥🔥 ~ handleSignup ~ appending imageData:',
-            imageData,
-          );
+
           formData.append('cover_images', imageData);
         }
       });
     }
+    console.log('🔥 ~ handleSignup ~ formData:', formData);
 
     const response = await companySignUp(formData).unwrap();
     console.log(response, response?.status, 'response----handleSignup');

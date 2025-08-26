@@ -101,8 +101,8 @@ const initialState: CompanyState = {
     location: '',
   },
   auth: {
-    email: __DEV__ ? 'Abc13@gmail.com' : '',
-    password:  __DEV__ ? 'Johndoe@1' : '',
+    email: '',
+    password: '',
   },
 };
 

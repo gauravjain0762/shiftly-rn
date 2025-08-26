@@ -170,11 +170,7 @@ const CoJob = () => {
           <FlatList
             data={latestJobList}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              flexGrow: 1,
-              marginTop: hp(12),
-              paddingBottom: '20%',
-            }}
+            contentContainerStyle={styles.contentContainer}
             renderItem={({item, index}) => (
               <View key={index} style={{marginBottom: hp(10)}}>
                 <MyJobCard
@@ -187,7 +183,12 @@ const CoJob = () => {
             ListEmptyComponent={() => (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>
-                  {'There is no job posted yet'}
+                  {filters?.location ||
+                  filters?.job_types ||
+                  filters?.salary_from !== 1000 ||
+                  filters?.salary_to !== 50000
+                    ? 'No filtered jobs found'
+                    : 'There is no job posted yet'}
                 </Text>
               </View>
             )}
@@ -407,5 +408,10 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     ...commonFontStyle(500, 18, colors.black),
+  },
+  contentContainer: {
+    flexGrow: 1,
+    marginTop: hp(12),
+    paddingBottom: '20%',
   },
 });

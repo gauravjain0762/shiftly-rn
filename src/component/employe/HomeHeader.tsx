@@ -28,8 +28,7 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
   companyProfile,
 }) => {
-  // const {companyProfile} = useSelector((state: RootState) => state.auth);
-  // console.log("🔥🔥🔥 ~ HomeHeader ~ companyProfile:", companyProfile)
+  console.log("🔥🔥🔥 ~ HomeHeader ~ companyProfile:", companyProfile);
 
   return (
     <View style={styles.header}>

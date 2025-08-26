@@ -12,25 +12,16 @@ import {
 import React, {useEffect, useMemo, useState, useCallback} from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
-  GradientButton,
   LinearContainer,
-  LocationContainer,
   ParallaxContainer,
   ShareModal,
 } from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
-import {AppStyles} from '../../../theme/appStyles';
-import {
-  goBack,
-  navigateTo,
-  resetNavigation,
-} from '../../../utils/commonFunction';
+import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useSelector} from 'react-redux';
-import {useTranslation} from 'react-i18next';
 import {RootState} from '../../../store';
-import {useGetProfileQuery} from '../../../api/authApi';
 import {useAppDispatch} from '../../../redux/hooks';
 import {
   setCompanyProfileAllData,
@@ -41,10 +32,12 @@ import MyJobCard from '../../../component/common/MyJobCard';
 import {
   useGetCompanyJobsQuery,
   useGetCompanyPostsQuery,
+  useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
 import ImageWithLoader from '../../../component/common/ImageWithLoader';
 import {useNavigation} from '@react-navigation/native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
@@ -52,7 +45,7 @@ const CompanyProfile = () => {
   const {data: JobData} = useGetCompanyJobsQuery({});
   const jobsList = JobData?.data?.jobs;
 
-  const {companyProfileData, companyProfileAllData} = useSelector(
+  const {companyProfileData, companyProfileAllData, userInfo} = useSelector(
     (state: RootState) => state.auth,
   );
 
@@ -73,9 +66,9 @@ const CompanyProfile = () => {
 
   // Memoize cover images to prevent recreation on tab changes
   const coverImages = useMemo(() => {
-    if (!companyProfileData?.cover_images?.length) return [IMAGES.dummy_cover];
+    if (!userInfo?.cover_images?.length) return [IMAGES.dummy_cover];
 
-    return companyProfileData.cover_images
+    return userInfo.cover_images
       .filter((img: any) => {
         if (!img) return false;
 
@@ -105,13 +98,26 @@ const CompanyProfile = () => {
   const handleBackPress = useCallback(() => {
     const state = navigation.getState() as any;
 
+    if (!state?.routes || state.routes.length < 2) {
+      navigation.reset({
+        index: 0,
+        routes: [{name: SCREENS.CoTabNavigator as never}],
+      });
+      return;
+    }
+
     const routes = state.routes;
     const previousRoute = routes[routes.length - 2];
+    console.log('🔥🔥🔥 ~ CompanyProfile ~ previousRoute:', previousRoute);
 
-    if (previousRoute?.name === SCREENS.CoProfile) {
+    if (previousRoute?.name === 'CoTabNavigator') {
+      console.log('go back>>>>>>>>');
       navigation.goBack();
     } else {
-      resetNavigation(SCREENS.CoTabNavigator);
+      navigation.reset({
+        index: 0,
+        routes: [{name: SCREENS.CoTabNavigator as never}],
+      });
     }
   }, [navigation]);
 
@@ -170,103 +176,108 @@ const CompanyProfile = () => {
   );
 
   return (
-    <ParallaxContainer
-      imagePath={coverImages}
-      ImageChildren={imageChildren}
-      ContainerStyle={styles.container}
-      showLoader={shouldShowCoverLoader}
-      loaderColor={colors._0B3970}>
-      <LinearContainer
-        SafeAreaProps={{edges: ['bottom']}}
-        containerStyle={styles.linearContainer}
-        colors={['#FFF8E6', '#F3E1B7']}>
-        <View style={styles.profileHeader}>
-          {/* Logo with conditional loader */}
-          {hasValidLogo ? (
-            <ImageWithLoader
-              source={{uri: companyProfileData?.logo}}
-              style={styles.logo}
-              containerStyle={styles.logoContainer}
-              loaderSize="small"
-              loaderColor={colors._0B3970}
-              placeholder={logoPlaceholder}
-            />
-          ) : (
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.noLogoText}>No Logo</Text>
-            </View>
-          )}
-
-          <View style={styles.titleTextContainer}>
-            <Text style={styles.companyName}>
-              {companyProfileData?.company_name || 'N/A'}
-            </Text>
-            <Text style={styles.tagline}>{companyProfileData?.mission}</Text>
-            <Text style={styles.industry}>{companyProfileData?.address}</Text>
-          </View>
-        </View>
-
-        {companyProfileData?.about && (
-          <Text style={styles.description}>
-            {companyProfileData?.about || ''}
-          </Text>
-        )}
-
-        {companyProfileData?.values && (
-          <Text style={styles.description}>
-            {companyProfileData?.values || ''}
-          </Text>
-        )}
-
-        <View style={styles.tabRow}>
-          {ProfileTabs.map((item, index) => (
-            <Pressable
-              key={item}
-              onPress={() => handleTabPress(index)}
-              style={styles.tabItem}>
-              <Text style={styles.tabText}>{item}</Text>
-              {selectedTanIndex === index && (
-                <View style={styles.tabIndicator} />
+    <SafeAreaView style={{flex: 1, backgroundColor: colors._F3E1B7}} edges={['bottom']} >
+      <ScrollView
+        contentContainerStyle={{paddingBottom: hp(40)}}
+        showsVerticalScrollIndicator={false}>
+        <ParallaxContainer
+          imagePath={coverImages}
+          ImageChildren={imageChildren}
+          ContainerStyle={styles.container}
+          showLoader={shouldShowCoverLoader}
+          loaderColor={colors._0B3970}>
+          <LinearContainer
+            SafeAreaProps={{edges: ['bottom']}}
+            containerStyle={styles.linearContainer}
+            colors={['#FFF8E6', '#F3E1B7']}>
+            {/* ✅ Add ScrollView here */}
+            <View style={styles.profileHeader}>
+              {/* Logo with conditional loader */}
+              {hasValidLogo ? (
+                <ImageWithLoader
+                  source={{uri: companyProfileData?.logo}}
+                  style={styles.logo}
+                  containerStyle={styles.logoContainer}
+                  loaderSize="small"
+                  loaderColor={colors._0B3970}
+                  placeholder={logoPlaceholder}
+                />
+              ) : (
+                <View style={styles.logoPlaceholder}>
+                  <Text style={styles.noLogoText}>No Logo</Text>
+                </View>
               )}
-            </Pressable>
-          ))}
-        </View>
 
-        <View style={styles.divider} />
+              <View style={styles.titleTextContainer}>
+                <Text style={styles.companyName}>
+                  {companyProfileData?.company_name || 'N/A'}
+                </Text>
+                <Text style={styles.tagline}>
+                  {companyProfileData?.mission}
+                </Text>
+                <Text style={styles.industry}>
+                  {companyProfileData?.address}
+                </Text>
+              </View>
+            </View>
 
-        {selectedTanIndex === 0 && (
-          <CoAboutTab
-            companyProfileData={companyProfileData}
-            companyProfileAllData={companyProfileAllData}
-          />
-        )}
+            {companyProfileData?.about && (
+              <Text style={styles.description}>
+                {companyProfileData?.about || ''}
+              </Text>
+            )}
 
-        {selectedTanIndex === 1 && (
-          <FlatList
-            numColumns={2}
-            data={allPosts}
-            style={{marginTop: hp(10)}}
-            renderItem={renderPostItem}
-            keyExtractor={item => `post-${item.id}`}
-            columnWrapperStyle={{justifyContent: 'space-between'}}
-          />
-        )}
+            {companyProfileData?.values && (
+              <Text style={styles.description}>
+                {companyProfileData?.values || ''}
+              </Text>
+            )}
 
-        {renderJobs}
+            <View style={styles.tabRow}>
+              {ProfileTabs.map((item, index) => (
+                <Pressable
+                  key={item}
+                  onPress={() => handleTabPress(index)}
+                  style={styles.tabItem}>
+                  <Text style={styles.tabText}>{item}</Text>
+                  {selectedTanIndex === index && (
+                    <View style={styles.tabIndicator} />
+                  )}
+                </Pressable>
+              ))}
+            </View>
 
-        {/* <GradientButton
-          type="Company"
-          style={styles.button}
-          title={t('Create a Post')}
-          onPress={handleCreatePost}
-        /> */}
+            <View style={styles.divider} />
 
-        <ShareModal
-          visible={isShareModalVisible}
-          onClose={() => setIsShareModalVisible(false)}
-        />
-      </LinearContainer>
-    </ParallaxContainer>
+            {selectedTanIndex === 0 && (
+              <CoAboutTab
+                companyProfileData={companyProfileData}
+                companyProfileAllData={companyProfileAllData}
+              />
+            )}
+
+            {selectedTanIndex === 1 && (
+              <FlatList
+                numColumns={2}
+                data={allPosts}
+                style={{marginTop: hp(10)}}
+                renderItem={renderPostItem}
+                keyExtractor={item => `post-${item.id}`}
+                columnWrapperStyle={{justifyContent: 'space-between'}}
+                scrollEnabled={false} // ⚡ disable nested scrolling
+              />
+            )}
+
+            {renderJobs}
+
+            <ShareModal
+              visible={isShareModalVisible}
+              onClose={() => setIsShareModalVisible(false)}
+            />
+          </LinearContainer>
+        </ParallaxContainer>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

@@ -238,7 +238,7 @@ const CoPost = () => {
               </View>
               <CustomTextInput
                 placeholder={t('Enter the post title')}
-                placeholderTextColor={colors._4A4A4A}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={(e: any) => updatePostForm({title: e})}
                 value={title}
                 inputStyle={styles.input1}
@@ -286,7 +286,7 @@ const CoPost = () => {
               </View>
               <CustomTextInput
                 placeholder={t('Enter the description')}
-                placeholderTextColor={colors._4A4A4A}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={(e: any) => updatePostForm({description: e})}
                 value={description}
                 inputStyle={[styles.input1, {maxHeight: hp(180)}]}
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   post: {
-    ...commonFontStyle(400, 22, colors._7B7878),
+    ...commonFontStyle(400, 22, colors._181818),
   },
   modalIconWrapper: {
     width: wp(90),
