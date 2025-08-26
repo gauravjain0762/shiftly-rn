@@ -19,6 +19,7 @@ export const dashboardApi = createApi({
     'CreatePost',
     'GetPost',
     'GetProfile',
+    'GetCompanyProfile',
     'CreateProfile',
     'GetJobs',
     'CreateJob',
@@ -78,7 +79,7 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      providesTags: ['GetPost'],
+      providesTags: ['GetPost','GetCompanyProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -159,7 +160,7 @@ export const dashboardApi = createApi({
           'Content-Type': 'multipart/form-data',
         },
       }),
-      invalidatesTags: ['CreateProfile'],
+      invalidatesTags: ['CreateProfile','GetCompanyProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -171,6 +172,29 @@ export const dashboardApi = createApi({
           }
         } catch (error) {
           console.log('Update Profile Error', error);
+        }
+      },
+    }),
+      getProfile: builder.query<any, void>({
+      query: () => ({
+        url: API.getCompanyProfile,
+        method: HTTP_METHOD.GET,
+        skipLoader: false,
+      }),
+      providesTags:['GetCompanyProfile'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status && data.data?.company) {
+            console.log(data,'datadatadatadata');
+            
+            dispatch(setUserInfo(data.data.company));
+            await setAsyncUserInfo(data.data.company);
+          } else {
+            errorToast(data?.message || 'Something went wrong.');
+          }
+        } catch (error) {
+          console.log('Get Profile Error', error);
         }
       },
     }),
@@ -638,4 +662,5 @@ export const {
   useGetCompanyChatsQuery,
   useGetCompanyChatMessagesQuery,
   useSendCompanyMessageMutation,
+  useGetProfileQuery
 } = dashboardApi;

@@ -1,51 +1,30 @@
-import React, {useState} from 'react';
-import {ActivityIndicator, StyleSheet, View} from 'react-native';
-
-import {WebView} from 'react-native-webview';
+import {StyleSheet, View} from 'react-native';
+import React from 'react';
 import {useRoute} from '@react-navigation/native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {BackHeader} from '../../component';
-import {hp, wp} from '../../theme/fonts';
+import WebViewRender from '../../component/common/WebViewRender';
+import {BackHeader, LinearContainer} from '../../component';
 import {useTranslation} from 'react-i18next';
+import {hp, wp} from '../../theme/fonts';
 
-const WebviewScreen = () => {
+const WebViewScreen = () => {
   const {t} = useTranslation();
   const {params} = useRoute<any>();
-  const URL = params?.link as {link: string | any} | any;
-  const title = params?.title as string;
-  const [isLoading, setIsLoading] = useState(false);
-
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <BackHeader
         type="company"
-        title={t(title)}
+        title={t(params?.title)}
         titleStyle={{alignSelf: 'center', right: '20%'}}
         containerStyle={styles.header}
       />
-      {isLoading && (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator size={'large'} />
-        </View>
-      )}
-      <WebView
-        source={URL ? {uri: URL} : {uri: 'https://google.com/'}}
-        style={styles.main}
-        onLoadStart={() => {
-          setIsLoading(true);
-        }}
-        onLoad={() => {
-          setIsLoading(false);
-        }}
-        onLoadEnd={() => {
-          setIsLoading(false);
-        }}
-      />
-    </SafeAreaView>
+      <View style={{flex: 1}}>
+        <WebViewRender url={params?.link} />
+      </View>
+    </LinearContainer>
   );
 };
 
-export default WebviewScreen;
+export default WebViewScreen;
 
 const styles = StyleSheet.create({
   main: {

@@ -4,25 +4,17 @@ import {BackHeader, GradientButton, LinearContainer} from '../../../component';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
-import {useGetProfileQuery} from '../../../api/authApi';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useFocusEffect} from '@react-navigation/native';
 import {IMAGES} from '../../../assets/Images';
 import ImageWithLoader from '../../../component/common/ImageWithLoader';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const CoMyProfile = () => {
   const {t} = useTranslation();
-  const {data, refetch} = useGetProfileQuery();
-  const companyProfile = data?.data?.company;
-  console.log('🔥 ~ CoMyProfile ~ companyProfile:', companyProfile);
-
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, []),
-  );
-
+  const {userInfo} = useSelector((state: RootState) => state.auth);
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <View style={styles.main}>
@@ -35,9 +27,9 @@ const CoMyProfile = () => {
         />
 
         <View style={styles.profileRow}>
-          {companyProfile?.logo ? (
+          {userInfo?.logo ? (
             <ImageWithLoader
-              source={{uri: companyProfile.logo}}
+              source={{uri: userInfo.logo}}
               style={styles.profileImage}
               loaderSize="small"
               loaderColor={colors._0B3970}
@@ -54,9 +46,9 @@ const CoMyProfile = () => {
             />
           )}
           <View>
-            <Text style={styles.coTitle}>{companyProfile?.company_name}</Text>
+            <Text style={styles.coTitle}>{userInfo?.company_name}</Text>
             <Text style={styles.typeText}>
-              {companyProfile?.name || 'Restaurant & Hospital'}
+              {userInfo?.name || 'Restaurant & Hospital'}
             </Text>
           </View>
         </View>
@@ -64,7 +56,7 @@ const CoMyProfile = () => {
         <View style={{marginVertical: hp(18)}}>
           <Text style={styles.labelText}>{t('Description')}</Text>
           <Text style={styles.descText}>
-            {companyProfile?.about ||
+            {userInfo?.about ||
               'Dubai is a city of grand visions and endless wonders, where towering skyscrapers & luxurious malls meet the ancient allure of desert dunes & vibrant souks.'}
           </Text>
         </View>
@@ -73,20 +65,20 @@ const CoMyProfile = () => {
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Email')}</Text>
             <Text style={styles.labelDesc}>
-              {companyProfile?.email || 'marriott@restaurant.com'}
+              {userInfo?.email || 'marriott@restaurant.com'}
             </Text>
           </View>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Phone')}</Text>
             <Text style={styles.labelDesc}>
-              {`🇦🇪 +${companyProfile?.phone_code} ${companyProfile?.phone}`}
+              {`🇦🇪 +${userInfo?.phone_code} ${userInfo?.phone}`}
             </Text>
           </View>
           <View style={styles.space}>
             <Text style={styles.labelText}>{t('Location')}</Text>
             <Text style={styles.labelDesc}>
-              {companyProfile?.address ||
-                companyProfile?.location ||
+              {userInfo?.address ||
+                userInfo?.location ||
                 ' JLT Dubai, United Arab Emirates'}
             </Text>
           </View>

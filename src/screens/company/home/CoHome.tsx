@@ -12,33 +12,36 @@ import FeedCard from '../../../component/employe/FeedCard';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useGetCompanyPostsQuery} from '../../../api/dashboardApi';
+import {
+  useGetCompanyPostsQuery,
+} from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
 import {colors} from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
 import {useTranslation} from 'react-i18next';
-import {useGetProfileQuery} from '../../../api/authApi';
 import {useAppDispatch} from '../../../redux/hooks';
 import {
   setCompanyProfileAllData,
   setCompanyProfileData,
 } from '../../../features/authSlice';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
 
 const CoHome = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
+  const {userInfo}: any = useSelector((state: RootState) => state.auth);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const {data} = useGetProfileQuery();
-  const companyProfile = data?.data?.company;
 
   useEffect(() => {
-    if (data?.status && data.data?.company) {
-      dispatch(setCompanyProfileAllData(data.data.company));
-      dispatch(setCompanyProfileData(data.data.company));
+    if (userInfo) {
+      dispatch(setCompanyProfileAllData(userInfo));
+      dispatch(setCompanyProfileData(userInfo));
     }
-  }, [data]);
+  }, [userInfo]);
 
   const {
     data: getPost,
@@ -77,7 +80,7 @@ const CoHome = () => {
       <View style={styles.header}>
         <HomeHeader
           type="company"
-          companyProfile={companyProfile}
+          companyProfile={userInfo}
           onPressAvatar={() => navigateTo(SCREENS.CoMyProfile)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />

@@ -4,10 +4,13 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StatusBar,
   StyleSheet,
   View,
+  TouchableOpacity,
+  ActivityIndicator,
+  Text,
+  Alert,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {useTranslation} from 'react-i18next';
@@ -24,6 +27,7 @@ import {navigationRef} from '../../navigation/RootContainer';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
 import {getAsyncUserLocation} from '../../utils/asyncStorage';
+import CustomImage from './CustomImage';
 
 const LocationScreen = () => {
   const {t} = useTranslation();
@@ -38,40 +42,123 @@ const LocationScreen = () => {
     longitude: number;
   } | null>(null);
   const [position, setPosition] = useState({
-    latitude: 0,
-    longitude: 0,
+    latitude: 25.2048,
+    longitude: 55.2708,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [isMapMoving, setIsMapMoving] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false); // New state to track search focus
   const ref = useRef<any | null>(null);
 
   useEffect(() => {
     if (userAddress?.address) {
       setSearch(userAddress.address);
       ref.current?.setAddressText(userAddress.address);
+      setSelectedAddress(userAddress);
     }
   }, [userAddress]);
 
   const getUserLocation = async () => {
     try {
+      setIsLoadingLocation(true);
+
+      // First try to get saved location
       const locationString = await AsyncStorage.getItem('user_location');
       if (locationString !== null) {
         const location = JSON.parse(locationString);
-        console.log('🔥🔥🔥 ~ getUserLocation ~ location:', location);
-        setPosition(prev => ({
-          ...prev,
-          latitude: location?.lat,
-          longitude: location?.lng,
-        }));
+        console.log('🔥🔥🔥 ~ getUserLocation ~ saved location:', location);
 
-        console.log('Retrieved location:', location);
+        const newPosition = {
+          latitude: location?.lat || location?.latitude,
+          longitude: location?.lng || location?.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+
+        setPosition(newPosition);
+        setMarkerPosition({
+          latitude: location?.lat || location?.latitude,
+          longitude: location?.lng || location?.longitude,
+        });
+
+        if (location.address) {
+          setSearch(location.address);
+          ref.current?.setAddressText(location.address);
+          setSelectedAddress(location);
+        }
+
+        // Animate to saved location after map loads
+        setTimeout(() => {
+          mapRef.current?.animateToRegion(newPosition, 1000);
+        }, 500);
+
+        setIsLoadingLocation(false);
         return location;
+      }
+
+      // If no saved location, get current location
+      const currentLocation = await getAsyncUserLocation();
+      if (currentLocation) {
+        const newPosition = {
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+
+        setPosition(newPosition);
+        setMarkerPosition({
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+        });
+
+        // Get address for current location
+        getAddress(currentLocation, (data: any) => {
+          const address = data?.results?.[0]?.formatted_address;
+          const components = data?.results?.[0]?.address_components || [];
+
+          const stateObj = components.find((c: any) =>
+            c.types.includes('administrative_area_level_1'),
+          );
+          const countryObj = components.find((c: any) =>
+            c.types.includes('country'),
+          );
+
+          const state = stateObj?.long_name || '';
+          const country = countryObj?.long_name || '';
+
+          if (address) {
+            setSearch(address);
+            ref.current?.setAddressText(address);
+            setSelectedAddress({
+              address,
+              lat: currentLocation.latitude,
+              lng: currentLocation.longitude,
+              state,
+              country,
+            });
+          }
+        });
+
+        setTimeout(() => {
+          mapRef.current?.animateToRegion(newPosition, 1000);
+        }, 500);
       }
     } catch (error) {
       console.error('Failed to retrieve user location:', error);
+      Alert.alert(
+        'Location Error',
+        'Unable to get your location. Please search for a location or enable location services.',
+        [{text: 'OK'}],
+      );
+    } finally {
+      setIsLoadingLocation(false);
     }
-    return null;
   };
 
   useFocusEffect(
@@ -80,85 +167,147 @@ const LocationScreen = () => {
     }, []),
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      getUserLocation().then(location => {
-        if (location?.lat && location?.lng) {
-          setMarkerPosition({
-            latitude: location.lat,
-            longitude: location.lng,
-          });
-        }
-      });
-    }, []),
-  );
-
   useEffect(() => {
-    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () =>
-      setKeyboardVisible(true),
-    );
-    const keyboardDidHide = Keyboard.addListener('keyboardDidHide', () =>
-      setKeyboardVisible(false),
-    );
+    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+      setIsSearchExpanded(true);
+    });
+    const keyboardDidHide = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+      setTimeout(() => setIsSearchExpanded(false), 200);
+    });
     return () => {
       keyboardDidShow.remove();
       keyboardDidHide.remove();
     };
   }, []);
 
-  // const handlePlaceSelect = async (item: any) => {
-  //   setSearch(item.description);
+  const handlePlaceSelect = async (data: any, details: any) => {
+    if (!details) return;
 
-  //   const region = {
-  //     latitude: item.geometry.location.lat,
-  //     longitude: item.geometry.location.lng,
-  //   };
+    Keyboard.dismiss();
+    setIsSearchExpanded(false);
+    setIsSearchFocused(false); // Reset search focus when place is selected
 
-  //   getAddress(
-  //     region,
-  //     async (response: any) => {
-  //       const formatted =
-  //         response?.results?.[0]?.formatted_address || item.description;
-  //       setSearch(formatted);
-  //       setPosition({
-  //         latitude: region.latitude,
-  //         longitude: region.longitude,
-  //         latitudeDelta: 0.05,
-  //         longitudeDelta: 0.05,
-  //       });
-  //       mapRef.current?.animateToRegion({
-  //         ...region,
-  //         latitudeDelta: 0.05,
-  //         longitudeDelta: 0.05,
-  //       });
-  //       await AsyncStorage.setItem('user_location', formatted);
-  //     },
-  //     (error: any) => console.log('Address fetch error:', error),
-  //   );
-  // };
+    const {lat, lng} = details.geometry.location;
+    const region = {
+      latitude: lat,
+      longitude: lng,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+
+    const address = details.formatted_address || data.description;
+    const components = details.address_components || [];
+
+    const stateObj = components.find((c: any) =>
+      c.types.includes('administrative_area_level_1'),
+    );
+    const countryObj = components.find((c: any) => c.types.includes('country'));
+
+    const state = stateObj?.long_name || '';
+    const country = countryObj?.long_name || '';
+
+    setSearch(address);
+    setPosition(region);
+    setMarkerPosition({latitude: lat, longitude: lng});
+    setSelectedAddress({
+      address,
+      lat,
+      lng,
+      state,
+      country,
+    });
+
+    mapRef.current?.animateToRegion(region, 500);
+  };
 
   const handleMapPress = (e: any) => {
+    if (isKeyboardVisible || isSearchFocused) {
+      // Check both keyboard and search focus
+      Keyboard.dismiss();
+      setIsSearchExpanded(false);
+      setIsSearchFocused(false);
+      return;
+    }
     const coords = e.nativeEvent.coordinate;
-    moveMarker(coords);
+    moveMarkerToCoords(coords);
   };
 
   const handlePoiClick = (e: any) => {
+    if (isSearchFocused) return; // Don't handle POI clicks when search is focused
     const coords = e.nativeEvent.coordinate;
-    moveMarker(coords);
-    
+    moveMarkerToCoords(coords);
   };
 
-  const moveMarker = (coords: any) => {
-    setPosition(prev => ({...prev, ...coords}));
-    setMarkerPosition(coords);
-    mapRef.current?.animateToRegion(
-      {
-        ...coords,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+  const handleRegionChange = (region: any) => {
+    // Don't update marker position if search is focused/expanded
+    if (isSearchFocused || isSearchExpanded) {
+      return;
+    }
+
+    if (!isMapMoving) {
+      setIsMapMoving(true);
+    }
+
+    setMarkerPosition({
+      latitude: region.latitude,
+      longitude: region.longitude,
+    });
+
+    setPosition(region);
+  };
+
+  const handleRegionChangeComplete = (region: any) => {
+    // Don't update address if search is focused/expanded
+    if (isSearchFocused || isSearchExpanded) {
+      return;
+    }
+
+    setIsMapMoving(false);
+
+    getAddress(
+      {latitude: region.latitude, longitude: region.longitude},
+      (data: any) => {
+        const address = data?.results?.[0]?.formatted_address;
+        const components = data?.results?.[0]?.address_components || [];
+
+        const stateObj = components.find((c: any) =>
+          c.types.includes('administrative_area_level_1'),
+        );
+        const countryObj = components.find((c: any) =>
+          c.types.includes('country'),
+        );
+
+        const state = stateObj?.long_name || '';
+        const country = countryObj?.long_name || '';
+
+        if (address) {
+          setSearch(address);
+          ref.current?.setAddressText(address);
+          setSelectedAddress({
+            address,
+            lat: region.latitude,
+            lng: region.longitude,
+            state,
+            country,
+          });
+        }
       },
-      500,
     );
+  };
+
+  const moveMarkerToCoords = (coords: any) => {
+    const region = {
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+
+    setPosition(region);
+    setMarkerPosition(coords);
+    mapRef.current?.animateToRegion(region, 500);
 
     getAddress(coords, (data: any) => {
       const address = data?.results?.[0]?.formatted_address;
@@ -177,77 +326,111 @@ const LocationScreen = () => {
       if (address) {
         setSearch(address);
         ref.current?.setAddressText(address);
-        AsyncStorage.setItem(
-          'user_location',
-          JSON.stringify({
-            address,
-            lat: coords.latitude,
-            lng: coords.longitude,
-            state,
-            country,
-          }),
-        );
+        setSelectedAddress({
+          address,
+          lat: coords.latitude,
+          lng: coords.longitude,
+          state,
+          country,
+        });
       }
     });
   };
 
   const handleGetCurrentLocation = async () => {
+    setIsLoadingLocation(true);
     const location = await getAsyncUserLocation();
     console.log('🔥🔥🔥 ~ handleGetCurrentLocation ~ location:', location);
-    getAddress(location, (data: any) => {
-      const address = data?.results?.[0]?.formatted_address;
-      const components = data?.results?.[0]?.address_components || [];
 
-      const stateObj = components.find((c: any) =>
-        c.types.includes('administrative_area_level_1'),
-      );
-      const countryObj = components.find((c: any) =>
-        c.types.includes('country'),
-      );
+    if (location) {
+      const region = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
 
-      const state = stateObj?.long_name || '';
-      const country = countryObj?.long_name || '';
-      if (address) {
-        setSearch(address);
-        ref.current?.setAddressText(address);
-        AsyncStorage.setItem(
-          'user_location',
-          JSON.stringify({
-            address: address,
+      setPosition(region);
+      setMarkerPosition({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+      mapRef.current?.animateToRegion(region, 500);
+
+      getAddress(location, (data: any) => {
+        const address = data?.results?.[0]?.formatted_address;
+        const components = data?.results?.[0]?.address_components || [];
+
+        const stateObj = components.find((c: any) =>
+          c.types.includes('administrative_area_level_1'),
+        );
+        const countryObj = components.find((c: any) =>
+          c.types.includes('country'),
+        );
+
+        const state = stateObj?.long_name || '';
+        const country = countryObj?.long_name || '';
+
+        if (address) {
+          setSearch(address);
+          ref.current?.setAddressText(address);
+          setSelectedAddress({
+            address,
             lat: location.latitude,
             lng: location.longitude,
             state,
             country,
+          });
+        }
+      });
+    } else {
+      Alert.alert(
+        'Location Error',
+        'Unable to get your current location. Please check your location settings.',
+        [{text: 'OK'}],
+      );
+    }
+    setIsLoadingLocation(false);
+  };
+
+  const handleSaveLocation = async () => {
+    if (selectedAddress) {
+      try {
+        await AsyncStorage.setItem(
+          'user_location',
+          JSON.stringify({
+            ...selectedAddress,
+            latitude: selectedAddress.lat,
+            longitude: selectedAddress.lng,
           }),
         );
+        console.log('Location saved successfully');
+        navigationRef.goBack();
+      } catch (error) {
+        console.error('Failed to save location:', error);
+        Alert.alert('Error', 'Failed to save location. Please try again.');
       }
-    });
-    if (location) {
-      setPosition({
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-      setMarkerPosition({
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-      });
-      mapRef.current?.animateToRegion(
-        {
-          latitude: location?.latitude,
-          longitude: location?.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        500,
-      );
+    } else {
+      Alert.alert('Error', 'Please select a location first.');
     }
   };
 
-  const handleMarkerDrag = (e: any) => {
-    const coords = e.nativeEvent.coordinate;
-    setMarkerPosition(coords);
+  const handleGoBack = () => {
+    navigationRef.goBack();
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchExpanded(true);
+    setIsSearchFocused(true); // Set search as focused
+  };
+
+  const handleSearchBlur = () => {
+    setTimeout(() => {
+      if (!isKeyboardVisible) {
+        setIsSearchExpanded(false);
+        setIsSearchFocused(false); // Reset search focus when blurred
+      }
+    }, 200);
   };
 
   return (
@@ -258,61 +441,73 @@ const LocationScreen = () => {
         backgroundColor="transparent"
       />
       <SafeAreaView style={AppStyles.mainWhiteContainer} edges={[]}>
-        <GooglePlacesAutocomplete
-          ref={ref}
-          placeholder="Search Location"
-          keyboardShouldPersistTaps="handled"
-          onPress={async (data, details = null) => {
-            Keyboard.dismiss();
-            if (!details) return;
+        {/* Search Bar with Back Button - Fixed Position */}
+        <View
+          style={[
+            styles.searchContainer,
+            {marginTop: useSafeAreaInsets().top},
+          ]}>
+          <CustomImage
+            source={IMAGES.backArrow}
+            size={24}
+            tintColor={colors.black}
+            onPress={handleGoBack}
+            containerStyle={styles.backButton}
+          />
 
-            const {lat, lng} = details.geometry.location;
-            const region = {
-              latitude: lat,
-              longitude: lng,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            };
-            const address = details.formatted_address || data.description;
+          <View style={styles.googleAutoCompleteWrapper}>
+            <GooglePlacesAutocomplete
+              ref={ref}
+              placeholder="Search Location"
+              keyboardShouldPersistTaps="handled"
+              onPress={handlePlaceSelect}
+              styles={{
+                container: styles.googleAutoCompleteContainer,
+                textInput: styles.googleAutoCompleteInput,
+                listView: styles.googleAutoCompleteListOverlay,
+                row: styles.googleAutoCompleteRow,
+                description: styles.googleAutoCompleteDescription,
+              }}
+              textInputProps={{
+                value: search,
+                onChangeText: setSearch,
+                placeholderTextColor: '#999',
+                onFocus: handleSearchFocus,
+                onBlur: handleSearchBlur,
+              }}
+              predefinedPlaces={[]}
+              minLength={2}
+              fetchDetails={true}
+              query={{
+                key: API?.GOOGLE_MAP_API_KEY,
+                language: 'en',
+              }}
+              autoFillOnNotFound={false}
+              currentLocation={false}
+              debounce={300}
+              timeout={20000}
+              disableScroll={false}
+              enablePoweredByContainer={false}
+              numberOfLines={1}
+              listViewDisplayed={isSearchExpanded}
+            />
+          </View>
+        </View>
 
-            ref.current?.setAddressText(address);
-            setSearch(address);
-            setPosition(region);
-            setMarkerPosition({latitude: lat, longitude: lng});
-            mapRef.current?.animateToRegion(region, 500);
-            await AsyncStorage.setItem(
-              'user_location',
-              JSON.stringify({
-                address: address,
-                lat: lat,
-                lng: lng,
-              }),
-            );
-          }}
-          styles={{container: styles.googleAutoCompleteContainer}}
-          textInputProps={{
-            value: search,
-            onChangeText: setSearch,
-            placeholderTextColor: '#000',
-            style: styles.googleAutoCompleteInput,
-          }}
-          predefinedPlaces={[]}
-          minLength={0}
-          fetchDetails={true}
-          query={{
-            key: API?.GOOGLE_MAP_API_KEY,
-            language: 'en',
-          }}
-          autoFillOnNotFound={false}
-          currentLocation={false}
-          currentLocationLabel="Current location"
-          debounce={300}
-          timeout={20000}
-          disableScroll={false}
-        />
         <KeyboardAvoidingView
           style={AppStyles.flex}
-          behavior={isKeyboardVisible ? 'height' : undefined}>
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          {/* Loading Overlay */}
+          {isLoadingLocation && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator
+                size="large"
+                color={colors.coPrimary || '#007AFF'}
+              />
+              <Text style={styles.loadingText}>Getting your location...</Text>
+            </View>
+          )}
+
           <View style={AppStyles.flex}>
             <View style={styles.container}>
               <MapView
@@ -321,88 +516,87 @@ const LocationScreen = () => {
                 region={position}
                 onPress={handleMapPress}
                 onPoiClick={handlePoiClick}
-                onMarkerDrag={handleMarkerDrag}
-                onMapReady={() => setIsMapLoaded(true)}
-                onMapLoaded={() => setIsMapLoaded(true)}
-                style={styles.mapStyle}>
-                <Marker
-                  draggable
-                  onDrag={e => {
-                    console.log('Marker moving:', e.nativeEvent.coordinate);
-                  }}
-                  onDragEnd={e => {
-                    const {latitude, longitude} = e.nativeEvent.coordinate;
-                    console.log('Final position:', latitude, longitude);
-
-                    // Update position
-                    setPosition({
-                      latitude,
-                      longitude,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    });
-
-                    setMarkerPosition({latitude, longitude});
-
-                    // Fetch address from coordinates and update placeholder
-                    getAddress({latitude, longitude}, (data: any) => {
-                      const address = data?.results?.[0]?.formatted_address;
-                      const components =
-                        data?.results?.[0]?.address_components || [];
-
-                      const stateObj = components.find((c: any) =>
-                        c.types.includes('administrative_area_level_1'),
+                onRegionChange={handleRegionChange}
+                onRegionChangeComplete={handleRegionChangeComplete}
+                onMapReady={() => {
+                  setIsMapLoaded(true);
+                  // Auto-animate to user location when map is ready
+                  if (markerPosition) {
+                    setTimeout(() => {
+                      mapRef.current?.animateToRegion(
+                        {
+                          ...position,
+                          latitudeDelta: 0.01,
+                          longitudeDelta: 0.01,
+                        },
+                        1000,
                       );
-                      const countryObj = components.find((c: any) =>
-                        c.types.includes('country'),
-                      );
-
-                      const state = stateObj?.long_name || '';
-                      const country = countryObj?.long_name || '';
-
-                      if (address) {
-                        setSearch(address);
-                        ref.current?.setAddressText(address);
-                        AsyncStorage.setItem(
-                          'user_location',
-                          JSON.stringify({
-                            address,
-                            lat: latitude,
-                            lng: longitude,
-                            state,
-                            country,
-                          }),
-                        );
-                      }
-                    });
-                  }}
-                  coordinate={{
-                    latitude: position.latitude,
-                    longitude: position.longitude,
-                  }}>
-                  {Platform.OS === 'ios' && (
-                    <Image
-                      resizeMode="contain"
-                      source={IMAGES.location_marker}
-                      style={styles.customMarkerImage}
-                    />
-                  )}
-                </Marker>
+                    }, 1000);
+                  }
+                }}
+                style={styles.mapStyle}
+                showsUserLocation={true}
+                showsMyLocationButton={false}
+                showsCompass={false}
+                toolbarEnabled={false}>
+                {markerPosition && (
+                  <Marker coordinate={markerPosition} draggable={false}>
+                    {Platform.OS === 'ios' ? (
+                      <Image
+                        resizeMode="contain"
+                        source={IMAGES.location_marker}
+                        style={styles.customMarkerImage}
+                      />
+                    ) : (
+                      <View style={styles.customMarker}>
+                        <View style={styles.markerDot} />
+                      </View>
+                    )}
+                  </Marker>
+                )}
               </MapView>
             </View>
+
+            {/* Address Display */}
+            {/* {selectedAddress && !isKeyboardVisible && (
+              <View style={styles.addressDisplay}>
+                <Text style={styles.selectedAddressText} numberOfLines={2}>
+                  📍 {selectedAddress.address}
+                </Text>
+              </View>
+            )} */}
+
             <GradientButton
               type="Employee"
-              title={t('Save')}
-              style={styles.btn}
-              onPress={() => navigationRef.goBack()}
+              title={t('Save Location')}
+              style={[
+                styles.btn,
+                (!selectedAddress || isKeyboardVisible) && styles.btnDisabled,
+              ]}
+              onPress={handleSaveLocation}
+              disabled={!selectedAddress}
             />
           </View>
-          <Pressable onPress={handleGetCurrentLocation}>
-            <Image
-              source={IMAGES.current_location}
-              style={styles.currentLocationButton}
-            />
-          </Pressable>
+
+          <TouchableOpacity
+            onPress={handleGetCurrentLocation}
+            style={[
+              styles.currentLocationButton,
+              isKeyboardVisible && styles.currentLocationButtonHidden,
+            ]}
+            disabled={isLoadingLocation}>
+            {isLoadingLocation ? (
+              <ActivityIndicator
+                size="small"
+                color={colors.primary || '#007AFF'}
+              />
+            ) : (
+              <Image
+                source={IMAGES.current_location}
+                style={styles.currentLocationIcon}
+              />
+            )}
+          </TouchableOpacity>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
@@ -420,74 +614,179 @@ const styles = StyleSheet.create({
   mapStyle: {
     ...StyleSheet.absoluteFillObject,
   },
-  loaderContainer: {
+  searchContainer: {
+    position: 'absolute',
+    // top: hp(10),
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 1001,
+    paddingHorizontal: wp(15),
+  },
+  backButton: {
+    padding: wp(10),
+    backgroundColor: colors.white,
+    borderRadius: hp(25),
+    marginRight: wp(10),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  googleAutoCompleteWrapper: {
     flex: 1,
+    zIndex: 1001,
+  },
+  googleAutoCompleteContainer: {
+    flex: 0,
+    borderRadius: hp(25),
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1001,
+  },
+  googleAutoCompleteInput: {
+    height: hp(50),
+    paddingHorizontal: wp(15),
+    ...commonFontStyle(500, 16, colors.black),
+    borderRadius: hp(25),
+    backgroundColor: 'white',
+  },
+  googleAutoCompleteListOverlay: {
+    position: 'absolute',
+    top: hp(55),
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: hp(10),
+    maxHeight: hp(300),
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    zIndex: 1002,
+  },
+  googleAutoCompleteRow: {
+    paddingVertical: hp(12),
+    paddingHorizontal: wp(15),
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  googleAutoCompleteDescription: {
+    ...commonFontStyle(400, 14, colors.black),
+    lineHeight: hp(18),
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 999,
   },
-  locationIcon: {
-    width: wp(22),
-    height: wp(22),
+  loadingText: {
+    marginTop: hp(10),
+    ...commonFontStyle(500, 16, colors.black),
   },
-  locationContainer: {
+  addressDisplay: {
     position: 'absolute',
-    bottom: hp(76),
-    right: wp(22),
+    bottom: hp(80),
+    left: wp(15),
+    right: wp(15),
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: wp(15),
+    paddingVertical: hp(10),
+    borderRadius: hp(10),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  modalContent: {
-    backgroundColor: colors.white,
-    paddingHorizontal: wp(28),
-    paddingTop: hp(10),
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingBottom: hp(16),
-  },
-  sheetBarStyle: {
-    width: wp(48),
-    height: hp(5),
-    alignSelf: 'center',
-    borderRadius: 100,
-    marginBottom: hp(10),
-  },
-  title: {
-    ...commonFontStyle(600, 22, colors.black),
-    textAlign: 'center',
-    marginBottom: hp(20),
+  selectedAddressText: {
+    ...commonFontStyle(500, 14, colors.black),
+    lineHeight: hp(18),
   },
   btn: {
     left: 0,
     right: 0,
     bottom: 0,
     position: 'absolute',
-    marginVertical: hp(40),
-    marginHorizontal: wp(40),
+    marginVertical: hp(20),
+    marginHorizontal: wp(20),
+  },
+  btnDisabled: {
+    opacity: 0.6,
   },
   customMarkerImage: {
     width: wp(40),
     height: hp(40),
-    borderRadius: hp(20),
   },
-  googleAutoCompleteContainer: {
-    flex: 0,
-    marginHorizontal: wp(15),
-    borderRadius: hp(15),
+  customMarker: {
+    width: wp(20),
+    height: wp(20),
+    borderRadius: wp(10),
+    backgroundColor: colors.primary || '#007AFF',
+    borderWidth: 3,
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  markerDot: {
+    width: wp(8),
+    height: wp(8),
+    borderRadius: wp(4),
     backgroundColor: 'white',
-    position: 'absolute',
-    top: '10%',
-    left: 0,
-    right: 0,
-    zIndex: 9999,
-    paddingHorizontal: wp(20),
-  },
-  googleAutoCompleteInput: {
-    flex: 1,
-    height: hp(60),
-    ...commonFontStyle(500, 18, colors.black),
+    alignSelf: 'center',
+    marginTop: wp(3),
   },
   currentLocationButton: {
-    right: wp(16),
-    bottom: hp(150),
     position: 'absolute',
-    alignSelf: 'flex-end',
+    right: wp(16),
+    bottom: hp(100),
+    backgroundColor: 'white',
+    borderRadius: wp(25),
+    padding: wp(12),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  currentLocationButtonHidden: {
+    opacity: 0,
+  },
+  currentLocationIcon: {
+    width: wp(24),
+    height: wp(24),
   },
 });

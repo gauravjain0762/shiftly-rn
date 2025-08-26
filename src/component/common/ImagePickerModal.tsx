@@ -26,20 +26,47 @@ const ImagePickerModal = ({
 
   const openCamera = async () => {
     try {
-      const res = await ImageCropPicker.openCamera({
+      // const res = await ImageCropPicker.openCamera({
+      //   mediaType: 'photo',
+      //   cropping: true,
+      // });
+      //  if (Platform.OS == 'android') {
+      //   image.sourceURL = image.path;
+      // } else {
+      //   if (image.sourceURL == null) {
+      //     image.sourceURL = image.path;
+      //   }
+      // }
+      // let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
+
+      // // const temp = {
+      // //   ...res,
+      // //   uri: res.path,
+      // //   name: `image_${Date.now()}.jpg`,
+      // //   type: res.mime || 'image/jpeg',
+      // // };
+      // setImage(temp);
+      // closeActionSheet();
+      // onUpdate(temp);
+
+      ImageCropPicker.openCamera({
         mediaType: 'photo',
         cropping: true,
-      });
+      }).then(image => {
+        if (Platform.OS == 'android') {
+          image.sourceURL = image.path;
+        } else {
+          if (image.sourceURL == null) {
+            image.sourceURL = image.path;
+          }
+        }
+        let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
+        setImage(temp);
+        closeActionSheet();
+        onUpdate(temp);
 
-      const temp = {
-        ...res,
-        uri: res.path,
-        name: `image_${Date.now()}.jpg`,
-        type: res.mime || 'image/jpeg',
-      };
-      setImage(temp);
-      closeActionSheet();
-      onUpdate(temp);
+        closeActionSheet();
+      });
     } catch (err) {
       console.log('Camera cancelled or error', err);
     }

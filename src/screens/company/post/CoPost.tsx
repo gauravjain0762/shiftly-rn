@@ -88,13 +88,11 @@ const CoPost = () => {
         const formData = new FormData();
         formData.append('title', title.trim());
         formData.append('description', description.trim());
-        uploadedImages?.forEach(item => {
-          formData.append('images', {
-            uri: item.uri,
-            type: item.type || 'image/jpeg',
-            name: item.name || item.uri.split('/').pop(),
+        formData.append('images', {
+            uri: uploadedImages[0]?.uri,
+            type: uploadedImages[0]?.type || 'image/jpeg',
+            name: uploadedImages[0]?.name
           });
-        });
 
         const response = await companyPost(formData).unwrap();
         console.log(response, 'response----companyPost');

@@ -14,7 +14,6 @@ import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
-import {useGetProfileQuery} from '../../../api/authApi';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {useAppDispatch} from '../../../redux/hooks';
 import {setCompanyProfileData} from '../../../features/authSlice';
@@ -30,24 +29,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ImageWithLoader from '../../../component/common/ImageWithLoader';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const CoEditMyProfile = () => {
   const {t} = useTranslation();
-  const {data} = useGetProfileQuery();
+  const {userInfo} = useSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
-  const companyProfile = data?.data?.company;
-  console.log('🔥🔥🔥 ~ CoEditMyProfile ~ companyProfile:', companyProfile);
   const [updateCompanyProfile] = useCreateCompanyProfileMutation();
 
   const [companyName, setCompanyName] = useState(
-    companyProfile?.company_name || '',
+    userInfo?.company_name || '',
   );
-  const [about, setAbout] = useState(companyProfile?.about || '');
-  const [email, setEmail] = useState(companyProfile?.email || '');
+  const [about, setAbout] = useState(userInfo?.about || '');
+  const [email, setEmail] = useState(userInfo?.email || '');
   const [location, setLocation] = useState(
-    companyProfile?.location || companyProfile?.address || '',
+    userInfo?.location || userInfo?.address || '',
   );
-  const [logo, setLogo] = useState<any | {}>(companyProfile?.logo || {});
+  const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
   const [imageModal, setImageModal] = useState(false);
 
   const [userAddress, setUserAddress] = useState<
@@ -85,18 +84,18 @@ const CoEditMyProfile = () => {
   );
 
   const hasChanges = useMemo(() => {
-    if (!companyProfile) return false;
+    if (!userInfo) return false;
 
     const logoChanged =
-      (logo && typeof logo === 'object') || logo !== companyProfile.logo;
-    const aboutChanged = about !== (companyProfile.about || '');
+      (logo && typeof logo === 'object') || logo !== userInfo.logo;
+    const aboutChanged = about !== (userInfo.about || '');
     const locationChanged =
-      location !== (companyProfile.location || companyProfile.address || '');
+      location !== (userInfo.location || userInfo.address || '');
     const companyNameChanged =
-      companyName !== (companyProfile.company_name || '');
+      companyName !== (userInfo.company_name || '');
 
     return logoChanged || aboutChanged || locationChanged || companyNameChanged;
-  }, [logo, about, location, companyName, companyProfile]);
+  }, [logo, about, location, companyName, userInfo]);
 
   const UploadPhoto = (e: any) => {
     const uri = e?.sourceURL || e?.path || e?.uri;
@@ -173,8 +172,8 @@ const CoEditMyProfile = () => {
                   source={
                     logo?.uri
                       ? {uri: logo?.uri}
-                      : companyProfile?.logo
-                      ? {uri: companyProfile.logo}
+                      : userInfo?.logo
+                      ? {uri: userInfo.logo}
                       : IMAGES.hotel_cover
                   }
                   loaderSize="small"
@@ -237,8 +236,8 @@ const CoEditMyProfile = () => {
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Phone')}</Text>
               <Text style={styles.labelDesc}>{`🇦🇪 +${
-                companyProfile?.phone_code || ''
-              } ${companyProfile?.phone || ''}`}</Text>
+                userInfo?.phone_code || ''
+              } ${userInfo?.phone || ''}`}</Text>
             </View>
 
             <View style={styles.space}>

@@ -133,26 +133,6 @@ export const authApi = createApi({
         }
       },
     }),
-    getProfile: builder.query<any, void>({
-      query: () => ({
-        url: API.getCompanyProfile,
-        method: HTTP_METHOD.GET,
-        skipLoader: false,
-      }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          if (data?.status && data.data?.company) {
-            // dispatch(setUserInfo(data.data.company));
-            // await setAsyncUserInfo(data.data.company);
-          } else {
-            errorToast(data?.message || 'Something went wrong.');
-          }
-        } catch (error) {
-          console.log('Get Profile Error', error);
-        }
-      },
-    }),
     createJob: builder.mutation<any, any>({
       query: params => {
         return {
@@ -733,7 +713,6 @@ export const {
   useCompanyOTPVerifyMutation,
   useEmployeeLoginMutation,
   useEmployeeLogoutMutation,
-  useGetProfileQuery,
   useCreateJobMutation,
   useCompanyForgotPasswordMutation,
   useCompanyChangePasswordMutation,

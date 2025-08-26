@@ -16,7 +16,6 @@ import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {
   useCompanyDeleteAccountMutation,
   useCompanyLogoutMutation,
-  useGetProfileQuery,
 } from '../../../api/authApi';
 import {clearAsync} from '../../../utils/asyncStorage';
 import {
@@ -45,8 +44,6 @@ const CoProfile = () => {
     useState<boolean>(false);
   const {userInfo} = useSelector((state: RootState) => state.auth);
   console.log('🔥🔥🔥 ~ CoProfile ~ userInfo:', userInfo);
-  const {data} = useGetProfileQuery();
-  const companyProfile = data?.data?.company;
 
   const settingsData = [
     {
@@ -196,9 +193,9 @@ const CoProfile = () => {
           containerStyle={styles.header}
           RightIcon={
             <View>
-              {companyProfile?.logo ? (
+              {userInfo?.logo ? (
                 <ImageWithLoader
-                  source={{uri: companyProfile?.logo}}
+                  source={{uri: userInfo?.logo}}
                   style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
                   loaderSize="small"
                   loaderColor={colors._0B3970}

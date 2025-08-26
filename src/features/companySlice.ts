@@ -60,7 +60,7 @@ interface FiltersState {
 
 const initialState: CompanyState = {
   coPostJobSteps: 0,
-  coPostSteps: 0,
+  coPostSteps: 1,
   jobForm: {
     title: '',
     job_type: {label: 'Full Time', value: 'Full Time'},
