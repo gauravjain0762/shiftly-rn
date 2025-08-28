@@ -30,6 +30,7 @@ import {
   setExperienceListEdit,
   setAboutEdit,
 } from '../../../features/employeeSlice';
+import CustomImage from '../../../component/common/CustomImage';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch<any>();
@@ -82,7 +83,9 @@ const ProfileScreen = () => {
       dispatch(setExperienceListEdit(mappedExperiences[0] as any));
     }
 
-    const mappedLanguages = (userInfo?.languages || []).map((l: any) => l?.name).filter(Boolean);
+    const mappedLanguages = (userInfo?.languages || [])
+      .map((l: any) => l?.name)
+      .filter(Boolean);
     dispatch(
       setAboutEdit({
         aboutMe: '',
@@ -133,13 +136,15 @@ const ProfileScreen = () => {
           />
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
-          <Image
+          <CustomImage
             source={
               userInfo?.picture
                 ? {uri: userInfo?.picture}
                 : {uri: 'https://randomuser.me/api/portraits/women/44.jpg'}
             }
-            style={styles.avatar}
+            imageStyle={{height: '100%', width: '100%'}}
+            containerStyle={styles.avatar}
+            resizeMode="cover"
           />
           <Text style={styles.name}>
             {userInfo?.name || 'Smith Williamson'}
@@ -320,6 +325,7 @@ const styles = StyleSheet.create({
     width: wp(130),
     height: wp(130),
     borderRadius: 100,
+    overflow: 'hidden',
   },
   name: {
     ...commonFontStyle(600, 25, colors.white),

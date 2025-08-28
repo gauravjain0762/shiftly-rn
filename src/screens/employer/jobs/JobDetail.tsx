@@ -35,6 +35,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {API} from '../../../utils/apiConstant';
 import BaseText from '../../../component/common/BaseText';
+import CustomImage from '../../../component/common/CustomImage';
 
 const JobDetail = () => {
   const {t} = useTranslation();
@@ -91,28 +92,26 @@ const JobDetail = () => {
         }
         leftStyle={styles.lefticon}
       />
-      <Image
-        resizeMode="cover"
-        style={styles.banner}
+      <CustomImage
         source={
           curr_jobdetails?.company_id?.cover_images?.length
             ? {uri: curr_jobdetails.company_id.cover_images[0]}
             : data?.company_id?.logo
         }
+        imageStyle={{width: '100%', height: '100%'}}
+        resizeMode="cover"
+        containerStyle={styles.banner}
       />
 
       <ScrollView style={styles.container}>
         {/* Header Section */}
         <View style={styles.header}>
-          <View style={styles.logoBg}>
-            <Image
-              resizeMode="contain"
-              source={{
-                uri: data?.company_id?.logo,
-              }}
-              style={styles.logo}
-            />
-          </View>
+          <CustomImage
+            uri={data?.company_id?.logo}
+            imageStyle={{width: '100%', height: '100%'}}
+            resizeMode="cover"
+            containerStyle={styles.logoBg}
+          />
           <View style={styles.locationTitle}>
             <View style={styles.row}>
               <Image source={IMAGES.location} style={styles.location} />
@@ -205,6 +204,7 @@ const styles = StyleSheet.create({
   banner: {
     height: hp(230),
     marginTop: hp(10),
+    overflow: 'hidden',
   },
   container: {
     flex: 1,
@@ -219,6 +219,7 @@ const styles = StyleSheet.create({
     height: hp(34),
     resizeMode: 'contain',
     width: '100%',
+    overflow: 'hidden',
   },
   locationTitle: {
     marginLeft: wp(12),
@@ -260,6 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 100,
+    overflow: 'hidden',
   },
   like: {
     backgroundColor: colors.white,

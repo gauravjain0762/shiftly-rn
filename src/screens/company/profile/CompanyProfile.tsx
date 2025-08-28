@@ -35,9 +35,9 @@ import {
   useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
-import ImageWithLoader from '../../../component/common/ImageWithLoader';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import CustomImage from '../../../component/common/CustomImage';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
@@ -209,13 +209,11 @@ const CompanyProfile = () => {
             colors={['#FFF8E6', '#F3E1B7']}>
             <View style={styles.profileHeader}>
               {hasValidLogo ? (
-                <ImageWithLoader
-                  source={{uri: companyProfileData?.logo}}
-                  style={styles.logo}
+                <CustomImage
+                  uri={companyProfileData?.logo}
+                  imageStyle={{height: '100%', width: '100%'}}
                   containerStyle={styles.logoContainer}
-                  loaderSize="small"
-                  loaderColor={colors._0B3970}
-                  placeholder={logoPlaceholder}
+                  resizeMode="cover"
                 />
               ) : (
                 <View style={styles.logoPlaceholder}>

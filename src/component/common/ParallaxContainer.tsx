@@ -10,6 +10,7 @@ import React, {FC, ReactNode, useState, useCallback} from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import {colors} from '../../theme/colors';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import CustomImage from './CustomImage';
 
 type SimpleCarouselProps = {
   imagePath?: string | {uri: string} | (string | {uri: string})[];
@@ -81,26 +82,36 @@ const SimpleImage: FC<{
   if (!hasValidSource) return null;
 
   return (
-    <View style={styles.imageContainer}>
-      <ImageBackground
-        source={source}
-        resizeMode="cover"
-        style={style}
-        onLoadEnd={() => setIsLoading(false)}
-        onError={() => setIsLoading(false)}>
-        {children}
-      </ImageBackground>
+    // <View style={styles.imageContainer}>
+    //   <ImageBackground
+    //     source={source}
+    //     resizeMode="cover"
+    //     style={style}
+    //     onLoadEnd={() => setIsLoading(false)}
+    //     onError={() => setIsLoading(false)}>
+    //     {children}
+    //   </ImageBackground>
 
-      {showLoader && isLoading && (
-        <View style={[styles.loaderContainer, style]}>
-          <ActivityIndicator size="large" color={loaderColor} />
-        </View>
-      )}
-    </View>
+    //   {showLoader && isLoading && (
+    //     <View style={[styles.loaderContainer, style]}>
+    //       <ActivityIndicator size="large" color={loaderColor} />
+    //     </View>
+    //   )}
+    // </View>
+    <CustomImage
+      source={source}
+      imageStyle={style}
+      containerStyle={styles.imageContainer}
+      resizeMode="cover">
+      {children}
+    </CustomImage>
   );
 };
 
-const PaginationDots: FC<{data: any[]; currentIndex: number}> = ({data, currentIndex}) => {
+const PaginationDots: FC<{data: any[]; currentIndex: number}> = ({
+  data,
+  currentIndex,
+}) => {
   if (data.length <= 1) return null;
 
   return (
@@ -133,9 +144,11 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
   const renderCarouselItem = useCallback(
     ({item}: {item: any}) => {
       const hasValidSource = item && (typeof item === 'string' || item.uri);
-      const source = hasValidSource ? item : {
-        uri: 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png',
-      };
+      const source = hasValidSource
+        ? item
+        : {
+            uri: 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png',
+          };
 
       return (
         <SimpleImage
@@ -167,7 +180,7 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
           snapEnabled={hasMultipleImages}
           enabled={hasMultipleImages}
         />
-        
+
         <PaginationDots
           data={normalizedImages}
           currentIndex={currentImageIndex}

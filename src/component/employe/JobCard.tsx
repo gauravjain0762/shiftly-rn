@@ -11,6 +11,7 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
+import CustomImage from '../common/CustomImage';
 
 type props = {
   item?: any;
@@ -30,14 +31,17 @@ const JobCard: FC<props> = ({
   // console.log("🔥🔥🔥 ~ JobCard ~ heartImage:", heartImage)
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
-      <ImageBackground
-        source={{uri: item?.company_id?.cover_images[0]}}
-        style={styles.jobImage}>
+      <CustomImage
+        uri={item?.company_id?.cover_images[0]}
+        imageStyle={{width: '100%', height: '100%'}}
+        resizeMode="cover"
+        containerStyle={styles.jobImage}>
         <View style={styles.logo}>
-          <Image
-            resizeMode="contain"
-            style={styles.companyLogo}
-            source={{uri: item?.company_id?.logo}}
+          <CustomImage
+            uri={item?.company_id?.logo}
+            imageStyle={{width: '100%', height: '100%'}}
+            resizeMode="stretch"
+            containerStyle={styles.companyLogo}
           />
         </View>
         <View style={styles.actions}>
@@ -56,7 +60,7 @@ const JobCard: FC<props> = ({
             />
           </TouchableOpacity>
         </View>
-      </ImageBackground>
+      </CustomImage>
 
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
@@ -110,6 +114,7 @@ const styles = StyleSheet.create({
     width: wp(75),
     height: hp(75),
     borderRadius: hp(80),
+    overflow: 'hidden',
   },
   companyName: {
     ...commonFontStyle(400, 12, colors.black),

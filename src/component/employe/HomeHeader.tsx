@@ -13,7 +13,7 @@ import {useSelector} from 'react-redux';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import ImageWithLoader from '../common/ImageWithLoader';
+import CustomImage from '../common/CustomImage';
 
 type props = {
   onPressNotifi?: () => void;
@@ -33,38 +33,25 @@ const HomeHeader: FC<props> = ({
   return (
     <View style={styles.header}>
       <View style={styles.row}>
-        <TouchableOpacity onPress={onPressAvatar}>
-          {companyProfile?.logo ? (
-            <ImageWithLoader
-              source={{
-                uri:
-                  type === 'company'
-                    ? companyProfile.logo
-                    : companyProfile?.picture,
-              }}
-              style={styles.avatar}
-              loaderSize="small"
-              loaderColor={colors._0B3970}
-              placeholder={
-                <View style={styles.avatarPlaceholder}>
-                  <ActivityIndicator size="small" color={colors._0B3970} />
-                </View>
-              }
-            />
-          ) : companyProfile?.picture ? (
-            <ImageWithLoader
-              source={{uri: companyProfile.picture}}
-              style={styles.avatar}
-              loaderSize="small"
-              loaderColor={colors._0B3970}
-              placeholder={
-                <View style={styles.avatarPlaceholder}>
-                  <ActivityIndicator size="small" color={colors._0B3970} />
-                </View>
-              }
-            />
-          ) : null}
-        </TouchableOpacity>
+        {companyProfile?.logo ? (
+          <CustomImage
+            uri={
+              type === 'company' ? companyProfile.logo : companyProfile?.picture
+            }
+            imageStyle={{height: '100%', width: '100%'}}
+            containerStyle={styles.avatar}
+            resizeMode="stretch"
+            onPress={onPressAvatar}
+          />
+        ) : companyProfile?.picture ? (
+          <CustomImage
+            uri={companyProfile.picture}
+            imageStyle={{height: '100%', width: '100%'}}
+            containerStyle={styles.avatar}
+            resizeMode="stretch"
+            onPress={onPressAvatar}
+          />
+        ) : null}
 
         <View style={styles.info}>
           <Text
@@ -109,6 +96,7 @@ const styles = StyleSheet.create({
     width: wp(60),
     height: wp(60),
     borderRadius: 100,
+    overflow: 'hidden',
   },
   name: {
     ...commonFontStyle(700, 20, '#FFFFFF'),

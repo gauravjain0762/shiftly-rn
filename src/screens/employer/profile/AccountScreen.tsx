@@ -33,6 +33,7 @@ import {
 } from '../../../api/authApi';
 import {AppDispatch, persistor, RootState} from '../../../store';
 import LanguageModal from '../../../component/common/LanguageModel';
+import CustomImage from '../../../component/common/CustomImage';
 
 const AccountScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -164,13 +165,15 @@ const AccountScreen = () => {
           isRight={true}
           title={'Account'}
           RightIcon={
-            <Image
+            <CustomImage
               source={
                 userInfo?.picture
                   ? {uri: userInfo?.picture}
                   : {uri: 'https://randomuser.me/api/portraits/women/44.jpg'}
               }
-              style={styles.avatar}
+              imageStyle={{height: '100%', width: '100%'}}
+              containerStyle={styles.avatar}
+              resizeMode="cover"
             />
           }
         />
@@ -274,6 +277,7 @@ const styles = StyleSheet.create({
     width: wp(51),
     height: wp(51),
     borderRadius: 51,
+    overflow: 'hidden',
   },
   tab: {
     backgroundColor: colors.white,

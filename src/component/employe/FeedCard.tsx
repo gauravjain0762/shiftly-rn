@@ -5,6 +5,7 @@ import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
 import {getImageUrl, getTimeAgo} from '../../utils/commonFunction';
 import ExpandableText from '../common/ExpandableText';
+import CustomImage from '../common/CustomImage';
 
 type card = {
   onPressCard?: () => void;
@@ -23,11 +24,11 @@ const FeedCard: FC<card> = ({
       onPress={() => onPressCard()}
       style={styles.card}>
       <View style={styles.cardHeader}>
-        <Image
-          source={
-            item?.company_id?.logo ? {uri: item?.company_id?.logo} : IMAGES.logo
-          }
-          style={styles.logo}
+        <CustomImage
+          uri={item?.company_id?.logo}
+          imageStyle={{height: '100%', width: '100%'}}
+          containerStyle={styles.logo}
+          resizeMode="stretch"
         />
         <View>
           <Text style={styles.hotelName}>{item?.company_id?.company_name}</Text>
@@ -57,12 +58,11 @@ const FeedCard: FC<card> = ({
 
       {/* Banner */}
       <View style={styles.banner}>
-        <Image
-          source={
-            item?.images?.length > 0 ? {uri: item?.images[0]} : IMAGES.post
-          }
+        <CustomImage
+          uri={item?.images[0]}
+          imageStyle={{height: '100%', width: '100%'}}
+          containerStyle={styles.post}
           resizeMode="cover"
-          style={styles.post}
         />
       </View>
 
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
     width: wp(56),
     height: wp(56),
     borderRadius: 100,
+    overflow: 'hidden',
   },
   hotelName: {
     ...commonFontStyle(700, 18, colors._2F2F2F),
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: wp(14),
   },
-  post: {width: '100%', height: hp(230)},
+  post: {width: '100%', height: hp(230), overflow: 'hidden'},
   like: {
     width: wp(26),
     height: wp(26),

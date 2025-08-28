@@ -44,6 +44,7 @@ export const dashboardApi = createApi({
         url: API.getCompanyJobs,
         method: HTTP_METHOD.GET,
         params: params,
+        skipLoader:true
       }),
       providesTags: ['GetJobs'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
@@ -179,7 +180,7 @@ export const dashboardApi = createApi({
       query: () => ({
         url: API.getCompanyProfile,
         method: HTTP_METHOD.GET,
-        skipLoader: false,
+        skipLoader: true,
       }),
       providesTags: ['GetCompanyProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {

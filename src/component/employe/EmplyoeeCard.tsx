@@ -1,8 +1,16 @@
 import React from 'react';
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
+import CustomImage from '../common/CustomImage';
 
 interface Props {
   name: string;
@@ -20,16 +28,20 @@ const EmplyoeeCard = ({
   onPressEmployee,
 }: Props) => {
   return (
-    <View style={styles.employeeCardWrapper}>
+    <TouchableOpacity
+      onPress={onPressEmployee}
+      style={styles.employeeCardWrapper}>
       <View style={styles.employeeCard}>
         <View style={styles.employeeLeft}>
-          <Image
-            source={{
-              uri:
-                picture ||
-                'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D',
-            }}
-            style={styles.avatar2}
+          <CustomImage
+            uri={
+              picture
+                ? picture
+                : 'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D'
+            }
+            imageStyle={{height: '100%', width: '100%'}}
+            containerStyle={styles.avatar2}
+            resizeMode="stretch"
           />
           <View style={styles.employeeTextWrapper}>
             <Text style={styles.title}>{`${name || 'Tafnol Theresa'}`}</Text>
@@ -47,7 +59,7 @@ const EmplyoeeCard = ({
           )}
         </Pressable>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -93,6 +105,7 @@ const styles = StyleSheet.create({
     width: wp(100),
     height: hp(100),
     borderRadius: wp(10),
+    overflow: 'hidden',
   },
   checkImg: {
     width: wp(24),

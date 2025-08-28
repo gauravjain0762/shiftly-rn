@@ -19,6 +19,7 @@ import {useGetEmployeeProfileQuery} from '../../../api/dashboardApi';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Flag} from 'react-native-country-picker-modal';
 import {callingCodeToCountryCode} from '../../../utils/countryFlags';
+import CustomImage from '../../../component/common/CustomImage';
 
 export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
@@ -48,11 +49,11 @@ const ViewProfileScreen = () => {
             />
           </Pressable>
           <View style={styles.container}>
-            <Image
-              style={styles.avatar}
-              source={{
-                uri: userInfo?.picture,
-              }}
+            <CustomImage
+              uri={userInfo?.picture}
+              imageStyle={{height: '100%', width: '100%'}}
+              containerStyle={styles.avatar}
+              resizeMode="cover"
             />
             <Text style={styles.name}>{userInfo?.name}</Text>
             <View style={styles.locationRow}>
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
     width: wp(115),
     height: wp(115),
     borderRadius: 100,
+    overflow: 'hidden',
   },
   name: {
     ...commonFontStyle(600, 25, colors.white),

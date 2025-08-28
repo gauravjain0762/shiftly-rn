@@ -31,11 +31,11 @@ import {SCREENS} from '../../../navigation/screenNames';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import ImageWithLoader from '../../../component/common/ImageWithLoader';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
 import {Flag} from 'react-native-country-picker-modal';
+import CustomImage from '../../../component/common/CustomImage';
 
 const CoEditMyProfile = () => {
   const {t} = useTranslation();
@@ -173,7 +173,7 @@ const CoEditMyProfile = () => {
           <View style={styles.logoSection}>
             <TouchableOpacity onPress={() => setImageModal(true)}>
               <View>
-                <ImageWithLoader
+                <CustomImage
                   source={
                     logo?.uri
                       ? {uri: logo?.uri}
@@ -181,14 +181,9 @@ const CoEditMyProfile = () => {
                       ? {uri: userInfo.logo}
                       : IMAGES.hotel_cover
                   }
-                  loaderSize="small"
-                  style={styles.logoImage}
-                  loaderColor={colors._0B3970}
-                  placeholder={
-                    <View style={styles.loaderContainer}>
-                      <ActivityIndicator size="small" color={colors._0B3970} />
-                    </View>
-                  }
+                  imageStyle={{height: '100%', width: '100%'}}
+                  containerStyle={styles.logoImage}
+                  resizeMode="cover"
                 />
                 {/* Edit Icon */}
                 <TouchableOpacity
@@ -341,6 +336,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(95),
     borderColor: colors._C9C9C9,
     backgroundColor: colors.white,
+    overflow: 'hidden',
   },
   loaderContainer: {
     width: wp(100),

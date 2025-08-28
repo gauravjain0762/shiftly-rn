@@ -31,7 +31,7 @@ import {colors} from '../../../theme/colors';
 import {useTranslation} from 'react-i18next';
 import LanguageModal from '../../../component/common/LanguageModel';
 import {useSelector} from 'react-redux';
-import ImageWithLoader from '../../../component/common/ImageWithLoader';
+import CustomImage from '../../../component/common/CustomImage';
 
 const CoProfile = () => {
   const {t} = useTranslation();
@@ -192,24 +192,17 @@ const CoProfile = () => {
           containerStyle={styles.header}
           RightIcon={
             <View>
-              {userInfo?.logo ? (
-                <ImageWithLoader
-                  source={{uri: userInfo?.logo}}
-                  style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
-                  loaderSize="small"
-                  loaderColor={colors._0B3970}
-                  placeholder={
-                    <View style={styles.loaderContainer}>
-                      <ActivityIndicator size="small" color={colors._0B3970} />
-                    </View>
-                  }
-                />
-              ) : (
-                <Image
-                  source={IMAGES.avatar}
-                  style={{height: hp(51), width: wp(51), borderRadius: hp(51)}}
-                />
-              )}
+              <CustomImage
+                uri={userInfo?.logo}
+                imageStyle={{height: '100%', width: '100%'}}
+                containerStyle={{
+                  height: hp(51),
+                  width: wp(51),
+                  borderRadius: hp(51),
+                  overflow: 'hidden',
+                }}
+                resizeMode="cover"
+              />
             </View>
           }
         />

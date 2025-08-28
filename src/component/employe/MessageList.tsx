@@ -2,6 +2,7 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
+import CustomImage from '../common/CustomImage';
 
 type MessageItem = {
   id: string;
@@ -28,23 +29,26 @@ const MessageList: FC<Props> = ({
     <TouchableOpacity
       style={styles.itemContainer}
       onPress={() => onPressMessage(item)}>
-      <View style={styles.logoBg}>
-        <Image source={{uri: item?.company_id?.logo}} style={styles.logo} />
-      </View>
+      <CustomImage
+        uri={item?.company_id?.logo}
+        imageStyle={{height: '100%', width: '100%'}}
+        containerStyle={styles.logoBg}
+        resizeMode="cover"
+      />
       <View style={styles.textContainer}>
         <Text
           style={[
             styles.title,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.company_id?.company_name || "Test Chat"}
+          {item?.company_id?.company_name || 'Test Chat'}
         </Text>
         <Text
           style={[
             styles.sender,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.last_message || "last message"}
+          {item?.last_message || 'last message'}
         </Text>
         <Text
           style={[
@@ -143,5 +147,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 100,
+    overflow:'hidden'
   },
 });
