@@ -60,7 +60,9 @@ const JobsScreen = () => {
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
+  console.log("🔥🔥🔥 ~ JobsScreen ~ getFavoriteJobs:", getFavoriteJobs)
   const favJobList = getFavoriteJobs?.data?.jobs;
+  console.log("🔥🔥🔥 ~ JobsScreen ~ favJobList:", favJobList)
   const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
@@ -220,6 +222,7 @@ const JobsScreen = () => {
             const isFavorite = favJobList?.some(
               (fav: any) => fav._id === item?._id,
             );
+            // console.log("🔥🔥🔥 ~ isFavorite:", isFavorite)
             return (
               <JobCard
                 key={index}

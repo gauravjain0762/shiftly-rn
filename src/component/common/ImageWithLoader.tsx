@@ -50,24 +50,16 @@ const ImageWithLoader: React.FC<ImageWithLoaderProps> = ({
     setHasError(true);
   }, []);
 
-  // Auto-hide loader after timeout if no loading events occur
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       if (!hasStartedLoading) {
         console.log('⏰ ImageWithLoader: Auto-hiding loader (no load events)');
         setIsLoading(false);
       }
-    }, 2000); // 2 second timeout
+    }, 2000);
 
     return () => clearTimeout(timeout);
   }, [hasStartedLoading]);
-
-  console.log('🖼️ ImageWithLoader render:', {
-    isLoading,
-    hasError,
-    hasStartedLoading,
-    source,
-  });
 
   return (
     <View style={[styles.container, containerStyle]}>

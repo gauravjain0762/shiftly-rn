@@ -28,7 +28,7 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
   companyProfile,
 }) => {
-  console.log("🔥🔥🔥 ~ HomeHeader ~ companyProfile:", companyProfile);
+  console.log('🔥🔥🔥 ~ HomeHeader ~ companyProfile:', companyProfile);
 
   return (
     <View style={styles.header}>
@@ -36,7 +36,12 @@ const HomeHeader: FC<props> = ({
         <TouchableOpacity onPress={onPressAvatar}>
           {companyProfile?.logo ? (
             <ImageWithLoader
-              source={{uri: companyProfile.logo}}
+              source={{
+                uri:
+                  type === 'company'
+                    ? companyProfile.logo
+                    : companyProfile?.picture,
+              }}
               style={styles.avatar}
               loaderSize="small"
               loaderColor={colors._0B3970}
@@ -58,9 +63,7 @@ const HomeHeader: FC<props> = ({
                 </View>
               }
             />
-          ) : (
-            <Image source={IMAGES.avatar} style={styles.avatar} />
-          )}
+          ) : null}
         </TouchableOpacity>
 
         <View style={styles.info}>

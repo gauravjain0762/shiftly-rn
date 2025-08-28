@@ -49,9 +49,9 @@ import {
   useEmployeeResendOTPMutation,
   useEmployeeSignUpMutation,
   useEmpUpdateProfileMutation,
-  useUpdateProfileMutation,
 } from '../../../api/authApi';
 import {RootState} from '../../../store';
+import CustomImage from '../../../component/common/CustomImage';
 const {width} = Dimensions.get('window');
 
 const SignUp = () => {
@@ -66,7 +66,7 @@ const SignUp = () => {
     step,
     name,
     email,
-    timer,
+    // timer,
     showModal,
     imageModal,
     selected,
@@ -83,13 +83,14 @@ const SignUp = () => {
   } = signupData;
 
   const [password, setPassword] = useState(new Array(8).fill(''));
-  const [otp, setOtp] = useState(new Array(6).fill(''));
+  const [otp, setOtp] = useState(new Array(4).fill(''));
   const inputRefs = useRef<any>([]);
   const inputRefsOtp = useRef<any>([]);
   const [empSignUp] = useEmployeeSignUpMutation({});
   const [empOTPVerify] = useEmployeeOTPVerifyMutation({});
   const [employeeResendOTP] = useEmployeeResendOTPMutation({});
   const [empUpdateProfile] = useEmpUpdateProfileMutation({});
+  const [timer, setTimer] = useState(30);
 
   const options = [
     "I'm currently working in hospitality",
@@ -131,19 +132,33 @@ const SignUp = () => {
     dispatch(setCreateEmployeeAccount(updates));
   };
 
-  useEffect(() => {
-    if (signupData.step === undefined) {
-      updateSignupData({step: 1});
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (signupData.step === undefined) {
+  //     updateSignupData({step: 1});
+  //   }
+  // }, []);
 
   // Countdown timer
+  // useEffect(() => {
+  //   if (timer === 0) return;
+  //   const interval = setInterval(() => {
+  //     updateSignupData({timer: timer - 1});
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [timer]);
+
   useEffect(() => {
-    if (timer === 0) return;
-    const interval = setInterval(() => {
-      updateSignupData({timer: timer - 1});
-    }, 1000);
-    return () => clearInterval(interval);
+    let interval: NodeJS.Timeout | null = null;
+
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [timer]);
 
   const handleRegister = async () => {
@@ -159,6 +174,7 @@ const SignUp = () => {
 
       if (response?.status) {
         successToast(response?.message);
+        console.log('handleRegister >>>>>>>', response?.data);
         dispatch(setUserInfo(response?.data?.user));
         nextStep();
       } else {
@@ -170,8 +186,10 @@ const SignUp = () => {
   };
 
   const handleOTPVerify = async () => {
+    console.log('userInfo?._id: >>>>', userInfo?._id);
+
     const verifyData = {
-      otp: otp.join(''),
+      otp: otp.join('') || '123456',
       user_id: userInfo?._id,
       device_token: fcmToken ?? 'ddd',
       device_type: Platform.OS,
@@ -183,9 +201,10 @@ const SignUp = () => {
       if (response?.status) {
         successToast(response?.message);
         dispatch(setUserInfo(response?.data?.user));
-        dispatch(clearEmployeeAccount());
-        nextStep();
-        updateSignupData({showModal: true});
+        // dispatch(clearEmployeeAccount());
+        setTimeout(() => {
+          updateSignupData({showModal: true, timer: 0});
+        }, 200);
       } else {
         errorToast(response?.message);
       }
@@ -195,6 +214,7 @@ const SignUp = () => {
   };
 
   const handleResendOTP = async () => {
+    console.log('userInfo?._id: >>>>', userInfo?._id);
     try {
       const response = await employeeResendOTP({
         user_id: userInfo?._id,
@@ -202,9 +222,9 @@ const SignUp = () => {
 
       if (response?.status) {
         successToast(response?.message);
-        dispatch(setUserInfo(response?.data?.user));
+        dispatch(setUserInfo(response?.data));
         updateSignupData({timer: 30});
-        dispatch(clearEmployeeAccount());
+        // dispatch(clearEmployeeAccount());
       } else {
         errorToast(response?.message || 'Something went wrong');
       }
@@ -213,24 +233,28 @@ const SignUp = () => {
     }
   };
 
+  console.log('picture >>>>.', picture);
   const handleFinishSetup = async () => {
-    const updateData = {
-      about: describe,
-      dob: dob,
-      gender: selected1,
-      nationality: selected2,
-      country: selected3,
-      picture: picture?.path?.split('/').pop(),
-    };
-
     const form = new FormData();
-    Object.entries(updateData).forEach(([key, value]) => {
-      form.append(key, value);
-    });
+
+    form.append('about', describe);
+    form.append('dob', dob);
+    form.append('gender', selected1);
+    form.append('nationality', selected2);
+    form.append('country', selected3);
+
+    if (picture?.path) {
+      form.append('picture', {
+        uri: picture?.path,
+        type: picture?.mime || 'image/jpeg',
+        name: picture?.path.split('/').pop() || 'profile.jpg',
+      });
+    }
 
     try {
       const res = await empUpdateProfile(form).unwrap();
       console.log('🔥🔥 ~ handleFinishSetup ~ res:', res?.data);
+
       if (res?.status) {
         successToast(res?.message);
         dispatch(setUserInfo(res?.data?.user));
@@ -331,8 +355,8 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t(`What's your full name?`)}</Text>
               <CustomTextInput
-                placeholder={t('Type your name here...')}
-                placeholderTextColor={colors._F4E2B8}
+                placeholder={t('Type your name here')}
+                placeholderTextColor={colors._D5D5D5}
                 onChangeText={text => updateSignupData({name: text})}
                 value={name}
                 inputStyle={styles.input}
@@ -360,8 +384,8 @@ const SignUp = () => {
                 {t('What is your email address?')}
               </Text>
               <CustomTextInput
-                placeholder={t('Type your email here...')}
-                placeholderTextColor={colors._F4E2B8}
+                placeholder={t('Type your email here')}
+                placeholderTextColor={colors._D5D5D5}
                 onChangeText={text => updateSignupData({email: text})}
                 value={email}
                 inputStyle={styles.input}
@@ -387,6 +411,11 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               <View style={styles.info_row}>
+                <CustomImage
+                  source={IMAGES.info}
+                  size={hp(22)}
+                  imageStyle={{marginTop: hp(2)}}
+                />
                 <Text style={styles.infotext}>
                   {
                     'Password must include at least 8 characters, one uppercase letter, one number, and one symbol.'
@@ -399,6 +428,7 @@ const SignUp = () => {
                     key={idx}
                     ref={(el: any) => (inputRefs.current[idx] = el)}
                     value={val ? '*' : ''}
+                    placeholderTextColor={colors._D5D5D5}
                     onChangeText={text => handleChange(text, idx)}
                     onKeyPress={e => handleKeyPress(e, idx)}
                     maxLength={1}
@@ -438,10 +468,14 @@ const SignUp = () => {
               <PhoneInput
                 phone={phone}
                 callingCode={phone_code}
+                placeholderTextColor={colors._D5D5D5}
                 onPhoneChange={(e: any) => updateSignupData({phone: e})}
                 onCallingCodeChange={(e: any) =>
                   updateSignupData({phone_code: e})
                 }
+                category="Employee"
+                maxLength={10}
+                // placeholder='Enter your phone number'
               />
             </View>
             <GradientButton
@@ -487,6 +521,7 @@ const SignUp = () => {
                       style={styles.otpBox1}
                       keyboardType="decimal-pad"
                       autoFocus={idx === 0}
+                      placeholderTextColor={colors._D5D5D5}
                     />
                   ),
                 )}
@@ -527,8 +562,8 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t('Which best describes you?')}</Text>
               <CustomTextInput
-                placeholder={t(`I'm a job seeker`)}
-                placeholderTextColor={colors._F4E2B8}
+                placeholder={t(`Select which describe you`)}
+                placeholderTextColor={colors._D5D5D5}
                 onChangeText={text => updateSignupData({describe: text})}
                 value={describe}
                 inputStyle={styles.input1}
@@ -584,8 +619,8 @@ const SignUp = () => {
                 />
                 <Text style={styles.dateText}>
                   {dob
-                    ? moment(dob).format('YYYY-MM-DD')
-                    : moment().format('YYYY-MM-DD')}
+                    ? moment(dob).format('MM/DD/YYYY')
+                    : moment().format('MM/DD/YYYY')}
                 </Text>
               </Pressable>
 
@@ -608,7 +643,15 @@ const SignUp = () => {
                 {t('What is your gender?')}
               </Text>
               <Pressable style={styles.dateRow} onPress={() => {}}>
-                <Text style={styles.dateText}>{selected1}</Text>
+                <Text
+                  style={[
+                    styles.dateText,
+                    {
+                      marginLeft: 0,
+                    },
+                  ]}>
+                  {selected1}
+                </Text>
               </Pressable>
               <View style={styles.underline} />
               {options1.map((option, index) => {
@@ -777,16 +820,22 @@ const SignUp = () => {
                 style={styles.uploadBox}>
                 <View style={styles.imagePlaceholder}>
                   <Image
-                    source={picture ? {uri: picture?.path} : IMAGES.user}
-                    style={{
-                      width: wp(120),
-                      height: hp(120),
-                      resizeMode: 'contain',
-                      borderRadius: hp(100),
-                    }}
+                    source={picture?.path ? {uri: picture?.path} : IMAGES.user}
+                    style={styles.profileImage}
                     resizeMode="cover"
                   />
                 </View>
+                {picture?.path && (
+                  <Pressable
+                    onPress={() => updateSignupData({picture: ''})}
+                    style={styles.removeButton}>
+                    <CustomImage
+                      size={hp(12)}
+                      source={IMAGES.close}
+                      tintColor={colors.red}
+                    />
+                  </Pressable>
+                )}
                 <Text style={styles.uploadText}>
                   Upload Profile Image (optional)
                 </Text>
@@ -821,7 +870,9 @@ const SignUp = () => {
               <GradientButton
                 style={styles.btn}
                 title={t('Explore Jobs')}
-                onPress={() => navigateTo(SCREENS.TabNavigator)}
+                onPress={() => {
+                  navigateTo(SCREENS.TabNavigator);
+                }}
               />
             </View>
           </View>
@@ -870,6 +921,7 @@ const SignUp = () => {
       <WelcomeModal
         visible={showModal}
         onClose={() => {
+          nextStep();
           updateSignupData({showModal: false});
         }}
       />
@@ -936,7 +988,7 @@ const styles = StyleSheet.create({
   input1: {
     borderBottomWidth: 2,
     borderColor: colors._F4E2B8,
-    ...commonFontStyle(700, 27, colors._F4E2B8),
+    ...commonFontStyle(700, 22, colors._F4E2B8),
     flex: 1,
     paddingBottom: hp(15),
     marginTop: hp(65),
@@ -958,15 +1010,14 @@ const styles = StyleSheet.create({
   },
   infotext: {
     ...commonFontStyle(400, 16, colors.white),
-    lineHeight: hp(28),
-    top: -8,
+    lineHeight: hp(24),
   },
   secText: {
     ...commonFontStyle(500, 25, colors.white),
     marginVertical: hp(34),
   },
   secText1: {
-    ...commonFontStyle(400, 18, colors.white),
+    ...commonFontStyle(400, 17, colors.white),
   },
   resendText: {
     ...commonFontStyle(600, 20, colors._F4E2B8),
@@ -975,9 +1026,9 @@ const styles = StyleSheet.create({
     marginTop: hp(74),
   },
   info_row: {
-    flexDirection: 'row',
     gap: wp(10),
     marginTop: hp(15),
+    flexDirection: 'row',
   },
   cellStyle: {
     borderWidth: 0,
@@ -1060,7 +1111,7 @@ const styles = StyleSheet.create({
     marginTop: 67,
   },
   dateText: {
-    ...commonFontStyle(700, 22, colors._F4E2B8),
+    ...commonFontStyle(400, 22, colors._F4E2B8),
     marginLeft: 10,
   },
   underline: {
@@ -1116,5 +1167,24 @@ const styles = StyleSheet.create({
   uploadText: {
     ...commonFontStyle(400, 18, colors.white),
     marginTop: 12,
+  },
+  profileImage: {
+    width: wp(120),
+    height: hp(120),
+    borderRadius: hp(100),
+    resizeMode: 'contain',
+  },
+  removeButton: {
+    width: wp(22),
+    height: hp(22),
+    position: 'absolute',
+    top: '25%',
+    right: '40%',
+    zIndex: 9999,
+    overflow: 'visible',
+    borderRadius: hp(22),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
   },
 });

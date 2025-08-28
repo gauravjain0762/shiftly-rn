@@ -34,7 +34,7 @@ const CoAboutTab = ({companyProfileData}: Props) => {
         <View style={[AppStyles.flex, {paddingLeft: wp(30)}]}>
           <Text style={styles.infoTitle}>Type</Text>
           <Text style={styles.infoValue}>
-            {companyProfileData?.business_type_id}
+            {companyProfileData?.business_type_id?.title}
           </Text>
         </View>
       </View>
@@ -46,12 +46,12 @@ const CoAboutTab = ({companyProfileData}: Props) => {
         </Text>
       </View>
 
-      <View style={styles.infoSection}>
+      {/* <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>Sectors/industry</Text>
         <Text style={styles.infoValue}>
           {companyProfileData?.business_type_id}
         </Text>
-      </View>
+      </View> */}
 
       <LocationContainer
         containerStyle={styles.map}

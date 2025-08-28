@@ -48,6 +48,7 @@ const ApplyJob = () => {
       job_id: data?._id,
       resume_id: selectedDoc,
     };
+    console.log("🔥🔥🔥 ~ handleApplyJob ~ applyJobParams:", applyJobParams)
 
     try {
       const res = await applyJob(applyJobParams).unwrap();

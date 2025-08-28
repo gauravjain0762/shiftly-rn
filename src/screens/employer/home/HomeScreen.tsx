@@ -7,18 +7,42 @@ import FeedCard from '../../../component/employe/FeedCard';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useGetEmployeePostsQuery} from '../../../api/dashboardApi';
+import {
+  useGetEmployeePostsQuery,
+  useGetEmployeeProfileQuery,
+} from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {
+  clearEmployeeAccount,
+  setCreateEmployeeAccount,
+  setUserInfo,
+} from '../../../features/authSlice';
+import {useAppDispatch} from '../../../redux/hooks';
 
 const HomeScreen = () => {
-  // const {data: getProfile, isLoading: profileLoading} = useGetEmployeeProfileQuery({});
+  const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const {userInfo}: any = useSelector((state: RootState) => state.auth);
+  const {data: profileData} = useGetEmployeeProfileQuery({});
 
-  const {data: getPost, isFetching, isLoading} = useGetEmployeePostsQuery({});
+  const {
+    data: getPost,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useGetEmployeePostsQuery({});
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
   const posts = getPost?.data?.posts;
+
+  useEffect(() => {
+    if (profileData) {
+      dispatch(setUserInfo(profileData?.data?.user));
+    }
+  }, [profileData]);
 
   useEffect(() => {
     if (!getPost) return;
@@ -41,6 +65,7 @@ const HomeScreen = () => {
   const handleRefresh = () => {
     setCurrentPage(1);
     setAllPosts([]);
+    refetch();
   };
 
   const renderheader = () => {
@@ -48,6 +73,7 @@ const HomeScreen = () => {
       <View style={styles.header}>
         <HomeHeader
           onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
+          companyProfile={userInfo}
         />
       </View>
     );
@@ -62,7 +88,7 @@ const HomeScreen = () => {
           data={allPosts}
           style={AppStyles.flex}
           refreshing={isFetching}
-          onRefresh={handleRefresh}
+          // onRefresh={handleRefresh}
           onEndReachedThreshold={0.5}
           onEndReached={handleLoadMore}
           keyExtractor={(_, index) => index.toString()}

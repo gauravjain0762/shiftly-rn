@@ -98,7 +98,6 @@ const ForgotPassword = () => {
       errorToast('Please enter a valid email');
       return;
     }
-    console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ auth:', auth);
     try {
       const res = await companyForgotPassword({email: auth?.email}).unwrap();
       console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ res:', res);

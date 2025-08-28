@@ -200,12 +200,7 @@ const CoJobDetails = () => {
                     <ApplicantCard
                       key={index}
                       item={item}
-                      handleShortListEmployee={() => {
-                        if (!item?.status) {
-                          handleShortListEmployee(item);
-                        }
-                      }}
-                      showShortListButton={!item?.status}
+                      showShortListButton={false}
                     />
                   );
                 })

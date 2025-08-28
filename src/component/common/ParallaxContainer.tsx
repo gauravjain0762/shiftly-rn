@@ -128,12 +128,13 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const normalizedImages = Array.isArray(imagePath) ? imagePath : [imagePath];
+  const hasMultipleImages = normalizedImages.length > 1;
 
   const renderCarouselItem = useCallback(
     ({item}: {item: any}) => {
       const hasValidSource = item && (typeof item === 'string' || item.uri);
       const source = hasValidSource ? item : {
-        uri: 'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900',
+        uri: 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png',
       };
 
       return (
@@ -159,11 +160,12 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
           scrollAnimationDuration={300}
           onSnapToItem={setCurrentImageIndex}
           renderItem={renderCarouselItem}
-          loop
-          autoPlay
+          loop={hasMultipleImages}
+          autoPlay={hasMultipleImages}
           autoPlayInterval={3000}
-          pagingEnabled
-          snapEnabled
+          pagingEnabled={hasMultipleImages}
+          snapEnabled={hasMultipleImages}
+          enabled={hasMultipleImages}
         />
         
         <PaginationDots

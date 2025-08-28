@@ -34,8 +34,8 @@ const LoginScreen = () => {
 
   const [employeeLogin, {isLoading: loginLoading}] = useEmployeeLoginMutation();
   const [authData, setAuthData] = React.useState({
-    email: 'bilal@devicebee.com',
-    password: '12345678',
+    email: __DEV__ ? 'bilal@devicebee.com' : '',
+    password: __DEV__ ? '12345678' : '',
   });
 
   const handleLogin = async () => {

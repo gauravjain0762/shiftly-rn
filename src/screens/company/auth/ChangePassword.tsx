@@ -50,13 +50,12 @@ const ChangePassword = () => {
       }).unwrap();
       if (res?.status) {
         successToast(res?.message);
-        dispatch(setUserInfo(res.data?.user));
         resetNavigation(SCREENS.CoTabNavigator);
       } else {
         errorToast(res?.message || 'Something went wrong');
       }
     } catch (error: any) {
-      errorToast(error?.data?.message || 'Failed to send OTP');
+      errorToast(error?.data?.message);
     }
   };
 

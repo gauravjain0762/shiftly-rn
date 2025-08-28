@@ -10,6 +10,7 @@ import React, {FC} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
+import ExpandableText from '../common/ExpandableText';
 
 type props = {
   item?: any;
@@ -26,6 +27,7 @@ const JobCard: FC<props> = ({
   heartImage,
   onPressShare = () => {},
 }) => {
+  // console.log("🔥🔥🔥 ~ JobCard ~ heartImage:", heartImage)
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <ImageBackground
@@ -69,7 +71,11 @@ const JobCard: FC<props> = ({
             <Text style={styles.badgeText}>{item?.job_type}</Text>
           </View>
         </View>
-        <Text style={styles.jobDescription}>{item?.description}</Text>
+        <ExpandableText
+          description={item?.description}
+          showStyle={{paddingHorizontal: 0, fontSize: 15}}
+          descriptionStyle={styles.jobDescription}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -117,6 +123,7 @@ const styles = StyleSheet.create({
   jobDescription: {
     ...commonFontStyle(400, 12, colors._656464),
     lineHeight: hp(18),
+    paddingHorizontal: 0,
   },
   cardFooter: {
     flexDirection: 'row',

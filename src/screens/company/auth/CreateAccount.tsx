@@ -107,15 +107,14 @@ const CreateAccount = () => {
     logo,
     cover_images,
   } = useSelector((state: RootState) => state.auth.companyProfileData || {});
-  console.log('🔥🔥🔥 ~ CreateAccount ~ cover_images:', cover_images);
-  console.log(
-    '🔥🔥🔥 ~ CreateAccount ~ companyProfileData:',
-    companyProfileData,
-  );
-  const {data: businessTypes, isLoading: Loading} = useGetBusinessTypesQuery(
+  // console.log('🔥🔥🔥 ~ CreateAccount ~ cover_images:', cover_images);
+  // console.log(
+  //   '🔥🔥🔥 ~ CreateAccount ~ companyProfileData:',
+  //   companyProfileData,
+  // );
+  const {data: businessTypes} = useGetBusinessTypesQuery(
     {},
   );
-  console.log('🔥🔥🔥 ~ CreateAccount ~ businessTypes:', businessTypes);
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
   const dispatch = useAppDispatch();

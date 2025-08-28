@@ -17,6 +17,7 @@ interface Props {
   description: string;
   maxLines?: number;
   showStyle?: StyleProp<TextStyle>;
+  descriptionStyle?: StyleProp<TextStyle>;
 }
 
 const ExpandableText: React.FC<Props> = ({
@@ -24,6 +25,7 @@ const ExpandableText: React.FC<Props> = ({
   style,
   maxLines = 5,
   showStyle,
+  descriptionStyle,
 }) => {
   const [showMore, setShowMore] = useState(false);
   const [shouldShowButton, setShouldShowButton] = useState(false);
@@ -61,7 +63,7 @@ const ExpandableText: React.FC<Props> = ({
       )}
 
       <BaseText
-        style={style}
+        style={descriptionStyle}
         ellipsizeMode="tail"
         numberOfLines={showMore ? undefined : maxLines}>
         {description}

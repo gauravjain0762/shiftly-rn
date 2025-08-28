@@ -68,7 +68,7 @@ const FeedCard: FC<card> = ({
 
       <ExpandableText
         maxLines={3}
-        style={styles.description}
+        descriptionStyle={styles.description}
         description={item?.description}
       />
     </TouchableOpacity>

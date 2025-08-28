@@ -51,6 +51,7 @@ const CompanyProfile = () => {
 
   const {data: getPost} = useGetCompanyPostsQuery({});
   const allPosts = getPost?.data?.posts;
+  console.log('🔥🔥🔥 ~ CompanyProfile ~ allPosts:', allPosts);
 
   const dispatch = useAppDispatch();
   const {data} = useGetProfileQuery();
@@ -148,13 +149,27 @@ const CompanyProfile = () => {
   const renderJobs = useMemo(() => {
     if (selectedTanIndex !== 2) return null;
 
+    if (jobsList?.length === 0) {
+      return (
+        <Text
+          style={[
+            commonFontStyle(500, 16, colors._3D3D3D),
+            {textAlign: 'center', marginTop: hp(20)},
+          ]}>
+          No Jobs Found
+        </Text>
+      );
+    }
+
     return jobsList?.map((item: any, index: number) => (
-      <View style={{marginBottom: hp(15)}} key={`job-${item.id || index}`}>
+      <ScrollView
+        style={{marginBottom: hp(15)}}
+        key={`job-${item.id || index}`}>
         <MyJobCard
           item={item}
           onPressShare={() => setIsShareModalVisible(true)}
         />
-      </View>
+      </ScrollView>
     ));
   }, [selectedTanIndex, jobsList]);
 
@@ -176,7 +191,9 @@ const CompanyProfile = () => {
   );
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: colors._F3E1B7}} edges={['bottom']} >
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: colors._F3E1B7}}
+      edges={['bottom']}>
       <ScrollView
         contentContainerStyle={{paddingBottom: hp(40)}}
         showsVerticalScrollIndicator={false}>
@@ -190,9 +207,7 @@ const CompanyProfile = () => {
             SafeAreaProps={{edges: ['bottom']}}
             containerStyle={styles.linearContainer}
             colors={['#FFF8E6', '#F3E1B7']}>
-            {/* ✅ Add ScrollView here */}
             <View style={styles.profileHeader}>
-              {/* Logo with conditional loader */}
               {hasValidLogo ? (
                 <ImageWithLoader
                   source={{uri: companyProfileData?.logo}}
@@ -210,7 +225,7 @@ const CompanyProfile = () => {
 
               <View style={styles.titleTextContainer}>
                 <Text style={styles.companyName}>
-                  {companyProfileData?.company_name || 'N/A'}
+                  {companyProfileData?.company_name}
                 </Text>
                 <Text style={styles.tagline}>
                   {companyProfileData?.mission}
@@ -234,7 +249,7 @@ const CompanyProfile = () => {
             )}
 
             <View style={styles.tabRow}>
-              {ProfileTabs.map((item, index) => (
+              {ProfileTabs?.map((item, index) => (
                 <Pressable
                   key={item}
                   onPress={() => handleTabPress(index)}
@@ -264,7 +279,15 @@ const CompanyProfile = () => {
                 renderItem={renderPostItem}
                 keyExtractor={item => `post-${item.id}`}
                 columnWrapperStyle={{justifyContent: 'space-between'}}
-                scrollEnabled={false} // ⚡ disable nested scrolling
+                ListEmptyComponent={() => (
+                  <Text
+                    style={[
+                      commonFontStyle(500, 16, colors._3D3D3D),
+                      {textAlign: 'center', marginTop: hp(20)},
+                    ]}>
+                    No Posts Found
+                  </Text>
+                )}
               />
             )}
 

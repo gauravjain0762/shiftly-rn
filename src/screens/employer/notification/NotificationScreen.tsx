@@ -6,6 +6,7 @@ import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import NotificationCard from '../../../component/employe/NotificationCard';
+import BaseText from '../../../component/common/BaseText';
 
 const notifications = [
   {
@@ -85,6 +86,15 @@ const NotificationScreen = () => {
           contentContainerStyle={styles.scrollContainer}
           ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={() => {
+            return (
+              <View style={styles.emptyContainer}>
+                <BaseText style={styles.emptyText}>
+                  {'There is no notification available'}
+                </BaseText>
+              </View>
+            );
+          }}
         />
       </SafeAreaView>
     </LinearContainer>
@@ -119,7 +129,17 @@ const styles = StyleSheet.create({
   },
 
   scrollContainer: {
+    flexGrow: 1,
     // paddingVertical: hp(22),
     paddingHorizontal: wp(25),
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    ...commonFontStyle(400, 18, colors.white),
   },
 });

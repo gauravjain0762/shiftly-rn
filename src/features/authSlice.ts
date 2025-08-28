@@ -204,7 +204,7 @@ const authSlice = createSlice({
       const savedSteps = state?.createEmployeeAccount?.step;
       return {
         ...initialState,
-        steps: savedSteps,
+        step: savedSteps,
       };
     },
   },

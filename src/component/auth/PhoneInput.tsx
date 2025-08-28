@@ -26,7 +26,9 @@ type picker = {
   phoneStyle?: TextStyle;
   onCallingCodeChange?: any;
   placeholder?: string;
-} & TextProps & TextInputProps;
+  category?: 'Company' | 'Employee';
+} & TextProps &
+  TextInputProps;
 
 const PhoneInput: FC<picker> = ({
   callingCodeStyle,
@@ -37,6 +39,7 @@ const PhoneInput: FC<picker> = ({
   onCallingCodeChange,
   phoneStyle,
   placeholder,
+  category = 'Company',
   ...TextInputProps
 }) => {
   // const [phone, setPhone] = useState('');
@@ -85,13 +88,13 @@ const PhoneInput: FC<picker> = ({
           style={[styles.input, phoneStyle]}
           value={phone}
           onChangeText={handlePhoneChange}
-          placeholder={placeholder || "28 364 12"}
+          placeholder={placeholder || '28 364 12'}
           keyboardType="phone-pad"
           {...TextInputProps}
         />
         {valid && phone?.length > 8 && (
           <Image
-            source={IMAGES.welcome_icon}
+            source={IMAGES.right}
             style={{width: 22, height: 22, resizeMode: 'contain'}}
           />
         )}
@@ -103,7 +106,11 @@ const PhoneInput: FC<picker> = ({
             source={IMAGES.error_icon}
             style={{width: 31, height: 28, resizeMode: 'contain'}}
           />
-          <Text style={styles.errorText}>
+          <Text
+            style={[
+              styles.errorText,
+              {color: category === 'Employee' ? colors.white : colors._3D3D3D},
+            ]}>
             {t('Please enter a valid phone number')}
           </Text>
         </View>
