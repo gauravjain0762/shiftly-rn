@@ -11,12 +11,18 @@ type Props = {
 };
 
 const CustomPostCard = ({title, image}: Props) => {
+  const resolvedImage =
+    Array.isArray(image) && image.length > 0
+      ? image[0] // first image from array
+      : typeof image === 'string'
+      ? image
+      : null;
+
   return (
     <View style={styles.card}>
       <Image
-        source={
-          typeof image === 'string' ? {uri: image} : image || {uri: IMAGE_URL}
-        }
+        source={resolvedImage ? {uri: resolvedImage} : {uri: IMAGE_URL}}
+
         style={styles.image}
       />
       <View style={styles.textContainer}>

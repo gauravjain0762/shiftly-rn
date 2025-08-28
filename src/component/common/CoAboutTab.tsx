@@ -53,12 +53,14 @@ const CoAboutTab = ({companyProfileData}: Props) => {
         </Text>
       </View> */}
 
-      <LocationContainer
-        containerStyle={styles.map}
-        lat={companyProfileData?.lat}
-        lng={companyProfileData?.lng}
-        address={companyProfileData?.address}
-      />
+      {companyProfileData && (
+        <LocationContainer
+          containerStyle={styles.map}
+          lat={companyProfileData?.lat}
+          lng={companyProfileData?.lng}
+          address={companyProfileData?.address}
+        />
+      )}
     </View>
   );
 };

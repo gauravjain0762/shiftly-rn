@@ -16,8 +16,8 @@ import Config from 'react-native-config';
 
 type map = {
   containerStyle?: ViewStyle;
-  lat?: number | undefined;
-  lng?: number | undefined;
+  lat?: number | undefined|any;
+  lng?: number | undefined|any;
   onPressMap?: () => void;
   address?: string | undefined;
   showAddressCard?: boolean;
@@ -63,6 +63,7 @@ const LocationContainer: FC<map> = ({
         </View>
       )}
       <Pressable onPress={onPressMap}>
+        {location?.latitude ? <>
         <MapView
           region={{
             latitude: lat || location?.latitude,
@@ -86,6 +87,7 @@ const LocationContainer: FC<map> = ({
             />
           </Marker>
         </MapView>
+        </>: <View />}
       </Pressable>
     </View>
   );
