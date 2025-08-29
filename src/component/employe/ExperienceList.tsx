@@ -17,6 +17,7 @@ import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
 import CustomInput from '../common/CustomInput';
 import {errorToast} from '../../utils/commonFunction';
+import CountryPicker from 'react-native-country-picker-modal';
 
 type MessageItem = {
   id: string;
@@ -60,6 +61,8 @@ const ExperienceList: FC<Props> = ({
   isEditing,
   onSaveExperience,
 }: any) => {
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+
   return (
     <View style={{paddingHorizontal: 29}}>
       {/* <CustomDropdown
@@ -126,7 +129,7 @@ const ExperienceList: FC<Props> = ({
           });
         }}
       />
-      <CustomDropdown
+      {/* <CustomDropdown
         data={educationOptions}
         label="Country"
         placeholder={'Select Country'}
@@ -139,8 +142,35 @@ const ExperienceList: FC<Props> = ({
             country: selectedItem?.value,
           });
         }}
-      />
-
+      /> */}
+      <View style={{flex: 1}}>
+        <Text style={styles.label}>{'Country'}</Text>
+        <TouchableOpacity
+          onPress={() => setIsVisible(true)}
+          style={styles.country}>
+          <Text style={styles.countryText} numberOfLines={2}>
+            {educationListEdit?.country || 'Select Country'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {isVisible && (
+        <CountryPicker
+          visible={isVisible ? true : false}
+          withFilter
+          withCountryNameButton // show only name in selected view
+          withCallingCode={false}
+          withFlag // hides flag in selected view
+          withEmoji={false} // hides emoji flag in selected view
+          onSelect={(item: any) => {
+            setEducationListEdit({...educationListEdit, country: item?.name});
+            setIsVisible(false);
+          }}
+          onClose={() => {
+            setIsVisible(false);
+          }}
+          placeholder=""
+        />
+      )}
       <Text style={styles.headerText}>When did you start this job?</Text>
       {/* Start & End Date */}
       <View
@@ -355,5 +385,22 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginHorizontal: wp(4),
+  },
+
+  country: {
+    paddingHorizontal: wp(16),
+    borderRadius: 20,
+    height: 59,
+    borderWidth: 1.5,
+    borderColor: '#225797',
+    justifyContent: 'center',
+  },
+  countryText: {
+    ...commonFontStyle(400, 18, '#F4E2B8'),
+  },
+  label: {
+    marginTop: 20,
+    marginBottom: 12,
+    ...commonFontStyle(400, 18, '#DADADA'),
   },
 });
