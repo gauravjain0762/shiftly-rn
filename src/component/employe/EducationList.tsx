@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {
   Alert,
   Image,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import GradientButton from '../common/GradientButton';
@@ -16,6 +17,7 @@ import moment from 'moment';
 import {EducationItem} from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
 import {errorToast} from '../../utils/commonFunction';
+import CountryPicker, {Country} from 'react-native-country-picker-modal';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -34,7 +36,7 @@ const EducationList: FC<Props> = ({
   isEditing,
   onSaveEducation,
 }) => {
-  console.log('🔥🔥 ~ educationListEdit:', educationListEdit);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   return (
     <View style={{paddingHorizontal: 29}}>
@@ -105,7 +107,7 @@ const EducationList: FC<Props> = ({
           marginBottom: 20,
           gap: 10,
         }}>
-        <CustomInput
+        {/* <CustomInput
           label="Country"
           placeholder="Enter Country"
           value={educationListEdit?.country}
@@ -113,17 +115,49 @@ const EducationList: FC<Props> = ({
             setEducationListEdit({...educationListEdit, country: text})
           }
           containerStyle={{flex: 1}}
-        />
-        <CustomInput
-          label="Province"
-          placeholder="Enter Province"
-          value={educationListEdit?.province}
-          onChange={text =>
-            setEducationListEdit({...educationListEdit, province: text})
-          }
-          containerStyle={{flex: 1}}
-        />
+        /> */}
+        <View style={{width: '50%'}}>
+          <Text style={styles.label}>{'Country'}</Text>
+          <TouchableOpacity
+            onPress={() => setIsVisible(true)}
+            style={styles.country}>
+            <Text style={styles.countryText} numberOfLines={2}>
+              {educationListEdit?.country || 'Select Country'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{width: '50%'}}>
+          <CustomInput
+            label="Province"
+            placeholder="Enter Province"
+            value={educationListEdit?.province}
+            onChange={(text: any) =>
+              setEducationListEdit({...educationListEdit, province: text})
+            }
+            containerStyle={{flex: 1}}
+          />
+        </View>
       </View>
+
+      {isVisible && (
+        <CountryPicker
+          visible={isVisible ? true : false}
+          withFilter
+          withCountryNameButton // show only name in selected view
+          withCallingCode={false}
+          withFlag // hides flag in selected view
+          withEmoji={false} // hides emoji flag in selected view
+          onSelect={(item: any) => {
+            setEducationListEdit({...educationListEdit, country: item?.name});
+            setIsVisible(false);
+          }}
+          onClose={() => {
+            setIsVisible(false);
+          }}
+          placeholder=""
+        />
+      )}
+
       <TouchableOpacity
         onPress={isEditing ? onSaveEducation : addNewEducation}
         style={styles.btnRow}>
@@ -186,5 +220,21 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginHorizontal: wp(4),
+  },
+  country: {
+    paddingHorizontal: wp(16),
+    borderRadius: 20,
+    height: 59,
+    borderWidth: 1.5,
+    borderColor: '#225797',
+    justifyContent: 'center',
+  },
+  countryText: {
+    ...commonFontStyle(400, 18, '#F4E2B8'),
+  },
+  label: {
+    marginTop: 20,
+    marginBottom: 12,
+    ...commonFontStyle(400, 18, '#DADADA'),
   },
 });

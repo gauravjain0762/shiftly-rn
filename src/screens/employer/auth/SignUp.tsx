@@ -97,7 +97,6 @@ const SignUp = () => {
   const [timer, setTimer] = useState(30);
 
   const [isVisible, setIsVisible] = useState<null | string>(null);
-  console.log('country', isVisible);
 
   const options = [
     "I'm currently working in hospitality",
@@ -105,11 +104,6 @@ const SignUp = () => {
     "I'm a job seeker",
   ];
   const options1 = ['Male', 'Female', 'prefer not to disclose'];
-  const options2 = [
-    'United State America',
-    'United Arab Emirates',
-    'United Kindom',
-  ];
 
   // Update Redux state helper
   const updateSignupData = (
