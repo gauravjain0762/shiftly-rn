@@ -85,9 +85,9 @@ const WelcomeScreen = () => {
 
   const onLogin = () => {
     if (role === 'company') {
-      navigateTo(SCREENS.CoStack, SCREENS.CoLogin);
+      navigateTo(SCREENS.CoStack);
     } else {
-      navigateTo(SCREENS.EmployeeStack, SCREENS.LoginScreen);
+      navigateTo(SCREENS.EmployeeStack);
     }
   };
 
@@ -230,11 +230,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  container1: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
   },
   logo: {
     height: 60,
