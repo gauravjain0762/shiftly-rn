@@ -37,11 +37,11 @@ const educationOptions = [
 ];
 
 const experienceOptions = [
-  {label: "Internship", value: "internship"},
-  {label: "Part-time", value: "part_time"},
-  {label: "Full-time", value: "full_time"},
-  {label: "Freelance", value: "freelance"},
-  {label: "Contract", value: "contract"},
+  {label: 'Internship', value: 'internship'},
+  {label: 'Part-time', value: 'part_time'},
+  {label: 'Full-time', value: 'full_time'},
+  {label: 'Freelance', value: 'freelance'},
+  {label: 'Contract', value: 'contract'},
 ];
 
 type Props = {
@@ -62,7 +62,7 @@ const ExperienceList: FC<Props> = ({
 }: any) => {
   return (
     <View style={{paddingHorizontal: 29}}>
-      <CustomDropdown
+      {/* <CustomDropdown
         data={educationOptions}
         label="Preferred Position"
         placeholder={'Preferred Position'}
@@ -75,6 +75,17 @@ const ExperienceList: FC<Props> = ({
             preferred: selectedItem?.value,
           });
         }}
+      /> */}
+      <CustomInput
+        label="Preferred Position"
+        placeholder={'Enter Preferred Position'}
+        value={educationListEdit.preferred}
+        onChange={(text: any) => {
+          setEducationListEdit({
+            ...educationListEdit,
+            preferred: text,
+          });
+        }}
       />
 
       <Text style={styles.headerText}>Past Job Experience</Text>
@@ -82,7 +93,7 @@ const ExperienceList: FC<Props> = ({
         label="Title"
         placeholder={'Enter Title'}
         value={educationListEdit.title}
-        onChange={text => {
+        onChange={(text: any) => {
           setEducationListEdit({
             ...educationListEdit,
             title: text,
@@ -93,7 +104,7 @@ const ExperienceList: FC<Props> = ({
         label="Company"
         placeholder={'Enter Company'}
         value={educationListEdit.company}
-        onChange={text => {
+        onChange={(text: any) => {
           setEducationListEdit({
             ...educationListEdit,
             company: text,
