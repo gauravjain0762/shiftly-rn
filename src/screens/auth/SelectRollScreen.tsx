@@ -1,15 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  StatusBar,
-  SafeAreaView,
-} from 'react-native';
+import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {IMAGES} from '../../assets/Images';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
@@ -18,7 +10,7 @@ import {SCREENS} from '../../navigation/screenNames';
 import useRole from '../../hooks/useRole';
 
 const SelectRollScreen = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const {role, setRole} = useRole();
 
   return (
@@ -42,7 +34,7 @@ const SelectRollScreen = () => {
               setRole('company');
               navigateTo(SCREENS.WelcomeScreen);
             }}
-            style={[styles.button, {borderColor: '#000', borderTopWidth: 0.5}]}>
+            style={[styles.button, {borderColor: '#000', borderTopWidth: hp(0.2)}]}>
             <Text style={styles.buttonTextDark}>
               {t('Continue as Employer')}
             </Text>
@@ -77,67 +69,68 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 20,
+    marginHorizontal: wp(20),
   },
   logo: {
-    width: 121,
-    height: 122,
+    width: wp(122),
+    height: hp(122),
     resizeMode: 'contain',
-    marginBottom: 23,
+    marginBottom: hp(23),
   },
   cardEmployer: {
-    backgroundColor: colors._FBE7BD,
-    borderRadius: 20,
-    paddingVertical: 21,
     width: '92%',
     alignItems: 'center',
-    marginBottom: 60,
+    marginBottom: hp(60),
+    borderRadius: hp(20),
+    paddingVertical: hp(21),
+    backgroundColor: colors._FBE7BD,
   },
   cardJobSeeker: {
-    backgroundColor: colors._0B3970,
-    borderRadius: 20,
-    paddingVertical: 21,
     width: '94%',
     alignItems: 'center',
+    borderRadius: hp(20),
+    paddingVertical: hp(21),
+    backgroundColor: colors._0B3970,
   },
   icon: {
-    marginBottom: 23,
-    width: 41,
-    height: 41,
+    width: wp(41),
+    height: hp(41),
+    marginBottom: hp(23),
   },
   titleBlack: {
-    ...commonFontStyle(700, 19, colors.black),
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: hp(8),
+    paddingHorizontal: wp(23),
+    ...commonFontStyle(700, 19, colors.black),
   },
   titleWhite: {
-    ...commonFontStyle(700, 19, colors.white),
     textAlign: 'center',
-    marginBottom: 10,
-    marginHorizontal: 68,
+    marginBottom: hp(8),
+    marginHorizontal: hp(23),
+    ...commonFontStyle(700, 19, colors.white),
   },
   desc: {
-    ...commonFontStyle(400, 18, colors.black),
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: hp(22),
+    ...commonFontStyle(400, 18, colors.black),
   },
   descWhite: {
-    ...commonFontStyle(400, 18, colors.white),
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: hp(20),
+    ...commonFontStyle(400, 18, colors.white),
   },
   button: {
-    borderTopWidth: 1,
-    borderTopColor: colors._104686,
     width: '100%',
+    borderTopWidth: 1,
     alignItems: 'center',
+    borderTopColor: colors._104686,
   },
   buttonText: {
-    marginTop: 17,
+    marginTop: hp(17),
     ...commonFontStyle(500, 18, colors.white),
   },
   buttonTextDark: {
-    marginTop: 17,
+    marginTop: hp(17),
     ...commonFontStyle(500, 19, colors.black),
   },
 });

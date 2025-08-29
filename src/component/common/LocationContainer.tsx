@@ -58,7 +58,7 @@ const LocationContainer: FC<map> = ({
             </View>
           </View>
           <Text style={styles.locationText}>
-            {address || `Crescent Road, The Palm Jumeirah, Dubai, 211222, AE`}
+            {address || `No location found`}
           </Text>
         </View>
       )}

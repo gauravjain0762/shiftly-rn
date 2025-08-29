@@ -9,7 +9,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {BackHeader, GradientButton, LinearContainer} from '../../../component';
+import {
+  BackHeader,
+  CustomDropdown,
+  GradientButton,
+  LinearContainer,
+} from '../../../component';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
@@ -19,6 +24,7 @@ import {useAppDispatch} from '../../../redux/hooks';
 import {setCompanyProfileData, setUserInfo} from '../../../features/authSlice';
 import {
   useCreateCompanyProfileMutation,
+  useGetBusinessTypesQuery,
   useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import {
@@ -36,13 +42,16 @@ import {RootState} from '../../../store';
 import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
 import {Flag} from 'react-native-country-picker-modal';
 import CustomImage from '../../../component/common/CustomImage';
+import {companySize} from './CreateAccount';
 
 const CoEditMyProfile = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log('🔥 ~ CoEditMyProfile ~ userInfo:', userInfo);
   const [updateCompanyProfile] = useCreateCompanyProfileMutation();
   const {data: profileData} = useGetProfileQuery();
+  const {data: businessTypes} = useGetBusinessTypesQuery({});
 
   const [companyName, setCompanyName] = useState(userInfo?.company_name || '');
   const [about, setAbout] = useState(userInfo?.about || '');
@@ -50,7 +59,17 @@ const CoEditMyProfile = () => {
   const [location, setLocation] = useState(
     userInfo?.location || userInfo?.address || '',
   );
+  const [website, setWebsite] = useState(userInfo?.website || '');
+  const [coSize, setCoSize] = useState(userInfo?.company_size || '');
+  const [businessType, setBusinessType] = useState(
+    userInfo?.business_type_id?._id || '',
+  );
+  const [coverImages, setCoverImages] = useState<any[]>(
+    userInfo?.cover_images || [],
+  );
+  console.log("🔥🔥 ~ CoEditMyProfile ~ coverImages:", coverImages)
   const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
+  const [imgType, setImageType] = useState<'logo' | 'cover'>('logo');
   const [imageModal, setImageModal] = useState(false);
   const [userAddress, setUserAddress] = useState<
     | {
@@ -98,27 +117,50 @@ const CoEditMyProfile = () => {
     const locationChanged =
       location !== (userInfo.location || userInfo.address || '');
     const companyNameChanged = companyName !== (userInfo.company_name || '');
+    const websiteChanged = website !== (userInfo.website || '');
+    const coSizeChanged = coSize !== (userInfo.company_size || '');
+    const businessTypeChanged =
+      businessType !== (userInfo.business_type_id?._id || '');
+    const coverImagesChanged = coverImages !== userInfo.cover_images;
 
-    return logoChanged || aboutChanged || locationChanged || companyNameChanged;
-  }, [logo, about, location, companyName, userInfo]);
+    return (
+      logoChanged ||
+      aboutChanged ||
+      locationChanged ||
+      companyNameChanged ||
+      websiteChanged ||
+      coSizeChanged ||
+      businessTypeChanged ||
+      coverImagesChanged
+    );
+  }, [
+    logo,
+    about,
+    location,
+    companyName,
+    website,
+    coSize,
+    businessType,
+    userInfo,
+    coverImages,
+  ]);
 
   const UploadPhoto = (e: any) => {
     const uri = e?.sourceURL || e?.path || e?.uri;
     if (!uri) return;
 
-    const newLogo = {
-      name: e?.filename || e?.name || 'logo.jpg',
+    const newImage = {
+      name: e?.filename || e?.name || 'image.jpg',
       uri,
       type: e?.mime || 'image/jpeg',
     };
 
-    setLogo(newLogo);
-
-    dispatch(
-      setCompanyProfileData({
-        logo: newLogo,
-      }),
-    );
+    if (imgType === 'logo') {
+      setLogo(newImage);
+    } else {
+      const updatedCovers = [...(coverImages || []), newImage];
+      setCoverImages(updatedCovers);
+    }
   };
 
   const handleUpdateProfile = async () => {
@@ -133,11 +175,30 @@ const CoEditMyProfile = () => {
         } as any);
       }
 
+      if (coverImages?.length > 0) {
+        coverImages.forEach((img, index) => {
+          if (img.uri) {
+            const imageData = {
+              uri: img.uri,
+              type: img.type || 'image/jpeg',
+              name: img.name || `cover_${index}.jpg`,
+            };
+
+            formData.append('cover_images', imageData);
+          }
+        });
+      }
+
       if (about) {
         formData.append('about', about);
       }
 
       formData.append('address', userAddress?.address || location);
+      formData.append('lat', userAddress?.lat?.toString() || '');
+      formData.append('lng', userAddress?.lng?.toString() || '');
+      formData.append('website', website);
+      formData.append('company_size', coSize);
+      formData.append('business_type_id', businessType);
 
       const res = await updateCompanyProfile(formData).unwrap();
       const resData = res?.data?.company;
@@ -147,8 +208,15 @@ const CoEditMyProfile = () => {
             logo: resData?.logo,
             about: resData?.about,
             address: resData?.location,
+            company_size: resData?.company_size,
+            cover_images: resData?.cover_images,
+            otp: resData?.otp,
+            lat: resData?.lat,
+            lng: resData?.lng,
+            website: resData?.website,
           }),
         );
+        dispatch(setUserInfo(resData));
         successToast(res?.message);
         navigationRef?.current?.goBack();
       }
@@ -188,7 +256,9 @@ const CoEditMyProfile = () => {
                 {/* Edit Icon */}
                 <TouchableOpacity
                   style={styles.editIconWrapper}
-                  onPress={() => setImageModal(true)}>
+                  onPress={() => {
+                    setImageModal(true), setImageType('logo');
+                  }}>
                   <Image
                     source={IMAGES.edit}
                     style={styles.editIcon}
@@ -203,23 +273,61 @@ const CoEditMyProfile = () => {
               onChangeText={setCompanyName}
               placeholder={t('Company Name')}
               style={styles.inputCompanyName}
-              placeholderTextColor={colors._4D4D4D}
               textAlign="center"
             />
           </View>
 
-          <Text style={styles.labelText}>{t('Description')}</Text>
-          <TextInput
-            multiline
-            value={about}
-            onChangeText={setAbout}
-            style={styles.inputAbout}
-            placeholder={t('About Company')}
-            placeholderTextColor={colors._656464}
-          />
+          <View style={styles.coverSection}>
+            <Text style={styles.labelText}>{t('Cover Images')}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {coverImages?.map((img, index) => (
+                <View key={index} style={styles.coverImageWrapper}>
+                  <CustomImage
+                    source={{uri: img?.uri || img}}
+                    containerStyle={styles.coverImage}
+                    resizeMode="cover"
+                    imageStyle={{height: '100%', width: '100%'}}
+                  />
+                  <TouchableOpacity
+                    style={styles.removeCoverBtn}
+                    onPress={() => {
+                      const updatedCovers = coverImages.filter(
+                        (_, i) => i !== index,
+                      );
+                      setCoverImages(updatedCovers);
+                      dispatch(
+                        setCompanyProfileData({cover_images: updatedCovers}),
+                      );
+                    }}>
+                    <Text style={styles.removeText}>X</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+
+              <TouchableOpacity
+                style={styles.addCoverBtn}
+                onPress={() => {
+                  setImageModal(true), setImageType('cover');
+                }}>
+                <Image source={IMAGES.pluse} style={{width: 30, height: 30}} />
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
+          <View style={{marginTop: hp(10)}}>
+            <Text style={styles.labelText}>{t('Description')}</Text>
+            <TextInput
+              multiline
+              value={about}
+              onChangeText={setAbout}
+              style={styles.inputAbout}
+              placeholder={t('About Company')}
+              placeholderTextColor={colors._7B7878}
+            />
+          </View>
 
           {/* Fields */}
-          <View style={styles.fieldsWrapper}>
+          <View style={[styles.fieldsWrapper, {marginTop: hp(10)}]}>
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Email')}</Text>
               <TextInput
@@ -228,7 +336,7 @@ const CoEditMyProfile = () => {
                 onChangeText={setEmail}
                 placeholder="company@email.com"
                 style={styles.inputText}
-                placeholderTextColor={colors._555555}
+                placeholderTextColor={colors._7B7878}
                 keyboardType="email-address"
               />
             </View>
@@ -252,14 +360,68 @@ const CoEditMyProfile = () => {
             </View>
 
             <View style={styles.space}>
+              <Text style={styles.labelText}>{t('Website')}</Text>
+              <TextInput
+                value={website}
+                onChangeText={setWebsite}
+                placeholder="https://company.com"
+                style={styles.inputContainer}
+                placeholderTextColor={colors._7B7878}
+                keyboardType="url"
+              />
+            </View>
+
+            <View style={styles.space}>
+              <Text style={styles.labelText}>{t('Company Size')}</Text>
+              <CustomDropdown
+                data={companySize || []}
+                labelField="label"
+                valueField="value"
+                placeholder={'Please select company size'}
+                value={userInfo?.company_size}
+                onChange={(e: any) => {
+                  setCoSize(e?.value);
+                }}
+                dropdownStyle={styles.dropdown}
+                renderRightIcon={IMAGES.ic_down}
+                RightIconStyle={styles.rightIcon}
+                selectedTextStyle={[styles.selectedTextStyle]}
+              />
+            </View>
+
+            <View style={styles.space}>
+              <Text style={styles.labelText}>{t('Business Type')}</Text>
+              <CustomDropdown
+                data={
+                  businessTypes?.data?.types?.map((item: any) => ({
+                    label: item.title,
+                    value: item._id,
+                  })) || []
+                }
+                labelField="label"
+                valueField="value"
+                placeholder={'Please select a business type'}
+                value={businessType}
+                onChange={(e: any) => {
+                  setBusinessType(e?.value);
+                }}
+                dropdownStyle={styles.dropdown}
+                renderRightIcon={IMAGES.ic_down}
+                RightIconStyle={styles.rightIcon}
+                selectedTextStyle={styles.selectedTextStyle}
+              />
+            </View>
+
+            <View style={styles.space}>
               <Text style={styles.labelText}>{t('Location')}</Text>
               <TextInput
                 value={location}
                 onChangeText={setLocation}
                 placeholder="Company address"
                 style={[styles.inputText, styles.locationInput]}
-                placeholderTextColor={colors._555555}
+                placeholderTextColor={colors._7B7878}
                 multiline
+                editable={false}
               />
               <TouchableOpacity
                 style={styles.changeLocationBtn}
@@ -315,7 +477,7 @@ const styles = StyleSheet.create({
   },
   inputAbout: {
     marginVertical: hp(12),
-    ...commonFontStyle(400, 15, colors._656464),
+    ...commonFontStyle(400, 18, colors._181818),
     borderWidth: 1,
     borderColor: colors._C9C9C9,
     borderRadius: hp(8),
@@ -365,6 +527,13 @@ const styles = StyleSheet.create({
     borderColor: colors._C9C9C9,
     paddingBottom: hp(4),
   },
+  inputContainer: {
+    padding: wp(14),
+    borderWidth: hp(1),
+    borderRadius: hp(8),
+    borderColor: colors._C9C9C9,
+    ...commonFontStyle(400, 18, colors._181818),
+  },
   fieldsWrapper: {
     gap: hp(20),
   },
@@ -372,12 +541,12 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 20, colors._0B3970),
   },
   labelDesc: {
-    ...commonFontStyle(400, 18, colors._555555),
+    ...commonFontStyle(400, 18, colors._181818),
   },
   inputText: {
-    ...commonFontStyle(400, 18, colors._555555),
-    borderColor: colors._C9C9C9,
     paddingBottom: hp(5),
+    borderColor: colors._C9C9C9,
+    ...commonFontStyle(400, 18, colors._181818),
   },
   space: {
     gap: hp(10),
@@ -400,9 +569,60 @@ const styles = StyleSheet.create({
     marginTop: hp(24),
   },
   locationInput: {
-    height: hp(56),
+    height: hp(58),
     borderWidth: hp(1),
     borderRadius: hp(8),
-    paddingHorizontal: wp(10),
+    paddingHorizontal: wp(14),
+  },
+  dropdown: {
+    borderRadius: hp(10),
+  },
+  rightIcon: {
+    width: wp(16),
+    height: hp(13),
+    tintColor: colors._0B3970,
+  },
+  selectedTextStyle: {
+    ...commonFontStyle(400, 18, colors._181818),
+  },
+  coverSection: {
+    gap: hp(10),
+    marginBottom: hp(12),
+  },
+  coverImageWrapper: {
+    marginRight: wp(10),
+    position: 'relative',
+  },
+  coverImage: {
+    width: wp(120),
+    height: hp(80),
+    borderWidth: 1,
+    overflow: 'hidden',
+    borderRadius: hp(8),
+    borderColor: colors._C9C9C9,
+  },
+  removeCoverBtn: {
+    top: 5,
+    right: 5,
+    width: hp(22),
+    height: hp(22),
+    borderRadius: hp(22),
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  removeText: {
+    ...commonFontStyle(600, 12, colors.white),
+  },
+  addCoverBtn: {
+    width: wp(120),
+    height: hp(80),
+    borderRadius: hp(8),
+    borderWidth: 1,
+    borderColor: colors._C9C9C9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
   },
 });

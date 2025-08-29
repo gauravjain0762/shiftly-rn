@@ -51,7 +51,6 @@ const CompanyProfile = () => {
 
   const {data: getPost} = useGetCompanyPostsQuery({});
   const allPosts = getPost?.data?.posts;
-  console.log('🔥🔥🔥 ~ CompanyProfile ~ allPosts:', allPosts);
 
   const dispatch = useAppDispatch();
   const {data} = useGetProfileQuery();
@@ -321,7 +320,7 @@ const styles = StyleSheet.create({
   backArrow: {
     width: wp(21),
     height: wp(21),
-    tintColor: colors.white,
+    tintColor: colors._F3E1B7,
   },
   profileHeader: {
     flexDirection: 'row',

@@ -13,12 +13,8 @@ export const errorToast = (message: string) => {
 };
 
 export const emailCheck = (email: string) => {
-  let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
-  if (reg.test(email) === false) {
-    return false;
-  } else {
-    return true;
-  }
+  const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+  return reg.test(email.toLowerCase());
 };
 
 export const nameCheck = (name: string) => {

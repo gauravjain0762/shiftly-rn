@@ -16,7 +16,20 @@ interface AppState {
   companyRegistrationStep?: number;
   companyRegisterData?: any;
   registerSuccessModal?: boolean;
-  companyProfileData?: any;
+  companyProfileData?: {
+    website: string;
+    company_size: string;
+    address: string;
+    lat: number;
+    lng: number;
+    about: string;
+    mission: string;
+    values: string;
+    services: any[];
+    logo: any;
+    cover_images: any[];
+    otp: string[];
+  };
   companyServices?: any[];
   companyProfileAllData?: any[];
   services: any[];
@@ -82,6 +95,7 @@ const initialState: AppState = {
     services: [],
     logo: {},
     cover_images: [],
+    otp: ['', '', '', ''],
   },
   companyServices: [],
   companyProfileAllData: [],
@@ -175,7 +189,7 @@ const authSlice = createSlice({
       state.companyProfileData = {
         ...state.companyProfileData,
         ...action.payload,
-      };
+      } as AppState['companyProfileData'];
     },
     setCompanyServices: (state, action: PayloadAction<any[]>) => {
       state.companyServices = action.payload;

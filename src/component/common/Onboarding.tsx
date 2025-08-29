@@ -25,8 +25,8 @@ const {width, height} = Dimensions.get('window');
 export type OnboardingDataItem = {
   id: string;
   title: string;
-  description: string;
-  lottieAnim: string;
+  description?: string;
+  lottieAnim?: string;
 };
 
 // Define the props for the reusable component
@@ -155,9 +155,10 @@ const styles = StyleSheet.create({
     flex: 1,
     bottom: '10%',
     width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignSelf: 'center',
+    // flexDirection: 'row',
+    // alignItems: 'center',
+    // justifyContent: 'center',
   },
   paginationDot: {
     width: wp(10),

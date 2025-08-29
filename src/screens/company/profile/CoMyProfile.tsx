@@ -1,7 +1,7 @@
-import React, {useCallback} from 'react';
+import React from 'react';
 import {
-  ActivityIndicator,
   Image,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -14,7 +14,6 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {IMAGES} from '../../../assets/Images';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {Flag} from 'react-native-country-picker-modal';
@@ -43,6 +42,7 @@ const CoMyProfile = () => {
           containerStyle={styles.header}
         />
         <ScrollView scrollEnabled showsVerticalScrollIndicator={false}>
+          {/* Profile Header */}
           <View style={styles.profileRow}>
             <CustomImage
               uri={userInfo?.logo}
@@ -51,53 +51,84 @@ const CoMyProfile = () => {
               resizeMode="stretch"
             />
             <View>
-              <Text style={styles.coTitle}>{userInfo?.company_name}</Text>
-              <Text style={styles.typeText}>
-                {userInfo?.name || 'Restaurant & Hospital'}
+              <Text style={styles.coTitle}>
+                {userInfo?.company_name || 'N/A'}
               </Text>
+              <Text style={styles.typeText}>{userInfo?.name || 'N/A'}</Text>
             </View>
           </View>
 
+          {/* About / Description */}
           <View style={{marginVertical: hp(18)}}>
             <Text style={styles.labelText}>{t('Description')}</Text>
-            <Text style={styles.descText}>
-              {userInfo?.about ||
-                'Dubai is a city of grand visions and endless wonders, where towering skyscrapers & luxurious malls meet the ancient allure of desert dunes & vibrant souks.'}
-            </Text>
+            <Text style={styles.descText}>{userInfo?.about || 'N/A'}</Text>
           </View>
 
+          {/* Info Section */}
           <View style={styles.infoContainer}>
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Email')}</Text>
-              <Text style={styles.labelDesc}>
-                {userInfo?.email || 'marriott@restaurant.com'}
-              </Text>
+              <Text style={styles.labelDesc}>{userInfo?.email || 'N/A'}</Text>
             </View>
+
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Phone')}</Text>
-
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Flag
                   withEmoji
-                  flagSize={40}
+                  flagSize={hp(26)}
                   withFlagButton
                   countryCode={callingCodeToCountry(countryCode) as any}
                 />
                 <Text style={styles.labelDesc}>
-                  {`+${countryCode} ${userInfo?.phone}`}
+                  {`+${countryCode} ${userInfo?.phone}` || 'N/A'}
                 </Text>
               </View>
             </View>
+
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Location')}</Text>
               <Text style={styles.labelDesc}>
-                {userInfo?.address ||
-                  userInfo?.location ||
-                  ' JLT Dubai, United Arab Emirates'}
+                {userInfo?.address || userInfo?.location || 'N/A'}
+              </Text>
+            </View>
+
+            {/* Website */}
+            <View style={styles.space}>
+              <Text style={styles.labelText}>{t('Website')}</Text>
+              <Text
+                style={[styles.labelDesc, {color: colors._0B3970}]}
+                onPress={async () => {
+                  let link = userInfo?.website;
+                  if (link && !link.startsWith('http')) {
+                    link = `https://${link}`;
+                  }
+                  if (link && (await Linking.canOpenURL(link))) {
+                    Linking.openURL(link);
+                  }
+                }}>
+                {`https://${userInfo?.website || 'N/A'}`}
+              </Text>
+            </View>
+
+            {/* Company Size */}
+            <View style={styles.space}>
+              <Text style={styles.labelText}>{t('Company Size')}</Text>
+              <Text style={styles.labelDesc}>
+                {userInfo?.company_size || 'N/A'}
+              </Text>
+            </View>
+
+            {/* Business Type */}
+            <View style={styles.space}>
+              <Text style={styles.labelText}>{t('Business Type')}</Text>
+              <Text style={styles.labelDesc}>
+                {userInfo?.business_type_id?.title || 'N/A'}
               </Text>
             </View>
           </View>
 
+          {/* Edit Button */}
           <GradientButton
             style={styles.btn}
             type="Company"
@@ -132,10 +163,10 @@ const styles = StyleSheet.create({
     gap: wp(15),
   },
   profileImage: {
-    height: hp(90),
     width: wp(90),
-    borderRadius: wp(90),
+    height: hp(90),
     overflow: 'hidden',
+    borderRadius: wp(90),
   },
   coTitle: {
     ...commonFontStyle(600, 25, colors._0B3970),
@@ -145,11 +176,11 @@ const styles = StyleSheet.create({
   },
   descText: {
     marginTop: hp(10),
-    ...commonFontStyle(400, 15, colors._656464),
+    ...commonFontStyle(400, 18, colors._656464),
   },
   infoContainer: {
-    marginTop: hp(18),
-    gap: hp(35),
+    gap: hp(26),
+    // marginTop: hp(18),
   },
   labelText: {
     ...commonFontStyle(600, 20, colors._0B3970),
@@ -162,13 +193,13 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginTop: hp(40),
+    marginBottom: hp(10),
   },
-  loaderContainer: {
-    width: wp(90),
-    height: hp(90),
-    borderRadius: hp(90),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
+  coverImage: {
+    width: wp(120),
+    height: hp(80),
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginRight: wp(12),
   },
 });

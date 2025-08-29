@@ -64,7 +64,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
-const companySize = [
+export const companySize = [
   {label: '0 - 50', value: '0 - 50'},
   {label: '50 - 100', value: '50 - 100'},
   {label: '100 - 500', value: '100 - 500'},
@@ -100,21 +100,19 @@ const CreateAccount = () => {
     userInfo,
     registerSuccessModal,
     companyProfileData,
-    companyServices = [],
   } = useSelector((state: RootState) => state.auth);
   const {
     services = [],
     logo,
     cover_images,
+    otp,
   } = useSelector((state: RootState) => state.auth.companyProfileData || {});
   // console.log('🔥🔥🔥 ~ CreateAccount ~ cover_images:', cover_images);
   // console.log(
   //   '🔥🔥🔥 ~ CreateAccount ~ companyProfileData:',
   //   companyProfileData,
   // );
-  const {data: businessTypes} = useGetBusinessTypesQuery(
-    {},
-  );
+  const {data: businessTypes} = useGetBusinessTypesQuery({});
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
   const dispatch = useAppDispatch();
@@ -127,8 +125,8 @@ const CreateAccount = () => {
   const [imageModal, setImageModal] = useState(false);
   const [position, setPosition] = useState<any>(undefined);
   const mapRef = useRef<any>(null);
-  // const [logo, setLogo] = useState({});
-  const [coverImages, setCoverImages] = useState<any[]>([]);
+  const inputRefsOtp = useRef<any>([]);
+  // const [otp, setOtp] = useState(new Array(4).fill(''));
   const [type, setType] = useState<'logo' | 'cover'>('logo');
   const [model, setModel] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -188,9 +186,6 @@ const CreateAccount = () => {
     // dispatch(setCompanyRegistrationStep(1));
   }, [companyRegistrationStep]);
 
-  const inputRefsOtp = useRef<any>([]);
-  const [otp, setOtp] = useState(new Array(4).fill(''));
-
   const onCurrentLocation = async () => {
     await requestLocationPermission(
       false,
@@ -216,20 +211,6 @@ const CreateAccount = () => {
   //   }
   // }, []);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [timer]);
-
   const nextStep = () => {
     setTimeout(() => {
       dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) + 1));
@@ -247,20 +228,23 @@ const CreateAccount = () => {
   const {t, i18n} = useTranslation();
 
   useEffect(() => {
-    if (timer == 0) return;
-    console.log('startttttt', start);
-    if (start) {
-      const interval = setInterval(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (timer > 0) {
+      interval = setInterval(() => {
         setTimer(prev => prev - 1);
       }, 1000);
-      return () => clearInterval(interval);
     }
-  }, [timer, start]);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timer]);
 
   const handleChangeOtp = (text: any, index: any) => {
     const newPass = [...otp];
     newPass[index] = text;
-    setOtp(newPass);
+    dispatch(setCompanyProfileData({otp: newPass}));
 
     if (text && index < 7) {
       inputRefsOtp.current[index + 1]?.focus();
@@ -271,7 +255,7 @@ const CreateAccount = () => {
     if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       const newPass = [...otp];
       newPass[index - 1] = '';
-      setOtp(newPass);
+      dispatch(setCompanyProfileData({otp: newPass}));
       inputRefsOtp.current[index - 1]?.focus();
     }
   };
@@ -886,7 +870,7 @@ const CreateAccount = () => {
                     style={styles.resendText}>
                     {t('Resend')}
                   </Text>
-                ) : (
+                ) : !registerSuccessModal ? (
                   <View style={[{marginTop: hp(31), alignItems: 'center'}]}>
                     <Text style={styles.secText}>{`00:${
                       timer < 10 ? `0${timer}` : timer
@@ -905,7 +889,7 @@ const CreateAccount = () => {
                       </View>
                     )} */}
                   </View>
-                )}
+                ) : null}
               </>
             </View>
             <GradientButton
@@ -1412,6 +1396,7 @@ const CreateAccount = () => {
           visible={registerSuccessModal}
           onClose={() => {
             dispatch(setRegisterSuccessModal(false));
+            dispatch(setCompanyProfileData({otp: new Array(4).fill('')}));
             nextStep();
           }}
           ButtonContainer={

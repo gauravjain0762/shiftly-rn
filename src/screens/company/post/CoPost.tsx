@@ -89,10 +89,10 @@ const CoPost = () => {
         formData.append('title', title.trim());
         formData.append('description', description.trim());
         formData.append('images', {
-            uri: uploadedImages[0]?.uri,
-            type: uploadedImages[0]?.type || 'image/jpeg',
-            name: uploadedImages[0]?.name
-          });
+          uri: uploadedImages[0]?.uri,
+          type: uploadedImages[0]?.type || 'image/jpeg',
+          name: uploadedImages[0]?.name,
+        });
 
         const response = await companyPost(formData).unwrap();
         console.log(response, 'response----companyPost');
@@ -341,15 +341,15 @@ const CoPost = () => {
                 />
               )}
               <ExpandableText
-                style={[
+                descriptionStyle={[
                   styles.post,
-                  {paddingHorizontal: wp(26), marginTop: hp(20)},
+                  {marginHorizontal: wp(26), marginTop: hp(20)},
                 ]}
                 description={description}
                 maxLines={5}
                 showStyle={{
                   paddingVertical: hp(8),
-                  paddingHorizontal: wp(26),
+                  marginHorizontal: wp(26),
                 }}
               />
             </View>
@@ -416,7 +416,7 @@ const CoPost = () => {
           type="Company"
           title={t('Home')}
           onPress={() => {
-            dispatch(setCoPostSteps(1)); // Reset to step 1 instead of 0
+            dispatch(setCoPostSteps(1));
             updatePostForm({
               isPostModalVisible: false,
               uploadedImages: [],
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   post: {
-    ...commonFontStyle(400, 22, colors._181818),
+    ...commonFontStyle(400, 20, colors._181818),
   },
   modalIconWrapper: {
     width: wp(90),

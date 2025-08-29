@@ -23,18 +23,20 @@ const CoAboutTab = ({companyProfileData}: Props) => {
             <Text
               onPress={async () => {
                 if (await Linking.canOpenURL(companyProfileData?.website)) {
-                  Linking.openURL(companyProfileData?.website);
+                  Linking.openURL(companyProfileData?.website || 'N/A');
                 }
               }}
               style={styles.infoValue}>
-              {companyProfileData?.website}
+              {companyProfileData?.website
+                ? `https://${companyProfileData?.website || 'N/A'}`
+                : 'N/A'}
             </Text>
           </View>
         </View>
         <View style={[AppStyles.flex, {paddingLeft: wp(30)}]}>
           <Text style={styles.infoTitle}>Type</Text>
           <Text style={styles.infoValue}>
-            {companyProfileData?.business_type_id?.title}
+            {companyProfileData?.business_type_id?.title || 'N/A'}
           </Text>
         </View>
       </View>
@@ -42,7 +44,7 @@ const CoAboutTab = ({companyProfileData}: Props) => {
       <View style={styles.infoSection}>
         <Text style={styles.infoTitle}>Company size</Text>
         <Text style={styles.infoValue}>
-          {companyProfileData?.company_size || '50 - 100'}
+          {companyProfileData?.company_size || 'N/A'}
         </Text>
       </View>
 

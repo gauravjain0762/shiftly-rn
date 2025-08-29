@@ -85,9 +85,9 @@ const WelcomeScreen = () => {
 
   const onLogin = () => {
     if (role === 'company') {
-      resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
+      navigateTo(SCREENS.CoStack, SCREENS.CoLogin);
     } else {
-      resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
+      navigateTo(SCREENS.EmployeeStack, SCREENS.LoginScreen);
     }
   };
 
@@ -204,7 +204,7 @@ const WelcomeScreen = () => {
             <Text style={styles.emailText}>{t('Continue with email')}</Text>
           </TouchableOpacity>
 
-          {Platform.OS == 'ios' && (
+          {/* {Platform.OS == 'ios' && (
             <TouchableOpacity
               onPress={() => handleAppleSignIn()}
               style={styles.whiteButton}>
@@ -218,7 +218,7 @@ const WelcomeScreen = () => {
             style={styles.whiteButton}>
             <Image source={IMAGES.g_icon} style={styles.icon} />
             <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </ScrollView>
     </LinearContainer>

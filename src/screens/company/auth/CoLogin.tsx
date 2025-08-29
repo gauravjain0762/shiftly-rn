@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {
+  BackHeader,
   CustomTextInput,
   GradientButton,
   LinearContainer,
@@ -71,6 +72,12 @@ const CoLogin = () => {
         enableOnAndroid={true}
         contentContainerStyle={{flexGrow: 1, paddingBottom: hp(30)}}
         showsVerticalScrollIndicator={false}>
+        <BackHeader
+          title={''}
+          type="company"
+          isRight={false}
+          containerStyle={styles.header}
+        />
         <Image source={IMAGES.newlogo1} style={styles.logo} />
         <View style={styles.logincontainer}>
           <View style={styles.container}>
@@ -83,6 +90,7 @@ const CoLogin = () => {
               onChangeText={e => {
                 dispatch(setAuthData({email: e, password}));
               }}
+              keyboardType="email-address"
             />
             <Text style={styles.label}>{t('Password')}</Text>
             <CustomTextInput
@@ -128,12 +136,12 @@ export default CoLogin;
 
 const styles = StyleSheet.create({
   logo: {
-    marginTop: hp(50),
+    marginTop: hp(10),
     alignSelf: 'center',
     resizeMode: 'contain',
   },
   container: {
-    marginTop: hp(40),
+    marginTop: hp(30),
   },
   input: {
     ...commonFontStyle(400, 18, colors._181818),
@@ -143,6 +151,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: wp(23),
     paddingVertical: hp(18),
+    textTransform: 'lowercase',
   },
   label: {
     ...commonFontStyle(400, 18, colors._0B3970),
@@ -186,5 +195,9 @@ const styles = StyleSheet.create({
   },
   button: {
     marginBottom: hp(60),
+  },
+  header: {
+    paddingTop: hp(10),
+    paddingHorizontal: wp(23),
   },
 });

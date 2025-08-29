@@ -227,90 +227,89 @@ const CoJobDetails = () => {
                   <BaseText>No shortlisted applicants</BaseText>
                 </View>
               ))}
-
-            <GradientButton
-              type="Company"
-              style={styles.button}
-              title={t('Edit Job')}
-              onPress={() => {
-                console.log('job_type>>>>>.', jobDetail?.job_type);
-                dispatch(
-                  setJobFormState({
-                    job_id: job_id,
-                    title: jobDetail?.title,
-                    job_type:
-                      typeof jobDetail?.job_type === 'string'
-                        ? {
-                            label: jobDetail?.job_type,
-                            value: jobDetail?.job_type,
-                          }
-                        : jobDetail?.job_type,
-                    area:
-                      typeof jobDetail?.area === 'string'
-                        ? {label: jobDetail?.area, value: jobDetail?.area}
-                        : jobDetail?.area,
-                    duration:
-                      typeof jobDetail?.duration === 'string'
-                        ? {
-                            label: jobDetail?.duration,
-                            value: jobDetail?.duration,
-                          }
-                        : jobDetail?.duration,
-                    job_sector:
-                      typeof jobDetail?.job_sector === 'string'
-                        ? {
-                            label: jobDetail?.job_sector,
-                            value: jobDetail?.job_sector,
-                          }
-                        : jobDetail?.job_sector,
-                    startDate:
-                      typeof jobDetail?.start_date === 'string'
-                        ? {
-                            label: jobDetail?.start_date,
-                            value: jobDetail?.start_date,
-                          }
-                        : jobDetail?.start_date,
-                    contract:
-                      typeof jobDetail?.contract_type === 'string'
-                        ? {
-                            label: jobDetail?.contract_type,
-                            value: jobDetail?.contract_type,
-                          }
-                        : jobDetail?.contract_type,
-                    salary: {
-                      label: `${Number(
-                        jobDetail?.monthly_salary_from,
-                      ).toLocaleString()} - ${Number(
-                        jobDetail?.monthly_salary_to,
-                      ).toLocaleString()}`,
-                      value: `${Number(
-                        jobDetail?.monthly_salary_from,
-                      ).toLocaleString()} - ${Number(
-                        jobDetail?.monthly_salary_to,
-                      ).toLocaleString()}`,
-                    },
-                    position: {
-                      label: String(jobDetail?.no_positions),
-                      value: String(jobDetail?.no_positions),
-                    },
-                    describe: jobDetail?.description,
-                    selected: jobDetail?.facilities || [],
-                    jobSkills:
-                      jobDetail?.skills?.map((s: any) => s.title) || [],
-                    skillId: jobDetail?.skills?.map((s: any) => s._id) || [],
-                    requirements: jobDetail?.requirements || [],
-                    invite_users:
-                      jobDetail?.invited_users?.map((u: any) => u?._id) || [],
-                    canApply: jobDetail?.people_anywhere,
-                    editMode: true,
-                  }),
-                );
-                navigateTo(SCREENS.PostJob);
-              }}
-            />
           </View>
         </View>
       </ScrollView>
+
+      <GradientButton
+        type="Company"
+        style={styles.button}
+        title={t('Edit Job')}
+        onPress={() => {
+          console.log('job_type>>>>>.', jobDetail?.job_type);
+          dispatch(
+            setJobFormState({
+              job_id: job_id,
+              title: jobDetail?.title,
+              job_type:
+                typeof jobDetail?.job_type === 'string'
+                  ? {
+                      label: jobDetail?.job_type,
+                      value: jobDetail?.job_type,
+                    }
+                  : jobDetail?.job_type,
+              area:
+                typeof jobDetail?.area === 'string'
+                  ? {label: jobDetail?.area, value: jobDetail?.area}
+                  : jobDetail?.area,
+              duration:
+                typeof jobDetail?.duration === 'string'
+                  ? {
+                      label: jobDetail?.duration,
+                      value: jobDetail?.duration,
+                    }
+                  : jobDetail?.duration,
+              job_sector:
+                typeof jobDetail?.job_sector === 'string'
+                  ? {
+                      label: jobDetail?.job_sector,
+                      value: jobDetail?.job_sector,
+                    }
+                  : jobDetail?.job_sector,
+              startDate:
+                typeof jobDetail?.start_date === 'string'
+                  ? {
+                      label: jobDetail?.start_date,
+                      value: jobDetail?.start_date,
+                    }
+                  : jobDetail?.start_date,
+              contract:
+                typeof jobDetail?.contract_type === 'string'
+                  ? {
+                      label: jobDetail?.contract_type,
+                      value: jobDetail?.contract_type,
+                    }
+                  : jobDetail?.contract_type,
+              salary: {
+                label: `${Number(
+                  jobDetail?.monthly_salary_from,
+                ).toLocaleString()} - ${Number(
+                  jobDetail?.monthly_salary_to,
+                ).toLocaleString()}`,
+                value: `${Number(
+                  jobDetail?.monthly_salary_from,
+                ).toLocaleString()} - ${Number(
+                  jobDetail?.monthly_salary_to,
+                ).toLocaleString()}`,
+              },
+              position: {
+                label: String(jobDetail?.no_positions),
+                value: String(jobDetail?.no_positions),
+              },
+              describe: jobDetail?.description,
+              selected: jobDetail?.facilities || [],
+              jobSkills: jobDetail?.skills?.map((s: any) => s.title) || [],
+              skillId: jobDetail?.skills?.map((s: any) => s._id) || [],
+              requirements: jobDetail?.requirements || [],
+              invite_users:
+                jobDetail?.invited_users?.map((u: any) => u?._id) || [],
+              canApply: jobDetail?.people_anywhere,
+              editMode: true,
+            }),
+          );
+          navigateTo(SCREENS.PostJob);
+        }}
+      />
 
       <ShareModal
         visible={isShareModalVisible}
@@ -438,7 +437,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9D9D9',
   },
   button: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    position: 'absolute',
     marginVertical: hp(45),
+    marginHorizontal: wp(22),
   },
   emptyState: {
     alignItems: 'center',
