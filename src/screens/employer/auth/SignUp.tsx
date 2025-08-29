@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {
   Dimensions,
   Image,
@@ -33,6 +34,7 @@ import moment from 'moment';
 import {
   errorToast,
   navigateTo,
+  passwordRules,
   successToast,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
@@ -40,7 +42,6 @@ import DateTimePicker from 'react-native-modal-datetime-picker';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  clearEmployeeAccount,
   setCreateEmployeeAccount,
   setUserInfo,
 } from '../../../features/authSlice';
@@ -52,6 +53,8 @@ import {
 } from '../../../api/authApi';
 import {RootState} from '../../../store';
 import CustomImage from '../../../component/common/CustomImage';
+import CountryPicker, {Country} from 'react-native-country-picker-modal';
+
 const {width} = Dimensions.get('window');
 
 const SignUp = () => {
@@ -76,15 +79,16 @@ const SignUp = () => {
     dob,
     open,
     full_password,
+    otp,
     phone,
     phone_code,
     describe,
     picture,
   } = signupData;
 
-  const [password, setPassword] = useState(new Array(8).fill(''));
-  const [otp, setOtp] = useState(new Array(4).fill(''));
-  const inputRefs = useRef<any>([]);
+  const [password, setPassword] = useState('');
+  // const [otp, setOtp] = useState(new Array(4).fill(''));
+  // const inputRefs = useRef<any>([]);
   const inputRefsOtp = useRef<any>([]);
   const [empSignUp] = useEmployeeSignUpMutation({});
   const [empOTPVerify] = useEmployeeOTPVerifyMutation({});
@@ -92,12 +96,15 @@ const SignUp = () => {
   const [empUpdateProfile] = useEmpUpdateProfileMutation({});
   const [timer, setTimer] = useState(30);
 
+  const [isVisible, setIsVisible] = useState<null | string>(null);
+  console.log('country', isVisible);
+
   const options = [
     "I'm currently working in hospitality",
     "I'm a hospitality student",
     "I'm a job seeker",
   ];
-  const options1 = ['Male', 'Female'];
+  const options1 = ['Male', 'Female', 'prefer not to disclose'];
   const options2 = [
     'United State America',
     'United Arab Emirates',
@@ -122,7 +129,7 @@ const SignUp = () => {
       isPickerVisible: boolean;
       open: boolean;
       full_password: string | undefined;
-      full_otp: string | undefined;
+      otp: string | undefined;
       phone: string;
       phone_code: string;
       describe: string;
@@ -161,23 +168,41 @@ const SignUp = () => {
     };
   }, [timer]);
 
-  const handleRegister = async () => {
+  const handleRegister = async (isCheck?: boolean) => {
     try {
-      const response = await empSignUp({
+      let obj = {
         name: name,
-        email: email,
+        email: email || email.trim().toLowerCase(),
         password: full_password,
         phone_code: phone_code,
         phone: phone,
-      }).unwrap();
-      // console.log('🔥 ~ handleRegister ~ response?.data:', response?.data);
+        validate_email: Boolean(isCheck),
+        // validate_phone: Boolean(!isCheck),
+      };
+      if (isCheck) {
+        delete obj.password;
+        delete obj.phone_code;
+        delete obj.phone;
+      }
+
+      console.log('🔥 ~ handleRegister ~ obj:', obj);
+
+      const response = await empSignUp(obj).unwrap();
+      console.log('🔥 ~ handleRegister ~ response?.data:', response);
 
       if (response?.status) {
-        successToast(response?.message);
-        console.log('handleRegister >>>>>>>', response?.data);
-        dispatch(setUserInfo(response?.data?.user));
+        if (!isCheck) {
+          console.log('🔥 ~ handleRegister ~ response?.data?.user:');
+
+          successToast(response?.message);
+          dispatch(setUserInfo(response?.data?.user));
+        }
         nextStep();
       } else {
+        console.log(
+          '🔥 ~ handleRegister ~ response?.message:',
+          response?.message,
+        );
         errorToast(response?.message);
       }
     } catch (error) {
@@ -233,7 +258,6 @@ const SignUp = () => {
     }
   };
 
-  console.log('picture >>>>.', picture);
   const handleFinishSetup = async () => {
     const form = new FormData();
 
@@ -282,52 +306,54 @@ const SignUp = () => {
     }
   };
 
-  const handleChange = (text: string, index: number) => {
-    const newPass = [...password];
-    newPass[index] = text;
-    setPassword(newPass);
+  // const handleChange = (text: string, index: number) => {
+  //   const newPass = [...password];
+  //   newPass[index] = text;
+  //   setPassword(newPass);
 
-    if (newPass.every(val => val !== '')) {
-      dispatch(
-        setCreateEmployeeAccount({
-          full_password: newPass.join(''),
-        }),
-      );
-    }
+  //   if (newPass.every(val => val !== '')) {
+  //     dispatch(
+  //       setCreateEmployeeAccount({
+  //         full_password: newPass.join(''),
+  //       }),
+  //     );
+  //   }
 
-    if (text && index < 7) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
+  //   if (text && index < 7) {
+  //     inputRefs.current[index + 1]?.focus();
+  //   }
+  // };
 
-  const handleKeyPress = (
-    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-    index: number,
-  ) => {
-    if (
-      e.nativeEvent.key === 'Backspace' &&
-      password[index] === '' &&
-      index > 0
-    ) {
-      const newPass = [...password];
-      newPass[index - 1] = '';
-      setPassword(newPass);
+  // const handleKeyPress = (
+  //   e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+  //   index: number,
+  // ) => {
+  //   if (
+  //     e.nativeEvent.key === 'Backspace' &&
+  //     password[index] === '' &&
+  //     index > 0
+  //   ) {
+  //     const newPass = [...password];
+  //     newPass[index - 1] = '';
+  //     setPassword(newPass);
 
-      dispatch(
-        setCreateEmployeeAccount({
-          full_password: newPass.join(''),
-        }),
-      );
+  //     dispatch(
+  //       setCreateEmployeeAccount({
+  //         full_password: newPass.join(''),
+  //       }),
+  //     );
 
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
+  //     inputRefs.current[index - 1]?.focus();
+  //   }
+  // };
 
   const handleChangeOtp = (text: string, index: number) => {
     const newOtp = [...otp];
     newOtp[index] = text;
-    setOtp(newOtp);
-    // updateSignupData({otp: newOtp});
+    // setOtp(newOtp);
+    console.log('🔥 ~ handleChangeOtp ~ newOtp:', newOtp);
+
+    updateSignupData({otp: newOtp});
 
     if (text && index < 7) {
       inputRefsOtp.current[index + 1]?.focus();
@@ -341,8 +367,8 @@ const SignUp = () => {
     if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       const newOtp = [...otp];
       newOtp[index - 1] = '';
-      setOtp(newOtp);
-      // updateSignupData({otp: newOtp});
+      // setOtp(newOtp);
+      updateSignupData({otp: newOtp});
       inputRefsOtp.current[index - 1]?.focus();
     }
   };
@@ -388,7 +414,8 @@ const SignUp = () => {
                 placeholderTextColor={colors._D5D5D5}
                 onChangeText={text => updateSignupData({email: text})}
                 value={email}
-                inputStyle={styles.input}
+                inputStyle={{...styles.input, textTransform: 'lowercase'}}
+                keyboardType="email-address"
               />
             </View>
             <GradientButton
@@ -399,7 +426,8 @@ const SignUp = () => {
                   errorToast(t('Email is required'));
                   return;
                 }
-                nextStep();
+                // nextStep();
+                handleRegister(true);
               }}
             />
           </View>
@@ -410,7 +438,7 @@ const SignUp = () => {
           <View style={styles.innerConrainer}>
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
-              <View style={styles.info_row}>
+              {/* <View style={styles.info_row}>
                 <CustomImage
                   source={IMAGES.info}
                   size={hp(22)}
@@ -421,37 +449,71 @@ const SignUp = () => {
                     'Password must include at least 8 characters, one uppercase letter, one number, and one symbol.'
                   }
                 </Text>
-              </View>
+              </View> */}
               <View style={styles.otpContainer}>
-                {password.map((val, idx) => (
-                  <TextInput
-                    key={idx}
-                    ref={(el: any) => (inputRefs.current[idx] = el)}
-                    value={val ? '*' : ''}
-                    placeholderTextColor={colors._D5D5D5}
-                    onChangeText={text => handleChange(text, idx)}
-                    onKeyPress={e => handleKeyPress(e, idx)}
-                    maxLength={1}
-                    style={styles.otpBox}
-                    keyboardType="decimal-pad"
-                    autoFocus={idx === 0}
+                <CustomTextInput
+                  showRightIcon
+                  inputStyle={styles.passinput}
+                  containerStyle={styles.inputcontainer}
+                  imgStyle={styles.eye}
+                  placeholder="* * * * * * * *"
+                  placeholderTextColor={colors._7B7878}
+                  isPassword
+                  value={password}
+                  onChangeText={(text: any) => {
+                    setPassword(text);
+
+                    dispatch(
+                      setCreateEmployeeAccount({
+                        full_password: text,
+                      }),
+                    );
+                  }}
+                />
+              </View>
+              <View>
+                <View style={styles.passlableCon}>
+                  <Image
+                    source={IMAGES.shield}
+                    resizeMode="contain"
+                    style={styles.shield}
                   />
-                ))}
+                  <Text style={styles.passRule}>{t('Password Rule')}</Text>
+                </View>
+                {passwordRules?.map((item: any, index: number) => {
+                  const passed = item?.test(password);
+                  return (
+                    <View key={index} style={styles.rules}>
+                      {passed ? (
+                        <Image
+                          source={IMAGES.check}
+                          style={styles.check}
+                          tintColor={colors.coPrimary}
+                        />
+                      ) : (
+                        <View style={styles.point} />
+                      )}
+                      <Text style={styles.ruleTitle}>{item?.label}</Text>
+                    </View>
+                  );
+                })}
               </View>
             </View>
             <GradientButton
               style={styles.btn}
               title={'Next'}
               onPress={() => {
-                const enteredPassword = password.join('').trim();
+                const enteredPassword = password;
+
                 if (!enteredPassword) {
                   errorToast(t('Password is required'));
                   return;
                 }
-                if (enteredPassword?.length < 8) {
-                  errorToast(t('Password must be at least 8 characters'));
+                if (!passwordRules.every(rule => rule.test(enteredPassword))) {
+                  errorToast('Password does not meet all the requirements');
                   return;
                 }
+
                 nextStep();
               }}
             />
@@ -509,25 +571,26 @@ const SignUp = () => {
                 </View>
               )}
               <View style={styles.otpContainer}>
-                {otp.map(
-                  (val: any, idx: React.Key | null | undefined | any) => (
-                    <TextInput
-                      key={idx}
-                      ref={(el: any) => (inputRefsOtp.current[idx] = el)}
-                      value={val ? '*' : ''}
-                      onChangeText={text => handleChangeOtp(text, idx)}
-                      onKeyPress={e => handleKeyPressOtp(e, idx)}
-                      maxLength={1}
-                      style={styles.otpBox1}
-                      keyboardType="decimal-pad"
-                      autoFocus={idx === 0}
-                      placeholderTextColor={colors._D5D5D5}
-                    />
-                  ),
-                )}
+                {otp &&
+                  otp?.map(
+                    (val: any, idx: React.Key | null | undefined | any) => (
+                      <TextInput
+                        key={idx}
+                        ref={(el: any) => (inputRefsOtp.current[idx] = el)}
+                        value={val ? '*' : ''}
+                        onChangeText={text => handleChangeOtp(text, idx)}
+                        onKeyPress={e => handleKeyPressOtp(e, idx)}
+                        maxLength={1}
+                        style={styles.otpBox1}
+                        keyboardType="decimal-pad"
+                        autoFocus={idx === 0}
+                        placeholderTextColor={colors._D5D5D5}
+                      />
+                    ),
+                  )}
               </View>
               <>
-                {timer == 0 ? (
+                {showModal ? null : timer == 0 ? (
                   <Text
                     onPress={() => handleResendOTP()}
                     style={styles.resendText}>
@@ -567,6 +630,8 @@ const SignUp = () => {
                 onChangeText={text => updateSignupData({describe: text})}
                 value={describe}
                 inputStyle={styles.input1}
+                multiline
+                numberOfLines={3}
               />
               {options.map((option, index) => {
                 const isSelected = option === selected;
@@ -628,7 +693,13 @@ const SignUp = () => {
                 value={dob ? new Date(dob) : new Date()}
                 display={Platform.OS == 'ios' ? 'spinner' : 'default'}
                 isVisible={open}
-                maximumDate={new Date()}
+                // ✅ User must be born on or before (today - 16 years)
+                maximumDate={
+                  new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 16),
+                  )
+                }
+                minimumDate={new Date(1900, 0, 1)} // or any earliest DOB you allow
                 onConfirm={dates => {
                   updateSignupData({
                     open: false,
@@ -637,7 +708,6 @@ const SignUp = () => {
                 }}
                 onCancel={() => updateSignupData({open: false})}
               />
-
               <View style={styles.underline} />
               <Text style={[styles.title, {marginTop: 40}]}>
                 {t('What is your gender?')}
@@ -650,7 +720,7 @@ const SignUp = () => {
                       marginLeft: 0,
                     },
                   ]}>
-                  {selected1}
+                  {selected1 ? selected1 : t('What is your gender?')}
                 </Text>
               </Pressable>
               <View style={styles.underline} />
@@ -693,9 +763,11 @@ const SignUp = () => {
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}>
               <Text style={styles.title}>{t('Select your nationality ')}</Text>
-              <Pressable
+              <TouchableOpacity
                 style={[styles.dateRow, {alignItems: 'center'}]}
-                onPress={() => {}}>
+                onPress={() => {
+                  setIsVisible('1');
+                }}>
                 <Image
                   source={IMAGES.close}
                   style={{
@@ -705,48 +777,19 @@ const SignUp = () => {
                     tintColor: '#F4E2B8',
                   }}
                 />
-                <Text style={styles.dateText}>{selected2}</Text>
-              </Pressable>
+                <Text style={styles.dateText}>{selected2 || 'Select '}</Text>
+              </TouchableOpacity>
 
               <View style={styles.underline} />
-              {options2.map((option, index) => {
-                const isSelected = option === selected2;
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.optionContainer]}
-                    onPress={() => updateSignupData({selected2: option})}>
-                    <Image
-                      source={IMAGES.flag}
-                      style={{
-                        width: 38,
-                        height: 22,
-                        resizeMode: 'contain',
-                        marginRight: 17,
-                      }}
-                    />
-                    <Text
-                      style={[
-                        styles.optionText,
-                        isSelected && styles.selectedText,
-                      ]}>
-                      {option}
-                    </Text>
-                    {isSelected && (
-                      <Image
-                        source={IMAGES.mark}
-                        style={{width: 25, height: 22, resizeMode: 'contain'}}
-                      />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
+
               <Text style={[styles.title, {marginTop: 27}]}>
                 {t('Where are you currently residing?')}
               </Text>
-              <Pressable
+              <TouchableOpacity
                 style={[styles.dateRow, {alignItems: 'center', marginTop: 27}]}
-                onPress={() => {}}>
+                onPress={() => {
+                  setIsVisible('2');
+                }}>
                 <Image
                   source={IMAGES.close}
                   style={{
@@ -756,48 +799,50 @@ const SignUp = () => {
                     tintColor: '#F4E2B8',
                   }}
                 />
-                <Text style={styles.dateText}>{selected3}</Text>
-              </Pressable>
+                <Text style={styles.dateText}>{selected3 || 'Select '}</Text>
+              </TouchableOpacity>
 
               <View style={styles.underline} />
-              {options2.map((option, index) => {
-                const isSelected = option === selected3;
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.optionContainer]}
-                    onPress={() => updateSignupData({selected3: option})}>
-                    <Image
-                      source={IMAGES.flag}
-                      style={{
-                        width: 38,
-                        height: 22,
-                        resizeMode: 'contain',
-                        marginRight: 17,
-                      }}
-                    />
-                    <Text
-                      style={[
-                        styles.optionText,
-                        isSelected && styles.selectedText,
-                      ]}>
-                      {option}
-                    </Text>
-                    {isSelected && (
-                      <Image
-                        source={IMAGES.mark}
-                        style={{width: 25, height: 22, resizeMode: 'contain'}}
-                      />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
+
+              {isVisible && (
+                <CountryPicker
+                  visible={isVisible ? true : false}
+                  withFilter
+                  withCountryNameButton // show only name in selected view
+                  withCallingCode={false}
+                  withFlag // hides flag in selected view
+                  withEmoji={false} // hides emoji flag in selected view
+                  onSelect={(item: Country) => {
+                    if (isVisible === '1') {
+                      updateSignupData({
+                        selected2: (item?.name && item?.name.toString()) || '',
+                      });
+                    } else {
+                      updateSignupData({
+                        selected3: (item?.name && item?.name.toString()) || '',
+                      });
+                    }
+
+                    setIsVisible(null);
+                  }}
+                  onClose={() => {
+                    setIsVisible(null);
+                  }}
+                  placeholder=""
+                />
+              )}
             </ScrollView>
             <View style={{marginBottom: 30}} />
             <GradientButton
-              style={[styles.btn]}
+              style={styles.btn}
               title={'Next'}
-              onPress={nextStep}
+              onPress={() => {
+                if (selected2 && selected3) {
+                  nextStep();
+                } else {
+                  errorToast('Please select nationality and residing');
+                }
+              }}
             />
           </View>
         );
@@ -920,6 +965,7 @@ const SignUp = () => {
       </KeyboardAwareScrollView>
       <WelcomeModal
         visible={showModal}
+        name={name}
         onClose={() => {
           nextStep();
           updateSignupData({showModal: false});
@@ -1186,5 +1232,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.white,
+  },
+
+  inputcontainer: {
+    borderWidth: 2,
+    borderColor: colors._234F86,
+    borderRadius: 10,
+    paddingHorizontal: wp(23),
+    paddingVertical: hp(16),
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flex: 1,
+  },
+  passinput: {
+    ...commonFontStyle(700, 24, '#F4E2B8'),
+    paddingTop: 8,
+  },
+  eye: {
+    tintColor: '#e1ba60ff',
+  },
+  passlableCon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(9),
+    marginBottom: hp(10),
+    marginTop: hp(28),
+  },
+  shield: {
+    width: wp(27),
+    height: wp(27),
+    resizeMode: 'contain',
+    tintColor: colors.coPrimary,
+  },
+  passRule: {
+    ...commonFontStyle(500, 25, colors.white),
+  },
+  point: {
+    width: wp(9),
+    height: wp(9),
+    backgroundColor: '#1C1B1F',
+    borderRadius: 100,
+  },
+  rules: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: wp(20),
+    paddingLeft: wp(10),
+    paddingBottom: hp(2),
+  },
+  ruleTitle: {
+    ...commonFontStyle(400, 15, colors.white),
+  },
+  check: {
+    width: wp(12),
+    height: wp(12),
+    resizeMode: 'contain',
+    tintColor: colors.coPrimary,
   },
 });

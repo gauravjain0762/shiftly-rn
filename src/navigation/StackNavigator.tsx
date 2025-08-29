@@ -1,4 +1,5 @@
-import {FC} from 'react';
+/* eslint-disable react/no-unstable-nested-components */
+import React, {FC} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {useAppDispatch} from '../redux/hooks';
 import {colors} from '../theme/colors';
@@ -390,6 +391,11 @@ const StackNavigator: FC = () => {
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
       <Stack.Screen name={SCREENS.LocationScreen} component={LocationScreen} />
       <Stack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.CoMessage}
+        component={CoMessage}
+      />
       <Stack.Screen
         options={({navigation}) => ({headerShown: false})}
         name={SCREENS.PostJob}

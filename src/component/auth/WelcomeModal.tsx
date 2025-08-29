@@ -12,11 +12,21 @@ const WelcomeModal = ({
   onClose,
   description,
   ButtonContainer,
+}: {
+  visible: boolean;
+  name?: string;
+  onClose: () => void;
+  description?: string;
+  ButtonContainer?: React.ReactNode;
 }) => {
   const {t, i18n} = useTranslation();
 
   return (
-    <Modal style={styles.modal} animationIn={'slideInUp'} isVisible={visible}>
+    <Modal
+      backdropOpacity={0.4}
+      style={styles.modal}
+      animationIn={'slideInUp'}
+      isVisible={visible}>
       <View style={styles.modalContent}>
         <Image
           source={IMAGES.welcome_icon}

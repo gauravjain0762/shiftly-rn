@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import {
   FlatList,
   Image,
@@ -40,6 +41,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setIsBannerLoaded} from '../../../features/employeeSlice';
 import BaseText from '../../../component/common/BaseText';
+import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
+import FastImage from 'react-native-fast-image';
 
 const jobTypes: object[] = [
   {type: 'Full Time', value: 'Full Time'},
@@ -60,9 +63,7 @@ const JobsScreen = () => {
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
-  console.log("🔥🔥🔥 ~ JobsScreen ~ getFavoriteJobs:", getFavoriteJobs)
   const favJobList = getFavoriteJobs?.data?.jobs;
-  console.log("🔥🔥🔥 ~ JobsScreen ~ favJobList:", favJobList)
   const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
@@ -131,9 +132,15 @@ const JobsScreen = () => {
 
   const handleAddRemoveFavoriteJob = async (item: any) => {
     try {
+      // console.log('🔥🔥🔥 ~ handleAddRemoveFavoriteJob ~ item:', item?._id);
+      // console.log(
+      //   '🔥🔥🔥 ~ handleAddRemoveFavoriteJob ~ userInfo?.user_id:',
+      //   userInfo?._id,
+      // );
+
       const res = await addRemoveFavoriteJob({
         job_id: item?._id,
-        user_id: userInfo?.user_id,
+        user_id: userInfo?._id,
       }).unwrap();
 
       if (res?.status) {
@@ -148,7 +155,7 @@ const JobsScreen = () => {
   };
 
   const BannerItem = ({item, index}: any) => (
-    <Image
+    <FastImage
       key={index}
       resizeMode="cover"
       source={{uri: item?.image}}
@@ -180,22 +187,20 @@ const JobsScreen = () => {
       </View>
 
       <View style={styles.carouselWrapper}>
-        {/* {isBannerLoaded ? (
-          <SkeletonPlaceholder>
-            <View style={styles.skeletonBox} />
-          </SkeletonPlaceholder>
-        ) : ( */}
-        <Carousel
-          loop
-          autoPlay
-          height={180}
-          data={carouselImages}
-          renderItem={BannerItem}
-          width={SCREEN_WIDTH - 32}
-          scrollAnimationDuration={2500}
-          onSnapToItem={index => setActiveIndex(index)}
-        />
-        {/* )} */}
+        {isLoading ? (
+          <BannerSkeleton />
+        ) : (
+          <Carousel
+            loop
+            autoPlay
+            height={180}
+            data={carouselImages}
+            renderItem={BannerItem}
+            width={SCREEN_WIDTH - 32}
+            scrollAnimationDuration={2500}
+            onSnapToItem={index => setActiveIndex(index)}
+          />
+        )}
       </View>
 
       <View
@@ -222,7 +227,7 @@ const JobsScreen = () => {
             const isFavorite = favJobList?.some(
               (fav: any) => fav._id === item?._id,
             );
-            // console.log("🔥🔥🔥 ~ isFavorite:", isFavorite)
+            // console.log('🔥🔥🔥 ~ isFavorite:', isFavorite);
             return (
               <JobCard
                 key={index}

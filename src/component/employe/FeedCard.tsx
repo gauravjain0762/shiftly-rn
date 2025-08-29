@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   vacancy: {
-    ...commonFontStyle(600, 19, colors._1F1F1F),
+    ...commonFontStyle(600, 17, colors._1F1F1F),
     marginBottom: 8,
     paddingHorizontal: wp(14),
   },

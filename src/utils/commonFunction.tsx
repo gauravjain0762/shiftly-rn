@@ -138,3 +138,20 @@ export const getTimeAgo = (createdAt: string): string => {
   if (diffMinutes > 0) return `${diffMinutes}m`;
   return `${diffSeconds}s`;
 };
+
+export const passwordRules = [
+  {label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8},
+  {
+    label: 'At least 1 uppercase letter',
+    test: (pw: string) => /[A-Z]/.test(pw),
+  },
+  {
+    label: 'At least 1 lowercase letter',
+    test: (pw: string) => /[a-z]/.test(pw),
+  },
+  {label: 'At least 1 number', test: (pw: string) => /\d/.test(pw)},
+  {
+    label: 'At least 1 special character (e.g. @, #, $, !)',
+    test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
+  },
+];

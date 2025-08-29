@@ -40,7 +40,7 @@ interface AppState {
     open: boolean;
     password: string[];
     full_password: string;
-    full_otp: string;
+    otp: string[];
     phone: string | undefined;
     phone_code: string | undefined;
     describe: string;
@@ -81,7 +81,7 @@ const initialState: AppState = {
     values: '',
     services: [],
     logo: {},
-    cover_images: []
+    cover_images: [],
   },
   companyServices: [],
   companyProfileAllData: [],
@@ -98,15 +98,17 @@ const initialState: AppState = {
     showModal: false,
     imageModal: false,
     selected: "I'm a job seeker",
-    selected1: 'Male',
-    selected2: 'United State America',
-    selected3: 'United State America',
-    dob: new Date().toLocaleDateString('en-CA'),
+    selected1: '',
+    selected2: '',
+    selected3: '',
+    dob: new Date(
+      new Date().setFullYear(new Date().getFullYear() - 16),
+    ).toISOString(),
     isPickerVisible: false,
     open: false,
     password: new Array(8).fill(''),
     full_password: '',
-    full_otp: '',
+    otp: new Array(4).fill(''),
     phone: '',
     phone_code: '971',
     describe: "I'm a job seeker",

@@ -1,5 +1,4 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
 
 import {hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
@@ -73,5 +72,3 @@ const MyJobsSkeleton = () => {
 };
 
 export default MyJobsSkeleton;
-
-const styles = StyleSheet.create({});

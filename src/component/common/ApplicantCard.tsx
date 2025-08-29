@@ -52,7 +52,7 @@ const ApplicantCard = ({
         <View style={styles.actionContainer}>
           <Pressable
             onPress={() => {
-              navigateTo(SCREENS.CoChat);
+              navigateTo(SCREENS.CoMessage);
             }}
             style={styles.chatButton}>
             <Image source={IMAGES.chat} />

@@ -11,8 +11,8 @@ import {IMAGES} from '../../assets/Images';
 import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {useTranslation} from 'react-i18next';
-import { navigateTo } from '../../utils/commonFunction';
-import { SCREENS } from '../../navigation/screenNames';
+import {navigateTo, resetNavigation} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
 
 const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
   const {t, i18n} = useTranslation();
@@ -39,16 +39,21 @@ const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
             {t('Awsome! your profile is completed successffully')}
           </Text>
 
-          <TouchableOpacity style={styles.button} onPress={()=>{
-            onClose()
-            navigateTo(SCREENS.TabNavigator)
-          }}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              onClose();
+
+              resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
+            }}>
             <Text style={styles.buttonText}>{t('Explore Jobs')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={()=>{
-            onClose()
-            navigateTo(SCREENS.TabNavigator)
-          }}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              onClose();
+              navigateTo(SCREENS.TabNavigator);
+            }}>
             <Text style={styles.buttonText}>{t('Home')}</Text>
           </TouchableOpacity>
         </View>
