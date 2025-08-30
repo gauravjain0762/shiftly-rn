@@ -98,6 +98,7 @@ const CoProfile = () => {
             navigateTo(SCREENS.WebviewScreen, {
               link: '',
               title: 'Privacy Policy',
+              type: 'company',
             });
           },
         },
@@ -108,6 +109,7 @@ const CoProfile = () => {
             navigateTo(SCREENS.WebviewScreen, {
               link: '',
               title: 'Terms of Use',
+              type: 'company',
             });
           },
         },
@@ -118,6 +120,7 @@ const CoProfile = () => {
             navigateTo(SCREENS.WebviewScreen, {
               link: '',
               title: 'Help & Support',
+              type: 'company',
             });
           },
         },

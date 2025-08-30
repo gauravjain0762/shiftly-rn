@@ -68,10 +68,10 @@ const LocationContainer: FC<map> = ({
           region={{
             latitude: lat || location?.latitude,
             longitude: lng || location?.longitude,
-            latitudeDelta: 0.04,
-            longitudeDelta: 0.04,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02,
           }}
-          zoomEnabled={false}
+          zoomEnabled={true}
           scrollEnabled={false}
           provider="google"
           key={Config?.MAP_KEY}

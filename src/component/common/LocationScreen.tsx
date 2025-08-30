@@ -8,100 +8,74 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  ActivityIndicator,
-  Text,
   Alert,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {useTranslation} from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {AppStyles} from '../../theme/appStyles';
 import {colors} from '../../theme/colors';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-import {getAddress} from '../../utils/locationHandler';
+import {
+  getAddress,
+  requestLocationPermission,
+} from '../../utils/locationHandler';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import {API} from '../../utils/apiConstant';
 import GradientButton from './GradientButton';
 import {navigationRef} from '../../navigation/RootContainer';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
-import {getAsyncUserLocation} from '../../utils/asyncStorage';
+import {getAsyncUserLocation, setAsyncLocation} from '../../utils/asyncStorage';
 import CustomImage from './CustomImage';
+import {setUserInfo} from '../../features/authSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from '../../store';
 
 const LocationScreen = () => {
   const {t} = useTranslation();
-  const {params} = useRoute<any>();
-  const userAddress = params?.userAddress;
   const mapRef = useRef<any | null>(null);
 
-  const [search, setSearch] = useState(userAddress?.address || '');
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  // console.log('🔥🔥🔥 ~ LocationScreen ~ userInfo:', userInfo);
+
+  const [search, setSearch] = useState(userInfo?.address || '');
+  // console.log('🔥🔥🔥 ~ LocationScreen ~ search:', search);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
     latitude: number;
     longitude: number;
-  } | null>(null);
+  } | null>({
+    latitude: userInfo?.lat,
+    longitude: userInfo?.lng,
+  });
   const [position, setPosition] = useState({
-    latitude: 25.2048,
-    longitude: 55.2708,
+    latitude: userInfo?.lat,
+    longitude: userInfo?.lng,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  // console.log('🔥 ~ LocationScreen ~ position:', position);
   const [isMapMoving, setIsMapMoving] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false); // New state to track search focus
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const ref = useRef<any | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (userAddress?.address) {
-      setSearch(userAddress.address);
-      ref.current?.setAddressText(userAddress.address);
-      setSelectedAddress(userAddress);
+    if (userInfo?.address) {
+      setSearch(userInfo?.address);
+      ref.current?.setAddressText(userInfo?.address);
+      setSelectedAddress(userInfo?.address);
     }
-  }, [userAddress]);
+  }, [userInfo?.address]);
 
   const getUserLocation = async () => {
     try {
       setIsLoadingLocation(true);
 
-      // First try to get saved location
-      const locationString = await AsyncStorage.getItem('user_location');
-      if (locationString !== null) {
-        const location = JSON.parse(locationString);
-        console.log('🔥🔥🔥 ~ getUserLocation ~ saved location:', location);
-
-        const newPosition = {
-          latitude: location?.lat || location?.latitude,
-          longitude: location?.lng || location?.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        };
-
-        setPosition(newPosition);
-        setMarkerPosition({
-          latitude: location?.lat || location?.latitude,
-          longitude: location?.lng || location?.longitude,
-        });
-
-        if (location.address) {
-          setSearch(location.address);
-          ref.current?.setAddressText(location.address);
-          setSelectedAddress(location);
-        }
-
-        // Animate to saved location after map loads
-        setTimeout(() => {
-          mapRef.current?.animateToRegion(newPosition, 1000);
-        }, 500);
-
-        setIsLoadingLocation(false);
-        return location;
-      }
-
-      // If no saved location, get current location
       const currentLocation = await getAsyncUserLocation();
       if (currentLocation) {
         const newPosition = {
@@ -117,8 +91,8 @@ const LocationScreen = () => {
           longitude: currentLocation.longitude,
         });
 
-        // Get address for current location
         getAddress(currentLocation, (data: any) => {
+          console.log('getAddress 1 is called -  >>>>>>>');
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
 
@@ -148,6 +122,20 @@ const LocationScreen = () => {
         setTimeout(() => {
           mapRef.current?.animateToRegion(newPosition, 1000);
         }, 500);
+      } else {
+        return new Promise(resolve => {
+          requestLocationPermission(
+            true,
+            res => {
+              setAsyncLocation(res);
+              resolve(res);
+            },
+            (err: any) => {
+              console.error('Location permission error:', err);
+              resolve(null);
+            },
+          );
+        });
       }
     } catch (error) {
       console.error('Failed to retrieve user location:', error);
@@ -163,8 +151,11 @@ const LocationScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      getUserLocation();
-    }, []),
+      if (!userInfo?.address) {
+        console.log('current lcoation setting >>>>>>>>>>>>');
+        getUserLocation();
+      }
+    }, [userInfo?.address]),
   );
 
   useEffect(() => {
@@ -187,7 +178,7 @@ const LocationScreen = () => {
 
     Keyboard.dismiss();
     setIsSearchExpanded(false);
-    setIsSearchFocused(false); // Reset search focus when place is selected
+    setIsSearchFocused(false);
 
     const {lat, lng} = details.geometry.location;
     const region = {
@@ -224,7 +215,6 @@ const LocationScreen = () => {
 
   const handleMapPress = (e: any) => {
     if (isKeyboardVisible || isSearchFocused) {
-      // Check both keyboard and search focus
       Keyboard.dismiss();
       setIsSearchExpanded(false);
       setIsSearchFocused(false);
@@ -235,13 +225,12 @@ const LocationScreen = () => {
   };
 
   const handlePoiClick = (e: any) => {
-    if (isSearchFocused) return; // Don't handle POI clicks when search is focused
+    if (isSearchFocused) return;
     const coords = e.nativeEvent.coordinate;
     moveMarkerToCoords(coords);
   };
 
   const handleRegionChange = (region: any) => {
-    // Don't update marker position if search is focused/expanded
     if (isSearchFocused || isSearchExpanded) {
       return;
     }
@@ -259,8 +248,7 @@ const LocationScreen = () => {
   };
 
   const handleRegionChangeComplete = (region: any) => {
-    // Don't update address if search is focused/expanded
-    if (isSearchFocused || isSearchExpanded) {
+    if (isSearchFocused || isSearchExpanded || !isMapMoving) {
       return;
     }
 
@@ -269,6 +257,8 @@ const LocationScreen = () => {
     getAddress(
       {latitude: region.latitude, longitude: region.longitude},
       (data: any) => {
+        console.log('getAddress 2 is called -  >>>>>>>');
+
         const address = data?.results?.[0]?.formatted_address;
         const components = data?.results?.[0]?.address_components || [];
 
@@ -310,6 +300,8 @@ const LocationScreen = () => {
     mapRef.current?.animateToRegion(region, 500);
 
     getAddress(coords, (data: any) => {
+      console.log('getAddress 3 is called -  >>>>>>>');
+
       const address = data?.results?.[0]?.formatted_address;
       const components = data?.results?.[0]?.address_components || [];
 
@@ -340,7 +332,7 @@ const LocationScreen = () => {
   const handleGetCurrentLocation = async () => {
     setIsLoadingLocation(true);
     const location = await getAsyncUserLocation();
-    console.log('🔥🔥🔥 ~ handleGetCurrentLocation ~ location:', location);
+    // console.log('🔥🔥🔥 ~ handleGetCurrentLocation ~ location:', location);
 
     if (location) {
       const region = {
@@ -358,6 +350,8 @@ const LocationScreen = () => {
       mapRef.current?.animateToRegion(region, 500);
 
       getAddress(location, (data: any) => {
+        console.log('getAddress 4 is called -  >>>>>>>');
+
         const address = data?.results?.[0]?.formatted_address;
         const components = data?.results?.[0]?.address_components || [];
 
@@ -394,17 +388,16 @@ const LocationScreen = () => {
   };
 
   const handleSaveLocation = async () => {
+    const data = {
+      ...selectedAddress,
+      lat: selectedAddress?.lat,
+      lng: selectedAddress?.lng,
+    };
+    // console.log('🔥🔥🔥 ~ handleSaveLocation ~ data:', data);
     if (selectedAddress) {
       try {
-        await AsyncStorage.setItem(
-          'user_location',
-          JSON.stringify({
-            ...selectedAddress,
-            latitude: selectedAddress.lat,
-            longitude: selectedAddress.lng,
-          }),
-        );
-        console.log('Location saved successfully');
+        dispatch(setUserInfo({...userInfo, ...data}));
+        console.log('>>>>>>>>Location saved successfully>>>>>>>>');
         navigationRef.goBack();
       } catch (error) {
         console.error('Failed to save location:', error);
@@ -497,17 +490,6 @@ const LocationScreen = () => {
         <KeyboardAvoidingView
           style={AppStyles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          {/* Loading Overlay */}
-          {isLoadingLocation && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator
-                size="large"
-                color={colors.coPrimary || '#007AFF'}
-              />
-              <Text style={styles.loadingText}>Getting your location...</Text>
-            </View>
-          )}
-
           <View style={AppStyles.flex}>
             <View style={styles.container}>
               <MapView
@@ -519,8 +501,7 @@ const LocationScreen = () => {
                 onRegionChange={handleRegionChange}
                 onRegionChangeComplete={handleRegionChangeComplete}
                 onMapReady={() => {
-                  setIsMapLoaded(true);
-                  // Auto-animate to user location when map is ready
+                  // setIsMapLoaded(true);
                   if (markerPosition) {
                     setTimeout(() => {
                       mapRef.current?.animateToRegion(
@@ -557,15 +538,6 @@ const LocationScreen = () => {
               </MapView>
             </View>
 
-            {/* Address Display */}
-            {/* {selectedAddress && !isKeyboardVisible && (
-              <View style={styles.addressDisplay}>
-                <Text style={styles.selectedAddressText} numberOfLines={2}>
-                  📍 {selectedAddress.address}
-                </Text>
-              </View>
-            )} */}
-
             <GradientButton
               type="Employee"
               title={t('Save Location')}
@@ -583,19 +555,11 @@ const LocationScreen = () => {
             style={[
               styles.currentLocationButton,
               isKeyboardVisible && styles.currentLocationButtonHidden,
-            ]}
-            disabled={isLoadingLocation}>
-            {isLoadingLocation ? (
-              <ActivityIndicator
-                size="small"
-                color={colors.primary || '#007AFF'}
-              />
-            ) : (
-              <Image
-                source={IMAGES.current_location}
-                style={styles.currentLocationIcon}
-              />
-            )}
+            ]}>
+            <Image
+              source={IMAGES.current_location}
+              style={styles.currentLocationIcon}
+            />
           </TouchableOpacity>
         </KeyboardAvoidingView>
       </SafeAreaView>

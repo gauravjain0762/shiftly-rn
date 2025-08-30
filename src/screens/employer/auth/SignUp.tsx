@@ -376,7 +376,7 @@ const SignUp = () => {
               <Text style={styles.title}>{t(`What's your full name?`)}</Text>
               <CustomTextInput
                 placeholder={t('Type your name here')}
-                placeholderTextColor={colors._D5D5D5}
+                placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({name: text})}
                 value={name}
                 inputStyle={styles.input}
@@ -405,7 +405,7 @@ const SignUp = () => {
               </Text>
               <CustomTextInput
                 placeholder={t('Type your email here')}
-                placeholderTextColor={colors._D5D5D5}
+                placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({email: text})}
                 value={email}
                 inputStyle={{...styles.input, textTransform: 'lowercase'}}
@@ -451,7 +451,7 @@ const SignUp = () => {
                   containerStyle={styles.inputcontainer}
                   imgStyle={styles.eye}
                   placeholder="* * * * * * * *"
-                  placeholderTextColor={colors._7B7878}
+                  placeholderTextColor={colors._F4E2B8}
                   isPassword
                   value={password}
                   onChangeText={(text: any) => {
@@ -524,7 +524,7 @@ const SignUp = () => {
               <PhoneInput
                 phone={phone}
                 callingCode={phone_code}
-                placeholderTextColor={colors._D5D5D5}
+                placeholderTextColor={colors._F4E2B8}
                 onPhoneChange={(e: any) => updateSignupData({phone: e})}
                 onCallingCodeChange={(e: any) =>
                   updateSignupData({phone_code: e})
@@ -577,7 +577,7 @@ const SignUp = () => {
                         maxLength={1}
                         style={styles.otpBox1}
                         keyboardType="decimal-pad"
-                        autoFocus={idx === 0}
+                        // autoFocus={idx === 0}
                         placeholderTextColor={colors._D5D5D5}
                       />
                     ),
@@ -591,7 +591,7 @@ const SignUp = () => {
                     {t('Resend')}
                   </Text>
                 ) : (
-                  <View style={[{marginTop: hp(31), alignItems: 'center'}]}>
+                  <View style={[{marginTop: hp(40), alignItems: 'center'}]}>
                     <Text style={styles.secText}>
                       {timer} {t('Sec')}
                     </Text>
@@ -620,7 +620,7 @@ const SignUp = () => {
               <Text style={styles.title}>{t('Which best describes you?')}</Text>
               <CustomTextInput
                 placeholder={t(`Select which describe you`)}
-                placeholderTextColor={colors._D5D5D5}
+                placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({describe: text})}
                 value={describe}
                 inputStyle={styles.input1}
@@ -684,6 +684,9 @@ const SignUp = () => {
               </Pressable>
 
               <DateTimePicker
+                pickerStyleIOS={{
+                  alignSelf: 'center',
+                }}
                 value={dob ? new Date(dob) : new Date()}
                 display={Platform.OS == 'ios' ? 'spinner' : 'default'}
                 isVisible={open}
@@ -745,7 +748,13 @@ const SignUp = () => {
             <GradientButton
               style={styles.btn}
               title={'Next'}
-              onPress={nextStep}
+              onPress={() => {
+                if (!selected1) {
+                  errorToast('Please select a gender');
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -1054,9 +1063,9 @@ const styles = StyleSheet.create({
   },
   secText: {
     ...commonFontStyle(500, 25, colors.white),
-    marginVertical: hp(34),
   },
   secText1: {
+    marginVertical: hp(34),
     ...commonFontStyle(400, 17, colors.white),
   },
   resendText: {
@@ -1160,7 +1169,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   otpBox1: {
-    width: wp(40),
+    width: wp(64),
     height: hp(50),
     borderBottomWidth: 2,
     borderColor: '#ffeecf',

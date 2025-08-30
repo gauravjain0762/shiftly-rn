@@ -1,14 +1,20 @@
 import React from 'react';
 
-import {hp, SCREEN_WIDTH, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {View} from 'react-native';
+import {colors} from '../../theme/colors';
+import {hp, SCREEN_WIDTH, wp} from '../../theme/fonts';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-const BannerSkeleton = () => {
+type Props = {
+  backgroundColor?: string;
+};
+
+const BannerSkeleton = (props: Props) => {
   return (
     <View>
-      <SkeletonPlaceholder borderRadius={4}>
+      <SkeletonPlaceholder
+        backgroundColor={props.backgroundColor}
+        borderRadius={4}>
         <SkeletonPlaceholder.Item
           alignSelf="center"
           marginBottom={hp(10)}

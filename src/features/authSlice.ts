@@ -29,6 +29,8 @@ interface AppState {
     logo: any;
     cover_images: any[];
     otp: string[];
+    location: string;
+    company_name: string;
   };
   companyServices?: any[];
   companyProfileAllData?: any[];
@@ -96,6 +98,8 @@ const initialState: AppState = {
     logo: {},
     cover_images: [],
     otp: ['', '', '', ''],
+    location: '',
+    company_name: '',
   },
   companyServices: [],
   companyProfileAllData: [],

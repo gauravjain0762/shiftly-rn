@@ -16,12 +16,19 @@ import {IMAGES} from '../../assets/Images';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 
-const CustomDatePicker = ({label, value, onChange, onPress,maximumDate,minimumDate}) => {
+const CustomDatePicker = ({
+  label,
+  value,
+  onChange,
+  onPress,
+  maximumDate,
+  minimumDate,
+}) => {
   const [showPicker, setShowPicker] = useState(false);
   const [open, setOpen] = useState(false);
 
   return (
-    <View style={{flex: 1,}}>
+    <View style={{flex: 1}}>
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
         onPress={() => setOpen(true)}
@@ -45,6 +52,9 @@ const CustomDatePicker = ({label, value, onChange, onPress,maximumDate,minimumDa
         mode={'date'}
         minimumDate={minimumDate}
         maximumDate={maximumDate}
+        pickerStyleIOS={{
+          alignSelf: 'center',
+        }}
         display={Platform.OS == 'ios' ? 'spinner' : 'default'}
         isVisible={open}
         onConfirm={date => {

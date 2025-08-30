@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -58,7 +59,6 @@ const JobsScreen = () => {
   const {t} = useTranslation();
   const dispatch = useDispatch<any>();
   const [modal, setModal] = useState<boolean>(false);
-  const {isBannerLoaded} = useSelector((state: any) => state.employee);
   const [activeIndex, setActiveIndex] = useState(0);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {userInfo} = useSelector((state: RootState) => state.auth);
@@ -170,192 +170,198 @@ const JobsScreen = () => {
 
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
-        <View style={styles.headerImgBar}>
-          <TouchableOpacity>
-            <Image style={styles.headerIcons} source={IMAGES.search} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
-            <Image style={styles.headerIcons} source={IMAGES.filter} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigateTo(SCREENS.NotificationScreen)}>
-            <Image style={styles.headerIcons} source={IMAGES.notification} />
-          </TouchableOpacity>
+      <ScrollView style={{flex: 1}}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
+          <View style={styles.headerImgBar}>
+            <TouchableOpacity>
+              <Image style={styles.headerIcons} source={IMAGES.search} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
+              <Image style={styles.headerIcons} source={IMAGES.filter} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigateTo(SCREENS.NotificationScreen)}>
+              <Image style={styles.headerIcons} source={IMAGES.notification} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.carouselWrapper}>
+        <View style={styles.carouselWrapper}>
+          {isLoading ? (
+            <BannerSkeleton backgroundColor={colors._lightBlueSkeleton} />
+          ) : (
+            <Carousel
+              loop
+              autoPlay
+              height={180}
+              data={carouselImages}
+              renderItem={BannerItem}
+              width={SCREEN_WIDTH - 32}
+              scrollAnimationDuration={2500}
+              onSnapToItem={index => setActiveIndex(index)}
+            />
+          )}
+        </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 10,
+          }}>
+          {carouselImages?.map((_: any, index: number) => (
+            <View
+              key={index}
+              style={{
+                ...styles.carouselDot,
+                width: index === activeIndex ? 17 : 6,
+              }}
+            />
+          ))}
+        </View>
+        <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
         {isLoading ? (
-          <BannerSkeleton />
+          <MyJobsSkeleton backgroundColor={colors._lightBlueSkeleton} />
         ) : (
-          <Carousel
-            loop
-            autoPlay
-            height={180}
-            data={carouselImages}
-            renderItem={BannerItem}
-            width={SCREEN_WIDTH - 32}
-            scrollAnimationDuration={2500}
-            onSnapToItem={index => setActiveIndex(index)}
+          <FlatList
+            data={jobList}
+            style={AppStyles.flex}
+            showsVerticalScrollIndicator={false}
+            renderItem={({item, index}: any) => {
+              const isFavorite = favJobList?.some(
+                (fav: any) => fav._id === item?._id,
+              );
+              // console.log('🔥🔥🔥 ~ isFavorite:', isFavorite);
+              return (
+                <JobCard
+                  key={index}
+                  item={item}
+                  onPressShare={() => {
+                    setModal(true);
+                  }}
+                  heartImage={isFavorite ? IMAGES.ic_favorite : null}
+                  onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
+                  onPress={() =>
+                    navigateTo(SCREEN_NAMES.JobDetail, {
+                      item: item,
+                      resumeList: resumeList,
+                    })
+                  }
+                />
+              );
+            }}
+            keyExtractor={(_, index) => index.toString()}
+            ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
+            contentContainerStyle={styles.scrollContainer}
+            ListEmptyComponent={
+              <BaseText
+                style={{
+                  ...commonFontStyle(500, 17, colors.white),
+                  textAlign: 'center',
+                }}>
+                {t('No jobs found')}
+              </BaseText>
+            }
           />
         )}
-      </View>
 
-      <View
-        style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10}}>
-        {carouselImages?.map((_: any, index: number) => (
-          <View
-            key={index}
-            style={{
-              ...styles.carouselDot,
-              width: index === activeIndex ? 17 : 6,
-            }}
-          />
-        ))}
-      </View>
-      <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
-      {isLoading ? (
-        <MyJobsSkeleton />
-      ) : (
-        <FlatList
-          data={jobList}
-          style={AppStyles.flex}
-          showsVerticalScrollIndicator={false}
-          renderItem={({item, index}: any) => {
-            const isFavorite = favJobList?.some(
-              (fav: any) => fav._id === item?._id,
-            );
-            // console.log('🔥🔥🔥 ~ isFavorite:', isFavorite);
-            return (
-              <JobCard
-                key={index}
-                item={item}
-                onPressShare={() => {
-                  setModal(true);
-                }}
-                heartImage={isFavorite ? IMAGES.ic_favorite : null}
-                onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
-                onPress={() =>
-                  navigateTo(SCREEN_NAMES.JobDetail, {
-                    item: item,
-                    resumeList: resumeList,
-                  })
+        <BottomModal
+          visible={isFilterModalVisible}
+          backgroundColor={colors._FBE7BD}
+          onClose={() => setIsFilterModalVisible(false)}>
+          <View style={styles.modalContent}>
+            <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
+
+            <Text style={styles.sectionLabel}>{t('Department')}</Text>
+            <View style={styles.pillRow}>
+              {departments.map(dept => {
+                const isSelected = filters.departments.includes(dept);
+                return (
+                  <Pressable
+                    key={dept}
+                    style={[styles.pill, isSelected && styles.pillSelected]}
+                    onPress={() => {
+                      setFilters(prev => ({
+                        ...prev,
+                        departments: isSelected
+                          ? prev.departments.filter(d => d !== dept)
+                          : [...prev.departments, dept],
+                      }));
+                    }}>
+                    <Text
+                      style={[
+                        styles.pillText,
+                        isSelected && styles.pillTextSelected,
+                      ]}>
+                      {dept}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <CustomTextInput
+                value={filters.location}
+                onChangeText={txt =>
+                  setFilters(prev => ({...prev, location: txt}))
                 }
+                placeholder={t('Location')}
+                placeholderTextColor={colors.black}
+                inputStyle={styles.locationInput}
               />
-            );
-          }}
-          keyExtractor={(_, index) => index.toString()}
-          ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
-          contentContainerStyle={styles.scrollContainer}
-          ListEmptyComponent={
-            <BaseText
-              style={{
-                ...commonFontStyle(500, 17, colors.white),
-                textAlign: 'center',
-              }}>
-              {t('No jobs found')}
-            </BaseText>
-          }
-        />
-      )}
+              <View style={styles.underline} />
+            </View>
 
-      <BottomModal
-        visible={isFilterModalVisible}
-        backgroundColor={colors._FBE7BD}
-        onClose={() => setIsFilterModalVisible(false)}>
-        <View style={styles.modalContent}>
-          <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
+            <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
+            <View style={styles.pillRow}>
+              {jobTypes.map((job: any) => {
+                const isSelected = filters.job_types.includes(job.type);
+                return (
+                  <Pressable
+                    key={job.type}
+                    style={[styles.pill, isSelected && styles.pillSelected]}
+                    onPress={() => {
+                      setFilters(prev => ({
+                        ...prev,
+                        job_types: isSelected
+                          ? prev.job_types.filter(j => j !== job.type)
+                          : [...prev.job_types, job.type],
+                      }));
+                    }}>
+                    <Text
+                      style={[
+                        styles.pillText,
+                        isSelected && styles.pillTextSelected,
+                      ]}>
+                      {job.value}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <Text style={styles.sectionLabel}>{t('Department')}</Text>
-          <View style={styles.pillRow}>
-            {departments.map(dept => {
-              const isSelected = filters.departments.includes(dept);
-              return (
-                <Pressable
-                  key={dept}
-                  style={[styles.pill, isSelected && styles.pillSelected]}
-                  onPress={() => {
-                    setFilters(prev => ({
-                      ...prev,
-                      departments: isSelected
-                        ? prev.departments.filter(d => d !== dept)
-                        : [...prev.departments, dept],
-                    }));
-                  }}>
-                  <Text
-                    style={[
-                      styles.pillText,
-                      isSelected && styles.pillTextSelected,
-                    ]}>
-                    {dept}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            <View style={styles.salarySection}>
+              <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
+              <RangeSlider range={range} setRange={setRange} />
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <Pressable onPress={clearFilters} style={styles.clearContainer}>
+                <Text>{'Clear'}</Text>
+              </Pressable>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Apply Filter')}
+                onPress={handleApplyFilter}
+              />
+            </View>
           </View>
-
-          <View style={styles.inputWrapper}>
-            <CustomTextInput
-              value={filters.location}
-              onChangeText={txt =>
-                setFilters(prev => ({...prev, location: txt}))
-              }
-              placeholder={t('Location')}
-              placeholderTextColor={colors.black}
-              inputStyle={styles.locationInput}
-            />
-            <View style={styles.underline} />
-          </View>
-
-          <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
-          <View style={styles.pillRow}>
-            {jobTypes.map((job: any) => {
-              const isSelected = filters.job_types.includes(job.type);
-              return (
-                <Pressable
-                  key={job.type}
-                  style={[styles.pill, isSelected && styles.pillSelected]}
-                  onPress={() => {
-                    setFilters(prev => ({
-                      ...prev,
-                      job_types: isSelected
-                        ? prev.job_types.filter(j => j !== job.type)
-                        : [...prev.job_types, job.type],
-                    }));
-                  }}>
-                  <Text
-                    style={[
-                      styles.pillText,
-                      isSelected && styles.pillTextSelected,
-                    ]}>
-                    {job.value}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View style={styles.salarySection}>
-            <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
-            <RangeSlider range={range} setRange={setRange} />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Pressable onPress={clearFilters} style={styles.clearContainer}>
-              <Text>{'Clear'}</Text>
-            </Pressable>
-            <GradientButton
-              style={styles.btn}
-              type="Company"
-              title={t('Apply Filter')}
-              onPress={handleApplyFilter}
-            />
-          </View>
-        </View>
-      </BottomModal>
-      <ShareModal visible={modal} onClose={() => setModal(!modal)} />
+        </BottomModal>
+        <ShareModal visible={modal} onClose={() => setModal(!modal)} />
+      </ScrollView>
     </LinearContainer>
   );
 };

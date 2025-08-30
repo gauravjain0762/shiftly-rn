@@ -48,17 +48,15 @@ const CoEditMyProfile = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥 ~ CoEditMyProfile ~ userInfo:', userInfo);
   const [updateCompanyProfile] = useCreateCompanyProfileMutation();
-  const {data: profileData} = useGetProfileQuery();
   const {data: businessTypes} = useGetBusinessTypesQuery({});
+  const {data: profileData} = useGetProfileQuery();
+  const updatedData = profileData?.data?.company;
+  console.log('🔥 ~ CoEditMyProfile ~ updatedData:', updatedData);
 
   const [companyName, setCompanyName] = useState(userInfo?.company_name || '');
   const [about, setAbout] = useState(userInfo?.about || '');
   const [email, setEmail] = useState(userInfo?.email || '');
-  const [location, setLocation] = useState(
-    userInfo?.location || userInfo?.address || '',
-  );
   const [website, setWebsite] = useState(userInfo?.website || '');
   const [coSize, setCoSize] = useState(userInfo?.company_size || '');
   const [businessType, setBusinessType] = useState(
@@ -67,46 +65,9 @@ const CoEditMyProfile = () => {
   const [coverImages, setCoverImages] = useState<any[]>(
     userInfo?.cover_images || [],
   );
-  console.log("🔥🔥 ~ CoEditMyProfile ~ coverImages:", coverImages)
   const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
   const [imgType, setImageType] = useState<'logo' | 'cover'>('logo');
   const [imageModal, setImageModal] = useState(false);
-  const [userAddress, setUserAddress] = useState<
-    | {
-        address: string;
-        lat: number;
-        lng: number;
-        state: string;
-        country: string;
-      }
-    | undefined
-  >();
-
-  useEffect(() => {
-    dispatch(setUserInfo(profileData?.data?.company));
-  }, [dispatch, profileData]);
-
-  const getUserLocation = async () => {
-    try {
-      const locationString = await AsyncStorage.getItem('user_location');
-      if (locationString !== null) {
-        const location = JSON.parse(locationString);
-        setUserAddress(location);
-        setLocation(location.address);
-        console.log('Retrieved location:', location);
-        return location;
-      }
-    } catch (error) {
-      console.error('Failed to retrieve user location:', error);
-    }
-    return null;
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      getUserLocation();
-    }, []),
-  );
 
   const hasChanges = useMemo(() => {
     if (!userInfo) return false;
@@ -114,8 +75,7 @@ const CoEditMyProfile = () => {
     const logoChanged =
       (logo && typeof logo === 'object') || logo !== userInfo.logo;
     const aboutChanged = about !== (userInfo.about || '');
-    const locationChanged =
-      location !== (userInfo.location || userInfo.address || '');
+    const locationChanged = userInfo?.address !== (updatedData?.address || '');
     const companyNameChanged = companyName !== (userInfo.company_name || '');
     const websiteChanged = website !== (userInfo.website || '');
     const coSizeChanged = coSize !== (userInfo.company_size || '');
@@ -136,7 +96,7 @@ const CoEditMyProfile = () => {
   }, [
     logo,
     about,
-    location,
+    userInfo?.address,
     companyName,
     website,
     coSize,
@@ -144,6 +104,12 @@ const CoEditMyProfile = () => {
     userInfo,
     coverImages,
   ]);
+
+  useEffect(() => {
+    if (!userInfo?.website || userInfo?.website === null) {
+      setWebsite('https://');
+    }
+  }, [userInfo?.website]);
 
   const UploadPhoto = (e: any) => {
     const uri = e?.sourceURL || e?.path || e?.uri;
@@ -193,9 +159,9 @@ const CoEditMyProfile = () => {
         formData.append('about', about);
       }
 
-      formData.append('address', userAddress?.address || location);
-      formData.append('lat', userAddress?.lat?.toString() || '');
-      formData.append('lng', userAddress?.lng?.toString() || '');
+      formData.append('address', userInfo?.address);
+      formData.append('lat', userInfo?.lat?.toString() || '');
+      formData.append('lng', userInfo?.lng?.toString() || '');
       formData.append('website', website);
       formData.append('company_size', coSize);
       formData.append('business_type_id', businessType);
@@ -335,7 +301,12 @@ const CoEditMyProfile = () => {
                 editable={false}
                 onChangeText={setEmail}
                 placeholder="company@email.com"
-                style={styles.inputText}
+                style={[
+                  styles.inputText,
+                  {
+                    textTransform: 'lowercase',
+                  },
+                ]}
                 placeholderTextColor={colors._7B7878}
                 keyboardType="email-address"
               />
@@ -362,7 +333,7 @@ const CoEditMyProfile = () => {
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Website')}</Text>
               <TextInput
-                value={website}
+                value={`${website}`}
                 onChangeText={setWebsite}
                 placeholder="https://company.com"
                 style={styles.inputContainer}
@@ -414,28 +385,30 @@ const CoEditMyProfile = () => {
 
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Location')}</Text>
-              <TextInput
-                value={location}
-                onChangeText={setLocation}
-                placeholder="Company address"
-                style={[styles.inputText, styles.locationInput]}
-                placeholderTextColor={colors._7B7878}
-                multiline
-                editable={false}
-              />
+              {userInfo?.address && (
+                <TextInput
+                  value={userInfo?.address}
+                  style={[styles.inputText, styles.locationInput]}
+                  placeholderTextColor={colors._7B7878}
+                  multiline
+                  editable={false}
+                />
+              )}
               <TouchableOpacity
                 style={styles.changeLocationBtn}
                 onPress={() => {
-                  navigateTo(SCREENS.LocationScreen, {
-                    userAddress: userAddress,
-                  });
+                  navigateTo(SCREENS.LocationScreen);
                 }}>
                 <Image
                   source={IMAGES.location}
                   style={{width: wp(16), height: hp(16)}}
                 />
                 <Text style={styles.changeLocationText}>
-                  {t('Change Location')}
+                  {t(
+                    userInfo?.address === null
+                      ? 'Set Location'
+                      : 'Change Location',
+                  )}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -531,6 +504,7 @@ const styles = StyleSheet.create({
     padding: wp(14),
     borderWidth: hp(1),
     borderRadius: hp(8),
+    textTransform: 'lowercase',
     borderColor: colors._C9C9C9,
     ...commonFontStyle(400, 18, colors._181818),
   },

@@ -121,10 +121,6 @@ const CompanyProfile = () => {
     }
   }, [navigation]);
 
-  const handleCreatePost = useCallback(() => {
-    navigateTo(SCREENS.CoPost);
-  }, []);
-
   const handleTabPress = useCallback((index: number) => {
     setSelectedTabIndex(index);
   }, []);
@@ -172,15 +168,6 @@ const CompanyProfile = () => {
     ));
   }, [selectedTanIndex, jobsList]);
 
-  const logoPlaceholder = useMemo(
-    () => (
-      <View style={styles.logoPlaceholder}>
-        <ActivityIndicator size="small" color={colors._0B3970} />
-      </View>
-    ),
-    [],
-  );
-
   const hasValidLogo = useMemo(
     () =>
       !!companyProfileData?.logo &&
@@ -207,26 +194,26 @@ const CompanyProfile = () => {
             containerStyle={styles.linearContainer}
             colors={['#FFF8E6', '#F3E1B7']}>
             <View style={styles.profileHeader}>
-              {hasValidLogo ? (
-                <CustomImage
-                  uri={companyProfileData?.logo}
-                  imageStyle={{height: '100%', width: '100%'}}
-                  containerStyle={styles.logoContainer}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.logoPlaceholder}>
-                  <Text style={styles.noLogoText}>No Logo</Text>
-                </View>
-              )}
+              <CustomImage
+                uri={
+                  hasValidLogo
+                    ? companyProfileData?.logo
+                    : 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png'
+                }
+                imageStyle={{height: '100%', width: '100%'}}
+                containerStyle={styles.logoContainer}
+                resizeMode="cover"
+              />
 
               <View style={styles.titleTextContainer}>
                 <Text style={styles.companyName}>
                   {companyProfileData?.company_name}
                 </Text>
-                <Text style={styles.tagline}>
-                  {companyProfileData?.mission}
-                </Text>
+                {companyProfileData?.mission && (
+                  <Text style={styles.tagline}>
+                    {companyProfileData?.mission}
+                  </Text>
+                )}
                 <Text style={styles.industry}>
                   {companyProfileData?.address}
                 </Text>

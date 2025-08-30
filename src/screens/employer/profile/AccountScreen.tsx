@@ -98,21 +98,33 @@ const AccountScreen = () => {
           label: 'Privacy Policy',
           icon: IMAGES.PrivacyPolicy,
           onPress: () => {
-            navigateTo(SCREENS.WebviewScreen, {link: ''});
+            navigateTo(SCREENS.WebviewScreen, {
+              link: '',
+              title: 'Privacy Policy',
+              type: 'employe',
+            });
           },
         },
         {
           label: 'Terms of Use',
           icon: IMAGES.TermsUse,
           onPress: () => {
-            navigateTo(SCREENS.WebviewScreen, {link: ''});
+            navigateTo(SCREENS.WebviewScreen, {
+              link: '',
+              title: 'Terms of Use',
+              type: 'employe',
+            });
           },
         },
         {
           label: 'Help & Support',
           icon: IMAGES.HelpSupport,
           onPress: () => {
-            navigateTo(SCREENS.WebviewScreen, {link: ''});
+            navigateTo(SCREENS.WebviewScreen, {
+              link: '',
+              title: 'Help & Support',
+              type: 'employe',
+            });
           },
         },
         {

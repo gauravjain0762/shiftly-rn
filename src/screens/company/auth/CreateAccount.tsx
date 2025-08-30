@@ -37,7 +37,10 @@ import {
 import {SCREENS} from '../../../navigation/screenNames';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MapView, {Marker} from 'react-native-maps';
-import {requestLocationPermission} from '../../../utils/locationHandler';
+import {
+  getAddress,
+  requestLocationPermission,
+} from '../../../utils/locationHandler';
 import {API} from '../../../utils/apiConstant';
 import Config from 'react-native-config';
 import {useSelector} from 'react-redux';
@@ -54,6 +57,7 @@ import {
   setCompanyRegisterData,
   setCompanyRegistrationStep,
   setRegisterSuccessModal,
+  setUserInfo,
 } from '../../../features/authSlice';
 import {useAppDispatch} from '../../../redux/hooks';
 import {
@@ -63,6 +67,7 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import Geolocation from '@react-native-community/geolocation';
 
 export const companySize = [
   {label: '0 - 50', value: '0 - 50'},
@@ -107,11 +112,6 @@ const CreateAccount = () => {
     cover_images,
     otp,
   } = useSelector((state: RootState) => state.auth.companyProfileData || {});
-  // console.log('🔥🔥🔥 ~ CreateAccount ~ cover_images:', cover_images);
-  // console.log(
-  //   '🔥🔥🔥 ~ CreateAccount ~ companyProfileData:',
-  //   companyProfileData,
-  // );
   const {data: businessTypes} = useGetBusinessTypesQuery({});
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
@@ -131,16 +131,6 @@ const CreateAccount = () => {
   const [model, setModel] = useState(false);
   const [visible, setVisible] = useState(false);
   const [start, setStart] = useState(false);
-  const [userAddress, setUserAddress] = useState<
-    | {
-        address: string;
-        lat: number;
-        lng: number;
-        state: string;
-        country: string;
-      }
-    | undefined
-  >();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -159,27 +149,6 @@ const CreateAccount = () => {
       );
     }
   }, []);
-
-  const getUserLocation = async () => {
-    try {
-      const locationString = await AsyncStorage.getItem('user_location');
-      if (locationString !== null) {
-        const location = JSON.parse(locationString);
-        setUserAddress(location);
-        console.log('Retrieved location:', location);
-        return location;
-      }
-    } catch (error) {
-      console.error('Failed to retrieve user location:', error);
-    }
-    return null;
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      getUserLocation();
-    }, []),
-  );
 
   useEffect(() => {
     onCurrentLocation();
@@ -309,12 +278,11 @@ const CreateAccount = () => {
   const handleSignup = async () => {
     const formData = new FormData();
 
-    // Add regular fields
     formData.append('website', companyProfileData?.website || '');
     formData.append('company_size', companyProfileData?.company_size || '');
-    formData.append('address', companyProfileData?.address || '');
-    formData.append('lat', companyProfileData?.lat?.toString() || '0');
-    formData.append('lng', companyProfileData?.lng?.toString() || '0');
+    formData.append('address', userInfo?.address || '');
+    formData.append('lat', userInfo?.lat?.toString() || '0');
+    formData.append('lng', userInfo?.lng?.toString() || '0');
     formData.append('about', companyProfileData?.about || '');
     formData.append('mission', companyProfileData?.mission || '');
     formData.append('values', companyProfileData?.values || '');
@@ -446,15 +414,16 @@ const CreateAccount = () => {
     // Add regular fields
     formData.append('website', companyProfileData?.website || '');
     formData.append('company_size', companyProfileData?.company_size || '');
-    formData.append('address', companyProfileData?.address || '');
-    formData.append('lat', companyProfileData?.lat?.toString() || '0');
-    formData.append('lng', companyProfileData?.lng?.toString() || '0');
+    formData.append('address', userInfo?.address || '');
+    formData.append('lat', userInfo?.lat?.toString() || '0');
+    formData.append('lng', userInfo?.lng?.toString() || '0');
     formData.append('about', companyProfileData?.about || '');
     formData.append('mission', companyProfileData?.mission || '');
     formData.append('values', companyProfileData?.values || '');
     formData.append('services', companyProfileData?.services?.join(',') || '');
     formData.append('company_name', companyRegisterData?.company_name || '');
 
+    console.log('🔥 ~ handleCreateProfile ~ formData:', JSON.stringify(formData));
     // Add logo if exists
     if (companyProfileData?.logo?.uri) {
       formData.append('logo', {
@@ -464,10 +433,6 @@ const CreateAccount = () => {
       });
     }
 
-    console.log(
-      '🔥🔥🔥 ~ handleCreateProfile ~ companyProfileData.cover_images:',
-      companyProfileData?.cover_images,
-    );
     if (companyProfileData?.cover_images?.length > 0) {
       companyProfileData.cover_images.forEach((image: any, index: number) => {
         if (image?.uri) {
@@ -798,7 +763,7 @@ const CreateAccount = () => {
                 {t('What is your phone number?')}
               </Text>
               <PhoneInput
-                placeholder={t('Enter your phone number')}
+                placeholder={t('Enter your phone')}
                 phoneStyle={{color: colors._0B3970}}
                 callingCodeStyle={{color: colors._0B3970}}
                 callingCode={companyRegisterData?.phone_code}
@@ -999,11 +964,11 @@ const CreateAccount = () => {
                   onChangeText={(e: any) => {
                     dispatch(
                       setCompanyProfileData({
-                        address: userAddress?.address,
+                        address: userInfo?.address,
                       }),
                     );
                   }}
-                  value={userAddress?.address}
+                  value={userInfo?.address}
                   inputStyle={styles.addressInput}
                   multiline
                   editable={false}
@@ -1020,24 +985,20 @@ const CreateAccount = () => {
                 {t('Choose your map location')}
               </Text>
               <LocationContainer
-                address={userAddress?.address}
+                address={userInfo?.address}
                 onPressMap={() => {
-                  navigateTo(SCREENS.LocationScreen, {
-                    userAddress: userAddress,
-                  });
+                  navigateTo(SCREENS.LocationScreen);
                 }}
                 containerStyle={styles.map}
-                lat={userAddress?.lat}
-                lng={userAddress?.lng}
+                lat={userInfo?.lat}
+                lng={userInfo?.lng}
                 showAddressCard={false}
               />
             </View>
             <View>
               <TouchableOpacity
                 onPress={() => {
-                  navigateTo(SCREENS.LocationScreen, {
-                    userAddress: userAddress,
-                  });
+                  navigateTo(SCREENS.LocationScreen);
                 }}
                 style={styles.diffButton}>
                 <Text style={styles.btnTitle}>
@@ -1057,9 +1018,18 @@ const CreateAccount = () => {
                   );
                   dispatch(
                     setCompanyProfileData({
-                      lat: userAddress?.lat,
-                      lng: userAddress?.lng,
-                      address: userAddress?.address,
+                      lat: userInfo?.lat,
+                      lng: userInfo?.lng,
+                      address: userInfo?.address,
+                      location: userInfo?.address,
+                    }),
+                  );
+                  dispatch(
+                    setUserInfo({
+                      ...userInfo,
+                      lat: userInfo?.lat,
+                      lng: userInfo?.lng,
+                      address: userInfo?.address,
                     }),
                   );
                   nextStep();

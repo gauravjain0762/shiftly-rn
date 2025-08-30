@@ -192,7 +192,7 @@ const WelcomeScreen = () => {
         <View
           style={{
             width: '90%',
-            bottom: '5%',
+            bottom: '12%',
             alignItems: 'center',
           }}>
           <TouchableOpacity
@@ -204,7 +204,7 @@ const WelcomeScreen = () => {
             <Text style={styles.emailText}>{t('Continue with email')}</Text>
           </TouchableOpacity>
 
-          {/* {Platform.OS == 'ios' && (
+          {Platform.OS == 'ios' && (
             <TouchableOpacity
               onPress={() => handleAppleSignIn()}
               style={styles.whiteButton}>
@@ -218,7 +218,7 @@ const WelcomeScreen = () => {
             style={styles.whiteButton}>
             <Image source={IMAGES.g_icon} style={styles.icon} />
             <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </LinearContainer>

@@ -4,9 +4,15 @@ import {hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-const MyJobsSkeleton = () => {
+type Props = {
+  backgroundColor?: string;
+};
+
+const MyJobsSkeleton = (props: Props) => {
   return (
-    <SkeletonPlaceholder borderRadius={4}>
+    <SkeletonPlaceholder
+      backgroundColor={props.backgroundColor}
+      borderRadius={4}>
       {[1, 2, 3, 4].map((_, idx) => (
         <SkeletonPlaceholder.Item
           key={idx}

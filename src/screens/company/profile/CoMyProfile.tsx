@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Image,
   Linking,
@@ -23,6 +23,7 @@ import CustomImage from '../../../component/common/CustomImage';
 const CoMyProfile = () => {
   const {t} = useTranslation();
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log('🔥🔥🔥 ~ CoMyProfile ~ userInfo:', userInfo);
   const countryCode = userInfo?.phone_code || 'AE';
 
   return (
@@ -68,7 +69,15 @@ const CoMyProfile = () => {
           <View style={styles.infoContainer}>
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Email')}</Text>
-              <Text style={styles.labelDesc}>{userInfo?.email || 'N/A'}</Text>
+              <Text
+                style={[
+                  styles.labelDesc,
+                  {
+                    textTransform: 'lowercase',
+                  },
+                ]}>
+                {userInfo?.email || 'N/A'}
+              </Text>
             </View>
 
             <View style={styles.space}>
@@ -88,9 +97,7 @@ const CoMyProfile = () => {
 
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Location')}</Text>
-              <Text style={styles.labelDesc}>
-                {userInfo?.address || userInfo?.location || 'N/A'}
-              </Text>
+              <Text style={styles.labelDesc}>{userInfo?.address || 'N/A'}</Text>
             </View>
 
             {/* Website */}
@@ -107,7 +114,7 @@ const CoMyProfile = () => {
                     Linking.openURL(link);
                   }
                 }}>
-                {`https://${userInfo?.website || 'N/A'}`}
+                {userInfo?.website ? `${userInfo?.website}` : 'N/A'}
               </Text>
             </View>
 

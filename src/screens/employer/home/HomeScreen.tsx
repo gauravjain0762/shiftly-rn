@@ -20,6 +20,7 @@ import {
   setUserInfo,
 } from '../../../features/authSlice';
 import {useAppDispatch} from '../../../redux/hooks';
+import {colors} from '../../../theme/colors';
 
 const HomeScreen = () => {
   const dispatch = useAppDispatch();
@@ -82,7 +83,7 @@ const HomeScreen = () => {
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       {isLoading && currentPage === 1 ? (
-        <PostSkeleton />
+        <PostSkeleton backgroundColor={colors._lightBlueSkeleton} />
       ) : (
         <FlatList
           data={allPosts}

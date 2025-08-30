@@ -28,17 +28,18 @@ const CoAboutTab = ({companyProfileData}: Props) => {
               }}
               style={styles.infoValue}>
               {companyProfileData?.website
-                ? `https://${companyProfileData?.website || 'N/A'}`
+                ? `${companyProfileData?.website || 'N/A'}`
                 : 'N/A'}
             </Text>
           </View>
         </View>
-        <View style={[AppStyles.flex, {paddingLeft: wp(30)}]}>
-          <Text style={styles.infoTitle}>Type</Text>
-          <Text style={styles.infoValue}>
-            {companyProfileData?.business_type_id?.title || 'N/A'}
-          </Text>
-        </View>
+      </View>
+
+      <View style={[styles.infoSection]}>
+        <Text style={styles.infoTitle}>Type</Text>
+        <Text style={styles.infoValue}>
+          {companyProfileData?.business_type_id?.title || 'N/A'}
+        </Text>
       </View>
 
       <View style={styles.infoSection}>
@@ -76,10 +77,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   infoSection: {
-    marginTop: 14,
+    marginTop: hp(18),
   },
   infoTitle: {
-    marginBottom: hp(10),
+    marginBottom: hp(8),
     ...commonFontStyle(400, 18, colors._0B3970),
   },
   infoValue: {

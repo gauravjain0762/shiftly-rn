@@ -2,12 +2,16 @@ import React from 'react';
 import {hp, wp} from '../../theme/fonts';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-const PostSkeleton = () => {
+type Props = {
+  backgroundColor?: string;
+};
+
+const PostSkeleton = (props: Props) => {
   return (
     <SkeletonPlaceholder
       borderRadius={4}
       highlightColor="#f0f0f0"
-      backgroundColor="#e0e0e0">
+      backgroundColor={props?.backgroundColor || '#e0e0e0'}>
       {[1, 2, 3, 4].map((_, idx) => (
         <SkeletonPlaceholder.Item
           key={idx}
