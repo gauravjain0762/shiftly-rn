@@ -121,6 +121,7 @@ export const IMAGES = {
   user_on: require('./image/tab/user_on.png'),
   postFill: require('./image/postFill.png'),
   post_off: require('./image/post.png'),
+  post_1: require('./image/post_1.png'),
 
   //extra
   logo: require('./extra/logo.png'),

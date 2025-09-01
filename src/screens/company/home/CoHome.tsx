@@ -1,11 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
 import {HomeHeader, LinearContainer} from '../../../component';
 import {AppStyles} from '../../../theme/appStyles';
 import FeedCard from '../../../component/employe/FeedCard';

@@ -14,8 +14,6 @@ export const connectSocket = (id: string, type: 'user' | 'company'): void => {
     console.log('disconnect ---');
   }
 
-  console.log('type', type, id);
-
   socket = io(API.SOCKET_URL, {
     path: '/Shiftly/socket.io',
     transports: ['websocket'],
@@ -23,13 +21,17 @@ export const connectSocket = (id: string, type: 'user' | 'company'): void => {
   });
 
   socket.on('connect', () => {
-    console.log('✅ Socket connected:', socket?.id);
+    console.log('✅ Socket connected:', id);
 
     if (type === 'user') {
       socket?.emit('user-connected', id);
     } else {
       socket?.emit('company-connected', id);
     }
+  });
+
+  socket.on('chat_message', response => {
+    console.log('Received chat message:', response);
   });
 
   socket.on('disconnect', () => {
@@ -44,17 +46,10 @@ export const onChatMessage = (callback: (message: any) => void) => {
   if (!socket) {
     return;
   }
-  socket.on('chat_message', callback);
-};
-
-/**
- * Send chat message
- */
-export const sendChatMessage = (message: any) => {
-  if (!socket) {
-    return;
-  }
-  socket.emit('chat_message', message);
+  socket.on('chat_message', response => {
+    console.log('Received chat message:', response);
+    callback(response);
+  });
 };
 
 /**

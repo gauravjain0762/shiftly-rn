@@ -1,32 +1,18 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  Image,
-} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {IMAGES} from '../assets/Images';
 import FastImage from 'react-native-fast-image';
 import {colors} from '../theme/colors';
 import {commonFontStyle, hp, wp} from '../theme/fonts';
 import {SCREENS} from './screenNames';
-import {useAppSelector} from '../redux/hooks';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-import JobsScreen from '../screens/employer/jobs/JobsScreen';
-import ProfileScreen from '../screens/employer/profile/ProfileScreen';
-import HomeScreen from '../screens/employer/home/HomeScreen';
-import ActivityScreen from '../screens/employer/activity/ActivityScreen';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CoHome from '../screens/company/home/CoHome';
 import CoJob from '../screens/company/job/CoJob';
 import CoPost from '../screens/company/post/CoPost';
 import CoActivity from '../screens/company/activity/CoActivity';
-import CompanyProfile from '../screens/company/profile/CompanyProfile';
 import CoProfile from '../screens/company/profile/CoProfile';
-import CoJobDetails from '../screens/company/job/JobDetails';
 
 const Tab = createBottomTabNavigator();
 
@@ -52,7 +38,7 @@ const CustomTabBar = ({state, navigation}: any) => {
             iconName = isFocused ? IMAGES.Jobs_on : IMAGES.Jobs_off;
             break;
           case SCREENS.CoPost:
-            iconName = isFocused ? IMAGES.postFill : IMAGES.postFill;
+            iconName = isFocused ? IMAGES.postFill : IMAGES.post_1;
             break;
 
           case SCREENS.CoActivity:
@@ -174,7 +160,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   labelText: {
-    ...commonFontStyle(400, 10, '#727D8A'),
+    ...commonFontStyle(400, 13, '#727D8A'),
     marginTop: 10,
   },
 });

@@ -234,22 +234,7 @@ const authPersistConfig = {
   key: 'auth',
   storage: AsyncStorage,
   // Only persist these fields
-  whitelist: [
-    'loginModal',
-    'language',
-    'isLoading',
-    'authToken',
-    'fcmToken',
-    'userInfo',
-    'guestLogin',
-    'businessType',
-    'companyRegisterForm',
-    'companyRegistrationStep',
-    'registerSuccessModal',
-    'companyProfileData',
-    'companyServices',
-    'companyProfileAllData',
-  ],
+  whitelist: ['language', 'authToken', 'fcmToken', 'userInfo', 'guestLogin'],
 };
 
 export const persistedAuthReducer = persistReducer(
