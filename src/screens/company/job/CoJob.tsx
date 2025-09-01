@@ -175,8 +175,8 @@ const CoJob = () => {
               <View key={index} style={{marginBottom: hp(10)}}>
                 <MyJobCard
                   item={item}
-                  onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
                   onPressShare={() => setIsShareModalVisible(true)}
+                  onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
                 />
               </View>
             )}

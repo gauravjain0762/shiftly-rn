@@ -198,6 +198,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: hp(10),
-    paddingHorizontal: wp(23),
+    paddingHorizontal: wp(35),
   },
 });

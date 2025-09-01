@@ -36,6 +36,8 @@ export const mobileNumberCheck = (mobileNo: string) => {
   return reg.test(mobileNo);
 };
 
+export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // export const resetNavigation = (name: string, params?: any | undefined) => {
 //   navigationRef.dispatch(
 //     CommonActions.reset({

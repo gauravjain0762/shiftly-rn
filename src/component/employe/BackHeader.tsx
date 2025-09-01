@@ -50,7 +50,7 @@ const BackHeader: FC<props> = ({
           source={IMAGES.backArrow}
           style={[
             styles.back,
-            {tintColor: type == 'employe' ? colors.white : colors.black},
+            {tintColor: type == 'employe' ? colors.white : colors._0B3970},
           ]}
         />
       </TouchableOpacity>

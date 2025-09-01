@@ -1,12 +1,5 @@
 import React, {useState} from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {
   BackHeader,
   CustomTextInput,
@@ -39,6 +32,7 @@ import {
 import BottomModal from '../../../component/common/BottomModal';
 import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
 import ExpandableText from '../../../component/common/ExpandableText';
+import CharLength from '../../../component/common/CharLength';
 
 const CoPost = () => {
   const {t} = useTranslation();
@@ -52,8 +46,7 @@ const CoPost = () => {
     uploadedImages,
     title,
     isPostUploading,
-  } = useAppSelector(selectPostForm);
-  console.log('🔥 ~ CoPost ~ uploadedImages:', uploadedImages);
+  } = useAppSelector(state => selectPostForm(state as any));
   const {updatePostForm} = usePostFormUpdater();
 
   const nextStep = () => dispatch(setCoPostSteps(steps + 1));
@@ -210,7 +203,7 @@ const CoPost = () => {
               </>
             ) : (
               <GradientButton
-                style={[styles.btn, {}]}
+                style={[styles.btn]}
                 type="Company"
                 title={t('Upload Image')}
                 onPress={() => {
@@ -237,12 +230,18 @@ const CoPost = () => {
                 </Text>
               </View>
               <CustomTextInput
-                placeholder={t('Enter the post title')}
-                placeholderTextColor={colors._7B7878}
-                onChangeText={(e: any) => updatePostForm({title: e})}
                 value={title}
+                maxLength={50}
                 inputStyle={styles.input1}
+                placeholderTextColor={colors._7B7878}
+                placeholder={t('Enter the post title')}
+                onChangeText={(e: any) => updatePostForm({title: e})}
                 containerStyle={[styles.Inputcontainer, postInputContainer]}
+              />
+              <CharLength
+                chars={50}
+                value={title}
+                style={{paddingHorizontal: wp(30)}}
               />
             </View>
             <GradientButton
@@ -285,16 +284,22 @@ const CoPost = () => {
                 </Text>
               </View>
               <CustomTextInput
-                placeholder={t('Enter the description')}
-                placeholderTextColor={colors._7B7878}
-                onChangeText={(e: any) => updatePostForm({description: e})}
-                value={description}
-                inputStyle={[styles.input1, {maxHeight: hp(180)}]}
                 multiline
+                value={description}
+                placeholderTextColor={colors._7B7878}
+                placeholder={t('Enter the description')}
+                onChangeText={(e: any) => updatePostForm({description: e})}
+                inputStyle={[styles.input1, {maxHeight: hp(180)}]}
                 containerStyle={[
                   styles.Inputcontainer,
                   {marginTop: hp(65), marginHorizontal: wp(35)},
                 ]}
+                maxLength={200}
+              />
+              <CharLength
+                chars={200}
+                value={description}
+                style={{paddingHorizontal: wp(30)}}
               />
             </View>
             <GradientButton

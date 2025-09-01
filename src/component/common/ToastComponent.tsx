@@ -12,7 +12,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import {colors} from '../../theme/colors';
 import {
   commonFontStyle,
-  fontFamily,
   hp,
   SCREEN_WIDTH,
   wp,

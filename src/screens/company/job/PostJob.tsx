@@ -63,6 +63,7 @@ import {
 } from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import BaseText from '../../../component/common/BaseText';
+import CharLength from '../../../component/common/CharLength';
 
 const jobTypeData = [
   {label: 'Full Time', value: 'Full Time'},
@@ -383,10 +384,7 @@ const PostJob = () => {
                   placeholder={t('Enter role description')}
                   onChangeText={e => updateJobForm({describe: e})}
                 />
-                <Text
-                  style={
-                    styles.characterCount
-                  }>{`${describe?.length}/1000 Characters`}</Text>
+                <CharLength value={describe} chars={1000} />
               </View>
               <GradientButton
                 type="Company"
@@ -608,15 +606,12 @@ const PostJob = () => {
                 placeholder={t('Write requirements')}
                 inputStyle={styles.modalInputStyle}
               />
-              <Text
-                style={
-                  styles.characterCount
-                }>{`${requirementText?.length}/400 Characters`}</Text>
+              <CharLength chars={400} value={requirementText} />
               <GradientButton
                 type="Company"
                 style={styles.btn}
-                onPress={handleAddRequirements}
                 title={t('Add Requirement')}
+                onPress={handleAddRequirements}
               />
             </BottomModal>
           </>
@@ -1183,11 +1178,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  characterCount: {
-    marginTop: hp(15),
-    alignSelf: 'flex-end',
-    ...commonFontStyle(400, 16, colors._4A4A4A),
-  },
   checkbox: {
     height: wp(24),
     width: wp(24),
@@ -1304,6 +1294,7 @@ const styles = StyleSheet.create({
   modalInputContainer: {
     height: hp(100),
     padding: hp(18),
+    marginBottom: 0,
     marginTop: hp(29),
     borderWidth: wp(1.5),
     borderRadius: wp(10),

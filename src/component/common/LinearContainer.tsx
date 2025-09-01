@@ -18,9 +18,10 @@ import {colors} from '../../theme/colors';
 
 type Props = {
   children: any;
-  containerStyle?: ViewStyle[] | {};
+  containerStyle?: ViewStyle | {};
   colors?: string[] | '';
   SafeAreaProps?: SafeAreaViewProps;
+  props?: any;
 };
 
 const LinearContainer = ({
@@ -28,14 +29,18 @@ const LinearContainer = ({
   containerStyle = [],
   colors = '',
   SafeAreaProps = {edges: ['top']},
+  ...props
 }: Props) => {
   return (
     <View style={[styles.mainContainer]}>
       <LinearGradient
         style={styles.linearView}
         colors={colors || ['#043379', '#041F50']}>
-        <SafeAreaView {...SafeAreaProps} style={[AppStyles.flex]} edges={['top']} >
-          <View style={[styles.containerStyle, containerStyle]}>
+        <SafeAreaView
+          {...SafeAreaProps}
+          style={[AppStyles.flex]}
+          edges={['top']}>
+          <View style={[styles.containerStyle, containerStyle]} {...props}>
             {children}
           </View>
         </SafeAreaView>

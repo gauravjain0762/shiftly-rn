@@ -15,7 +15,12 @@ import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {AppStyles} from '../../../theme/appStyles';
-import {CustomTextInput, GradientButton} from '../../../component';
+import {
+  BackHeader,
+  CustomTextInput,
+  GradientButton,
+  LinearContainer,
+} from '../../../component';
 import CustomBtn from '../../../component/common/CustomBtn';
 import {useTranslation} from 'react-i18next';
 import {
@@ -56,14 +61,22 @@ const LoginScreen = () => {
     }
   };
   return (
-    <LinearGradient colors={['#043379', '#041F50']} style={styles.container}>
+    <LinearContainer
+      colors={['#043379', '#041F50']}
+      containerStyle={styles.container}>
       <KeyboardAwareScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[AppStyles.flexGrow, {}]}
         showsVerticalScrollIndicator={false}>
+        <BackHeader
+          title={''}
+          type="employe"
+          isRight={false}
+          containerStyle={styles.header}
+        />
         <Image source={IMAGES.logoText} style={styles.logo} />
 
-        <View style={[styles.inputWrapper, {marginBottom: hp(67)}]}>
+        <View style={[styles.inputWrapper, {marginBottom: hp(60)}]}>
           <Text style={styles.labelText}>Enter your email to login</Text>
 
           <CustomTextInput
@@ -112,13 +125,17 @@ const LoginScreen = () => {
           />
         </View>
       </KeyboardAwareScrollView>
-    </LinearGradient>
+    </LinearContainer>
   );
 };
 
 export default LoginScreen;
 
 const styles = StyleSheet.create({
+  header: {
+    paddingTop: hp(24),
+    paddingHorizontal: wp(35),
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -128,8 +145,8 @@ const styles = StyleSheet.create({
     height: hp(110),
     width: wp(110),
     resizeMode: 'contain',
-    marginBottom: hp(84),
-    marginTop: hp(100),
+    marginBottom: hp(70),
+    marginTop: hp(25),
   },
   inputWrapper: {
     marginBottom: 25,

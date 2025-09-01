@@ -32,6 +32,7 @@ import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import moment from 'moment';
 import {
+  emailRegex,
   errorToast,
   navigateTo,
   passwordRules,
@@ -54,6 +55,7 @@ import {
 import {RootState} from '../../../store';
 import CustomImage from '../../../component/common/CustomImage';
 import CountryPicker, {Country} from 'react-native-country-picker-modal';
+import CharLength from '../../../component/common/CharLength';
 
 const {width} = Dimensions.get('window');
 
@@ -380,7 +382,10 @@ const SignUp = () => {
                 onChangeText={text => updateSignupData({name: text})}
                 value={name}
                 inputStyle={styles.input}
+                containerStyle={{marginBottom: 0}}
+                maxLength={50}
               />
+              <CharLength chars={50} value={name} type={'employee'} />
             </View>
             <GradientButton
               style={styles.btn}
@@ -418,6 +423,10 @@ const SignUp = () => {
               onPress={() => {
                 if (!email?.trim()) {
                   errorToast(t('Email is required'));
+                  return;
+                }
+                if (!emailRegex.test(email)) {
+                  errorToast('Please enter a valid email address');
                   return;
                 }
                 // nextStep();

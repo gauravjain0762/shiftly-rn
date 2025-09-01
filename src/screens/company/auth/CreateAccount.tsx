@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   CustomDropdown,
   CustomTextInput,
@@ -28,6 +28,7 @@ import {AppStyles} from '../../../theme/appStyles';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {
+  emailRegex,
   errorToast,
   goBack,
   navigateTo,
@@ -65,9 +66,8 @@ import {
   useGetServicesQuery,
 } from '../../../api/dashboardApi';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import Geolocation from '@react-native-community/geolocation';
+import {useNavigation} from '@react-navigation/native';
+import CharLength from '../../../component/common/CharLength';
 
 export const companySize = [
   {label: '0 - 50', value: '0 - 50'},
@@ -111,7 +111,7 @@ const CreateAccount = () => {
     logo,
     cover_images,
     otp,
-  } = useSelector((state: RootState) => state.auth.companyProfileData || {});
+  } = useSelector((state: any) => state.auth.companyProfileData || {});
   const {data: businessTypes} = useGetBusinessTypesQuery({});
   const {data: servicesData} = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
@@ -230,19 +230,12 @@ const CreateAccount = () => {
   };
 
   const UploadPhoto = (e: any) => {
-    console.log('🔥🔥🔥 ~ UploadPhoto ~ e:', e);
-    console.log('🔥🔥🔥 ~ UploadPhoto ~ type:', type);
-
     if (type === 'cover') {
       const newImage = {
         name: e?.filename || e?.name || 'cover.jpg',
         uri: e?.sourceURL || e?.uri || e?.path,
         type: e?.mime || 'image/jpeg',
       };
-      console.log('🔥🔥🔥 ~ UploadPhoto ~ newImage:', newImage);
-      console.log('🔥🔥🔥 ~ UploadPhoto ~ current cover_images:', cover_images);
-
-      // want to upload multiple images
       dispatch(
         setCompanyProfileData({
           cover_images: [...(cover_images || []), newImage],
@@ -271,13 +264,17 @@ const CreateAccount = () => {
     );
   };
 
-  console.log(
-    '🔥 ~ handleSignup ~ companyRegisterData:',
-    companyRegisterData?.phone_code,
-  );
   const handleSignup = async () => {
     const formData = new FormData();
 
+    console.log(
+      'companyProfileData?.website>>>>>. ',
+      companyProfileData?.website,
+    );
+    console.log(
+      'companyProfileData?.company_size>>>>>. ',
+      companyProfileData?.company_size,
+    );
     formData.append('website', companyProfileData?.website || '');
     formData.append('company_size', companyProfileData?.company_size || '');
     formData.append('address', userInfo?.address || '');
@@ -326,10 +323,9 @@ const CreateAccount = () => {
         }
       });
     }
-    console.log('🔥 ~ handleSignup ~ formData:', formData);
 
     const response = await companySignUp(formData).unwrap();
-    console.log(response, response?.status, 'response----handleSignup');
+    // console.log(response, response?.status, 'response----handleSignup');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
       successToast(response?.message);
@@ -358,7 +354,6 @@ const CreateAccount = () => {
     }
 
     // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(companyRegisterData.email)) {
       errorToast('Please enter a valid email address');
       return;
@@ -373,7 +368,6 @@ const CreateAccount = () => {
       };
 
       const response = await companySignUp(data).unwrap();
-      console.log(response, 'response----', companyRegistrationStep);
 
       if (response?.status) {
         nextStep();
@@ -396,10 +390,9 @@ const CreateAccount = () => {
       deviceToken: fcmToken ?? 'ddd',
       deviceType: Platform.OS,
     };
-    console.log(data, 'data');
 
     const response = await OtpVerify(data).unwrap();
-    console.log(response, 'response----');
+    // console.log(response, 'response----');
     if (response?.status) {
       dispatch(setRegisterSuccessModal(true));
       successToast(response?.message);
@@ -408,8 +401,12 @@ const CreateAccount = () => {
     }
   };
 
-  const handleCreateProfile = async () => {
+  const handleCreateProfile = async (type?: string) => {
     const formData = new FormData();
+    console.log(
+      'companyProfileData?.website>>>>>. ',
+      companyProfileData?.website,
+    );
 
     // Add regular fields
     formData.append('website', companyProfileData?.website || '');
@@ -423,7 +420,10 @@ const CreateAccount = () => {
     formData.append('services', companyProfileData?.services?.join(',') || '');
     formData.append('company_name', companyRegisterData?.company_name || '');
 
-    console.log('🔥 ~ handleCreateProfile ~ formData:', JSON.stringify(formData));
+    // console.log(
+    //   '🔥 ~ handleCreateProfile ~ formData:',
+    //   JSON.stringify(formData),
+    // );
     // Add logo if exists
     if (companyProfileData?.logo?.uri) {
       formData.append('logo', {
@@ -451,17 +451,20 @@ const CreateAccount = () => {
             name: fileName,
           };
 
-          console.log('📸 Appending imageData:', imageData);
           formData.append('cover_images', imageData);
         }
       });
     }
 
     const response = await companyProfile(formData).unwrap();
-    console.log(response, response?.status, 'response----handleCreateProfile');
+    // console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
-      resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile);
+      if (type === 'complete') {
+        resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile);
+      } else {
+        resetNavigation(SCREENS.CoTabNavigator);
+      }
       dispatch(
         setCompanyRegisterData({
           website: '',
@@ -564,15 +567,13 @@ const CreateAccount = () => {
                   inputStyle={styles.input1}
                   containerStyle={styles.Inputcontainer}
                   numberOfLines={1}
+                  maxLength={50}
                 />
-                {/* <TouchableOpacity onPress={() => setModel(!model)} hitSlop={10}>
-                  <Image
-                    source={IMAGES.info}
-                    resizeMode="contain"
-                    style={styles.info}
-                  />
-                </TouchableOpacity> */}
               </View>
+              <CharLength
+                chars={50}
+                value={companyRegisterData?.company_name}
+              />
               {model && (
                 <View style={styles.infomodel}>
                   <Text style={styles.businessName}>{t('Business Name')}</Text>
@@ -630,11 +631,13 @@ const CreateAccount = () => {
                       }),
                     )
                   }
-                  value={companyRegisterData?.name}
                   inputStyle={styles.input1}
+                  value={companyRegisterData?.name}
                   containerStyle={styles.Inputcontainer}
+                  maxLength={50}
                 />
               </View>
+              <CharLength chars={50} value={companyRegisterData?.name} />
             </View>
             <GradientButton
               style={styles.btn}
@@ -674,7 +677,7 @@ const CreateAccount = () => {
                     )
                   }
                   value={companyRegisterData?.email}
-                  inputStyle={styles.input1}
+                  inputStyle={[styles.input1, {textTransform: 'lowercase'}]}
                   containerStyle={styles.Inputcontainer}
                 />
               </View>
@@ -812,7 +815,7 @@ const CreateAccount = () => {
                 </View>
               )}
               <View style={styles.otpContainer}>
-                {otp?.map((val, idx) => (
+                {otp?.map((val: any, idx: any | undefined) => (
                   <TextInput
                     key={idx}
                     ref={(el: any) => (inputRefsOtp.current[idx] = el)}
@@ -1010,12 +1013,6 @@ const CreateAccount = () => {
                 type="Company"
                 title={t('Next')}
                 onPress={() => {
-                  console.log(
-                    'lat:',
-                    position?.latitude,
-                    'lng:',
-                    position?.longitude,
-                  );
                   dispatch(
                     setCompanyProfileData({
                       lat: userInfo?.lat,
@@ -1307,10 +1304,10 @@ const CreateAccount = () => {
                 style={styles.btn}
                 type="Company"
                 title={t('Continue')}
-                onPress={() => handleCreateProfile()}
+                onPress={() => handleCreateProfile('complete')}
               />
               <TouchableOpacity
-                onPress={() => resetNavigation(SCREENS.CoTabNavigator)}
+                onPress={() => handleCreateProfile('skip')}
                 style={styles.skipBtn}>
                 <Text style={styles.skipNow}>{t('Skip for now')}</Text>
               </TouchableOpacity>

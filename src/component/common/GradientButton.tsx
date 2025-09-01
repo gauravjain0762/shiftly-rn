@@ -2,6 +2,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {
   GestureResponderEvent,
   Pressable,
+  StyleProp,
   StyleSheet,
   Text,
   TextStyle,
@@ -17,7 +18,7 @@ import {Defs, RadialGradient, Rect, Stop, Svg} from 'react-native-svg';
 interface DiamondGradientButtonProps extends TouchableOpacityProps {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   stopColor?: string;
   cx?: string;
@@ -53,7 +54,10 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
       style={[
         styles.wrapper,
         style,
-        {borderWidth: type == 'Employee' ? 2.5 : 0, opacity: rest.disabled ? 0.6 : 1},
+        {
+          borderWidth: type == 'Employee' ? 2.5 : 0,
+          opacity: rest.disabled ? 0.6 : 1,
+        },
       ]}>
       {type == 'Employee' ? (
         <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>

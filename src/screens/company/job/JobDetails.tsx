@@ -1,5 +1,6 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -15,7 +16,7 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {colors} from '../../../theme/colors';
@@ -43,15 +44,12 @@ const CoJobDetails = () => {
   const {params} = useRoute<any>();
   const dispatch = useDispatch();
   const job_id = params?._id as any;
-  console.log('🔥🔥 ~ CoJobDetails ~ job_id:', job_id);
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  const {data, refetch} = useGetCompanyJobDetailsQuery(job_id);
+  const {data, refetch, isLoading} = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const jobDetail = data?.data;
-  console.log('🔥🔥🔥 ~ CoJobDetails ~ jobDetail:', jobDetail);
-  console.log('🔥 ~ CoJobDetails ~ jobDetail:', jobDetail?.invite_users);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,15 +71,12 @@ const CoJobDetails = () => {
   const keyValueArray = Object.entries(JobDetailsArr);
 
   const handleShortListEmployee = async (item: any) => {
-    console.log('🔥🔥🔥 ~ handleShortListEmployee ~ item:', item);
     const params = {
       applicant_id: item?._id,
       job_id: job_id,
     };
-    console.log('🔥🔥🔥 ~ handleShortListEmployee ~ params:', params);
     try {
       const res = await addShortListEmployee(params).unwrap();
-      console.log('🔥🔥🔥 ~ handleShortListEmployee ~ res:', res);
 
       if (res?.status === true) {
         successToast(res?.message);
@@ -95,221 +90,235 @@ const CoJobDetails = () => {
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
-      <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
-        <BackHeader
-          type="company"
-          isRight={false}
-          title={jobDetail?.title || 'Restaurant Manager'}
-          titleStyle={styles.title}
-          containerStyle={styles.header}
-          RightIcon={
-            <TouchableOpacity
-              onPress={() => {
-                setIsShareModalVisible(true);
-              }}
-              style={styles.iconButton}>
-              <Image
-                source={IMAGES.share}
-                resizeMode="contain"
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          }
-        />
-
-        <View style={styles.bodyContainer}>
-          <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id || '-'}`}</Text>
-
-          <View style={styles.addressContainer}>
-            <Image source={IMAGES.location} style={styles.locationIcon} />
-            <Text style={styles.location}>{jobDetail?.address}</Text>
-          </View>
-
-          <Text style={styles.description}>{jobDetail?.description}</Text>
-
-          <View style={styles.jobDetailsContainer}>
-            <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
-
-            <FlatList
-              numColumns={3}
-              scrollEnabled={false}
-              data={keyValueArray}
-              style={styles.flatlist}
-              keyExtractor={(_, index) => index.toString()}
-              contentContainerStyle={styles.flatListContent}
-              renderItem={({item, index}) => {
-                const [key, value] = item;
-
-                return (
-                  <View key={index} style={styles.detailItem}>
-                    <Text style={styles.detailKey}>{key}</Text>
-
-                    <View style={styles.valueWrapper}>
-                      {key === 'Salary' && <Image source={IMAGES.currency} />}
-                      <Text style={styles.detailValue}>{value || '-'}</Text>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          </View>
-
-          <View style={styles.bottomContainer}>
-            <View style={styles.tabContainer}>
-              {Tabs.map((item, index) => (
-                <Pressable
-                  key={index}
-                  style={styles.tabItem}
-                  onPress={() => setSelectedTabIndex(index)}>
-                  <Text style={styles.tabText}>{item}</Text>
-                  {selectedTabIndex === index && (
-                    <View style={styles.tabIndicator} />
-                  )}
-                </Pressable>
-              ))}
-            </View>
-
-            <View style={styles.divider} />
-            {selectedTabIndex === 0 ? (
-              jobDetail?.applicants?.length > 0 ? (
-                jobDetail?.applicants?.map((item: any, index: number) => {
-                  if (item === null) return null;
-                  return (
-                    <ApplicantCard
-                      key={index}
-                      item={item}
-                      handleShortListEmployee={() =>
-                        handleShortListEmployee(item)
-                      }
-                      showShortListButton={!item?.status}
-                    />
-                  );
-                })
-              ) : (
-                <View style={styles.emptyState}>
-                  <BaseText>There are no applicants</BaseText>
-                </View>
-              )
-            ) : null}
-
-            {selectedTabIndex === 1 &&
-              (jobDetail?.invited_users?.length > 0 ? (
-                jobDetail?.invited_users?.map((item: any, index: number) => {
-                  if (item === null) return null;
-                  return (
-                    <ApplicantCard
-                      key={index}
-                      item={item}
-                      showShortListButton={false}
-                    />
-                  );
-                })
-              ) : (
-                <View style={styles.emptyState}>
-                  <BaseText>There are no invited users</BaseText>
-                </View>
-              ))}
-
-            {selectedTabIndex === 2 &&
-              (jobDetail?.shortlisted?.length > 0 ? (
-                jobDetail.shortlisted.map((item: any, index: number) => {
-                  if (item === null) return null;
-                  return (
-                    <ApplicantCard
-                      key={index}
-                      item={item}
-                      showShortListButton={false}
-                    />
-                  );
-                })
-              ) : (
-                <View style={styles.emptyState}>
-                  <BaseText>No shortlisted applicants</BaseText>
-                </View>
-              ))}
-          </View>
+      {isLoading ? (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <ActivityIndicator size={'large'} />
         </View>
-      </ScrollView>
+      ) : (
+        <>
+          <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
+            <BackHeader
+              type="company"
+              isRight={false}
+              title={jobDetail?.title || 'Restaurant Manager'}
+              titleStyle={styles.title}
+              containerStyle={styles.header}
+              RightIcon={
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsShareModalVisible(true);
+                  }}
+                  style={styles.iconButton}>
+                  <Image
+                    source={IMAGES.share}
+                    resizeMode="contain"
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              }
+            />
 
-      <GradientButton
-        type="Company"
-        style={styles.button}
-        title={t('Edit Job')}
-        onPress={() => {
-          console.log('job_type>>>>>.', jobDetail?.job_type);
-          dispatch(
-            setJobFormState({
-              job_id: job_id,
-              title: jobDetail?.title,
-              job_type:
-                typeof jobDetail?.job_type === 'string'
-                  ? {
-                      label: jobDetail?.job_type,
-                      value: jobDetail?.job_type,
-                    }
-                  : jobDetail?.job_type,
-              area:
-                typeof jobDetail?.area === 'string'
-                  ? {label: jobDetail?.area, value: jobDetail?.area}
-                  : jobDetail?.area,
-              duration:
-                typeof jobDetail?.duration === 'string'
-                  ? {
-                      label: jobDetail?.duration,
-                      value: jobDetail?.duration,
-                    }
-                  : jobDetail?.duration,
-              job_sector:
-                typeof jobDetail?.job_sector === 'string'
-                  ? {
-                      label: jobDetail?.job_sector,
-                      value: jobDetail?.job_sector,
-                    }
-                  : jobDetail?.job_sector,
-              startDate:
-                typeof jobDetail?.start_date === 'string'
-                  ? {
-                      label: jobDetail?.start_date,
-                      value: jobDetail?.start_date,
-                    }
-                  : jobDetail?.start_date,
-              contract:
-                typeof jobDetail?.contract_type === 'string'
-                  ? {
-                      label: jobDetail?.contract_type,
-                      value: jobDetail?.contract_type,
-                    }
-                  : jobDetail?.contract_type,
-              salary: {
-                label: `${Number(
-                  jobDetail?.monthly_salary_from,
-                ).toLocaleString()} - ${Number(
-                  jobDetail?.monthly_salary_to,
-                ).toLocaleString()}`,
-                value: `${Number(
-                  jobDetail?.monthly_salary_from,
-                ).toLocaleString()} - ${Number(
-                  jobDetail?.monthly_salary_to,
-                ).toLocaleString()}`,
-              },
-              position: {
-                label: String(jobDetail?.no_positions),
-                value: String(jobDetail?.no_positions),
-              },
-              describe: jobDetail?.description,
-              selected: jobDetail?.facilities || [],
-              jobSkills: jobDetail?.skills?.map((s: any) => s.title) || [],
-              skillId: jobDetail?.skills?.map((s: any) => s._id) || [],
-              requirements: jobDetail?.requirements || [],
-              invite_users:
-                jobDetail?.invited_users?.map((u: any) => u?._id) || [],
-              canApply: jobDetail?.people_anywhere,
-              editMode: true,
-            }),
-          );
-          navigateTo(SCREENS.PostJob);
-        }}
-      />
+            <View style={styles.bodyContainer}>
+              <Text style={styles.jobId}>{`Job ID: ${
+                jobDetail?._id || '-'
+              }`}</Text>
+
+              <View style={styles.addressContainer}>
+                <Image source={IMAGES.location} style={styles.locationIcon} />
+                <Text style={styles.location}>{jobDetail?.address}</Text>
+              </View>
+
+              <Text style={styles.description}>{jobDetail?.description}</Text>
+
+              <View style={styles.jobDetailsContainer}>
+                <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
+
+                <FlatList
+                  numColumns={3}
+                  scrollEnabled={false}
+                  data={keyValueArray}
+                  style={styles.flatlist}
+                  keyExtractor={(_, index) => index.toString()}
+                  contentContainerStyle={styles.flatListContent}
+                  renderItem={({item, index}) => {
+                    const [key, value] = item;
+
+                    return (
+                      <View key={index} style={styles.detailItem}>
+                        <Text style={styles.detailKey}>{key}</Text>
+
+                        <View style={styles.valueWrapper}>
+                          {key === 'Salary' && (
+                            <Image source={IMAGES.currency} />
+                          )}
+                          <Text style={styles.detailValue}>{value || '-'}</Text>
+                        </View>
+                      </View>
+                    );
+                  }}
+                />
+              </View>
+
+              <View style={styles.bottomContainer}>
+                <View style={styles.tabContainer}>
+                  {Tabs.map((item, index) => (
+                    <Pressable
+                      key={index}
+                      style={styles.tabItem}
+                      onPress={() => setSelectedTabIndex(index)}>
+                      <Text style={styles.tabText}>{item}</Text>
+                      {selectedTabIndex === index && (
+                        <View style={styles.tabIndicator} />
+                      )}
+                    </Pressable>
+                  ))}
+                </View>
+
+                <View style={styles.divider} />
+                {selectedTabIndex === 0 ? (
+                  jobDetail?.applicants?.length > 0 ? (
+                    jobDetail?.applicants?.map((item: any, index: number) => {
+                      if (item === null) return null;
+                      return (
+                        <ApplicantCard
+                          key={index}
+                          item={item}
+                          handleShortListEmployee={() =>
+                            handleShortListEmployee(item)
+                          }
+                          showShortListButton={!item?.status}
+                        />
+                      );
+                    })
+                  ) : (
+                    <View style={styles.emptyState}>
+                      <BaseText>There are no applicants</BaseText>
+                    </View>
+                  )
+                ) : null}
+
+                {selectedTabIndex === 1 &&
+                  (jobDetail?.invited_users?.length > 0 ? (
+                    jobDetail?.invited_users?.map(
+                      (item: any, index: number) => {
+                        if (item === null) return null;
+                        return (
+                          <ApplicantCard
+                            key={index}
+                            item={item}
+                            showShortListButton={false}
+                          />
+                        );
+                      },
+                    )
+                  ) : (
+                    <View style={styles.emptyState}>
+                      <BaseText>There are no invited users</BaseText>
+                    </View>
+                  ))}
+
+                {selectedTabIndex === 2 &&
+                  (jobDetail?.shortlisted?.length > 0 ? (
+                    jobDetail.shortlisted.map((item: any, index: number) => {
+                      if (item === null) return null;
+                      return (
+                        <ApplicantCard
+                          key={index}
+                          item={item}
+                          showShortListButton={false}
+                        />
+                      );
+                    })
+                  ) : (
+                    <View style={styles.emptyState}>
+                      <BaseText>No shortlisted applicants</BaseText>
+                    </View>
+                  ))}
+              </View>
+            </View>
+          </ScrollView>
+
+          <GradientButton
+            type="Company"
+            style={styles.button}
+            title={t('Edit Job')}
+            onPress={() => {
+              console.log('job_type>>>>>.', jobDetail?.job_type);
+              dispatch(
+                setJobFormState({
+                  job_id: job_id,
+                  title: jobDetail?.title,
+                  job_type:
+                    typeof jobDetail?.job_type === 'string'
+                      ? {
+                          label: jobDetail?.job_type,
+                          value: jobDetail?.job_type,
+                        }
+                      : jobDetail?.job_type,
+                  area:
+                    typeof jobDetail?.area === 'string'
+                      ? {label: jobDetail?.area, value: jobDetail?.area}
+                      : jobDetail?.area,
+                  duration:
+                    typeof jobDetail?.duration === 'string'
+                      ? {
+                          label: jobDetail?.duration,
+                          value: jobDetail?.duration,
+                        }
+                      : jobDetail?.duration,
+                  job_sector:
+                    typeof jobDetail?.job_sector === 'string'
+                      ? {
+                          label: jobDetail?.job_sector,
+                          value: jobDetail?.job_sector,
+                        }
+                      : jobDetail?.job_sector,
+                  startDate:
+                    typeof jobDetail?.start_date === 'string'
+                      ? {
+                          label: jobDetail?.start_date,
+                          value: jobDetail?.start_date,
+                        }
+                      : jobDetail?.start_date,
+                  contract:
+                    typeof jobDetail?.contract_type === 'string'
+                      ? {
+                          label: jobDetail?.contract_type,
+                          value: jobDetail?.contract_type,
+                        }
+                      : jobDetail?.contract_type,
+                  salary: {
+                    label: `${Number(
+                      jobDetail?.monthly_salary_from,
+                    ).toLocaleString()} - ${Number(
+                      jobDetail?.monthly_salary_to,
+                    ).toLocaleString()}`,
+                    value: `${Number(
+                      jobDetail?.monthly_salary_from,
+                    ).toLocaleString()} - ${Number(
+                      jobDetail?.monthly_salary_to,
+                    ).toLocaleString()}`,
+                  },
+                  position: {
+                    label: String(jobDetail?.no_positions),
+                    value: String(jobDetail?.no_positions),
+                  },
+                  describe: jobDetail?.description,
+                  selected: jobDetail?.facilities || [],
+                  jobSkills: jobDetail?.skills?.map((s: any) => s.title) || [],
+                  skillId: jobDetail?.skills?.map((s: any) => s._id) || [],
+                  requirements: jobDetail?.requirements || [],
+                  invite_users:
+                    jobDetail?.invited_users?.map((u: any) => u?._id) || [],
+                  canApply: jobDetail?.people_anywhere,
+                  editMode: true,
+                }),
+              );
+              navigateTo(SCREENS.PostJob);
+            }}
+          />
+        </>
+      )}
 
       <ShareModal
         visible={isShareModalVisible}

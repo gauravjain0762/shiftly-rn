@@ -6,24 +6,21 @@ import {
   Image,
   TouchableOpacity,
   StatusBar,
-  SafeAreaView,
   ScrollView,
   Platform,
 } from 'react-native';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
-import LinearGradient from 'react-native-linear-gradient';
 import {useTranslation} from 'react-i18next';
 import {
   errorToast,
   navigateTo,
   resetNavigation,
-  successToast,
 } from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
 import Onboarding from '../../component/common/Onboarding';
-import {LinearContainer} from '../../component';
+import {BackHeader, LinearContainer} from '../../component';
 import useRole from '../../hooks/useRole';
 import {
   GoogleSignin,
@@ -35,8 +32,6 @@ import {
   useEmployeeAppleSignInMutation,
   useEmployeeGoogleSignInMutation,
 } from '../../api/authApi';
-import {navigationRef} from '../../navigation/RootContainer';
-import {CommonActions} from '@react-navigation/native';
 import {appleAuth} from '@invertase/react-native-apple-authentication';
 import {jwtDecode} from 'jwt-decode';
 import auth from '@react-native-firebase/auth';
@@ -62,7 +57,7 @@ const AppOnboardingData = [
 ];
 
 const WelcomeScreen = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const {role} = useRole();
   const [loading, setLoading] = useState<boolean>(false);
   const [companyGoogleSignIn] = useCompanyGoogleSignInMutation({});
@@ -157,11 +152,10 @@ const WelcomeScreen = () => {
           device_type: Platform.OS,
         };
 
-        let response;
         if (role === 'company') {
-          response = await companyAppleSignIn(data).unwrap();
+          await companyAppleSignIn(data).unwrap();
         } else {
-          response = await employeeAppleSignIn(data).unwrap();
+          await employeeAppleSignIn(data).unwrap();
         }
       }
     } catch (error: any) {
@@ -174,54 +168,60 @@ const WelcomeScreen = () => {
   };
 
   return (
-    <LinearContainer
-      containerStyle={styles.gradient}
-      colors={['#0D468C', '#041326']}>
+    <>
       <StatusBar barStyle="light-content" backgroundColor="#00204A" />
-      {/* <View> */}
-      <ScrollView
-        style={{flex: 1}}
-        bounces={false}
-        contentContainerStyle={{flexGrow: 1, alignItems: 'center'}}
-        showsVerticalScrollIndicator={false}>
-        <Onboarding
-          data={AppOnboardingData}
-          // onComplete={}
+      <LinearContainer
+        containerStyle={styles.gradient}
+        colors={['#0D468C', '#041326']}>
+        <BackHeader
+          title={t('')}
+          type="employe"
+          isRight={false}
+          containerStyle={styles.backHeaderContainer}
         />
 
-        <View
-          style={{
-            width: '90%',
-            bottom: '12%',
-            alignItems: 'center',
-          }}>
-          <TouchableOpacity
-            style={styles.emailButton}
-            onPress={() => {
-              onLogin();
-            }}>
-            <Image source={IMAGES.e_icon} style={styles.icon} />
-            <Text style={styles.emailText}>{t('Continue with email')}</Text>
-          </TouchableOpacity>
+        <ScrollView
+          style={styles.scrollView}
+          bounces={false}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <Onboarding data={AppOnboardingData} role={role ?? undefined} />
 
-          {Platform.OS == 'ios' && (
+          <View style={[styles.buttonWrapper, {bottom: role === 'company' ? '15%' : '5%' }]}>
             <TouchableOpacity
-              onPress={() => handleAppleSignIn()}
-              style={styles.whiteButton}>
-              <Image source={IMAGES.a_icon} style={styles.icon} />
-              <Text style={styles.whiteText}>{t('Continue with Apple')}</Text>
+              style={styles.emailButton}
+              onPress={() => {
+                onLogin();
+              }}>
+              <Image source={IMAGES.e_icon} style={styles.icon} />
+              <Text style={styles.emailText}>{t('Continue with email')}</Text>
             </TouchableOpacity>
-          )}
 
-          <TouchableOpacity
-            onPress={() => handleGoogleSignIn()}
-            style={styles.whiteButton}>
-            <Image source={IMAGES.g_icon} style={styles.icon} />
-            <Text style={styles.whiteText}>{t('Continue with Google')}</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </LinearContainer>
+            {role === 'employee' && Platform.OS == 'ios' && (
+              <>
+                <TouchableOpacity
+                  onPress={() => handleAppleSignIn()}
+                  style={styles.whiteButton}>
+                  <Image source={IMAGES.a_icon} style={styles.icon} />
+                  <Text style={styles.whiteText}>
+                    {t('Continue with Apple')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleGoogleSignIn()}
+                  style={styles.whiteButton}>
+                  <Image source={IMAGES.g_icon} style={styles.icon} />
+                  <Text style={styles.whiteText}>
+                    {t('Continue with Google')}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </ScrollView>
+      </LinearContainer>
+    </>
   );
 };
 
@@ -230,6 +230,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  backHeaderContainer: {
+    paddingTop: hp(24),
+    alignSelf: 'flex-start',
+    paddingHorizontal: wp(35),
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+  },
+  buttonWrapper: {
+    width: '90%',
+    alignItems: 'center',
   },
   logo: {
     height: 60,

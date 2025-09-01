@@ -43,6 +43,7 @@ import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
 import {Flag} from 'react-native-country-picker-modal';
 import CustomImage from '../../../component/common/CustomImage';
 import {companySize} from './CreateAccount';
+import CharLength from '../../../component/common/CharLength';
 
 const CoEditMyProfile = () => {
   const {t} = useTranslation();
@@ -68,6 +69,7 @@ const CoEditMyProfile = () => {
   const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
   const [imgType, setImageType] = useState<'logo' | 'cover'>('logo');
   const [imageModal, setImageModal] = useState(false);
+  const [removedCoverImages, setRemovedCoverImages] = useState<string[]>([]);
 
   const hasChanges = useMemo(() => {
     if (!userInfo) return false;
@@ -159,12 +161,19 @@ const CoEditMyProfile = () => {
         formData.append('about', about);
       }
 
+      const remove_cover_images = removedCoverImages;
+      console.log(
+        '🔥 ~ handleUpdateProfile ~ remove_cover_images:',
+        remove_cover_images,
+      );
+
       formData.append('address', userInfo?.address);
       formData.append('lat', userInfo?.lat?.toString() || '');
       formData.append('lng', userInfo?.lng?.toString() || '');
       formData.append('website', website);
       formData.append('company_size', coSize);
       formData.append('business_type_id', businessType);
+      formData.append('remove_cover_images', remove_cover_images);
 
       const res = await updateCompanyProfile(formData).unwrap();
       const resData = res?.data?.company;
@@ -249,14 +258,15 @@ const CoEditMyProfile = () => {
               {coverImages?.map((img, index) => (
                 <View key={index} style={styles.coverImageWrapper}>
                   <CustomImage
-                    source={{uri: img?.uri || img}}
-                    containerStyle={styles.coverImage}
                     resizeMode="cover"
+                    source={{uri: img || img?.uri}}
+                    containerStyle={styles.coverImage}
                     imageStyle={{height: '100%', width: '100%'}}
                   />
                   <TouchableOpacity
                     style={styles.removeCoverBtn}
                     onPress={() => {
+                      setRemovedCoverImages((prev: any) => [...prev, img]);
                       const updatedCovers = coverImages.filter(
                         (_, i) => i !== index,
                       );
@@ -285,11 +295,13 @@ const CoEditMyProfile = () => {
             <TextInput
               multiline
               value={about}
+              maxLength={500}
               onChangeText={setAbout}
               style={styles.inputAbout}
               placeholder={t('About Company')}
               placeholderTextColor={colors._7B7878}
             />
+            <CharLength value={about} chars={500} />
           </View>
 
           {/* Fields */}
@@ -349,8 +361,9 @@ const CoEditMyProfile = () => {
                 labelField="label"
                 valueField="value"
                 placeholder={'Please select company size'}
-                value={userInfo?.company_size}
+                value={coSize}
                 onChange={(e: any) => {
+                  console.log('🔥🔥 ~ e:', e);
                   setCoSize(e?.value);
                 }}
                 dropdownStyle={styles.dropdown}
@@ -449,7 +462,7 @@ const styles = StyleSheet.create({
     right: '60%',
   },
   inputAbout: {
-    marginVertical: hp(12),
+    marginTop: hp(12),
     ...commonFontStyle(400, 18, colors._181818),
     borderWidth: 1,
     borderColor: colors._C9C9C9,

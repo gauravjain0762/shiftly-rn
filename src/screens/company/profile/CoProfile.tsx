@@ -174,7 +174,7 @@ const CoProfile = () => {
       if (res?.status) {
         successToast(res?.message);
         clearAsync();
-        resetNavigation(SCREEN_NAMES.WelcomeScreen);
+        resetNavigation(SCREEN_NAMES.SelectRollScreen);
         dispatch(logouts());
         resetStore();
       }

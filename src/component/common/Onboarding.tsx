@@ -1,14 +1,12 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef} from 'react';
 import {
   StyleSheet,
   FlatList,
   View,
   Text,
   Dimensions,
-  TouchableOpacity,
   Image,
   ImageBackground,
-  ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -19,9 +17,8 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import ScrollingPaginationDots from './ScrollingPaginationDots';
 
-const {width, height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-// Define the structure of a single onboarding item
 export type OnboardingDataItem = {
   id: string;
   title: string;
@@ -29,41 +26,19 @@ export type OnboardingDataItem = {
   lottieAnim?: string;
 };
 
-// Define the props for the reusable component
 type OnboardingProps = {
-  data?: OnboardingDataItem[];
   onComplete?: () => void;
+  data?: OnboardingDataItem[];
+  role?: 'company' | 'employee';
 };
 
-const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
+const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
   const flatListRef = useRef<FlatList<OnboardingDataItem>>(null);
   const scrollX = useSharedValue(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Update current index based on viewable items
-  const viewableItemsChanged = useRef(
-    ({viewableItems}: {viewableItems: Array<{index: number | null}>}) => {
-      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-        setCurrentIndex(viewableItems[0].index);
-      }
-    },
-  ).current;
-
-  const viewConfig = useRef({viewAreaCoveragePercentThreshold: 50}).current;
-
-  // Reanimated scroll handler
   const scrollHandler = useAnimatedScrollHandler(event => {
     scrollX.value = event.contentOffset.x;
   });
-
-  // Handle "Next" or "Get Started" button press
-  const onNextPress = () => {
-    if (currentIndex < data.length - 1) {
-      flatListRef.current?.scrollToIndex({index: currentIndex + 1});
-    } else {
-      onComplete();
-    }
-  };
 
   const renderItem = ({item}: {item: OnboardingDataItem}) => {
     return (
@@ -77,15 +52,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
           source={IMAGES.login_bg}
           style={styles.illustration}
           resizeMode="contain">
-          <View
-            style={{
-              gap: '30%',
-              left: '22%',
-              bottom: '10%',
-              flexDirection: 'row',
-              alignItems: 'center',
-              position: 'absolute',
-            }}>
+          <View style={styles.innerImages}>
             <Image source={IMAGES.login_bg1} />
             <Image source={IMAGES.login_bg2} />
           </View>
@@ -112,15 +79,16 @@ const Onboarding: React.FC<OnboardingProps> = ({data, onComplete}) => {
         bounces={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        onViewableItemsChanged={viewableItemsChanged}
-        viewabilityConfig={viewConfig}
       />
 
-      {/* Pagination Dots */}
-      <View style={styles.paginationContainer}>
+      <View
+        style={[
+          styles.paginationContainer,
+          {bottom: role === 'company' ? '12%' : '6%'},
+        ]}>
         <ScrollingPaginationDots
           scrollX={scrollX}
-          count={data.length}
+          count={data?.length}
           slideWidth={width}
           dotColor={'red'}
           inactiveDotColor={colors._DADADA}
@@ -153,7 +121,6 @@ const styles = StyleSheet.create({
   },
   paginationContainer: {
     flex: 1,
-    bottom: '10%',
     width: '100%',
     alignSelf: 'center',
     // flexDirection: 'row',
@@ -186,6 +153,14 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(200),
   },
+  innerImages: {
+    gap: '30%',
+    left: '22%',
+    bottom: '10%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'absolute',
+  },
   title: {
     marginTop: hp(20),
     ...commonFontStyle(500, 14, colors.white),
@@ -197,7 +172,6 @@ const styles = StyleSheet.create({
     marginBottom: hp(10),
     ...commonFontStyle(600, 17, colors._DADADA),
   },
-
   dots: {
     flexDirection: 'row',
     marginVertical: hp(34),

@@ -46,6 +46,8 @@ const JobDetail = () => {
   const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
   const curr_jobdetails = jobDetail?.data?.job;
   const resumeList = jobDetail?.data?.resumes;
+  const job_facilities = jobDetail?.data?.job?.facilities;
+  console.log('🔥🔥 ~ JobDetail ~ job_facilities:', job_facilities);
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
@@ -152,14 +154,13 @@ const JobDetail = () => {
         {/* Offer */}
         <Text style={styles.sectionTitle}>What we offer</Text>
         <View style={styles.bulletList}>
-          {data?.facilities?.map((item: any, index: number) => {
-            if (item?.length) {
-              return (
-                <View key={index}>
-                  <BaseText style={styles.description}>{`• ${item}`}</BaseText>
-                </View>
-              );
-            }
+          {job_facilities?.map((item: any, index: number) => {
+            return (
+              <View key={index}>
+                <BaseText
+                  style={styles.description}>{`• ${item?.title}`}</BaseText>
+              </View>
+            );
           })}
         </View>
 

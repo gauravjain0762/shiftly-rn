@@ -88,7 +88,7 @@ return (
 });
 
 type ScrollingPaginationDotsProps = {
-count: number;
+count: any | number;
 scrollX: SharedValue<number>;
 dotColor: string; // Color for the active dot (at full opacity)
 inactiveDotColor?: string; // Base color for dots; if not provided, dotColor is used
