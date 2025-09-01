@@ -24,7 +24,7 @@ import {
 import moment from 'moment';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {errorToast, successToast} from '../../../utils/commonFunction';
+import {errorToast} from '../../../utils/commonFunction';
 
 const Chat = () => {
   const {params} = useRoute<any>();
@@ -80,7 +80,7 @@ const Chat = () => {
             </View>
             <View>
               <Text style={styles.senderName}>
-                {recipientDetails?.user_id?.name || 'Test User'}
+                {recipientDetails?.company_id?.company_name}
               </Text>
               <Text style={styles.timeText}>
                 {moment(item?.time).format('hh:mm A')}
@@ -141,7 +141,7 @@ const Chat = () => {
             </TouchableOpacity>
             <View style={{flex: 1}}>
               <Text style={styles.company}>
-                {recipientDetails?.company_id?.company_name || 'Test User'}
+                {recipientDetails?.company_id?.company_name}
               </Text>
               {/* <Text style={styles.hrText}>Bilal Izhar HR Admin</Text> */}
             </View>

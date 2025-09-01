@@ -18,18 +18,20 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import {useRoute} from '@react-navigation/native';
-import {navigationRef} from '../../../navigation/RootContainer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
-import {errorToast, resetNavigation, successToast} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  resetNavigation,
+  successToast,
+} from '../../../utils/commonFunction';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import { SCREENS } from '../../../navigation/screenNames';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const ApplyJob = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const [imageModal, setImageModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<any>([]);
-  console.log('🔥🔥🔥 ~ ApplyJob ~ selectedDoc:', selectedDoc);
   const {params} = useRoute<any>();
   const data = params?.data as any;
   const resumeList = params?.resumeList as any;
@@ -39,19 +41,26 @@ const ApplyJob = () => {
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
 
   const handleApplyJob = async () => {
-    if (!selectedDoc?.length) {
+    if (!selectedDoc) {
       errorToast('Please select or upload a resume');
       return;
     }
 
-    const applyJobParams = {
-      job_id: data?._id,
-      resume_id: selectedDoc,
-    };
-    console.log("🔥🔥🔥 ~ handleApplyJob ~ applyJobParams:", applyJobParams)
+    const formData = new FormData();
+    formData.append('job_id', data?._id);
+
+    if (selectedDoc?._id) {
+      formData.append('resume_id', selectedDoc?._id);
+    } else {
+      formData.append('resume', {
+        uri: selectedDoc.file,
+        type: selectedDoc.type || 'image/jpeg',
+        name: selectedDoc.file_name || 'logo.jpg',
+      } as any);
+    }
 
     try {
-      const res = await applyJob(applyJobParams).unwrap();
+      const res = await applyJob(formData).unwrap();
 
       if (res?.status) {
         successToast(res?.message);
@@ -59,8 +68,11 @@ const ApplyJob = () => {
       } else {
         errorToast(res?.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error applying job:', error);
+      errorToast(
+        error?.message || error?.data?.message || 'Something went wrong',
+      );
     }
   };
 
@@ -112,14 +124,14 @@ const ApplyJob = () => {
                   key={index}
                   style={styles.docRow}
                   onPress={() => {
-                    if (selectedDoc === doc._id) {
+                    if (selectedDoc?.file_name === doc?.file_name) {
                       setSelectedDoc(null);
                     } else {
-                      setSelectedDoc(doc._id);
+                      setSelectedDoc(doc);
                     }
                   }}>
                   <View style={styles.radioCircle}>
-                    {selectedDoc === doc._id && (
+                    {selectedDoc?.file_name === doc.file_name && (
                       <View style={styles.check}>
                         <Image source={IMAGES.check} style={styles.checked} />
                       </View>
@@ -164,7 +176,7 @@ const ApplyJob = () => {
         visible={visible}
         onClose={() => setVisible(!visible)}
         onJobList={() => {
-          resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen)
+          resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
           setVisible(false);
         }}
       />
@@ -173,16 +185,17 @@ const ApplyJob = () => {
         actionSheet={imageModal}
         setActionSheet={setImageModal}
         onUpdate={(image: any) => {
+          // console.log('🔥 ~ image:', image);
           setImageModal(false);
 
           const newResume = {
-            _id: Date.now().toString(),
-            file_name: image.filename || 'Uploaded CV',
-            file: image.path,
-            isLocal: true,
+            file_name: image?.name || image?.filename || 'Uploaded CV',
+            file: image?.path || image?.uri,
+            type: image?.type,
           };
-          setResumes([newResume]);
-          setSelectedDoc(newResume._id);
+
+          setResumes(prev => [...prev, newResume]);
+          setSelectedDoc(newResume);
         }}
         allowDocument={true}
       />

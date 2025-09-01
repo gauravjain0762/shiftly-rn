@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import DocumentPicker from '@react-native-documents/picker';
+import DocumentPicker from 'react-native-document-picker';
 import {colors} from '../../theme/colors';
 import {hp, wp} from '../../theme/fonts';
 
@@ -26,29 +26,6 @@ const ImagePickerModal = ({
 
   const openCamera = async () => {
     try {
-      // const res = await ImageCropPicker.openCamera({
-      //   mediaType: 'photo',
-      //   cropping: true,
-      // });
-      //  if (Platform.OS == 'android') {
-      //   image.sourceURL = image.path;
-      // } else {
-      //   if (image.sourceURL == null) {
-      //     image.sourceURL = image.path;
-      //   }
-      // }
-      // let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
-
-      // // const temp = {
-      // //   ...res,
-      // //   uri: res.path,
-      // //   name: `image_${Date.now()}.jpg`,
-      // //   type: res.mime || 'image/jpeg',
-      // // };
-      // setImage(temp);
-      // closeActionSheet();
-      // onUpdate(temp);
-
       ImageCropPicker.openCamera({
         mediaType: 'photo',
         cropping: true,
@@ -94,6 +71,7 @@ const ImagePickerModal = ({
   };
 
   const openDocument = async () => {
+    console.log('opening document>>>>>>');
     try {
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
@@ -114,6 +92,7 @@ const ImagePickerModal = ({
       });
 
       const file = res[0];
+      console.log("🔥 ~ openDocument ~ file:", file)
       const temp = {
         uri: file.uri,
         name: file.name,

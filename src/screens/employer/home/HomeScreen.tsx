@@ -21,6 +21,7 @@ import {
 } from '../../../features/authSlice';
 import {useAppDispatch} from '../../../redux/hooks';
 import {colors} from '../../../theme/colors';
+import {connectSocket} from '../../../hooks/socketManager';
 
 const HomeScreen = () => {
   const dispatch = useAppDispatch();
@@ -38,6 +39,12 @@ const HomeScreen = () => {
   } = useGetEmployeePostsQuery({});
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
   const posts = getPost?.data?.posts;
+
+  useEffect(() => {
+    if (userInfo?._id) {
+      connectSocket(userInfo?._id, 'user');
+    }
+  }, [userInfo]);
 
   useEffect(() => {
     if (profileData) {

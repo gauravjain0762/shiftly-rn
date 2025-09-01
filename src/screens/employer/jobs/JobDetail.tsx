@@ -33,7 +33,6 @@ import {
 } from '../../../api/dashboardApi';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
-import {API} from '../../../utils/apiConstant';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 
@@ -47,7 +46,6 @@ const JobDetail = () => {
   const curr_jobdetails = jobDetail?.data?.job;
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
-  console.log('🔥🔥 ~ JobDetail ~ job_facilities:', job_facilities);
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});

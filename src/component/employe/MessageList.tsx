@@ -41,7 +41,7 @@ const MessageList: FC<Props> = ({
             styles.title,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.company_id?.company_name || 'Test Chat'}
+          {item?.company_id?.company_name || 'Unknown'}
         </Text>
         <Text
           style={[
