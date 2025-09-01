@@ -28,6 +28,7 @@ import {
 } from '../../../features/authSlice';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
+import {connectSocket} from '../../../hooks/socketManager';
 
 const CoHome = () => {
   const {t} = useTranslation();
@@ -46,7 +47,14 @@ const CoHome = () => {
       dispatch(setCompanyProfileData(userdata));
       dispatch(setUserInfo(userdata));
     }
-  }, [userdata]);
+  }, [dispatch, userdata]);
+
+  useEffect(() => {
+    // Example: connect as a user
+    if (userInfo?._id) {
+      connectSocket(userInfo?._id, 'company');
+    }
+  }, [userInfo]);
 
   const {
     data: getPost,
@@ -55,10 +63,10 @@ const CoHome = () => {
   } = useGetCompanyPostsQuery({page: currentPage});
 
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
-  const posts = getPost?.data?.posts ?? [];
 
   useEffect(() => {
     if (!getPost) return;
+    const posts = (getPost?.data?.posts as any[]) ?? [];
 
     if (currentPage === 1) {
       setAllPosts(posts);
@@ -66,7 +74,7 @@ const CoHome = () => {
       setAllPosts(prev => [...prev, ...posts]);
     }
     setIsLoadingMore(false);
-  }, [getPost, posts, currentPage]);
+  }, [getPost, currentPage]);
 
   const handleLoadMore = () => {
     if (!isFetching && !isLoadingMore && currentPage < totalPages) {

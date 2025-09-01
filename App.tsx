@@ -1,21 +1,19 @@
-import { StyleSheet, Text, View, SafeAreaView, Animated, Easing } from 'react-native';
-import React, { useRef } from 'react';
-import { Provider } from 'react-redux';
+/* eslint-disable react/no-unstable-nested-components */
+import {View, Animated, Easing, LogBox} from 'react-native';
+import React, {useRef} from 'react';
+import {Provider} from 'react-redux';
 // import store from './src/redux';
 import Toast from 'react-native-toast-message';
-import { colors } from './src/theme/colors';
-import { hp, commonFontStyle, SCREEN_WIDTH } from './src/theme/fonts';
-import StackNavigator from './src/navigation/StackNavigator';
 import RootContainer from './src/navigation/RootContainer';
 import ToastComponent from './src/component/common/ToastComponent';
 import {PersistGate} from 'redux-persist/integration/react';
-import { persistor, store } from './src/store';
-import "react-native-get-random-values"
+import {persistor, store} from './src/store';
+import 'react-native-get-random-values';
 
 type Props = {};
+LogBox.ignoreAllLogs();
 
-const App = (props: Props) => {
-  
+const App = ({}: Props) => {
   const lineAnim = useRef(new Animated.Value(1)).current;
 
   const startLineAnimation = () => {
@@ -24,58 +22,39 @@ const App = (props: Props) => {
 
     Animated.timing(lineAnim, {
       toValue: 0,
-      duration: 3000,
+      duration: 2000,
       easing: Easing.linear,
       useNativeDriver: false, // width anim can't use native driver
     }).start();
   };
 
   const toastConfig = {
-    success: ({text1, ...rest}: any) => (
+    success: ({text1}: any) => (
       <ToastComponent type="success" text1={text1} lineAnim={lineAnim} />
     ),
-    error: ({text1, ...rest}: any) => (
+    error: ({text1}: any) => (
       <ToastComponent type="error" text1={text1} lineAnim={lineAnim} />
     ),
   };
 
   return (
     <Provider store={store}>
-     <PersistGate loading={null} persistor={persistor}>
-      <View style={{ flex: 1 }}>
-        <RootContainer />
-        <Toast
+      <PersistGate loading={null} persistor={persistor}>
+        <View style={{flex: 1}}>
+          <RootContainer />
+          <Toast
             config={toastConfig}
             position="bottom"
             topOffset={0}
-            visibilityTime={3000}
+            visibilityTime={2000}
             onShow={() => {
               startLineAnimation(); // Reset and trigger the animation
             }}
           />
-      </View>
+        </View>
       </PersistGate>
-      </Provider>
+    </Provider>
   );
 };
 
 export default App;
-
-const styles = StyleSheet.create({
-  toastStyle: {
-    backgroundColor: 'red',
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    width: SCREEN_WIDTH,
-  },
-  textStyleToastSuccess: {
-    backgroundColor: 'green',
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    width: SCREEN_WIDTH,
-  },
-  textStyleToast: {
-    ...commonFontStyle(500, 14, colors.white),
-    textAlign: 'center'
-  },
-});

@@ -1,6 +1,6 @@
 export const API = {
   BASE_URL: 'https://sky.devicebee.com/Shiftly/api/',
-
+  SOCKET_URL: 'https://sky.devicebee.com',
   //  -------   Company    --------
 
   // Auth
@@ -25,7 +25,7 @@ export const API = {
   getSuggestedEmployees: '/company/getSuggestedEmployees',
   getFacilities: '/company/getFacilities',
   getCompanyJobDetails: '/company/getJobDetails',
-  addShortlistEmployee:'/company/shortlistEmployee',
+  addShortlistEmployee: '/company/shortlistEmployee',
   editCompanyJob: '/company/editJob',
 
   // UserDetails
@@ -55,9 +55,9 @@ export const API = {
   employeeResetPassword: '/resetPassword',
   employeeChangePassword: '/changePassword',
   employeeDeleteAccount: '/deleteAccount',
-  employeeApplyJob: "/applyJob",
-  employeeGoogleSignIn: "/googleSignin",
-  employeeAppleSignIn: "/appleSignin",
+  employeeApplyJob: '/applyJob',
+  employeeGoogleSignIn: '/googleSignin',
+  employeeAppleSignIn: '/appleSignin',
 
   // Dashboard
   getEmployeePosts: '/getPosts',
@@ -66,7 +66,7 @@ export const API = {
   getEmployeeJobDetails: '/getJobDetails',
   getEmployeeSkills: '/getSkills',
   addRemoveFavourite: '/addRemoveFavourite',
-  getFavouritesJob: "/getFavourites",
+  getFavouritesJob: '/getFavourites',
 
   // UserDetails
   getProfile: '/getProfile',

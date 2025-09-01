@@ -58,7 +58,6 @@ const Splash = (props: Props) => {
         const userLanguage = await getAsyncLanguage();
 
         dispatch(setLanguages(userLanguage));
-        console.log(userData, 'userData');
 
         if (userData?.is_guest === true) {
           // Handle guest user
@@ -93,13 +92,6 @@ const Splash = (props: Props) => {
     userRole: string | any,
     isAuthenticated: boolean,
   ) => {
-    console.log(
-      'Navigating based on role:',
-      userRole,
-      'Authenticated:',
-      isAuthenticated,
-    );
-
     if (isAuthenticated) {
       // User is logged in, navigate to main app
       switch (userRole) {

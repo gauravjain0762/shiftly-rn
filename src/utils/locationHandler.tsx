@@ -85,33 +85,27 @@ const requestIOSPermission = async (
   onSuccess: (location: any) => void,
   onFail: any,
 ) => {
-  console.log('Checking iOS location permissions...');
   try {
     const newStatus = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
     const permissionWhenInUse = PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
     const permissionAlways = PERMISSIONS.IOS.LOCATION_ALWAYS;
-    console.log('newStatusnewStatus', newStatus);
     let permissionStatus = await check(permissionAlways);
     if (permissionStatus !== RESULTS.GRANTED) {
       permissionStatus = await check(permissionWhenInUse);
     }
     if (permissionStatus === RESULTS.GRANTED) {
-      console.log('Permission already granted, fetching location...');
       getCurrentLocation(onSuccess);
       return;
     } else if (GetForcefully) {
       console.log('Requesting location permission...');
       if (newStatus === RESULTS.GRANTED) {
-        console.log('Permission granted after request, fetching location...');
         getCurrentLocation(onSuccess);
       } else if (
         newStatus === RESULTS.BLOCKED ||
         newStatus === RESULTS.DENIED
       ) {
-        console.log('Permission denied, showing settings alert...');
         showPermissionDeniedAlert(onFail);
       } else {
-        console.log('Permission status unknown:', newStatus);
         onFail('Permission status unknown');
       }
     } else {

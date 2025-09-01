@@ -38,10 +38,12 @@ export const axiosBaseQuery: BaseQueryFn<
     : null;
   const authHeaders = token ? {Authorization: `Bearer ${token}`} : {};
 
-  console.log('getState()', getState());
+  // console.log('getState()', getState());
   // console.log('authHeaders', authHeaders);
-  console.log('params', params);
-  console.log(url, 'url');
+  if (params) {
+    console.log('params--', params);
+  }
+  console.log('url--', url);
 
   try {
     const result = await axiosInstance.request({

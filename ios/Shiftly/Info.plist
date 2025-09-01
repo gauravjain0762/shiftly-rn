@@ -18,12 +18,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.469951772536-8ol7o647gh9r8u0bl19a7a6ahctbkopp</string>
-	<key>GIDClientID</key>
-    <string>469951772536-8ol7o647gh9r8u0bl19a7a6ahctbkopp.apps.googleusercontent.com</string>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:469951772536:ios:809a9614f14e803886ba8d</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -39,6 +33,10 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>GIDClientID</key>
+	<string>469951772536-8ol7o647gh9r8u0bl19a7a6ahctbkopp.apps.googleusercontent.com</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:469951772536:ios:809a9614f14e803886ba8d</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -58,6 +56,8 @@
 	<string>Need microphone access for uploading audio</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to the photo library.</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.469951772536-8ol7o647gh9r8u0bl19a7a6ahctbkopp</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Black.ttf</string>
@@ -68,6 +68,11 @@
 		<string>Inter-Regular.ttf</string>
 		<string>Inter-SemiBold.ttf</string>
 		<string>Inter-Thin.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
