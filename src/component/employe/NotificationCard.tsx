@@ -1,26 +1,35 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
 import React, {FC} from 'react';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {IMAGES} from '../../assets/Images';
+import {Image, StyleSheet, View} from 'react-native';
+
 import {colors} from '../../theme/colors';
+import {IMAGES} from '../../assets/Images';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import BaseText from '../common/BaseText';
+import {formatted} from '../../utils/commonFunction';
 
 type props = {
   onPress: () => void;
   item?: any;
 };
 
-const NotificationCard: FC<props> = ({onPress = () => {}, item}) => {
+const NotificationCard: FC<props> = ({
+  onPress = () => {},
+  item,
+  index,
+}: any) => {
   return (
     <View style={styles.card}>
-      <View style={[styles.iconWrapper, item.highlight && styles.starIcon]}>
+      <View style={[styles.iconWrapper, styles.starIcon]}>
         <Image
-          source={item.highlight ? IMAGES.star : IMAGES.mark1}
-          style={{width: 15, height: 12, resizeMode: 'contain'}}
+          source={IMAGES.bell}
+          style={{width: wp(16), height: hp(16), resizeMode: 'contain'}}
         />
       </View>
-      <View style={styles.textWrapper}>
-        <Text style={styles.message}>{item.text}</Text>
-        <Text style={styles.time}>{item.time}</Text>
+      <View style={{flex: 1, gap: hp(5)}}>
+        {/* <BaseText style={styles.notificationTitle}>{index + 1}</BaseText> */}
+        <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
+        <BaseText style={styles.message}>{item?.message}</BaseText>
+        <BaseText style={styles.time}>{formatted(item?.created_at)}</BaseText>
       </View>
     </View>
   );
@@ -62,14 +71,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   starIcon: {
-    backgroundColor: '#FFC325', // yellow background for star icon
+    backgroundColor: '#FFC325',
   },
   textWrapper: {
     flex: 1,
   },
+  notificationTitle: {
+    marginBottom: hp(2),
+    ...commonFontStyle(500, 17, colors._F4E2B8),
+  },
   message: {
-    ...commonFontStyle(500, 16, '#F4E2B8'),
+    ...commonFontStyle(400, 16, colors._F4E2B8),
     marginBottom: 8,
-    lineHeight:25
+    lineHeight: 25,
   },
 });

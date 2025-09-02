@@ -18,4 +18,9 @@ export const AppStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
   },
+  centeredContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

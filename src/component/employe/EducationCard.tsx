@@ -2,41 +2,41 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  TouchableOpacity,
   Image,
+  StyleSheet,
   ImageBackground,
+  TouchableOpacity,
 } from 'react-native';
-import {commonFontStyle, wp} from '../../theme/fonts';
+
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
-import moment from 'moment';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
-const EducationCard = ({item,onRemove,onEdit}) => {
-  const startYear = item?.startDate && moment(item?.startDate).isValid()
-    ? moment(item?.startDate).format('YYYY')
-    : '';
-  const endYear = item?.endDate && moment(item?.endDate).isValid()
-    ? moment(item?.endDate).format('YYYY')
-    : '';
-
+const EducationCard = ({item, onRemove, onEdit}: any) => {
   return (
     <View style={styles.card}>
       <View style={styles.rowSpaceBetween}>
         <Text style={styles.degree}>{item?.degree}</Text>
-        <Text style={styles.duration}>{startYear}{startYear || endYear ? ' - ' : ''}{endYear}</Text>
+        <Text style={styles.duration}>
+          {item?.startDate_year}
+          {item?.startDate_year || item?.endDate_year ? ' - ' : ''}
+          {item?.endDate_year}
+        </Text>
       </View>
 
       <View style={styles.rowSpaceBetween}>
         <View>
           <Text style={styles.university}>{item?.university}</Text>
-          <Text style={styles.location}>{item?.country} {item?.province}</Text>
+          <Text style={styles.location}>
+            {item?.country} {item?.province}
+          </Text>
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity onPress={()=>{
-            onRemove()
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              onRemove();
+            }}>
             <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
               <Image
                 source={IMAGES.close_icon}
@@ -44,9 +44,10 @@ const EducationCard = ({item,onRemove,onEdit}) => {
               />
             </ImageBackground>
           </TouchableOpacity>
-          <TouchableOpacity onPress={()=>{
-            onEdit()
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              onEdit();
+            }}>
             <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
               <Image
                 source={IMAGES.edit_icon}
@@ -64,16 +65,17 @@ const EducationCard = ({item,onRemove,onEdit}) => {
 
 const styles = StyleSheet.create({
   card: {
-    // backgroundColor: '#003366', // Match your background color
-    // padding: 16,
-    borderRadius: 6,
+    padding: hp(16),
+    marginTop: hp(15),
+    borderRadius: hp(6),
     position: 'relative',
     marginHorizontal: wp(25),
+    backgroundColor: '#003366',
   },
   rowSpaceBetween: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   degree: {
     ...commonFontStyle(700, 18, colors._F4E2B8),

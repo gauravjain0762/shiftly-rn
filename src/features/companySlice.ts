@@ -101,8 +101,8 @@ const initialState: CompanyState = {
     location: '',
   },
   auth: {
-    email: __DEV__ ? 'Abc13@gmail.com' : '',
-    password: __DEV__ ? '12345678' : '',
+    email: __DEV__ ? 'company@devicebee.com' : '',
+    password: __DEV__ ? '123456' : '',
   },
 };
 

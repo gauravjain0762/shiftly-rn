@@ -1,76 +1,70 @@
+import React, {useState, useEffect} from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
-  ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
-import React from 'react';
+
 import {BackHeader, LinearContainer} from '../../../component';
 import {useTranslation} from 'react-i18next';
 import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
-
-const notifications = [
-  {
-    id: 1,
-    icon: IMAGES.notification_check,
-    title: '10 People have applied in this vacancy last 1 hour',
-    time: '10:30 PM',
-  },
-  {
-    id: 2,
-    icon: IMAGES.notification_star,
-    title: 'Congratulations, your profile has been completed post your job.',
-    time: '10:40 PM',
-  },
-  {
-    id: 3,
-    icon: IMAGES.notification_check,
-    title: 'Royal Tech Solution view your profile and shortlist for interview.',
-    time: '10:50 PM',
-  },
-  {
-    id: 4,
-    icon: IMAGES.notification_check,
-    title:
-      'your resume upload successfully for Zentech UI/Ux Designer Position.',
-    time: '10:30 PM',
-  },
-  {
-    id: 5,
-    icon: IMAGES.notification_star,
-    title: 'Congratulations, your profile has been completed post your job.',
-    time: '10:40 PM',
-  },
-  {
-    id: 6,
-    icon: IMAGES.notification_check,
-    title: 'Royal Tech Solution view your profile and shortlist for interview.',
-    time: '10:50 PM',
-  },
-  {
-    id: 7,
-    icon: IMAGES.notification_star,
-    title:
-      'your resume upload successfully for Zentech UI/Ux Designer Position.',
-    time: '10:50 PM',
-  },
-];
+import {useGetCompanyNotificationQuery} from '../../../api/dashboardApi';
+import {formatted} from '../../../utils/commonFunction';
+import {AppStyles} from '../../../theme/appStyles';
 
 const CoNotification = () => {
   const {t} = useTranslation();
 
+  const [page, setPage] = useState<number>(1);
+  const [allNotifications, setAllNotifications] = useState<any[]>([]);
+  const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
+
+  const {
+    data: notificationsData,
+    isFetching,
+    isLoading,
+  } = useGetCompanyNotificationQuery({page}, {refetchOnMountOrArgChange: true});
+
+  const notificationList = notificationsData?.data?.notifications || [];
+  const pagination = notificationsData?.data?.pagination;
+
+  useEffect(() => {
+    if (notificationsData) {
+      const newData = notificationList;
+      setAllNotifications(prev =>
+        pagination?.current_page === 1 ? newData : [...prev, ...newData],
+      );
+      setOnEndReachedCalled(false);
+    }
+  }, [notificationsData]);
+
+  const onReached = () => {
+    if (
+      pagination?.current_page < pagination?.total_pages &&
+      !onEndReachedCalled &&
+      !isFetching
+    ) {
+      const nextPage = page + 1;
+      setOnEndReachedCalled(true);
+      setPage(nextPage);
+    }
+  };
+
   const renderItem = ({item, index}: any) => (
     <View key={index} style={styles.card}>
       <View style={styles.cardContent}>
-        <Image source={item.icon} style={styles.icon} />
-        <View style={{flex: 1}}>
-          <Text style={styles.notificationTitle}>{item?.title}</Text>
-          <Text style={styles.time}>{item?.time}</Text>
+        <View style={[styles.iconWrapper]}>
+          <Image source={IMAGES.bell} style={styles.bell} />
+        </View>
+        <View style={{flex: 1, gap: hp(5)}}>
+          <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
+          <BaseText style={styles.time}>{item?.message}</BaseText>
+          <BaseText style={styles.time}>{formatted(item?.created_at)}</BaseText>
         </View>
       </View>
     </View>
@@ -80,27 +74,41 @@ const CoNotification = () => {
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <BackHeader
         type="company"
+        isRight={true}
         title={t('Notifications')}
         containerStyle={styles.header}
-        isRight={false}
-        titleStyle={styles.title}
+        RightIcon={<View style={{width: 20}} />}
       />
-      <FlatList
-        data={[]}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
-        ListEmptyComponent={() => {
-          return (
-            <View style={styles.emptyContainer}>
-              <BaseText style={styles.emptyText}>
-                {t('There is no notification available')}
-              </BaseText>
-            </View>
-          );
-        }}
-      />
+
+      {isLoading ? (
+        <View style={AppStyles.centeredContainer}>
+          <ActivityIndicator size={'large'} />
+        </View>
+      ) : (
+        <FlatList
+          data={allNotifications}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContainer}
+          ListEmptyComponent={() => {
+            return (
+              <View style={styles.emptyContainer}>
+                <BaseText style={styles.emptyText}>
+                  {t('There is no notification available')}
+                </BaseText>
+              </View>
+            );
+          }}
+          onEndReached={onReached}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={() =>
+            isFetching && pagination?.current_page < pagination?.total_pages ? (
+              <ActivityIndicator style={{marginVertical: 10}} />
+            ) : null
+          }
+        />
+      )}
     </LinearContainer>
   );
 };
@@ -140,11 +148,11 @@ const styles = StyleSheet.create({
     marginRight: wp(16),
   },
   notificationTitle: {
-    ...commonFontStyle(500, 16, colors._3B3939),
-    marginBottom: hp(8),
+    marginBottom: hp(2),
+    ...commonFontStyle(500, 17, colors._3B3939),
   },
   time: {
-    ...commonFontStyle(500, 16, colors._464646),
+    ...commonFontStyle(400, 16, colors._464646),
   },
   emptyContainer: {
     flex: 1,
@@ -154,5 +162,21 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     ...commonFontStyle(400, 18, colors.black),
+  },
+  iconWrapper: {
+    backgroundColor: '#0D468C',
+    // padding: 6,
+    borderRadius: 20,
+    marginRight: 12,
+    width: 39,
+    height: 39,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bell: {
+    width: wp(16),
+    height: hp(16),
+    resizeMode: 'contain',
+    tintColor: colors.white,
   },
 });

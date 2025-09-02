@@ -232,7 +232,6 @@ const JobsScreen = () => {
               const isFavorite = favJobList?.some(
                 (fav: any) => fav._id === item?._id,
               );
-              // console.log('🔥🔥🔥 ~ isFavorite:', isFavorite);
               return (
                 <JobCard
                   key={index}

@@ -31,7 +31,7 @@ import {setAuthData} from '../../../features/companySlice';
 
 const CoLogin = () => {
   const {t} = useTranslation();
-  // const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const [companyLogin] = useCompanyLoginMutation();
   const {auth} = useSelector((state: RootState) => state.company);
@@ -46,6 +46,7 @@ const CoLogin = () => {
       const data = {
         email: email.trim(),
         password: password.trim(),
+        device_token: fcmToken ?? 'ddd',
       };
 
       try {

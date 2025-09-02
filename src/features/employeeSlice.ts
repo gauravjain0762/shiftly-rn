@@ -6,10 +6,13 @@ export interface EducationItem {
   education_id?: string;
   degree: string;
   university: string;
-  startDate: string | null;
-  endDate: string | null;
+  startDate_month: string | null;
+  startDate_year: string | null;
+  endDate_month: string | null;
+  endDate_year: string | null;
   country: string;
   province: string;
+  isEditing?: boolean;
 }
 
 export interface ExperienceItem {
@@ -40,6 +43,7 @@ export interface EmployeeState {
   activeStep: number;
   showModal: boolean;
   educationList: EducationItem[];
+  originalEducation?: EducationItem;
   experienceList: ExperienceItem[];
   educationListEdit: EducationItem;
   experienceListEdit: ExperienceItem;
@@ -57,11 +61,14 @@ const initialState: EmployeeState = {
   educationListEdit: {
     degree: '',
     university: '',
-    startDate: '',
-    endDate: '',
+    startDate_month: '',
+    endDate_month: '',
+    endDate_year: '',
+    startDate_year: '',
     country: '',
     province: '',
     education_id: '',
+    isEditing: false,
   },
   experienceListEdit: {
     preferred: '',
@@ -87,7 +94,7 @@ const initialState: EmployeeState = {
   },
   favoriteJobs: [],
   isBannerLoaded: false,
-  isSuccessModalVisible: false
+  isSuccessModalVisible: false,
 };
 
 const employeeSlice = createSlice({

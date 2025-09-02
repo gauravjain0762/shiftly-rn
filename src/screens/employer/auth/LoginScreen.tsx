@@ -53,7 +53,7 @@ const LoginScreen = () => {
         email: authData?.email.trim().toLowerCase(),
         password: authData?.password.trim(),
         language: language,
-        // deviceToken: fcmToken ?? 'ddd',
+        deviceToken: fcmToken ?? 'ddd',
         deviceType: Platform.OS,
       };
       const response = await employeeLogin(data).unwrap();

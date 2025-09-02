@@ -1,6 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -34,8 +33,6 @@ import {
 } from '../../../utils/commonFunction';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {SCREENS} from '../../../navigation/screenNames';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
@@ -53,7 +50,6 @@ const CoEditMyProfile = () => {
   const {data: businessTypes} = useGetBusinessTypesQuery({});
   const {data: profileData} = useGetProfileQuery();
   const updatedData = profileData?.data?.company;
-  console.log('🔥 ~ CoEditMyProfile ~ updatedData:', updatedData);
 
   const [companyName, setCompanyName] = useState(userInfo?.company_name || '');
   const [about, setAbout] = useState(userInfo?.about || '');
@@ -66,6 +62,7 @@ const CoEditMyProfile = () => {
   const [coverImages, setCoverImages] = useState<any[]>(
     userInfo?.cover_images || [],
   );
+  console.log('🔥🔥🔥 ~ CoEditMyProfile ~ coverImages:', coverImages);
   const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
   const [imgType, setImageType] = useState<'logo' | 'cover'>('logo');
   const [imageModal, setImageModal] = useState(false);
@@ -126,7 +123,8 @@ const CoEditMyProfile = () => {
     if (imgType === 'logo') {
       setLogo(newImage);
     } else {
-      const updatedCovers = [...(coverImages || []), newImage];
+      const updatedCovers = [...coverImages, newImage];
+      console.log("🔥 ~ UploadPhoto ~ updatedCovers:", updatedCovers)
       setCoverImages(updatedCovers);
     }
   };
@@ -145,52 +143,35 @@ const CoEditMyProfile = () => {
 
       if (coverImages?.length > 0) {
         coverImages.forEach((img, index) => {
-          if (img.uri) {
-            const imageData = {
+          if (typeof img === 'object' && img.uri) {
+            formData.append('cover_images', {
               uri: img.uri,
               type: img.type || 'image/jpeg',
               name: img.name || `cover_${index}.jpg`,
-            };
-
-            formData.append('cover_images', imageData);
+            } as any);
           }
         });
       }
 
-      if (about) {
-        formData.append('about', about);
+      if (removedCoverImages?.length > 0) {
+        removedCoverImages.forEach(url => {
+          formData.append('remove_cover_images', url);
+        });
       }
 
-      const remove_cover_images = removedCoverImages;
-      console.log(
-        '🔥 ~ handleUpdateProfile ~ remove_cover_images:',
-        remove_cover_images,
-      );
-
-      formData.append('address', userInfo?.address);
+      if (about) formData.append('about', about);
+      formData.append('address', userInfo?.address || '');
       formData.append('lat', userInfo?.lat?.toString() || '');
       formData.append('lng', userInfo?.lng?.toString() || '');
-      formData.append('website', website);
-      formData.append('company_size', coSize);
-      formData.append('business_type_id', businessType);
-      formData.append('remove_cover_images', remove_cover_images);
+      formData.append('website', website || '');
+      formData.append('company_size', coSize || '');
+      formData.append('business_type_id', businessType?.toString() || '');
 
       const res = await updateCompanyProfile(formData).unwrap();
       const resData = res?.data?.company;
+
       if (res?.status) {
-        dispatch(
-          setCompanyProfileData({
-            logo: resData?.logo,
-            about: resData?.about,
-            address: resData?.location,
-            company_size: resData?.company_size,
-            cover_images: resData?.cover_images,
-            otp: resData?.otp,
-            lat: resData?.lat,
-            lng: resData?.lng,
-            website: resData?.website,
-          }),
-        );
+        dispatch(setCompanyProfileData(resData));
         dispatch(setUserInfo(resData));
         successToast(res?.message);
         navigationRef?.current?.goBack();
@@ -259,7 +240,7 @@ const CoEditMyProfile = () => {
                 <View key={index} style={styles.coverImageWrapper}>
                   <CustomImage
                     resizeMode="cover"
-                    source={{uri: img || img?.uri}}
+                    source={{uri: img?.uri || img}}
                     containerStyle={styles.coverImage}
                     imageStyle={{height: '100%', width: '100%'}}
                   />

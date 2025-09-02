@@ -41,6 +41,9 @@ export const API = {
   getCompanyChatMessages: '/company/getChatMessages',
   sendCompanyMessage: '/company/sendMessage',
 
+  //Notifications
+  getCompanyNotifications: '/company/getNotifications',
+
   // CompanyLogin: '',
 
   //  -------   Employee    --------
@@ -81,6 +84,9 @@ export const API = {
   employeeGetChats: '/getChats',
   employeeGetChatMessages: '/getChatMessages',
   employeeSendMessage: '/sendMessage',
+
+  //Notifications
+  getEmployeeNotifications: '/getNotifications',
 
   // google Map API
   GOOGLE_MAP_API_KEY: 'AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E',

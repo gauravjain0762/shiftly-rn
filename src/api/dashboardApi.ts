@@ -320,6 +320,22 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getCompanyNotification: builder.query<any, any>({
+      query: params => ({
+        url: API.getCompanyNotifications,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+        params: params,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getCompanyNotification Error', error);
+        }
+      },
+    }),
 
     //  -------   Employee   --------
     // getEmployeeDashboard
@@ -626,6 +642,25 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getEmployeeNotifications: builder.query<any, any>({
+      query: params => {
+        console.log('🔥🔥🔥 ~ params:', params);
+        return {
+          url: API.getEmployeeNotifications,
+          method: HTTP_METHOD.GET,
+          params: params,
+          skipLoader: true,
+        };
+      },
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getEmployeeNotifications Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -665,4 +700,6 @@ export const {
   useGetProfileQuery,
   useLazyEmployeeGetChatMessagesQuery,
   useLazyGetCompanyChatMessagesQuery,
+  useGetCompanyNotificationQuery,
+  useGetEmployeeNotificationsQuery,
 } = dashboardApi;

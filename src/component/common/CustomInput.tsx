@@ -12,14 +12,9 @@ import {
 import React, {useState} from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {Dropdown as DropdownElement} from 'react-native-element-dropdown';
-import {IMAGES} from '../../assets/Images';
-import DateTimePicker from 'react-native-modal-datetime-picker';
-import moment from 'moment';
 
 const CustomInput = ({label, value, onChange, onPress, placeholder}: any) => {
-  const [showPicker, setShowPicker] = useState(false);
-  const [open, setOpen] = useState(false);
+
 
   return (
     <View style={{flex: 1}}>

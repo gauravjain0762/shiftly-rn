@@ -1,101 +1,97 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
-import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import React, {useEffect, useState} from 'react';
+import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import NotificationCard from '../../../component/employe/NotificationCard';
 import BaseText from '../../../component/common/BaseText';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {BackHeader, LinearContainer} from '../../../component';
+import NotificationCard from '../../../component/employe/NotificationCard';
+import {useGetEmployeeNotificationsQuery} from '../../../api/dashboardApi';
 
-const notifications = [
-  {
-    id: '1',
-    icon: 'check-circle',
-    text: '10 People have applied in this vacancy last 1 hour',
-    time: '10:30 PM',
-    highlight: false,
-  },
-  {
-    id: '2',
-    icon: 'star',
-    text: 'Congratulations, your profile has been completed post your job.',
-    time: '10:40 PM',
-    highlight: true,
-  },
-  {
-    id: '3',
-    icon: 'check-circle',
-    text: 'Royal Tech Solution view your profile and shortlist for interview.',
-    time: '10:50 PM',
-    highlight: false,
-  },
-  {
-    id: '4',
-    icon: 'check-circle',
-    text: 'your resume upload successfully for Zentech UI/Ux Designer Position.',
-    time: '10:30 PM',
-    highlight: false,
-  },
-  {
-    id: '5',
-    icon: 'star',
-    text: 'Congratulations, your profile has been completed post your job.',
-    time: '10:40 PM',
-    highlight: true,
-  },
-  {
-    id: '6',
-    icon: 'check-circle',
-    text: 'Royal Tech Solution view your profile and shortlist for interview.',
-    time: '10:50 PM',
-    highlight: false,
-  },
-  {
-    id: '5',
-    icon: 'star',
-    text: 'Congratulations, your profile has been completed post your job.',
-    time: '10:40 PM',
-    highlight: true,
-  },
-  {
-    id: '6',
-    icon: 'check-circle',
-    text: 'Royal Tech Solution view your profile and shortlist for interview.',
-    time: '10:50 PM',
-    highlight: false,
-  },
-];
 const NotificationScreen = () => {
+  const [page, setPage] = useState<number>(1);
+  const [allNotifications, setAllNotifications] = useState<any[]>([]);
+  const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
+
+  const {
+    isLoading,
+    isFetching,
+    data: notificationsData,
+  } = useGetEmployeeNotificationsQuery(
+    {page},
+    {refetchOnMountOrArgChange: true},
+  );
+  const notificationList = notificationsData?.data?.notifications || [];
+  const pagination = notificationsData?.data?.pagination;
+
+  useEffect(() => {
+    if (notificationsData) {
+      const newData = notificationList;
+      setAllNotifications(prev =>
+        pagination?.current_page === 1 ? newData : [...prev, ...newData],
+      );
+      setOnEndReachedCalled(false);
+    }
+  }, [notificationsData]);
+
+  const onReached = () => {
+    if (
+      pagination?.current_page < pagination?.total_pages &&
+      !onEndReachedCalled &&
+      !isFetching
+    ) {
+      const nextPage = page + 1;
+      console.log(' ~ onReached ~ nextPage:', nextPage);
+      setOnEndReachedCalled(true);
+      setPage(nextPage);
+    }
+  };
+
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <View style={styles.topConrainer}>
           <BackHeader
-            containerStyle={styles.header}
             isRight={true}
             title={'Notifications'}
+            containerStyle={styles.header}
             RightIcon={<View style={{width: 20}} />}
           />
         </View>
-        <FlatList
-          data={[]} // notificaitons
-          style={AppStyles.flex}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={(item: any) => <NotificationCard {...item} />}
-          contentContainerStyle={styles.scrollContainer}
-          ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => {
-            return (
-              <View style={styles.emptyContainer}>
-                <BaseText style={styles.emptyText}>
-                  {'There is no notification available'}
-                </BaseText>
-              </View>
-            );
-          }}
-        />
+        {isLoading && page === 1 ? (
+          <View style={AppStyles.centeredContainer}>
+            <ActivityIndicator size={'large'} />
+          </View>
+        ) : (
+          <FlatList
+            style={AppStyles.flex}
+            data={allNotifications}
+            keyExtractor={(_, index) => index.toString()}
+            contentContainerStyle={styles.scrollContainer}
+            renderItem={(item: any) => <NotificationCard {...item} />}
+            ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
+            showsVerticalScrollIndicator={false}
+            onEndReached={onReached}
+            onEndReachedThreshold={0.5}
+            ListEmptyComponent={() => {
+              return (
+                <View style={styles.emptyContainer}>
+                  <BaseText style={styles.emptyText}>
+                    {'There is no notification available'}
+                  </BaseText>
+                </View>
+              );
+            }}
+            ListFooterComponent={
+              isFetching &&
+              pagination?.current_page < pagination?.total_pages ? (
+                <ActivityIndicator style={{marginVertical: hp(16)}} />
+              ) : null
+            }
+          />
+        )}
       </SafeAreaView>
     </LinearContainer>
   );

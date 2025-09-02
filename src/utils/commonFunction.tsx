@@ -47,6 +47,9 @@ export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //   );
 // };
 
+export const formatted = (isoTime: string) =>
+  moment(isoTime).local().format('hh:mm A');
+
 export const resetNavigation = (
   parentRouteName: string | undefined | any,
   childRouteName?: string | undefined | any,

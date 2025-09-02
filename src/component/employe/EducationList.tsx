@@ -1,30 +1,19 @@
-/* eslint-disable react-native/no-inline-styles */
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
 import GradientButton from '../common/GradientButton';
 import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
-import moment from 'moment';
 import {EducationItem} from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
-import {errorToast} from '../../utils/commonFunction';
-import CountryPicker, {Country} from 'react-native-country-picker-modal';
+import CountryPicker from 'react-native-country-picker-modal';
+import {colors} from '../../theme/colors';
 
 type Props = {
   educationListEdit: EducationItem;
   setEducationListEdit: (item: EducationItem) => void;
   addNewEducation: () => void;
   onNextPress: () => void;
-  isEditing?: boolean;
   onSaveEducation?: () => void;
 };
 
@@ -33,18 +22,29 @@ const EducationList: FC<Props> = ({
   setEducationListEdit,
   addNewEducation,
   onNextPress,
-  isEditing,
   onSaveEducation,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const isEmptyEducation = (edu: EducationItem) => {
+    return (
+      !edu.degree &&
+      !edu.university &&
+      !edu.startDate_month &&
+      !edu.startDate_year &&
+      !edu.endDate_month &&
+      !edu.endDate_year &&
+      !edu.country &&
+      !edu.province
+    );
+  };
 
   return (
-    <View style={{paddingHorizontal: 29}}>
+    <View style={styles.wrapper}>
       <CustomInput
         label="Degree"
         placeholder="Enter Degree"
         value={educationListEdit?.degree}
-        onChange={text =>
+        onChange={(text: any) =>
           setEducationListEdit({...educationListEdit, degree: text})
         }
       />
@@ -52,81 +52,48 @@ const EducationList: FC<Props> = ({
         label="University"
         placeholder="Enter University"
         value={educationListEdit?.university}
-        onChange={text =>
+        onChange={(text: any) =>
           setEducationListEdit({...educationListEdit, university: text})
         }
       />
-      {/* Start & End Date */}
-      <View style={{flexDirection: 'row', marginBottom: 20, gap: 10}}>
+      <View style={styles.dateContainer}>
         <CustomDatePicker
           label="Start Date"
-          value={
-            educationListEdit.startDate
-              ? moment(educationListEdit.startDate).format('DD-MM-YYYY')
-              : ''
-          }
-          maximumDate={new Date()}
+          dateValue={educationListEdit}
           onChange={(date: any) => {
             setEducationListEdit({
               ...educationListEdit,
-              startDate: moment(date).toISOString(),
+              startDate_month: date?.month?.toString(),
+              startDate_year: date?.year?.toString(),
             });
           }}
         />
         <CustomDatePicker
           label="End Date"
-          value={
-            educationListEdit.endDate
-              ? moment(educationListEdit.endDate).format('DD-MM-YYYY')
-              : ''
-          }
-          minimumDate={
-            educationListEdit.startDate
-              ? new Date(educationListEdit.startDate)
-              : undefined
-          }
+          dateValue={educationListEdit}
           onChange={(date: any) => {
-            if (
-              educationListEdit.startDate &&
-              moment(date).isBefore(moment(educationListEdit.startDate))
-            ) {
-              errorToast('End Date cannot be before Start Date');
-              return;
-            }
             setEducationListEdit({
               ...educationListEdit,
-              endDate: moment(date).toISOString(),
+              endDate_month: date?.month?.toString(),
+              endDate_year: date?.year?.toString(),
             });
           }}
         />
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginBottom: 20,
-          gap: 10,
-        }}>
-        {/* <CustomInput
-          label="Country"
-          placeholder="Enter Country"
-          value={educationListEdit?.country}
-          onChange={text =>
-            setEducationListEdit({...educationListEdit, country: text})
-          }
-          containerStyle={{flex: 1}}
-        /> */}
-        <View style={{width: '50%'}}>
+
+      <View style={styles.row}>
+        <View style={styles.halfWidth}>
           <Text style={styles.label}>{'Country'}</Text>
           <TouchableOpacity
             onPress={() => setIsVisible(true)}
             style={styles.country}>
-            <Text style={styles.countryText} numberOfLines={2}>
+            <Text style={educationListEdit?.country ? styles.countryText : styles.countryPlaceholder} numberOfLines={2}>
               {educationListEdit?.country || 'Select Country'}
             </Text>
+            <Image source={IMAGES.down1} style={styles.dropdownIcon} />
           </TouchableOpacity>
         </View>
-        <View style={{width: '50%'}}>
+        <View style={styles.halfWidth}>
           <CustomInput
             label="Province"
             placeholder="Enter Province"
@@ -134,39 +101,55 @@ const EducationList: FC<Props> = ({
             onChange={(text: any) =>
               setEducationListEdit({...educationListEdit, province: text})
             }
-            containerStyle={{flex: 1}}
+            containerStyle={styles.flex1}
           />
         </View>
       </View>
 
       {isVisible && (
         <CountryPicker
-          visible={isVisible ? true : false}
+          visible={isVisible}
           withFilter
-          withCountryNameButton // show only name in selected view
+          withCountryNameButton
           withCallingCode={false}
-          withFlag // hides flag in selected view
-          withEmoji={false} // hides emoji flag in selected view
+          withFlag
+          withEmoji={false}
           onSelect={(item: any) => {
-            setEducationListEdit({...educationListEdit, country: item?.name});
+            const countryName =
+              typeof item?.name === 'string'
+                ? item.name
+                : item?.name?.common || '';
+            setEducationListEdit({...educationListEdit, country: countryName});
             setIsVisible(false);
           }}
           onClose={() => {
             setIsVisible(false);
           }}
-          placeholder=""
         />
       )}
 
       <TouchableOpacity
-        onPress={isEditing ? onSaveEducation : addNewEducation}
-        style={styles.btnRow}>
+        onPress={
+          educationListEdit?.isEditing ? onSaveEducation : addNewEducation
+        }
+        disabled={
+          !educationListEdit?.isEditing && isEmptyEducation(educationListEdit)
+        }
+        style={[
+          styles.btnRow,
+          !educationListEdit?.isEditing &&
+            isEmptyEducation(educationListEdit) && {
+              opacity: 0.5,
+            },
+        ]}>
         <Image
-          source={IMAGES.close1}
-          style={{width: 22, height: 22, resizeMode: 'contain'}}
+          source={educationListEdit?.isEditing ? IMAGES.check : IMAGES.close1}
+          style={styles.closeIcon}
         />
         <Text style={styles.addEduText}>
-          {isEditing ? 'Save Education' : 'Add Another Education'}
+          {educationListEdit?.isEditing
+            ? 'Save Education'
+            : 'Add Another Education'}
         </Text>
       </TouchableOpacity>
 
@@ -178,31 +161,24 @@ const EducationList: FC<Props> = ({
 export default EducationList;
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
+    paddingHorizontal: 29,
+  },
+  dateContainer: {
+    marginBottom: 20,
+    gap: 10,
+  },
+  row: {
+    gap: wp(10),
+    flexDirection: 'row',
+    marginBottom: hp(20),
+    justifyContent: 'space-between',
+  },
+  halfWidth: {
+    width: '50%',
+  },
+  flex1: {
     flex: 1,
-  },
-  avatar: {
-    width: wp(51),
-    height: wp(51),
-    borderRadius: 51,
-  },
-  tab: {
-    backgroundColor: colors.white,
-    paddingVertical: hp(14),
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: hp(22),
-  },
-  activeTabText: {
-    ...commonFontStyle(700, 20, colors._0B3B75),
-  },
-  addEduText: {
-    ...commonFontStyle(500, 20, '#F4E2B8'),
-  },
-  topConrainer: {
-    paddingHorizontal: wp(25),
-    paddingTop: hp(18),
-    paddingBottom: hp(5),
   },
   btnRow: {
     flexDirection: 'row',
@@ -222,19 +198,41 @@ const styles = StyleSheet.create({
     marginHorizontal: wp(4),
   },
   country: {
-    paddingHorizontal: wp(16),
-    borderRadius: 20,
-    height: 59,
+    gap: wp(10),
+    height: hp(59),
     borderWidth: 1.5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: hp(20),
     borderColor: '#225797',
     justifyContent: 'center',
+    paddingHorizontal: wp(20),
   },
   countryText: {
+    flex: 1,
     ...commonFontStyle(400, 18, '#F4E2B8'),
+  },
+  countryPlaceholder: {
+    flex: 1,
+    ...commonFontStyle(400, 18, '#969595'),
+  },
+  dropdownIcon: {
+    width: 12,
+    height: 13,
+    resizeMode: 'contain',
+  },
+  closeIcon: {
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
+    tintColor: colors.coPrimary,
   },
   label: {
     marginTop: 20,
     marginBottom: 12,
     ...commonFontStyle(400, 18, '#DADADA'),
+  },
+  addEduText: {
+    ...commonFontStyle(500, 20, '#F4E2B8'),
   },
 });
