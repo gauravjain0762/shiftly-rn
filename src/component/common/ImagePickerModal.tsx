@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import DocumentPicker from 'react-native-document-picker';
+// import DocumentPicker from 'react-native-document-picker';
 import {colors} from '../../theme/colors';
 import {hp, wp} from '../../theme/fonts';
 
@@ -72,42 +72,42 @@ const ImagePickerModal = ({
 
   const openDocument = async () => {
     console.log('opening document>>>>>>');
-    try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert('Permission Denied', 'Storage permission is required');
-          return;
-        }
-      }
+    // try {
+    //   if (Platform.OS === 'android') {
+    //     const granted = await PermissionsAndroid.request(
+    //       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+    //     );
+    //     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+    //       Alert.alert('Permission Denied', 'Storage permission is required');
+    //       return;
+    //     }
+    //   }
 
-      const res = await DocumentPicker.pick({
-        type: [
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.doc,
-          DocumentPicker.types.docx,
-        ],
-      });
+    //   const res = await DocumentPicker.pick({
+    //     type: [
+    //       DocumentPicker.types.pdf,
+    //       DocumentPicker.types.doc,
+    //       DocumentPicker.types.docx,
+    //     ],
+    //   });
 
-      const file = res[0];
-      console.log("🔥 ~ openDocument ~ file:", file)
-      const temp = {
-        uri: file.uri,
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      };
-      closeActionSheet();
-      onUpdate(temp);
-    } catch (err: any) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log('Document picker cancelled');
-      } else {
-        console.log('Document picker error', err);
-      }
-    }
+    //   const file = res[0];
+    //   console.log("🔥 ~ openDocument ~ file:", file)
+    //   const temp = {
+    //     uri: file.uri,
+    //     name: file.name,
+    //     type: file.type,
+    //     size: file.size,
+    //   };
+    //   closeActionSheet();
+    //   onUpdate(temp);
+    // } catch (err: any) {
+    //   if (DocumentPicker.isCancel(err)) {
+    //     console.log('Document picker cancelled');
+    //   } else {
+    //     console.log('Document picker error', err);
+    //   }
+    // }
   };
 
   return (

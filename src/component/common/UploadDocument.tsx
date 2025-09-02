@@ -1,8 +1,8 @@
 import React from 'react';
 import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 
-import DocumentPicker from 'react-native-document-picker';
-import { IMAGES } from '../../assets/Images';
+// import DocumentPicker from 'react-native-document-picker';
+import {IMAGES} from '../../assets/Images';
 import BaseText from './BaseText';
 
 type Props = {
@@ -13,33 +13,32 @@ type Props = {
 
 const UploadDocument = ({value, onSelect = () => {}, title}: Props) => {
   const openDocPicker = async () => {
-    try {
-      const pickerResult = await DocumentPicker.pickSingle({
-        presentationStyle: 'fullScreen',
-        type: [
-          DocumentPicker.types.doc,
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.images,
-          DocumentPicker.types.zip,
-          DocumentPicker.types.docx,
-          DocumentPicker.types.ppt,
-          DocumentPicker.types.pptx,
-          DocumentPicker.types.xls,
-          DocumentPicker.types.xlsx,
-          DocumentPicker.types.plainText,
-        ],
-      });
-
-      console.log('pickerResult', pickerResult);
-      const newFile = {
-        uri: pickerResult.uri,
-        name: pickerResult.name,
-        type: pickerResult.type,
-      };
-      onSelect(newFile);
-    } catch (e) {
-      console.log('error--', e);
-    }
+    // try {
+    //   const pickerResult = await DocumentPicker.pickSingle({
+    //     presentationStyle: 'fullScreen',
+    //     type: [
+    //       DocumentPicker.types.doc,
+    //       DocumentPicker.types.pdf,
+    //       DocumentPicker.types.images,
+    //       DocumentPicker.types.zip,
+    //       DocumentPicker.types.docx,
+    //       DocumentPicker.types.ppt,
+    //       DocumentPicker.types.pptx,
+    //       DocumentPicker.types.xls,
+    //       DocumentPicker.types.xlsx,
+    //       DocumentPicker.types.plainText,
+    //     ],
+    //   });
+    //   console.log('pickerResult', pickerResult);
+    //   const newFile = {
+    //     uri: pickerResult.uri,
+    //     name: pickerResult.name,
+    //     type: pickerResult.type,
+    //   };
+    //   onSelect(newFile);
+    // } catch (e) {
+    //   console.log('error--', e);
+    // }
   };
 
   return (
