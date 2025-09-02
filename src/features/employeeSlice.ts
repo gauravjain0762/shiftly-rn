@@ -46,6 +46,7 @@ export interface EmployeeState {
   aboutEdit: AboutMe;
   favoriteJobs: any[];
   isBannerLoaded: boolean;
+  isSuccessModalVisible: boolean;
 }
 
 const initialState: EmployeeState = {
@@ -86,6 +87,7 @@ const initialState: EmployeeState = {
   },
   favoriteJobs: [],
   isBannerLoaded: false,
+  isSuccessModalVisible: false
 };
 
 const employeeSlice = createSlice({

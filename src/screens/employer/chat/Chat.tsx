@@ -2,6 +2,8 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -9,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {LinearContainer} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
@@ -39,6 +41,22 @@ const Chat = () => {
   const recipientDetails = chats?.data?.chat || {};
   const allChats = chats?.data?.messages || [];
   const [logo, setLogo] = useState<any | {}>();
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (allChats.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({
+          offset: Number.MAX_SAFE_INTEGER,
+          animated: true,
+        });
+        flatListRef.current?.scrollToOffset({
+          offset: Number.MAX_SAFE_INTEGER - 40,
+          animated: true,
+        });
+      }, 100);
+    }
+  }, [allChats]);
 
   const handleSendChat = async () => {
     if (!message?.trim()) {
@@ -148,10 +166,11 @@ const Chat = () => {
             <Image source={IMAGES.dots} style={styles.arrowIcon1} />
           </View>
         </View>
-        <KeyboardAwareScrollView
-          extraHeight={20}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{flexGrow: 1}}>
+        <KeyboardAvoidingView
+          style={{flex: 1}}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust header height if needed
+        >
           <View style={styles.card}>
             <Text style={styles.dateText}>
               You applied to this position on 18 October 2024.
@@ -163,11 +182,22 @@ const Chat = () => {
           </View>
 
           <FlatList
+            ref={flatListRef}
             data={allChats}
             renderItem={renderMessage}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.chatContent}
             keyExtractor={(_, index) => index.toString()}
+            onContentSizeChange={() => {
+              if (allChats.length > 0) {
+                flatListRef.current?.scrollToEnd({animated: true});
+              }
+            }}
+            onLayout={() => {
+              if (allChats.length > 0) {
+                flatListRef.current?.scrollToEnd({animated: true});
+              }
+            }}
           />
 
           <View style={styles.inputContainer}>
@@ -216,7 +246,8 @@ const Chat = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAwareScrollView>
+        </KeyboardAvoidingView>
+
         <ImagePickerModal
           actionSheet={isImagePickerVisible}
           setActionSheet={() => setImagePickerVisible(false)}
@@ -359,12 +390,8 @@ const styles = StyleSheet.create({
   inputContainer: {
     paddingHorizontal: wp(14),
     paddingVertical: hp(15),
-    // position: 'absolute',
-    // bottom: 0,
-    // width: '100%',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    // marginTop: 100,
   },
   input: {
     flex: 1,

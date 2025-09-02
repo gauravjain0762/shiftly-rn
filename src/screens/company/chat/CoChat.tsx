@@ -50,7 +50,14 @@ const CoChat = () => {
   useEffect(() => {
     if (allChats.length > 0) {
       setTimeout(() => {
-        flatListRef.current?.scrollToEnd({animated: true});
+        flatListRef.current?.scrollToOffset({
+          offset: Number.MAX_SAFE_INTEGER,
+          animated: true,
+        });
+        flatListRef.current?.scrollToOffset({
+          offset: Number.MAX_SAFE_INTEGER - 40,
+          animated: true,
+        });
       }, 100);
     }
   }, [allChats]);
@@ -111,7 +118,7 @@ const CoChat = () => {
             </View>
             <View>
               <Text style={styles.senderName}>
-                {recipientDetails?.user_id?.name || 'Test User'}
+                {recipientDetails?.user_id?.name}
               </Text>
               <Text style={styles.timeText}>
                 {moment(item?.time).format('hh:mm A')}
@@ -160,7 +167,7 @@ const CoChat = () => {
               </TouchableOpacity>
               <View style={{flex: 1}}>
                 <Text style={styles.company}>
-                  {recipientDetails?.company_id?.company_name || 'Test User'}
+                  {recipientDetails?.user_id?.name}
                 </Text>
               </View>
               <Image source={IMAGES.dots} style={styles.arrowIcon1} />

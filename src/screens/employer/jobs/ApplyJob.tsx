@@ -30,12 +30,12 @@ import {SCREENS} from '../../../navigation/screenNames';
 
 const ApplyJob = () => {
   const {t} = useTranslation();
-  const [imageModal, setImageModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<any>([]);
   const {params} = useRoute<any>();
   const data = params?.data as any;
+  const [imageModal, setImageModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<any>([]);
   const resumeList = params?.resumeList as any;
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState<boolean>(false);
   const {bottom} = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
@@ -63,10 +63,19 @@ const ApplyJob = () => {
       const res = await applyJob(formData).unwrap();
 
       if (res?.status) {
+        if (!visible) {
+          setTimeout(() => {
+            setVisible(true);
+          }, 200);
+        }
         successToast(res?.message);
-        setVisible(true);
       } else {
         errorToast(res?.message);
+        if (!visible) {
+          setTimeout(() => {
+            setVisible(true);
+          }, 200);
+        }
       }
     } catch (error: any) {
       console.error('Error applying job:', error);
@@ -88,20 +97,27 @@ const ApplyJob = () => {
           <View style={styles.jobCard}>
             <View style={styles.logoBg}>
               <Image
-                source={{
-                  uri: data?.logo,
-                }}
+                source={
+                  data?.company_id?.logo
+                    ? {
+                        uri: data?.company_id?.logo,
+                      }
+                    : IMAGES.dummy_cover
+                }
                 style={styles.logo}
               />
             </View>
             <View style={{flex: 1}}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
               <Text style={styles.location}>{data?.address}</Text>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text
-                  style={
-                    styles.meta
-                  }>{`${data?.area} - ${data?.job_type}`}</Text>
+              <Text style={styles.meta}>{data?.area}</Text>
+              <View
+                style={{
+                  marginTop: hp(5),
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Text style={styles.meta}>{`${data?.job_type}`}</Text>
                 <Text
                   style={
                     styles.salary
@@ -138,7 +154,10 @@ const ApplyJob = () => {
                     )}
                   </View>
                   <Text style={styles.docLabel}>{doc.file_name}</Text>
-                  <Image source={{uri: doc.file}} style={styles.docIcon} />
+                  <Image
+                    source={doc?.file ? {uri: doc?.file} : IMAGES.dummy_cover}
+                    style={styles.docIcon}
+                  />
                 </TouchableOpacity>
               );
             })}
@@ -185,7 +204,6 @@ const ApplyJob = () => {
         actionSheet={imageModal}
         setActionSheet={setImageModal}
         onUpdate={(image: any) => {
-          // console.log('🔥 ~ image:', image);
           setImageModal(false);
 
           const newResume = {
@@ -215,29 +233,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jobCard: {
-    backgroundColor: '#F4E2B8',
-    borderRadius: 16,
-    flexDirection: 'row',
     padding: wp(15),
+    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: hp(16),
     marginBottom: hp(20),
+    paddingBottom: hp(15),
     marginHorizontal: wp(25),
+    backgroundColor: '#F4E2B8',
   },
   logo: {
-    height: hp(34),
-    resizeMode: 'contain',
+    width: '100%',
+    height: '100%',
+    borderRadius: hp(100),
   },
   jobTitle: {
     ...commonFontStyle(700, 17, colors._33485B),
   },
   location: {
-    marginTop: 3,
+    marginTop: hp(4),
     ...commonFontStyle(400, 15, colors._33485B),
-    flex: 1,
+    // flex: 1,
   },
   meta: {
-    ...commonFontStyle(400, 14, '#33485B'),
     flex: 1,
+    // marginTop: hp(2),
+    ...commonFontStyle(400, 14, '#33485B'),
   },
   salary: {
     ...commonFontStyle(700, 16, '#33485B'),
@@ -296,12 +317,12 @@ const styles = StyleSheet.create({
     marginHorizontal: wp(35),
   },
   logoBg: {
-    backgroundColor: colors.white,
-    marginRight: 12,
-    borderRadius: 100,
     width: wp(73),
     height: wp(73),
+    borderRadius: 100,
+    marginRight: hp(12),
     justifyContent: 'center',
+    backgroundColor: colors.white,
   },
   uploadButton: {
     width: '90%',

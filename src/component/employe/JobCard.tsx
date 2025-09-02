@@ -28,7 +28,6 @@ const JobCard: FC<props> = ({
   heartImage,
   onPressShare = () => {},
 }) => {
-  // console.log("🔥🔥🔥 ~ JobCard ~ heartImage:", heartImage)
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <CustomImage
@@ -38,10 +37,10 @@ const JobCard: FC<props> = ({
         containerStyle={styles.jobImage}>
         <View style={styles.logo}>
           <CustomImage
-            uri={item?.company_id?.logo}
-            imageStyle={{width: '100%', height: '100%'}}
             resizeMode="stretch"
+            uri={item?.company_id?.logo}
             containerStyle={styles.companyLogo}
+            imageStyle={{width: '100%', height: '100%'}}
           />
         </View>
         <View style={styles.actions}>
@@ -161,9 +160,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    bottom: 0,
     width: wp(80),
     height: wp(80),
+    bottom: hp(10),
     borderRadius: 100,
     position: 'absolute',
     alignItems: 'center',
