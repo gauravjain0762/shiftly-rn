@@ -20,6 +20,7 @@ type Props = {
   onPressAttachment: () => void;
   image: any;
   setImage: (logo: any) => void;
+  type?: 'user' | 'company';
 };
 
 const ChatInput = ({
@@ -29,10 +30,16 @@ const ChatInput = ({
   onPressAttachment,
   image,
   setImage,
+  type,
 }: Props) => {
   console.log('image', image);
   return (
-    <View style={styles.inputContainer}>
+    <View
+      style={{
+        ...styles.inputContainer,
+        borderTopColor:
+          type === 'user' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.1)',
+      }}>
       {image?.uri ? (
         <View>
           <Pressable
@@ -62,9 +69,14 @@ const ChatInput = ({
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <TextInput
           value={message}
-          style={styles.input}
+          style={{
+            ...styles.input,
+            color: type === 'company' ? colors.black : colors.white,
+          }}
           onChangeText={setMessage}
-          placeholderTextColor="#fff"
+          placeholderTextColor={
+            type === 'company' ? colors.black : colors.white
+          }
           placeholder="Write your message..."
         />
         <TouchableOpacity onPress={onPressAttachment} style={{marginRight: 10}}>
@@ -72,12 +84,18 @@ const ChatInput = ({
             <FastImage
               source={IMAGES.pin}
               style={{width: 18, height: 18}}
+              defaultSource={IMAGES.pin}
               resizeMode="contain"
             />
           </ImageBackground>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleSendChat}>
-          <FastImage source={IMAGES.send} style={styles.sendIcon} />
+          <FastImage
+            source={IMAGES.send}
+            style={styles.sendIcon}
+            defaultSource={IMAGES.send}
+            tintColor={type === 'company' ? colors._0B3970 : colors.white}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -95,7 +113,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    ...commonFontStyle(400, 14, '#fff'),
+    ...commonFontStyle(400, 14, colors.white),
     marginRight: 4,
   },
   iconWrapper: {

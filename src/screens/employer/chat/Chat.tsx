@@ -177,6 +177,7 @@ const Chat = () => {
             message={message}
             setMessage={setMessage}
             onPressAttachment={() => setImagePickerVisible(true)}
+            type={'user'}
           />
         </KeyboardAvoidingView>
 

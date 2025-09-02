@@ -13,8 +13,6 @@ const MessageBubble: React.FC<{
   recipientName: string;
   type: 'user' | 'company';
 }> = ({item, recipientName, type}) => {
-  console.log('item', item.file);
-
   const isUser = item.sender !== 'company';
 
   return (
@@ -49,27 +47,27 @@ const MessageBubble: React.FC<{
       )}
 
       <View style={{flex: 1}}>
-        <View
-          style={[
-            styles.bubble,
-
-            isUser
-              ? styles.userBubble
-              : {
-                  ...styles.otherBubble,
-                  backgroundColor:
-                    type === 'user' ? '#234570' : colors?._0B3970,
-                },
-          ]}>
-          <Text
+        {item.message && (
+          <View
             style={[
-              styles.messageText,
-              isUser ? styles.userText : styles.otherText,
+              styles.bubble,
+              isUser
+                ? styles.userBubble
+                : {
+                    ...styles.otherBubble,
+                    backgroundColor:
+                      type === 'user' ? '#234570' : colors?._0B3970,
+                  },
             ]}>
-            {item.message}
-          </Text>
-        </View>
-
+            <Text
+              style={[
+                styles.messageText,
+                isUser ? styles.userText : styles.otherText,
+              ]}>
+              {item.message}
+            </Text>
+          </View>
+        )}
         {item.file ? (
           item.file?.includes('pdf') ||
           item.file?.includes('doc') ||
@@ -83,7 +81,7 @@ const MessageBubble: React.FC<{
             />
           ) : (
             <FastImage
-              source={{uri: item.file || '', cache: 'cacheOnly'}}
+              source={{uri: item.file}}
               style={{
                 ...styles.attachment,
                 alignSelf: isUser ? 'flex-end' : 'flex-start',

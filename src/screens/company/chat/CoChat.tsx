@@ -3,13 +3,10 @@ import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
   FlatList,
   Image,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -30,6 +27,8 @@ import {
 } from '../../../api/dashboardApi';
 import {onChatMessage} from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
+import ChatInput from '../../../component/chat/ChatInput';
+import FastImage from 'react-native-fast-image';
 // import MessageBubble from '../../../component/chat/MessageBubble';
 
 // ---------- Types ----------
@@ -75,29 +74,43 @@ const MessageBubble = React.memo(
         )}
 
         <View style={{flex: 1}}>
-          <View
-            style={[
-              styles.bubble,
-              isCompany ? styles.userBubble : styles.otherBubble,
-            ]}>
-            <Text
+          {item.message && (
+            <View
               style={[
-                styles.messageText,
-                isCompany ? styles.userText : styles.otherText,
+                styles.bubble,
+                isCompany ? styles.userBubble : styles.otherBubble,
               ]}>
-              {item.message}
-            </Text>
-          </View>
-
-          {item.file_type === 'image' && item.file && (
-            <Image
-              source={{uri: item.file}}
-              style={{
-                ...styles.attachment,
-                alignSelf: isCompany ? 'flex-end' : 'flex-start',
-              }}
-            />
+              <Text
+                style={[
+                  styles.messageText,
+                  isCompany ? styles.userText : styles.otherText,
+                ]}>
+                {item.message}
+              </Text>
+            </View>
           )}
+
+          {item.file ? (
+            item.file?.includes('pdf') ||
+            item.file?.includes('doc') ||
+            item.file?.includes('docx') ? (
+              <FastImage
+                source={IMAGES.pdfIcon}
+                style={{
+                  ...styles.attachment,
+                  alignSelf: isCompany ? 'flex-end' : 'flex-start',
+                }}
+              />
+            ) : (
+              <FastImage
+                source={{uri: item.file}}
+                style={{
+                  ...styles.attachment,
+                  alignSelf: isCompany ? 'flex-end' : 'flex-start',
+                }}
+              />
+            )
+          ) : null}
         </View>
       </View>
     );
@@ -230,7 +243,7 @@ const CoChat = () => {
                 <MessageBubble
                   item={item}
                   recipientName={chats?.data?.chat?.user_id?.name}
-                  type={'company'}
+                  // type={'company'}
                 />
               )}
               keyExtractor={(item, index) => item._id ?? index.toString()}
@@ -241,46 +254,16 @@ const CoChat = () => {
           </View>
 
           {/* INPUT */}
-          <View style={styles.inputContainer}>
-            {logo && (
-              <View>
-                <Pressable
-                  onPress={() => setLogo(null)}
-                  style={styles.closeContainer}>
-                  <Image
-                    tintColor={'red'}
-                    source={IMAGES.close_icon}
-                    style={styles.close}
-                  />
-                </Pressable>
-                <Image source={{uri: logo.uri}} style={styles.logo} />
-              </View>
-            )}
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                placeholder="Write your message..."
-                placeholderTextColor={colors.black}
-                style={styles.input}
-                value={message}
-                onChangeText={setMessage}
-              />
-              <TouchableOpacity
-                onPress={() => setImagePickerVisible(true)}
-                style={{marginRight: 10}}>
-                <ImageBackground
-                  source={IMAGES.btnBg1}
-                  style={styles.iconWrapper}>
-                  <Image
-                    source={IMAGES.pin}
-                    style={{width: 18, height: 18, resizeMode: 'contain'}}
-                  />
-                </ImageBackground>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSendChat}>
-                <Image source={IMAGES.send} style={styles.sendIcon} />
-              </TouchableOpacity>
-            </View>
-          </View>
+
+          <ChatInput
+            image={logo}
+            setImage={setLogo}
+            handleSendChat={handleSendChat}
+            message={message}
+            setMessage={setMessage}
+            onPressAttachment={() => setImagePickerVisible(true)}
+            type={'company'}
+          />
         </KeyboardAvoidingView>
 
         {/* Image picker */}
@@ -288,6 +271,7 @@ const CoChat = () => {
           actionSheet={isImagePickerVisible}
           setActionSheet={() => setImagePickerVisible(false)}
           onUpdate={handleImageSelected}
+          allowDocument
         />
       </SafeAreaView>
     </LinearContainer>
@@ -361,7 +345,7 @@ const styles = StyleSheet.create({
   },
 
   chatContent: {
-    paddingTop: hp(4),
+    paddingTop: hp(15),
     paddingBottom: hp(10),
     paddingHorizontal: wp(22),
   },
