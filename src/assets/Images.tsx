@@ -109,6 +109,7 @@ export const IMAGES = {
   ic_favorite: require('./image/favorite.png'),
   check_mark: require('./image/check_mark.png'),
   circle: require('./image/circle.png'),
+  pdfIcon: require('./image/pdfIcon.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

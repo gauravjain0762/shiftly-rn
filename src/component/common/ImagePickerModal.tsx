@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,21 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
-// import DocumentPicker from 'react-native-document-picker';
+import DocumentPicker from 'react-native-document-picker';
 import {colors} from '../../theme/colors';
 import {hp, wp} from '../../theme/fonts';
 
 const ImagePickerModal = ({
   actionSheet,
-  setActionSheet,
-  onUpdate,
+  setActionSheet = () => {},
+  onUpdate = () => {},
   allowDocument = false,
-}: any) => {
-  const [image, setImage] = useState<any>(undefined);
-
+}: {
+  actionSheet?: boolean;
+  setActionSheet?: (value: boolean) => void;
+  onUpdate?: (value: any) => void;
+  allowDocument?: boolean;
+}) => {
   const closeActionSheet = () => setActionSheet(false);
 
   const openCamera = async () => {
@@ -30,7 +33,7 @@ const ImagePickerModal = ({
         mediaType: 'photo',
         cropping: true,
       }).then(image => {
-        if (Platform.OS == 'android') {
+        if (Platform.OS === 'android') {
           image.sourceURL = image.path;
         } else {
           if (image.sourceURL == null) {
@@ -38,7 +41,6 @@ const ImagePickerModal = ({
           }
         }
         let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
-        setImage(temp);
         closeActionSheet();
         onUpdate(temp);
 
@@ -62,7 +64,6 @@ const ImagePickerModal = ({
         name: res.path.split('/').pop(),
         type: res.mime || 'image/jpeg',
       };
-      setImage(temp);
       closeActionSheet();
       onUpdate(temp);
     } catch (err) {
@@ -72,42 +73,42 @@ const ImagePickerModal = ({
 
   const openDocument = async () => {
     console.log('opening document>>>>>>');
-    // try {
-    //   if (Platform.OS === 'android') {
-    //     const granted = await PermissionsAndroid.request(
-    //       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-    //     );
-    //     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-    //       Alert.alert('Permission Denied', 'Storage permission is required');
-    //       return;
-    //     }
-    //   }
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission Denied', 'Storage permission is required');
+          return;
+        }
+      }
 
-    //   const res = await DocumentPicker.pick({
-    //     type: [
-    //       DocumentPicker.types.pdf,
-    //       DocumentPicker.types.doc,
-    //       DocumentPicker.types.docx,
-    //     ],
-    //   });
+      const res = await DocumentPicker.pick({
+        type: [
+          DocumentPicker.types.pdf,
+          DocumentPicker.types.doc,
+          DocumentPicker.types.docx,
+        ],
+      });
 
-    //   const file = res[0];
-    //   console.log("🔥 ~ openDocument ~ file:", file)
-    //   const temp = {
-    //     uri: file.uri,
-    //     name: file.name,
-    //     type: file.type,
-    //     size: file.size,
-    //   };
-    //   closeActionSheet();
-    //   onUpdate(temp);
-    // } catch (err: any) {
-    //   if (DocumentPicker.isCancel(err)) {
-    //     console.log('Document picker cancelled');
-    //   } else {
-    //     console.log('Document picker error', err);
-    //   }
-    // }
+      const file = res[0];
+      console.log('🔥 ~ openDocument ~ file:', file);
+      const temp = {
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      };
+      closeActionSheet();
+      onUpdate(temp);
+    } catch (err: any) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('Document picker cancelled');
+      } else {
+        console.log('Document picker error', err);
+      }
+    }
   };
 
   return (

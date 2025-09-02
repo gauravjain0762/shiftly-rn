@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-inline-styles */
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
   FlatList,
   Image,
@@ -11,102 +13,49 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useRoute} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import moment from 'moment';
+
 import {LinearContainer} from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {navigationRef} from '../../../navigation/RootContainer';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {errorToast} from '../../../utils/commonFunction';
-import {useRoute} from '@react-navigation/native';
 import {
-  useGetCompanyChatMessagesQuery,
+  useLazyGetCompanyChatMessagesQuery,
   useSendCompanyMessageMutation,
 } from '../../../api/dashboardApi';
-import {useSelector} from 'react-redux';
-import moment from 'moment';
+import {onChatMessage} from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {SafeAreaView} from 'react-native-safe-area-context';
+// import MessageBubble from '../../../component/chat/MessageBubble';
 
-const CoChat = () => {
-  const {params} = useRoute<any>();
-  const data = params?.data;
-  const chatId = data?._id;
-  console.log('🔥🔥🔥 ~ CoChat ~ chatId:', chatId);
-  const userInfo = useSelector((state: any) => state.auth.userInfo);
+// ---------- Types ----------
+type Message = {
+  _id?: string;
+  sender: 'user' | 'company';
+  message: string;
+  time: string;
+  file?: string | null;
+  file_type?: 'image' | null;
+};
 
-  const [isImagePickerVisible, setImagePickerVisible] =
-    useState<boolean>(false);
-  const [message, setMessage] = useState<string | number | any>('');
-  console.log('🔥🔥🔥 ~ CoChat ~ message:', message);
-  const [sendCompanyMessage] = useSendCompanyMessageMutation();
-  const {data: chats, refetch} = useGetCompanyChatMessagesQuery(chatId);
-  const recipientDetails = chats?.data?.chat || {};
-  const allChats = chats?.data?.messages || [];
-  const [logo, setLogo] = useState<any | {}>();
-  const flatListRef = useRef<FlatList>(null);
+type LogoFile = {
+  name: string;
+  uri: string;
+  type: string;
+} | null;
 
-  useEffect(() => {
-    if (allChats.length > 0) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToOffset({
-          offset: Number.MAX_SAFE_INTEGER,
-          animated: true,
-        });
-        flatListRef.current?.scrollToOffset({
-          offset: Number.MAX_SAFE_INTEGER - 40,
-          animated: true,
-        });
-      }, 100);
-    }
-  }, [allChats]);
+// ---------- Components ----------
+const MessageBubble = React.memo(
+  ({item, recipientName}: {item: Message; recipientName: string}) => {
+    const isCompany = item.sender !== 'user';
 
-  const handleSendChat = async () => {
-    if (!message?.trim()) {
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('chat_id', chatId);
-    formData.append('user_id', userInfo?._id);
-    formData.append('message', message);
-    formData.append('file', logo);
-    try {
-      const res = await sendCompanyMessage(formData).unwrap();
-      if (res?.status) {
-        setMessage('');
-        setLogo(null);
-        await refetch();
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd({animated: true});
-        }, 150);
-        console.log('res message', res);
-      } else {
-        errorToast(res?.message || 'Failed to send message');
-      }
-    } catch (error) {
-      console.error('Error Sending message', error);
-    }
-  };
-
-  const handleImageSelected = (e: any) => {
-    const uri = e?.sourceURL || e?.path || e?.uri;
-    if (!uri) return;
-
-    const newLogo = {
-      name: e?.filename || e?.name || 'logo.jpg',
-      uri,
-      type: e?.mime || 'image/jpeg',
-    };
-
-    setLogo(newLogo);
-  };
-
-  const renderMessage = ({item, index}: any) => {
     return (
-      <View key={index} style={[styles.messageContainer]}>
-        {item.sender === 'user' && (
+      <View style={styles.messageContainer}>
+        {!isCompany && (
           <View style={{flexDirection: 'row'}}>
             <View style={styles.avatarContainer}>
               <Image
@@ -117,11 +66,9 @@ const CoChat = () => {
               />
             </View>
             <View>
-              <Text style={styles.senderName}>
-                {recipientDetails?.user_id?.name}
-              </Text>
+              <Text style={styles.senderName}>{recipientName}</Text>
               <Text style={styles.timeText}>
-                {moment(item?.time).format('hh:mm A')}
+                {moment(item.time).format('hh:mm A')}
               </Text>
             </View>
           </View>
@@ -131,25 +78,112 @@ const CoChat = () => {
           <View
             style={[
               styles.bubble,
-              item.sender !== 'user' ? styles.userBubble : styles.otherBubble,
+              isCompany ? styles.userBubble : styles.otherBubble,
             ]}>
             <Text
               style={[
                 styles.messageText,
-                item.sender !== 'user' ? styles.userText : styles.otherText,
+                isCompany ? styles.userText : styles.otherText,
               ]}>
               {item.message}
             </Text>
           </View>
-          {item?.file_type === 'image' &&
-          item?.file_type !== null &&
-          item?.file !== null ? (
-            <Image source={{uri: item?.file}} style={styles.attachment} />
-          ) : null}
+
+          {item.file_type === 'image' && item.file && (
+            <Image
+              source={{uri: item.file}}
+              style={{
+                ...styles.attachment,
+                alignSelf: isCompany ? 'flex-end' : 'flex-start',
+              }}
+            />
+          )}
         </View>
       </View>
     );
+  },
+);
+
+const CoChat = () => {
+  const {params} = useRoute<any>();
+  const chatId = params?.data?._id;
+  const userInfo = useSelector((state: any) => state.auth.userInfo);
+
+  const [isImagePickerVisible, setImagePickerVisible] = useState(false);
+  const [message, setMessage] = useState('');
+  const [logo, setLogo] = useState<LogoFile>(null);
+
+  const [chatList, setChatList] = useState<Message[]>([]);
+
+  const flatListRef = useRef<FlatList>(null);
+
+  // ----- API hooks -----
+  const [sendCompanyMessage] = useSendCompanyMessageMutation();
+  const [getCompanyChatMessages, {data: chats}] =
+    useLazyGetCompanyChatMessagesQuery();
+
+  // ----- Load messages -----
+  useEffect(() => {
+    if (chatId) {
+      getCompanyChatMessages(chatId);
+    }
+  }, [chatId, getCompanyChatMessages]);
+
+  useEffect(() => {
+    if (chats?.data?.messages) {
+      let messages = chats?.data?.messages || [];
+      if (messages.length > 0) {
+        setChatList([...messages].reverse()); // newest first
+      }
+    }
+  }, [chats]);
+
+  // ----- Socket listener -----
+  useEffect(() => {
+    onChatMessage((newMessage: any) => {
+      console.log('📩 New chat message:', newMessage);
+      setChatList(prev => [newMessage, ...prev]);
+    });
+  }, []);
+
+  // ----- Send chat -----
+  const handleSendChat = async () => {
+    if (!message.trim() && !logo) return;
+
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('user_id', userInfo?._id);
+    formData.append('message', message);
+
+    if (logo) {
+      formData.append('file', logo as any);
+    }
+
+    try {
+      const res = await sendCompanyMessage(formData).unwrap();
+      if (res?.status) {
+        setChatList(prev => [res?.data?.message, ...prev]);
+        setMessage('');
+        setLogo(null);
+      } else {
+        errorToast(res?.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('❌ Error sending message', error);
+    }
   };
+
+  // ----- Image picker -----
+  const handleImageSelected = useCallback((img: any) => {
+    const uri = img?.sourceURL || img?.path || img?.uri;
+    if (!uri) return;
+
+    setLogo({
+      name: img?.filename || img?.name || 'image.jpg',
+      uri,
+      type: img?.mime || 'image/jpeg',
+    });
+  }, []);
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -157,8 +191,7 @@ const CoChat = () => {
         <KeyboardAvoidingView
           style={{flex: 1}}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust header height if needed
-        >
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           {/* HEADER */}
           <View style={styles.container}>
             <View style={styles.headerRow}>
@@ -167,7 +200,7 @@ const CoChat = () => {
               </TouchableOpacity>
               <View style={{flex: 1}}>
                 <Text style={styles.company}>
-                  {recipientDetails?.user_id?.name}
+                  {chats?.data?.chat?.user_id?.name || ''}
                 </Text>
               </View>
               <Image source={IMAGES.dots} style={styles.arrowIcon1} />
@@ -189,26 +222,25 @@ const CoChat = () => {
               </TouchableOpacity>
             </View>
 
+            {/* Messages */}
             <FlatList
               ref={flatListRef}
-              data={allChats}
-              renderItem={renderMessage}
-              keyExtractor={item => item.id}
-              contentContainerStyle={styles.chatContent}
+              data={chatList}
+              renderItem={({item}) => (
+                <MessageBubble
+                  item={item}
+                  recipientName={chats?.data?.chat?.user_id?.name}
+                  type={'company'}
+                />
+              )}
+              keyExtractor={(item, index) => item._id ?? index.toString()}
               showsVerticalScrollIndicator={false}
-              onContentSizeChange={() => {
-                if (allChats.length > 0) {
-                  flatListRef.current?.scrollToEnd({animated: true});
-                }
-              }}
-              onLayout={() => {
-                if (allChats.length > 0) {
-                  flatListRef.current?.scrollToEnd({animated: true});
-                }
-              }}
+              contentContainerStyle={styles.chatContent}
+              inverted
             />
           </View>
 
+          {/* INPUT */}
           <View style={styles.inputContainer}>
             {logo && (
               <View>
@@ -251,6 +283,7 @@ const CoChat = () => {
           </View>
         </KeyboardAvoidingView>
 
+        {/* Image picker */}
         <ImagePickerModal
           actionSheet={isImagePickerVisible}
           setActionSheet={() => setImagePickerVisible(false)}

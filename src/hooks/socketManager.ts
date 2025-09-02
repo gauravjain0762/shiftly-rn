@@ -21,17 +21,13 @@ export const connectSocket = (id: string, type: 'user' | 'company'): void => {
   });
 
   socket.on('connect', () => {
-    console.log('✅ Socket connected:', id);
+    console.log('✅ Socket connected:', id, type);
 
     if (type === 'user') {
       socket?.emit('user-connected', id);
     } else {
       socket?.emit('company-connected', id);
     }
-  });
-
-  socket.on('chat_message', response => {
-    console.log('Received chat message:', response);
   });
 
   socket.on('disconnect', () => {
@@ -47,7 +43,6 @@ export const onChatMessage = (callback: (message: any) => void) => {
     return;
   }
   socket.on('chat_message', response => {
-    console.log('Received chat message:', response);
     callback(response);
   });
 };

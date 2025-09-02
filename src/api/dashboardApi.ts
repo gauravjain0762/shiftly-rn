@@ -663,4 +663,6 @@ export const {
   useGetCompanyChatMessagesQuery,
   useSendCompanyMessageMutation,
   useGetProfileQuery,
+  useLazyEmployeeGetChatMessagesQuery,
+  useLazyGetCompanyChatMessagesQuery,
 } = dashboardApi;
