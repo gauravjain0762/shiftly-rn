@@ -187,7 +187,7 @@ const WelcomeScreen = () => {
           showsVerticalScrollIndicator={false}>
           <Onboarding data={AppOnboardingData} role={role ?? undefined} />
 
-          <View style={[styles.buttonWrapper, {bottom: role === 'company' ? '15%' : '5%' }]}>
+          <View style={[styles.buttonWrapper, {bottom: role === 'company' ? '15%' : '3%' }]}>
             <TouchableOpacity
               style={styles.emailButton}
               onPress={() => {

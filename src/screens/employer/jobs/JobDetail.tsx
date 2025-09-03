@@ -59,7 +59,7 @@ const JobDetail = () => {
       }).unwrap();
 
       if (res?.status) {
-        successToast(res?.message);
+        // successToast(res?.message);
         await refetch();
       } else {
         errorToast(res?.message);
@@ -121,10 +121,10 @@ const JobDetail = () => {
           </View>
           <TouchableOpacity
             onPress={() => handleAddRemoveFavoriteJob(data)}
-            style={[styles.like, {padding: isFavorite ? hp(4) : hp(8)}]}>
+            style={[styles.like]}>
             <Image
-              style={isFavorite ? styles.filledHeart : styles.heart}
-              source={isFavorite ? IMAGES.ic_favorite : IMAGES.like}
+              style={styles.heart}
+              source={isFavorite ? IMAGES.like : IMAGES.hart}
             />
           </TouchableOpacity>
         </View>
@@ -277,9 +277,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: wp(4),
-  },
-  filledHeart: {
-    width: wp(30),
-    height: hp(30),
   },
 });

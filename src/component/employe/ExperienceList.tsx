@@ -3,21 +3,22 @@ import {
   ImageBackground,
   Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {FC, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
 import GradientButton from '../common/GradientButton';
 import CustomDropdown from '../common/CustomDropdown';
 import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
 import CustomInput from '../common/CustomInput';
-import {errorToast} from '../../utils/commonFunction';
 import CountryPicker from 'react-native-country-picker-modal';
+import BaseText from '../common/BaseText';
+import {ExperienceItem} from '../../features/employeeSlice';
+import {errorToast} from '../../utils/commonFunction';
+import {colors} from '../../theme/colors';
 
 const experienceOptions = [
   {label: 'Internship', value: 'internship'},
@@ -28,61 +29,81 @@ const experienceOptions = [
 ];
 
 const ExperienceList: FC<any> = ({
-  educationListEdit,
-  setEducationListEdit,
-  addNewEducation,
   onNextPress,
-  isEditing,
+  experienceList,
+  addNewExperience,
   onSaveExperience,
+  experienceListEdit,
+  setExperienceListEdit,
+  experienceData,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const isEmptyExperience = (exp: ExperienceItem) => {
+    return (
+      !exp?.company ||
+      !exp?.title ||
+      !exp?.preferred ||
+      !exp?.country ||
+      !exp?.department ||
+      !exp?.jobStart_month ||
+      !exp?.jobStart_year ||
+      !exp?.experience_type ||
+      (!exp?.still_working && (!exp?.jobEnd_month || !exp?.jobEnd_year))
+    );
+  };
 
   return (
     <View style={styles.wrapper}>
       <CustomInput
         label="Preferred Position"
         placeholder={'Enter Preferred Position'}
-        value={educationListEdit.preferred}
+        value={experienceListEdit.preferred}
         onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, preferred: text})
+          setExperienceListEdit({...experienceListEdit, preferred: text})
         }
       />
 
-      <Text style={styles.headerText}>Past Job Experience</Text>
+      <BaseText style={styles.headerText}>Past Job Experience</BaseText>
       <CustomInput
         label="Title"
         placeholder={'Enter Title'}
-        value={educationListEdit.title}
+        value={experienceListEdit.title}
         onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, title: text})
+          setExperienceListEdit({...experienceListEdit, title: text})
         }
       />
       <CustomInput
         label="Company"
         placeholder={'Enter Company'}
-        value={educationListEdit.company}
+        value={experienceListEdit.company}
         onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, company: text})
+          setExperienceListEdit({...experienceListEdit, company: text})
         }
       />
 
       <CustomInput
         label="Department"
         placeholder={'Enter Department'}
-        value={educationListEdit?.department}
+        value={experienceListEdit?.department}
         onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, department: text})
+          setExperienceListEdit({...experienceListEdit, department: text})
         }
       />
 
       <View style={styles.countryWrapper}>
-        <Text style={styles.label}>{'Country'}</Text>
+        <BaseText style={styles.label}>{'Country'}</BaseText>
         <TouchableOpacity
           onPress={() => setIsVisible(true)}
           style={styles.country}>
-          <Text style={styles.countryText} numberOfLines={2}>
-            {educationListEdit?.country || 'Select Country'}
-          </Text>
+          <BaseText
+            style={
+              experienceListEdit?.country
+                ? styles.countryText
+                : styles.countryPlaceholder
+            }
+            numberOfLines={2}>
+            {experienceListEdit?.country || 'Select Country'}
+          </BaseText>
         </TouchableOpacity>
       </View>
 
@@ -95,89 +116,68 @@ const ExperienceList: FC<any> = ({
           withFlag
           withEmoji={false}
           onSelect={(item: any) => {
-            setEducationListEdit({...educationListEdit, country: item?.name});
+            setExperienceListEdit({...experienceListEdit, country: item?.name});
             setIsVisible(false);
           }}
           onClose={() => setIsVisible(false)}
         />
       )}
 
-      <Text style={styles.headerText}>When did you start this job?</Text>
+      <BaseText style={styles.headerText}>
+        When did you start this job?
+      </BaseText>
       <CustomDatePicker
-        label="Start Date"
-        value={
-          educationListEdit?.job_start
-            ? moment(educationListEdit?.job_start).format('DD-MM-YYYY')
-            : ''
-        }
-        maximumDate={new Date()}
+        type={'Experience'}
+        label={'Start Date'}
+        dateValue={experienceListEdit}
         onChange={(date: any) =>
-          setEducationListEdit({
-            ...educationListEdit,
-            job_start: moment(date).toISOString(),
+          setExperienceListEdit({
+            ...experienceListEdit,
+            jobStart_month: date?.month?.toString(),
+            jobStart_year: date?.year?.toString(),
           })
         }
       />
 
       <View>
-        <Text style={styles.headerText}>When did it end?</Text>
+        <BaseText style={styles.headerText}>When did it end?</BaseText>
         <Pressable
           onPress={() =>
-            setEducationListEdit({
-              ...educationListEdit,
-              still_working: !educationListEdit?.still_working,
-              job_end: !educationListEdit?.still_working
-                ? null
-                : educationListEdit?.job_end,
+            setExperienceListEdit({
+              ...experienceListEdit,
+              still_working: !experienceListEdit?.still_working,
             })
           }
           style={styles.stillWrapper}>
           <TouchableOpacity
             onPress={() =>
-              setEducationListEdit({
-                ...educationListEdit,
-                still_working: !educationListEdit?.still_working,
-                job_end: !educationListEdit?.still_working
-                  ? null
-                  : educationListEdit?.job_end,
+              setExperienceListEdit({
+                ...experienceListEdit,
+                still_working: !experienceListEdit?.still_working,
               })
             }>
             <ImageBackground
               source={IMAGES.checkBox}
               resizeMode="contain"
               style={styles.checkbox}>
-              {educationListEdit?.still_working && (
+              {experienceListEdit?.still_working && (
                 <Image source={IMAGES.check} style={styles.checkIcon} />
               )}
             </ImageBackground>
           </TouchableOpacity>
-          <Text style={styles.stillText}>Still working here</Text>
+          <BaseText style={styles.stillText}>Still working here</BaseText>
         </Pressable>
 
-        {!educationListEdit?.still_working && (
+        {!experienceListEdit?.still_working && (
           <CustomDatePicker
-            label="End Date"
-            value={
-              educationListEdit?.job_end
-                ? moment(educationListEdit?.job_end).format('DD-MM-YYYY')
-                : ''
-            }
-            minimumDate={
-              educationListEdit?.job_start
-                ? new Date(educationListEdit?.job_start)
-                : undefined
-            }
+            type={'Experience'}
+            label={'End Date'}
+            dateValue={experienceListEdit}
             onChange={(date: any) => {
-              if (
-                educationListEdit.job_start &&
-                moment(date).isBefore(moment(educationListEdit.job_start))
-              ) {
-                errorToast('End Date cannot be before Start Date');
-                return;
-              }
-              setEducationListEdit({
-                ...educationListEdit,
-                job_end: moment(date).toISOString(),
+              setExperienceListEdit({
+                ...experienceListEdit,
+                jobEnd_month: date?.month?.toString(),
+                jobEnd_year: date?.year?.toString(),
               });
             }}
           />
@@ -188,26 +188,56 @@ const ExperienceList: FC<any> = ({
         data={experienceOptions}
         label="What type of experience"
         placeholder={'What type of experience'}
-        value={educationListEdit?.experience_type}
+        value={experienceListEdit?.experience_type}
         container={{marginBottom: 15}}
-        onChange={selectedItem =>
-          setEducationListEdit({
-            ...educationListEdit,
+        onChange={(selectedItem: {label: string; value: string} | any) => {
+          setExperienceListEdit({
+            ...experienceListEdit,
             experience_type: selectedItem?.value,
-          })
-        }
+          });
+        }}
       />
 
       <TouchableOpacity
-        onPress={() => (isEditing ? onSaveExperience?.() : addNewEducation())}
-        style={styles.btnRow}>
-        <Image source={IMAGES.close1} style={styles.closeIcon} />
-        <Text style={styles.addEduText}>
-          {isEditing ? 'Save Experience' : 'Add Another Experience'}
-        </Text>
+        onPress={
+          experienceListEdit?.isEditing ? onSaveExperience : addNewExperience
+        }
+        disabled={
+          !experienceListEdit?.isEditing &&
+          isEmptyExperience(experienceListEdit)
+        }
+        style={[
+          styles.btnRow,
+          !experienceListEdit?.isEditing &&
+            isEmptyExperience(experienceListEdit) && {
+              opacity: 0.5,
+            },
+        ]}>
+        <Image
+          style={styles.closeIcon}
+          source={experienceListEdit?.isEditing ? IMAGES.check : IMAGES.close1}
+        />
+        <BaseText style={styles.addEduText}>
+          {experienceListEdit?.isEditing
+            ? 'Save Exeprience'
+            : 'Add Another Experience'}
+        </BaseText>
       </TouchableOpacity>
 
-      <GradientButton style={styles.btn} title={'Next'} onPress={onNextPress} />
+      <GradientButton
+        style={styles.btn}
+        title={'Next'}
+        onPress={() => {
+          // if (
+          //   (experienceData?.length || 0) + (experienceList?.length || 0) ===
+          //   0
+          // ) {
+          //   errorToast('Please add the experience');
+          //   return;
+          // }
+          onNextPress();
+        }}
+      />
     </View>
   );
 };
@@ -284,8 +314,12 @@ const styles = StyleSheet.create({
     width: wp(22),
     height: hp(22),
     resizeMode: 'contain',
+    tintColor: colors.coPrimary,
   },
   addEduText: {
     ...commonFontStyle(500, wp(20), '#F4E2B8'),
+  },
+  countryPlaceholder: {
+    ...commonFontStyle(400, 18, '#969595'),
   },
 });

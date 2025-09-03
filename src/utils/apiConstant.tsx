@@ -79,6 +79,8 @@ export const API = {
   updateAboutMe: '/updateAboutMe',
   getEducations: '/getEducations',
   getExperiences: '/getExperiences',
+  removeEducation: '/removeEducation',
+  removeExperience: 'removeExperience',
 
   // Chats
   employeeGetChats: '/getChats',

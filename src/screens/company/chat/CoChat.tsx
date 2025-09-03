@@ -5,6 +5,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -30,6 +31,7 @@ import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import ChatInput from '../../../component/chat/ChatInput';
 import FastImage from 'react-native-fast-image';
 import {SCREENS} from '../../../navigation/screenNames';
+import CustomImage from '../../../component/common/CustomImage';
 // import MessageBubble from '../../../component/chat/MessageBubble';
 
 // ---------- Types ----------
@@ -163,6 +165,22 @@ const CoChat = () => {
   const [chatList, setChatList] = useState<Message[]>([]);
 
   const flatListRef = useRef<FlatList>(null);
+  const [showDownIcon, setShowDownIcon] = useState(false);
+
+  const handleChatScrollDown = () => {
+    flatListRef.current?.scrollToOffset({offset: 0, animated: true});
+    setShowDownIcon(false);
+  };
+
+  // ----- Detect scroll -----
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY > 200) {
+      setShowDownIcon(true);
+    } else {
+      setShowDownIcon(false);
+    }
+  };
 
   // ----- API hooks -----
   const [sendCompanyMessage] = useSendCompanyMessageMutation();
@@ -283,9 +301,21 @@ const CoChat = () => {
               keyExtractor={(item, index) => item._id ?? index.toString()}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.chatContent}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
               inverted
             />
           </View>
+
+          {showDownIcon && (
+            <Pressable onPress={handleChatScrollDown} style={styles.downIcon}>
+              <CustomImage
+                size={wp(22)}
+                source={IMAGES.down_arrow}
+                tintColor={colors?.coPrimary}
+              />
+            </Pressable>
+          )}
 
           {/* INPUT */}
 
@@ -486,4 +516,19 @@ const styles = StyleSheet.create({
     height: hp(22),
   },
   logo: {height: hp(55), width: wp(55)},
+  downIcon: {
+    position: 'absolute',
+    bottom: hp(100),
+    alignSelf: 'center',
+    width: wp(40),
+    height: wp(40),
+    borderRadius: wp(20),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors._104686,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
 });

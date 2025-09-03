@@ -12,6 +12,7 @@ import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
 import CustomImage from '../common/CustomImage';
+import FastImage from 'react-native-fast-image';
 
 type props = {
   item?: any;
@@ -45,17 +46,17 @@ const JobCard: FC<props> = ({
         </View>
         <View style={styles.actions}>
           <TouchableOpacity onPress={onPressShare} style={styles.iconButton}>
-            <Image
+            <FastImage
               source={IMAGES.share}
               resizeMode="contain"
               style={styles.icon}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={onPressFavorite} style={styles.iconButton}>
-            <Image
+            <FastImage
               resizeMode="contain"
-              source={heartImage ? heartImage : IMAGES.hart}
-              style={heartImage ? styles.iconFilled : styles.icon}
+              source={heartImage ? IMAGES.like : IMAGES.hart}
+              style={styles.icon}
             />
           </TouchableOpacity>
         </View>
@@ -146,10 +147,10 @@ const styles = StyleSheet.create({
   actions: {
     gap: hp(7),
     alignSelf: 'flex-end',
-    paddingBottom: hp(10),
     paddingRight: wp(8),
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: hp(8)
   },
   iconButton: {
     backgroundColor: colors.white,
@@ -158,6 +159,14 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   logo: {
     width: wp(80),

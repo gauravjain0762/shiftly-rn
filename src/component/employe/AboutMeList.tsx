@@ -1,20 +1,13 @@
-import {
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {FC, useState} from 'react';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import React, {FC} from 'react';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+
 import {colors} from '../../theme/colors';
-import GradientButton from '../common/GradientButton';
-import CustomDropdownMulti from '../common/CustomDropdownMulti';
-import CustomInput from '../common/CustomInput';
 import {IMAGES} from '../../assets/Images';
-import {useGetEmployeeSkillsQuery} from '../../api/dashboardApi';
-import {useDispatch} from 'react-redux';
+import CustomInput from '../common/CustomInput';
+import GradientButton from '../common/GradientButton';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import CustomDropdownMulti from '../common/CustomDropdownMulti';
+import CustomSwitch from '../common/CustomSwitch';
 
 type MessageItem = {
   id: string;
@@ -42,8 +35,12 @@ const languages = [
 ];
 
 type Props = {
-  onPressMessage: (item: MessageItem) => void;
+  aboutEdit: any;
+  experienceList: any;
   item: MessageItem[];
+  setAboutEdit: any;
+  onNextPress: () => void;
+  onPressMessage: (item: MessageItem) => void;
 };
 
 const getDotColor = (level: string) => {
@@ -64,27 +61,27 @@ const getDotColor = (level: string) => {
 const proficiencyLevels = ['Native', 'Fluent', 'Intermediate', 'Basic'];
 
 const AboutMeList: FC<Props> = ({
-  onPressMessage = () => {},
-  educationListEdit,
-  setEducationListEdit,
+  aboutEdit,
+  setAboutEdit,
   onNextPress,
+  experienceList,
 }: any) => {
   return (
     <View style={styles.containerWrapper}>
-      <Text style={styles.headerTitle}>Front Desk Manager</Text>
+      {/* <Text style={styles.headerTitle}>{experienceList[0]?.title}</Text> */}
 
       <View style={styles.optionWrapper}>
         <TouchableOpacity
           style={styles.optionItem}
           onPress={() => {
-            setEducationListEdit({...educationListEdit, open_for_jobs: true});
+            setAboutEdit({...aboutEdit, open_for_jobs: true});
           }}>
           <View
             style={[
               styles.iconContainer,
               {
                 borderColor:
-                  educationListEdit?.open_for_jobs === true
+                  aboutEdit?.open_for_jobs === true
                     ? colors.coPrimary
                     : colors._104686,
               },
@@ -99,14 +96,14 @@ const AboutMeList: FC<Props> = ({
         <TouchableOpacity
           style={styles.optionItem}
           onPress={() => {
-            setEducationListEdit({...educationListEdit, open_for_jobs: false});
+            setAboutEdit({...aboutEdit, open_for_jobs: false});
           }}>
           <View
             style={[
               styles.iconContainer,
               {
                 borderColor:
-                  educationListEdit?.open_for_jobs === false
+                  aboutEdit?.open_for_jobs === false
                     ? colors.coPrimary
                     : colors._104686,
               },
@@ -122,50 +119,49 @@ const AboutMeList: FC<Props> = ({
       <CustomInput
         label="Location"
         placeholder={'Enter Location'}
-        value={educationListEdit.location}
+        value={aboutEdit.location}
         onChange={(text: any) => {
-          setEducationListEdit({...educationListEdit, location: text});
+          setAboutEdit({...aboutEdit, location: text});
         }}
       />
 
       <CustomInput
         label="Key Responsibilities"
         placeholder={'Enter Key Responsibilities'}
-        value={educationListEdit.responsibilities}
+        value={aboutEdit.responsibilities}
         onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, responsibilities: text})
+          setAboutEdit({...aboutEdit, responsibilities: text})
         }
       />
 
       <Text style={styles.headerText}>Select your language</Text>
 
       <CustomDropdownMulti
+        disable={false}
         data={languages.map(lang => ({label: lang, value: lang}))}
         placeholder={'Select more than one'}
-        value={educationListEdit.selectedLanguages}
+        value={aboutEdit?.selectedLanguages}
         container={styles.multiDropdownContainer}
-        disable={false}
-        placeholderStyle={styles.placeholderStyle}
         selectedStyle={styles.selectedStyle}
         onChange={(selectedItems: any) => {
-          setEducationListEdit({
-            ...educationListEdit,
+          setAboutEdit({
+            ...aboutEdit,
             selectedLanguages: selectedItems,
           });
         }}
       />
 
-      {/* {!!educationListEdit.selectedLanguages?.length && (
+      {!!aboutEdit.selectedLanguages?.length && (
         <View style={styles.languageListContainer}>
-          {educationListEdit.selectedLanguages.map((name: string) => (
+          {aboutEdit.selectedLanguages.map((name: string) => (
             <View key={name} style={styles.languageChip}>
               <Text style={styles.languageChipText}>{name}</Text>
             </View>
           ))}
         </View>
-      )} */}
+      )}
 
-      {educationListEdit.selectedLanguages.map((lang: any) => (
+      {aboutEdit.selectedLanguages.map((lang: any) => (
         <View style={styles.row} key={lang}>
           <Text style={styles.language}>{lang}</Text>
           {proficiencyLevels.map(level => (
@@ -173,15 +169,14 @@ const AboutMeList: FC<Props> = ({
               key={level}
               style={[
                 styles.dot,
-                educationListEdit.proficiency[lang] === level &&
-                  styles.selectedDot,
+                aboutEdit.proficiency[lang] === level && styles.selectedDot,
                 {backgroundColor: getDotColor(level)},
               ]}
               onPress={() => {
-                setEducationListEdit({
-                  ...educationListEdit,
+                setAboutEdit({
+                  ...aboutEdit,
                   proficiency: {
-                    ...educationListEdit.proficiency,
+                    ...aboutEdit.proficiency,
                     [lang]: level,
                   },
                 });
@@ -190,6 +185,8 @@ const AboutMeList: FC<Props> = ({
           ))}
         </View>
       ))}
+
+      {/* <CustomSwitch isOn={aboutEdit?.open_for_jobs} setIsOn={setAboutEdit}  /> */}
 
       <GradientButton
         style={styles.btn}
@@ -204,6 +201,7 @@ export default AboutMeList;
 
 const styles = StyleSheet.create({
   containerWrapper: {
+    marginTop: hp(16),
     paddingHorizontal: 29,
   },
   headerTitle: {
@@ -255,10 +253,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   multiDropdownContainer: {
-    marginBottom: 15,
+    // marginBottom: 15,
   },
   headerText: {
-    ...commonFontStyle(700, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, '#DADADA'),
     marginBottom: 8,
     marginTop: 20,
   },
@@ -277,11 +275,10 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, '#F4E2B8'),
   },
   languageListContainer: {
-    flexDirection: 'row',
+    gap: wp(4),
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 10,
-    marginBottom: 10,
+    flexDirection: 'row',
+    marginBottom: hp(5),
   },
   languageChip: {
     borderWidth: 1,

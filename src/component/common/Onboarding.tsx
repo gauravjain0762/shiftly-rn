@@ -84,7 +84,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
       <View
         style={[
           styles.paginationContainer,
-          {bottom: role === 'company' ? '12%' : '6%'},
+          {bottom: role === 'company' ? '10%' : '4%'},
         ]}>
         <ScrollingPaginationDots
           scrollX={scrollX}

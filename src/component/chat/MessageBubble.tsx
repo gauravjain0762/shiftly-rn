@@ -181,5 +181,6 @@ const styles = StyleSheet.create({
     height: hp(120),
     marginTop: hp(10),
     alignSelf: 'flex-end',
+    borderRadius: hp(8)
   },
 });

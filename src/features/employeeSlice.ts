@@ -16,15 +16,19 @@ export interface EducationItem {
 }
 
 export interface ExperienceItem {
+  experience_id?: string;
   preferred: string;
   title: string;
   company: string;
   department: string;
   country: string;
-  job_start: string;
-  job_end: string;
+  jobStart_month: string;
+  jobStart_year: string;
+  jobEnd_month: string;
+  jobEnd_year: string;
   still_working: boolean;
   experience_type: string;
+  isEditing?: boolean;
 }
 
 export interface AboutMe {
@@ -71,15 +75,19 @@ const initialState: EmployeeState = {
     isEditing: false,
   },
   experienceListEdit: {
+    experience_id: '',
     preferred: '',
     title: '',
     company: '',
     department: '',
     country: '',
-    job_start: '',
-    job_end: '',
+    jobStart_month: '',
+    jobStart_year: '',
+    jobEnd_month: '',
+    jobEnd_year: '',
     still_working: false,
     experience_type: '',
+    isEditing: false,
   },
   aboutEdit: {
     aboutMe: '',

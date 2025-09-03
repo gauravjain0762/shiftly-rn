@@ -8,6 +8,8 @@ import {EducationItem} from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
 import {colors} from '../../theme/colors';
+import {errorToast} from '../../utils/commonFunction';
+import BaseText from '../common/BaseText';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -15,6 +17,8 @@ type Props = {
   addNewEducation: () => void;
   onNextPress: () => void;
   onSaveEducation?: () => void;
+  educationList: EducationItem[];
+  educationData?: EducationItem[];
 };
 
 const EducationList: FC<Props> = ({
@@ -23,17 +27,20 @@ const EducationList: FC<Props> = ({
   addNewEducation,
   onNextPress,
   onSaveEducation,
+  educationList,
+  educationData,
 }) => {
+  console.log("🔥🔥🔥 ~ EducationList ~ educationList:", educationList)
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const isEmptyEducation = (edu: EducationItem) => {
     return (
-      !edu.degree &&
-      !edu.university &&
-      !edu.startDate_month &&
-      !edu.startDate_year &&
-      !edu.endDate_month &&
-      !edu.endDate_year &&
-      !edu.country &&
+      !edu.degree ||
+      !edu.university ||
+      !edu.startDate_month ||
+      !edu.startDate_year ||
+      !edu.endDate_month ||
+      !edu.endDate_year ||
+      !edu.country ||
       !edu.province
     );
   };
@@ -64,7 +71,7 @@ const EducationList: FC<Props> = ({
             setEducationListEdit({
               ...educationListEdit,
               startDate_month: date?.month?.toString(),
-              startDate_year: date?.year?.toString(),
+              startDate_year: date?.year,
             });
           }}
         />
@@ -87,7 +94,13 @@ const EducationList: FC<Props> = ({
           <TouchableOpacity
             onPress={() => setIsVisible(true)}
             style={styles.country}>
-            <Text style={educationListEdit?.country ? styles.countryText : styles.countryPlaceholder} numberOfLines={2}>
+            <Text
+              style={
+                educationListEdit?.country
+                  ? styles.countryText
+                  : styles.countryPlaceholder
+              }
+              numberOfLines={2}>
               {educationListEdit?.country || 'Select Country'}
             </Text>
             <Image source={IMAGES.down1} style={styles.dropdownIcon} />
@@ -143,17 +156,27 @@ const EducationList: FC<Props> = ({
             },
         ]}>
         <Image
-          source={educationListEdit?.isEditing ? IMAGES.check : IMAGES.close1}
           style={styles.closeIcon}
+          source={educationListEdit?.isEditing ? IMAGES.check : IMAGES.close1}
         />
-        <Text style={styles.addEduText}>
+        <BaseText style={styles.addEduText}>
           {educationListEdit?.isEditing
             ? 'Save Education'
             : 'Add Another Education'}
-        </Text>
+        </BaseText>
       </TouchableOpacity>
 
-      <GradientButton style={styles.btn} title="Next" onPress={onNextPress} />
+      <GradientButton
+        style={styles.btn}
+        title="Next"
+        onPress={() => {
+          // if (educationList.length < 1) {
+          //   errorToast('Please add the education');
+          //   return;
+          // }
+          onNextPress();
+        }}
+      />
     </View>
   );
 };

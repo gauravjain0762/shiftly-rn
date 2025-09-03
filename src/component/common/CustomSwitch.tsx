@@ -1,5 +1,6 @@
 import React, {FC, useState} from 'react';
 import {View, TouchableOpacity, StyleSheet, ViewStyle} from 'react-native';
+import {hp, wp} from '../../theme/fonts';
 
 type Switch = {
   isOn?: boolean;
@@ -48,16 +49,17 @@ const CustomSwitch: FC<Switch> = ({
 
 const styles = StyleSheet.create({
   switchContainer: {
-    width: 47,
-    height: 26,
+    width: wp(47),
+    height: hp(26),
     borderRadius: 34 / 2,
     justifyContent: 'center',
     backgroundColor: '#fff',
   },
   thumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 13,
+    left: wp(3),
+    width: wp(20),
+    height: hp(20),
+    borderRadius: hp(13),
   },
 });
 

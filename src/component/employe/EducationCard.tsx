@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   ImageBackground,
@@ -9,27 +8,60 @@ import {
 } from 'react-native';
 
 import {colors} from '../../theme/colors';
+import BaseText from '../common/BaseText';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
-const EducationCard = ({item, onRemove, onEdit}: any) => {
+type Props = {
+  item: any;
+  onEdit: () => void;
+  onRemove: () => void;
+  type?: 'Education' | 'Experience';
+};
+
+const EducationCard = ({item, onRemove, onEdit, type}: Props) => {
+  console.log('🔥🔥🔥 ~ EducationCard ~ item:', item);
+  const isEducation = type === 'Education';
+
   return (
     <View style={styles.card}>
       <View style={styles.rowSpaceBetween}>
-        <Text style={styles.degree}>{item?.degree}</Text>
-        <Text style={styles.duration}>
-          {item?.startDate_year}
-          {item?.startDate_year || item?.endDate_year ? ' - ' : ''}
-          {item?.endDate_year}
-        </Text>
+        <BaseText style={styles.degree}>
+          {isEducation ? item?.degree : item?.title}
+        </BaseText>
+        {isEducation ? (
+          <BaseText style={styles.duration}>
+            {item?.startDate_year || item?.start_date?.year || ''}
+            {item?.endDate_year || item?.end_date?.year ? ' - ' : ''}
+            {item?.endDate_year || item?.end_date?.year || ''}
+          </BaseText>
+        ) : (
+          <BaseText style={styles.duration}>
+            {item?.jobStart_year || item?.job_start?.year
+              ? item.jobStart_year || item.job_start.year
+              : ''}
+
+            {item?.still_working || item?.jobEnd_year || item?.job_end?.year
+              ? ' - '
+              : ''}
+
+            {item?.still_working
+              ? 'Present'
+              : item?.jobEnd_year || item?.job_end?.year
+              ? item.jobEnd_year || item.job_end.year
+              : ''}
+          </BaseText>
+        )}
       </View>
 
       <View style={styles.rowSpaceBetween}>
         <View>
-          <Text style={styles.university}>{item?.university}</Text>
-          <Text style={styles.location}>
+          <BaseText style={styles.university}>
+            {isEducation ? item?.university : item?.company}
+          </BaseText>
+          <BaseText style={styles.location}>
             {item?.country} {item?.province}
-          </Text>
+          </BaseText>
         </View>
 
         <View style={styles.actions}>

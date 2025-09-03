@@ -7,100 +7,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback} from 'react';
 import {LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
-import Slider from '@react-native-community/slider';
 import {goBack, navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import moment from 'moment';
-import {
-  useGetEducationsQuery,
-  useGetExperiencesQuery,
-} from '../../../api/dashboardApi';
-import {
-  setEducationList,
-  setEducationListEdit,
-  setExperienceList,
-  setExperienceListEdit,
-  setAboutEdit,
-} from '../../../features/employeeSlice';
+
 import CustomImage from '../../../component/common/CustomImage';
 
 const ProfileScreen = () => {
-  const dispatch = useDispatch<any>();
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  const {data: getEducation} = useGetEducationsQuery({});
-  const {data: getExperiences} = useGetExperiencesQuery({});
-  const educationData = getEducation?.data?.educations;
-  const experienceData = getExperiences?.data?.experiences;
+  console.log("🔥🔥🔥 ~ ProfileScreen ~ userInfo:", userInfo)
 
   const handleEditProfile = async () => {
-    const mappedEducations = (educationData || []).map((e: any) => ({
-      degree: e?.degree || '',
-      university: e?.university || '',
-      startDate: e?.start_date || '',
-      endDate: e?.end_date || '',
-      country: e?.country || '',
-      province: e?.province || '',
-      education_id: e?.education_id || '',
-    }));
-
-    dispatch(setEducationList(mappedEducations));
-
-    const parseToISO = (input: any) => {
-      if (!input) return '';
-      const parsedStrict = moment(input, 'MMMM YYYY', true);
-      if (parsedStrict.isValid()) return parsedStrict.toISOString();
-      const flexible = moment(input);
-      return flexible.isValid() ? flexible.toISOString() : '';
-    };
-
-    const mappedExperiences = (experienceData || []).map((e: any) => ({
-      preferred: e?.preferred || '',
-      title: e?.title || '',
-      company: e?.company || '',
-      department: e?.department || '',
-      country: e?.country || '',
-      job_start: parseToISO(e?.job_start),
-      job_end: parseToISO(e?.job_end),
-      still_working: !!e?.still_working,
-      experience_type: e?.experience_type || '',
-      _id: e?._id,
-    }));
-
-    dispatch(setExperienceList(mappedExperiences));
-
-    if (mappedEducations?.length > 0) {
-      dispatch(setEducationListEdit(mappedEducations[0]));
-    }
-    if (mappedExperiences?.length > 0) {
-      dispatch(setExperienceListEdit(mappedExperiences[0] as any));
-    }
-
-    const mappedLanguages = (userInfo?.languages || [])
-      .map((l: any) => l?.name)
-      .filter(Boolean);
-    dispatch(
-      setAboutEdit({
-        aboutMe: '',
-        responsibilities: userInfo?.responsibility || '',
-        selectOne: [],
-        isOn: false,
-        location: userInfo?.location || '',
-        selectedLanguages: mappedLanguages,
-        proficiency: '',
-        checkEnd: false,
-        open_for_jobs: false,
-      }),
-    );
-
-    navigateTo(SCREENS.EditProfileScreen);
+    navigateTo(SCREENS.CreateProfileScreen);
   };
 
   const HeaderWithAdd = useCallback(
@@ -192,7 +117,7 @@ const ProfileScreen = () => {
             </View>
           </View>
 
-          <Pressable style={styles.ctaCard}>
+          {/* <Pressable style={styles.ctaCard}>
             <View style={styles.ctaTextContainer}>
               <Text style={styles.ctaTitle}>
                 Put your hospitality soft skills to the test
@@ -203,7 +128,7 @@ const ProfileScreen = () => {
               </Text>
             </View>
             <Image style={styles.right} source={IMAGES.back} />
-          </Pressable>
+          </Pressable> */}
           {/* Section: About Me */}
           <Section
             title="About me"
@@ -233,7 +158,7 @@ const ProfileScreen = () => {
               style={{flexDirection: 'row', alignItems: 'center', gap: wp(8)}}>
               {userInfo?.languages?.map((item: any, index: number) => (
                 <View key={index} style={[styles.skillBadge]}>
-                  <Text style={styles.skillText}>{item?.name}</Text>
+                  <Text style={styles.skillText}>{item}</Text>
                 </View>
               ))}
             </View>

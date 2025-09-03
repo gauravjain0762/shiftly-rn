@@ -89,7 +89,6 @@ const ViewProfileScreen = () => {
                 {
                   label: 'Nationality',
                   value: userInfo?.nationality,
-                  // showFlag: userInfo?.nationality && true,
                 },
                 {label: 'Email', value: userInfo?.email},
                 {

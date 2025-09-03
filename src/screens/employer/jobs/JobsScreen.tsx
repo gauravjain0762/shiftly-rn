@@ -144,7 +144,7 @@ const JobsScreen = () => {
       }).unwrap();
 
       if (res?.status) {
-        successToast(res?.message);
+        // successToast(res?.message);
         await refetch();
       } else {
         errorToast(res?.message);
@@ -239,7 +239,7 @@ const JobsScreen = () => {
                   onPressShare={() => {
                     setModal(true);
                   }}
-                  heartImage={isFavorite ? IMAGES.ic_favorite : null}
+                  heartImage={isFavorite}
                   onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
                   onPress={() =>
                     navigateTo(SCREEN_NAMES.JobDetail, {

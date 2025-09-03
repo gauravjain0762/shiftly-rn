@@ -111,6 +111,7 @@ export const IMAGES = {
   circle: require('./image/circle.png'),
   pdfIcon: require('./image/pdfIcon.png'),
   document: require('./image/document.png'),
+  down_arrow: require('./image/down_arrow.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

@@ -18,6 +18,7 @@ const FeedCard: FC<card> = ({
   item,
   isFollow = false,
 }) => {
+  console.log('🔥🔥🔥 ~ FeedCard ~ item:', item);
   return (
     <TouchableOpacity
       activeOpacity={1}
@@ -59,7 +60,7 @@ const FeedCard: FC<card> = ({
       {/* Banner */}
       <View style={styles.banner}>
         <CustomImage
-          uri={item?.images[0]}
+          uri={item?.images?.length > 0 ? item?.images[0] : ''}
           imageStyle={{height: '100%', width: '100%'}}
           containerStyle={styles.post}
           resizeMode="cover"

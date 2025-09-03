@@ -5,6 +5,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -24,6 +25,8 @@ import {onChatMessage} from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MessageBubble from '../../../component/chat/MessageBubble';
 import ChatInput from '../../../component/chat/ChatInput';
+import CustomImage from '../../../component/common/CustomImage';
+import {colors} from '../../../theme/colors';
 
 // ---------- Types ----------
 export type Message = {
@@ -58,6 +61,22 @@ const Chat = () => {
   const [getCompanyChatMessages, {data: chats}] =
     useLazyGetCompanyChatMessagesQuery();
   const [chatList, setChatList] = useState<Message[]>([]);
+  const [showDownIcon, setShowDownIcon] = useState(false);
+
+  const handleChatScrollDown = () => {
+    flatListRef.current?.scrollToOffset({offset: 0, animated: true});
+    setShowDownIcon(false);
+  };
+
+  // ----- Detect scroll -----
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY > 200) {
+      setShowDownIcon(true);
+    } else {
+      setShowDownIcon(false);
+    }
+  };
 
   // ----- Load messages -----
   useEffect(() => {
@@ -169,7 +188,15 @@ const Chat = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.chatContent}
             inverted
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
           />
+
+          {showDownIcon && (
+            <Pressable onPress={handleChatScrollDown} style={styles.downIcon}>
+              <CustomImage source={IMAGES.down_arrow} size={wp(22)} />
+            </Pressable>
+          )}
 
           {/* Input */}
 
@@ -243,5 +270,20 @@ const styles = StyleSheet.create({
     paddingTop: hp(15),
     paddingBottom: hp(10),
     paddingHorizontal: wp(22),
+  },
+  downIcon: {
+    position: 'absolute',
+    bottom: hp(100),
+    alignSelf: 'center',
+    width: wp(40),
+    height: wp(40),
+    borderRadius: wp(20),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.coPrimary,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 });

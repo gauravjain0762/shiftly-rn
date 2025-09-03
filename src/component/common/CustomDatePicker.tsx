@@ -28,19 +28,36 @@ const months = [
 
 const years = Array.from({length: 2050 - 1975 + 1}, (_, i) => 1975 + i);
 
-const CustomDatePicker = ({label, onChange, dateValue}: any) => {
+type DateProps = {
+  type: 'Education' | 'Experience';
+  label: string;
+  dateValue: any;
+  onChange: (date: any) => void;
+};
+
+const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
   const [openPicker, setOpenPicker] = useState<'Month' | 'Year' | null>(null);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
 
   useEffect(() => {
     if (dateValue) {
-      if (label === 'Start Date') {
-        setSelectedMonth(dateValue.startDate_month || '');
-        setSelectedYear(dateValue.startDate_year || '');
-      } else if (label === 'End Date') {
-        setSelectedMonth(dateValue.endDate_month || '');
-        setSelectedYear(dateValue.endDate_year || '');
+      if (type === 'Experience') {
+        if (label === 'Start Date') {
+          setSelectedMonth(dateValue.jobStart_month || '');
+          setSelectedYear(dateValue.jobStart_year || '');
+        } else if (label === 'End Date') {
+          setSelectedMonth(dateValue.jobEnd_month || '');
+          setSelectedYear(dateValue.jobEnd_year || '');
+        }
+      } else {
+        if (label === 'Start Date') {
+          setSelectedMonth(dateValue.startDate_month || '');
+          setSelectedYear(dateValue.startDate_year || '');
+        } else if (label === 'End Date') {
+          setSelectedMonth(dateValue.endDate_month || '');
+          setSelectedYear(dateValue.endDate_year || '');
+        }
       }
     }
   }, [dateValue, label]);

@@ -54,7 +54,7 @@ const EditProfileScreen = () => {
     experienceListEdit,
     aboutEdit,
   } = useSelector((state: RootState) => selectEmployeeState(state));
-  console.log('🔥🔥🔥 ~ EditProfileScreen ~ experienceList:', experienceList);
+  // console.log('🔥🔥🔥 ~ EditProfileScreen ~ experienceList:', experienceList);
   const [addUpdateEducation] = useAddUpdateEducationMutation({});
   const [addUpdateExperience] = useAddUpdateExperienceMutation({});
 

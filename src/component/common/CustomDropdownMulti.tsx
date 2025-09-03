@@ -38,6 +38,7 @@ type Props = {
   minimumDate?: string;
   dropIcon?: string;
   dateMode?: string;
+  placeholderStyle?: any;
 };
 
 const CustomDropdownMulti = ({

@@ -44,7 +44,7 @@ export const dashboardApi = createApi({
         url: API.getCompanyJobs,
         method: HTTP_METHOD.GET,
         params: params,
-        skipLoader:true
+        skipLoader: true,
       }),
       providesTags: ['GetJobs'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
@@ -644,7 +644,6 @@ export const dashboardApi = createApi({
     }),
     getEmployeeNotifications: builder.query<any, any>({
       query: params => {
-        console.log('🔥🔥🔥 ~ params:', params);
         return {
           url: API.getEmployeeNotifications,
           method: HTTP_METHOD.GET,
@@ -652,13 +651,23 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          console.log(data, 'datadata');
-        } catch (error) {
-          console.log('getEmployeeNotifications Error', error);
-        }
+    }),
+    removeEducation: builder.mutation<any, any>({
+      query: params => {
+        return {
+          url: `${API.removeEducation}/${params}`,
+          method: HTTP_METHOD.DELETE,
+          skipLoader: true,
+        };
+      },
+    }),
+    removeExperience: builder.mutation<any, any>({
+      query: params => {
+        return {
+          url: `${API.removeExperience}/${params}`,
+          method: HTTP_METHOD.DELETE,
+          skipLoader: true,
+        };
       },
     }),
   }),
@@ -702,4 +711,6 @@ export const {
   useLazyGetCompanyChatMessagesQuery,
   useGetCompanyNotificationQuery,
   useGetEmployeeNotificationsQuery,
+  useRemoveEducationMutation,
+  useRemoveExperienceMutation,
 } = dashboardApi;
