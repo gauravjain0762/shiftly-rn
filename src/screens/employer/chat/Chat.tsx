@@ -27,12 +27,15 @@ import ChatInput from '../../../component/chat/ChatInput';
 
 // ---------- Types ----------
 export type Message = {
-  _id?: string;
-  sender: 'user' | 'company';
+  chat_id: string;
+  createdAt: string;
+  file: string | null;
+  file_type: 'image' | null;
   message: string;
-  time: string;
-  file?: string | null;
-  file_type?: 'image' | null;
+  sender: 'user' | 'company';
+  updatedAt: string;
+  __v: number;
+  _id: string;
 };
 
 type LogoFile = {

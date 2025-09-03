@@ -32,7 +32,6 @@ const ChatInput = ({
   setImage,
   type,
 }: Props) => {
-  console.log('image', image);
   return (
     <View
       style={{
@@ -52,14 +51,17 @@ const ChatInput = ({
               defaultSource={IMAGES.close_icon}
             />
           </Pressable>
-          {image?.uri?.includes('image') ? (
-            <FastImage source={{uri: image.uri}} style={styles.logo} />
-          ) : (
+          {image?.uri?.includes('pdf') ||
+          image?.uri?.includes('doc') ||
+          image?.uri?.includes('docx') ? (
             <FastImage
-              source={IMAGES.pdfIcon}
-              defaultSource={IMAGES.pdfIcon}
+              source={IMAGES.document}
+              defaultSource={IMAGES.document}
               style={styles.logo}
+              tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
             />
+          ) : (
+            <FastImage source={{uri: image.uri}} style={styles.logo} />
           )}
         </View>
       ) : (

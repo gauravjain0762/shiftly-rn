@@ -1,12 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {memo} from 'react';
 import moment from 'moment';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {Message} from '../../screens/employer/chat/Chat';
 import {IMAGES} from '../../assets/Images';
+import {navigateTo} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
 
 const MessageBubble: React.FC<{
   item: Message;
@@ -40,13 +42,18 @@ const MessageBubble: React.FC<{
                 ...styles.timeText,
                 color: type === 'company' ? colors._0B3970 : colors.white,
               }}>
-              {moment(item.time).format('hh:mm A')}
+              {moment(item.createdAt).format('hh:mm A')}
             </Text>
           </View>
         </View>
       )}
 
       <View style={{flex: 1}}>
+        {isUser && (
+          <Text style={{...styles.timeText, alignSelf: 'flex-end'}}>
+            {moment(item?.createdAt).format('hh:mm A')}
+          </Text>
+        )}
         {item.message && (
           <View
             style={[
@@ -72,21 +79,41 @@ const MessageBubble: React.FC<{
           item.file?.includes('pdf') ||
           item.file?.includes('doc') ||
           item.file?.includes('docx') ? (
-            <FastImage
-              source={IMAGES.pdfIcon}
-              style={{
-                ...styles.attachment,
-                alignSelf: isUser ? 'flex-end' : 'flex-start',
-              }}
-            />
+            <TouchableOpacity
+              onPress={() => {
+                navigateTo(SCREENS.WebviewScreen, {
+                  link: item.file,
+                  title: '',
+                  type: 'employe',
+                });
+              }}>
+              <FastImage
+                source={IMAGES.document}
+                defaultSource={IMAGES.document}
+                tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
+                style={{
+                  ...styles.attachment,
+                  alignSelf: isUser ? 'flex-end' : 'flex-start',
+                }}
+              />
+            </TouchableOpacity>
           ) : (
-            <FastImage
-              source={{uri: item.file}}
-              style={{
-                ...styles.attachment,
-                alignSelf: isUser ? 'flex-end' : 'flex-start',
-              }}
-            />
+            <TouchableOpacity
+              onPress={() => {
+                navigateTo(SCREENS.WebviewScreen, {
+                  link: item.file,
+                  title: '',
+                  type: 'employe',
+                });
+              }}>
+              <FastImage
+                source={{uri: item.file}}
+                style={{
+                  ...styles.attachment,
+                  alignSelf: isUser ? 'flex-end' : 'flex-start',
+                }}
+              />
+            </TouchableOpacity>
           )
         ) : null}
       </View>

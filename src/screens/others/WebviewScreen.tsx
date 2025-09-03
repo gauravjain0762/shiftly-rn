@@ -1,8 +1,9 @@
+/* eslint-disable react-native/no-inline-styles */
 import {StyleSheet, View} from 'react-native';
 import React from 'react';
 import {useRoute} from '@react-navigation/native';
 import WebViewRender from '../../component/common/WebViewRender';
-import {BackHeader, LinearContainer} from '../../component';
+import {BackHeader, LinearContainer, Loader} from '../../component';
 import {useTranslation} from 'react-i18next';
 import {hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
@@ -11,6 +12,8 @@ const WebViewScreen = () => {
   const {t} = useTranslation();
   const {params} = useRoute<any>();
   const type = params?.type;
+
+  const [isLoading, setIsLoading] = React.useState(true);
   return (
     <LinearContainer
       colors={
@@ -28,7 +31,11 @@ const WebViewScreen = () => {
         isRight={false}
       />
       <View style={{flex: 1}}>
-        <WebViewRender url={params?.link} />
+        <WebViewRender
+          url={params?.link}
+          onLoadEnd={() => setIsLoading(false)}
+        />
+        {isLoading && <Loader />}
       </View>
     </LinearContainer>
   );

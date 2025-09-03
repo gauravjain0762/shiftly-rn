@@ -110,6 +110,7 @@ export const IMAGES = {
   check_mark: require('./image/check_mark.png'),
   circle: require('./image/circle.png'),
   pdfIcon: require('./image/pdfIcon.png'),
+  document: require('./image/document.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

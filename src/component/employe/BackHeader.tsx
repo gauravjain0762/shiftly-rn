@@ -3,6 +3,7 @@ import {
   ImageStyle,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -23,7 +24,7 @@ type props = {
   isRight?: boolean;
   RightIcon?: ReactNode;
   RightIconStyle?: ImageStyle;
-  titleStyle?: ViewStyle;
+  titleStyle?: TextStyle;
   leftStyle?: ViewStyle;
   type?: 'company' | 'employe';
   alignBackAndTitleTogether?: boolean;

@@ -20,7 +20,7 @@ import {IMAGES} from '../../../assets/Images';
 import {navigationRef} from '../../../navigation/RootContainer';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
-import {errorToast} from '../../../utils/commonFunction';
+import {errorToast, navigateTo} from '../../../utils/commonFunction';
 import {
   useLazyGetCompanyChatMessagesQuery,
   useSendCompanyMessageMutation,
@@ -29,6 +29,7 @@ import {onChatMessage} from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import ChatInput from '../../../component/chat/ChatInput';
 import FastImage from 'react-native-fast-image';
+import {SCREENS} from '../../../navigation/screenNames';
 // import MessageBubble from '../../../component/chat/MessageBubble';
 
 // ---------- Types ----------
@@ -36,7 +37,7 @@ type Message = {
   _id?: string;
   sender: 'user' | 'company';
   message: string;
-  time: string;
+  createdAt: string;
   file?: string | null;
   file_type?: 'image' | null;
 };
@@ -49,7 +50,15 @@ type LogoFile = {
 
 // ---------- Components ----------
 const MessageBubble = React.memo(
-  ({item, recipientName}: {item: Message; recipientName: string}) => {
+  ({
+    item,
+    recipientName,
+    type,
+  }: {
+    item: Message;
+    recipientName: string;
+    type: 'user' | 'company';
+  }) => {
     const isCompany = item.sender !== 'user';
 
     return (
@@ -67,13 +76,18 @@ const MessageBubble = React.memo(
             <View>
               <Text style={styles.senderName}>{recipientName}</Text>
               <Text style={styles.timeText}>
-                {moment(item.time).format('hh:mm A')}
+                {moment(item?.createdAt).format('hh:mm A')}
               </Text>
             </View>
           </View>
         )}
 
         <View style={{flex: 1}}>
+          {isCompany && (
+            <Text style={{...styles.timeText, alignSelf: 'flex-end'}}>
+              {moment(item?.createdAt).format('hh:mm A')}
+            </Text>
+          )}
           {item.message && (
             <View
               style={[
@@ -94,21 +108,41 @@ const MessageBubble = React.memo(
             item.file?.includes('pdf') ||
             item.file?.includes('doc') ||
             item.file?.includes('docx') ? (
-              <FastImage
-                source={IMAGES.pdfIcon}
-                style={{
-                  ...styles.attachment,
-                  alignSelf: isCompany ? 'flex-end' : 'flex-start',
-                }}
-              />
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.WebviewScreen, {
+                    link: item.file,
+                    title: '',
+                    type: 'company',
+                  });
+                }}>
+                <FastImage
+                  source={IMAGES.document}
+                  defaultSource={IMAGES.document}
+                  tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
+                  style={{
+                    ...styles.attachment,
+                    alignSelf: isCompany ? 'flex-end' : 'flex-start',
+                  }}
+                />
+              </TouchableOpacity>
             ) : (
-              <FastImage
-                source={{uri: item.file}}
-                style={{
-                  ...styles.attachment,
-                  alignSelf: isCompany ? 'flex-end' : 'flex-start',
-                }}
-              />
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.WebviewScreen, {
+                    link: item.file,
+                    title: '',
+                    type: 'company',
+                  });
+                }}>
+                <FastImage
+                  source={{uri: item.file}}
+                  style={{
+                    ...styles.attachment,
+                    alignSelf: isCompany ? 'flex-end' : 'flex-start',
+                  }}
+                />
+              </TouchableOpacity>
             )
           ) : null}
         </View>
@@ -243,7 +277,7 @@ const CoChat = () => {
                 <MessageBubble
                   item={item}
                   recipientName={chats?.data?.chat?.user_id?.name}
-                  // type={'company'}
+                  type={'company'}
                 />
               )}
               keyExtractor={(item, index) => item._id ?? index.toString()}
