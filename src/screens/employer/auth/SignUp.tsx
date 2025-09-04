@@ -941,7 +941,7 @@ const SignUp = () => {
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <Progress.Bar
-        progress={(step * 11) / 100}
+        progress={(step * 12) / 100}
         width={SCREEN_WIDTH}
         borderRadius={0}
         animated

@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useEffect} from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 import {colors} from '../../theme/colors';
@@ -8,6 +8,9 @@ import GradientButton from '../common/GradientButton';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
 import CustomSwitch from '../common/CustomSwitch';
+import {useGetEmployeeProfileQuery} from '../../api/dashboardApi';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../store';
 
 type MessageItem = {
   id: string;
@@ -64,12 +67,28 @@ const AboutMeList: FC<Props> = ({
   aboutEdit,
   setAboutEdit,
   onNextPress,
-  experienceList,
 }: any) => {
+  console.log('🔥🔥🔥 ~ AboutMeList ~ aboutEdit:', aboutEdit);
+  const {data: empProfile} = useGetEmployeeProfileQuery({});
+  const empData = empProfile?.data?.user;
+
+  useEffect(() => {
+    if (empData) {
+      console.log('🔥🔥🔥 ~ AboutMeList ~ empData:', empData);
+
+      // setAboutEdit({
+      //   ...aboutEdit,
+      //   open_for_jobs: empData?.open_for_job,
+      //   location: empData?.location || '',
+      //   responsibilities: empData?.responsibility || '',
+      //   languages: empData?.languages || [],
+      //   selectedLanguages: (empData?.languages || []).map((l: any) => l.name),
+      // });
+    }
+  }, [empData]);
+
   return (
     <View style={styles.containerWrapper}>
-      {/* <Text style={styles.headerTitle}>{experienceList[0]?.title}</Text> */}
-
       <View style={styles.optionWrapper}>
         <TouchableOpacity
           style={styles.optionItem}
@@ -119,7 +138,7 @@ const AboutMeList: FC<Props> = ({
       <CustomInput
         label="Location"
         placeholder={'Enter Location'}
-        value={aboutEdit.location}
+        value={aboutEdit?.location}
         onChange={(text: any) => {
           setAboutEdit({...aboutEdit, location: text});
         }}
@@ -144,14 +163,23 @@ const AboutMeList: FC<Props> = ({
         container={styles.multiDropdownContainer}
         selectedStyle={styles.selectedStyle}
         onChange={(selectedItems: any) => {
+          console.log('🔥🔥🔥 ~ selectedItems:', selectedItems);
+          const updatedLanguages = selectedItems.map((name: string) => {
+            const existing = (aboutEdit.languages || []).find(
+              (l: any) => l.name === name,
+            );
+            return existing || {name, level: ''};
+          });
+
           setAboutEdit({
             ...aboutEdit,
             selectedLanguages: selectedItems,
+            languages: updatedLanguages,
           });
         }}
       />
 
-      {!!aboutEdit.selectedLanguages?.length && (
+      {aboutEdit?.selectedLanguages?.length && (
         <View style={styles.languageListContainer}>
           {aboutEdit.selectedLanguages.map((name: string) => (
             <View key={name} style={styles.languageChip}>
@@ -161,7 +189,7 @@ const AboutMeList: FC<Props> = ({
         </View>
       )}
 
-      {aboutEdit.selectedLanguages.map((lang: any) => (
+      {aboutEdit?.selectedLanguages?.map((lang: any) => (
         <View style={styles.row} key={lang}>
           <Text style={styles.language}>{lang}</Text>
           {proficiencyLevels.map(level => (
@@ -169,16 +197,21 @@ const AboutMeList: FC<Props> = ({
               key={level}
               style={[
                 styles.dot,
-                aboutEdit.proficiency[lang] === level && styles.selectedDot,
+                aboutEdit.languages?.find((l: any) => l.name === lang)
+                  ?.level === level && styles.selectedDot,
                 {backgroundColor: getDotColor(level)},
               ]}
               onPress={() => {
+                const updatedLanguages = [
+                  ...(aboutEdit.languages || []).filter(
+                    (l: any) => l.name !== lang,
+                  ),
+                  {name: lang, level},
+                ];
+
                 setAboutEdit({
                   ...aboutEdit,
-                  proficiency: {
-                    ...aboutEdit.proficiency,
-                    [lang]: level,
-                  },
+                  languages: updatedLanguages,
                 });
               }}
             />
@@ -187,12 +220,6 @@ const AboutMeList: FC<Props> = ({
       ))}
 
       {/* <CustomSwitch isOn={aboutEdit?.open_for_jobs} setIsOn={setAboutEdit}  /> */}
-
-      <GradientButton
-        style={styles.btn}
-        title={'Update'}
-        onPress={onNextPress}
-      />
     </View>
   );
 };

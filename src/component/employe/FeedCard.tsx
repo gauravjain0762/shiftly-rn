@@ -18,7 +18,6 @@ const FeedCard: FC<card> = ({
   item,
   isFollow = false,
 }) => {
-  console.log('🔥🔥🔥 ~ FeedCard ~ item:', item);
   return (
     <TouchableOpacity
       activeOpacity={1}

@@ -7,16 +7,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect} from 'react';
-import {BackHeader, LinearContainer} from '../../../component';
+import React, {act, useCallback, useEffect, useState} from 'react';
+import {
+  BackHeader,
+  GradientButton,
+  LinearContainer,
+  Loader,
+} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Stepper from '../../../component/employe/Stepper';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import EducationList from '../../../component/employe/EducationList';
+import EducationList, {
+  isEmptyEducation,
+} from '../../../component/employe/EducationList';
 import EducationCard from '../../../component/employe/EducationCard';
-import ExperienceList from '../../../component/employe/ExperienceList';
+import ExperienceList, {
+  isEmptyExperience,
+} from '../../../component/employe/ExperienceList';
 import AboutMeList from '../../../component/employe/AboutMeList';
 import SuccessffullyModal from '../../../component/employe/SuccessffullyModal';
 import {useDispatch, useSelector} from 'react-redux';
@@ -42,9 +51,16 @@ import {
   useUpdateAboutMeMutation,
 } from '../../../api/dashboardApi';
 import {errorToast, goBack, successToast} from '../../../utils/commonFunction';
+import {setUserInfo} from '../../../features/authSlice';
+import {useFocusEffect} from '@react-navigation/native';
+import BaseText from '../../../component/common/BaseText';
+import {IMAGES} from '../../../assets/Images';
 
 const CreateProfileScreen = () => {
   const dispatch = useDispatch();
+  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const [isEducationUpdate, setIsEducationUpdate] = useState(false);
+  const [isExperienceUpdate, setIsExperienceUpdate] = useState(false);
 
   const {
     educationList,
@@ -55,6 +71,7 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
+  console.log('🔥🔥 ~ CreateProfileScreen ~ aboutEdit:', aboutEdit);
   const {data: getEducation, refetch: refetchEducation} = useGetEducationsQuery(
     {},
     {
@@ -75,26 +92,51 @@ const CreateProfileScreen = () => {
   const educationData = getEducation?.data?.educations;
   const experienceData = getExperiences?.data?.experiences;
 
-  const [addUpdateEducation] = useAddUpdateEducationMutation({});
-  const [addUpdateExperience] = useAddUpdateExperienceMutation({});
-  const [updateAboutMe] = useUpdateAboutMeMutation({});
+  const [addUpdateEducation, {isLoading: isLoadingEducation}] =
+    useAddUpdateEducationMutation({});
+  const [addUpdateExperience, {isLoading: isLoadingExperience}] =
+    useAddUpdateExperienceMutation({});
+  const [updateAboutMe, {isLoading: isLoadingAboutme}] =
+    useUpdateAboutMeMutation({});
   const [removeEducation] = useRemoveEducationMutation({});
   const [removeExperience] = useRemoveExperienceMutation({});
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        dispatch(setActiveStep(1));
+      };
+    }, []),
+  );
+
+  useEffect(() => {
+    if (educationData) {
+      dispatch(setEducationList(educationData));
+    }
+    if (experienceData) {
+      dispatch(setExperienceList(experienceData));
+    }
+  }, [educationData, experienceData]);
 
   const handleSaveOrAddEducation = () => {
     if (educationListEdit?.isEditing) {
       dispatch(
         setEducationList(
-          educationList.map((edu: any) =>
-            edu.education_id === educationListEdit.education_id ||
-            edu._id === educationListEdit._id
+          educationList.map((edu: any) => {
+            const isEditing =
+              edu.education_id === educationListEdit.education_id;
+
+            return edu.isLocal === true
+              ? isEditing
+                ? {...educationListEdit, isEditing: false}
+                : edu
+              : edu._id === educationListEdit._id
               ? {...educationListEdit, isEditing: false}
-              : edu,
-          ),
+              : edu;
+          }),
         ),
       );
     } else {
-      // Just add a new local entry
       dispatch(
         setEducationList([
           ...educationList,
@@ -102,11 +144,12 @@ const CreateProfileScreen = () => {
             ...educationListEdit,
             education_id: Date.now().toString(),
             isEditing: false,
+            isLocal: true,
           },
         ]),
       );
     }
-
+    setIsEducationUpdate(true);
     // Reset the editing state
     dispatch(
       setEducationListEdit({
@@ -134,6 +177,22 @@ const CreateProfileScreen = () => {
           ),
         ),
       );
+      dispatch(
+        setExperienceList(
+          experienceList.map((exp: any) => {
+            const isEditing =
+              exp.experience_id === experienceListEdit.experience_id;
+
+            return exp.isLocal === true
+              ? isEditing
+                ? {...experienceListEdit, isEditing: false}
+                : exp
+              : exp._id === experienceListEdit._id
+              ? {...experienceListEdit, isEditing: false}
+              : exp;
+          }),
+        ),
+      );
     } else {
       dispatch(
         setExperienceList([
@@ -142,14 +201,17 @@ const CreateProfileScreen = () => {
             ...experienceListEdit,
             experience_id: Date.now().toString(),
             isEditing: false,
+            isLocal: true,
           },
         ]),
       );
     }
 
+    setIsExperienceUpdate(true);
+
     dispatch(
       setExperienceListEdit({
-        preferred: '',
+        preferred_position: '',
         title: '',
         company: '',
         department: '',
@@ -169,6 +231,7 @@ const CreateProfileScreen = () => {
     try {
       for (const edu of educationList) {
         const payload = {
+          education_id: edu._id || '',
           degree: edu.degree,
           university: edu.university,
           country: edu.country,
@@ -188,7 +251,7 @@ const CreateProfileScreen = () => {
           console.log('Education saved:', response);
 
           if (response?.status) {
-            successToast(response?.message);
+            // successToast(response?.message);
           } else {
             errorToast(response?.message);
           }
@@ -208,7 +271,9 @@ const CreateProfileScreen = () => {
     try {
       for (const exp of experienceList) {
         const payload = {
+          experience_id: exp._id || '',
           title: exp?.title,
+          preferred_position: exp?.preferred_position,
           company: exp?.company,
           department: exp?.department,
           country: exp?.country,
@@ -228,7 +293,7 @@ const CreateProfileScreen = () => {
         const response = await addUpdateExperience(payload).unwrap();
 
         if (response?.status) {
-          successToast(response?.message);
+          // successToast(response?.message);
           dispatch(setActiveStep(3));
         } else {
           errorToast(response?.message);
@@ -243,18 +308,37 @@ const CreateProfileScreen = () => {
   };
 
   const handleAddAboutMe = async () => {
-    console.log('aboutEdit', aboutEdit);
+    const languages = (aboutEdit?.languages || []).map((lang: any) => ({
+      name: lang.name,
+      level: lang.level,
+    }));
+
     const params = {
       open_for_job: aboutEdit?.open_for_jobs ? true : false,
       location: aboutEdit?.location,
       responsibility: aboutEdit?.responsibilities,
-      languages: aboutEdit?.selectedLanguages,
+      languages,
     };
-    console.log('🔥🔥🔥 ~ handleAddAboutMe ~ params:', params);
+
+    console.log(' ~ handleAddAboutMe ~ params:', params);
+
     try {
       const res = await updateAboutMe(params).unwrap();
+      const updatedData = res?.data?.user;
       if (res?.status) {
-        successToast(res?.message);
+        console.log('>>>>>>>>~ handleAddAboutMe ~ updatedData:', updatedData);
+        dispatch(
+          setUserInfo({
+            ...userInfo,
+            open_for_job: updatedData?.open_for_job,
+            location: updatedData?.location || '',
+            responsibility: updatedData?.responsibility || '',
+            languages: updatedData?.languages || [],
+            selectedLanguages: (updatedData?.languages || []).map(
+              (l: any) => l.name,
+            ),
+          }),
+        );
         dispatch(setShowModal(true));
       } else {
         errorToast(res?.message);
@@ -269,6 +353,7 @@ const CreateProfileScreen = () => {
           responsibilities: '',
           proficiency: '',
           selectedLanguages: [],
+          languages: [],
           selectOne: [],
           isOn: false,
         }),
@@ -280,8 +365,13 @@ const CreateProfileScreen = () => {
 
   const handleUpdateProfile = async () => {
     try {
-      await handleAddEducation();
-      await handleAddUExperience();
+      if (isEducationUpdate) {
+        await handleAddEducation();
+      }
+
+      if (isExperienceUpdate) {
+        await handleAddUExperience();
+      }
       await handleAddAboutMe();
 
       dispatch(setActiveStep(1));
@@ -296,6 +386,9 @@ const CreateProfileScreen = () => {
         const res = await removeEducation(item._id).unwrap();
         successToast(res?.message || 'Education removed');
         refetchEducation();
+        dispatch(
+          setEducationList(educationList.filter(edu => edu._id !== item._id)),
+        );
       } else {
         dispatch(
           setEducationList(
@@ -315,6 +408,7 @@ const CreateProfileScreen = () => {
         const res = await removeExperience(item._id).unwrap();
         successToast(res?.message || 'Experience removed');
         refetchExperience();
+        setExperienceList(experienceList.filter(exp => exp._id !== item._id));
       } else {
         dispatch(
           setExperienceList(
@@ -334,87 +428,95 @@ const CreateProfileScreen = () => {
     <SafeAreaView
       edges={['bottom']}
       style={{flex: 1, backgroundColor: colors._041326}}>
-      <KeyboardAwareScrollView
-        enableOnAndroid={true}
-        enableAutomaticScroll={true}
-        automaticallyAdjustContentInsets
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
-        <LinearContainer
-          SafeAreaProps={{edges: ['bottom', 'top']}}
-          colors={['#0D468C', '#041326']}>
-          <View style={styles.topConrainer}>
-            <BackHeader
-              isRight={true}
-              title={'Create Your Profile'}
-              RightIcon={<View />}
-              onBackPress={() => {
-                if (activeStep === 1) {
-                  goBack();
-                  dispatch(
-                    setEducationListEdit({
-                      degree: '',
-                      university: '',
-                      startDate_month: '',
-                      startDate_year: '',
-                      endDate_month: '',
-                      endDate_year: '',
-                      country: '',
-                      province: '',
-                      isEditing: false,
-                    }),
-                  );
+      <LinearContainer
+        SafeAreaProps={{edges: ['bottom', 'top']}}
+        colors={['#0D468C', '#041326']}>
+        {/* Fixed Header */}
+        <View style={styles.topConrainer}>
+          <BackHeader
+            isRight={true}
+            title={'Create Your Profile'}
+            RightIcon={<View />}
+            onBackPress={() => {
+              if (activeStep === 1) {
+                goBack();
+                dispatch(
+                  setEducationListEdit({
+                    degree: '',
+                    university: '',
+                    startDate_month: '',
+                    startDate_year: '',
+                    endDate_month: '',
+                    endDate_year: '',
+                    country: '',
+                    province: '',
+                    isEditing: false,
+                  }),
+                );
 
-                  dispatch(
-                    setExperienceListEdit({
-                      preferred: '',
-                      title: '',
-                      company: '',
-                      department: '',
-                      country: '',
-                      jobStart_month: '',
-                      jobStart_year: '',
-                      jobEnd_month: '',
-                      jobEnd_year: '',
-                      still_working: false,
-                      experience_type: '',
-                      isEditing: false,
-                    }),
-                  );
+                dispatch(
+                  setExperienceListEdit({
+                    experience_id: '',
+                    job_end: {month: '', year: ''},
+                    job_start: {month: '', year: ''},
+                    preferred_position: '',
+                    title: '',
+                    company: '',
+                    department: '',
+                    country: '',
+                    jobStart_month: '',
+                    jobStart_year: '',
+                    jobEnd_month: '',
+                    jobEnd_year: '',
+                    still_working: false,
+                    experience_type: '',
+                    isEditing: false,
+                  }),
+                );
 
-                  dispatch(
-                    setAboutEdit({
-                      aboutMe: '',
-                      checkEnd: false,
-                      location: '',
-                      open_for_jobs: false,
-                      responsibilities: '',
-                      proficiency: '',
-                      selectedLanguages: [],
-                      selectOne: [],
-                      isOn: false,
-                    }),
-                  );
+                dispatch(
+                  setAboutEdit({
+                    aboutMe: '',
+                    checkEnd: false,
+                    location: '',
+                    open_for_jobs: false,
+                    responsibilities: '',
+                    proficiency: '',
+                    selectedLanguages: [],
+                    languages: [],
+                    selectOne: [],
+                    isOn: false,
+                  }),
+                );
 
-                  dispatch(setEducationList([]));
-                  dispatch(setExperienceList([]));
-                  dispatch(setActiveStep(1));
-                } else {
-                  dispatch(setActiveStep(activeStep - 1));
-                }
-              }}
-            />
-          </View>
-
-          <Stepper
-            activeStep={activeStep}
-            setActiveStep={(step: number) => dispatch(setActiveStep(step))}
+                dispatch(setEducationList([]));
+                dispatch(setExperienceList([]));
+                dispatch(setActiveStep(1));
+              } else {
+                dispatch(setActiveStep(activeStep - 1));
+              }
+            }}
           />
+        </View>
 
+        {/* Fixed Stepper */}
+        <Stepper
+          activeStep={activeStep}
+          setActiveStep={(step: number) => dispatch(setActiveStep(step))}
+        />
+
+        {/* Scrollable Content Area */}
+        <KeyboardAwareScrollView
+          style={{flex: 1}}
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          automaticallyAdjustContentInsets
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
           {activeStep === 1 && (
             <>
-              {[...(educationData || []), ...educationList].map(
-                (item: any, index: number) => (
+              {educationList?.length > 0 &&
+                educationList?.map((item: any, index: number) => (
                   <EducationCard
                     key={item?._id || item?.education_id || index}
                     item={item}
@@ -441,8 +543,7 @@ const CreateProfileScreen = () => {
                       );
                     }}
                   />
-                ),
-              )}
+                ))}
 
               <EducationList
                 educationList={educationData || educationList}
@@ -450,19 +551,16 @@ const CreateProfileScreen = () => {
                 setEducationListEdit={val =>
                   dispatch(setEducationListEdit(val))
                 }
-                addNewEducation={handleSaveOrAddEducation}
-                onSaveEducation={handleSaveOrAddEducation}
-                onNextPress={() => {
-                  dispatch(setActiveStep(2));
-                }}
+                // addNewEducation={handleSaveOrAddEducation}
+                // onSaveEducation={handleSaveOrAddEducation}
               />
             </>
           )}
 
           {activeStep === 2 && (
             <>
-              {[...(experienceData || []), ...experienceList].map(
-                (item, index) => (
+              {experienceList?.length > 0 &&
+                experienceList?.map((item, index) => (
                   <EducationCard
                     key={index}
                     item={item}
@@ -507,8 +605,7 @@ const CreateProfileScreen = () => {
                       );
                     }}
                   />
-                ),
-              )}
+                ))}
               <ExperienceList
                 experienceList={experienceData || experienceList}
                 experienceListEdit={experienceListEdit}
@@ -528,27 +625,151 @@ const CreateProfileScreen = () => {
             <AboutMeList
               aboutEdit={aboutEdit}
               experienceList={experienceList}
-              onNextPress={handleUpdateProfile}
+              onNextPress={() => {}}
               setAboutEdit={(val: any) => dispatch(setAboutEdit(val))}
             />
           )}
+        </KeyboardAwareScrollView>
 
-          <SuccessffullyModal
-            visible={showModal}
-            onClose={() => dispatch(setShowModal(false))}
+        <SuccessffullyModal
+          visible={showModal}
+          onClose={() => dispatch(setShowModal(false))}
+        />
+      </LinearContainer>
+
+      {activeStep === 1 && (
+        <View style={styles.buttonStyle}>
+          <TouchableOpacity
+            onPress={handleSaveOrAddEducation}
+            disabled={
+              !educationListEdit?.isEditing &&
+              isEmptyEducation(educationListEdit)
+            }
+            style={[
+              styles.btnRow,
+              !educationListEdit?.isEditing &&
+                isEmptyEducation(educationListEdit) && {
+                  opacity: 0.5,
+                },
+            ]}>
+            <Image
+              style={styles.closeIcon}
+              source={
+                educationListEdit?.isEditing ? IMAGES.check : IMAGES.close1
+              }
+            />
+            <BaseText style={styles.addEduText}>
+              {educationListEdit?.isEditing
+                ? 'Save Education'
+                : 'Add Another Education'}
+            </BaseText>
+          </TouchableOpacity>
+
+          <GradientButton
+            style={styles.btn}
+            title="Next"
+            onPress={() => {
+              dispatch(setActiveStep(2));
+            }}
           />
-        </LinearContainer>
-      </KeyboardAwareScrollView>
+        </View>
+      )}
+
+      {activeStep === 2 && (
+        <View style={styles.buttonStyle}>
+          <TouchableOpacity
+            onPress={handleSaveOrAddExperience}
+            disabled={
+              !experienceListEdit?.isEditing &&
+              isEmptyExperience(experienceListEdit)
+            }
+            style={[
+              styles.btnRow,
+              !experienceListEdit?.isEditing &&
+                isEmptyExperience(experienceListEdit) && {
+                  opacity: 0.5,
+                },
+            ]}>
+            <Image
+              style={styles.closeIcon}
+              source={
+                experienceListEdit?.isEditing ? IMAGES.check : IMAGES.close1
+              }
+            />
+            <BaseText style={styles.addEduText}>
+              {experienceListEdit?.isEditing
+                ? 'Save Exeprience'
+                : 'Add Another Experience'}
+            </BaseText>
+          </TouchableOpacity>
+
+          <GradientButton
+            style={styles.btn}
+            title={'Next'}
+            onPress={() => {
+              dispatch(setActiveStep(3));
+            }}
+          />
+        </View>
+      )}
+
+      {activeStep === 3 && (
+        <GradientButton
+          style={[
+            styles.btn,
+            {
+              marginHorizontal: wp(25),
+            },
+          ]}
+          title={'Update'}
+          onPress={() => {
+            if (isLoadingAboutme || isLoadingEducation || isLoadingExperience) {
+              return;
+            } else {
+              handleUpdateProfile();
+            }
+          }}
+        />
+      )}
+      {(isLoadingEducation || isLoadingAboutme) && <Loader />}
     </SafeAreaView>
   );
 };
-
 export default CreateProfileScreen;
 
 const styles = StyleSheet.create({
   topConrainer: {
-    paddingHorizontal: wp(25),
     paddingTop: hp(18),
     paddingBottom: hp(5),
+    paddingHorizontal: wp(25),
+  },
+  btnRow: {
+    gap: hp(4),
+    marginTop: hp(10),
+    borderWidth: wp(2),
+    paddingTop: hp(12),
+    flexDirection: 'row',
+    borderRadius: hp(50),
+    marginBottom: hp(12),
+    alignItems: 'center',
+    paddingBottom: hp(12),
+    marginHorizontal: wp(4),
+    borderColor: '#F4E2B8',
+    justifyContent: 'center',
+  },
+  btn: {
+    marginHorizontal: wp(4),
+  },
+  addEduText: {
+    ...commonFontStyle(500, 20, '#F4E2B8'),
+  },
+  closeIcon: {
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
+    tintColor: colors.coPrimary,
+  },
+  buttonStyle: {
+    paddingHorizontal: wp(25),
   },
 });

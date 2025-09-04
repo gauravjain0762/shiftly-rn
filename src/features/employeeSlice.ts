@@ -13,15 +13,18 @@ export interface EducationItem {
   country: string;
   province: string;
   isEditing?: boolean;
+  isLocal?: boolean;
 }
 
 export interface ExperienceItem {
   experience_id?: string;
-  preferred: string;
+  preferred_position: string;
   title: string;
   company: string;
   department: string;
   country: string;
+  job_start: {month: string; year: string};
+  job_end: {month: string; year: string};
   jobStart_month: string;
   jobStart_year: string;
   jobEnd_month: string;
@@ -29,6 +32,7 @@ export interface ExperienceItem {
   still_working: boolean;
   experience_type: string;
   isEditing?: boolean;
+  isLocal?: boolean;
 }
 
 export interface AboutMe {
@@ -38,9 +42,15 @@ export interface AboutMe {
   isOn: boolean;
   location: string;
   selectedLanguages: string[];
+  languages: {name: string; level: string}[];
   proficiency: string;
   checkEnd: boolean;
   open_for_jobs: boolean;
+}
+
+interface AuthState {
+  email: string;
+  password: string;
 }
 
 export interface EmployeeState {
@@ -55,6 +65,7 @@ export interface EmployeeState {
   favoriteJobs: any[];
   isBannerLoaded: boolean;
   isSuccessModalVisible: boolean;
+  auth: AuthState;
 }
 
 const initialState: EmployeeState = {
@@ -73,10 +84,11 @@ const initialState: EmployeeState = {
     province: '',
     education_id: '',
     isEditing: false,
+    isLocal: true,
   },
   experienceListEdit: {
     experience_id: '',
-    preferred: '',
+    preferred_position: '',
     title: '',
     company: '',
     department: '',
@@ -88,6 +100,15 @@ const initialState: EmployeeState = {
     still_working: false,
     experience_type: '',
     isEditing: false,
+    isLocal: true,
+    job_start: {
+      month: '',
+      year: ''
+    },
+    job_end: {
+      month: '',
+      year: ''
+    }
   },
   aboutEdit: {
     aboutMe: '',
@@ -96,6 +117,12 @@ const initialState: EmployeeState = {
     isOn: false,
     location: '',
     selectedLanguages: [],
+    languages: [
+      {
+        name: '',
+        level: '',
+      },
+    ],
     proficiency: '',
     checkEnd: false,
     open_for_jobs: false,
@@ -103,6 +130,10 @@ const initialState: EmployeeState = {
   favoriteJobs: [],
   isBannerLoaded: false,
   isSuccessModalVisible: false,
+  auth: {
+    email: __DEV__ ? 'bilal@devicebee.com' : '',
+    password: __DEV__ ? '12345678' : '',
+  },
 };
 
 const employeeSlice = createSlice({
@@ -152,6 +183,15 @@ const employeeSlice = createSlice({
     setIsBannerLoaded: (state, action: PayloadAction<boolean>) => {
       state.isBannerLoaded = action.payload;
     },
+    setIsSuccessModalVisible: (state, action: PayloadAction<boolean>) => {
+      state.isSuccessModalVisible = action.payload;
+    },
+    setAuthData: (state, action: PayloadAction<Partial<AuthState>>) => {
+      state.auth = {
+        ...state.auth,
+        ...action.payload,
+      };
+    },
     resetEmployeeState: () => initialState,
   },
 });
@@ -171,6 +211,8 @@ export const {
   resetEmployeeState,
   setFavoriteJobs,
   setIsBannerLoaded,
+  setIsSuccessModalVisible,
+  setAuthData,
 } = employeeSlice.actions;
 
 export const selectEmployeeState = (state: RootState): EmployeeState =>

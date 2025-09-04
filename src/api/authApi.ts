@@ -384,7 +384,7 @@ export const authApi = createApi({
         url: API.employeeLogin,
         method: HTTP_METHOD.POST,
         data: credentials,
-        skipLoader: false,
+        // skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {

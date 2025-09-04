@@ -20,7 +20,6 @@ type Props = {
 };
 
 const EducationCard = ({item, onRemove, onEdit, type}: Props) => {
-  console.log('🔥🔥🔥 ~ EducationCard ~ item:', item);
   const isEducation = type === 'Education';
 
   return (

@@ -28,38 +28,37 @@ const experienceOptions = [
   {label: 'Contract', value: 'contract'},
 ];
 
+export const isEmptyExperience = (exp: ExperienceItem) => {
+  return (
+    !exp?.company ||
+    !exp?.title ||
+    !exp?.preferred_position ||
+    !exp?.country ||
+    !exp?.department ||
+    !exp?.jobStart_month ||
+    !exp?.jobStart_year ||
+    !exp?.experience_type ||
+    (!exp?.still_working && (!exp?.jobEnd_month || !exp?.jobEnd_year))
+  );
+};
+
 const ExperienceList: FC<any> = ({
-  onNextPress,
-  experienceList,
-  addNewExperience,
-  onSaveExperience,
   experienceListEdit,
   setExperienceListEdit,
-  experienceData,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const isEmptyExperience = (exp: ExperienceItem) => {
-    return (
-      !exp?.company ||
-      !exp?.title ||
-      !exp?.preferred ||
-      !exp?.country ||
-      !exp?.department ||
-      !exp?.jobStart_month ||
-      !exp?.jobStart_year ||
-      !exp?.experience_type ||
-      (!exp?.still_working && (!exp?.jobEnd_month || !exp?.jobEnd_year))
-    );
-  };
 
   return (
     <View style={styles.wrapper}>
       <CustomInput
         label="Preferred Position"
         placeholder={'Enter Preferred Position'}
-        value={experienceListEdit.preferred}
+        value={experienceListEdit.preferred_position}
         onChange={(text: any) =>
-          setExperienceListEdit({...experienceListEdit, preferred: text})
+          setExperienceListEdit({
+            ...experienceListEdit,
+            preferred_position: text,
+          })
         }
       />
 
@@ -195,47 +194,6 @@ const ExperienceList: FC<any> = ({
             ...experienceListEdit,
             experience_type: selectedItem?.value,
           });
-        }}
-      />
-
-      <TouchableOpacity
-        onPress={
-          experienceListEdit?.isEditing ? onSaveExperience : addNewExperience
-        }
-        disabled={
-          !experienceListEdit?.isEditing &&
-          isEmptyExperience(experienceListEdit)
-        }
-        style={[
-          styles.btnRow,
-          !experienceListEdit?.isEditing &&
-            isEmptyExperience(experienceListEdit) && {
-              opacity: 0.5,
-            },
-        ]}>
-        <Image
-          style={styles.closeIcon}
-          source={experienceListEdit?.isEditing ? IMAGES.check : IMAGES.close1}
-        />
-        <BaseText style={styles.addEduText}>
-          {experienceListEdit?.isEditing
-            ? 'Save Exeprience'
-            : 'Add Another Experience'}
-        </BaseText>
-      </TouchableOpacity>
-
-      <GradientButton
-        style={styles.btn}
-        title={'Next'}
-        onPress={() => {
-          // if (
-          //   (experienceData?.length || 0) + (experienceList?.length || 0) ===
-          //   0
-          // ) {
-          //   errorToast('Please add the experience');
-          //   return;
-          // }
-          onNextPress();
         }}
       />
     </View>

@@ -92,6 +92,7 @@ const CoLogin = () => {
                 dispatch(setAuthData({email: e, password}));
               }}
               keyboardType="email-address"
+              autoCapitalize="none"
             />
             <Text style={styles.label}>{t('Password')}</Text>
             <CustomTextInput

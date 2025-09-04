@@ -3,13 +3,11 @@ import React from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Image,
   StyleSheet,
   Platform,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
@@ -21,7 +19,6 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import CustomBtn from '../../../component/common/CustomBtn';
 import {useTranslation} from 'react-i18next';
 import {
   emailCheck,
@@ -30,36 +27,46 @@ import {
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useEmployeeLoginMutation} from '../../../api/authApi';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
+import {setAuthData} from '../../../features/employeeSlice';
 
 const LoginScreen = () => {
   const {t, i18n} = useTranslation();
-  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
 
-  const [employeeLogin, {isLoading: loginLoading}] = useEmployeeLoginMutation();
-  const [authData, setAuthData] = React.useState({
-    email: __DEV__ ? 'bilal@devicebee.com' : '',
-    password: __DEV__ ? '12345678' : '',
-  });
+  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  const [employeeLogin] = useEmployeeLoginMutation({});
+
+  const {auth} = useSelector((state: RootState) => state.employee);
+  const {email, password} = auth;
 
   const handleLogin = async () => {
-    if (!emailCheck(authData?.email)) {
-      errorToast(t('Please enter a valid email'));
-    } else if (authData?.password === '') {
-      errorToast(t('Please enter password'));
-    } else {
-      let data = {
-        email: authData?.email.trim().toLowerCase(),
-        password: authData?.password.trim(),
-        language: language,
-        deviceToken: fcmToken ?? 'ddd',
-        deviceType: Platform.OS,
-      };
-      const response = await employeeLogin(data).unwrap();
-      console.log(response, 'response----');
+    try {
+      if (!emailCheck(email)) {
+        errorToast(t('Please enter a valid email'));
+      } else if (password === '') {
+        errorToast(t('Please enter password'));
+      } else {
+        let data = {
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+          language: language,
+          deviceToken: fcmToken ?? 'ddd',
+          deviceType: Platform.OS,
+        };
+
+        const response = await employeeLogin(data).unwrap();
+        if (response?.status) {
+          dispatch(setAuthData({email: '', password: ''}));
+          console.log(response, 'response----');
+        }
+      }
+    } catch (error) {
+      console.error('Error registering user:', error);
     }
   };
+
   return (
     <LinearContainer
       colors={['#043379', '#041F50']}
@@ -82,11 +89,13 @@ const LoginScreen = () => {
           <CustomTextInput
             placeholder="Email"
             placeholderTextColor={colors._F4E2B8}
-            value={authData?.email}
-            inputStyle={{color: colors._F4E2B8}}
+            value={email}
+            inputStyle={{color: colors._F4E2B8, textTransform: 'lowercase'}}
             onChangeText={e => {
-              setAuthData({...authData, email: e});
+              dispatch(setAuthData({email: e, password}));
             }}
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
         </View>
 
@@ -97,9 +106,9 @@ const LoginScreen = () => {
             placeholderTextColor={colors._F4E2B8}
             showRightIcon={true}
             inputStyle={{color: colors._F4E2B8}}
-            value={authData?.password}
+            value={password}
             onChangeText={e => {
-              setAuthData({...authData, password: e});
+              dispatch(setAuthData({password: e, email}));
             }}
             isPassword
           />

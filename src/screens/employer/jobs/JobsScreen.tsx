@@ -32,6 +32,7 @@ import {useTranslation} from 'react-i18next';
 import {
   useAddRemoveFavouriteMutation,
   useGetFavouritesJobQuery,
+  useGetFilterDataQuery,
   useLazyGetEmployeeJobsQuery,
 } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
@@ -53,7 +54,7 @@ const jobTypes: object[] = [
   {type: 'Freelance', value: 'Freelance'},
 ];
 
-const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
+// const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
 
 const JobsScreen = () => {
   const {t} = useTranslation();
@@ -63,6 +64,8 @@ const JobsScreen = () => {
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {userInfo} = useSelector((state: RootState) => state.auth);
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
+  const {data: getDepartmentData} = useGetFilterDataQuery({});
+  const departments = getDepartmentData?.data?.job_sectors;
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
@@ -70,13 +73,13 @@ const JobsScreen = () => {
   const carouselImages = data?.data?.banners;
 
   const [filters, setFilters] = useState<{
-    departments: string[];
+    job_sectors: string[];
     job_types: string[];
     salary_from: number;
     salary_to: number;
     location: string;
   }>({
-    departments: [],
+    job_sectors: [],
     job_types: [],
     salary_from: 0,
     salary_to: 0,
@@ -87,14 +90,14 @@ const JobsScreen = () => {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   const queryParams = {
-    job_types: filters.job_types.length
-      ? filters.job_types.join(',')
-      : undefined,
     salary_from: filters.salary_from || undefined,
     salary_to: filters.salary_to || undefined,
     location: filters.location || undefined,
-    departments: filters.departments.length
-      ? filters.departments.join(',')
+    job_types: filters.job_types.length
+      ? filters.job_types.join(',')
+      : undefined,
+    job_sectors: filters?.job_sectors?.length
+      ? filters.job_sectors.join(',')
       : undefined,
   };
 
@@ -110,15 +113,25 @@ const JobsScreen = () => {
     };
     setFilters(newFilters);
     setIsFilterModalVisible(false);
-    trigger({
-      ...queryParams,
-      job_types: newFilters.job_types.join(','),
-    });
+
+    const newQueryParams = {
+      salary_from: newFilters.salary_from || undefined,
+      salary_to: newFilters.salary_to || undefined,
+      location: newFilters.location || undefined,
+      job_types: newFilters.job_types.length
+        ? newFilters.job_types.join(',')
+        : undefined,
+      job_sectors: newFilters.job_sectors.length
+        ? newFilters.job_sectors.join(',')
+        : undefined,
+    };
+
+    trigger(newQueryParams);
   };
 
   const clearFilters = () => {
     setFilters({
-      departments: [],
+      job_sectors: [],
       job_types: [],
       salary_from: 0,
       salary_to: 0,
@@ -132,19 +145,12 @@ const JobsScreen = () => {
 
   const handleAddRemoveFavoriteJob = async (item: any) => {
     try {
-      // console.log('🔥🔥🔥 ~ handleAddRemoveFavoriteJob ~ item:', item?._id);
-      // console.log(
-      //   '🔥🔥🔥 ~ handleAddRemoveFavoriteJob ~ userInfo?.user_id:',
-      //   userInfo?._id,
-      // );
-
       const res = await addRemoveFavoriteJob({
         job_id: item?._id,
         user_id: userInfo?._id,
       }).unwrap();
 
       if (res?.status) {
-        // successToast(res?.message);
         await refetch();
       } else {
         errorToast(res?.message);
@@ -274,8 +280,8 @@ const JobsScreen = () => {
 
             <Text style={styles.sectionLabel}>{t('Department')}</Text>
             <View style={styles.pillRow}>
-              {departments.map(dept => {
-                const isSelected = filters.departments.includes(dept);
+              {departments?.map((dept: any) => {
+                const isSelected = filters.job_sectors.includes(dept);
                 return (
                   <Pressable
                     key={dept}
@@ -283,9 +289,9 @@ const JobsScreen = () => {
                     onPress={() => {
                       setFilters(prev => ({
                         ...prev,
-                        departments: isSelected
-                          ? prev.departments.filter(d => d !== dept)
-                          : [...prev.departments, dept],
+                        job_sectors: isSelected
+                          ? prev.job_sectors.filter(d => d !== dept)
+                          : [...prev.job_sectors, dept],
                       }));
                     }}>
                     <Text

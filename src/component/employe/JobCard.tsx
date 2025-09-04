@@ -41,7 +41,10 @@ const JobCard: FC<props> = ({
             resizeMode="stretch"
             uri={item?.company_id?.logo}
             containerStyle={styles.companyLogo}
-            imageStyle={{width: '100%', height: '100%'}}
+            imageStyle={{
+              width: '100%',
+              height: '100%',
+            }}
           />
         </View>
         <View style={styles.actions}>
@@ -150,7 +153,7 @@ const styles = StyleSheet.create({
     paddingRight: wp(8),
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: hp(8)
+    marginTop: hp(8),
   },
   iconButton: {
     backgroundColor: colors.white,
@@ -162,11 +165,11 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 1,
+    elevation: 3,
   },
   logo: {
     width: wp(80),
@@ -178,6 +181,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: wp(20),
     backgroundColor: colors.white,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   titleRow: {
     flexDirection: 'row',

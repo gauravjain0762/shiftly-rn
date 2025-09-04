@@ -351,20 +351,20 @@ export const dashboardApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadata');
           dispatch(setUserInfo(data.data?.user));
-          await setAsyncUserInfo(data.data?.user);
         } catch (error) {
           console.log('Guest Login Error', error);
         }
       },
     }),
     getEmployeeJobs: builder.query<any, any>({
-      query: ({job_types, salary_from, salary_to, location}) => {
+      query: ({job_types, salary_from, salary_to, location, job_sectors}) => {
         const params = new URLSearchParams();
 
         if (job_types) params.append('job_types', job_types);
         if (salary_from) params.append('salary_from', salary_from.toString());
         if (salary_to) params.append('salary_to', salary_to.toString());
         if (location) params.append('location', location);
+        if (job_sectors) params.append('job_sectors', job_sectors);
 
         return {
           url: `${API.getEmployeeJobs}?${params.toString()}`,
@@ -373,14 +373,6 @@ export const dashboardApi = createApi({
         };
       },
       providesTags: ['GetEmployeeJobs'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          console.log(data, 'GetEmployeeJobs datadata >>>>>>>');
-        } catch (error) {
-          console.log('Guest Login Error', error);
-        }
-      },
     }),
     getEmployeeJobDetails: builder.query<any, any>({
       query: job_id => {
@@ -589,6 +581,13 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getFilterData: builder.query<any, any>({
+      query: () => ({
+        url: API.getFilterData,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+    }),
     employeeGetChats: builder.query<any, any>({
       query: () => ({
         url: API.employeeGetChats,
@@ -713,4 +712,5 @@ export const {
   useGetEmployeeNotificationsQuery,
   useRemoveEducationMutation,
   useRemoveExperienceMutation,
+  useGetFilterDataQuery,
 } = dashboardApi;

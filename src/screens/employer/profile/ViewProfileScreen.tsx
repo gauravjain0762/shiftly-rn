@@ -47,6 +47,12 @@ const ViewProfileScreen = () => {
               source={IMAGES.backArrow}
               style={{height: hp(20), width: wp(24)}}
             />
+            <TouchableOpacity
+              onPress={() => navigateTo(SCREENS.EditAccount)}
+              style={styles.editAccountBtn}>
+              <CustomImage size={wp(20)} source={IMAGES.edit} />
+              <Text style={styles.editAccountBtnText}>Edit Account</Text>
+            </TouchableOpacity>
           </Pressable>
           <View style={styles.container}>
             <CustomImage
@@ -62,11 +68,7 @@ const ViewProfileScreen = () => {
             </View>
 
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
-              <TouchableOpacity
-                // onPress={() => {
-                //   navigateTo(SCREENS.AccountScreen);
-                // }}
-                style={styles.editButton}>
+              <TouchableOpacity style={styles.editButton}>
                 <Text style={styles.editButtonText}>Open to Work</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -78,14 +80,13 @@ const ViewProfileScreen = () => {
               </TouchableOpacity>
             </View>
             <Text style={styles.decText}>
-              {userInfo?.about_desc ||
+              {userInfo?.about ||
                 'Sed ut perspiciatis unde omns iste natus error site voluptatem accusantum dolorem queitters lipsum lipslaudantiuml ipsum text.'}
             </Text>
           </View>
           <View style={styles.detailsContainer}>
             <FlatList
               data={[
-                {label: 'Profession', value: userInfo?.responsibility},
                 {
                   label: 'Nationality',
                   value: userInfo?.nationality,
@@ -96,8 +97,6 @@ const ViewProfileScreen = () => {
                   value: `+971 ${userInfo?.phone}`,
                   showFlag: true,
                 },
-                {label: 'Experience', value: userInfo?.experience?.title},
-                {label: 'Education', value: userInfo?.education?.degree},
               ]}
               keyExtractor={(_, index) => index.toString()}
               contentContainerStyle={{gap: hp(23)}}
@@ -170,6 +169,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 23,
     lineHeight: 30,
     marginTop: 32,
+    alignSelf: 'flex-start',
   },
   locationicon: {
     width: wp(24),
@@ -181,5 +181,18 @@ const styles = StyleSheet.create({
     marginVertical: hp(20),
     alignItems: 'flex-start',
     paddingHorizontal: wp(23),
+  },
+  editAccountBtn: {
+    gap: wp(4),
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(8),
+    backgroundColor: colors._F4E2B8,
+  },
+  editAccountBtnText: {
+    ...commonFontStyle(500, 16, '#0A376D'),
   },
 });

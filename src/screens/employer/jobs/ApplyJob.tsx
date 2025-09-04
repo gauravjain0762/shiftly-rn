@@ -27,9 +27,13 @@ import {
 } from '../../../utils/commonFunction';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import {SCREENS} from '../../../navigation/screenNames';
+import {RootState} from '../../../store';
+import {useDispatch, useSelector} from 'react-redux';
+import {setIsSuccessModalVisible} from '../../../features/employeeSlice';
 
 const ApplyJob = () => {
   const {t} = useTranslation();
+  const dispatch = useDispatch();
   const {params} = useRoute<any>();
   const data = params?.data as any;
   const [imageModal, setImageModal] = useState(false);
@@ -39,6 +43,9 @@ const ApplyJob = () => {
   const {bottom} = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
+  const {isSuccessModalVisible} = useSelector(
+    (state: RootState) => state.employee,
+  );
 
   const handleApplyJob = async () => {
     if (!selectedDoc) {
@@ -63,19 +70,10 @@ const ApplyJob = () => {
       const res = await applyJob(formData).unwrap();
 
       if (res?.status) {
-        if (!visible) {
-          setTimeout(() => {
-            setVisible(true);
-          }, 200);
-        }
-        successToast(res?.message);
+        // successToast(res?.message);
+        dispatch(setIsSuccessModalVisible(true));
       } else {
         errorToast(res?.message);
-        if (!visible) {
-          setTimeout(() => {
-            setVisible(true);
-          }, 200);
-        }
       }
     } catch (error: any) {
       console.error('Error applying job:', error);
@@ -83,6 +81,11 @@ const ApplyJob = () => {
         error?.message || error?.data?.message || 'Something went wrong',
       );
     }
+  };
+
+  const closeModal = () => {
+    dispatch(setIsSuccessModalVisible(false));
+    resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
   };
 
   return (
@@ -192,12 +195,9 @@ const ApplyJob = () => {
         </View>
       </LinearContainer>
       <ApplicationSuccessModal
-        visible={visible}
-        onClose={() => setVisible(!visible)}
-        onJobList={() => {
-          resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
-          setVisible(false);
-        }}
+        onJobList={closeModal}
+        onExploreJobs={closeModal}
+        visible={isSuccessModalVisible}
       />
 
       <ImagePickerModal

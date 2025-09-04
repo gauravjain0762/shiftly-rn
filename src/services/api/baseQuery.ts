@@ -29,6 +29,7 @@ export const axiosBaseQuery: BaseQueryFn<
   const {dispatch, getState} = api;
   const {url, method, data, params, headers, skipLoader} = args;
 
+  console.log("🔥🔥🔥 ~ axiosBaseQuery ~ skipLoader:", skipLoader)
   if (!skipLoader) {
     dispatch(incrementPendingRequests());
   }

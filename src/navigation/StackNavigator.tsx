@@ -47,6 +47,7 @@ import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
 import WebviewScreen from '../screens/others/WebviewScreen';
 import ProfileScreen from '../screens/employer/profile/ProfileScreen';
 import CoProfile from '../screens/company/profile/CoProfile';
+import EditAccountScreen from '../screens/employer/profile/EditAccount';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -269,6 +270,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.ProfileScreen}
           component={ProfileScreen}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.EditAccount}
+          component={EditAccountScreen}
         />
         {/* Seeker */}
       </Stack.Navigator>

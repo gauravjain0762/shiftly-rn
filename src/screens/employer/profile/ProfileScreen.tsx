@@ -22,7 +22,7 @@ import CustomImage from '../../../component/common/CustomImage';
 
 const ProfileScreen = () => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log("🔥🔥🔥 ~ ProfileScreen ~ userInfo:", userInfo)
+  console.log('🔥 ~ ProfileScreen ~ userInfo:', userInfo);
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen);
@@ -87,7 +87,7 @@ const ProfileScreen = () => {
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => {
               navigateTo(SCREENS.ViewProfileScreen);
             }}
@@ -100,15 +100,23 @@ const ProfileScreen = () => {
               ]}>
               0 Profile Views
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <View style={styles.completionCard}>
             <Text style={styles.completionTitle}>Profile completion</Text>
             <View style={styles.row}>
               <View style={styles.progressBarBg}>
-                <View style={styles.progressBarFill} />
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {width: userInfo?.profile_completion * 2.75},
+                  ]}
+                />
               </View>
-              <Text style={styles.percentage}>50%</Text>
+              <Text
+                style={
+                  styles.percentage
+                }>{`${userInfo?.profile_completion}%`}</Text>
             </View>
             <View style={styles.progressRow}>
               <Text style={styles.progressText}>
@@ -141,10 +149,7 @@ const ProfileScreen = () => {
           {/* Section: Professional Experience */}
           <Section
             title="Professional Experience"
-            content={
-              userInfo?.responsibility ||
-              'Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.'
-            }
+            content={userInfo?.experience?.title}
           />
 
           {/* Section: My Languages */}
@@ -155,10 +160,15 @@ const ProfileScreen = () => {
             </TouchableOpacity> */}
             <HeaderWithAdd title="My Languages" />
             <View
-              style={{flexDirection: 'row', alignItems: 'center', gap: wp(8)}}>
+              style={{
+                gap: wp(8),
+                flexWrap: 'wrap',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
               {userInfo?.languages?.map((item: any, index: number) => (
                 <View key={index} style={[styles.skillBadge]}>
-                  <Text style={styles.skillText}>{item}</Text>
+                  <Text style={styles.skillText}>{item?.name}</Text>
                 </View>
               ))}
             </View>
@@ -179,10 +189,7 @@ const ProfileScreen = () => {
             onPress={() => {
               navigateTo(SCREENS.CreateProfileScreen);
             }}
-            content={
-              userInfo?.education?.degree ||
-              'Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.'
-            }
+            content={userInfo?.education?.degree}
           />
 
           {/* Section: Skills */}
@@ -300,9 +307,9 @@ const styles = StyleSheet.create({
     marginBottom: hp(4),
   },
   progressBarBg: {
+    width: '80%',
     height: hp(6),
     borderRadius: 6,
-    width: '80%',
     marginVertical: 8,
     backgroundColor: 'rgba(209, 197, 166, 0.8)',
   },
@@ -310,7 +317,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#111827',
     height: 6,
     borderRadius: 6,
-    width: '50%',
   },
   progressRow: {
     flexDirection: 'row',

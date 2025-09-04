@@ -20,6 +20,18 @@ type Props = {
   educationList: EducationItem[];
   educationData?: EducationItem[];
 };
+export const isEmptyEducation = (edu: EducationItem) => {
+  return (
+    !edu.degree ||
+    !edu.university ||
+    !edu.startDate_month ||
+    !edu.startDate_year ||
+    !edu.endDate_month ||
+    !edu.endDate_year ||
+    !edu.country ||
+    !edu.province
+  );
+};
 
 const EducationList: FC<Props> = ({
   educationListEdit,
@@ -30,20 +42,7 @@ const EducationList: FC<Props> = ({
   educationList,
   educationData,
 }) => {
-  console.log("🔥🔥🔥 ~ EducationList ~ educationList:", educationList)
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const isEmptyEducation = (edu: EducationItem) => {
-    return (
-      !edu.degree ||
-      !edu.university ||
-      !edu.startDate_month ||
-      !edu.startDate_year ||
-      !edu.endDate_month ||
-      !edu.endDate_year ||
-      !edu.country ||
-      !edu.province
-    );
-  };
 
   return (
     <View style={styles.wrapper}>
@@ -140,43 +139,6 @@ const EducationList: FC<Props> = ({
           }}
         />
       )}
-
-      <TouchableOpacity
-        onPress={
-          educationListEdit?.isEditing ? onSaveEducation : addNewEducation
-        }
-        disabled={
-          !educationListEdit?.isEditing && isEmptyEducation(educationListEdit)
-        }
-        style={[
-          styles.btnRow,
-          !educationListEdit?.isEditing &&
-            isEmptyEducation(educationListEdit) && {
-              opacity: 0.5,
-            },
-        ]}>
-        <Image
-          style={styles.closeIcon}
-          source={educationListEdit?.isEditing ? IMAGES.check : IMAGES.close1}
-        />
-        <BaseText style={styles.addEduText}>
-          {educationListEdit?.isEditing
-            ? 'Save Education'
-            : 'Add Another Education'}
-        </BaseText>
-      </TouchableOpacity>
-
-      <GradientButton
-        style={styles.btn}
-        title="Next"
-        onPress={() => {
-          // if (educationList.length < 1) {
-          //   errorToast('Please add the education');
-          //   return;
-          // }
-          onNextPress();
-        }}
-      />
     </View>
   );
 };
@@ -203,23 +165,7 @@ const styles = StyleSheet.create({
   flex1: {
     flex: 1,
   },
-  btnRow: {
-    flexDirection: 'row',
-    borderWidth: 2,
-    borderColor: '#F4E2B8',
-    borderRadius: 50,
-    paddingTop: 12,
-    paddingBottom: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    marginHorizontal: wp(4),
-    marginBottom: 37,
-    marginTop: 10,
-  },
-  btn: {
-    marginHorizontal: wp(4),
-  },
+
   country: {
     gap: wp(10),
     height: hp(59),
@@ -244,18 +190,10 @@ const styles = StyleSheet.create({
     height: 13,
     resizeMode: 'contain',
   },
-  closeIcon: {
-    width: 22,
-    height: 22,
-    resizeMode: 'contain',
-    tintColor: colors.coPrimary,
-  },
   label: {
     marginTop: 20,
     marginBottom: 12,
     ...commonFontStyle(400, 18, '#DADADA'),
   },
-  addEduText: {
-    ...commonFontStyle(500, 20, '#F4E2B8'),
-  },
+
 });

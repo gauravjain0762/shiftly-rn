@@ -70,6 +70,7 @@ export const API = {
   getEmployeeSkills: '/getSkills',
   addRemoveFavourite: '/addRemoveFavourite',
   getFavouritesJob: '/getFavourites',
+  getFilterData: '/getFilterData',
 
   // UserDetails
   getProfile: '/getProfile',
