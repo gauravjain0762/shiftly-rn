@@ -38,9 +38,9 @@ const CoMessage = () => {
         renderItem={({item, index}: any) => (
           <MessageList
             key={index}
-            onPressMessage={e => navigateTo(SCREENS.CoChat, {data: e})}
             item={item}
             type="company"
+            onPressMessage={e => navigateTo(SCREENS.CoChat, {data: e})}
           />
         )}
         ListEmptyComponent={() => {

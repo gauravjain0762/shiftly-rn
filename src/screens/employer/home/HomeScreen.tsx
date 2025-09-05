@@ -80,8 +80,8 @@ const HomeScreen = () => {
     return (
       <View style={styles.header}>
         <HomeHeader
-          onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
           companyProfile={userInfo}
+          onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
         />
       </View>
     );

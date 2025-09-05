@@ -1,8 +1,9 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+
 import {colors} from '../../theme/colors';
 import CustomImage from '../common/CustomImage';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
 type MessageItem = {
   id: string;
@@ -147,6 +148,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 100,
-    overflow:'hidden'
+    overflow: 'hidden',
   },
 });

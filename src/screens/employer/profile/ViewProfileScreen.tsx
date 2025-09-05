@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {BackHeader, LinearContainer} from '../../../component';
+import {BackHeader, GradientButton, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
@@ -47,12 +47,6 @@ const ViewProfileScreen = () => {
               source={IMAGES.backArrow}
               style={{height: hp(20), width: wp(24)}}
             />
-            <TouchableOpacity
-              onPress={() => navigateTo(SCREENS.EditAccount)}
-              style={styles.editAccountBtn}>
-              <CustomImage size={wp(20)} source={IMAGES.edit} />
-              <Text style={styles.editAccountBtnText}>Edit Account</Text>
-            </TouchableOpacity>
           </Pressable>
           <View style={styles.container}>
             <CustomImage
@@ -79,14 +73,15 @@ const ViewProfileScreen = () => {
                 <Text style={styles.editButtonText}>View Profile</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.decText}>
+            {/* <Text style={styles.decText}>
               {userInfo?.about ||
                 'Sed ut perspiciatis unde omns iste natus error site voluptatem accusantum dolorem queitters lipsum lipslaudantiuml ipsum text.'}
-            </Text>
+            </Text> */}
           </View>
           <View style={styles.detailsContainer}>
             <FlatList
               data={[
+                {label: 'About me', value: userInfo?.about},
                 {
                   label: 'Nationality',
                   value: userInfo?.nationality,
@@ -94,7 +89,7 @@ const ViewProfileScreen = () => {
                 {label: 'Email', value: userInfo?.email},
                 {
                   label: 'Phone',
-                  value: `+971 ${userInfo?.phone}`,
+                  value: `${userInfo?.phone_code} ${userInfo?.phone}`,
                   showFlag: true,
                 },
               ]}
@@ -122,6 +117,20 @@ const ViewProfileScreen = () => {
               )}
             />
           </View>
+          {/* <TouchableOpacity
+            onPress={() => navigateTo(SCREENS.EditAccount)}
+            style={styles.editAccountBtn}>
+            <Text style={styles.editAccountBtnText}>Edit Account</Text>
+          </TouchableOpacity> */}
+
+          <GradientButton
+            onPress={() => navigateTo(SCREENS.EditAccount)}
+            title="Edit Details"
+            style={{
+              marginTop: '18%',
+              marginHorizontal: wp(23),
+            }}
+          />
         </ScrollView>
       </SafeAreaView>
     </LinearContainer>
@@ -178,17 +187,20 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     gap: hp(23),
+    marginTop: hp(40),
     marginVertical: hp(20),
     alignItems: 'flex-start',
     paddingHorizontal: wp(23),
   },
   editAccountBtn: {
     gap: wp(4),
-    borderRadius: 8,
-    flexDirection: 'row',
+    width: '80%',
+    alignSelf: 'center',
     alignItems: 'center',
-    alignSelf: 'flex-end',
-    paddingVertical: hp(8),
+    justifyContent: 'center',
+    borderRadius: 8,
+    marginTop: hp(20),
+    paddingVertical: hp(16),
     paddingHorizontal: wp(8),
     backgroundColor: colors._F4E2B8,
   },

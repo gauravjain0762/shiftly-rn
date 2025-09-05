@@ -2,15 +2,13 @@ import React, {useState, useEffect} from 'react';
 import {
   Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Alert,
   TextInput,
 } from 'react-native';
-import {BackHeader, LinearContainer} from '../../../component';
+import {CustomTextInput, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
@@ -21,11 +19,13 @@ import {callingCodeToCountryCode} from '../../../utils/countryFlags';
 import CustomImage from '../../../component/common/CustomImage';
 import CustomInput from '../../../component/common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
-import ImagePicker from 'react-native-image-crop-picker';
 import GradientButton from '../../../component/common/GradientButton';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
+import CharLength from '../../../component/common/CharLength';
 
 export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
@@ -37,67 +37,36 @@ export const callingCodeToCountry = (callingCode: any) => {
 const EditAccountScreen = () => {
   const {userInfo}: any = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
+    picture: '',
     name: '',
     location: '',
     nationality: '',
+    about: '',
     phone: '',
     phone_code: '',
-    about: '',
-    picture: '',
+    email: '',
   });
-
-  const [selectedImage, setSelectedImage] = useState(null);
+  const countryCode = formData.phone_code || 'AE';
+  const [picture, setPicture] = useState<any>(null);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [showNationalityPicker, setShowNationalityPicker] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
+  const [updateProfile] = useEmpUpdateProfileMutation();
 
-  //   const [updateProfile] = useUpdateEmployeeProfileMutation();
-
-  const handleImagePicker = () => {
-    Alert.alert('Select Image', 'Choose an option', [
-      {text: 'Camera', onPress: openCamera},
-      {text: 'Gallery', onPress: openGallery},
-      {text: 'Cancel', style: 'cancel'},
-    ]);
-  };
-
-  const openCamera = () => {
-    ImagePicker.openCamera({
-      width: 400,
-      height: 400,
-      cropping: true,
-      cropperCircleOverlay: true,
-      compressImageMaxWidth: 300,
-      compressImageMaxHeight: 300,
-      compressImageQuality: 0.7,
-    })
-      .then(image => {
-        setSelectedImage(image);
-        setFormData(prev => ({...prev, picture: image.path}));
-      })
-      .catch(error => {
-        console.log('Camera error:', error);
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        picture: userInfo.picture || '',
+        name: userInfo.name || '',
+        location: userInfo.location || '',
+        nationality: userInfo.nationality || '',
+        about: userInfo.about || '',
+        phone: userInfo.phone || '',
+        phone_code: userInfo.phone_code || '',
+        email: userInfo.email || '',
       });
-  };
-
-  const openGallery = () => {
-    ImagePicker.openPicker({
-      width: 400,
-      height: 400,
-      cropping: true,
-      cropperCircleOverlay: true,
-      compressImageMaxWidth: 300,
-      compressImageMaxHeight: 300,
-      compressImageQuality: 0.7,
-    })
-      .then(image => {
-        setSelectedImage(image);
-        setFormData(prev => ({...prev, picture: image.path}));
-      })
-      .catch(error => {
-        console.log('Gallery error:', error);
-      });
-  };
+    }
+  }, [userInfo]);
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
@@ -110,41 +79,43 @@ const EditAccountScreen = () => {
       return;
     }
 
+    console.log('🔥 ~ handleSave ~ formData:', formData);
     try {
       const updateData = new FormData();
       updateData.append('name', formData.name);
-      updateData.append('location', formData.location);
+      updateData.append('address', formData.location);
       updateData.append('nationality', formData.nationality);
       updateData.append('phone', formData.phone);
       updateData.append('phone_code', formData.phone_code);
       updateData.append('about', formData.about);
 
-      if (selectedImage) {
+      if (picture?.path) {
         updateData.append('picture', {
-          uri: selectedImage.path,
-          type: selectedImage.mime,
-          name: 'profile.jpg',
-        } as any);
+          uri: picture?.path,
+          type: picture?.mime || 'image/jpeg',
+          name: picture?.path.split('/').pop() || 'profile.jpg',
+        });
       }
 
       const response = await updateProfile(updateData).unwrap();
-      successToast('Profile updated successfully');
-      //   refetch();
-      goBack();
+      console.log('🔥 ~ handleSave ~ response?.data:', response?.data);
+      if (response?.status) {
+        successToast('Profile updated successfully');
+        goBack();
+      }
     } catch (error) {
       errorToast('Failed to update profile');
       console.log('Update error:', error);
     }
   };
 
-  const countryCode = formData.phone_code || 'AE';
-
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top']}}
       colors={['#0D468C', '#041326']}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
-        <ScrollView
+        <KeyboardAwareScrollView
+          enableOnAndroid
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}>
           {/* Header */}
@@ -163,31 +134,33 @@ const EditAccountScreen = () => {
                 onPress={() => setIsImagePickerVisible(true)}
                 style={styles.avatarContainer}>
                 <CustomImage
-                  uri={formData.picture || userInfo?.picture}
-                  imageStyle={{height: '100%', width: '100%'}}
-                  containerStyle={styles.avatar}
                   resizeMode="cover"
+                  uri={picture?.path || formData?.picture}
+                  containerStyle={styles.avatar}
+                  imageStyle={{height: '100%', width: '100%'}}
                 />
                 <View style={styles.editIconContainer}>
                   <Image source={IMAGES.edit_icon} style={styles.editIcon} />
                 </View>
               </TouchableOpacity>
-              <Text style={styles.avatarLabel}>Change Photo</Text>
+              {/* <Text style={styles.avatarLabel}>Change Photo</Text> */}
             </View>
 
             <CustomInput
               label="Full Name"
               placeholder="Enter your name"
-              value={userInfo?.name}
-              onChange={text => setFormData(prev => ({...prev, name: text}))}
+              value={formData?.name}
+              onChange={(text: any) =>
+                setFormData(prev => ({...prev, name: text}))
+              }
               containerStyle={styles.inputContainer}
             />
 
             <CustomInput
               label="Location"
               placeholder="Enter your location"
-              value={userInfo?.location}
-              onChange={text =>
+              value={formData?.location}
+              onChange={(text: any) =>
                 setFormData(prev => ({...prev, location: text}))
               }
               containerStyle={styles.inputContainer}
@@ -196,13 +169,20 @@ const EditAccountScreen = () => {
             <CustomInput
               label="About Me"
               placeholder="Tell us about yourself"
-              value={userInfo?.about}
-              onChange={text => setFormData(prev => ({...prev, about: text}))}
-              containerStyle={styles.inputContainer}
+              value={formData?.about}
+              onChange={(text: any) =>
+                setFormData(prev => ({...prev, about: text}))
+              }
+              inputStyle={[
+                styles.inputContainer,
+                {
+                  height: hp(120),
+                },
+              ]}
               multiline={true}
-              numberOfLines={4}
-              textAlignVertical="top"
+              maxLength={100}
             />
+            <CharLength chars={100} value={formData?.about} type={'employee'} />
           </View>
 
           {/* Details Section */}
@@ -215,11 +195,11 @@ const EditAccountScreen = () => {
                 style={styles.countrySelector}>
                 <Text
                   style={
-                    formData.nationality
+                    formData?.nationality
                       ? styles.countryText
                       : styles.countryPlaceholder
                   }>
-                  {userInfo?.nationality || 'Select Nationality'}
+                  {formData?.nationality || 'Select Nationality'}
                 </Text>
                 <Image source={IMAGES.down1} style={styles.dropdownIcon} />
               </TouchableOpacity>
@@ -229,7 +209,7 @@ const EditAccountScreen = () => {
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Email</Text>
               <View style={styles.nonEditableField}>
-                <Text style={styles.nonEditableText}>{userInfo?.email}</Text>
+                <Text style={styles.nonEditableText}>{formData?.email}</Text>
               </View>
             </View>
 
@@ -246,7 +226,7 @@ const EditAccountScreen = () => {
                     countryCode={callingCodeToCountry(countryCode) as any}
                   />
                   <Text style={styles.countryCodeText}>
-                    {userInfo?.phone_code}
+                    {formData?.phone_code}
                   </Text>
                   <Image
                     source={IMAGES.down1}
@@ -260,11 +240,12 @@ const EditAccountScreen = () => {
                   style={styles.phoneTextInput}
                   placeholder="Enter phone number"
                   placeholderTextColor="#969595"
-                  value={userInfo?.phone}
+                  value={formData?.phone}
                   onChangeText={text =>
                     setFormData(prev => ({...prev, phone: text}))
                   }
                   keyboardType="phone-pad"
+                  maxLength={10}
                 />
               </View>
             </View>
@@ -274,9 +255,8 @@ const EditAccountScreen = () => {
             title="Save Changes"
             onPress={handleSave}
             style={styles.saveButton}
-            textStyle={styles.saveButtonText}
           />
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         {showCountryPicker && (
           <CountryPicker
@@ -298,10 +278,11 @@ const EditAccountScreen = () => {
 
         {showNationalityPicker && (
           <CountryPicker
-            visible={showNationalityPicker}
-            withCallingCode={false}
             withFlag
+            withFilter
             withEmoji={false}
+            withCallingCode={false}
+            visible={showNationalityPicker}
             onSelect={country => {
               const countryName =
                 typeof country?.name === 'string'
@@ -315,7 +296,9 @@ const EditAccountScreen = () => {
         )}
 
         <ImagePickerModal
-          onUpdate={() => {}}
+          onUpdate={(image: any) => {
+            setPicture(image);
+          }}
           actionSheet={isImagePickerVisible}
           setActionSheet={setIsImagePickerVisible}
         />

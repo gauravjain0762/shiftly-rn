@@ -50,7 +50,6 @@ const CoJob = () => {
   const {t} = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
-  console.log('🔥 ~ CoJob ~ filters:', filters);
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);

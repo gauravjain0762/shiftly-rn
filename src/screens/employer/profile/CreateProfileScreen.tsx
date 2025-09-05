@@ -71,7 +71,6 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
-  console.log('🔥🔥 ~ CreateProfileScreen ~ aboutEdit:', aboutEdit);
   const {data: getEducation, refetch: refetchEducation} = useGetEducationsQuery(
     {},
     {

@@ -64,7 +64,7 @@ const HomeHeader: FC<props> = ({
               styles.location,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            {companyProfile?.address}
+            {companyProfile?.location}
           </Text>
         </View>
       </View>

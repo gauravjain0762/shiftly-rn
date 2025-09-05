@@ -13,18 +13,25 @@ import React, {useState} from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 
-const CustomInput = ({label, value, onChange, onPress, placeholder}: any) => {
-
-
+const CustomInput = ({
+  label,
+  value,
+  onChange,
+  onPress,
+  placeholder,
+  inputStyle,
+  ...props
+}: any) => {
   return (
     <View style={{flex: 1}}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         placeholder={placeholder}
         value={value}
-        style={styles.dropdown}
+        style={[styles.dropdown, inputStyle]}
         placeholderTextColor={'#969595'}
         onChangeText={onChange}
+        {...props}
       />
       {/* <TouchableOpacity
         onPress={() => setOpen(true)}
@@ -49,7 +56,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#225797',
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     ...commonFontStyle(400, 18, '#F4E2B8'),
   },
   label: {

@@ -243,11 +243,6 @@ const StackNavigator: FC = () => {
         />
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
-          name={SCREENS.EditProfileScreen}
-          component={EditProfileScreen}
-        />
-        <Stack.Screen
-          options={({navigation}) => ({headerShown: false})}
           name={SCREENS.Chat}
           component={Chat}
         />

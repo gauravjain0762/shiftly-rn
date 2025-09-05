@@ -674,34 +674,6 @@ export const authApi = createApi({
         }
       },
     }),
-    empUpdateProfile: builder.mutation<any, any>({
-      query: credentials => {
-        console.log('credentials', credentials);
-        console.log('API.updateProfile', API.empUpdateProfile);
-        return {
-          url: API.empUpdateProfile,
-          method: HTTP_METHOD.POST,
-          data: credentials,
-          skipLoader: false,
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Content-Type': 'multipart/form-data',
-          },
-        };
-      },
-      invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          if (data?.status) {
-          } else {
-            errorToast(data?.message);
-          }
-        } catch (error) {
-          console.log('updateProfile Error', error);
-        }
-      },
-    }),
   }),
 });
 
@@ -726,7 +698,6 @@ export const {
   useEmployeeResendOTPMutation,
   useEmployeeResetPasswordMutation,
   useEmployeeSignUpMutation,
-  useEmpUpdateProfileMutation,
   useCompanyGoogleSignInMutation,
   useEmployeeGoogleSignInMutation,
   useCompanyAppleSignInMutation,

@@ -356,6 +356,33 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    empUpdateProfile: builder.mutation<any, any>({
+      query: credentials => {
+        return {
+          url: API.empUpdateProfile,
+          method: HTTP_METHOD.POST,
+          data: credentials,
+          skipLoader: false,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Content-Type': 'multipart/form-data',
+          },
+        };
+      },
+      invalidatesTags: ['GetProfile'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status) {
+          } else {
+            dispatch(setUserInfo(data?.data?.user));
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('updateProfile Error', error);
+        }
+      },
+    }),
     getEmployeeJobs: builder.query<any, any>({
       query: ({job_types, salary_from, salary_to, location, job_sectors}) => {
         const params = new URLSearchParams();
@@ -713,4 +740,5 @@ export const {
   useRemoveEducationMutation,
   useRemoveExperienceMutation,
   useGetFilterDataQuery,
+  useEmpUpdateProfileMutation,
 } = dashboardApi;

@@ -96,7 +96,9 @@ const CoJobDetails = () => {
         </View>
       ) : (
         <>
-          <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}} 
+            contentContainerStyle={{paddingBottom: hp(120)}}
+          >
             <BackHeader
               type="company"
               isRight={false}
@@ -186,6 +188,11 @@ const CoJobDetails = () => {
                           handleShortListEmployee={() =>
                             handleShortListEmployee(item)
                           }
+                          onPressChat={() => {
+                            navigateTo(SCREENS.CoChat, {
+                              data: item,
+                            });
+                          }}
                           showShortListButton={!item?.status}
                         />
                       );
@@ -207,6 +214,11 @@ const CoJobDetails = () => {
                             key={index}
                             item={item}
                             showShortListButton={false}
+                            onPressChat={() => {
+                              navigateTo(SCREENS.CoChat, {
+                                data: item,
+                              });
+                            }}
                           />
                         );
                       },

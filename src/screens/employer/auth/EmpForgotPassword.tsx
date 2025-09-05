@@ -326,8 +326,8 @@ const EmpForgotPassword = () => {
         contentContainerStyle={passwordStyles.scrollcontainer}
         style={passwordStyles.container}>
         <TouchableOpacity
-          onPress={() => prevStep(forgotPasswordSteps)}
           hitSlop={8}
+          onPress={() => prevStep(forgotPasswordSteps)}
           style={[passwordStyles.backBtn]}>
           <Image
             resizeMode="contain"
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   title: {
     paddingTop: hp(10),
-    ...commonFontStyle(500, 25, colors._FBE7BD),
+    ...commonFontStyle(500, 25, colors.white),
   },
   btn: {
     marginVertical: wp(30),
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   infotext: {
     top: -8,
     lineHeight: hp(28),
-    ...commonFontStyle(400, 20, colors._FBE7BD),
+    ...commonFontStyle(400, 20, colors.white),
   },
   otpContainer: {
     marginTop: hp(40),
@@ -383,16 +383,16 @@ const styles = StyleSheet.create({
     ...commonFontStyle(700, 30, colors._FBE7BD),
   },
   secText: {
-    ...commonFontStyle(500, 25, colors._FBE7BD),
+    ...commonFontStyle(500, 25, colors.white),
     marginVertical: hp(34),
   },
   secText1: {
-    ...commonFontStyle(400, 20, colors._FBE7BD),
+    ...commonFontStyle(400, 20, colors.white),
   },
   resendText: {
     marginTop: hp(74),
     textAlign: 'center',
     textDecorationLine: 'underline',
-    ...commonFontStyle(600, 20, colors._FBE7BD),
+    ...commonFontStyle(600, 20, colors.white),
   },
 });

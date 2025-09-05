@@ -43,6 +43,7 @@ const JobDetail = () => {
   const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.item;
   const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
+  console.log("🔥🔥🔥 ~ JobDetail ~ jobDetail:", jobDetail)
   const curr_jobdetails = jobDetail?.data?.job;
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
@@ -79,6 +80,9 @@ const JobDetail = () => {
       <BackHeader
         title={t('Job Detail')}
         containerStyle={styles.headerContainer}
+        titleStyle={{
+          ...commonFontStyle(600, 22, colors.white),
+        }}
         RightIcon={
           <TouchableOpacity
             onPress={() => setModal(!modal)}
@@ -107,16 +111,12 @@ const JobDetail = () => {
         {/* Header Section */}
         <View style={styles.header}>
           <CustomImage
-            uri={data?.company_id?.logo}
-            imageStyle={{width: '100%', height: '100%'}}
             resizeMode="cover"
+            uri={data?.company_id?.logo}
             containerStyle={styles.logoBg}
+            imageStyle={{width: '100%', height: '100%'}}
           />
           <View style={styles.locationTitle}>
-            <View style={styles.row}>
-              <Image source={IMAGES.location} style={styles.location} />
-              <Text style={styles.locationText}>{data?.address}</Text>
-            </View>
             <Text style={styles.jobTitle}>{data?.title}</Text>
           </View>
           <TouchableOpacity
@@ -129,6 +129,10 @@ const JobDetail = () => {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.row}>
+          <Image source={IMAGES.location} style={styles.location} />
+          <Text style={styles.locationText}>{data?.address}</Text>
+        </View>
         {/* Description */}
         <Text style={styles.description}>
           {data?.description ||
@@ -277,5 +281,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: wp(4),
+    marginBottom: hp(15),
   },
 });

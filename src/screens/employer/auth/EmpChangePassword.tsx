@@ -223,7 +223,7 @@ export const passwordStyles = StyleSheet.create({
   back: {
     width: wp(21),
     height: wp(21),
-    tintColor: colors._FBE7BD,
+    tintColor: colors.white,
   },
   title: {
     marginTop: hp(20),

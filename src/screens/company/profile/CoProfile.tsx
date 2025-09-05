@@ -62,17 +62,17 @@ const CoProfile = () => {
         },
       ],
     },
-    {
-      section: 'Security',
-      items: [
-        {
-          label: 'Change Password',
-          icon: IMAGES.ChangePassword,
-          onPress: () => navigateTo(SCREENS.ChangePassword),
-        },
-        {label: 'Security', icon: IMAGES.Security},
-      ],
-    },
+    // {
+    //   section: 'Security',
+    //   items: [
+    //     {
+    //       label: 'Change Password',
+    //       icon: IMAGES.ChangePassword,
+    //       onPress: () => navigateTo(SCREENS.ChangePassword),
+    //     },
+    //     {label: 'Security', icon: IMAGES.Security},
+    //   ],
+    // },
     {
       section: 'General',
       items: [

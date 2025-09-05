@@ -3,7 +3,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -19,6 +18,7 @@ import {RootState} from '../../../store';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import CustomImage from '../../../component/common/CustomImage';
+import BaseText from '../../../component/common/BaseText';
 
 const ProfileScreen = () => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
@@ -31,7 +31,7 @@ const ProfileScreen = () => {
   const HeaderWithAdd = useCallback(
     ({title}: any) => (
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{title}</Text>
+        <BaseText style={styles.title}>{title}</BaseText>
       </View>
     ),
     [],
@@ -41,7 +41,7 @@ const ProfileScreen = () => {
     ({title, content}: any) => (
       <View style={styles.card}>
         <HeaderWithAdd title={title} />
-        <Text style={styles.content}>{content}</Text>
+        <BaseText style={styles.content}>{content}</BaseText>
       </View>
     ),
     [],
@@ -71,20 +71,16 @@ const ProfileScreen = () => {
             containerStyle={styles.avatar}
             resizeMode="cover"
           />
-          <Text style={styles.name}>
-            {userInfo?.name || 'Smith Williamson'}
-          </Text>
+          <BaseText style={styles.name}>{userInfo?.name || "N/A"}</BaseText>
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} />
-            <Text style={styles.location}>
-              {userInfo?.address || 'Dubai Marina, Dubai - U.A.E'}
-            </Text>
+            <BaseText style={styles.location}>{userInfo?.location || "N/A"}</BaseText>
           </View>
 
           <TouchableOpacity
             onPress={handleEditProfile}
             style={styles.editButton}>
-            <Text style={styles.editButtonText}>Edit Profile</Text>
+            <BaseText style={styles.editButtonText}>Edit Profile</BaseText>
           </TouchableOpacity>
 
           {/* <TouchableOpacity
@@ -92,18 +88,20 @@ const ProfileScreen = () => {
               navigateTo(SCREENS.ViewProfileScreen);
             }}
             style={styles.statsRow}>
-            <Text style={styles.statText}>0 Connections</Text>
-            <Text
+            <BaseText style={styles.statText}>0 Connections</BaseText>
+            <BaseText
               style={[
                 styles.statText,
                 {opacity: 0.6, color: 'rgba(255, 255, 255, 1)'},
               ]}>
               0 Profile Views
-            </Text>
+            </BaseText>
           </TouchableOpacity> */}
 
           <View style={styles.completionCard}>
-            <Text style={styles.completionTitle}>Profile completion</Text>
+            <BaseText style={styles.completionTitle}>
+              Profile completion
+            </BaseText>
             <View style={styles.row}>
               <View style={styles.progressBarBg}>
                 <View
@@ -113,74 +111,39 @@ const ProfileScreen = () => {
                   ]}
                 />
               </View>
-              <Text
+              <BaseText
                 style={
                   styles.percentage
-                }>{`${userInfo?.profile_completion}%`}</Text>
+                }>{`${userInfo?.profile_completion}%` || "N/A"}</BaseText>
             </View>
             <View style={styles.progressRow}>
-              <Text style={styles.progressText}>
+              <BaseText style={styles.progressText}>
                 Keep it up! you’re halfway there.
-              </Text>
+              </BaseText>
             </View>
           </View>
 
-          {/* <Pressable style={styles.ctaCard}>
-            <View style={styles.ctaTextContainer}>
-              <Text style={styles.ctaTitle}>
-                Put your hospitality soft skills to the test
-              </Text>
-              <Text style={styles.ctaSubtitle}>
-                Take Shiftly new test and find out if you have what it takes to
-                succeed in hospitality
-              </Text>
-            </View>
-            <Image style={styles.right} source={IMAGES.back} />
-          </Pressable> */}
           {/* Section: About Me */}
-          <Section
-            title="About me"
-            content={
-              userInfo?.about ||
-              'Sed ut perspiciatis unde omnis iste natus error site voluptatem accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.'
-            }
-          />
+          <Section title="About me" content={userInfo?.about || "N/A"} />
 
           {/* Section: Professional Experience */}
           <Section
             title="Professional Experience"
-            content={userInfo?.experience?.title}
+            content={userInfo?.experience?.title|| "N/A"}
           />
 
           {/* Section: My Languages */}
-
           <View style={[styles.card, {width: '90%'}]}>
-            {/* <TouchableOpacity style={styles.addButton}>
-              <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity> */}
             <HeaderWithAdd title="My Languages" />
-            <View
-              style={{
-                gap: wp(8),
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              {userInfo?.languages?.map((item: any, index: number) => (
+            <View style={styles.languageContainer}>
+              {userInfo?.languages?.length ? userInfo?.languages?.map((item: any, index: number) => (
                 <View key={index} style={[styles.skillBadge]}>
-                  <Text style={styles.skillText}>{item?.name}</Text>
+                  <BaseText style={styles.skillText}>{item?.name}</BaseText>
                 </View>
-              ))}
+              )) : 
+                <BaseText  style={styles.skillText}>{"N/A"}</BaseText>
+              }
             </View>
-            {/* <Slider
-              style={{width: '100%', height: 40}}
-              value={range as any}
-              minimumValue={0}
-              maximumValue={100}
-              minimumTrackTintColor={'#F4E2B8'}
-              maximumTrackTintColor={'#17457D'}
-              onValueChange={(value: any) => setRange(value)}
-            /> */}
           </View>
 
           {/* Section: Education */}
@@ -189,55 +152,22 @@ const ProfileScreen = () => {
             onPress={() => {
               navigateTo(SCREENS.CreateProfileScreen);
             }}
-            content={userInfo?.education?.degree}
+            content={userInfo?.education?.degree || 'N/A'}
           />
 
           {/* Section: Skills */}
           <View style={styles.card}>
             <HeaderWithAdd title="Skills" />
-            {/* <TouchableOpacity style={styles.addButton}>
-              <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity> */}
             <View style={styles.skillContainer}>
-              {[
-                'All Job',
-                'Design',
-                'Marketing',
-                'Engineer',
-                'Programming',
-                'Finance',
-              ].map(skill => (
-                <View key={skill} style={styles.skillBadge}>
-                  <Text style={styles.skillText}>{skill}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Section: Additional Info */}
-          <View style={styles.card}>
-            {/* <TouchableOpacity style={styles.addButton}>
-              <Image source={IMAGES.pluse} style={styles.plus} />
-            </TouchableOpacity> */}
-            <HeaderWithAdd title="Additional Information" />
-            <Text style={styles.subtitle}>Highlight your achievements</Text>
-            <Text style={styles.content}>
-              Sed ut perspiciatis unde omnis iste natus error site voluptatem
-              accusantium dolorem queitters lipsum lipslaudantiuml ipsum text.
-            </Text>
-          </View>
-
-          {/* Section: Achievements */}
-          <View style={styles.card}>
-            <HeaderWithAdd title={'Achievements \nand Certifications'} />
-            <View style={styles.certRow}>
-              {[1, 2, 3, 4].map(item => (
-                <Image
-                  key={item}
-                  source={IMAGES.Maskgroup}
-                  style={styles.certImage}
-                />
-              ))}
+              {userInfo?.skills?.length ? (
+                userInfo?.skills?.map((skill: any) => (
+                  <View key={skill} style={styles.skillBadge}>
+                    <BaseText style={styles.skillText}>{skill?.title}</BaseText>
+                  </View>
+                ))
+              ) : (
+                <BaseText style={styles.skillText}>{'N/A'}</BaseText>
+              )}
             </View>
           </View>
         </SafeAreaView>
@@ -414,6 +344,12 @@ const styles = StyleSheet.create({
   subtitle: {
     ...commonFontStyle(500, 21, colors.white),
   },
+  languageContainer: {
+    gap: wp(8),
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   languageText: {
     ...commonFontStyle(500, 14, '#fff'),
     marginTop: 12,
@@ -439,7 +375,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   skillText: {
-    ...commonFontStyle(400, 15, '#F4E2B8'),
+    ...commonFontStyle(400, 16, '#F4E2B8'),
   },
   certRow: {
     flexDirection: 'row',

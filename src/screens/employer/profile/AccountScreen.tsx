@@ -75,7 +75,7 @@ const AccountScreen = () => {
             navigateTo(SCREENS.EmpChangePassword);
           },
         },
-        {label: 'Security', icon: IMAGES.Security},
+        // {label: 'Security', icon: IMAGES.Security},
       ],
     },
     {

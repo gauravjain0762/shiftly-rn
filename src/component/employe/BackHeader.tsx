@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(16),
   },
   headerTitle: {
-    ...commonFontStyle(400, 20, colors.white),
+    ...commonFontStyle(600, 22, colors.white),
   },
   back: {
     width: wp(21),

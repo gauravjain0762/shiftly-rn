@@ -124,7 +124,7 @@ const CoEditMyProfile = () => {
       setLogo(newImage);
     } else {
       const updatedCovers = [...coverImages, newImage];
-      console.log("🔥 ~ UploadPhoto ~ updatedCovers:", updatedCovers)
+      console.log('🔥 ~ UploadPhoto ~ updatedCovers:', updatedCovers);
       setCoverImages(updatedCovers);
     }
   };

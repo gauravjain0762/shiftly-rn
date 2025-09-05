@@ -155,7 +155,9 @@ const MessageBubble = React.memo(
 
 const CoChat = () => {
   const {params} = useRoute<any>();
+  const chatData = params?.data;
   const chatId = params?.data?._id;
+  console.log('🔥 ~ CoChat ~ chatId:', chatId);
   const userInfo = useSelector((state: any) => state.auth.userInfo);
 
   const [isImagePickerVisible, setImagePickerVisible] = useState(false);

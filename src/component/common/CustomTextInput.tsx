@@ -87,7 +87,7 @@ const getGlobalStyles = (props: any) => {
     },
     input: {
       flex: 1,
-      ...commonFontStyle(700, 22, colors._1F1F1F),
+      ...commonFontStyle(500, 22, colors._1F1F1F),
     },
   });
 };

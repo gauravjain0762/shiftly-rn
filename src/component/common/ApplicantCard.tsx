@@ -12,11 +12,10 @@ import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {navigateTo} from '../../utils/commonFunction';
-import {SCREENS} from '../../navigation/screenNames';
 
 type Props = {
   item: any;
+  onPressChat?: () => void;
   showShortListButton?: boolean;
   handleShortListEmployee?: () => void;
 };
@@ -25,6 +24,7 @@ const ApplicantCard = ({
   item,
   showShortListButton = true,
   handleShortListEmployee,
+  onPressChat = () => {},
 }: Props) => {
   const {t} = useTranslation();
 
@@ -51,9 +51,7 @@ const ApplicantCard = ({
         </View>
         <View style={styles.actionContainer}>
           <Pressable
-            onPress={() => {
-              navigateTo(SCREENS.CoMessage);
-            }}
+            onPress={onPressChat}
             style={styles.chatButton}>
             <Image source={IMAGES.chat} />
           </Pressable>
