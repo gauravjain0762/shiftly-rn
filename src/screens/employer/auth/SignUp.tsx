@@ -50,12 +50,12 @@ import {
   useEmployeeOTPVerifyMutation,
   useEmployeeResendOTPMutation,
   useEmployeeSignUpMutation,
-  useEmpUpdateProfileMutation,
 } from '../../../api/authApi';
 import {RootState} from '../../../store';
 import CustomImage from '../../../component/common/CustomImage';
 import CountryPicker, {Country} from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
+import { useEmpUpdateProfileMutation } from '../../../api/dashboardApi';
 
 const {width} = Dimensions.get('window');
 
@@ -840,7 +840,7 @@ const SignUp = () => {
                   onClose={() => {
                     setIsVisible(null);
                   }}
-                  placeholder=""
+                  // placeholder=""
                 />
               )}
             </ScrollView>

@@ -306,6 +306,7 @@ const CreateProfileScreen = () => {
     }
   };
 
+  console.log(">>>> ~ handleAddAboutMe ~ aboutEdit:", aboutEdit)
   const handleAddAboutMe = async () => {
     const languages = (aboutEdit?.languages || []).map((lang: any) => ({
       name: lang.name,

@@ -200,7 +200,9 @@ const WelcomeScreen = () => {
             {role === 'employee' && Platform.OS == 'ios' && (
               <>
                 <TouchableOpacity
-                  onPress={() => handleAppleSignIn()}
+                  onPress={() => {}
+                    // handleAppleSignIn()
+                  }
                   style={styles.whiteButton}>
                   <Image source={IMAGES.a_icon} style={styles.icon} />
                   <Text style={styles.whiteText}>
@@ -209,7 +211,9 @@ const WelcomeScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => handleGoogleSignIn()}
+                  onPress={() => {}
+                    // handleGoogleSignIn()
+                  }
                   style={styles.whiteButton}>
                   <Image source={IMAGES.g_icon} style={styles.icon} />
                   <Text style={styles.whiteText}>

@@ -349,8 +349,7 @@ export const dashboardApi = createApi({
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
-          console.log(data, 'datadata');
-          dispatch(setUserInfo(data.data?.user));
+          console.log(data, '>>>>>>>> GetProfile datadata');
         } catch (error) {
           console.log('Guest Login Error', error);
         }
@@ -569,6 +568,7 @@ export const dashboardApi = createApi({
         skipLoader: true,
         data: credentials,
       }),
+      invalidatesTags: ['GetProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
