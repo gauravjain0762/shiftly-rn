@@ -23,7 +23,7 @@ const WebViewScreen = () => {
         type={type}
         title={t(params?.title)}
         titleStyle={{
-          right: '50%',
+          right: '45%',
           alignSelf: 'center',
           color: type === 'employe' ? colors.white : colors.black,
         }}

@@ -31,7 +31,7 @@ export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
     ?.toString()
     ?.replace('+', '') as keyof typeof callingCodeToCountryCode;
-  return callingCodeToCountryCode[cleanCode] || 'AE';
+  return callingCodeToCountryCode[cleanCode] || '';
 };
 
 const EditAccountScreen = () => {
@@ -46,7 +46,7 @@ const EditAccountScreen = () => {
     phone_code: '',
     email: '',
   });
-  const countryCode = formData.phone_code || 'AE';
+  const countryCode = formData?.phone_code || '';
   const [picture, setPicture] = useState<any>(null);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [showNationalityPicker, setShowNationalityPicker] = useState(false);
@@ -86,7 +86,10 @@ const EditAccountScreen = () => {
       updateData.append('address', formData.location);
       updateData.append('nationality', formData.nationality);
       updateData.append('phone', formData.phone);
-      updateData.append('phone_code', formData.phone_code);
+      updateData.append(
+        'phone_code',
+        formData.phone_code?.replace('+', '') || '',
+      );
       updateData.append('about', formData.about);
 
       if (picture?.path) {
@@ -135,9 +138,14 @@ const EditAccountScreen = () => {
                 style={styles.avatarContainer}>
                 <CustomImage
                   resizeMode="cover"
-                  uri={picture?.path || formData?.picture}
                   containerStyle={styles.avatar}
-                  imageStyle={{height: '100%', width: '100%'}}
+                  uri={picture?.path || formData?.picture}
+                  imageStyle={{
+                    height: '100%',
+                    width: '100%',
+                    borderWidth: 1,
+                    borderColor: 'white',
+                  }}
                 />
                 <View style={styles.editIconContainer}>
                   <Image source={IMAGES.edit_icon} style={styles.editIcon} />
@@ -205,7 +213,6 @@ const EditAccountScreen = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Email (Non-editable) */}
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Email</Text>
               <View style={styles.nonEditableField}>
@@ -221,12 +228,13 @@ const EditAccountScreen = () => {
                   onPress={() => setShowCountryPicker(true)}
                   style={styles.countryCodeSelector}>
                   <Flag
-                    withEmoji
-                    flagSize={18}
+                    withFlagButton
+                    flagSize={wp(18)}
+                    withEmoji={true}
                     countryCode={callingCodeToCountry(countryCode) as any}
                   />
                   <Text style={styles.countryCodeText}>
-                    {formData?.phone_code}
+                    {`${formData?.phone_code}` || ''}
                   </Text>
                   <Image
                     source={IMAGES.down1}
@@ -263,8 +271,8 @@ const EditAccountScreen = () => {
             visible={showCountryPicker}
             withFilter
             withFlag
-            withCallingCode
-            withEmoji={false}
+            withEmoji={true}
+            withCallingCode={true}
             onSelect={country => {
               setFormData(prev => ({
                 ...prev,
@@ -281,7 +289,6 @@ const EditAccountScreen = () => {
             withFlag
             withFilter
             withEmoji={false}
-            withCallingCode={false}
             visible={showNationalityPicker}
             onSelect={country => {
               const countryName =
@@ -451,7 +458,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingRight: wp(12),
-    minWidth: wp(80),
+    minWidth: wp(100),
   },
   phoneSeparator: {
     width: 1,
@@ -469,7 +476,6 @@ const styles = StyleSheet.create({
   },
   countryCodeText: {
     ...commonFontStyle(400, 14, '#F4E2B8'),
-    marginHorizontal: wp(6),
     minWidth: wp(35),
   },
 

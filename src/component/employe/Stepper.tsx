@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, hp} from '../../theme/fonts';
 
 const colors = {
   background: '#002147',
@@ -14,9 +14,10 @@ const stepData = [
   {label: 'Education', step: 1},
   {label: 'Experience', step: 2},
   {label: 'About Me', step: 3},
+  {label: 'Upload', step: 4},
 ];
 
-const Stepper = ({activeStep = 1,setActiveStep}) => {
+const Stepper = ({activeStep = 1}) => {
   return (
     <View style={styles.container}>
       {stepData.map(({label, step}) => {
@@ -47,9 +48,9 @@ const CIRCLE_SIZE = 50;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    paddingVertical: hp(14),
     justifyContent: 'space-around',
     // backgroundColor: colors.background,
-    // paddingVertical: 20,
   },
   stepItem: {
     alignItems: 'center',

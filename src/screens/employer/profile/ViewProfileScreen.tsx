@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {BackHeader, GradientButton, LinearContainer} from '../../../component';
+import {LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {IMAGES} from '../../../assets/Images';
@@ -58,7 +58,7 @@ const ViewProfileScreen = () => {
             <Text style={styles.name}>{userInfo?.name}</Text>
             <View style={styles.locationRow}>
               <Image source={IMAGES.marker} style={styles.locationicon} />
-              <Text style={styles.location}>{userInfo?.location}</Text>
+              <Text style={styles.location}>{userInfo?.location || 'N/A'}</Text>
             </View>
 
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
@@ -89,7 +89,7 @@ const ViewProfileScreen = () => {
                 {label: 'Email', value: userInfo?.email},
                 {
                   label: 'Phone',
-                  value: `${userInfo?.phone_code} ${userInfo?.phone}`,
+                  value: `+${userInfo?.phone_code} ${userInfo?.phone}`,
                   showFlag: true,
                 },
               ]}
@@ -104,7 +104,7 @@ const ViewProfileScreen = () => {
                     {item?.showFlag && (
                       <Flag
                         withEmoji
-                        flagSize={40}
+                        flagSize={wp(30)}
                         withFlagButton
                         countryCode={callingCodeToCountry(countryCode) as any}
                       />
@@ -117,20 +117,28 @@ const ViewProfileScreen = () => {
               )}
             />
           </View>
-          {/* <TouchableOpacity
-            onPress={() => navigateTo(SCREENS.EditAccount)}
-            style={styles.editAccountBtn}>
-            <Text style={styles.editAccountBtnText}>Edit Account</Text>
-          </TouchableOpacity> */}
 
-          <GradientButton
+          <TouchableOpacity
             onPress={() => navigateTo(SCREENS.EditAccount)}
-            title="Edit Details"
-            style={{
-              marginTop: '18%',
-              marginHorizontal: wp(23),
-            }}
-          />
+            style={[
+              styles.editButton,
+              {
+                width: '70%',
+                alignSelf: 'center',
+                marginHorizontal: wp(23),
+              },
+            ]}>
+            <Text
+              style={[
+                styles.editButtonText,
+                {
+                  textAlign: 'center',
+                  ...commonFontStyle(400, 18, '#0A376D'),
+                },
+              ]}>
+              Edit Details
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     </LinearContainer>
@@ -157,7 +165,7 @@ const styles = StyleSheet.create({
   },
   locationRow: {
     flexDirection: 'row',
-    gap: wp(16),
+    gap: wp(6),
     marginTop: hp(8),
   },
   location: {

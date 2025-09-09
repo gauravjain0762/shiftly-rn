@@ -281,12 +281,22 @@ export const dashboardApi = createApi({
         }
       },
     }),
-    getCompanyChatMessages: builder.query<any, any>({
-      query: chatId => {
-        const queryParam = chatId ? `?chat_id=${chatId}` : '';
+    getCompanyChatMessages: builder.query<
+      any,
+      {chat_id?: string; job_id?: string; user_id?: string}
+    >({
+      query: ({chat_id, user_id, job_id}) => {
+        const params = new URLSearchParams();
+
+        if (chat_id) {
+          params.append('chat_id', chat_id);
+        } else {
+          if (user_id) params.append('user_id', user_id);
+          if (job_id) params.append('job_id', job_id);
+        }
 
         return {
-          url: `${API.getCompanyChatMessages}${queryParam}`,
+          url: `${API.getCompanyChatMessages}?${params.toString()}`,
           method: HTTP_METHOD.GET,
           skipLoader: true,
         };
@@ -294,12 +304,13 @@ export const dashboardApi = createApi({
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
-          console.log(data, 'datadata');
+          console.log('getCompanyChatMessages', data);
         } catch (error) {
           console.log('getCompanyChatMessages Error', error);
         }
       },
     }),
+
     sendCompanyMessage: builder.mutation<any, any>({
       query: credentials => ({
         url: API.sendCompanyMessage,
@@ -373,8 +384,8 @@ export const dashboardApi = createApi({
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
-          } else {
             dispatch(setUserInfo(data?.data?.user));
+          } else {
             errorToast(data?.message);
           }
         } catch (error) {
@@ -567,6 +578,10 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.POST,
         skipLoader: true,
         data: credentials,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
       }),
       invalidatesTags: ['GetProfile'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
@@ -696,6 +711,15 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    removeResume: builder.mutation<any, any>({
+      query: params => {
+        return {
+          url: `${API.removeResume}/${params}`,
+          method: HTTP_METHOD.DELETE,
+          skipLoader: true,
+        };
+      },
+    }),
   }),
 });
 
@@ -741,4 +765,5 @@ export const {
   useRemoveExperienceMutation,
   useGetFilterDataQuery,
   useEmpUpdateProfileMutation,
+  useRemoveResumeMutation,
 } = dashboardApi;

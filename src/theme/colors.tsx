@@ -49,7 +49,7 @@ export const colors = {
   _C9C9C9: '#C9C9C9',
   _D9D9D9: '#D9D9D9',
   _EFEFEF: '#EFEFEF',
-  _lightBlueSkeleton: '#D1E2F3',
+  _lightBlueSkeleton: '#0B3B75',
 
   _25201a: '#25201a',
   greyOpacity: 'rgba(0,0,0,0.5)',

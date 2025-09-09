@@ -26,6 +26,7 @@ type picker = {
   phoneStyle?: TextStyle;
   onCallingCodeChange?: any;
   placeholder?: string;
+  countryCode?: string | any;
   category?: 'Company' | 'Employee';
 } & TextProps &
   TextInputProps;
@@ -39,11 +40,12 @@ const PhoneInput: FC<picker> = ({
   onCallingCodeChange,
   phoneStyle,
   placeholder,
+  countryCode,
   category = 'Company',
   ...TextInputProps
 }) => {
   // const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState<any>('AE');
+  // const [countryCode, setCountryCode] = useState<any>('AE');
   const [showModal, setShowModal] = useState(false);
   const [valid, setValid] = useState(true);
   const {t, i18n} = useTranslation();
@@ -63,8 +65,7 @@ const PhoneInput: FC<picker> = ({
           withCallingCode
           flagSize={50}
           onSelect={country => {
-            setCountryCode(country.cca2);
-            onCallingCodeChange?.(country.callingCode[0]);
+            onCallingCodeChange?.(country);
           }}
           onClose={() => {
             setShowModal(false);

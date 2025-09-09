@@ -98,7 +98,7 @@ const CoHome = () => {
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       {isLoading && currentPage === 1 ? (
-        <PostSkeleton />
+        <PostSkeleton backgroundColor={colors.coPrimary} />
       ) : (
         <FlatList
           data={allPosts}

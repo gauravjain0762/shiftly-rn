@@ -1,13 +1,5 @@
-import {
-  FlatList,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {act, useCallback, useEffect, useState} from 'react';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   BackHeader,
   GradientButton,
@@ -45,6 +37,8 @@ import {
   useAddUpdateEducationMutation,
   useAddUpdateExperienceMutation,
   useGetEducationsQuery,
+  useGetEmployeeProfileQuery,
+  useGetEmployeeSkillsQuery,
   useGetExperiencesQuery,
   useRemoveEducationMutation,
   useRemoveExperienceMutation,
@@ -55,13 +49,18 @@ import {setUserInfo} from '../../../features/authSlice';
 import {useFocusEffect} from '@react-navigation/native';
 import BaseText from '../../../component/common/BaseText';
 import {IMAGES} from '../../../assets/Images';
+import UploadResume from '../../../component/employe/UploadResume';
+import {lang} from 'moment';
+
+type Resume = {
+  file_name: string;
+  file: string;
+  type: string;
+};
 
 const CreateProfileScreen = () => {
   const dispatch = useDispatch();
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  const [isEducationUpdate, setIsEducationUpdate] = useState(false);
-  const [isExperienceUpdate, setIsExperienceUpdate] = useState(false);
-
   const {
     educationList,
     educationListEdit,
@@ -78,9 +77,16 @@ const CreateProfileScreen = () => {
       refetchOnMountOrArgChange: true,
     },
   );
-
   const {data: getExperiences, refetch: refetchExperience} =
     useGetExperiencesQuery(
+      {},
+      {
+        refetchOnFocus: true,
+        refetchOnMountOrArgChange: true,
+      },
+    );
+  const {data: getAboutmeandResumes, refetch: refetchAboutMe} =
+    useGetEmployeeProfileQuery(
       {},
       {
         refetchOnFocus: true,
@@ -90,6 +96,12 @@ const CreateProfileScreen = () => {
 
   const educationData = getEducation?.data?.educations;
   const experienceData = getExperiences?.data?.experiences;
+  const aboutmeandResumes = getAboutmeandResumes?.data?.user;
+  const uploadedResumes = aboutmeandResumes?.resumes;
+
+  const [isEducationUpdate, setIsEducationUpdate] = useState(false);
+  const [isExperienceUpdate, setIsExperienceUpdate] = useState(false);
+  const [resumes, setResumes] = useState<Resume[]>(uploadedResumes || []);
 
   const [addUpdateEducation, {isLoading: isLoadingEducation}] =
     useAddUpdateEducationMutation({});
@@ -99,6 +111,8 @@ const CreateProfileScreen = () => {
     useUpdateAboutMeMutation({});
   const [removeEducation] = useRemoveEducationMutation({});
   const [removeExperience] = useRemoveExperienceMutation({});
+  const {data: skillsData} = useGetEmployeeSkillsQuery({});
+  const skillsList = skillsData?.data?.skills;
 
   useFocusEffect(
     useCallback(() => {
@@ -114,6 +128,24 @@ const CreateProfileScreen = () => {
     }
     if (experienceData) {
       dispatch(setExperienceList(experienceData));
+    }
+
+    console.log(
+      '🔥🔥🔥 ~ CreateProfileScreen ~ aboutmeandResumes:',
+      aboutmeandResumes?.languages,
+    );
+    if (aboutmeandResumes) {
+      dispatch(
+        setAboutEdit({
+          open_for_jobs: aboutmeandResumes?.open_for_job || '',
+          responsibilities: aboutmeandResumes?.responsibility || '',
+          location: aboutmeandResumes?.location || '',
+          selectedSkills: (aboutmeandResumes?.skills || []).map((s: any) =>
+            typeof s === 'string' ? s : s._id,
+          ),
+          selectedLanguages: aboutmeandResumes?.languages || [],
+        }),
+      );
     }
   }, [educationData, experienceData]);
 
@@ -247,7 +279,6 @@ const CreateProfileScreen = () => {
 
         try {
           const response = await addUpdateEducation(payload).unwrap();
-          console.log('Education saved:', response);
 
           if (response?.status) {
             // successToast(response?.message);
@@ -306,39 +337,51 @@ const CreateProfileScreen = () => {
     }
   };
 
-  console.log(">>>> ~ handleAddAboutMe ~ aboutEdit:", aboutEdit)
   const handleAddAboutMe = async () => {
-    const languages = (aboutEdit?.languages || []).map((lang: any) => ({
-      name: lang.name,
-      level: lang.level,
-    }));
+    const formData = new FormData();
 
-    const params = {
-      open_for_job: aboutEdit?.open_for_jobs ? true : false,
-      location: aboutEdit?.location,
-      responsibility: aboutEdit?.responsibilities,
-      languages,
-    };
+    formData.append('open_for_job', aboutEdit?.open_for_jobs ? true : false);
+    formData.append('location', aboutEdit?.location || '');
+    formData.append('responsibility', aboutEdit?.responsibilities || '');
 
-    console.log(' ~ handleAddAboutMe ~ params:', params);
+    formData.append('skills', aboutEdit?.selectedSkills?.join(',') || '');
+
+    if (aboutEdit?.selectedLanguages?.length) {
+      aboutEdit.selectedLanguages.forEach((lang: any, index: number) => {
+        formData.append(`languages[${index}][name]`, lang.name);
+        formData.append(`languages[${index}][level]`, lang.level);
+      });
+    }
+
+    if (resumes?.length > 0) {
+      resumes
+        .filter((resume: any) => !resume._id)
+        .forEach((resume: any, index: number) => {
+          formData.append('resumes', {
+            uri: resume.file,
+            type: resume.type,
+            name: resume.file_name || `resume_${index}.pdf`,
+          } as any);
+        });
+    }
 
     try {
-      const res = await updateAboutMe(params).unwrap();
+      const res = await updateAboutMe(formData).unwrap();
       const updatedData = res?.data?.user;
+
       if (res?.status) {
-        console.log('>>>>>>>>~ handleAddAboutMe ~ updatedData:', updatedData);
-        dispatch(
-          setUserInfo({
-            ...userInfo,
-            open_for_job: updatedData?.open_for_job,
-            location: updatedData?.location || '',
-            responsibility: updatedData?.responsibility || '',
-            languages: updatedData?.languages || [],
-            selectedLanguages: (updatedData?.languages || []).map(
-              (l: any) => l.name,
-            ),
-          }),
-        );
+        // dispatch(
+        //   setUserInfo({
+        //     ...userInfo,
+        //     open_for_job: updatedData?.open_for_job,
+        //     location: updatedData?.location || '',
+        //     responsibility: updatedData?.responsibility || '',
+        //     languages: updatedData?.languages || [],
+        //     selectedLanguages: (updatedData?.languages || []).map(
+        //       (l: any) => l.name,
+        //     ),
+        //   }),
+        // );
         dispatch(setShowModal(true));
       } else {
         errorToast(res?.message);
@@ -373,10 +416,10 @@ const CreateProfileScreen = () => {
         await handleAddUExperience();
       }
       await handleAddAboutMe();
-
-      dispatch(setActiveStep(1));
     } catch (error) {
       console.error('Error updating profile:', error);
+    } finally {
+      dispatch(setActiveStep(1));
     }
   };
 
@@ -500,10 +543,7 @@ const CreateProfileScreen = () => {
         </View>
 
         {/* Fixed Stepper */}
-        <Stepper
-          activeStep={activeStep}
-          setActiveStep={(step: number) => dispatch(setActiveStep(step))}
-        />
+        <Stepper activeStep={activeStep} />
 
         {/* Scrollable Content Area */}
         <KeyboardAwareScrollView
@@ -551,8 +591,6 @@ const CreateProfileScreen = () => {
                 setEducationListEdit={val =>
                   dispatch(setEducationListEdit(val))
                 }
-                // addNewEducation={handleSaveOrAddEducation}
-                // onSaveEducation={handleSaveOrAddEducation}
               />
             </>
           )}
@@ -614,9 +652,6 @@ const CreateProfileScreen = () => {
                 }
                 addNewExperience={handleSaveOrAddExperience}
                 onSaveExperience={handleSaveOrAddExperience}
-                onNextPress={() => {
-                  dispatch(setActiveStep(3));
-                }}
               />
             </>
           )}
@@ -624,10 +659,17 @@ const CreateProfileScreen = () => {
           {activeStep === 3 && (
             <AboutMeList
               aboutEdit={aboutEdit}
+              skillsList={skillsList}
+              onNextPress={() => {
+                dispatch(setActiveStep(4));
+              }}
               experienceList={experienceList}
-              onNextPress={() => {}}
               setAboutEdit={(val: any) => dispatch(setAboutEdit(val))}
             />
+          )}
+
+          {activeStep === 4 && (
+            <UploadResume resumes={resumes} setResumes={setResumes} />
           )}
         </KeyboardAwareScrollView>
 
@@ -721,7 +763,22 @@ const CreateProfileScreen = () => {
               marginHorizontal: wp(25),
             },
           ]}
-          title={'Update'}
+          title={'Next'}
+          onPress={() => {
+            dispatch(setActiveStep(4));
+          }}
+        />
+      )}
+
+      {activeStep === 4 && (
+        <GradientButton
+          style={[
+            styles.btn,
+            {
+              marginHorizontal: wp(25),
+            },
+          ]}
+          title={'Update Profile'}
           onPress={() => {
             if (isLoadingAboutme || isLoadingEducation || isLoadingExperience) {
               return;

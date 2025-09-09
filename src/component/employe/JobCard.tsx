@@ -34,12 +34,13 @@ const JobCard: FC<props> = ({
       <CustomImage
         uri={item?.company_id?.cover_images[0]}
         imageStyle={{width: '100%', height: '100%'}}
-        resizeMode="cover"
+        // resizeMode="cover"
         containerStyle={styles.jobImage}>
         <View style={styles.logo}>
           <CustomImage
             resizeMode="stretch"
             uri={item?.company_id?.logo}
+            source={IMAGES.dummy_cover}
             containerStyle={styles.companyLogo}
             imageStyle={{
               width: '100%',
@@ -92,9 +93,9 @@ export default JobCard;
 
 const styles = StyleSheet.create({
   jobCard: {
-    backgroundColor: colors.white,
     borderRadius: 15,
     overflow: 'hidden',
+    backgroundColor: colors._EFEFEF,
   },
   jobImage: {
     width: '100%',

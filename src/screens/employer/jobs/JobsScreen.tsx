@@ -45,6 +45,7 @@ import {setIsBannerLoaded} from '../../../features/employeeSlice';
 import BaseText from '../../../component/common/BaseText';
 import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
 import FastImage from 'react-native-fast-image';
+import CustomImage from '../../../component/common/CustomImage';
 
 const jobTypes: object[] = [
   {type: 'Full Time', value: 'Full Time'},
@@ -139,7 +140,6 @@ const JobsScreen = () => {
       // employer_type: '',
     });
     setRange([0, 100000]);
-    setIsFilterModalVisible(false);
     trigger({});
   };
 
@@ -260,13 +260,21 @@ const JobsScreen = () => {
             ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
             contentContainerStyle={styles.scrollContainer}
             ListEmptyComponent={
-              <BaseText
+              <View
                 style={{
-                  ...commonFontStyle(500, 17, colors.white),
-                  textAlign: 'center',
+                  flex: 1,
+                  marginTop: '40%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
-                {t('No jobs found')}
-              </BaseText>
+                <BaseText
+                  style={{
+                    ...commonFontStyle(500, 17, colors.white),
+                    textAlign: 'center',
+                  }}>
+                  {t('No jobs found')}
+                </BaseText>
+              </View>
             }
           />
         )}
@@ -276,7 +284,22 @@ const JobsScreen = () => {
           backgroundColor={colors._FBE7BD}
           onClose={() => setIsFilterModalVisible(false)}>
           <View style={styles.modalContent}>
-            <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+              <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
+
+              <CustomImage
+                onPress={() => {
+                  setIsFilterModalVisible(false);
+                }}
+                source={IMAGES.close}
+                size={wp(18)}
+              />
+            </View>
 
             <Text style={styles.sectionLabel}>{t('Department')}</Text>
             <View style={styles.pillRow}>
@@ -445,6 +468,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   filterTitle: {
+    flex: 3,
+    marginLeft: '12%',
     textAlign: 'center',
     ...commonFontStyle(500, 20, colors.black),
   },

@@ -82,6 +82,7 @@ export const API = {
   getExperiences: '/getExperiences',
   removeEducation: '/removeEducation',
   removeExperience: 'removeExperience',
+  removeResume: '/deleteResume',
 
   // Chats
   employeeGetChats: '/getChats',

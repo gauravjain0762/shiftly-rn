@@ -14,6 +14,7 @@ export interface EducationItem {
   province: string;
   isEditing?: boolean;
   isLocal?: boolean;
+  _id?: string;
 }
 
 export interface ExperienceItem {
@@ -33,19 +34,21 @@ export interface ExperienceItem {
   experience_type: string;
   isEditing?: boolean;
   isLocal?: boolean;
+  _id?: string;
 }
 
 export interface AboutMe {
-  aboutMe: string;
-  responsibilities: string;
-  selectOne: string[];
-  isOn: boolean;
-  location: string;
-  selectedLanguages: string[];
-  languages: {name: string; level: string}[];
-  proficiency: string;
-  checkEnd: boolean;
-  open_for_jobs: boolean;
+  aboutMe?: string;
+  responsibilities?: string;
+  selectOne?: string[];
+  isOn?: boolean;
+  location?: string;
+  selectedLanguages?: string[];
+  languages?: {name: string; level: string}[];
+  proficiency?: string;
+  checkEnd?: boolean;
+  open_for_jobs?: boolean;
+  selectedSkills?: string[];
 }
 
 interface AuthState {
@@ -103,12 +106,12 @@ const initialState: EmployeeState = {
     isLocal: true,
     job_start: {
       month: '',
-      year: ''
+      year: '',
     },
     job_end: {
       month: '',
-      year: ''
-    }
+      year: '',
+    },
   },
   aboutEdit: {
     aboutMe: '',
@@ -126,12 +129,13 @@ const initialState: EmployeeState = {
     proficiency: '',
     checkEnd: false,
     open_for_jobs: false,
+    selectedSkills: [],
   },
   favoriteJobs: [],
   isBannerLoaded: false,
   isSuccessModalVisible: false,
   auth: {
-    email: __DEV__ ? 'bilal@devicebee.com' : '',
+    email: __DEV__ ? 'emplyoee1@gmail.com' : '',
     password: __DEV__ ? '12345678' : '',
   },
 };

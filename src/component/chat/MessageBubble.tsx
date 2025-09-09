@@ -1,7 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {memo} from 'react';
+import React, {memo, useState} from 'react';
 import moment from 'moment';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
@@ -9,13 +15,29 @@ import {Message} from '../../screens/employer/chat/Chat';
 import {IMAGES} from '../../assets/Images';
 import {navigateTo} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
+import CustomImage from '../common/CustomImage';
 
 const MessageBubble: React.FC<{
   item: Message;
   recipientName: string;
   type: 'user' | 'company';
-}> = ({item, recipientName, type}) => {
+  chatData: any;
+}> = ({item, recipientName, type, chatData}) => {
+  console.log('>>>>>>>> ~ MessageBubble ~ item:', item?.file);
   const isUser = item.sender !== 'company';
+
+  const openFile = () => {
+    navigateTo(SCREENS.WebviewScreen, {
+      link: item.file,
+      title: '',
+      type: 'employe',
+    });
+  };
+
+  const isDocument =
+    item.file?.includes('pdf') ||
+    item.file?.includes('doc') ||
+    item.file?.includes('docx');
 
   return (
     <View style={styles.messageContainer}>
@@ -24,9 +46,10 @@ const MessageBubble: React.FC<{
           <View style={styles.avatarContainer}>
             <FastImage
               source={{
-                uri: 'https://content.presspage.com/templates/658/2042/729924/royal-atlantis-logo.png',
+                uri: chatData?.user_id?.picture,
               }}
               style={styles.avatar}
+              resizeMode={FastImage.resizeMode.contain}
             />
           </View>
           <View>
@@ -54,7 +77,8 @@ const MessageBubble: React.FC<{
             {moment(item?.createdAt).format('hh:mm A')}
           </Text>
         )}
-        {item.message && (
+
+        {item?.message && (
           <View
             style={[
               styles.bubble,
@@ -75,47 +99,41 @@ const MessageBubble: React.FC<{
             </Text>
           </View>
         )}
-        {item.file ? (
-          item.file?.includes('pdf') ||
-          item.file?.includes('doc') ||
-          item.file?.includes('docx') ? (
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo(SCREENS.WebviewScreen, {
-                  link: item.file,
-                  title: '',
-                  type: 'employe',
-                });
-              }}>
-              <FastImage
-                source={IMAGES.document}
-                defaultSource={IMAGES.document}
-                tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
-                style={{
-                  ...styles.attachment,
-                  alignSelf: isUser ? 'flex-end' : 'flex-start',
+
+        {item?.file && (
+          <View
+            style={[
+              styles.attachmentContainer,
+              {alignSelf: isUser ? 'flex-end' : 'flex-start'},
+            ]}>
+            {isDocument ? (
+              // Document attachment
+              <TouchableOpacity onPress={openFile}>
+                <FastImage
+                  source={IMAGES.document}
+                  defaultSource={IMAGES.document}
+                  tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
+                  style={styles.attachment}
+                  resizeMode={FastImage.resizeMode.contain}
+                />
+              </TouchableOpacity>
+            ) : (
+              <CustomImage
+                source={{uri: item?.file}}
+                onPress={() => {
+                  navigateTo(SCREENS.WebviewScreen, {
+                    link: item.file,
+                    title: '',
+                    type: 'employe',
+                  });
                 }}
+                imageStyle={{width: '100%', height: '100%'}}
+                containerStyle={styles.imageContainer}
+                resizeMode="cover"
               />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo(SCREENS.WebviewScreen, {
-                  link: item.file,
-                  title: '',
-                  type: 'employe',
-                });
-              }}>
-              <FastImage
-                source={{uri: item.file}}
-                style={{
-                  ...styles.attachment,
-                  alignSelf: isUser ? 'flex-end' : 'flex-start',
-                }}
-              />
-            </TouchableOpacity>
-          )
-        ) : null}
+            )}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -176,11 +194,74 @@ const styles = StyleSheet.create({
   otherText: {
     color: '#fff',
   },
+
+  // Enhanced attachment styles
+  attachmentContainer: {
+    marginTop: hp(10),
+    position: 'relative',
+  },
+  imageContainer: {
+    position: 'relative',
+    width: wp(120),
+    height: hp(120),
+    borderRadius: hp(8),
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0', // Placeholder background
+  },
   attachment: {
     width: wp(120),
     height: hp(120),
-    marginTop: hp(10),
-    alignSelf: 'flex-end',
-    borderRadius: hp(8)
+    borderRadius: hp(8),
+    backgroundColor: '#f0f0f0', // Placeholder background
+  },
+
+  // Loading and error overlays
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(240, 240, 240, 0.9)',
+    borderRadius: hp(8),
+  },
+  loadingText: {
+    marginTop: 5,
+    fontSize: 10,
+    color: '#666',
+  },
+  errorOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    borderRadius: hp(8),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 0, 0.3)',
+    borderStyle: 'dashed',
+  },
+  errorText: {
+    fontSize: 11,
+    color: '#666',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  retryCount: {
+    fontSize: 9,
+    color: '#999',
+    marginTop: 2,
+  },
+  debugText: {
+    fontSize: 8,
+    color: '#666',
+    marginTop: 2,
+    textAlign: 'center',
+    opacity: 0.7,
   },
 });

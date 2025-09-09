@@ -3,7 +3,6 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,6 +11,7 @@ import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import BaseText from './BaseText';
 
 type Props = {
   item: any;
@@ -33,26 +33,28 @@ const ApplicantCard = ({
       <View style={styles.row}>
         <Image
           style={styles.avatar}
-          source={item?.picture ? {uri: item?.picture} : IMAGES.avatar}
+          source={
+            item?.user_id?.picture
+              ? {uri: item?.user_id?.picture}
+              : IMAGES.avatar
+          }
         />
         <View style={styles.infoContainer}>
-          <Text numberOfLines={1} style={styles.name}>
-            {item?.name}
-          </Text>
-          <Text numberOfLines={2} style={styles.field} ellipsizeMode="tail">
-            {item?.responsibility}
-          </Text>
-          {/* <Text
+          <BaseText numberOfLines={1} style={styles.name}>
+            {item?.user_id?.name || 'N/A'}
+          </BaseText>
+          <BaseText numberOfLines={2} style={styles.field} ellipsizeMode="tail">
+            {item?.user_id?.responsibility || 'N/A'}
+          </BaseText>
+          {/* <BaseText
             ellipsizeMode="tail"
             numberOfLines={1}
             style={styles.experience}>
             5y Experience
-          </Text> */}
+          </BaseText> */}
         </View>
         <View style={styles.actionContainer}>
-          <Pressable
-            onPress={onPressChat}
-            style={styles.chatButton}>
+          <Pressable onPress={onPressChat} style={styles.chatButton}>
             <Image source={IMAGES.chat} />
           </Pressable>
           {showShortListButton && (
@@ -60,9 +62,9 @@ const ApplicantCard = ({
               activeOpacity={0.5}
               onPress={handleShortListEmployee}
               style={styles.actionButton}>
-              <Text style={styles.actionText}>
+              <BaseText style={styles.actionText}>
                 {t(!showShortListButton ? 'Shortlisted' : 'Shortlist')}
-              </Text>
+              </BaseText>
             </TouchableOpacity>
           )}
           <View
@@ -72,7 +74,7 @@ const ApplicantCard = ({
                 marginTop: hp(4),
               },
             ]}>
-            <Text style={styles.actionText}>{t('View Profile')}</Text>
+            <BaseText style={styles.actionText}>{t('View Profile')}</BaseText>
           </View>
         </View>
       </View>

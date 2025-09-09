@@ -26,9 +26,10 @@ const FeedCard: FC<card> = ({
       <View style={styles.cardHeader}>
         <CustomImage
           uri={item?.company_id?.logo}
+          source={IMAGES.logoImg}
           imageStyle={{height: '100%', width: '100%'}}
           containerStyle={styles.logo}
-          resizeMode="stretch"
+          resizeMode="cover"
         />
         <View>
           <Text style={styles.hotelName}>{item?.company_id?.company_name}</Text>
@@ -60,9 +61,9 @@ const FeedCard: FC<card> = ({
       <View style={styles.banner}>
         <CustomImage
           uri={item?.images?.length > 0 ? item?.images[0] : ''}
-          imageStyle={{height: '100%', width: '100%'}}
+          imageStyle={{height: '100%', width: '100%', opacity: 1}}
           containerStyle={styles.post}
-          resizeMode="cover"
+          resizeMode="contain"
         />
       </View>
 

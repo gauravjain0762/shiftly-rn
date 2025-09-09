@@ -22,7 +22,6 @@ import BaseText from '../../../component/common/BaseText';
 
 const ProfileScreen = () => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥 ~ ProfileScreen ~ userInfo:', userInfo);
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen);
@@ -71,10 +70,12 @@ const ProfileScreen = () => {
             containerStyle={styles.avatar}
             resizeMode="cover"
           />
-          <BaseText style={styles.name}>{userInfo?.name || "N/A"}</BaseText>
+          <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} />
-            <BaseText style={styles.location}>{userInfo?.location || "N/A"}</BaseText>
+            <BaseText style={styles.location}>
+              {userInfo?.location || 'N/A'}
+            </BaseText>
           </View>
 
           <TouchableOpacity
@@ -98,51 +99,58 @@ const ProfileScreen = () => {
             </BaseText>
           </TouchableOpacity> */}
 
-          <View style={styles.completionCard}>
-            <BaseText style={styles.completionTitle}>
-              Profile completion
-            </BaseText>
-            <View style={styles.row}>
-              <View style={styles.progressBarBg}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    {width: userInfo?.profile_completion * 2.75},
-                  ]}
-                />
-              </View>
-              <BaseText
-                style={
-                  styles.percentage
-                }>{`${userInfo?.profile_completion}%` || "N/A"}</BaseText>
-            </View>
-            <View style={styles.progressRow}>
-              <BaseText style={styles.progressText}>
-                Keep it up! you’re halfway there.
+          {!userInfo?.profile_completion && (
+            <View style={{marginTop: hp(15)}} />
+          )}
+
+          {userInfo?.profile_completion && (
+            <View style={[styles.completionCard]}>
+              <BaseText style={styles.completionTitle}>
+                Profile completion
               </BaseText>
+              <View style={styles.row}>
+                <View style={styles.progressBarBg}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      {width: userInfo?.profile_completion * 2.75 || 0},
+                    ]}
+                  />
+                </View>
+                <BaseText style={styles.percentage}>
+                  {`${userInfo?.profile_completion}%` || 'N/A'}
+                </BaseText>
+              </View>
+              <View style={styles.progressRow}>
+                <BaseText style={styles.progressText}>
+                  Keep it up! you’re halfway there.
+                </BaseText>
+              </View>
             </View>
-          </View>
+          )}
 
           {/* Section: About Me */}
-          <Section title="About me" content={userInfo?.about || "N/A"} />
+          <Section title="About me" content={userInfo?.about || 'N/A'} />
 
           {/* Section: Professional Experience */}
           <Section
             title="Professional Experience"
-            content={userInfo?.experience?.title|| "N/A"}
+            content={userInfo?.experience?.title || 'N/A'}
           />
 
           {/* Section: My Languages */}
           <View style={[styles.card, {width: '90%'}]}>
             <HeaderWithAdd title="My Languages" />
             <View style={styles.languageContainer}>
-              {userInfo?.languages?.length ? userInfo?.languages?.map((item: any, index: number) => (
-                <View key={index} style={[styles.skillBadge]}>
-                  <BaseText style={styles.skillText}>{item?.name}</BaseText>
-                </View>
-              )) : 
-                <BaseText  style={styles.skillText}>{"N/A"}</BaseText>
-              }
+              {userInfo?.languages?.length ? (
+                userInfo?.languages?.map((item: any, index: number) => (
+                  <View key={index} style={[styles.skillBadge]}>
+                    <BaseText style={styles.skillText}>{item?.name}</BaseText>
+                  </View>
+                ))
+              ) : (
+                <BaseText style={styles.skillText}>{'N/A'}</BaseText>
+              )}
             </View>
           </View>
 
@@ -195,7 +203,7 @@ const styles = StyleSheet.create({
   },
   locationRow: {
     flexDirection: 'row',
-    gap: wp(16),
+    gap: wp(6),
     marginTop: hp(8),
   },
   location: {

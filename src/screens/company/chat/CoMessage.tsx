@@ -40,7 +40,13 @@ const CoMessage = () => {
             key={index}
             item={item}
             type="company"
-            onPressMessage={e => navigateTo(SCREENS.CoChat, {data: e})}
+            onPressMessage={e =>
+              navigateTo(SCREENS.CoChat, {
+                data: e,
+                accessChatId: true,
+                isFromJobDetail: false,
+              })
+            }
           />
         )}
         ListEmptyComponent={() => {

@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: 'center',
-    lineHeight: 30,
+    lineHeight: hp(20),
     marginTop: hp(29),
     marginBottom: hp(10),
     ...commonFontStyle(600, 17, colors._DADADA),

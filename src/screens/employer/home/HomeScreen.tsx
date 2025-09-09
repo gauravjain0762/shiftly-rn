@@ -30,8 +30,6 @@ const HomeScreen = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {userInfo}: any = useSelector((state: RootState) => state.auth);
   const {data: profileData} = useGetEmployeeProfileQuery({});
-  console.log("🔥🔥🔥 ~ HomeScreen ~ profileData:", profileData)
-  console.log("🔥🔥🔥 ~ HomeScreen ~ userInfo:", userInfo)
 
   const {
     data: getPost,

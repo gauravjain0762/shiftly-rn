@@ -10,6 +10,7 @@ import {
 import React, {useState, useRef, useEffect} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
+import {errorToast} from '../../utils/commonFunction';
 
 const months = [
   'January',
@@ -80,18 +81,106 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
   );
 
   const handleSelect = (item: string | number) => {
+    let newMonth = selectedMonth;
+    let newYear = selectedYear;
+
     if (openPicker === 'Month') {
-      setSelectedMonth(item as string);
-      setOpenPicker(null);
-      onChange?.({month: item, year: selectedYear});
+      newMonth = item as string;
+      setSelectedMonth(newMonth);
     } else if (openPicker === 'Year') {
-      setSelectedYear(item.toString());
-      setOpenPicker(null);
-      onChange?.({month: selectedMonth, year: item});
+      newYear = item.toString();
+      setSelectedYear(newYear);
     }
+
+    // ✅ Validation for End Date
+    if (type === 'Experience' || type === 'Education') {
+      if (label === 'End Date') {
+        const startMonth =
+          type === 'Experience'
+            ? dateValue?.jobStart_month
+            : dateValue?.startDate_month;
+        const startYear =
+          type === 'Experience'
+            ? dateValue?.jobStart_year
+            : dateValue?.startDate_year;
+
+        if (startYear && newYear) {
+          const start = new Date(
+            Number(startYear),
+            months.indexOf(startMonth || 'January'),
+          );
+          const end = new Date(
+            Number(newYear),
+            months.indexOf(newMonth || 'January'),
+          );
+
+          if (end < start) {
+            errorToast('End Date cannot be earlier than Start Date');
+            return;
+          }
+        }
+      }
+    }
+
+    setOpenPicker(null);
+    onChange?.({month: newMonth, year: newYear});
   };
 
-  const getData = () => (openPicker === 'Month' ? months : years);
+  // ✅ Filter years for End Date to prevent selecting years less than start year
+  const getFilteredYears = () => {
+    if (
+      label === 'End Date' &&
+      (type === 'Education' || type === 'Experience')
+    ) {
+      const startYear =
+        type === 'Experience'
+          ? dateValue?.jobStart_year
+          : dateValue?.startDate_year;
+
+      if (startYear) {
+        return years.filter(year => year >= Number(startYear));
+      }
+    }
+    return years;
+  };
+
+  // ✅ Filter months for End Date in the same year as start date
+  const getFilteredMonths = () => {
+    if (
+      label === 'End Date' &&
+      (type === 'Education' || type === 'Experience')
+    ) {
+      const startMonth =
+        type === 'Experience'
+          ? dateValue?.jobStart_month
+          : dateValue?.startDate_month;
+      const startYear =
+        type === 'Experience'
+          ? dateValue?.jobStart_year
+          : dateValue?.startDate_year;
+
+      // If end year is same as start year, filter months
+      if (
+        startYear &&
+        selectedYear &&
+        Number(selectedYear) === Number(startYear) &&
+        startMonth
+      ) {
+        const startMonthIndex = months.indexOf(startMonth);
+        return months.slice(startMonthIndex);
+      }
+    }
+    return months;
+  };
+
+  const getData = () => {
+    if (openPicker === 'Month') {
+      return getFilteredMonths();
+    } else if (openPicker === 'Year') {
+      return getFilteredYears();
+    }
+    return [];
+  };
 
   useEffect(() => {
     if (openPicker && flatListRef.current) {
@@ -99,9 +188,9 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
       let index = -1;
 
       if (openPicker === 'Month' && selectedMonth) {
-        index = months.indexOf(selectedMonth);
+        index = data.indexOf(selectedMonth);
       } else if (openPicker === 'Year' && selectedYear) {
-        index = years.indexOf(Number(selectedYear));
+        index = data.indexOf(Number(selectedYear));
       }
 
       if (index >= 0) {
@@ -110,7 +199,7 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
         }, 100);
       }
     }
-  }, [openPicker]);
+  }, [openPicker, selectedYear]); // Added selectedYear dependency
 
   return (
     <View style={{flex: 1}}>

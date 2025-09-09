@@ -19,11 +19,13 @@ const ImagePickerModal = ({
   setActionSheet = () => {},
   onUpdate = () => {},
   allowDocument = false,
+  isGalleryEnable = true,
 }: {
   actionSheet?: boolean;
   setActionSheet?: (value: boolean) => void;
   onUpdate?: (value: any) => void;
   allowDocument?: boolean;
+  isGalleryEnable?: boolean;
 }) => {
   const closeActionSheet = () => setActionSheet(false);
 
@@ -56,6 +58,7 @@ const ImagePickerModal = ({
       const res = await ImageCropPicker.openPicker({
         mediaType: 'photo',
         cropping: true,
+        compressImageQuality: 0.5,
       });
 
       const temp = {
@@ -118,13 +121,17 @@ const ImagePickerModal = ({
       style={styles.modal}>
       <View style={styles.container}>
         <View style={styles.optionGroup}>
-          <TouchableOpacity style={styles.optionButton} onPress={openGallery}>
-            <Text style={styles.text}>Select From Gallery</Text>
-          </TouchableOpacity>
+          {isGalleryEnable && (
+            <TouchableOpacity style={styles.optionButton} onPress={openGallery}>
+              <Text style={styles.text}>Select From Gallery</Text>
+            </TouchableOpacity>
+          )}
           <View style={styles.separator} />
-          <TouchableOpacity style={styles.optionButton} onPress={openCamera}>
-            <Text style={styles.text}>Take a Photo</Text>
-          </TouchableOpacity>
+          {isGalleryEnable && (
+            <TouchableOpacity style={styles.optionButton} onPress={openCamera}>
+              <Text style={styles.text}>Take a Photo</Text>
+            </TouchableOpacity>
+          )}
           {allowDocument && (
             <>
               <View style={styles.separator} />

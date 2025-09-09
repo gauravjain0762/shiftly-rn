@@ -55,7 +55,7 @@ import {RootState} from '../../../store';
 import CustomImage from '../../../component/common/CustomImage';
 import CountryPicker, {Country} from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
-import { useEmpUpdateProfileMutation } from '../../../api/dashboardApi';
+import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
 
 const {width} = Dimensions.get('window');
 
@@ -86,6 +86,7 @@ const SignUp = () => {
     phone_code,
     describe,
     picture,
+    countryCode,
   } = signupData;
 
   const [password, setPassword] = useState('');
@@ -130,6 +131,7 @@ const SignUp = () => {
       phone_code: string;
       describe: string;
       picture: string;
+      countryCode: any | string;
     }>,
   ) => {
     dispatch(setCreateEmployeeAccount(updates));
@@ -533,10 +535,14 @@ const SignUp = () => {
               <PhoneInput
                 phone={phone}
                 callingCode={phone_code}
+                countryCode={countryCode}
                 placeholderTextColor={colors._F4E2B8}
                 onPhoneChange={(e: any) => updateSignupData({phone: e})}
                 onCallingCodeChange={(e: any) =>
-                  updateSignupData({phone_code: e})
+                  updateSignupData({
+                    phone_code: e.callingCode[0],
+                    countryCode: e.cca2,
+                  })
                 }
                 category="Employee"
                 maxLength={10}

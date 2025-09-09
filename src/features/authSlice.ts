@@ -60,6 +60,7 @@ interface AppState {
     phone_code: string | undefined;
     describe: string;
     picture: string;
+    countryCode: any | string;
   };
 }
 
@@ -131,6 +132,7 @@ const initialState: AppState = {
     phone_code: '971',
     describe: "I'm a job seeker",
     picture: 'https://sky.devicebee.com/Shiftly/public/uploads//blank.png',
+    countryCode: 'AE',
   },
 };
 

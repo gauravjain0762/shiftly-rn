@@ -4,6 +4,7 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {colors} from '../../theme/colors';
 import CustomImage from '../common/CustomImage';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import {IMAGES} from '../../assets/Images';
 
 type MessageItem = {
   id: string;
@@ -26,15 +27,19 @@ const MessageList: FC<Props> = ({
   item,
   type = 'employe',
 }) => {
+  console.log("🔥🔥🔥 ~ MessageList ~ item:", item)
   return (
     <TouchableOpacity
       style={styles.itemContainer}
       onPress={() => onPressMessage(item)}>
       <CustomImage
-        uri={item?.company_id?.logo}
-        imageStyle={{height: '100%', width: '100%'}}
-        containerStyle={styles.logoBg}
         resizeMode="cover"
+        containerStyle={styles.logoBg}
+        size={
+          item?.company_id?.logo || item?.user_id?.picture ? '100%' : wp(30)
+        }
+        uri={item?.company_id?.logo || item?.user_id?.picture}
+        source={IMAGES.dummy_image}
       />
       <View style={styles.textContainer}>
         <Text
@@ -42,14 +47,14 @@ const MessageList: FC<Props> = ({
             styles.title,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.company_id?.company_name || 'Unknown'}
+          {item?.company_id?.company_name || item?.user_id?.name || 'Unknown'}
         </Text>
         <Text
           style={[
             styles.sender,
             {color: type == 'employe' ? colors.white : colors._0B3970},
           ]}>
-          {item?.last_message || 'last message'}
+          {item?.last_message || ''}
         </Text>
         <Text
           style={[
@@ -118,17 +123,17 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 18, colors.white),
   },
   sender: {
-    ...commonFontStyle(400, 12, colors.white),
+    ...commonFontStyle(400, 13, colors.white),
   },
   preview: {
-    ...commonFontStyle(400, 12, colors.white),
+    ...commonFontStyle(400, 13, colors.white),
   },
   rightContainer: {
     alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
   date: {
-    ...commonFontStyle(400, 12, '#FFFFFF'),
+    ...commonFontStyle(400, 13, '#FFFFFF'),
   },
   badge: {
     backgroundColor: colors.white,

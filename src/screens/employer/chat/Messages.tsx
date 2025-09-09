@@ -1,13 +1,13 @@
-import {FlatList, StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
-import {BackHeader, LinearContainer, SearchBar} from '../../../component';
+import {FlatList, StyleSheet, View} from 'react-native';
+
 import {hp, wp} from '../../../theme/fonts';
 import {useTranslation} from 'react-i18next';
-import {colors} from '../../../theme/colors';
-import MessageList from '../../../component/employe/MessageList';
-import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import {navigateTo} from '../../../utils/commonFunction';
+import MessageList from '../../../component/employe/MessageList';
 import {useEmployeeGetChatsQuery} from '../../../api/dashboardApi';
+import {BackHeader, LinearContainer, SearchBar} from '../../../component';
 
 const Messages = () => {
   const {t, i18n} = useTranslation();

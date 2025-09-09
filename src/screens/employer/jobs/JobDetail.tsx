@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 
 import {
@@ -21,8 +22,8 @@ import {colors} from '../../../theme/colors';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {
   errorToast,
+  formatDate,
   navigateTo,
-  successToast,
 } from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -35,6 +36,9 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
+import Carousel from 'react-native-reanimated-carousel';
+
+const {width: screenWidth} = Dimensions.get('window');
 
 const JobDetail = () => {
   const {t} = useTranslation();
@@ -42,8 +46,8 @@ const JobDetail = () => {
   const [modal, setModal] = useState(false);
   const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.item;
+  console.log('🔥🔥🔥 ~ JobDetail ~ data_id:', data?._id);
   const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
-  console.log("🔥🔥🔥 ~ JobDetail ~ jobDetail:", jobDetail)
   const curr_jobdetails = jobDetail?.data?.job;
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
@@ -51,6 +55,7 @@ const JobDetail = () => {
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleAddRemoveFavoriteJob = async (item: any) => {
     try {
@@ -60,7 +65,6 @@ const JobDetail = () => {
       }).unwrap();
 
       if (res?.status) {
-        // successToast(res?.message);
         await refetch();
       } else {
         errorToast(res?.message);
@@ -71,6 +75,29 @@ const JobDetail = () => {
   };
 
   const isFavorite = favJobList?.some((fav: any) => fav._id === data?._id);
+
+  const coverImages =
+    curr_jobdetails?.company_id?.cover_images?.length > 0
+      ? curr_jobdetails?.company_id?.cover_images
+      : [data?.company_id?.logo];
+
+  const renderCarouselItem = ({item, index}: any) => {
+    const isValidImage =
+      item &&
+      item.startsWith('http') &&
+      /\.(jpeg|jpg|png|gif|webp)$/i.test(item);
+
+    return (
+      <View key={index} style={styles.carouselItemContainer}>
+        <CustomImage
+          source={isValidImage ? {uri: item} : IMAGES.dummy_image}
+          // resizeMode="cover"
+          imageStyle={styles.imageStyle}
+          containerStyle={styles.carouselImage}
+        />
+      </View>
+    );
+  };
 
   return (
     <LinearContainer
@@ -96,18 +123,44 @@ const JobDetail = () => {
         }
         leftStyle={styles.lefticon}
       />
-      <CustomImage
-        source={
-          curr_jobdetails?.company_id?.cover_images?.length
-            ? {uri: curr_jobdetails.company_id.cover_images[0]}
-            : data?.company_id?.logo
-        }
-        imageStyle={{width: '100%', height: '100%'}}
-        resizeMode="cover"
-        containerStyle={styles.banner}
-      />
 
-      <ScrollView style={styles.container}>
+      {/* Fixed Carousel */}
+      <View style={styles.bannerWrapper}>
+        {coverImages && coverImages.length > 0 && (
+          <>
+            <Carousel
+              loop={coverImages.length > 1}
+              width={screenWidth}
+              height={hp(230)}
+              autoPlay={coverImages.length > 1}
+              autoPlayInterval={4000}
+              data={coverImages}
+              scrollAnimationDuration={500}
+              onSnapToItem={index => setActiveIndex(index)}
+              renderItem={renderCarouselItem}
+              style={styles.carousel}
+            />
+            {/* Pagination Dots - Only show if more than 1 image */}
+            {coverImages.length > 1 && (
+              <View style={styles.pagination}>
+                {coverImages.map(
+                  (_: any, index: React.Key | null | undefined) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.dot,
+                        activeIndex === index && styles.activeDot,
+                      ]}
+                    />
+                  ),
+                )}
+              </View>
+            )}
+          </>
+        )}
+      </View>
+
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.header}>
           <CustomImage
@@ -133,6 +186,7 @@ const JobDetail = () => {
           <Image source={IMAGES.location} style={styles.location} />
           <Text style={styles.locationText}>{data?.address}</Text>
         </View>
+
         {/* Description */}
         <Text style={styles.description}>
           {data?.description ||
@@ -167,20 +221,29 @@ const JobDetail = () => {
         </View>
 
         <View style={{height: hp(10)}} />
-        <GradientButton
-          onPress={() => {
-            if (data?.is_applied) {
-              errorToast('You already applied for this job.');
-              return;
-            }
-            navigateTo(SCREEN_NAMES.ApplyJob, {
-              data: data,
-              resumeList: resumeList,
-            });
-          }}
-          title={t(data?.is_applied ? 'Applied' : 'Apply Job')}
-        />
+        {data?.is_applied ? (
+          <BaseText
+            style={{
+              textAlign: 'center',
+              ...commonFontStyle(500, 18, colors.white),
+            }}>{`Applied on ${formatDate(data?.createdAt)}`}</BaseText>
+        ) : (
+          <GradientButton
+            onPress={() => {
+              if (data?.is_applied) {
+                errorToast('You already applied for this job.');
+                return;
+              }
+              navigateTo(SCREEN_NAMES.ApplyJob, {
+                data: data,
+                resumeList: resumeList,
+              });
+            }}
+            title={t(data?.is_applied ? 'Applied' : 'Apply Job')}
+          />
+        )}
       </ScrollView>
+
       <ShareModal visible={modal} onClose={() => setModal(!modal)} />
     </LinearContainer>
   );
@@ -204,10 +267,68 @@ const styles = StyleSheet.create({
     paddingTop: hp(15),
     paddingHorizontal: wp(16),
   },
-  banner: {
+  bannerWrapper: {
+    width: '100%',
     height: hp(230),
     marginTop: hp(10),
+    position: 'relative',
+  },
+  carousel: {
+    width: '100%',
+    height: '100%',
+  },
+  carouselItemContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
     overflow: 'hidden',
+  },
+  carouselImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  imageStyle: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  banner: {
+    height: hp(230),
+    overflow: 'hidden',
+    borderRadius: 12,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 15,
+    width: '100%',
+    alignItems: 'center',
+  },
+  dot: {
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    marginHorizontal: 3,
+  },
+  activeDot: {
+    backgroundColor: colors.white,
+    width: 12,
+    height: 8,
+    borderRadius: 4,
+  },
+  noImageContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+  },
+  noImageText: {
+    ...commonFontStyle(400, 16, colors.white),
   },
   container: {
     flex: 1,

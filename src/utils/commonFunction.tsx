@@ -156,3 +156,13 @@ export const passwordRules = [
     test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
   },
 ];
+
+export const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  return moment(dateString).local().format('MMMM DD, YYYY, h:mm A');
+};
+
+export const formatDateWithoutTime = (dateString: string) => {
+  if (!dateString) return '';
+  return moment(dateString).local().format('MMMM DD, YYYY.');
+};

@@ -18,15 +18,21 @@ import {IMAGES} from '../../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
   useEmployeeSendMessageMutation,
+  useLazyEmployeeGetChatMessagesQuery,
   useLazyGetCompanyChatMessagesQuery,
 } from '../../../api/dashboardApi';
-import {errorToast} from '../../../utils/commonFunction';
+import {
+  errorToast,
+  formatDateWithoutTime,
+  navigateTo,
+} from '../../../utils/commonFunction';
 import {onChatMessage} from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MessageBubble from '../../../component/chat/MessageBubble';
 import ChatInput from '../../../component/chat/ChatInput';
 import CustomImage from '../../../component/common/CustomImage';
 import {colors} from '../../../theme/colors';
+import {SCREENS} from '../../../navigation/screenNames';
 
 // ---------- Types ----------
 export type Message = {
@@ -49,6 +55,7 @@ type LogoFile = {
 
 const Chat = () => {
   const {params} = useRoute<any>();
+  const jobdetail_chatData = params?.data ?? {};
   const chatId = params?.data?._id;
   const flatListRef = useRef<FlatList>(null);
 
@@ -57,11 +64,12 @@ const Chat = () => {
   const [logo, setLogo] = useState<LogoFile>(null);
 
   const [sendMessage] = useEmployeeSendMessageMutation();
-  // const {data: chats, refetch} = useEmployeeGetChatMessagesQuery(chatId);
-  const [getCompanyChatMessages, {data: chats}] =
-    useLazyGetCompanyChatMessagesQuery();
+  const [getEmployeeChatMessages, {data: chats}] =
+    useLazyEmployeeGetChatMessagesQuery(chatId);
+  const chatData = chats?.data?.chat;
   const [chatList, setChatList] = useState<Message[]>([]);
   const [showDownIcon, setShowDownIcon] = useState(false);
+  const [showJobCard, setShowJobCard] = useState<boolean>(true);
 
   const handleChatScrollDown = () => {
     flatListRef.current?.scrollToOffset({offset: 0, animated: true});
@@ -81,9 +89,9 @@ const Chat = () => {
   // ----- Load messages -----
   useEffect(() => {
     if (chatId) {
-      getCompanyChatMessages(chatId);
+      getEmployeeChatMessages(chatId);
     }
-  }, [chatId, getCompanyChatMessages]);
+  }, [chatId, getEmployeeChatMessages]);
 
   useEffect(() => {
     if (chats?.data?.messages) {
@@ -146,8 +154,17 @@ const Chat = () => {
         {/* Header */}
         <View style={styles.container}>
           <BackHeader
-            title={chats?.data?.chat?.company_id?.company_name || ''}
-            RightIcon={<Image source={IMAGES.dots} style={styles.dotIcon} />}
+            title={jobdetail_chatData?.company_id?.company_name || 'Unknown'}
+            RightIcon={
+              <CustomImage
+                onPress={() => {
+                  setShowJobCard(prev => !prev);
+                }}
+                size={wp(24)}
+                tintColor={colors.white}
+                source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
+              />
+            }
             titleStyle={{
               flex: 1,
               paddingHorizontal: hp(10),
@@ -161,15 +178,29 @@ const Chat = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           {/* Job card */}
-          <View style={styles.card}>
-            <Text style={styles.dateText}>
-              You applied to this position on 18 October 2024.
-            </Text>
-            <Text style={styles.jobTitle}>Restaurant Manager - Full Time</Text>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>View Job</Text>
-            </TouchableOpacity>
-          </View>
+          {showJobCard && (
+            <View style={styles.card}>
+              <Text style={styles.dateText}>
+                You applied to this position on{' '}
+                {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
+              </Text>
+              <Text style={styles.jobTitle}>
+                {' '}
+                {`${jobdetail_chatData?.job_id?.title || 'N/A'} - ${
+                  jobdetail_chatData?.job_id?.job_type || 'N/A'
+                }`}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.JobDetail, {
+                    item: jobdetail_chatData?.job_id,
+                  });
+                }}
+                style={styles.button}>
+                <Text style={styles.buttonText}>View Job</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Messages */}
           <FlatList
@@ -182,6 +213,7 @@ const Chat = () => {
                   chats?.data?.chat?.company_id?.company_name || ''
                 }
                 type={'user'}
+                chatData={chatData}
               />
             )}
             keyExtractor={(item, index) => item._id ?? index.toString()}
@@ -217,6 +249,7 @@ const Chat = () => {
           setActionSheet={() => setImagePickerVisible(false)}
           onUpdate={handleImageSelected}
           allowDocument={true}
+          isGalleryEnable={false}
         />
       </SafeAreaView>
     </LinearContainer>

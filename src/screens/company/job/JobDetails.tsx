@@ -96,9 +96,10 @@ const CoJobDetails = () => {
         </View>
       ) : (
         <>
-          <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}} 
-            contentContainerStyle={{paddingBottom: hp(120)}}
-          >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{flex: 1}}
+            contentContainerStyle={{paddingBottom: hp(120)}}>
             <BackHeader
               type="company"
               isRight={false}
@@ -163,7 +164,7 @@ const CoJobDetails = () => {
 
               <View style={styles.bottomContainer}>
                 <View style={styles.tabContainer}>
-                  {Tabs.map((item, index) => (
+                  {Tabs?.map((item, index) => (
                     <Pressable
                       key={index}
                       style={styles.tabItem}
@@ -191,6 +192,7 @@ const CoJobDetails = () => {
                           onPressChat={() => {
                             navigateTo(SCREENS.CoChat, {
                               data: item,
+                              mainjob_data: jobDetail,
                             });
                           }}
                           showShortListButton={!item?.status}
@@ -216,7 +218,9 @@ const CoJobDetails = () => {
                             showShortListButton={false}
                             onPressChat={() => {
                               navigateTo(SCREENS.CoChat, {
-                                data: item,
+                                data: item, // inviteuser data
+                                mainjob_data: jobDetail, // main job whole data
+                                isFromJobDetail: true,
                               });
                             }}
                           />

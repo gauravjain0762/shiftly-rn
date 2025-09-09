@@ -4,13 +4,8 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import CustomInput from '../common/CustomInput';
-import GradientButton from '../common/GradientButton';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
-import CustomSwitch from '../common/CustomSwitch';
-import {useGetEmployeeProfileQuery} from '../../api/dashboardApi';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../store';
 
 type MessageItem = {
   id: string;
@@ -42,6 +37,7 @@ type Props = {
   experienceList: any;
   item: MessageItem[];
   setAboutEdit: any;
+  skillsList: any[];
   onNextPress: () => void;
   onPressMessage: (item: MessageItem) => void;
 };
@@ -63,30 +59,7 @@ const getDotColor = (level: string) => {
 
 const proficiencyLevels = ['Native', 'Fluent', 'Intermediate', 'Basic'];
 
-const AboutMeList: FC<Props> = ({
-  aboutEdit,
-  setAboutEdit,
-  onNextPress,
-}: any) => {
-  console.log('🔥🔥🔥 ~ AboutMeList ~ aboutEdit:', aboutEdit);
-  const {data: empProfile} = useGetEmployeeProfileQuery({});
-  const empData = empProfile?.data?.user;
-
-  useEffect(() => {
-    if (empData) {
-      console.log('🔥🔥🔥 ~ AboutMeList ~ empData:', empData);
-
-      // setAboutEdit({
-      //   ...aboutEdit,
-      //   open_for_jobs: empData?.open_for_job,
-      //   location: empData?.location || '',
-      //   responsibilities: empData?.responsibility || '',
-      //   languages: empData?.languages || [],
-      //   selectedLanguages: (empData?.languages || []).map((l: any) => l.name),
-      // });
-    }
-  }, [empData]);
-
+const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
   return (
     <View style={styles.containerWrapper}>
       <View style={styles.optionWrapper}>
@@ -153,71 +126,113 @@ const AboutMeList: FC<Props> = ({
         }
       />
 
-      <Text style={styles.headerText}>Select your language</Text>
+      <View>
+        <Text style={[styles.headerText, {marginTop: hp(20)}]}>
+          Select your skills
+        </Text>
+        <CustomDropdownMulti
+          disable={false}
+          data={(skillsList || []).map((skill: any) => ({
+            label: skill?.title,
+            value: skill?._id,
+          }))}
+          placeholder={'Select more than one'}
+          value={aboutEdit?.selectedSkills}
+          selectedStyle={styles.selectedStyle}
+          container={styles.multiDropdownContainer}
+          onChange={(selectedItems: any) => {
+            setAboutEdit({
+              ...aboutEdit,
+              selectedSkills: selectedItems,
+            });
+          }}
+        />
+      </View>
 
-      <CustomDropdownMulti
-        disable={false}
-        data={languages.map(lang => ({label: lang, value: lang}))}
-        placeholder={'Select more than one'}
-        value={aboutEdit?.selectedLanguages}
-        container={styles.multiDropdownContainer}
-        selectedStyle={styles.selectedStyle}
-        onChange={(selectedItems: any) => {
-          console.log('🔥🔥🔥 ~ selectedItems:', selectedItems);
-          const updatedLanguages = selectedItems.map((name: string) => {
-            const existing = (aboutEdit.languages || []).find(
-              (l: any) => l.name === name,
-            );
-            return existing || {name, level: ''};
-          });
-
-          setAboutEdit({
-            ...aboutEdit,
-            selectedLanguages: selectedItems,
-            languages: updatedLanguages,
-          });
-        }}
-      />
-
-      {aboutEdit?.selectedLanguages?.length && (
+      {aboutEdit?.selectedSkills?.length > 0 && (
         <View style={styles.languageListContainer}>
-          {aboutEdit.selectedLanguages.map((name: string) => (
-            <View key={name} style={styles.languageChip}>
-              <Text style={styles.languageChipText}>{name}</Text>
-            </View>
-          ))}
+          {aboutEdit?.selectedSkills?.map((id: string) => {
+            const skill = skillsList.find(
+              (s: any) => s._id === id || s._id === id?._id,
+            );
+            return (
+              <View key={id} style={styles.languageChip}>
+                <Text style={styles.languageChipText}>
+                  {skill?.title || id}
+                </Text>
+              </View>
+            );
+          })}
         </View>
       )}
 
-      {aboutEdit?.selectedLanguages?.map((lang: any) => (
-        <View style={styles.row} key={lang}>
-          <Text style={styles.language}>{lang}</Text>
-          {proficiencyLevels.map(level => (
-            <TouchableOpacity
-              key={level}
-              style={[
-                styles.dot,
-                aboutEdit.languages?.find((l: any) => l.name === lang)
-                  ?.level === level && styles.selectedDot,
-                {backgroundColor: getDotColor(level)},
-              ]}
-              onPress={() => {
-                const updatedLanguages = [
-                  ...(aboutEdit.languages || []).filter(
-                    (l: any) => l.name !== lang,
-                  ),
-                  {name: lang, level},
-                ];
+      <View>
+        <Text style={[styles.headerText, {marginTop: 0}]}>
+          Select your language
+        </Text>
+        <CustomDropdownMulti
+          disable={false}
+          data={languages.map(lang => ({label: lang, value: lang}))}
+          placeholder={'Select more than one'}
+          value={aboutEdit?.selectedLanguages.map((l: any) => l.name)} // dropdown expects array of strings
+          container={styles.multiDropdownContainer}
+          selectedStyle={styles.selectedStyle}
+          onChange={(selectedItems: string[]) => {
+            const updatedLanguages = selectedItems.map(name => {
+              // keep level if exists, otherwise empty
+              const existing = (aboutEdit?.selectedLanguages || []).find(
+                (l: any) => l.name === name,
+              );
+              return existing || {name, level: ''};
+            });
 
-                setAboutEdit({
-                  ...aboutEdit,
-                  languages: updatedLanguages,
-                });
-              }}
-            />
+            setAboutEdit({
+              ...aboutEdit,
+              selectedLanguages: updatedLanguages,
+            });
+          }}
+        />
+      </View>
+
+      {aboutEdit?.selectedLanguages?.length > 0 && (
+        <>
+          {/* Chips */}
+          <View style={styles.languageListContainer}>
+            {aboutEdit.selectedLanguages.map((lang: any, index: number) => (
+              <View key={`${lang.name}-${index}`} style={styles.languageChip}>
+                <Text style={styles.languageChipText}>{lang.name}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Language proficiency selector */}
+          {aboutEdit.selectedLanguages.map((lang: any, index: number) => (
+            <View style={styles.row} key={`${lang.name}-${index}`}>
+              <Text style={styles.language}>{lang.name}</Text>
+              {proficiencyLevels.map(level => (
+                <TouchableOpacity
+                  key={level}
+                  style={[
+                    styles.dot,
+                    lang.level === level && styles.selectedDot,
+                    {backgroundColor: getDotColor(level)},
+                  ]}
+                  onPress={() => {
+                    const updatedLanguages = aboutEdit.selectedLanguages.map(
+                      l => (l.name === lang.name ? {...l, level} : l),
+                    );
+
+                    setAboutEdit({
+                      ...aboutEdit,
+                      selectedLanguages: updatedLanguages,
+                    });
+                  }}
+                />
+              ))}
+            </View>
           ))}
-        </View>
-      ))}
+        </>
+      )}
 
       {/* <CustomSwitch isOn={aboutEdit?.open_for_jobs} setIsOn={setAboutEdit}  /> */}
     </View>
@@ -277,20 +292,19 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, '#DADADA'),
   },
   dropdownContainer: {
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   multiDropdownContainer: {
     // marginBottom: 15,
+    marginTop: 0,
   },
   headerText: {
     ...commonFontStyle(400, 18, '#DADADA'),
     marginBottom: 8,
-    marginTop: 20,
   },
-  subTitle: {
-    ...commonFontStyle(700, 18, '#F4E2B8'),
-    marginBottom: 10,
-    marginTop: 20,
+  skillsText: {
+    marginTop: hp(20),
+    ...commonFontStyle(400, 18, '#DADADA'),
   },
   selectedStyle: {
     height: 0,

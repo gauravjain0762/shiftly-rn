@@ -1,14 +1,12 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC, useState} from 'react';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import GradientButton from '../common/GradientButton';
 import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
 import {EducationItem} from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
-import {colors} from '../../theme/colors';
-import {errorToast} from '../../utils/commonFunction';
 import BaseText from '../common/BaseText';
 
 type Props = {
@@ -36,11 +34,6 @@ export const isEmptyEducation = (edu: EducationItem) => {
 const EducationList: FC<Props> = ({
   educationListEdit,
   setEducationListEdit,
-  addNewEducation,
-  onNextPress,
-  onSaveEducation,
-  educationList,
-  educationData,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -64,6 +57,7 @@ const EducationList: FC<Props> = ({
       />
       <View style={styles.dateContainer}>
         <CustomDatePicker
+          type="Education"
           label="Start Date"
           dateValue={educationListEdit}
           onChange={(date: any) => {
@@ -75,6 +69,7 @@ const EducationList: FC<Props> = ({
           }}
         />
         <CustomDatePicker
+          type="Education"
           label="End Date"
           dateValue={educationListEdit}
           onChange={(date: any) => {
@@ -89,11 +84,11 @@ const EducationList: FC<Props> = ({
 
       <View style={styles.row}>
         <View style={styles.halfWidth}>
-          <Text style={styles.label}>{'Country'}</Text>
+          <BaseText style={styles.label}>{'Country'}</BaseText>
           <TouchableOpacity
             onPress={() => setIsVisible(true)}
             style={styles.country}>
-            <Text
+            <BaseText
               style={
                 educationListEdit?.country
                   ? styles.countryText
@@ -101,7 +96,7 @@ const EducationList: FC<Props> = ({
               }
               numberOfLines={2}>
               {educationListEdit?.country || 'Select Country'}
-            </Text>
+            </BaseText>
             <Image source={IMAGES.down1} style={styles.dropdownIcon} />
           </TouchableOpacity>
         </View>
@@ -195,5 +190,4 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     ...commonFontStyle(400, 18, '#DADADA'),
   },
-
 });
