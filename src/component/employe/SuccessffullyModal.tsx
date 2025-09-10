@@ -43,7 +43,6 @@ const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
             style={styles.button}
             onPress={() => {
               onClose();
-
               resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
             }}>
             <Text style={styles.buttonText}>{t('Explore Jobs')}</Text>

@@ -394,7 +394,14 @@ export const dashboardApi = createApi({
       },
     }),
     getEmployeeJobs: builder.query<any, any>({
-      query: ({job_types, salary_from, salary_to, location, job_sectors}) => {
+      query: ({
+        job_types,
+        salary_from,
+        salary_to,
+        location,
+        job_sectors,
+        search,
+      }) => {
         const params = new URLSearchParams();
 
         if (job_types) params.append('job_types', job_types);
@@ -402,6 +409,7 @@ export const dashboardApi = createApi({
         if (salary_to) params.append('salary_to', salary_to.toString());
         if (location) params.append('location', location);
         if (job_sectors) params.append('job_sectors', job_sectors);
+        if (search) params.append('search', search);
 
         return {
           url: `${API.getEmployeeJobs}?${params.toString()}`,
@@ -572,6 +580,14 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    unshortlistEmployee: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.unshortlistEmployee,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+        data: credentials,
+      }),
+    }),
     updateAboutMe: builder.mutation<any, any>({
       query: credentials => ({
         url: API.updateAboutMe,
@@ -720,6 +736,15 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    getActivities: builder.query<any, any>({
+      query: () => {
+        return {
+          url: API.getActivities,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+    }),
   }),
 });
 
@@ -766,4 +791,6 @@ export const {
   useGetFilterDataQuery,
   useEmpUpdateProfileMutation,
   useRemoveResumeMutation,
+  useGetActivitiesQuery,
+  useUnshortlistEmployeeMutation,
 } = dashboardApi;

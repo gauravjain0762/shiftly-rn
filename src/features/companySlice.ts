@@ -27,6 +27,7 @@ interface JobFormState {
   editMode: boolean;
   job_id: string;
   invite_users: string[];
+  expiry_date: any | string;
 }
 
 interface PostFormState {
@@ -86,6 +87,7 @@ const initialState: CompanyState = {
     editMode: false,
     job_id: '',
     invite_users: [],
+    expiry_date: '',
   },
   postForm: {
     title: '',

@@ -3,11 +3,12 @@ import {View, StyleSheet, TouchableOpacity, Image, Text} from 'react-native';
 
 import BottomModal from './BottomModal';
 import {IMAGES} from '../../assets/Images';
-import { colors } from '../../theme/colors';
-import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import {colors} from '../../theme/colors';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import CustomImage from './CustomImage';
 
 type LanguageModalProps = {
-  type: 'Employee' | "Company";
+  type: 'Employee' | 'Company';
   visible: boolean;
   onClose: () => void;
   onLanguageSelect: (language: string) => void;
@@ -30,11 +31,11 @@ const LanguageModal = ({
     <BottomModal
       visible={visible}
       onClose={onClose}
-      backgroundColor={type === 'Employee' ? colors._E8CE92 : colors.coPrimary }
+      backgroundColor={type === 'Employee' ? colors._E8CE92 : colors.coPrimary}
       style={styles.modalContainer}>
       <View style={styles.header}>
         <Text style={styles.title}>{'Select Language'}</Text>
-        <Image source={IMAGES.close} style={styles.closeIcon} />
+        <CustomImage onPress={onClose} source={IMAGES.close} size={wp(20)} />
       </View>
 
       <View>
@@ -55,9 +56,8 @@ const LanguageModal = ({
               style={[
                 styles.radioButton,
                 {
-                  borderColor: type === 'Employee'
-                    ? colors._041326
-                    : colors._1F1F1F,
+                  borderColor:
+                    type === 'Employee' ? colors._041326 : colors._1F1F1F,
                 },
               ]}>
               {selectedLanguage === label && (
@@ -65,9 +65,8 @@ const LanguageModal = ({
                   style={[
                     styles.radioButtonInner,
                     {
-                      backgroundColor: type === 'Employee'
-                        ? colors._041326
-                        : colors._050505,
+                      backgroundColor:
+                        type === 'Employee' ? colors._041326 : colors._050505,
                     },
                   ]}
                 />

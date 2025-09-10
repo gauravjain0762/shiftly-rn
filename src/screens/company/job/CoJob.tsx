@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -10,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import {
-  BackHeader,
   CustomTextInput,
   GradientButton,
   LinearContainer,
@@ -103,7 +101,6 @@ const CoJob = () => {
 
   const handleResetFilters = () => {
     dispatch(resetFilters());
-    // Reset local state to match the reset filters
     setLocation('');
     setValue(null);
     setRange([1000, 50000]);
@@ -163,13 +160,14 @@ const CoJob = () => {
       </View>
 
       {isLoading ? (
-        <MyJobsSkeleton />
+        <MyJobsSkeleton backgroundColor={colors.coPrimary} />
       ) : (
         <View style={styles.outerContainer}>
           <FlatList
             data={latestJobList}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
+            keyExtractor={(_, index) => index.toString()}
             renderItem={({item, index}) => (
               <View key={index} style={{marginBottom: hp(10)}}>
                 <MyJobCard
@@ -179,6 +177,8 @@ const CoJob = () => {
                 />
               </View>
             )}
+            onRefresh={refetch}
+            refreshing={isLoading}
             ListEmptyComponent={() => (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>
@@ -191,7 +191,6 @@ const CoJob = () => {
                 </Text>
               </View>
             )}
-            keyExtractor={(_, index) => index.toString()}
           />
         </View>
       )}

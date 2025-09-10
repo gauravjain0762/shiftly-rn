@@ -34,7 +34,10 @@ const SelectRollScreen = () => {
               setRole('company');
               navigateTo(SCREENS.WelcomeScreen);
             }}
-            style={[styles.button, {borderColor: '#000', borderTopWidth: hp(0.2)}]}>
+            style={[
+              styles.button,
+              {borderColor: '#000', borderTopWidth: hp(0.2)},
+            ]}>
             <Text style={styles.buttonTextDark}>
               {t('Continue as Employer')}
             </Text>
@@ -89,7 +92,9 @@ const styles = StyleSheet.create({
     width: '94%',
     alignItems: 'center',
     borderRadius: hp(20),
+    borderWidth: hp(1.5),
     paddingVertical: hp(21),
+    borderColor: colors._104686,
     backgroundColor: colors._0B3970,
   },
   icon: {

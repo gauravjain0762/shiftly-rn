@@ -56,7 +56,7 @@ type LogoFile = {
 const Chat = () => {
   const {params} = useRoute<any>();
   const jobdetail_chatData = params?.data ?? {};
-  const chatId = params?.data?._id;
+  const chatId = params?.data?.chat_id;
   const flatListRef = useRef<FlatList>(null);
 
   const [isImagePickerVisible, setImagePickerVisible] = useState(false);
@@ -97,7 +97,7 @@ const Chat = () => {
     if (chats?.data?.messages) {
       let messages = chats?.data?.messages || [];
       if (messages.length > 0) {
-        setChatList([...messages].reverse()); // newest first
+        setChatList([...messages].reverse());
       }
     }
   }, [chats]);
@@ -154,7 +154,7 @@ const Chat = () => {
         {/* Header */}
         <View style={styles.container}>
           <BackHeader
-            title={jobdetail_chatData?.company_id?.company_name || 'Unknown'}
+            title={jobdetail_chatData?.company_name || 'Unknown'}
             RightIcon={
               <CustomImage
                 onPress={() => {
@@ -182,12 +182,12 @@ const Chat = () => {
             <View style={styles.card}>
               <Text style={styles.dateText}>
                 You applied to this position on{' '}
-                {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
+                {formatDateWithoutTime(jobdetail_chatData?.created_at)}
               </Text>
               <Text style={styles.jobTitle}>
                 {' '}
-                {`${jobdetail_chatData?.job_id?.title || 'N/A'} - ${
-                  jobdetail_chatData?.job_id?.job_type || 'N/A'
+                {`${jobdetail_chatData?.job_title || 'N/A'} - ${
+                  jobdetail_chatData?.job_type || 'N/A'
                 }`}
               </Text>
               <TouchableOpacity

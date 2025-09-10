@@ -149,9 +149,10 @@ export default ViewProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: hp(30),
     alignItems: 'center',
-    borderRadius: 12,
-    marginTop: 30,
+    borderRadius: hp(12),
+    paddingHorizontal: wp(50),
   },
   avatar: {
     width: wp(115),
@@ -160,8 +161,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   name: {
+    marginTop: hp(8),
+    textAlign: 'center',
     ...commonFontStyle(600, 25, colors.white),
-    marginTop: 8,
   },
   locationRow: {
     flexDirection: 'row',

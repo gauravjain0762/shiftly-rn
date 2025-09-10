@@ -1,11 +1,9 @@
-import {StyleSheet, TouchableOpacity, ViewStyle} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, ViewStyle} from 'react-native';
 import React from 'react';
 import FastImage, {FastImageProps, ImageStyle} from 'react-native-fast-image';
 import {colors} from '../../theme/colors';
 import {hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
-// import {getFontSize} from '../responsiveFn';
-// import {Colors} from '../../constants/Colors';
 
 interface Props {
   onPress?: () => void;
@@ -56,7 +54,7 @@ const CustomImage = ({
       <FastImage
         resizeMode={resizeMode}
         source={uri ? {uri: uri} : source}
-        tintColor={uri ? undefined : tintColor}
+        tintColor={tintColor}
         defaultSource={source ? source : IMAGES.dummy_image}
         style={[{width: size, height: size}, imageStyle]}
         {...props}>

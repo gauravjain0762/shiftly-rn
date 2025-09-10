@@ -1,4 +1,11 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
@@ -6,6 +13,8 @@ import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import NoDataText from '../../../component/common/NoDataText';
+import {useGetActivitiesQuery} from '../../../api/dashboardApi';
 
 const activities = [
   {
@@ -29,7 +38,7 @@ const activities = [
     id: '3',
     name: 'Marriot Hotel',
     subtitle: 'Restaurant Manager',
-      startDetails: 'Full Time',
+    startDetails: 'Full Time',
     endDetails: 'Dubai',
     time: '1 Hour ago',
     tag: 'Shortlisted',
@@ -45,29 +54,37 @@ const activities = [
 ];
 
 const ActivityScreen = () => {
+  const {data: activitiesData, isLoading, refetch} = useGetActivitiesQuery({});
+  const activities = activitiesData?.data?.activities || [];
+
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <View style={styles.topConrainer}>
         <BackHeader containerStyle={styles.header} />
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.activeTabText}>Active Chats</Text>
-        </TouchableOpacity>
-        <Text style={styles.activitiesTitle}>{'My Activities'}</Text>
       </View>
-      <FlatList
-        data={activities}
-        style={AppStyles.flex}
-        keyExtractor={item => item.id}
-        renderItem={(item: any) => (
-          <ActivitiesCard
-            onPress={() => navigateTo(SCREEN_NAMES?.Messages)}
-            {...item}
-          />
-        )}
-        contentContainerStyle={styles.scrollContainer}
-        ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
-        showsVerticalScrollIndicator={false}
-      />
+      {isLoading ? (
+        <ActivityIndicator size={'large'} />
+      ) : (
+        <FlatList
+          data={activities}
+          style={AppStyles.flex}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={(item: any) => <ActivitiesCard {...item} />}
+          contentContainerStyle={styles.scrollContainer}
+          ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
+          showsVerticalScrollIndicator={false}
+          refreshing={isLoading}
+          onRefresh={refetch}
+          ListEmptyComponent={() => {
+            return (
+              <NoDataText
+                text="No activities found"
+                textStyle={{color: colors.white}}
+              />
+            );
+          }}
+        />
+      )}
     </LinearContainer>
   );
 };
@@ -90,8 +107,8 @@ const styles = StyleSheet.create({
   },
   topConrainer: {
     paddingHorizontal: wp(25),
-    paddingVertical: hp(18),
-    borderBottomWidth: 1,
+    paddingTop: hp(18),
+    // borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   header: {
@@ -102,6 +119,7 @@ const styles = StyleSheet.create({
     marginTop: hp(22),
   },
   scrollContainer: {
+    flexGrow: 1,
     paddingVertical: hp(22),
     paddingHorizontal: wp(25),
   },

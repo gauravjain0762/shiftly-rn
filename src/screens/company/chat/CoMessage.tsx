@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+
 import {BackHeader, LinearContainer, SearchBar} from '../../../component';
 import {useTranslation} from 'react-i18next';
 import MessageList from '../../../component/employe/MessageList';
@@ -7,14 +8,13 @@ import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {hp, wp} from '../../../theme/fonts';
 import {useGetCompanyChatsQuery} from '../../../api/dashboardApi';
-import BaseText from '../../../component/common/BaseText';
+import NoDataText from '../../../component/common/NoDataText';
 
 const CoMessage = () => {
   const {t} = useTranslation();
-  const [value, setValue] = useState('');
-  const {data: chats} = useGetCompanyChatsQuery({});
+  const [value, setValue] = useState<string>('');
+  const {data: chats, isLoading, refetch} = useGetCompanyChatsQuery({});
   const chatList = chats?.data?.chats || [];
-  console.log('🔥🔥 ~ CoMessage ~ chatList:', chatList);
 
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
@@ -32,32 +32,35 @@ const CoMessage = () => {
           onChangeText={e => setValue(e)}
         />
       </View>
-      <FlatList
-        data={chatList}
-        showsVerticalScrollIndicator={false}
-        renderItem={({item, index}: any) => (
-          <MessageList
-            key={index}
-            item={item}
-            type="company"
-            onPressMessage={e =>
-              navigateTo(SCREENS.CoChat, {
-                data: e,
-                accessChatId: true,
-                isFromJobDetail: false,
-              })
-            }
-          />
-        )}
-        ListEmptyComponent={() => {
-          return (
-            <View>
-              <BaseText style={{textAlign: 'center'}} text={'No Chats found'} />
-            </View>
-          );
-        }}
-        keyExtractor={item => item.id}
-      />
+      {isLoading ? (
+        <ActivityIndicator size={'large'} />
+      ) : (
+        <FlatList
+          data={chatList}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{flexGrow: 1}}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({item, index}: any) => (
+            <MessageList
+              key={index}
+              item={item}
+              type="company"
+              onPressMessage={e =>
+                navigateTo(SCREENS.CoChat, {
+                  data: e,
+                  accessChatId: true,
+                  isFromJobDetail: false,
+                })
+              }
+            />
+          )}
+          ListEmptyComponent={() => {
+            return <NoDataText text="No chats found" />;
+          }}
+          onRefresh={refetch}
+          refreshing={isLoading}
+        />
+      )}
     </LinearContainer>
   );
 };

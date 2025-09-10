@@ -385,9 +385,9 @@ const SignUp = () => {
                 value={name}
                 inputStyle={styles.input}
                 containerStyle={{marginBottom: 0}}
-                maxLength={50}
+                maxLength={20}
               />
-              <CharLength chars={50} value={name} type={'employee'} />
+              <CharLength chars={20} value={name} type={'employee'} />
             </View>
             <GradientButton
               style={styles.btn}

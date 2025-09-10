@@ -46,7 +46,7 @@ const MessageBubble: React.FC<{
           <View style={styles.avatarContainer}>
             <FastImage
               source={{
-                uri: chatData?.user_id?.picture,
+                uri: chatData?.company_id?.logo,
               }}
               style={styles.avatar}
               resizeMode={FastImage.resizeMode.contain}
@@ -157,8 +157,8 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   avatar: {
-    width: 18,
-    height: 19,
+    width: '100%',
+    height: '100%',
     borderRadius: 16,
   },
   senderName: {

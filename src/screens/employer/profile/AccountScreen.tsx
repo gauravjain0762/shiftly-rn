@@ -24,7 +24,11 @@ import {
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {logouts, setAuthToken} from '../../../features/authSlice';
+import {
+  logouts,
+  setAuthToken,
+  setCreateEmployeeAccount,
+} from '../../../features/authSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import {clearAsync} from '../../../utils/asyncStorage';
 import {
@@ -149,6 +153,11 @@ const AccountScreen = () => {
       successToast(res.message);
       resetNavigation(SCREENS.SelectRollScreen);
       dispatch(setAuthToken(''));
+      dispatch(
+        setCreateEmployeeAccount({
+          step: 1,
+        }),
+      );
       await clearAsync();
       setPopupVisible(false);
     }

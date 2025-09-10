@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   ScrollView,
@@ -46,7 +46,6 @@ const JobDetail = () => {
   const [modal, setModal] = useState(false);
   const {params} = useRoute<RouteProp<any, any>>();
   const data = params?.item;
-  console.log('🔥🔥🔥 ~ JobDetail ~ data_id:', data?._id);
   const {data: jobDetail} = useGetEmployeeJobDetailsQuery(data?._id);
   const curr_jobdetails = jobDetail?.data?.job;
   const resumeList = jobDetail?.data?.resumes;
@@ -56,29 +55,52 @@ const JobDetail = () => {
   const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [activeIndex, setActiveIndex] = useState(0);
+  const [localFavorites, setLocalFavorites] = useState<string[]>([]);
 
-  const handleAddRemoveFavoriteJob = async (item: any) => {
+  useEffect(() => {
+    if (favJobList) {
+      setLocalFavorites(favJobList.map((job: any) => job._id));
+    }
+  }, [favJobList]);
+
+  const handleToggleFavorite = async (job: any) => {
+    const jobId = job._id;
+
+    setLocalFavorites(prev =>
+      prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId],
+    );
+
     try {
       const res = await addRemoveFavoriteJob({
-        job_id: item?._id,
+        job_id: jobId,
         user_id: userInfo?.user_id,
       }).unwrap();
 
-      if (res?.status) {
-        await refetch();
-      } else {
+      if (!res?.status) {
+        setLocalFavorites(prev =>
+          prev.includes(jobId)
+            ? prev.filter(id => id !== jobId)
+            : [...prev, jobId],
+        );
         errorToast(res?.message);
+      } else {
+        refetch();
       }
     } catch (error) {
+      setLocalFavorites(prev =>
+        prev.includes(jobId)
+          ? prev.filter(id => id !== jobId)
+          : [...prev, jobId],
+      );
       console.log('error', error);
     }
   };
 
-  const isFavorite = favJobList?.some((fav: any) => fav._id === data?._id);
+  const isFavorite = localFavorites.includes(data?._id);
 
   const coverImages =
-    curr_jobdetails?.company_id?.cover_images?.length > 0
-      ? curr_jobdetails?.company_id?.cover_images
+    data?.company_id?.cover_images?.length > 0
+      ? data?.company_id?.cover_images
       : [data?.company_id?.logo];
 
   const renderCarouselItem = ({item, index}: any) => {
@@ -90,10 +112,10 @@ const JobDetail = () => {
     return (
       <View key={index} style={styles.carouselItemContainer}>
         <CustomImage
-          source={isValidImage ? {uri: item} : IMAGES.dummy_image}
           // resizeMode="cover"
           imageStyle={styles.imageStyle}
           containerStyle={styles.carouselImage}
+          source={isValidImage ? {uri: item} : IMAGES.dummy_image}
         />
       </View>
     );
@@ -126,13 +148,13 @@ const JobDetail = () => {
 
       {/* Fixed Carousel */}
       <View style={styles.bannerWrapper}>
-        {coverImages && coverImages.length > 0 && (
+        {coverImages && coverImages?.length > 0 && (
           <>
             <Carousel
-              loop={coverImages.length > 1}
+              loop={coverImages?.length > 1}
               width={screenWidth}
               height={hp(230)}
-              autoPlay={coverImages.length > 1}
+              autoPlay={coverImages?.length > 1}
               autoPlayInterval={4000}
               data={coverImages}
               scrollAnimationDuration={500}
@@ -141,9 +163,9 @@ const JobDetail = () => {
               style={styles.carousel}
             />
             {/* Pagination Dots - Only show if more than 1 image */}
-            {coverImages.length > 1 && (
+            {coverImages?.length > 1 && (
               <View style={styles.pagination}>
-                {coverImages.map(
+                {coverImages?.map(
                   (_: any, index: React.Key | null | undefined) => (
                     <View
                       key={index}
@@ -173,7 +195,7 @@ const JobDetail = () => {
             <Text style={styles.jobTitle}>{data?.title}</Text>
           </View>
           <TouchableOpacity
-            onPress={() => handleAddRemoveFavoriteJob(data)}
+            onPress={() => handleToggleFavorite(data)}
             style={[styles.like]}>
             <Image
               style={styles.heart}
@@ -188,10 +210,7 @@ const JobDetail = () => {
         </View>
 
         {/* Description */}
-        <Text style={styles.description}>
-          {data?.description ||
-            `Atlantis Collection is a diverse group of luxury hotels with a fresh focus, offering guests a more authentic and thoughtful way to travel. We've created a collection brand that gives guests & colleagues an inspiring new choice. One that puts people at the heart of everything we do, to reframe luxury hospitality for the better.`}
-        </Text>
+        <Text style={styles.description}>{data?.description || 'N|A'}</Text>
 
         {/* Requirements */}
         <Text style={styles.sectionTitle}>What we need from you</Text>

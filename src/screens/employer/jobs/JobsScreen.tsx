@@ -88,23 +88,18 @@ const JobsScreen = () => {
   });
 
   const [range, setRange] = useState<number[]>([0, 50000]);
+  const [localFavorites, setLocalFavorites] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
-  const queryParams = {
-    salary_from: filters.salary_from || undefined,
-    salary_to: filters.salary_to || undefined,
-    location: filters.location || undefined,
-    job_types: filters.job_types.length
-      ? filters.job_types.join(',')
-      : undefined,
-    job_sectors: filters?.job_sectors?.length
-      ? filters.job_sectors.join(',')
-      : undefined,
-  };
 
   useEffect(() => {
     trigger({});
   }, [trigger]);
+
+  useEffect(() => {
+    if (favJobList) {
+      setLocalFavorites(favJobList.map((job: any) => job._id));
+    }
+  }, [favJobList]);
 
   const handleApplyFilter = () => {
     const newFilters = {
@@ -143,19 +138,35 @@ const JobsScreen = () => {
     trigger({});
   };
 
-  const handleAddRemoveFavoriteJob = async (item: any) => {
+  const handleToggleFavorite = async (job: any) => {
+    const jobId = job._id;
+
+    setLocalFavorites(prev =>
+      prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId],
+    );
+
     try {
       const res = await addRemoveFavoriteJob({
-        job_id: item?._id,
+        job_id: jobId,
         user_id: userInfo?._id,
       }).unwrap();
 
-      if (res?.status) {
-        await refetch();
-      } else {
+      if (!res?.status) {
+        setLocalFavorites(prev =>
+          prev.includes(jobId)
+            ? prev.filter(id => id !== jobId)
+            : [...prev, jobId],
+        );
         errorToast(res?.message);
+      } else {
+        refetch();
       }
     } catch (error) {
+      setLocalFavorites(prev =>
+        prev.includes(jobId)
+          ? prev.filter(id => id !== jobId)
+          : [...prev, jobId],
+      );
       console.log('error', error);
     }
   };
@@ -180,7 +191,12 @@ const JobsScreen = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
           <View style={styles.headerImgBar}>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigateTo(SCREENS.SearchJob, {
+                  data: jobList,
+                });
+              }}>
               <Image style={styles.headerIcons} source={IMAGES.search} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
@@ -210,12 +226,7 @@ const JobsScreen = () => {
           )}
         </View>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 10,
-          }}>
+        <View style={styles.innerContainer}>
           {carouselImages?.map((_: any, index: number) => (
             <View
               key={index}
@@ -235,9 +246,8 @@ const JobsScreen = () => {
             style={AppStyles.flex}
             showsVerticalScrollIndicator={false}
             renderItem={({item, index}: any) => {
-              const isFavorite = favJobList?.some(
-                (fav: any) => fav._id === item?._id,
-              );
+              const isFavorite = localFavorites.includes(item?._id);
+
               return (
                 <JobCard
                   key={index}
@@ -246,7 +256,7 @@ const JobsScreen = () => {
                     setModal(true);
                   }}
                   heartImage={isFavorite}
-                  onPressFavorite={() => handleAddRemoveFavoriteJob(item)}
+                  onPressFavorite={() => handleToggleFavorite(item)}
                   onPress={() =>
                     navigateTo(SCREEN_NAMES.JobDetail, {
                       item: item,
@@ -260,18 +270,8 @@ const JobsScreen = () => {
             ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
             contentContainerStyle={styles.scrollContainer}
             ListEmptyComponent={
-              <View
-                style={{
-                  flex: 1,
-                  marginTop: '40%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                <BaseText
-                  style={{
-                    ...commonFontStyle(500, 17, colors.white),
-                    textAlign: 'center',
-                  }}>
+              <View style={styles.emptyContainer}>
+                <BaseText style={styles.emptyText}>
                   {t('No jobs found')}
                 </BaseText>
               </View>
@@ -284,12 +284,7 @@ const JobsScreen = () => {
           backgroundColor={colors._FBE7BD}
           onClose={() => setIsFilterModalVisible(false)}>
           <View style={styles.modalContent}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
+            <View style={styles.filterContainer}>
               <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
 
               <CustomImage
@@ -431,6 +426,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: '5%',
     paddingHorizontal: wp(25),
   },
   carouselWrapper: {
@@ -579,5 +575,25 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 4,
     backgroundColor: colors.white,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  innerContainer: {
+    marginTop: hp(10),
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    marginTop: '40%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    ...commonFontStyle(500, 17, colors.white),
   },
 });

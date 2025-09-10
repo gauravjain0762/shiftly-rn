@@ -16,15 +16,19 @@ import BaseText from './BaseText';
 type Props = {
   item: any;
   onPressChat?: () => void;
+  selectedTabIndex?: number;
   showShortListButton?: boolean;
   handleShortListEmployee?: () => void;
+  handleRemoveShortListEmployee?: () => void;
 };
 
 const ApplicantCard = ({
   item,
-  showShortListButton = true,
-  handleShortListEmployee,
+  selectedTabIndex,
   onPressChat = () => {},
+  handleShortListEmployee,
+  showShortListButton = true,
+  handleRemoveShortListEmployee,
 }: Props) => {
   const {t} = useTranslation();
 
@@ -57,13 +61,17 @@ const ApplicantCard = ({
           <Pressable onPress={onPressChat} style={styles.chatButton}>
             <Image source={IMAGES.chat} />
           </Pressable>
-          {showShortListButton && (
+          {selectedTabIndex !== 1 && (
             <TouchableOpacity
               activeOpacity={0.5}
-              onPress={handleShortListEmployee}
+              onPress={
+                !showShortListButton
+                  ? handleRemoveShortListEmployee
+                  : handleShortListEmployee
+              }
               style={styles.actionButton}>
               <BaseText style={styles.actionText}>
-                {t(!showShortListButton ? 'Shortlisted' : 'Shortlist')}
+                {t(!showShortListButton ? 'Remove' : 'Shortlist')}
               </BaseText>
             </TouchableOpacity>
           )}

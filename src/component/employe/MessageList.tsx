@@ -27,7 +27,6 @@ const MessageList: FC<Props> = ({
   item,
   type = 'employe',
 }) => {
-  console.log("🔥🔥🔥 ~ MessageList ~ item:", item)
   return (
     <TouchableOpacity
       style={styles.itemContainer}

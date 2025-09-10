@@ -10,16 +10,15 @@ import {useEmployeeGetChatsQuery} from '../../../api/dashboardApi';
 import {BackHeader, LinearContainer, SearchBar} from '../../../component';
 
 const Messages = () => {
-  const {t, i18n} = useTranslation();
   const [value, setValue] = useState('');
-  const {data: chats} = useEmployeeGetChatsQuery({});
+  const {data: chats, isLoading, refetch} = useEmployeeGetChatsQuery({});
   const chatList = chats?.data?.chats || [];
 
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
       <View style={styles.headerContainer}>
         <BackHeader
-          title={t('Messages')}
+          title={'Messages'}
           isRight={false}
           containerStyle={styles.header}
         />
@@ -31,6 +30,7 @@ const Messages = () => {
       </View>
       <FlatList
         data={chatList}
+        keyExtractor={(_, index) => index.toString()}
         renderItem={({item, index}: any) => (
           <MessageList
             key={index}
@@ -38,7 +38,8 @@ const Messages = () => {
             onPressMessage={e => navigateTo(SCREENS.Chat, {data: e})}
           />
         )}
-        keyExtractor={item => item.id}
+        onRefresh={refetch}
+        refreshing={isLoading}
       />
     </LinearContainer>
   );

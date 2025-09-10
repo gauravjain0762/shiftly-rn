@@ -26,6 +26,7 @@ export const API = {
   getFacilities: '/company/getFacilities',
   getCompanyJobDetails: '/company/getJobDetails',
   addShortlistEmployee: '/company/shortlistEmployee',
+  unshortlistEmployee: '/company/unshortlistEmployee',
   editCompanyJob: '/company/editJob',
 
   // UserDetails
@@ -71,6 +72,7 @@ export const API = {
   addRemoveFavourite: '/addRemoveFavourite',
   getFavouritesJob: '/getFavourites',
   getFilterData: '/getFilterData',
+  getActivities: '/getActivities',
 
   // UserDetails
   getProfile: '/getProfile',

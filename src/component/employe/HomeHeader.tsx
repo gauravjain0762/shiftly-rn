@@ -1,15 +1,6 @@
 import React, {FC} from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-import {RootState} from '../../store';
-import {useSelector} from 'react-redux';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
@@ -57,15 +48,24 @@ const HomeHeader: FC<props> = ({
               styles.name,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            {companyProfile?.name || ''}
+            {companyProfile?.name || 'N/A'}
           </Text>
-          <Text
-            style={[
-              styles.location,
-              {color: type == 'company' ? colors._0B3970 : colors.white},
-            ]}>
-            {companyProfile?.location}
-          </Text>
+
+          <View
+            style={{flexDirection: 'row', alignItems: 'center', gap: wp(6)}}>
+            <CustomImage
+              size={wp(18)}
+              source={IMAGES.marker}
+              tintColor={type == 'company' ? colors.empPrimary : colors.white}
+            />
+            <Text
+              style={[
+                styles.location,
+                {color: type == 'company' ? colors._0B3970 : colors.white},
+              ]}>
+              {companyProfile?.location || 'N/A'}
+            </Text>
+          </View>
         </View>
       </View>
       <TouchableOpacity
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 15, '#DDEBFF'),
   },
   bellIcon: {
+    bottom: hp(8),
     marginLeft: 'auto',
   },
   bell: {
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     gap: wp(17),
   },
   info: {
-    gap: hp(4),
+    gap: hp(6),
     width: '70%',
   },
   avatarPlaceholder: {

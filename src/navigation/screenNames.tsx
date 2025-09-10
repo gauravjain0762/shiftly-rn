@@ -24,6 +24,7 @@ export const SCREENS = {
   ViewProfileScreen: 'ViewProfileScreen',
   WebviewScreen: 'WebviewScreen',
   EditAccount: 'EditAccount',
+  SearchJob: 'SearchJob',
 
   //company
   CoLogin: 'CoLogin',
@@ -77,6 +78,7 @@ export interface ScreenNames {
   EmpProfile: string;
   EmpForgotPassword: string;
   EditAccount: string;
+  SearchJob: string;
 
   //company
   CoLogin: string;

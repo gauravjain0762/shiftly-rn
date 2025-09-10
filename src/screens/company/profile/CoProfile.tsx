@@ -225,13 +225,7 @@ const CoProfile = () => {
                 ) : (
                   <Image
                     source={item.icon}
-                    style={{
-                      width: 22,
-                      height: 22,
-                      resizeMode: 'contain',
-                      marginRight: 14,
-                      tintColor: '#D6D6D6',
-                    }}
+                    style={styles.iconStyle}
                     tintColor={colors._555555}
                   />
                 )}
@@ -294,14 +288,14 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: hp(24),
     marginBottom: hp(28),
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(23),
   },
   title: {
     right: '22%',
   },
   section: {
     marginBottom: hp(24),
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(23),
   },
   sectionTitle: {
     marginBottom: hp(29),
@@ -328,6 +322,13 @@ const styles = StyleSheet.create({
     width: wp(12),
     height: hp(12),
     resizeMode: 'contain',
+  },
+  iconStyle: {
+    width: 22,
+    height: 22,
+    marginRight: 14,
+    resizeMode: 'contain',
+    tintColor: '#D6D6D6',
   },
   loaderContainer: {
     width: wp(51),

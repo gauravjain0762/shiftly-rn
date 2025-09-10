@@ -24,6 +24,7 @@ import ApplicantCard from '../../../component/common/ApplicantCard';
 import {
   useAddShortlistEmployeeMutation,
   useGetCompanyJobDetailsQuery,
+  useUnshortlistEmployeeMutation,
 } from '../../../api/dashboardApi';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {
@@ -49,6 +50,7 @@ const CoJobDetails = () => {
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   const {data, refetch, isLoading} = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
+  const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const jobDetail = data?.data;
 
   useFocusEffect(
@@ -72,7 +74,7 @@ const CoJobDetails = () => {
 
   const handleShortListEmployee = async (item: any) => {
     const params = {
-      applicant_id: item?._id,
+      applicant_id: item?.user_id?._id,
       job_id: job_id,
     };
     try {
@@ -80,6 +82,26 @@ const CoJobDetails = () => {
 
       if (res?.status === true) {
         successToast(res?.message);
+        refetch();
+      } else {
+        errorToast(res?.message);
+      }
+    } catch (error) {
+      console.error('Error shortlisting employee:', error);
+    }
+  };
+
+  const handleRemoveShortListEmployee = async (item: any) => {
+    const params = {
+      applicant_id: item?.user_id?._id,
+      job_id: job_id,
+    };
+    try {
+      const res = await removeShortListEmployee(params).unwrap();
+
+      if (res?.status === true) {
+        successToast(res?.message);
+        refetch();
       } else {
         errorToast(res?.message);
       }
@@ -193,9 +215,9 @@ const CoJobDetails = () => {
                             navigateTo(SCREENS.CoChat, {
                               data: item,
                               mainjob_data: jobDetail,
+                              isFromJobDetail: true,
                             });
                           }}
-                          showShortListButton={!item?.status}
                         />
                       );
                     })
@@ -218,11 +240,12 @@ const CoJobDetails = () => {
                             showShortListButton={false}
                             onPressChat={() => {
                               navigateTo(SCREENS.CoChat, {
-                                data: item, // inviteuser data
-                                mainjob_data: jobDetail, // main job whole data
+                                data: item,
+                                mainjob_data: jobDetail,
                                 isFromJobDetail: true,
                               });
                             }}
+                            selectedTabIndex={selectedTabIndex}
                           />
                         );
                       },
@@ -242,6 +265,16 @@ const CoJobDetails = () => {
                           key={index}
                           item={item}
                           showShortListButton={false}
+                          handleRemoveShortListEmployee={() => {
+                            handleRemoveShortListEmployee(item);
+                          }}
+                          onPressChat={() => {
+                            navigateTo(SCREENS.CoChat, {
+                              data: item,
+                              mainjob_data: jobDetail,
+                              isFromJobDetail: true,
+                            });
+                          }}
                         />
                       );
                     })
@@ -282,6 +315,9 @@ const CoJobDetails = () => {
                           value: jobDetail?.duration,
                         }
                       : jobDetail?.duration,
+                  expiry_date: moment(jobDetail?.expiry_date).format(
+                    'YYYY-MM-DD',
+                  ),
                   job_sector:
                     typeof jobDetail?.job_sector === 'string'
                       ? {

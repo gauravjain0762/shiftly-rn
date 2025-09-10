@@ -7,7 +7,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useMemo, useState, useCallback} from 'react';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
@@ -18,7 +17,6 @@ import {
 } from '../../../component';
 import {IMAGES} from '../../../assets/Images';
 import {colors} from '../../../theme/colors';
-import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
@@ -108,7 +106,6 @@ const CompanyProfile = () => {
 
     const routes = state.routes;
     const previousRoute = routes[routes.length - 2];
-    console.log('🔥🔥🔥 ~ CompanyProfile ~ previousRoute:', previousRoute);
 
     if (previousRoute?.name === 'CoTabNavigator') {
       console.log('go back>>>>>>>>');
@@ -124,15 +121,6 @@ const CompanyProfile = () => {
   const handleTabPress = useCallback((index: number) => {
     setSelectedTabIndex(index);
   }, []);
-
-  const imageChildren = useMemo(
-    () => (
-      <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-        <Image source={IMAGES.backArrow} style={styles.backArrow} />
-      </TouchableOpacity>
-    ),
-    [handleBackPress],
-  );
 
   const renderPostItem = useCallback(
     ({item}: {item: any}) => (
@@ -180,12 +168,15 @@ const CompanyProfile = () => {
     <SafeAreaView
       style={{flex: 1, backgroundColor: colors._F3E1B7}}
       edges={['bottom']}>
+      <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <Image source={IMAGES.backArrow} style={styles.backArrow} />
+      </TouchableOpacity>
       <ScrollView
         contentContainerStyle={{paddingBottom: hp(40)}}
         showsVerticalScrollIndicator={false}>
         <ParallaxContainer
           imagePath={coverImages}
-          ImageChildren={imageChildren}
+          // ImageChildren={imageChildren}
           ContainerStyle={styles.container}
           showLoader={shouldShowCoverLoader}
           loaderColor={colors._0B3970}>
@@ -207,28 +198,28 @@ const CompanyProfile = () => {
 
               <View style={styles.titleTextContainer}>
                 <Text style={styles.companyName}>
-                  {companyProfileData?.company_name}
+                  {companyProfileData?.company_name || 'N/A'}
                 </Text>
                 {companyProfileData?.mission && (
                   <Text style={styles.tagline}>
-                    {companyProfileData?.mission}
+                    {companyProfileData?.mission || 'N/A'}
                   </Text>
                 )}
                 <Text style={styles.industry}>
-                  {companyProfileData?.address}
+                  {companyProfileData?.address || 'N/A'}
                 </Text>
               </View>
             </View>
 
             {companyProfileData?.about && (
               <Text style={styles.description}>
-                {companyProfileData?.about || ''}
+                {companyProfileData?.about || 'N/A'}
               </Text>
             )}
 
             {companyProfileData?.values && (
               <Text style={styles.description}>
-                {companyProfileData?.values || ''}
+                {companyProfileData?.values || 'N/A'}
               </Text>
             )}
 
@@ -307,7 +298,7 @@ const styles = StyleSheet.create({
   backArrow: {
     width: wp(21),
     height: wp(21),
-    tintColor: colors._F3E1B7,
+    tintColor: colors.empPrimary,
   },
   profileHeader: {
     flexDirection: 'row',

@@ -44,8 +44,8 @@ const shareOptions = [
     icon: 'https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png',
   },
   {
-    name: 'Behance',
-    icon: 'https://images.seeklogo.com/logo-png/15/1/behance-logo-png_seeklogo-157940.png',
+    name: 'Whatsapp Business',
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/d/dc/Whatsapp_logo_2022.jpg',
   },
   {
     name: 'Pinterest',
@@ -72,7 +72,7 @@ const ShareModal: FC<modal> = ({visible, onClose = () => {}}) => {
           contentContainerStyle={styles.iconContainer}
           renderItem={({item}) => (
             <TouchableOpacity style={styles.iconWrapper}>
-              <FastImage  source={{uri: item.icon}} style={styles.iconImage} />
+              <FastImage source={{uri: item.icon}} style={styles.iconImage} />
               <Text style={styles.iconText}>{item.name}</Text>
             </TouchableOpacity>
           )}
@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   iconText: {
+    textAlign: 'center',
     ...commonFontStyle(500, 15, colors._181818),
   },
   closeButton: {

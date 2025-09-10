@@ -2,6 +2,7 @@ import {
   FlatList,
   Image,
   Keyboard,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -53,7 +54,7 @@ import {
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 import {useAppSelector} from '../../../redux/hooks';
 import {
@@ -64,6 +65,8 @@ import {
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import BaseText from '../../../component/common/BaseText';
 import CharLength from '../../../component/common/CharLength';
+import CustomDatePicker from '../../../component/common/CustomDatePicker';
+import DateTimePicker from 'react-native-modal-datetime-picker';
 
 const jobTypeData = [
   {label: 'Full Time', value: 'Full Time'},
@@ -152,13 +155,11 @@ const PostJob = () => {
     canApply,
     editMode,
     job_id,
+    expiry_date,
   } = useAppSelector((state: any) => selectJobForm(state));
-  console.log('🔥 ~ PostJob ~ job_type:', job_type);
   const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
-  // const {data: servicesData} = useGetServicesQuery({});
-  // const services = servicesData?.data?.services;
   const {data: facilitiesData} = useGetFacilitiesQuery({});
   const facilities = facilitiesData?.data?.facilities;
   const {data: skillsData} = useGetSkillsQuery({});
@@ -172,6 +173,7 @@ const PostJob = () => {
   });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
+
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
     value: item.title,
@@ -253,6 +255,7 @@ const PostJob = () => {
     people_anywhere: canApply,
     duration: duration?.value,
     job_sector: job_sector?.value,
+    expiry_date: expiry_date,
     start_date: startDate?.value,
     contract_type: contract?.value,
     monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
@@ -871,6 +874,53 @@ const PostJob = () => {
                 />
               </View>
               <View style={styles.field}>
+                <Text style={styles.label}>{t('Expiry Date')}</Text>
+                <Pressable
+                  style={{position: 'relative'}}
+                  onPress={() => updateJobForm({isModalVisible: true})}>
+                  <CustomDropdown
+                    data={
+                      expiry_date
+                        ? [{label: expiry_date, value: expiry_date}]
+                        : []
+                    }
+                    disable={true}
+                    value={expiry_date}
+                    placeholder="Select Date"
+                    labelField="label"
+                    valueField="value"
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                  />
+                  <Pressable
+                    style={[StyleSheet.absoluteFill, styles.overlayPressable]}
+                    onPress={() => updateJobForm({isModalVisible: true})}
+                  />
+                </Pressable>
+
+                <DateTimePicker
+                  mode="date"
+                  isVisible={isModalVisible}
+                  date={
+                    expiry_date && !isNaN(new Date(expiry_date).getTime())
+                      ? new Date(expiry_date)
+                      : new Date()
+                  }
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  pickerStyleIOS={{alignSelf: 'center'}}
+                  onConfirm={(date: Date) => {
+                    const formattedDate = date.toISOString().split('T')[0];
+                    updateJobForm({
+                      expiry_date: formattedDate,
+                      isModalVisible: false,
+                    });
+                  }}
+                  onCancel={() => updateJobForm({isModalVisible: false})}
+                />
+              </View>
+              <View style={styles.field}>
                 <Text style={styles.label}>{t('Job Sector/Industry')}</Text>
                 <CustomDropdown
                   data={dropdownBusinessTypesOptions}
@@ -985,6 +1035,10 @@ const PostJob = () => {
                   errorToast(t('Please enter a valid title'));
                   return;
                 }
+                if (!expiry_date.trim()) {
+                  errorToast(t('Please select expiry date'));
+                  return;
+                }
                 nextStep();
               }}
             />
@@ -1045,6 +1099,10 @@ const PostJob = () => {
 export default PostJob;
 
 const styles = StyleSheet.create({
+  overlayPressable: {
+    zIndex: 9999, // make sure it's above the dropdown
+    elevation: 9999, // for Android layering
+  },
   header: {
     paddingHorizontal: wp(35),
     paddingTop: hp(26),

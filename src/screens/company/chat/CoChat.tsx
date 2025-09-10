@@ -61,11 +61,8 @@ type LogoFile = {
 const CoChat = () => {
   const {params} = useRoute<any>();
   const jobdetail_chatData = params?.data ?? {};
-  console.log('🔥🔥🔥 ~ CoChat ~ jobdetail_chatData:', jobdetail_chatData);
   const mainjob_data = params?.mainjob_data ?? {};
-  console.log('🔥🔥🔥 ~ CoChat ~ mainjob_data:', mainjob_data);
   const isFromJobDetail = params?.isFromJobDetail ?? {};
-  console.log('🔥🔥🔥 ~ CoChat ~ isFromJobDetail:', isFromJobDetail);
   const chatId = params?.data?.chat_id || params?.data?._id || {};
 
   const userInfo = useSelector((state: any) => state.auth.userInfo);
@@ -238,7 +235,6 @@ const CoChat = () => {
     });
   }, []);
 
-  console.log('userInfo?._id', userInfo?._id);
   // ----- Send chat -----
   const handleSendChat = async () => {
     if (!message.trim() && !logo) return;
@@ -264,7 +260,6 @@ const CoChat = () => {
 
     try {
       const res = await sendCompanyMessage(formData).unwrap();
-      console.log('🔥🔥🔥 ~ handleSendChat ~ res:', res);
       if (res?.status) {
         setChatList(prev => [res?.data?.message, ...prev]);
         setMessage('');

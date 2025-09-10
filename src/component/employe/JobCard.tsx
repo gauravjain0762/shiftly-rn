@@ -1,18 +1,13 @@
-import {
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import React, {FC} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
 import CustomImage from '../common/CustomImage';
 import FastImage from 'react-native-fast-image';
+import {getTimeAgo} from '../../utils/commonFunction';
 
 type props = {
   item?: any;
@@ -32,15 +27,19 @@ const JobCard: FC<props> = ({
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <CustomImage
+        tintColor={'grey'}
+        source={IMAGES.dummy_image}
         uri={item?.company_id?.cover_images[0]}
-        imageStyle={{width: '100%', height: '100%'}}
-        // resizeMode="cover"
+        imageStyle={{
+          width: '100%',
+          height: '100%',
+        }}
         containerStyle={styles.jobImage}>
         <View style={styles.logo}>
           <CustomImage
             resizeMode="stretch"
-            uri={item?.company_id?.logo}
             source={IMAGES.dummy_cover}
+            uri={item?.company_id?.logo}
             containerStyle={styles.companyLogo}
             imageStyle={{
               width: '100%',
@@ -67,11 +66,11 @@ const JobCard: FC<props> = ({
       </CustomImage>
 
       <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <View style={styles.companyInfo}>
-            <Text style={styles.companyName}>{item?.company}</Text>
-          </View>
-          <Text style={styles.postedText}>{item?.posted}</Text>
+        <View style={styles.companyInfo}>
+          <Text style={[styles.companyName, {width: '74%'}]}>{item?.area}</Text>
+          <Text style={[styles.companyName]}>
+            {`Posted ${getTimeAgo(item?.createdAt)} ago`}
+          </Text>
         </View>
         <View style={styles.titleRow}>
           <Text style={styles.jobTitle}>{item?.title}</Text>
@@ -80,9 +79,10 @@ const JobCard: FC<props> = ({
           </View>
         </View>
         <ExpandableText
+          maxLines={3}
           description={item?.description}
-          showStyle={{paddingHorizontal: 0, fontSize: 15}}
           descriptionStyle={styles.jobDescription}
+          showStyle={{paddingHorizontal: 0, fontSize: 15}}
         />
       </View>
     </TouchableOpacity>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   companyInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   companyLogo: {
     width: wp(75),
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   companyName: {
-    ...commonFontStyle(400, 12, colors.black),
+    ...commonFontStyle(400, 13, colors.black),
   },
   postedText: {
     ...commonFontStyle(400, 11, colors.black),
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 18, colors.black),
   },
   jobDescription: {
-    ...commonFontStyle(400, 12, colors._656464),
+    ...commonFontStyle(400, 13, colors._656464),
     lineHeight: hp(18),
     paddingHorizontal: 0,
   },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badge: {
-    backgroundColor: colors.black,
+    backgroundColor: colors.empPrimary,
     paddingVertical: hp(6),
     paddingHorizontal: wp(14),
     borderRadius: 100,
@@ -151,10 +151,10 @@ const styles = StyleSheet.create({
   actions: {
     gap: hp(7),
     alignSelf: 'flex-end',
-    paddingRight: wp(8),
+    paddingRight: wp(10),
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: hp(8),
+    marginTop: hp(50),
   },
   iconButton: {
     backgroundColor: colors.white,
@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   titleRow: {
+    marginTop: hp(4),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

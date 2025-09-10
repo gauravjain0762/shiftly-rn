@@ -2,7 +2,6 @@ import {
   Image,
   ImageStyle,
   StyleSheet,
-  Text,
   TextStyle,
   TouchableOpacity,
   View,
@@ -15,6 +14,7 @@ import {colors} from '../../theme/colors';
 import {navigationRef} from '../../navigation/RootContainer';
 import {navigateTo} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
+import BaseText from '../common/BaseText';
 
 type props = {
   onBackPress?: () => void;
@@ -55,14 +55,14 @@ const BackHeader: FC<props> = ({
           ]}
         />
       </TouchableOpacity>
-      <Text
+      <BaseText
         style={[
           styles.headerTitle,
           {color: type == 'employe' ? colors.white : colors._0B3970},
           titleStyle,
         ]}>
         {title}
-      </Text>
+      </BaseText>
       {isRight && !RightIcon ? (
         <TouchableOpacity
           style={[styles.bellIcon, RightIconStyle]}

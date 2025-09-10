@@ -370,18 +370,6 @@ const CreateProfileScreen = () => {
       const updatedData = res?.data?.user;
 
       if (res?.status) {
-        // dispatch(
-        //   setUserInfo({
-        //     ...userInfo,
-        //     open_for_job: updatedData?.open_for_job,
-        //     location: updatedData?.location || '',
-        //     responsibility: updatedData?.responsibility || '',
-        //     languages: updatedData?.languages || [],
-        //     selectedLanguages: (updatedData?.languages || []).map(
-        //       (l: any) => l.name,
-        //     ),
-        //   }),
-        // );
         dispatch(setShowModal(true));
       } else {
         errorToast(res?.message);
@@ -419,7 +407,6 @@ const CreateProfileScreen = () => {
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {
-      dispatch(setActiveStep(1));
     }
   };
 
@@ -675,7 +662,10 @@ const CreateProfileScreen = () => {
 
         <SuccessffullyModal
           visible={showModal}
-          onClose={() => dispatch(setShowModal(false))}
+          onClose={() => {
+            dispatch(setShowModal(false));
+            dispatch(setActiveStep(1));
+          }}
         />
       </LinearContainer>
 

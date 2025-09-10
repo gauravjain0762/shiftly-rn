@@ -23,7 +23,6 @@ import CustomImage from '../../../component/common/CustomImage';
 const CoMyProfile = () => {
   const {t} = useTranslation();
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥🔥🔥 ~ CoMyProfile ~ userInfo:', userInfo);
   const countryCode = userInfo?.phone_code || 'AE';
 
   return (
@@ -155,7 +154,7 @@ export default CoMyProfile;
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(23),
   },
   header: {
     paddingTop: hp(24),

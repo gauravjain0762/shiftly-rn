@@ -1,54 +1,78 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {IMAGES} from '../../assets/Images';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+
 import {colors} from '../../theme/colors';
+import {IMAGES} from '../../assets/Images';
+import CustomImage from '../common/CustomImage';
+import {getTimeAgo, navigateTo} from '../../utils/commonFunction';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import {SCREENS} from '../../navigation/screenNames';
 
 type props = {
-  onPress: () => void;
   item?: any;
 };
 
-const ActivitiesCard: FC<props> = ({onPress = () => {}, item}) => {
+const ActivitiesCard: FC<props> = ({item}) => {
   return (
-    <TouchableOpacity onPress={() => onPress()} style={styles.card}>
-      <View style={styles.left}>
-        <Image
-          source={IMAGES.Activitielogo}
-          resizeMode="contain"
-          style={styles.logo}
-        />
-        <View style={styles.cardContent}>
-          <Text style={styles.title}>{item?.name}</Text>
-          <Text style={styles.subtitle}>{item?.subtitle}</Text>
-          {item?.tag == 'Chat' && (
-            <Text style={styles.details}>{item?.details}</Text>
-          )}
-          {item?.tag != 'Chat' && (
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={styles.details}>
-                {item?.startDetails} {' - '}
+    <Pressable style={styles.card}>
+      <View style={styles.header}>
+        <View style={styles.leftSection}>
+          <CustomImage
+            resizeMode="cover"
+            imageStyle={styles.logo}
+            uri={item?.company_logo}
+          />
+          <View style={styles.companyInfo}>
+            <Text style={styles.companyName} numberOfLines={1}>
+              {item?.company_name}
+            </Text>
+            <Text style={styles.jobSector} numberOfLines={1}>
+              {item?.job_sector}
+            </Text>
+            <View style={styles.locationRow}>
+              <CustomImage
+                size={wp(16)}
+                resizeMode="contain"
+                source={IMAGES.distance}
+              />
+              <Text style={styles.locationText} numberOfLines={1}>
+                {item?.area}
               </Text>
-              <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 2}}>
-                <Image
-                  source={IMAGES.distance}
-                  resizeMode="contain"
-                  style={{width: 11, height: 15, resizeMode: 'contain'}}
-                />
-                <Text style={styles.details}>{item?.endDetails}</Text>
-              </View>
             </View>
+          </View>
+        </View>
+
+        <View style={styles.rightSection}>
+          <Text style={styles.timeText}>
+            {`${getTimeAgo(item?.created_at)} ago`}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        <View style={styles.jobTypeContainer}>
+          <Text style={styles.jobTypeText}>{item?.job_type}</Text>
+        </View>
+
+        <View style={styles.tagsContainer}>
+          <View style={styles.statusTag}>
+            <Text style={styles.statusText}>
+              {item?.type?.charAt(0)?.toUpperCase() + item?.type?.slice(1)}
+            </Text>
+          </View>
+
+          {item?.chat_status === 'chat' && (
+            <Pressable
+              onPress={() => {
+                navigateTo(SCREENS.Chat, {data: item});
+              }}
+              style={styles.chatTag}>
+              <Text style={styles.chatText}>Chat</Text>
+            </Pressable>
           )}
         </View>
       </View>
-      <View style={styles.rightSide}>
-        <Text style={styles.time}>{item?.time}</Text>
-        <View style={styles.tagWrapper}>
-          <Text style={styles.tagText}>{item?.tag}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -58,50 +82,116 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors._0B3970,
     borderRadius: 20,
-    flexDirection: 'row',
     borderWidth: 1.5,
     borderColor: colors._104686,
-    padding: wp(13),
-    justifyContent: 'space-between',
+    padding: wp(16),
   },
-  left: {
+
+  header: {
     flexDirection: 'row',
-    gap: wp(18),
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: hp(16),
+  },
+
+  leftSection: {
+    flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    marginRight: wp(12),
   },
+
   logo: {
     width: wp(60),
     height: wp(60),
-    borderRadius: 100,
+    borderRadius: wp(12),
+    marginRight: wp(16),
   },
-  cardContent: {
+
+  companyInfo: {
     flex: 1,
-    gap: wp(9),
+    gap: hp(4),
   },
-  title: {
+
+  companyName: {
     ...commonFontStyle(600, 20, colors.white),
   },
-  subtitle: {
+
+  jobSector: {
     ...commonFontStyle(400, 14, colors.white),
+    opacity: 0.8,
   },
-  details: {
+
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(6),
+    marginTop: hp(2),
+  },
+
+  locationText: {
     ...commonFontStyle(400, 14, colors.white),
+    opacity: 0.7,
+    flex: 1,
   },
-  rightSide: {
+
+  rightSection: {
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
-  time: {
+
+  timeText: {
     ...commonFontStyle(400, 13, colors.white),
+    opacity: 0.7,
   },
-  tagWrapper: {
+
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: hp(12),
+    borderTopWidth: 1,
+    borderTopColor: colors._104686,
+  },
+
+  jobTypeContainer: {
+    flex: 1,
+  },
+
+  jobTypeText: {
+    ...commonFontStyle(400, 13, colors.white),
+    opacity: 0.8,
+  },
+
+  tagsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+
+  statusTag: {
     backgroundColor: colors.white,
-    borderRadius: 20,
-    paddingHorizontal: wp(12),
-    paddingVertical: hp(10),
+    borderRadius: hp(20),
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(16),
+    minWidth: wp(70),
+    alignItems: 'center',
   },
-  tagText: {
+
+  statusText: {
+    ...commonFontStyle(600, 12, '#003C8F'),
+  },
+
+  chatTag: {
+    backgroundColor: colors.white,
+    borderRadius: hp(20),
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(16),
+    minWidth: wp(60),
+    alignItems: 'center',
+  },
+
+  chatText: {
     ...commonFontStyle(600, 12, '#003C8F'),
   },
 });

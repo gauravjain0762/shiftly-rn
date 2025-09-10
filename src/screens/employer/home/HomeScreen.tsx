@@ -70,12 +70,6 @@ const HomeScreen = () => {
     }
   };
 
-  const handleRefresh = () => {
-    setCurrentPage(1);
-    setAllPosts([]);
-    refetch();
-  };
-
   const renderheader = () => {
     return (
       <View style={styles.header}>
@@ -95,8 +89,8 @@ const HomeScreen = () => {
         <FlatList
           data={allPosts}
           style={AppStyles.flex}
-          refreshing={isFetching}
-          // onRefresh={handleRefresh}
+          refreshing={isLoading}
+          onRefresh={refetch}
           onEndReachedThreshold={0.5}
           onEndReached={handleLoadMore}
           keyExtractor={(_, index) => index.toString()}

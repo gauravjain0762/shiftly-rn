@@ -150,13 +150,13 @@ const ApplyJob = () => {
                     }
                   }}>
                   <View style={styles.radioCircle}>
-                    {selectedDoc?.file_name === doc.file_name && (
+                    {selectedDoc?.file_name === doc?.file_name && (
                       <View style={styles.check}>
                         <Image source={IMAGES.check} style={styles.checked} />
                       </View>
                     )}
                   </View>
-                  <Text style={styles.docLabel}>{doc.file_name}</Text>
+                  <Text style={styles.docLabel}>{doc?.file_name}</Text>
                   <Image
                     source={doc?.file ? {uri: doc?.file} : IMAGES.dummy_cover}
                     style={styles.docIcon}
@@ -284,9 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 2,
     borderColor: '#FBE9C6',
-    // alignItems: 'center',
     justifyContent: 'center',
-    marginRight: wp(12),
     overflow: 'hidden',
   },
   checked: {
@@ -301,8 +299,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   docLabel: {
-    ...commonFontStyle(400, 21, colors.white),
     flex: 1,
+    paddingHorizontal: wp(10),
+    ...commonFontStyle(400, 21, colors.white),
   },
   docIcon: {
     width: wp(37),

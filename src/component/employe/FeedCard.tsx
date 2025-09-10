@@ -1,9 +1,10 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {FC} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
-import {getImageUrl, getTimeAgo} from '../../utils/commonFunction';
+import {getTimeAgo} from '../../utils/commonFunction';
 import ExpandableText from '../common/ExpandableText';
 import CustomImage from '../common/CustomImage';
 
@@ -13,11 +14,7 @@ type card = {
   item?: any;
 };
 
-const FeedCard: FC<card> = ({
-  onPressCard = () => {},
-  item,
-  isFollow = false,
-}) => {
+const FeedCard: FC<card> = ({onPressCard = () => {}, item}) => {
   return (
     <TouchableOpacity
       activeOpacity={1}
@@ -32,45 +29,33 @@ const FeedCard: FC<card> = ({
           resizeMode="cover"
         />
         <View>
-          <Text style={styles.hotelName}>{item?.company_id?.company_name}</Text>
+          <Text style={styles.hotelName}>
+            {item?.company_id?.company_name || 'N/A'}
+          </Text>
           <Text style={styles.walkIn}>
-            {/* Walk-in Interview ·{' '} */}
             <Text style={{color: colors._A3A3A3}}>
               {getTimeAgo(item?.createdAt)}
             </Text>
           </Text>
         </View>
-        {/* {isFollow ? (
-          <TouchableOpacity style={styles.followBtn}>
-            <Text style={styles.follow}>{'Follow'}</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.heartIcon}>
-            <Image
-              source={IMAGES.like}
-              resizeMode="contain"
-              style={styles.like}
-            />
-          </TouchableOpacity>
-        )} */}
       </View>
 
-      <Text style={styles.vacancy}>{item?.title}</Text>
+      <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
 
       {/* Banner */}
       <View style={styles.banner}>
         <CustomImage
+          containerStyle={styles.post}
           uri={item?.images?.length > 0 ? item?.images[0] : ''}
           imageStyle={{height: '100%', width: '100%', opacity: 1}}
-          containerStyle={styles.post}
-          resizeMode="contain"
+          resizeMode={item?.images?.length > 0 ? 'cover' : 'contain'}
         />
       </View>
 
       <ExpandableText
         maxLines={3}
         descriptionStyle={styles.description}
-        description={item?.description}
+        description={item?.description || 'N/A'}
       />
     </TouchableOpacity>
   );
@@ -84,9 +69,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   description: {
-    padding: wp(14),
+    marginTop: hp(8),
     lineHeight: hp(20),
-    paddingBottom: hp(8),
+    paddingBottom: hp(10),
+    paddingHorizontal: wp(14),
     ...commonFontStyle(400, 16, colors._6A6A6A),
   },
   card: {
@@ -94,11 +80,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   cardHeader: {
+    gap: wp(10),
+    padding: wp(10),
+    marginBottom: hp(8),
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-    gap: wp(12),
-    padding: wp(14),
   },
   logo: {
     width: wp(56),
@@ -121,7 +107,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: wp(14),
   },
-  post: {width: '100%', height: hp(230), overflow: 'hidden'},
+  post: {
+    width: '100%',
+    height: hp(230),
+    overflow: 'hidden',
+  },
   like: {
     width: wp(26),
     height: wp(26),
