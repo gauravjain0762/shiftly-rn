@@ -83,7 +83,7 @@ const getFirebaseToken = async (dispatch: any) => {
     }
   } catch (error) {
     console.log('FCM token error:', error);
-    errorToast('Failed to get FCM token');
+    // errorToast('Failed to get FCM token');
   }
 };
 

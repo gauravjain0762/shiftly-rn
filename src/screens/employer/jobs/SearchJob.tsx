@@ -22,7 +22,7 @@ import {
 import {useDebounce} from '../../../hooks/useRole';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
-import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
+import {KeyboardAwareFlatList} from 'react-native-keyboard-aware-scroll-view';
 
 const SearchJob = () => {
   const {params} = useRoute<any>();
@@ -79,10 +79,6 @@ const SearchJob = () => {
     refetch();
   }, [debouncedSearch, refetch]);
 
-  if (isLoading) {
-    <ActivityIndicator size={'large'} />;
-  }
-
   return (
     <LinearContainer colors={['#0D468C', '#041326']} containerStyle={{}}>
       <View style={styles.headerContainer}>
@@ -95,41 +91,44 @@ const SearchJob = () => {
         />
       </View>
 
-      <KeyboardAwareFlatList
-        data={jobList}
-        style={AppStyles.flex}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps='handled'
-        renderItem={({item, index}: any) => {
-          const isFavorite = localFavorites.includes(item?._id);
-          return (
-            <JobCard
-              key={item._id || index}
-              item={item}
-              onPressShare={() => setModal(true)}
-              heartImage={isFavorite}
-              onPressFavorite={() => handleToggleFavorite(item)}
-              onPress={() =>
-                navigateTo(SCREEN_NAMES.JobDetail, {
-                  item: item,
-                  resumeList: resumeList,
-                })
-              }
-            />
-          );
-        }}
-        keyExtractor={(item, index) => item._id || index.toString()}
-        ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
-        contentContainerStyle={styles.scrollContainer}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <BaseText style={styles.emptyText}>{'No jobs found'}</BaseText>
-          </View>
-        }
-        onRefresh={refetch}
-        refreshing={isLoading}
-      />
-
+      {isLoading ? (
+        <ActivityIndicator size={'large'} />
+      ) : (
+        <KeyboardAwareFlatList
+          data={jobList}
+          style={AppStyles.flex}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({item, index}: any) => {
+            const isFavorite = localFavorites.includes(item?._id);
+            return (
+              <JobCard
+                key={item._id || index}
+                item={item}
+                onPressShare={() => setModal(true)}
+                heartImage={isFavorite}
+                onPressFavorite={() => handleToggleFavorite(item)}
+                onPress={() =>
+                  navigateTo(SCREEN_NAMES.JobDetail, {
+                    item: item,
+                    resumeList: resumeList,
+                  })
+                }
+              />
+            );
+          }}
+          keyExtractor={(item, index) => item._id || index.toString()}
+          ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
+          contentContainerStyle={styles.scrollContainer}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <BaseText style={styles.emptyText}>{'No jobs found'}</BaseText>
+            </View>
+          }
+          onRefresh={refetch}
+          refreshing={isLoading}
+        />
+      )}
       <ShareModal visible={modal} onClose={() => setModal(!modal)} />
     </LinearContainer>
   );

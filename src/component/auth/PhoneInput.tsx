@@ -44,8 +44,6 @@ const PhoneInput: FC<picker> = ({
   category = 'Company',
   ...TextInputProps
 }) => {
-  // const [phone, setPhone] = useState('');
-  // const [countryCode, setCountryCode] = useState<any>('AE');
   const [showModal, setShowModal] = useState(false);
   const [valid, setValid] = useState(true);
   const {t, i18n} = useTranslation();

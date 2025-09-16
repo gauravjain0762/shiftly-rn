@@ -105,9 +105,13 @@ const EducationList: FC<Props> = ({
             label="Province"
             placeholder="Enter Province"
             value={educationListEdit?.province}
-            onChange={(text: any) =>
-              setEducationListEdit({...educationListEdit, province: text})
-            }
+            onChange={(text: string) => {
+              const onlyLetters = text.replace(/[^A-Za-z ]/g, '');
+              setEducationListEdit({
+                ...educationListEdit,
+                province: onlyLetters.trim(),
+              });
+            }}
             containerStyle={styles.flex1}
           />
         </View>

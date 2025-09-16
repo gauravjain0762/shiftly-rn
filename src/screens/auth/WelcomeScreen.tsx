@@ -27,14 +27,15 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
-  useCompanyAppleSignInMutation,
-  useCompanyGoogleSignInMutation,
   useEmployeeAppleSignInMutation,
   useEmployeeGoogleSignInMutation,
 } from '../../api/authApi';
 import {appleAuth} from '@invertase/react-native-apple-authentication';
 import {jwtDecode} from 'jwt-decode';
 import auth from '@react-native-firebase/auth';
+import {useDispatch, useSelector} from 'react-redux';
+import {setCreateEmployeeAccount, setUserInfo} from '../../features/authSlice';
+import {RootState} from '../../store';
 
 const AppOnboardingData = [
   {
@@ -57,13 +58,42 @@ const AppOnboardingData = [
 ];
 
 const WelcomeScreen = () => {
-  const {t} = useTranslation();
   const {role} = useRole();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [companyGoogleSignIn] = useCompanyGoogleSignInMutation({});
+  const {t} = useTranslation();
+  const dispatch = useDispatch();
+  const {fcmToken} = useSelector((state: RootState) => state.auth);
   const [employeeGoogleSignIn] = useEmployeeGoogleSignInMutation({});
-  const [companyAppleSignIn] = useCompanyAppleSignInMutation({});
   const [employeeAppleSignIn] = useEmployeeAppleSignInMutation({});
+
+  const updateSignupData = (
+    updates: Partial<{
+      step: number;
+      name: string;
+      email: string;
+      pin: string;
+      timer: number;
+      showModal: boolean;
+      imageModal: boolean;
+      selected: string;
+      selected1: string;
+      selected2: string;
+      selected3: string;
+      dob: string;
+      isPickerVisible: boolean;
+      open: boolean;
+      full_password: string | undefined;
+      otp: string[] | undefined;
+      phone: string;
+      phone_code: string;
+      describe: string;
+      picture: string;
+      countryCode: any | string;
+      googleId: string;
+      appleId: string;
+    }>,
+  ) => {
+    dispatch(setCreateEmployeeAccount(updates));
+  };
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((user: any) => {
@@ -88,32 +118,37 @@ const WelcomeScreen = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const {data}: any = userInfo;
       const {idToken} = data;
       if (idToken) {
-        const params = {
+        let socialObj: any = {
           name: data.user.name,
           email: data.user.email,
-          googleId: idToken,
           device_type: Platform.OS,
+          googleId: idToken,
+          device_token: fcmToken ?? 'ddd',
         };
 
-        if (role === 'company') {
-          const res = await companyGoogleSignIn(params).unwrap();
-          if (res?.status) {
-            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
-          }
-        }
+        updateSignupData({
+          step: 4,
+          ...socialObj,
+        });
 
-        if (role === 'employee') {
-          await employeeGoogleSignIn(params).unwrap();
+        const response = await employeeGoogleSignIn(socialObj).unwrap();
+        console.log('🔥🔥 ~ handleFinishSetup ~ Google res:', response?.data);
+
+        if (response?.data?.user?.phone_verified_at !== null) {
+          resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
+        } else {
+          resetNavigation(SCREENS.EmployeeStack, SCREENS.SignUp, {
+            isGoogleAuth: true,
+          });
         }
+        dispatch(setUserInfo(response?.data?.user));
       }
     } catch (error: any) {
-      setLoading(false);
       console.error('Google Sign-In failed:', error);
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('User cancelled the sign-in flow');
@@ -129,7 +164,6 @@ const WelcomeScreen = () => {
 
   const handleAppleSignIn = async () => {
     try {
-      setLoading(true);
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
@@ -145,21 +179,31 @@ const WelcomeScreen = () => {
 
         var str = decoded?.email || '';
         str = str.split('@');
-        let data = {
+        let socialObj = {
           name: fullName?.givenName || str[0],
           email: email || decoded?.email,
           appleId: appleAuthRequestResponse.user,
           device_type: Platform.OS,
+          devce_token: fcmToken ?? 'ddd',
         };
 
-        if (role === 'company') {
-          await companyAppleSignIn(data).unwrap();
+        updateSignupData({
+          step: 4,
+          ...socialObj,
+        });
+
+        const response = await employeeAppleSignIn(socialObj).unwrap();
+        console.log("🔥🔥 ~ handleAppleSignIn ~ response:", response)
+        if (response?.data?.user?.phone_verified_at !== null) {
+          resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
         } else {
-          await employeeAppleSignIn(data).unwrap();
+          resetNavigation(SCREENS.EmployeeStack, SCREENS.SignUp, {
+            isAppleAuth: true,
+          });
         }
+        dispatch(setUserInfo(response?.data?.user));
       }
     } catch (error: any) {
-      setLoading(false);
       console.log('onAppleButtonPress => error => ', error);
       errorToast(
         error?.message || error?.data?.message || 'Apple Sign-In failed',
@@ -187,7 +231,11 @@ const WelcomeScreen = () => {
           showsVerticalScrollIndicator={false}>
           <Onboarding data={AppOnboardingData} role={role ?? undefined} />
 
-          <View style={[styles.buttonWrapper, {bottom: role === 'company' ? '15%' : '3%' }]}>
+          <View
+            style={[
+              styles.buttonWrapper,
+              {bottom: role === 'company' ? '15%' : '3%'},
+            ]}>
             <TouchableOpacity
               style={styles.emailButton}
               onPress={() => {
@@ -197,31 +245,29 @@ const WelcomeScreen = () => {
               <Text style={styles.emailText}>{t('Continue with email')}</Text>
             </TouchableOpacity>
 
-            {role === 'employee' && Platform.OS == 'ios' && (
-              <>
+            <>
+              {role === 'employee' && Platform.OS === 'ios' && (
                 <TouchableOpacity
-                  onPress={() => {}
-                    // handleAppleSignIn()
-                  }
+                  onPress={handleAppleSignIn}
                   style={styles.whiteButton}>
                   <Image source={IMAGES.a_icon} style={styles.icon} />
                   <Text style={styles.whiteText}>
                     {t('Continue with Apple')}
                   </Text>
                 </TouchableOpacity>
+              )}
 
+              {role === 'employee' && (
                 <TouchableOpacity
-                  onPress={() => {}
-                    // handleGoogleSignIn()
-                  }
+                  onPress={handleGoogleSignIn}
                   style={styles.whiteButton}>
                   <Image source={IMAGES.g_icon} style={styles.icon} />
                   <Text style={styles.whiteText}>
                     {t('Continue with Google')}
                   </Text>
                 </TouchableOpacity>
-              </>
-            )}
+              )}
+            </>
           </View>
         </ScrollView>
       </LinearContainer>

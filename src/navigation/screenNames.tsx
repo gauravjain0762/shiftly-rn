@@ -25,6 +25,7 @@ export const SCREENS = {
   WebviewScreen: 'WebviewScreen',
   EditAccount: 'EditAccount',
   SearchJob: 'SearchJob',
+  FavoriteJobList: 'FavoriteJobList',
 
   //company
   CoLogin: 'CoLogin',

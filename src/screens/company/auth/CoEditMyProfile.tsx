@@ -62,7 +62,6 @@ const CoEditMyProfile = () => {
   const [coverImages, setCoverImages] = useState<any[]>(
     userInfo?.cover_images || [],
   );
-  console.log('🔥🔥🔥 ~ CoEditMyProfile ~ coverImages:', coverImages);
   const [logo, setLogo] = useState<any | {}>(userInfo?.logo || {});
   const [imgType, setImageType] = useState<'logo' | 'cover'>('logo');
   const [imageModal, setImageModal] = useState(false);
@@ -124,7 +123,6 @@ const CoEditMyProfile = () => {
       setLogo(newImage);
     } else {
       const updatedCovers = [...coverImages, newImage];
-      console.log('🔥 ~ UploadPhoto ~ updatedCovers:', updatedCovers);
       setCoverImages(updatedCovers);
     }
   };
@@ -282,7 +280,7 @@ const CoEditMyProfile = () => {
               placeholder={t('About Company')}
               placeholderTextColor={colors._7B7878}
             />
-            <CharLength value={about} chars={500} />
+            <CharLength value={about} chars={500} style={{}} />
           </View>
 
           {/* Fields */}
@@ -344,7 +342,6 @@ const CoEditMyProfile = () => {
                 placeholder={'Please select company size'}
                 value={coSize}
                 onChange={(e: any) => {
-                  console.log('🔥🔥 ~ e:', e);
                   setCoSize(e?.value);
                 }}
                 dropdownStyle={styles.dropdown}
@@ -433,14 +430,15 @@ export default CoEditMyProfile;
 
 const styles = StyleSheet.create({
   main: {
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(23),
   },
   header: {
     paddingTop: hp(24),
     marginBottom: hp(28),
   },
   title: {
-    right: '60%',
+    flex: 1,
+    marginLeft: wp(20),
   },
   inputAbout: {
     marginTop: hp(12),

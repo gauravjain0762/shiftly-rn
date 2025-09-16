@@ -30,6 +30,10 @@ import {useEmployeeLoginMutation} from '../../../api/authApi';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setAuthData} from '../../../features/employeeSlice';
+import {
+  clearEmployeeAccount,
+  setCreateEmployeeAccount,
+} from '../../../features/authSlice';
 
 const LoginScreen = () => {
   const {t, i18n} = useTranslation();
@@ -128,9 +132,11 @@ const LoginScreen = () => {
           />
           <Text style={styles.orText}>Or</Text>
           <GradientButton
-            // style={styles.btn}
             title={t('Sign Up')}
-            onPress={() => navigateTo(SCREENS.SignUp)}
+            onPress={() => {
+              dispatch(clearEmployeeAccount());
+              navigateTo(SCREENS.SignUp);
+            }}
           />
         </View>
       </KeyboardAwareScrollView>

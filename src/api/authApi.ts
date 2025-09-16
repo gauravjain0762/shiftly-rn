@@ -49,62 +49,6 @@ export const authApi = createApi({
         }
       },
     }),
-    companyGoogleSignIn: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.companyGoogleSignIn,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-      }),
-      invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          // console.log(data, 'datadatadatadatadata');
-
-          if (data?.status) {
-            console.log('data?.data?.authtoken >>>>>>', data?.data?.auth_token);
-            // await setAsyncToken(data?.data?.auth_token);
-            dispatch(setAuthToken(data.data?.auth_token));
-            dispatch(setUserInfo(data.data?.company));
-            await setAsyncUserInfo(data.data?.company);
-            dispatch(setGuestLogin(false));
-          } else {
-            errorToast(data?.message);
-          }
-        } catch (error) {
-          console.log('companyGoogleSignIn Error', error);
-        }
-      },
-    }),
-    companyAppleSignIn: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.companyAppleSignIn,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-      }),
-      invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          console.log(data, 'datadatadatadatadata');
-
-          if (data?.data?.company?.status) {
-            await setAsyncToken(data?.data?.auth_token);
-            dispatch(setAuthToken(data.data?.auth_token));
-            dispatch(setUserInfo(data.data?.company));
-            await setAsyncUserInfo(data.data?.company);
-            dispatch(setGuestLogin(false));
-            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
-          } else {
-            errorToast(data?.message);
-          }
-        } catch (error) {
-          console.log('companyAppleSignIn Error', error);
-        }
-      },
-    }),
     companySignUp: builder.mutation<any, any>({
       query: credentials => ({
         url: API.CompanySignup,
@@ -421,30 +365,38 @@ export const authApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
-            await setAsyncToken(data?.data?.auth_token);
             dispatch(setAuthToken(data.data?.auth_token));
             dispatch(setUserInfo(data.data?.user));
-            await setAsyncUserInfo(data.data?.user);
             dispatch(setGuestLogin(false));
-            navigationRef.current?.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: SCREENS.EmployeeStack,
-                    state: {
-                      index: 0,
-                      routes: [{name: SCREENS.TabNavigator}],
-                    },
-                  },
-                ],
-              }),
-            );
           } else {
             errorToast(data?.message);
           }
         } catch (error) {
           console.log('employeeGoogleSignIn Error', error);
+        }
+      },
+    }),
+    employeeSendOTP: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.employeeSendOTP,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+      }),
+      invalidatesTags: ['Auth'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'datadatadatadatadata');
+          if (data?.data?.user?.status) {
+            dispatch(setAuthToken(data.data?.auth_token));
+            dispatch(setUserInfo(data.data?.user));
+            dispatch(setGuestLogin(false));
+          } else {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('employeeSendOTP Error', error);
         }
       },
     }),
@@ -461,25 +413,9 @@ export const authApi = createApi({
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.data?.user?.status) {
-            await setAsyncToken(data?.data?.auth_token);
             dispatch(setAuthToken(data.data?.auth_token));
             dispatch(setUserInfo(data.data?.user));
-            await setAsyncUserInfo(data.data?.user);
             dispatch(setGuestLogin(false));
-            navigationRef.current?.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: SCREENS.EmployeeStack,
-                    state: {
-                      index: 0,
-                      routes: [{name: SCREENS.TabNavigator}],
-                    },
-                  },
-                ],
-              }),
-            );
           } else {
             errorToast(data?.message);
           }
@@ -698,8 +634,7 @@ export const {
   useEmployeeResendOTPMutation,
   useEmployeeResetPasswordMutation,
   useEmployeeSignUpMutation,
-  useCompanyGoogleSignInMutation,
   useEmployeeGoogleSignInMutation,
-  useCompanyAppleSignInMutation,
   useEmployeeAppleSignInMutation,
+  useEmployeeSendOTPMutation,
 } = authApi;

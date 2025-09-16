@@ -1,5 +1,4 @@
 import {
-  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -8,14 +7,10 @@ import {
   View,
 } from 'react-native';
 import React, {useState} from 'react';
-import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
+import {BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
-import {AppStyles} from '../../../theme/appStyles';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import NotificationCard from '../../../component/employe/NotificationCard';
 import {IMAGES} from '../../../assets/Images';
-import {navigationRef} from '../../../navigation/RootContainer';
 import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import CustomPopup from '../../../component/common/CustomPopup';
 import {
@@ -25,9 +20,10 @@ import {
   successToast,
 } from '../../../utils/commonFunction';
 import {
+  clearEmployeeAccount,
   logouts,
   setAuthToken,
-  setCreateEmployeeAccount,
+  setCompanyRegisterData,
 } from '../../../features/authSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import {clearAsync} from '../../../utils/asyncStorage';
@@ -35,7 +31,7 @@ import {
   useEmployeeDeleteAccountMutation,
   useEmployeeLogoutMutation,
 } from '../../../api/authApi';
-import {AppDispatch, persistor, RootState} from '../../../store';
+import {AppDispatch, RootState} from '../../../store';
 import LanguageModal from '../../../component/common/LanguageModel';
 import CustomImage from '../../../component/common/CustomImage';
 
@@ -86,15 +82,28 @@ const AccountScreen = () => {
       section: 'General',
       items: [
         {
-          label: 'Language',
-          icon: IMAGES.Language,
+          label: 'Favorite Jobs',
+          icon: IMAGES.Jobs_on,
           onPress: () => {
-            setLanguageModalVisible(true);
+            navigateTo(SCREENS.FavoriteJobList);
           },
         },
         {label: 'Notifications', icon: IMAGES.Notifications},
       ],
     },
+    // {
+    //   section: 'General',
+    //   items: [
+    //     {
+    //       label: 'Language',
+    //       icon: IMAGES.Language,
+    //       onPress: () => {
+    //         setLanguageModalVisible(true);
+    //       },
+    //     },
+    //     {label: 'Notifications', icon: IMAGES.Notifications},
+    //   ],
+    // },
     {
       section: 'About',
       items: [
@@ -151,14 +160,10 @@ const AccountScreen = () => {
     const res = await empLogout({}).unwrap();
     if (res.status) {
       successToast(res.message);
-      resetNavigation(SCREENS.SelectRollScreen);
       dispatch(setAuthToken(''));
-      dispatch(
-        setCreateEmployeeAccount({
-          step: 1,
-        }),
-      );
+      dispatch(clearEmployeeAccount());
       await clearAsync();
+      resetNavigation(SCREENS.SelectRollScreen);
       setPopupVisible(false);
     }
   };
@@ -168,9 +173,12 @@ const AccountScreen = () => {
       const res = await employeeDeleteAccount({}).unwrap();
       if (res?.status) {
         successToast(res?.message);
-        clearAsync();
         resetNavigation(SCREEN_NAMES.SelectRollScreen);
+        dispatch(setAuthToken(''));
+        dispatch(setCompanyRegisterData({}));
+        dispatch(clearEmployeeAccount());
         dispatch(logouts());
+        await clearAsync();
       }
     } catch (error) {
       console.error('Error deleting account: ', error);

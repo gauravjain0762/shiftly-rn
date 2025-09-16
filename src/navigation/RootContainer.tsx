@@ -16,6 +16,7 @@ import {
   openAppNotificationEvent,
   requestNotificationUserPermission,
 } from '../hooks/notificationHandler';
+import {Linking} from 'react-native';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -27,14 +28,8 @@ let DefaultThemeColor = {
 };
 
 const RootContainer: FC = () => {
-  // const {isLoading} = useAppSelector(state => state.common);
-  // const {isDarkTheme} = useAppSelector(state => state.common);
   const isLoading = useSelector(selectIsLoading);
   const dispatch = useAppDispatch();
-
-  // useEffect(() => {
-  //   dispatch(setDarkTheme(theme == 'dark' ? true : false));
-  // }, [theme]);
 
   useEffect(() => {
     requestNotificationUserPermission(dispatch);
@@ -44,8 +39,35 @@ const RootContainer: FC = () => {
     onNotificationPress();
   }, [dispatch]);
 
+  useEffect(() => {
+    Linking.getInitialURL().then(url => {
+      if (url !== null) {
+        console.log('url---', url);
+        let id = url.split('//')[1];
+        if (id.length > 0) {
+        }
+      }
+    });
+  }, []);
+
+  const linking = {
+    prefixes: ['https://sky.devicebee.com', 'shiftly://'],
+    config: {
+      screens: {
+        EmployeeStack: {
+          screens: {
+            JobDetail: 'job/:jobId',
+          },
+        },
+      },
+    },
+  };
+
   return (
-    <NavigationContainer theme={DefaultThemeColor as any} ref={navigationRef}>
+    <NavigationContainer
+      linking={linking}
+      theme={DefaultThemeColor as any}
+      ref={navigationRef}>
       {/* <StatusBar barStyle={'dark-content'} backgroundColor={colors.white} /> */}
       <StackNavigator />
       {isLoading && <Loader />}

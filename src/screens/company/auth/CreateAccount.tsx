@@ -766,10 +766,11 @@ const CreateAccount = () => {
                 {t('What is your phone number?')}
               </Text>
               <PhoneInput
+                countryCode={companyRegisterData?.countryCode}
+                callingCode={companyRegisterData?.phone_code}
                 placeholder={t('Enter your phone')}
                 phoneStyle={{color: colors._0B3970}}
                 callingCodeStyle={{color: colors._0B3970}}
-                callingCode={companyRegisterData?.phone_code}
                 placeholderTextColor={colors._7B7878}
                 phone={companyRegisterData?.phone}
                 downIcon={{
@@ -779,7 +780,12 @@ const CreateAccount = () => {
                   dispatch(setCompanyRegisterData({phone: e}))
                 }
                 onCallingCodeChange={(e: any) =>
-                  dispatch(setCompanyRegisterData({phone_code: e}))
+                  dispatch(
+                    setCompanyRegisterData({
+                      phone_code: e.callingCode[0],
+                      countryCode: e.cca2,
+                    }),
+                  )
                 }
                 maxLength={10}
               />

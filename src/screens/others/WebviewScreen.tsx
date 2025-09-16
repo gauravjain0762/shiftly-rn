@@ -36,10 +36,10 @@ const WebViewScreen = () => {
       /> */}
       <View style={styles.headerContainer}>
         <CustomImage
-          size={wp(21)}
+          size={wp(20)}
           onPress={goBack}
           source={IMAGES.backArrow}
-          tintColor={colors.empPrimary}
+          tintColor={ type === 'employe' ? colors.white : colors.empPrimary}
         />
         <BaseText
           style={[
@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     marginLeft: wp(15),
-    ...commonFontStyle(600, 22, colors.white),
+    ...commonFontStyle(600, 20, colors.white),
   },
 });

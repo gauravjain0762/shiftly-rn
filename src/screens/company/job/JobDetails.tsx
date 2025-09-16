@@ -125,7 +125,7 @@ const CoJobDetails = () => {
             <BackHeader
               type="company"
               isRight={false}
-              title={jobDetail?.title || 'Restaurant Manager'}
+              title={jobDetail?.title || 'N/A'}
               titleStyle={styles.title}
               containerStyle={styles.header}
               RightIcon={

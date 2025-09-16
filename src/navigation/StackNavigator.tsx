@@ -49,6 +49,7 @@ import ProfileScreen from '../screens/employer/profile/ProfileScreen';
 import CoProfile from '../screens/company/profile/CoProfile';
 import EditAccountScreen from '../screens/employer/profile/EditAccount';
 import SearchJob from '../screens/employer/jobs/SearchJob';
+import FavoriteJobList from '../screens/employer/jobs/FavoriteJobList';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -277,7 +278,11 @@ const StackNavigator: FC = () => {
           name={SCREENS.SearchJob}
           component={SearchJob}
         />
-        {/* Seeker */}
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.FavoriteJobList}
+          component={FavoriteJobList}
+        />
       </Stack.Navigator>
     );
   };

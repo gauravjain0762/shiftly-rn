@@ -94,7 +94,7 @@ const ApplyJob = () => {
         SafeAreaProps={{edges: ['bottom', 'top']}}
         colors={['#0D468C', '#041326']}
         containerStyle={[{paddingBottom: bottom}]}>
-        <BackHeader title={t('Apply Job')} containerStyle={styles.header} />
+        <BackHeader title={'Apply Job'} containerStyle={styles.header} />
         <View style={styles.container}>
           {/* Job Card */}
           <View style={styles.jobCard}>
@@ -113,7 +113,7 @@ const ApplyJob = () => {
             <View style={{flex: 1}}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
               <Text style={styles.location}>{data?.address}</Text>
-              <Text style={styles.meta}>{data?.area}</Text>
+              <Text style={[styles.meta, {flex: 0}]}>{data?.area}</Text>
               <View
                 style={{
                   marginTop: hp(5),
@@ -253,11 +253,9 @@ const styles = StyleSheet.create({
   location: {
     marginTop: hp(4),
     ...commonFontStyle(400, 15, colors._33485B),
-    // flex: 1,
   },
   meta: {
     flex: 1,
-    // marginTop: hp(2),
     ...commonFontStyle(400, 14, '#33485B'),
   },
   salary: {

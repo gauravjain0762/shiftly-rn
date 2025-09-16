@@ -15,6 +15,7 @@ type props = {
   onPress?: () => void;
   onPressShare?: () => void;
   onPressFavorite?: () => void;
+  isShowFavIcon?: boolean;
 };
 
 const JobCard: FC<props> = ({
@@ -23,16 +24,22 @@ const JobCard: FC<props> = ({
   onPressFavorite,
   heartImage,
   onPressShare = () => {},
+  isShowFavIcon = true,
 }) => {
+  const isValidImageUrl = (url?: string) => {
+    if (!url || typeof url !== 'string') return false;
+    return /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
+  };
+
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <CustomImage
-        tintColor={'grey'}
-        source={IMAGES.dummy_image}
-        uri={item?.company_id?.cover_images[0]}
+        tintColor={isValidImageUrl(item?.images?.[0]) ? '' : 'lightgrey'}
+        uri={isValidImageUrl(item?.images?.[0]) ? item?.images?.[0] : ''}
         imageStyle={{
           width: '100%',
           height: '100%',
+          opacity: 1,
         }}
         containerStyle={styles.jobImage}>
         <View style={styles.logo}>
@@ -47,7 +54,11 @@ const JobCard: FC<props> = ({
             }}
           />
         </View>
-        <View style={styles.actions}>
+        <View
+          style={[
+            styles.actions,
+            {marginTop: !isShowFavIcon ? hp(80) : hp(50)},
+          ]}>
           <TouchableOpacity onPress={onPressShare} style={styles.iconButton}>
             <FastImage
               source={IMAGES.share}
@@ -55,19 +66,25 @@ const JobCard: FC<props> = ({
               style={styles.icon}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onPressFavorite} style={styles.iconButton}>
-            <FastImage
-              resizeMode="contain"
-              source={heartImage ? IMAGES.like : IMAGES.hart}
-              style={styles.icon}
-            />
-          </TouchableOpacity>
+          {isShowFavIcon && (
+            <TouchableOpacity
+              onPress={onPressFavorite}
+              style={styles.iconButton}>
+              <FastImage
+                resizeMode="contain"
+                source={heartImage ? IMAGES.like : IMAGES.hart}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </CustomImage>
 
       <View style={styles.cardContent}>
         <View style={styles.companyInfo}>
-          <Text style={[styles.companyName, {width: '74%'}]}>{item?.area}</Text>
+          <Text style={[styles.companyName, {}]} numberOfLines={1}>
+            {item?.area?.slice(0, 30)}
+          </Text>
           <Text style={[styles.companyName]}>
             {`Posted ${getTimeAgo(item?.createdAt)} ago`}
           </Text>
@@ -79,7 +96,7 @@ const JobCard: FC<props> = ({
           </View>
         </View>
         <ExpandableText
-          maxLines={3}
+          maxLines={2}
           description={item?.description}
           descriptionStyle={styles.jobDescription}
           showStyle={{paddingHorizontal: 0, fontSize: 15}}
@@ -101,17 +118,21 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(140),
     justifyContent: 'flex-end',
+    overflow: 'hidden',
   },
   cardContent: {
-    padding: 12,
-    gap: hp(6),
+    gap: hp(2),
+    padding: hp(12),
+    backgroundColor: colors.white,
   },
   cardHeader: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   companyInfo: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
   companyLogo: {

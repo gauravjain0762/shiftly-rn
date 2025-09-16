@@ -2,6 +2,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {persistReducer} from 'redux-persist';
 
+type CompanyRegisterData = {
+  business_type_id: string;
+  company_name: string;
+  name: string;
+  email: string;
+  password: string;
+  phone_code: string;
+  phone: string;
+  countryCode: string;
+};
+
 interface AppState {
   isLoading: boolean;
   loginModal: boolean;
@@ -14,8 +25,8 @@ interface AppState {
   businessType?: any[];
   companyRegisterForm?: any;
   companyRegistrationStep?: number;
-  companyRegisterData?: any;
   registerSuccessModal?: boolean;
+  companyRegisterData: CompanyRegisterData;
   companyProfileData?: {
     website: string;
     company_size: string;
@@ -61,6 +72,8 @@ interface AppState {
     describe: string;
     picture: string;
     countryCode: any | string;
+    googleId?: string;
+    appleId?: string
   };
 }
 
@@ -84,6 +97,7 @@ const initialState: AppState = {
     password: '',
     phone_code: '971',
     phone: '',
+    countryCode: 'AE',
   },
   registerSuccessModal: false,
   companyProfileData: {
@@ -133,6 +147,8 @@ const initialState: AppState = {
     describe: "I'm a job seeker",
     picture: 'https://sky.devicebee.com/Shiftly/public/uploads//blank.png',
     countryCode: 'AE',
+    googleId: '',
+    appleId: ''
   },
 };
 
@@ -182,6 +198,7 @@ const authSlice = createSlice({
         ...action.payload,
       };
     },
+
     clearCompanyRegisterData: state => {
       state.companyRegisterData = initialState.companyRegisterData;
     },

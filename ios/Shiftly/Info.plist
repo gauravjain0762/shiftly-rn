@@ -30,6 +30,19 @@
 				<string>com.googleusercontent.apps.469951772536-8ol7o647gh9r8u0bl19a7a6ahctbkopp</string>
 			</array>
 		</dict>
+
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+			<string>shiftly</string>
+			</array>
+		</dict>
+	</array>
+	<key>AssociatedDomains</key>
+	<array>
+		<string>applinks:sky.devicebee.com</string>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>

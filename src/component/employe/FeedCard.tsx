@@ -49,6 +49,7 @@ const FeedCard: FC<card> = ({onPressCard = () => {}, item}) => {
           uri={item?.images?.length > 0 ? item?.images[0] : ''}
           imageStyle={{height: '100%', width: '100%', opacity: 1}}
           resizeMode={item?.images?.length > 0 ? 'cover' : 'contain'}
+          tintColor={item?.images?.length > 0 ? '' : 'lightgrey'}
         />
       </View>
 

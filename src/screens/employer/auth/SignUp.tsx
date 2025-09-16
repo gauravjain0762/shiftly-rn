@@ -36,6 +36,7 @@ import {
   errorToast,
   navigateTo,
   passwordRules,
+  resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
@@ -49,6 +50,7 @@ import {
 import {
   useEmployeeOTPVerifyMutation,
   useEmployeeResendOTPMutation,
+  useEmployeeSendOTPMutation,
   useEmployeeSignUpMutation,
 } from '../../../api/authApi';
 import {RootState} from '../../../store';
@@ -56,22 +58,27 @@ import CustomImage from '../../../component/common/CustomImage';
 import CountryPicker, {Country} from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
 import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
+import {useRoute} from '@react-navigation/native';
 
 const {width} = Dimensions.get('window');
 
 const SignUp = () => {
   const dispatch = useDispatch<any>();
   const {t} = useTranslation<any>();
+  const {params} = useRoute();
+  const {isGoogleAuth, isAppleAuth} =
+    (params as {isGoogleAuth: boolean; isAppleAuth: boolean}) ?? {};
   const {fcmToken, userInfo} = useSelector((state: RootState) => state.auth);
+  console.log('🔥🔥🔥 ~ SignUp ~ userInfo:', userInfo);
   const signupData = useSelector(
     (state: any) => state.auth.createEmployeeAccount,
   );
+  const [empSendOTP] = useEmployeeSendOTPMutation({});
 
   const {
     step,
     name,
     email,
-    // timer,
     showModal,
     imageModal,
     selected,
@@ -87,6 +94,8 @@ const SignUp = () => {
     describe,
     picture,
     countryCode,
+    googleId,
+    appleId,
   } = signupData;
 
   const [password, setPassword] = useState('');
@@ -108,7 +117,6 @@ const SignUp = () => {
   ];
   const options1 = ['Male', 'Female', 'prefer not to disclose'];
 
-  // Update Redux state helper
   const updateSignupData = (
     updates: Partial<{
       step: number;
@@ -126,7 +134,7 @@ const SignUp = () => {
       isPickerVisible: boolean;
       open: boolean;
       full_password: string | undefined;
-      otp: string | undefined;
+      otp: string[] | undefined;
       phone: string;
       phone_code: string;
       describe: string;
@@ -136,21 +144,6 @@ const SignUp = () => {
   ) => {
     dispatch(setCreateEmployeeAccount(updates));
   };
-
-  // useEffect(() => {
-  //   if (signupData.step === undefined) {
-  //     updateSignupData({step: 1});
-  //   }
-  // }, []);
-
-  // Countdown timer
-  // useEffect(() => {
-  //   if (timer === 0) return;
-  //   const interval = setInterval(() => {
-  //     updateSignupData({timer: timer - 1});
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [timer]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -182,25 +175,33 @@ const SignUp = () => {
         delete obj.phone_code;
         delete obj.phone;
       }
+      let response;
 
-      console.log('🔥 ~ handleRegister ~ obj:', obj);
+      let socialObj: any = {
+        user_id: userInfo?._id,
+        phone_code: phone_code,
+        phone: phone,
+      };
 
-      const response = await empSignUp(obj).unwrap();
-      console.log('🔥 ~ handleRegister ~ response?.data:', response);
+      if (isGoogleAuth || isAppleAuth) {
+        response = await empSendOTP(socialObj).unwrap();
+      } else {
+        response = await empSignUp(obj).unwrap();
+      }
 
       if (response?.status) {
         if (!isCheck) {
-          console.log('🔥 ~ handleRegister ~ response?.data?.user:');
-
           successToast(response?.message);
-          dispatch(setUserInfo(response?.data?.user));
+          dispatch(
+            setUserInfo(
+              isGoogleAuth || isAppleAuth
+                ? response?.data
+                : response?.data?.user,
+            ),
+          );
         }
         nextStep();
       } else {
-        console.log(
-          '🔥 ~ handleRegister ~ response?.message:',
-          response?.message,
-        );
         errorToast(response?.message);
       }
     } catch (error) {
@@ -209,8 +210,6 @@ const SignUp = () => {
   };
 
   const handleOTPVerify = async () => {
-    console.log('userInfo?._id: >>>>', userInfo?._id);
-
     const verifyData = {
       otp: otp.join('') || '123456',
       user_id: userInfo?._id,
@@ -257,7 +256,7 @@ const SignUp = () => {
   };
 
   const handleFinishSetup = async () => {
-    const form = new FormData();
+    let form = new FormData();
 
     form.append('about', describe);
     form.append('dob', dob);
@@ -273,8 +272,9 @@ const SignUp = () => {
       });
     }
 
+    let res;
     try {
-      const res = await empUpdateProfile(form).unwrap();
+      res = await empUpdateProfile(form).unwrap();
       console.log('🔥🔥 ~ handleFinishSetup ~ res:', res?.data);
 
       if (res?.status) {
@@ -462,7 +462,7 @@ const SignUp = () => {
                   containerStyle={styles.inputcontainer}
                   imgStyle={styles.eye}
                   placeholder="* * * * * * * *"
-                  placeholderTextColor={colors._F4E2B8}
+                  placeholderTextColor={colors._DADADA}
                   isPassword
                   value={password}
                   onChangeText={(text: any) => {
@@ -702,10 +702,9 @@ const SignUp = () => {
                 pickerStyleIOS={{
                   alignSelf: 'center',
                 }}
-                value={dob ? new Date(dob) : new Date()}
+                date={dob ? new Date(dob) : new Date()}
                 display={Platform.OS == 'ios' ? 'spinner' : 'default'}
                 isVisible={open}
-                // ✅ User must be born on or before (today - 16 years)
                 maximumDate={
                   new Date(
                     new Date().setFullYear(new Date().getFullYear() - 16),
@@ -826,10 +825,10 @@ const SignUp = () => {
                 <CountryPicker
                   visible={isVisible ? true : false}
                   withFilter
-                  withCountryNameButton // show only name in selected view
+                  withCountryNameButton
                   withCallingCode={false}
-                  withFlag // hides flag in selected view
-                  withEmoji={false} // hides emoji flag in selected view
+                  withFlag
+                  withEmoji={false}
                   onSelect={(item: Country) => {
                     if (isVisible === '1') {
                       updateSignupData({
@@ -964,7 +963,17 @@ const SignUp = () => {
         style={styles.container}>
         <View style={styles.rowView}>
           <TouchableOpacity
-            onPress={() => prevStep(step)}
+            onPress={() => {
+              if (isAppleAuth || isGoogleAuth) {
+                if (step === 4) {
+                  resetNavigation(SCREENS.WelcomeScreen);
+                } else {
+                  prevStep(step);
+                }
+              } else {
+                prevStep(step);
+              }
+            }}
             hitSlop={8}
             style={[styles.backBtn, {flex: 1}]}>
             <Image

@@ -16,6 +16,7 @@ import {IMAGES} from '../../assets/Images';
 import {navigateTo} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
 import CustomImage from '../common/CustomImage';
+import BaseText from '../common/BaseText';
 
 const MessageBubble: React.FC<{
   item: Message;
@@ -116,21 +117,30 @@ const MessageBubble: React.FC<{
                   style={styles.attachment}
                   resizeMode={FastImage.resizeMode.contain}
                 />
+                <BaseText
+                  style={{
+                    marginTop: hp(2),
+                    ...commonFontStyle(500, 13, colors.white),
+                  }}>
+                  {item?.file?.split('/').pop()}
+                </BaseText>
               </TouchableOpacity>
             ) : (
-              <CustomImage
-                source={{uri: item?.file}}
-                onPress={() => {
-                  navigateTo(SCREENS.WebviewScreen, {
-                    link: item.file,
-                    title: '',
-                    type: 'employe',
-                  });
-                }}
-                imageStyle={{width: '100%', height: '100%'}}
-                containerStyle={styles.imageContainer}
-                resizeMode="cover"
-              />
+              <>
+                <CustomImage
+                  source={{uri: item?.file}}
+                  onPress={() => {
+                    navigateTo(SCREENS.WebviewScreen, {
+                      link: item.file,
+                      title: '',
+                      type: 'employe',
+                    });
+                  }}
+                  imageStyle={{width: '100%', height: '100%'}}
+                  containerStyle={styles.imageContainer}
+                  resizeMode="cover"
+                />
+              </>
             )}
           </View>
         )}
