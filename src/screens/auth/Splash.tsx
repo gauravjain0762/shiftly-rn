@@ -30,15 +30,17 @@ const Splash = (props: Props) => {
   useEffect(() => {
     // Wait for role to load before initializing app
     if (!loading) {
-      initializeApp();
+      setTimeout(() => {
+        initializeApp();
+      }, 1500);
     }
   }, [loading, role]);
 
   const initializeApp = async () => {
     // Hide splash screen after 1 second
-    setTimeout(() => {
-      SplashScreen.hide();
-    }, 1000);
+    // setTimeout(() => {
+    //   SplashScreen.hide();
+    // }, 2000);
 
     // Get location permission first
     await getLocation();

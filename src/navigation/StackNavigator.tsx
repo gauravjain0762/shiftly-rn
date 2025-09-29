@@ -19,7 +19,6 @@ import NotificationScreen from '../screens/employer/notification/NotificationScr
 import AccountScreen from '../screens/employer/profile/AccountScreen';
 import CreateProfileScreen from '../screens/employer/profile/CreateProfileScreen';
 import Chat from '../screens/employer/chat/Chat';
-import EditProfileScreen from '../screens/employer/profile/EditProfileScreen';
 import ViewProfileScreen from '../screens/employer/profile/ViewProfileScreen';
 import CoLogin from '../screens/company/auth/CoLogin';
 import useRole from '../hooks/useRole';

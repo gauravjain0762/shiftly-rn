@@ -16,12 +16,14 @@ import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import ScrollingPaginationDots from './ScrollingPaginationDots';
+import CustomImage from './CustomImage';
 
 const {width} = Dimensions.get('window');
 
 export type OnboardingDataItem = {
   id: string;
   title: string;
+  image: any;
   description?: string;
   lottieAnim?: string;
 };
@@ -43,25 +45,30 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
   const renderItem = ({item}: {item: OnboardingDataItem}) => {
     return (
       <View style={[styles.slide, {width}]}>
-        <Image
+        <CustomImage
+          size={hp(140)}
           resizeMode="contain"
           source={IMAGES.newlogo}
-          style={styles.logo}
+          containerStyle={styles.logo}
         />
         <ImageBackground
-          source={IMAGES.login_bg}
+          source={item?.image}
           style={styles.illustration}
           resizeMode="contain">
-          <View style={styles.innerImages}>
+          {/* <View style={styles.innerImages}>
             <Image source={IMAGES.login_bg1} />
             <Image source={IMAGES.login_bg2} />
-          </View>
+          </View> */}
         </ImageBackground>
-        <Text style={styles.subtitle}>
-          {
-            "Find your next role in Dubai's top hotels, beach clubs, &restaurants.Let's get you hired! Start your Shiftly journey"
-          }
-        </Text>
+
+        <View
+          style={{
+            gap: hp(5),
+            marginTop: hp(29),
+          }}>
+          <Text style={styles.subtitle}>{item?.title}</Text>
+          <Text style={styles.subtitle}>{item?.description}</Text>
+        </View>
       </View>
     );
   };
@@ -84,7 +91,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
       <View
         style={[
           styles.paginationContainer,
-          {bottom: role === 'company' ? '10%' : '4%'},
+          {bottom: role === 'company' ? '10%' : '3%'},
         ]}>
         <ScrollingPaginationDots
           scrollX={scrollX}
@@ -168,8 +175,6 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     lineHeight: hp(20),
-    marginTop: hp(29),
-    marginBottom: hp(10),
     ...commonFontStyle(600, 17, colors._DADADA),
   },
   dots: {

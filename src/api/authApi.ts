@@ -18,17 +18,17 @@ export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: axiosBaseQuery,
   tagTypes: ['Auth', 'getBusiness'],
-  endpoints: builder => ({
+  endpoints: (builder: { mutation: (arg0: { query: ((credentials: any) => { url: string; method: "POST"; data: any; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; headers: { 'Cache-Control': string; 'Content-Type': string; }; }) | ((params: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | (() => { url: string; method: "POST"; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }) | ((credentials: any) => { url: string; method: "POST"; data: any; skipLoader: boolean; }); invalidatesTags?: string[]; onQueryStarted: ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>) | ((_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }) => Promise<void>); }) => any; query: (arg0: { query: () => { url: string; method: "GET"; skipLoader: boolean; }; onQueryStarted(_: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any; }): Promise<void>; }) => any; }) => ({
     //  -------   Company    --------
     companyLogin: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.CompanyLogin,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -50,7 +50,7 @@ export const authApi = createApi({
       },
     }),
     companySignUp: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.CompanySignup,
         method: HTTP_METHOD.POST,
         data: credentials,
@@ -61,7 +61,7 @@ export const authApi = createApi({
         },
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -78,7 +78,7 @@ export const authApi = createApi({
       },
     }),
     createJob: builder.mutation<any, any>({
-      query: params => {
+      query: (params: any) => {
         return {
           url: API.createCompanyJob,
           method: HTTP_METHOD.POST,
@@ -86,7 +86,7 @@ export const authApi = createApi({
           skipLoader: false,
         };
       },
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -129,14 +129,14 @@ export const authApi = createApi({
     // }),
 
     companyForgotPassword: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.companyForgotPassword,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -154,14 +154,14 @@ export const authApi = createApi({
       },
     }),
     companyOTPVerify: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.companyOTPVerify,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -182,14 +182,14 @@ export const authApi = createApi({
       },
     }),
     CompanyResendOTP: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.CompanyResendOTP,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -209,14 +209,14 @@ export const authApi = createApi({
       },
     }),
     companyChangePassword: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.companyResetPassword,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -237,14 +237,14 @@ export const authApi = createApi({
       },
     }),
     companyResetPassword: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.companyChangePassword,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -271,7 +271,7 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -285,14 +285,14 @@ export const authApi = createApi({
       },
     }),
     CompanyLogout: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.CompanyLogout,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -311,7 +311,7 @@ export const authApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadata');
@@ -324,14 +324,14 @@ export const authApi = createApi({
 
     //  -------   Employee   --------
     employeeLogin: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeLogin,
         method: HTTP_METHOD.POST,
         data: credentials,
         // skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -353,14 +353,14 @@ export const authApi = createApi({
       },
     }),
     employeeGoogleSignIn: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeGoogleSignIn,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -377,14 +377,14 @@ export const authApi = createApi({
       },
     }),
     employeeSendOTP: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeSendOTP,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -401,14 +401,14 @@ export const authApi = createApi({
       },
     }),
     employeeAppleSignIn: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeAppleSignIn,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -425,14 +425,14 @@ export const authApi = createApi({
       },
     }),
     employeeSignUp: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeSignup,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -449,7 +449,7 @@ export const authApi = createApi({
       },
     }),
     employeeOTPVerify: builder.mutation<any, any>({
-      query: credentials => {
+      query: (credentials: any) => {
         console.log('API.employeeOTPVerify', API.employeeOTPVerify);
         return {
           url: API.employeeOTPVerify,
@@ -459,7 +459,7 @@ export const authApi = createApi({
         };
       },
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -479,14 +479,14 @@ export const authApi = createApi({
       },
     }),
     employeeLogout: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeLogout,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -500,14 +500,14 @@ export const authApi = createApi({
       },
     }),
     employeeChangePassword: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeChangePassword,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -521,14 +521,14 @@ export const authApi = createApi({
       },
     }),
     employeeDeleteAccount: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeDeleteAccount,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -542,14 +542,14 @@ export const authApi = createApi({
       },
     }),
     employeeForgotPassword: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeForgotPassword,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
@@ -563,14 +563,14 @@ export const authApi = createApi({
       },
     }),
     employeeResendOTP: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeResendOTP,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {
@@ -583,14 +583,14 @@ export const authApi = createApi({
       },
     }),
     employeeResetPassword: builder.mutation<any, any>({
-      query: credentials => ({
+      query: (credentials: any) => ({
         url: API.employeeResetPassword,
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
           const {data} = await queryFulfilled;
           if (data?.status) {

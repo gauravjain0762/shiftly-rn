@@ -40,20 +40,23 @@ import {RootState} from '../../store';
 const AppOnboardingData = [
   {
     id: '1',
-    title: 'Discover Local Services, Fast',
-    description: `Find your next role in Dubai's top hotels, beach clubs, & restaurants. Let's get you hired!Start your Shiftly journey`,
+    image: IMAGES.illustration1,
+    title: 'Hire staff for your hotel in seconds 🏨',
+    description: `From front desk to housekeeping, find verified talent instantly.`,
   },
   {
     id: '2',
-    title: 'Book Appointments Instantly',
+    image: IMAGES.illustration2,
+    title: 'Build your restaurant team fast 🍴',
     description:
-      'Submit a booking request for the service you need, and we will connect you to verified local providers instantly. Once you confirm your requirements, qualified professionals will be notified, and you will receive quick responses to schedule your appointment.',
+      'Post a role and get matched with qualified chefs, waiters, and bartenders.',
   },
   {
     id: '3',
-    title: 'Chat with Providers, Directly',
+    image: IMAGES.illustration3,
+    title: 'Staff your beach club or resort 🌴',
     description:
-      'Once your booking is accepted, you can chat directly with the service provider via WhatsApp for easy coordination. No extra steps—just simple, direct communication to confirm your appointment details!',
+      'Find seasonal or long-term hospitality staff — no agency fees, no delays.',
   },
 ];
 
@@ -193,7 +196,7 @@ const WelcomeScreen = () => {
         });
 
         const response = await employeeAppleSignIn(socialObj).unwrap();
-        console.log("🔥🔥 ~ handleAppleSignIn ~ response:", response)
+        console.log('🔥🔥 ~ handleAppleSignIn ~ response:', response);
         if (response?.data?.user?.phone_verified_at !== null) {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
         } else {
@@ -282,7 +285,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backHeaderContainer: {
-    paddingTop: hp(24),
+    paddingTop: hp(12),
     alignSelf: 'flex-start',
     paddingHorizontal: wp(35),
   },
@@ -296,15 +299,6 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     width: '90%',
     alignItems: 'center',
-  },
-  logo: {
-    height: 60,
-    resizeMode: 'contain',
-    marginBottom: 12,
-  },
-  illustration: {
-    width: '100%',
-    height: 220,
   },
   title: {
     marginTop: 20,

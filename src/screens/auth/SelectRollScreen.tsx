@@ -24,7 +24,7 @@ const SelectRollScreen = () => {
           <Image source={IMAGES.Seeker} style={styles.icon} />
 
           <Text style={styles.titleBlack}>
-            {t('Looking for top hospitality talent?')}
+            {t('Hire Hospitality Talent in Minutes.')}
           </Text>
           <Text style={styles.desc}>
             {t('Post your shifts and hire faster.')}
@@ -47,7 +47,7 @@ const SelectRollScreen = () => {
         <View style={styles.cardJobSeeker}>
           <Image source={IMAGES.Employer} style={styles.icon} />
           <Text style={styles.titleWhite}>
-            {t('Ready to land your next hospitality role?')}
+            {t('Find Your Next Hospitality Job  Fast & Easy.')}
           </Text>
           <Text style={styles.descWhite}>{t('Let’s get started.')}</Text>
           <TouchableOpacity
@@ -75,15 +75,15 @@ const styles = StyleSheet.create({
     marginHorizontal: wp(20),
   },
   logo: {
-    width: wp(122),
-    height: hp(122),
+    width: wp(150),
+    height: hp(150),
     resizeMode: 'contain',
-    marginBottom: hp(23),
+    marginBottom: hp(40),
   },
   cardEmployer: {
     width: '92%',
     alignItems: 'center',
-    marginBottom: hp(60),
+    marginBottom: hp(35),
     borderRadius: hp(20),
     paddingVertical: hp(21),
     backgroundColor: colors._FBE7BD,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: hp(20),
     borderWidth: hp(1.5),
-    paddingVertical: hp(21),
+    paddingVertical: hp(17),
     borderColor: colors._104686,
     backgroundColor: colors._0B3970,
   },
@@ -104,24 +104,24 @@ const styles = StyleSheet.create({
   },
   titleBlack: {
     textAlign: 'center',
-    marginBottom: hp(8),
+    marginBottom: hp(5),
     paddingHorizontal: wp(23),
     ...commonFontStyle(700, 19, colors.black),
   },
   titleWhite: {
     textAlign: 'center',
-    marginBottom: hp(8),
+    marginBottom: hp(5),
     marginHorizontal: hp(23),
     ...commonFontStyle(700, 19, colors.white),
   },
   desc: {
     textAlign: 'center',
-    marginBottom: hp(22),
+    marginBottom: hp(16),
     ...commonFontStyle(400, 18, colors.black),
   },
   descWhite: {
     textAlign: 'center',
-    marginBottom: hp(20),
+    marginBottom: hp(16),
     ...commonFontStyle(400, 18, colors.white),
   },
   button: {
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
     borderTopColor: colors._104686,
   },
   buttonText: {
-    marginTop: hp(17),
+    marginTop: hp(14),
     ...commonFontStyle(500, 18, colors.white),
   },
   buttonTextDark: {
-    marginTop: hp(17),
+    marginTop: hp(14),
     ...commonFontStyle(500, 19, colors.black),
   },
 });

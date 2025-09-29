@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
     ...commonFontStyle(400, 14, colors.white),
     marginRight: 4,
+    paddingHorizontal: wp(8)
   },
   iconWrapper: {
     width: 39,

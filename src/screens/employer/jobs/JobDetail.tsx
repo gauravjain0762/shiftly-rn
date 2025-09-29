@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -19,11 +19,11 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {IMAGES} from '../../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { IMAGES } from '../../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   errorToast,
   formatDate,
@@ -31,37 +31,37 @@ import {
   navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
-import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   useAddRemoveFavouriteMutation,
   useGetEmployeeJobDetailsQuery,
   useGetFavouritesJobQuery,
 } from '../../../api/dashboardApi';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 import Carousel from 'react-native-reanimated-carousel';
-import {navigationRef} from '../../../navigation/RootContainer';
+import { navigationRef } from '../../../navigation/RootContainer';
 
-const {width: screenWidth} = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
 
 const JobDetail = () => {
-  const {t} = useTranslation();
-  const {bottom} = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { bottom } = useSafeAreaInsets();
   const [modal, setModal] = useState(false);
-  const {params} = useRoute<RouteProp<any, any>>();
+  const { params } = useRoute<RouteProp<any, any>>();
   const data = params || params?.item;
-  const {data: jobDetail, isLoading} = useGetEmployeeJobDetailsQuery(
+  const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
     data?.item?._id || data?.jobId,
   );
   const curr_jobdetails = jobDetail?.data?.job;
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
-  const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
+  const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [activeIndex, setActiveIndex] = useState(0);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
@@ -121,7 +121,7 @@ const JobDetail = () => {
       ? curr_jobdetails?.company_id?.cover_images
       : [curr_jobdetails?.company_id?.logo];
 
-  const renderCarouselItem = ({item, index}: any) => {
+  const renderCarouselItem = ({ item, index }: any) => {
     const isValidImage =
       item &&
       item.startsWith('http') &&
@@ -130,10 +130,11 @@ const JobDetail = () => {
     return (
       <View key={index} style={styles.carouselItemContainer}>
         <CustomImage
-          // resizeMode="cover"
+          resizeMode="cover"
           imageStyle={styles.imageStyle}
           containerStyle={styles.carouselImage}
-          source={isValidImage ? {uri: item} : IMAGES.dummy_image}
+          source={item ? { uri: item } : IMAGES.dummy_image}
+        // url={item}
         />
       </View>
     );
@@ -181,8 +182,8 @@ const JobDetail = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['bottom', 'top']}}
-      containerStyle={{paddingBottom: bottom}}
+      SafeAreaProps={{ edges: ['bottom', 'top'] }}
+      containerStyle={{ paddingBottom: bottom }}
       colors={['#1958a7ff', '#041326']}>
       <BackHeader
         title={'Job Detail'}
@@ -260,7 +261,7 @@ const JobDetail = () => {
                 resizeMode="cover"
                 uri={curr_jobdetails?.company_id?.logo}
                 containerStyle={styles.logoBg}
-                imageStyle={{width: '100%', height: '100%'}}
+                imageStyle={{ width: '100%', height: '100%' }}
               />
               <View style={styles.locationTitle}>
                 <Text style={styles.jobTitle}>{curr_jobdetails?.title}</Text>
@@ -327,7 +328,7 @@ const JobDetail = () => {
                 style={styles.flatlist}
                 keyExtractor={(_, index) => index.toString()}
                 contentContainerStyle={styles.flatListContent}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   const [key, value] = item;
 
                   return (
@@ -344,15 +345,15 @@ const JobDetail = () => {
               />
             </View>
 
-            <View style={{height: hp(40)}} />
+            <View style={{ height: hp(40) }} />
             {curr_jobdetails?.is_applied ? (
               <BaseText
                 style={{
                   textAlign: 'center',
                   ...commonFontStyle(500, 18, colors.white),
                 }}>{`Applied on ${formatDate(
-                curr_jobdetails?.createdAt,
-              )}`}</BaseText>
+                  curr_jobdetails?.createdAt,
+                )}`}</BaseText>
             ) : (
               <GradientButton
                 onPress={() => {
@@ -379,7 +380,7 @@ const JobDetail = () => {
 export default JobDetail;
 
 const styles = StyleSheet.create({
-  lefticon: {marginRight: wp(21)},
+  lefticon: { marginRight: wp(21) },
   share: {
     width: wp(17),
     height: wp(17),
@@ -408,23 +409,23 @@ const styles = StyleSheet.create({
   carouselItemContainer: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
+    // borderRadius: 12,
     overflow: 'hidden',
   },
   carouselImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
+    // borderRadius: 12,
   },
   imageStyle: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
+    // borderRadius: 12,
   },
   banner: {
     height: hp(230),
     overflow: 'hidden',
-    borderRadius: 12,
+    // borderRadius: 12,
   },
   pagination: {
     flexDirection: 'row',
@@ -576,12 +577,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(12),
     justifyContent: 'space-between',
   },
-  addJobText: {...commonFontStyle(500, 13, colors.black)},
+  addJobText: { ...commonFontStyle(500, 13, colors.black) },
   alertButton: {
     borderRadius: hp(20),
     paddingVertical: hp(8),
     paddingHorizontal: wp(10),
     backgroundColor: colors.empPrimary,
   },
-  alertText: {...commonFontStyle(500, 10, colors.white)},
+  alertText: { ...commonFontStyle(500, 10, colors.white) },
 });

@@ -34,6 +34,7 @@
 		6156D5D34F25EABDE57AECD6 /* Pods-Shiftly.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shiftly.debug.xcconfig"; path = "Target Support Files/Pods-Shiftly/Pods-Shiftly.debug.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Shiftly/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Shiftly/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		863955422E7BD4F80091868C /* Shiftly-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Shiftly-Bridging-Header.h"; sourceTree = "<group>"; };
 		865FCB412E55CE2200BE6D4D /* Shiftly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Shiftly.entitlements; path = Shiftly/Shiftly.entitlements; sourceTree = "<group>"; };
 		86D604682E55E64F001C0505 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		98FD55F4D34E4C1382F1DDF4 /* Inter-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.ttf"; path = "../src/assets/fonts/Inter-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -61,6 +62,7 @@
 		13B07FAE1A68108700A75B9A /* Shiftly */ = {
 			isa = PBXGroup;
 			children = (
+				863955422E7BD4F80091868C /* Shiftly-Bridging-Header.h */,
 				86D604682E55E64F001C0505 /* GoogleService-Info.plist */,
 				865FCB412E55CE2200BE6D4D /* Shiftly.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -147,7 +149,6 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				3116AF4D9A371CC87F93406C /* [CP] Embed Pods Frameworks */,
 				E78305159798025283EB79A9 /* [CP] Copy Pods Resources */,
 				5A928E237E5742CB03E1DB36 /* [CP-User] [RNFB] Core Configuration */,
 			);
@@ -229,23 +230,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
-		};
-		3116AF4D9A371CC87F93406C /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Shiftly/Pods-Shiftly-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Shiftly/Pods-Shiftly-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Shiftly/Pods-Shiftly-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 		5A928E237E5742CB03E1DB36 /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -341,6 +325,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.shiftly.myapp;
 				PRODUCT_NAME = Shiftly;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Shiftly/Shiftly-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -374,6 +359,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.shiftly.myapp;
 				PRODUCT_NAME = Shiftly;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Shiftly/Shiftly-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -466,7 +452,7 @@
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
-				USE_HERMES = true;
+				USE_HERMES = false;
 			};
 			name = Debug;
 		};
@@ -548,7 +534,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				USE_HERMES = true;
+				USE_HERMES = false;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

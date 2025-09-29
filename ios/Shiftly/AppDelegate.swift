@@ -39,11 +39,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       in: window,
       launchOptions: launchOptions
     )
+    // RNSplashScreen.show()
 
     return true
   }
 
-  // ✅ Must be outside didFinishLaunching
   func application(
     _ app: UIApplication,
     open url: URL,

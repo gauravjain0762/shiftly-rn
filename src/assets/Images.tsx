@@ -115,6 +115,11 @@ export const IMAGES = {
   pdfIcon: require('./image/pdfIcon.png'),
   document: require('./image/document.png'),
   down_arrow: require('./image/down_arrow.png'),
+  ic_company: require('./image/ic_company.png'),
+  ic_employed: require('./image/ic_employed.png'),
+  illustration1: require('./image/illustration1.png'),
+  illustration2: require('./image/illustration2.png'),
+  illustration3: require('./image/illustration3.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

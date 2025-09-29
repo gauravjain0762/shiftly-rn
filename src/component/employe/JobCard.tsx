@@ -1,13 +1,13 @@
-import React, {FC} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { FC } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
 import CustomImage from '../common/CustomImage';
 import FastImage from 'react-native-fast-image';
-import {getTimeAgo} from '../../utils/commonFunction';
+import { getTimeAgo } from '../../utils/commonFunction';
 
 type props = {
   item?: any;
@@ -20,12 +20,13 @@ type props = {
 
 const JobCard: FC<props> = ({
   item,
-  onPress = () => {},
+  onPress = () => { },
   onPressFavorite,
   heartImage,
-  onPressShare = () => {},
+  onPressShare = () => { },
   isShowFavIcon = true,
 }) => {
+  console.log("🔥🔥🔥 ~ JobCard ~ item:", item)
   const isValidImageUrl = (url?: string) => {
     if (!url || typeof url !== 'string') return false;
     return /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
@@ -34,13 +35,14 @@ const JobCard: FC<props> = ({
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <CustomImage
-        tintColor={isValidImageUrl(item?.images?.[0]) ? '' : 'lightgrey'}
-        uri={isValidImageUrl(item?.images?.[0]) ? item?.images?.[0] : ''}
+        tintColor={item?.company_id?.cover_images?.[0] ? '' : 'lightgrey'}
+        uri={item?.company_id?.cover_images?.[0] || ''}
         imageStyle={{
+          opacity: 1,
           width: '100%',
           height: '100%',
-          opacity: 1,
         }}
+        resizeMode={item?.company_id?.cover_images?.[0] ? 'cover' : 'cover'}
         containerStyle={styles.jobImage}>
         <View style={styles.logo}>
           <CustomImage
@@ -57,7 +59,7 @@ const JobCard: FC<props> = ({
         <View
           style={[
             styles.actions,
-            {marginTop: !isShowFavIcon ? hp(80) : hp(50)},
+            { marginTop: !isShowFavIcon ? hp(80) : hp(50) },
           ]}>
           <TouchableOpacity onPress={onPressShare} style={styles.iconButton}>
             <FastImage
@@ -99,7 +101,7 @@ const JobCard: FC<props> = ({
           maxLines={2}
           description={item?.description}
           descriptionStyle={styles.jobDescription}
-          showStyle={{paddingHorizontal: 0, fontSize: 15}}
+          showStyle={{ paddingHorizontal: 0, fontSize: 15 }}
         />
       </View>
     </TouchableOpacity>
@@ -117,8 +119,8 @@ const styles = StyleSheet.create({
   jobImage: {
     width: '100%',
     height: hp(140),
-    justifyContent: 'flex-end',
     overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
   cardContent: {
     gap: hp(2),
