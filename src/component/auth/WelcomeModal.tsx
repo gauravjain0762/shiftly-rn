@@ -12,6 +12,7 @@ const WelcomeModal = ({
   onClose,
   description,
   ButtonContainer,
+  style,
 }: {
   visible: boolean;
   name?: string;
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   modalContent: {
     backgroundColor: '#F4E2B8',

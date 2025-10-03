@@ -121,10 +121,10 @@ const CoLogin = () => {
               style={styles.button}
               title="Login"
             />
-            <Text style={styles.accoumt}>{t('Don’t have an account?')}</Text>
+            <Text style={styles.accoumt}>{t('New to Shiftly?')}</Text>
             <TouchableOpacity onPress={() => navigateTo(SCREENS.CreateAccount)}>
               <Text style={styles.createAccoumt}>
-                {t('Create Business Account')}
+                {t('Create Your Business Account')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -187,13 +187,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   accoumt: {
-    ...commonFontStyle(400, 18, colors._0D468C),
+    ...commonFontStyle(400, 18, colors.black),
     textAlign: 'center',
     marginBottom: hp(10),
   },
   createAccoumt: {
-    ...commonFontStyle(500, 18, colors.black),
+    ...commonFontStyle(500, 18, colors._0D468C),
     textAlign: 'center',
+    textDecorationLine: 'underline',
   },
   button: {
     marginBottom: hp(60),

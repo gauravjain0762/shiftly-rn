@@ -26,6 +26,39 @@ export const nameCheck = (name: string) => {
   }
 };
 
+export const fullNameCheck = (name: string) => {
+  if (!name) return false;
+  const parts = name.trim().split(' ').filter(Boolean);
+  if (parts.length < 2) return false;
+  const reg = /^[a-zA-Z]+$/;
+  return parts.every(part => reg.test(part));
+};
+
+export const companyEmailCheck = (email: string) => {
+  if (!email) return false;
+
+  const lowerEmail = email.toLowerCase();
+  const freeDomains = [
+    'gmail.com',
+    'yahoo.com',
+    'hotmail.com',
+    'outlook.com',
+    'aol.com',
+    'icloud.com',
+    'protonmail.com',
+    'zoho.com',
+    'mail.com',
+  ];
+  const domain = lowerEmail.split('@')[1];
+
+  if (!domain) return false;
+
+  if (freeDomains.includes(domain)) return false;
+
+  return emailRegex.test(lowerEmail);
+};
+
+
 export const passwordCheck = (string: string) => {
   let reg = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{9,}$/;
   return reg.test(string);

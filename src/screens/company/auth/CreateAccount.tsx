@@ -28,8 +28,10 @@ import {AppStyles} from '../../../theme/appStyles';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {
+  companyEmailCheck,
   emailRegex,
   errorToast,
+  fullNameCheck,
   goBack,
   navigateTo,
   resetNavigation,
@@ -37,13 +39,7 @@ import {
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import MapView, {Marker} from 'react-native-maps';
-import {
-  getAddress,
-  requestLocationPermission,
-} from '../../../utils/locationHandler';
-import {API} from '../../../utils/apiConstant';
-import Config from 'react-native-config';
+import {requestLocationPermission} from '../../../utils/locationHandler';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {
@@ -68,6 +64,7 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import CharLength from '../../../component/common/CharLength';
+import CustomCheckBox from '../../../component/common/CustomCheckBox';
 
 export const companySize = [
   {label: '0 - 50', value: '0 - 50'},
@@ -132,12 +129,17 @@ const CreateAccount = () => {
   const [visible, setVisible] = useState(false);
   const [start, setStart] = useState(false);
 
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [validationMsg, setValidationMsg] = useState('');
+  const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [isChecked, setIsChecked] = useState(false);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       dispatch(clearCompanyRegisterData());
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, dispatch]);
 
   useEffect(() => {
     if (!companyProfileData?.website || companyProfileData?.website === '') {
@@ -148,7 +150,7 @@ const CreateAccount = () => {
         }),
       );
     }
-  }, []);
+  }, [companyProfileData, dispatch]);
 
   useEffect(() => {
     onCurrentLocation();
@@ -194,7 +196,7 @@ const CreateAccount = () => {
     }
     // setStep(prev => prev - 1);
   };
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -209,6 +211,26 @@ const CreateAccount = () => {
       if (interval) clearInterval(interval);
     };
   }, [timer]);
+
+  const handleEmailChange = (email: string) => {
+    dispatch(setCompanyRegisterData({email}));
+
+    if (!email.trim()) {
+      setValidationMsg('');
+      setIsValid(null);
+      return;
+    }
+
+    if (companyEmailCheck(email)) {
+      setValidationMsg('✅ Looks good!');
+      setIsValid(true);
+    } else {
+      setValidationMsg(
+        '❌ Please enter a valid company email (not Gmail / Yahoo).',
+      );
+      setIsValid(false);
+    }
+  };
 
   const handleChangeOtp = (text: any, index: any) => {
     const newPass = [...otp];
@@ -324,13 +346,15 @@ const CreateAccount = () => {
       });
     }
 
-    const response = await companySignUp(formData).unwrap();
+    const response: any = await companySignUp(formData).unwrap();
     // console.log(response, response?.status, 'response----handleSignup');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
       successToast(response?.message);
-      setStart(prev => !prev);
+      setStart((prev: boolean) => !prev);
       nextStep();
+      // Preserve the email for OTP verification step
+      setEmail2(companyRegisterData?.email || '');
       dispatch(
         setCompanyRegisterData({
           business_type_id: '',
@@ -346,41 +370,41 @@ const CreateAccount = () => {
       errorToast(response?.message);
     }
   };
-  const emailCheck = async () => {
-    // Add validation before API call
-    if (!companyRegisterData?.email) {
-      errorToast('Please enter email address');
-      return;
-    }
+  // const emailCheck = async () => {
+  //   // Add validation before API call
+  //   if (!companyRegisterData?.email) {
+  //     errorToast('Please enter email address');
+  //     return;
+  //   }
 
-    // Basic email validation
-    if (!emailRegex.test(companyRegisterData.email)) {
-      errorToast('Please enter a valid email address');
-      return;
-    }
+  //   // Basic email validation
+  //   if (!emailRegex.test(companyRegisterData.email)) {
+  //     errorToast('Please enter a valid email address');
+  //     return;
+  //   }
 
-    // setEmailLoading(true);
+  //   // setEmailLoading(true);
 
-    try {
-      let data = {
-        email: companyRegisterData?.email,
-        validate_email: true,
-      };
+  //   try {
+  //     let data = {
+  //       email: companyRegisterData?.email,
+  //       validate_email: true,
+  //     };
 
-      const response = await companySignUp(data).unwrap();
+  //     const response = await companySignUp(data).unwrap();
 
-      if (response?.status) {
-        nextStep();
-      } else {
-        errorToast(response?.message || 'Email validation failed');
-      }
-    } catch (error: any) {
-      console.error('Email validation error:', error);
-      errorToast(
-        error?.data?.message || 'Something went wrong. Please try again.',
-      );
-    }
-  };
+  //     if (response?.status) {
+  //       nextStep();
+  //     } else {
+  //       errorToast(response?.message || 'Email validation failed');
+  //     }
+  //   } catch (error: any) {
+  //     console.error('Email validation error:', error);
+  //     errorToast(
+  //       error?.data?.message || 'Something went wrong. Please try again.',
+  //     );
+  //   }
+  // };
 
   const verifyOTP = async () => {
     let data = {
@@ -391,7 +415,7 @@ const CreateAccount = () => {
       deviceType: Platform.OS,
     };
 
-    const response = await OtpVerify(data).unwrap();
+    const response: any = await OtpVerify(data).unwrap();
     // console.log(response, 'response----');
     if (response?.status) {
       dispatch(setRegisterSuccessModal(true));
@@ -433,8 +457,11 @@ const CreateAccount = () => {
       });
     }
 
-    if (companyProfileData?.cover_images?.length > 0) {
-      companyProfileData.cover_images.forEach((image: any, index: number) => {
+    if (
+      companyProfileData?.cover_images &&
+      companyProfileData?.cover_images?.length > 0
+    ) {
+      companyProfileData?.cover_images.forEach((image: any, index: number) => {
         if (image?.uri) {
           const fileName =
             image.fileName ||
@@ -456,7 +483,7 @@ const CreateAccount = () => {
       });
     }
 
-    const response = await companyProfile(formData).unwrap();
+    const response: any = await companyProfile(formData).unwrap();
     // console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
@@ -467,17 +494,14 @@ const CreateAccount = () => {
       }
       dispatch(
         setCompanyRegisterData({
-          website: '',
-          company_size: '',
-          address: '',
-          lat: 0,
-          lng: 0,
-          about: '',
-          mission: '',
-          values: '',
-          services: '',
-          logo: {},
-          cover_images: {},
+          business_type_id: '',
+          company_name: '',
+          name: '',
+          email: '',
+          password: '',
+          phone_code: '971',
+          phone: '',
+          countryCode: 'AE',
         }),
       );
       successToast(response?.message);
@@ -500,7 +524,7 @@ const CreateAccount = () => {
                 style={{maxHeight: hp(350), marginTop: hp(15)}}>
                 <CustomDropdown
                   data={
-                    businessTypes?.data?.types?.map((item: any) => ({
+                    (businessTypes as any)?.data?.types?.map((item: any) => ({
                       label: item.title,
                       value: item._id,
                     })) || []
@@ -549,17 +573,15 @@ const CreateAccount = () => {
         return (
           <View style={styles.innerConrainer}>
             <View>
-              <Text style={styles.title}>
-                {t('Business / Organization Name')}
-              </Text>
+              <Text style={styles.title}>{t('Business Name')}</Text>
               <View style={styles.row}>
                 <CustomTextInput
-                  placeholder={t('Enter Business / Organiization name')}
+                  placeholder={t('Ex: Atlantis The Palm, Dubai')}
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) => {
+                  onChangeText={(companyName: string) => {
                     dispatch(
                       setCompanyRegisterData({
-                        company_name: e,
+                        company_name: companyName,
                       }),
                     );
                   }}
@@ -614,20 +636,20 @@ const CreateAccount = () => {
         return (
           <View style={styles.innerConrainer}>
             <View>
-              <Text style={styles.title}>{t('What is your name?')}</Text>
+              <Text style={styles.title}>{t('Account Manager’s Name')}</Text>
               <View style={styles.row}>
-                <Image
+                {/* <Image
                   source={IMAGES.badge}
                   resizeMode="contain"
                   style={styles.badge}
-                />
+                /> */}
                 <CustomTextInput
-                  placeholder={t('Enter Name')}
+                  placeholder={t('Ex: John Smith')}
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) =>
+                  onChangeText={(name: string) =>
                     dispatch(
                       setCompanyRegisterData({
-                        name: e,
+                        name,
                       }),
                     )
                   }
@@ -636,6 +658,18 @@ const CreateAccount = () => {
                   containerStyle={styles.Inputcontainer}
                   maxLength={50}
                 />
+                <TouchableOpacity
+                  onPress={() => setShowTooltip(!showTooltip)}
+                  style={{marginLeft: wp(8)}}>
+                  <Image source={IMAGES.info} style={styles.iBtn} />
+                </TouchableOpacity>
+                {showTooltip && (
+                  <View style={styles.iBtnTxt}>
+                    <Text style={styles.txtColor}>
+                      {'Your name is not displayed on published job posts.'}
+                    </Text>
+                  </View>
+                )}
               </View>
               <CharLength chars={50} value={companyRegisterData?.name} />
             </View>
@@ -644,8 +678,14 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
-                if (!companyRegisterData?.name?.trim()) {
+                const name = companyRegisterData?.name?.trim();
+
+                if (!name) {
                   errorToast('Please enter your name');
+                  return;
+                }
+                if (!fullNameCheck(name)) {
+                  errorToast('Please enter both first and last name');
                   return;
                 }
                 nextStep();
@@ -669,24 +709,55 @@ const CreateAccount = () => {
                 <CustomTextInput
                   placeholder={t('Enter your email')}
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) =>
-                    dispatch(
-                      setCompanyRegisterData({
-                        email: e,
-                      }),
-                    )
-                  }
+                  onChangeText={handleEmailChange}
                   value={companyRegisterData?.email}
                   inputStyle={[styles.input1, {textTransform: 'lowercase'}]}
-                  containerStyle={styles.Inputcontainer}
+                  containerStyle={[styles.Inputcontainer, {flex: 1}]}
                 />
+
+                <TouchableOpacity
+                  onPress={() => setShowTooltip(!showTooltip)}
+                  style={{marginLeft: wp(8)}}>
+                  <Image source={IMAGES.info} style={styles.iBtn} />
+                </TouchableOpacity>
+                {showTooltip && (
+                  <View style={styles.iBtnTxt}>
+                    <Text style={styles.txtColor}>
+                      {
+                        'Please use your official company email.\nPersonal emails (e.g., Gmail, Yahoo) are not accepted.'
+                      }
+                    </Text>
+                  </View>
+                )}
               </View>
+
+              {validationMsg.length > 0 && (
+                <Text
+                  style={[styles.validTxt, {color: isValid ? 'green' : 'red'}]}>
+                  {validationMsg}
+                </Text>
+              )}
             </View>
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={emailCheck}
+              onPress={() => {
+                const email = companyRegisterData?.email?.trim();
+
+                if (!email) {
+                  errorToast('Please enter your email address');
+                  return;
+                }
+
+                if (!companyEmailCheck(email)) {
+                  errorToast(
+                    'Please enter a valid company email (not Gmail, Yahoo, etc.)',
+                  );
+                  return;
+                }
+                nextStep();
+              }}
             />
           </View>
         );
@@ -728,7 +799,7 @@ const CreateAccount = () => {
                   return (
                     <View key={index} style={styles.rules}>
                       {passed ? (
-                        <Image source={IMAGES.check} style={styles.check} />
+                        <Image source={IMAGES.checked} style={styles.check} />
                       ) : (
                         <View style={styles.point} />
                       )}
@@ -736,6 +807,25 @@ const CreateAccount = () => {
                     </View>
                   );
                 })}
+              </View>
+
+              <View style={styles.checkBox}>
+                <CustomCheckBox
+                  checked={isChecked}
+                  onPress={() => setIsChecked(!isChecked)}
+                  label={
+                    <Text style={styles.txt}>
+                      I agree to the{' '}
+                      <Text style={styles.linkedTxt} onPress={() => {}}>
+                        Terms & Conditions
+                      </Text>{' '}
+                      and{' '}
+                      <Text style={styles.linkedTxt} onPress={() => {}}>
+                        Privacy Policy
+                      </Text>
+                    </Text>
+                  }
+                />
               </View>
             </View>
             <GradientButton
@@ -753,6 +843,14 @@ const CreateAccount = () => {
                   errorToast('Password does not meet all the requirements');
                   return;
                 }
+
+                if (!isChecked) {
+                  errorToast(
+                    'You must agree to the Terms & Conditions and Privacy Policy',
+                  );
+                  return;
+                }
+
                 nextStep();
               }}
             />
@@ -816,7 +914,11 @@ const CreateAccount = () => {
               {timer !== 0 && (
                 <View style={[styles.info_row, {marginTop: hp(19)}]}>
                   <Text style={styles.infotext}>
-                    {t('You will receive OTP by email')}
+                    We’ve sent a 4-digit code to your email{' '}
+                    <Text style={{fontWeight: 'bold', color: '_0B3970'}}>
+                      {companyRegisterData?.email || 'your email'}
+                    </Text>
+                    . Please enter it below.
                   </Text>
                 </View>
               )}
@@ -970,7 +1072,7 @@ const CreateAccount = () => {
               <View style={[styles.row, {marginTop: hp(15)}]}>
                 <CustomTextInput
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) => {
+                  onChangeText={_ => {
                     dispatch(
                       setCompanyProfileData({
                         address: userInfo?.address,
@@ -1062,10 +1164,10 @@ const CreateAccount = () => {
                 <CustomTextInput
                   placeholder={t('Introduce your company in few lines')}
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) => {
+                  onChangeText={(about: string) => {
                     dispatch(
                       setCompanyProfileData({
-                        about: e,
+                        about,
                       }),
                     );
                   }}
@@ -1084,10 +1186,10 @@ const CreateAccount = () => {
                 <Text style={styles.title}>{t('Mission')}</Text>
                 <CustomTextInput
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) => {
+                  onChangeText={(mission: string) => {
                     dispatch(
                       setCompanyProfileData({
-                        mission: e,
+                        mission,
                       }),
                     );
                   }}
@@ -1106,10 +1208,10 @@ const CreateAccount = () => {
                 <Text style={styles.title}>{t('Values')}</Text>
                 <CustomTextInput
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={(e: any) => {
+                  onChangeText={(values: string) => {
                     dispatch(
                       setCompanyProfileData({
-                        values: e,
+                        values,
                       }),
                     );
                   }}
@@ -1313,7 +1415,7 @@ const CreateAccount = () => {
                 onPress={() => handleCreateProfile('complete')}
               />
               <TouchableOpacity
-                onPress={() => handleCreateProfile('skip')}
+                onPress={() => handleCreateProfile('skip now')}
                 style={styles.skipBtn}>
                 <Text style={styles.skipNow}>{t('Skip for now')}</Text>
               </TouchableOpacity>
@@ -1362,9 +1464,9 @@ const CreateAccount = () => {
 
       {registerSuccessModal && (
         <WelcomeModal
-          name={t('Aboard!')}
+          name={'to Shiftly! 🎉'}
           description={t(
-            'We’re excited to have you here. Let’s complete your company profile to get started.',
+            'You’re all set. Complete your company profile now to unlock smarter hiring and start connecting with top talent.',
           )}
           visible={registerSuccessModal}
           onClose={() => {
@@ -1389,7 +1491,7 @@ const CreateAccount = () => {
                   resetNavigation(SCREENS.CoTabNavigator);
                 }}
                 style={styles.skip}>
-                <Text style={styles.skiptitle}>{t('Skip')}</Text>
+                <Text style={styles.skiptitle}>{t('Skip now')}</Text>
               </TouchableOpacity>
             </View>
           }
@@ -1586,17 +1688,14 @@ const styles = StyleSheet.create({
     marginTop: hp(74),
   },
   skip: {
-    borderWidth: 2,
     borderColor: '#BDBDBD',
-    borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: wp(10),
-    marginTop: hp(24),
   },
   skiptitle: {
-    ...commonFontStyle(400, 22, '#B4B4B4'),
+    ...commonFontStyle(400, 18, '#6f6e6eff'),
     paddingVertical: hp(10),
+    textDecorationLine: 'underline',
   },
   input: {
     ...commonFontStyle(400, 22, colors._4A4A4A),
@@ -1737,7 +1836,7 @@ const styles = StyleSheet.create({
     width: wp(12),
     height: wp(12),
     resizeMode: 'contain',
-    tintColor: colors._0B3970,
+    tintColor: colors.green,
   },
   dropdown: {
     borderRadius: hp(10),
@@ -1796,4 +1895,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
   },
+  iBtn: {
+    width: wp(20),
+    height: hp(20),
+    marginLeft: wp(8),
+    tintColor: colors._7B7878,
+  },
+  iBtnTxt: {
+    position: 'absolute',
+    right: 0,
+    bottom: hp(45),
+    backgroundColor: '#FFF3CD',
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: hp(1),
+    borderColor: '#7e7251ff',
+  },
+  txtColor: {
+    ...commonFontStyle(500, 12, colors._181818),
+  },
+  validTxt: {
+    marginTop: hp(10),
+    fontSize: wp(16),
+  },
+  linkedTxt: {color: 'black', textDecorationLine: 'underline'},
+  txt: {
+    ...commonFontStyle(500, 12, colors.black),
+  },
+  checkBox: {marginTop: hp(20)},
 });
