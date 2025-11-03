@@ -8,9 +8,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   CustomDropdown,
   CustomTextInput,
@@ -18,13 +19,13 @@ import {
   LinearContainer,
   LocationContainer,
 } from '../../../component';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../../theme/fonts';
-import {IMAGES} from '../../../assets/Images';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {useTranslation} from 'react-i18next';
-import {colors} from '../../../theme/colors';
-import {AppStyles} from '../../../theme/appStyles';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { commonFontStyle, hp, SCREEN_WIDTH, wp } from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { useTranslation } from 'react-i18next';
+import { colors } from '../../../theme/colors';
+import { AppStyles } from '../../../theme/appStyles';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {
@@ -37,11 +38,11 @@ import {
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
+import { SCREENS } from '../../../navigation/screenNames';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {requestLocationPermission} from '../../../utils/locationHandler';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
+import { getAddressList, getPlaceDetails, requestLocationPermission } from '../../../utils/locationHandler';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import {
   useCompanyOTPVerifyMutation,
   useCompanySignUpMutation,
@@ -56,26 +57,28 @@ import {
   setRegisterSuccessModal,
   setUserInfo,
 } from '../../../features/authSlice';
-import {useAppDispatch} from '../../../redux/hooks';
+import { useAppDispatch } from '../../../redux/hooks';
 import {
   useCreateCompanyProfileMutation,
   useGetServicesQuery,
 } from '../../../api/dashboardApi';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import CharLength from '../../../component/common/CharLength';
 import CustomCheckBox from '../../../component/common/CustomCheckBox';
+import { debounce } from 'lodash';
+import BaseText from '../../../component/common/BaseText';
 
 export const companySize = [
-  {label: '0 - 50', value: '0 - 50'},
-  {label: '50 - 100', value: '50 - 100'},
-  {label: '100 - 500', value: '100 - 500'},
-  {label: '500 - 1,000', value: '500 - 1,000'},
-  {label: '1,000+', value: '1,000+'},
+  { label: '0 - 50', value: '0 - 50' },
+  { label: '50 - 100', value: '50 - 100' },
+  { label: '100 - 500', value: '100 - 500' },
+  { label: '500 - 1,000', value: '500 - 1,000' },
+  { label: '1,000+', value: '1,000+' },
 ];
 
 const rules = [
-  {label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8},
+  { label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8 },
   {
     label: 'At least 1 uppercase letter',
     test: (pw: string) => /[A-Z]/.test(pw),
@@ -84,7 +87,7 @@ const rules = [
     label: 'At least 1 lowercase letter',
     test: (pw: string) => /[a-z]/.test(pw),
   },
-  {label: 'At least 1 number', test: (pw: string) => /\d/.test(pw)},
+  { label: 'At least 1 number', test: (pw: string) => /\d/.test(pw) },
   {
     label: 'At least 1 special character (e.g. @, #, $, !)',
     test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
@@ -109,8 +112,8 @@ const CreateAccount = () => {
     cover_images,
     otp,
   } = useSelector((state: any) => state.auth.companyProfileData || {});
-  const {data: businessTypes} = useGetBusinessTypesQuery({});
-  const {data: servicesData} = useGetServicesQuery({});
+  const { data: businessTypes } = useGetBusinessTypesQuery({});
+  const { data: servicesData } = useGetServicesQuery({});
   const serviceList = servicesData?.data?.services;
   const dispatch = useAppDispatch();
   const [companySignUp] = useCompanySignUpMutation();
@@ -133,6 +136,9 @@ const CreateAccount = () => {
   const [validationMsg, setValidationMsg] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isChecked, setIsChecked] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showLogoTooltip, setShowLogoTooltip] = useState(false);
+  const [showCoverTooltip, setShowCoverTooltip] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -196,7 +202,7 @@ const CreateAccount = () => {
     }
     // setStep(prev => prev - 1);
   };
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -213,7 +219,7 @@ const CreateAccount = () => {
   }, [timer]);
 
   const handleEmailChange = (email: string) => {
-    dispatch(setCompanyRegisterData({email}));
+    dispatch(setCompanyRegisterData({ email }));
 
     if (!email.trim()) {
       setValidationMsg('');
@@ -235,7 +241,7 @@ const CreateAccount = () => {
   const handleChangeOtp = (text: any, index: any) => {
     const newPass = [...otp];
     newPass[index] = text;
-    dispatch(setCompanyProfileData({otp: newPass}));
+    dispatch(setCompanyProfileData({ otp: newPass }));
 
     if (text && index < 7) {
       inputRefsOtp.current[index + 1]?.focus();
@@ -246,7 +252,7 @@ const CreateAccount = () => {
     if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
       const newPass = [...otp];
       newPass[index - 1] = '';
-      dispatch(setCompanyProfileData({otp: newPass}));
+      dispatch(setCompanyProfileData({ otp: newPass }));
       inputRefsOtp.current[index - 1]?.focus();
     }
   };
@@ -510,6 +516,14 @@ const CreateAccount = () => {
     }
   };
 
+  const debouncedGetAddressList = useCallback(
+    debounce(async text => {
+      const result = await getAddressList(text);
+      setSuggestions(result?.slice(0, 5) || []);
+    }, 500),
+    [],
+  );
+
   const renderStep = () => {
     switch (companyRegistrationStep || 1) {
       case 1:
@@ -521,7 +535,7 @@ const CreateAccount = () => {
               </Text>
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{maxHeight: hp(350), marginTop: hp(15)}}>
+                style={{ maxHeight: hp(350), marginTop: hp(15) }}>
                 <CustomDropdown
                   data={
                     (businessTypes as any)?.data?.types?.map((item: any) => ({
@@ -613,7 +627,7 @@ const CreateAccount = () => {
                       paddingVertical: hp(10),
                       paddingHorizontal: wp(14),
                     }}
-                    textStyle={{fontSize: 14}}
+                    textStyle={{ fontSize: 14 }}
                   />
                 </View>
               )}
@@ -660,7 +674,7 @@ const CreateAccount = () => {
                 />
                 <TouchableOpacity
                   onPress={() => setShowTooltip(!showTooltip)}
-                  style={{marginLeft: wp(8)}}>
+                  style={{ marginLeft: wp(8) }}>
                   <Image source={IMAGES.info} style={styles.iBtn} />
                 </TouchableOpacity>
                 {showTooltip && (
@@ -711,13 +725,13 @@ const CreateAccount = () => {
                   placeholderTextColor={colors._7B7878}
                   onChangeText={handleEmailChange}
                   value={companyRegisterData?.email}
-                  inputStyle={[styles.input1, {textTransform: 'lowercase'}]}
-                  containerStyle={[styles.Inputcontainer, {flex: 1}]}
+                  inputStyle={[styles.input1, { textTransform: 'lowercase' }]}
+                  containerStyle={[styles.Inputcontainer, { flex: 1 }]}
                 />
 
                 <TouchableOpacity
                   onPress={() => setShowTooltip(!showTooltip)}
-                  style={{marginLeft: wp(8)}}>
+                  style={{ marginLeft: wp(8) }}>
                   <Image source={IMAGES.info} style={styles.iBtn} />
                 </TouchableOpacity>
                 {showTooltip && (
@@ -733,7 +747,7 @@ const CreateAccount = () => {
 
               {validationMsg.length > 0 && (
                 <Text
-                  style={[styles.validTxt, {color: isValid ? 'green' : 'red'}]}>
+                  style={[styles.validTxt, { color: isValid ? 'green' : 'red' }]}>
                   {validationMsg}
                 </Text>
               )}
@@ -781,7 +795,7 @@ const CreateAccount = () => {
                 inputStyle={[styles.input1, AppStyles.flex]}
                 showRightIcon
                 isPassword
-                imgStyle={{tintColor: '#1C1B1F'}}
+                imgStyle={{ tintColor: '#1C1B1F' }}
                 containerStyle={styles.passwordContiner}
                 onShow={e => setVisible(e)}
               />
@@ -816,11 +830,11 @@ const CreateAccount = () => {
                   label={
                     <Text style={styles.txt}>
                       I agree to the{' '}
-                      <Text style={styles.linkedTxt} onPress={() => {}}>
+                      <Text style={styles.linkedTxt} onPress={() => { }}>
                         Terms & Conditions
                       </Text>{' '}
                       and{' '}
-                      <Text style={styles.linkedTxt} onPress={() => {}}>
+                      <Text style={styles.linkedTxt} onPress={() => { }}>
                         Privacy Policy
                       </Text>
                     </Text>
@@ -867,15 +881,15 @@ const CreateAccount = () => {
                 countryCode={companyRegisterData?.countryCode}
                 callingCode={companyRegisterData?.phone_code}
                 placeholder={t('Enter your phone')}
-                phoneStyle={{color: colors._0B3970}}
-                callingCodeStyle={{color: colors._0B3970}}
+                phoneStyle={{ color: colors._0B3970 }}
+                callingCodeStyle={{ color: colors._0B3970 }}
                 placeholderTextColor={colors._7B7878}
                 phone={companyRegisterData?.phone}
                 downIcon={{
                   tintColor: colors._4A4A4A,
                 }}
                 onPhoneChange={(e: any) =>
-                  dispatch(setCompanyRegisterData({phone: e}))
+                  dispatch(setCompanyRegisterData({ phone: e }))
                 }
                 onCallingCodeChange={(e: any) =>
                   dispatch(
@@ -912,10 +926,10 @@ const CreateAccount = () => {
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
               {timer !== 0 && (
-                <View style={[styles.info_row, {marginTop: hp(19)}]}>
+                <View style={[styles.info_row, { marginTop: hp(19) }]}>
                   <Text style={styles.infotext}>
                     We’ve sent a 4-digit code to your email{' '}
-                    <Text style={{fontWeight: 'bold', color: '_0B3970'}}>
+                    <Text style={{ fontWeight: 'bold', color: '_0B3970' }}>
                       {companyRegisterData?.email || 'your email'}
                     </Text>
                     . Please enter it below.
@@ -933,7 +947,7 @@ const CreateAccount = () => {
                     maxLength={1}
                     style={styles.otpBox1}
                     keyboardType="decimal-pad"
-                    // autoFocus={idx === 0 && otp.every(v => v === '')}
+                  // autoFocus={idx === 0 && otp.every(v => v === '')}
                   />
                 ))}
               </View>
@@ -947,10 +961,9 @@ const CreateAccount = () => {
                     {t('Resend')}
                   </Text>
                 ) : !registerSuccessModal ? (
-                  <View style={[{marginTop: hp(31), alignItems: 'center'}]}>
-                    <Text style={styles.secText}>{`00:${
-                      timer < 10 ? `0${timer}` : timer
-                    }`}</Text>
+                  <View style={[{ marginTop: hp(31), alignItems: 'center' }]}>
+                    <Text style={styles.secText}>{`00:${timer < 10 ? `0${timer}` : timer
+                      }`}</Text>
                     <Text style={styles.secText1}>
                       {t("Didn't receive the code? Resend in")} {timer}
                       {'s'}
@@ -1002,12 +1015,12 @@ const CreateAccount = () => {
                 }}
                 value={companyProfileData?.website}
                 inputStyle={styles.input}
-                containerStyle={[styles.Inputcontainer, {marginTop: hp(20)}]}
+                containerStyle={[styles.Inputcontainer, { marginTop: hp(20) }]}
               />
-              <View style={{marginTop: hp(50)}}>
+              <View style={{ marginTop: hp(50) }}>
                 <Text style={styles.title}>
                   {t('Company size')}{' '}
-                  <Text style={{fontSize: 15}}>{t('(Employees)')}</Text>
+                  <Text style={{ fontSize: 15 }}>{t('(Employees)')}</Text>
                 </Text>
                 {/* <Pressable style={styles.dateRow} onPress={() => {}}>
                   <Text style={styles.dateText}>{selected}</Text>
@@ -1017,7 +1030,7 @@ const CreateAccount = () => {
                 /> */}
                 <ScrollView
                   showsVerticalScrollIndicator={false}
-                  style={{maxHeight: hp(300), marginTop: hp(25)}}>
+                  style={{ maxHeight: hp(300), marginTop: hp(25) }}>
                   <CustomDropdown
                     data={companySize || []}
                     labelField="label"
@@ -1065,24 +1078,20 @@ const CreateAccount = () => {
               <Text style={styles.title}>
                 {t('Confirm your business address')}
               </Text>
-              <View style={[styles.inputIconLabel, {marginTop: hp(60)}]}>
+              <View style={[styles.inputIconLabel, { marginTop: hp(60) }]}>
                 <Text style={styles.label}>{t('Address')}</Text>
                 {/* <Image style={styles.info} source={IMAGES.info} /> */}
               </View>
-              <View style={[styles.row, {marginTop: hp(15)}]}>
+              <View style={[styles.row, { marginTop: hp(15) }]}>
                 <CustomTextInput
                   placeholderTextColor={colors._7B7878}
-                  onChangeText={_ => {
-                    dispatch(
-                      setCompanyProfileData({
-                        address: userInfo?.address,
-                      }),
-                    );
+                  onChangeText={text => {
+                    dispatch(setUserInfo({ ...userInfo, address: text }));
+                    debouncedGetAddressList(text);
                   }}
                   value={userInfo?.address}
                   inputStyle={styles.addressInput}
                   multiline
-                  editable={false}
                   textAlignVertical="top"
                   containerStyle={styles.Inputcontainer}
                 />
@@ -1092,6 +1101,54 @@ const CreateAccount = () => {
                   style={styles.edit}
                 />
               </View>
+
+              {suggestions.length > 0 && (
+                <View style={styles.suggestionContainer}>
+                  <FlatList
+                    data={suggestions}
+                    keyExtractor={item => item.place_id}
+                    renderItem={({ item }) => (
+                      <TouchableWithoutFeedback
+                        onPress={async () => {
+                          try {
+                            const location = await getPlaceDetails(item.place_id);
+                            console.log("🔥 ~ location:", location)
+
+                            if (location) {
+                              dispatch(
+                                setUserInfo({
+                                  ...userInfo,
+                                  address: item.description,
+                                  lat: location?.lat,
+                                  lng: location?.lng,
+                                }),
+                              );
+
+                              dispatch(
+                                setCompanyProfileData({
+                                  address: item.description,
+                                  lat: location?.lat,
+                                  lng: location?.lng,
+                                }),
+                              );
+                            }
+
+                            setSuggestions([]);
+                          } catch (err) {
+                            console.error('Error selecting address:', err);
+                          }
+                        }}>
+                        <View style={styles.suggestionItem}>
+                          <BaseText style={styles.suggestionText}>
+                            {item.structured_formatting.main_text}
+                          </BaseText>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    )}
+                  />
+                </View>
+              )}
+
               <Text style={styles.maplable}>
                 {t('Choose your map location')}
               </Text>
@@ -1151,18 +1208,14 @@ const CreateAccount = () => {
               <View style={styles.titleRow}>
                 <Text style={styles.title}>
                   {t('Describe in few lines about you business e.g.')}
-                  <Text style={{...commonFontStyle(500, 20, colors._0B3970)}}>
+                  <Text style={{ ...commonFontStyle(500, 20, colors._0B3970) }}>
                     {t('Description')}
                   </Text>
                 </Text>
-                {/* <Image
-                  style={[styles.info, {marginLeft: 0}]}
-                  source={IMAGES.info}
-                /> */}
               </View>
-              <View>
+              <View style={{ position: 'relative' }}>
                 <CustomTextInput
-                  placeholder={t('Introduce your company in few lines')}
+                  placeholder={t('Tell job seekers who you are and what you do.')}
                   placeholderTextColor={colors._7B7878}
                   onChangeText={(about: string) => {
                     dispatch(
@@ -1178,11 +1231,22 @@ const CreateAccount = () => {
                   textAlignVertical="top"
                   maxLength={500}
                 />
-                <Text style={styles.characterlanght}>{`${
-                  companyProfileData?.about.length || 0
-                }/500 Characters`}</Text>
+                <Text style={styles.characterlanght}>{`${companyProfileData?.about.length || 0
+                  }/500 Characters`}</Text>
+                <TouchableOpacity
+                  onPress={() => setShowTooltip(!showTooltip)}
+                  style={{ position: 'absolute', right: wp(5), bottom: hp(70) }}>
+                  <Image source={IMAGES.info} style={styles.iBtn} />
+                </TouchableOpacity>
+                {showTooltip && (
+                  <View style={styles.tooltipCase10}>
+                    <Text style={styles.txtColor}>
+                      {'Describe your business to help job seekers understand what you do.'}
+                    </Text>
+                  </View>
+                )}
               </View>
-              <View>
+              {/* <View>
                 <Text style={styles.title}>{t('Mission')}</Text>
                 <CustomTextInput
                   placeholderTextColor={colors._7B7878}
@@ -1194,15 +1258,14 @@ const CreateAccount = () => {
                     );
                   }}
                   value={companyProfileData?.mission}
-                  inputStyle={[styles.coIntroInput, {height: hp(80)}]}
+                  inputStyle={[styles.coIntroInput, { height: hp(80) }]}
                   multiline
                   containerStyle={styles.Inputcontainer}
                   textAlignVertical="top"
                   maxLength={100}
                 />
-                <Text style={styles.characterlanght}>{`${
-                  companyProfileData?.mission.length || 0
-                }/100 Characters`}</Text>
+                <Text style={styles.characterlanght}>{`${companyProfileData?.mission.length || 0
+                  }/100 Characters`}</Text>
               </View>
               <View>
                 <Text style={styles.title}>{t('Values')}</Text>
@@ -1222,191 +1285,229 @@ const CreateAccount = () => {
                   textAlignVertical="top"
                   maxLength={100}
                 />
-                <Text style={styles.characterlanght}>{`${
-                  companyProfileData?.values.length || 0
-                }/100 Characters`}</Text>
-              </View>
+                <Text style={styles.characterlanght}>{`${companyProfileData?.values.length || 0
+                  }/100 Characters`}</Text>
+              </View> */}
             </View>
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Next')}
-              onPress={() => nextStep()}
+              onPress={() => {
+                if (!companyProfileData?.about) {
+                  errorToast(t('Please describe your business.'))
+                  return
+                }
+                nextStep()
+              }}
             />
           </View>
         );
+      // case 11:
+      //   return (
+      //     <View style={styles.innerConrainer}>
+      //       <View style={AppStyles.flex}>
+      //         <Text style={styles.title}>
+      //           {t('Select your industry sectors')}
+      //         </Text>
+      //         <Text style={[styles.title, { marginVertical: hp(33) }]}>
+      //           {t('Your company’s services.')}
+      //         </Text>
+      //         <Pressable
+      //           style={[styles.dateRow, { marginTop: hp(10) }]}
+      //           onPress={() => { }}>
+      //           {serviceSelect?.length ? (
+      //             <Text style={styles.dateText}>
+      //               {serviceSelect.join(', ')}
+      //             </Text>
+      //           ) : (
+      //             <Text style={{ ...commonFontStyle(400, 20, colors._7B7878) }}>
+      //               {'Please select services below'}
+      //             </Text>
+      //           )}
+      //         </Pressable>
+      //         <View style={styles.underline} />
+
+      //         <FlatList
+      //           data={serviceList}
+      //           style={{ maxHeight: hp(300) }}
+      //           contentContainerStyle={{ flexGrow: 1 }}
+      //           showsVerticalScrollIndicator={true}
+      //           keyExtractor={(_, index) => index.toString()}
+      //           renderItem={({ item, index }: any) => {
+      //             const isSelected = serviceSelect.includes(item?.title);
+
+      //             return (
+      //               <TouchableOpacity
+      //                 key={index}
+      //                 style={[
+      //                   styles.optionContainer,
+      //                   isSelected && styles.selectedOptionContainer,
+      //                 ]}
+      //                 onPress={() => {
+      //                   dispatch(
+      //                     setCompanyProfileData({
+      //                       services: services.includes(item?._id)
+      //                         ? services?.filter((i: any) => i !== item?._id)
+      //                         : [...services, item?._id],
+      //                     }),
+      //                   );
+      //                   if (serviceSelect?.includes(item?.title)) {
+      //                     setServiceSelect(
+      //                       serviceSelect?.filter(
+      //                         (i: any) => i !== item?.title,
+      //                       ),
+      //                     );
+      //                   } else {
+      //                     setServiceSelect(prev => [...prev, item?.title]);
+      //                   }
+      //                 }}>
+      //                 <Text
+      //                   style={[
+      //                     styles.optionText,
+      //                     isSelected && styles.selectedText,
+      //                   ]}>
+      //                   {item?.title}
+      //                 </Text>
+      //                 {isSelected && (
+      //                   <Image
+      //                     source={IMAGES.mark}
+      //                     style={{
+      //                       width: 25,
+      //                       height: 22,
+      //                       resizeMode: 'contain',
+      //                       tintColor: colors._4A4A4A,
+      //                     }}
+      //                   />
+      //                 )}
+      //               </TouchableOpacity>
+      //             );
+      //           }}
+      //         />
+      //       </View>
+      //       <GradientButton
+      //         style={styles.btn}
+      //         type="Company"
+      //         title={t('Next')}
+      //         onPress={() => nextStep()}
+      //       />
+      //     </View>
+      //   );
       case 11:
         return (
           <View style={styles.innerConrainer}>
-            <View style={AppStyles.flex}>
-              <Text style={styles.title}>
-                {t('Select your industry sectors')}
-              </Text>
-              <Text style={[styles.title, {marginVertical: hp(33)}]}>
-                {t('Your company’s services.')}
-              </Text>
-              <Pressable
-                style={[styles.dateRow, {marginTop: hp(10)}]}
-                onPress={() => {}}>
-                {serviceSelect?.length ? (
-                  <Text style={styles.dateText}>
-                    {serviceSelect.join(', ')}
-                  </Text>
-                ) : (
-                  <Text style={{...commonFontStyle(400, 20, colors._7B7878)}}>
-                    {'Please select services below'}
-                  </Text>
-                )}
-              </Pressable>
-              <View style={styles.underline} />
-
-              <FlatList
-                data={serviceList}
-                style={{maxHeight: hp(300)}}
-                contentContainerStyle={{flexGrow: 1}}
-                showsVerticalScrollIndicator={true}
-                keyExtractor={(_, index) => index.toString()}
-                renderItem={({item, index}: any) => {
-                  const isSelected = serviceSelect.includes(item?.title);
-
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.optionContainer,
-                        isSelected && styles.selectedOptionContainer,
-                      ]}
-                      onPress={() => {
-                        dispatch(
-                          setCompanyProfileData({
-                            services: services.includes(item?._id)
-                              ? services?.filter((i: any) => i !== item?._id)
-                              : [...services, item?._id],
-                          }),
-                        );
-                        if (serviceSelect?.includes(item?.title)) {
-                          setServiceSelect(
-                            serviceSelect?.filter(
-                              (i: any) => i !== item?.title,
-                            ),
-                          );
-                        } else {
-                          setServiceSelect(prev => [...prev, item?.title]);
-                        }
-                      }}>
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.selectedText,
-                        ]}>
-                        {item?.title}
-                      </Text>
-                      {isSelected && (
-                        <Image
-                          source={IMAGES.mark}
-                          style={{
-                            width: 25,
-                            height: 22,
-                            resizeMode: 'contain',
-                            tintColor: colors._4A4A4A,
-                          }}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </View>
-            <GradientButton
-              style={styles.btn}
-              type="Company"
-              title={t('Next')}
-              onPress={() => nextStep()}
-            />
-          </View>
-        );
-      case 12:
-        return (
-          <View style={styles.innerConrainer}>
             <View>
-              <Text style={styles.title}>
-                {t('Personalise your company profile')}
-              </Text>
-              <TouchableOpacity
-                onPress={() => (setType('logo'), setImageModal(!imageModal))}
-                style={styles.logoConatiner}>
-                <Image
-                  source={
-                    Object.keys(logo)?.length
-                      ? {uri: logo?.uri}
-                      : IMAGES.logoImg
-                  }
-                  style={
-                    Object.keys(logo)?.length
-                      ? {
-                          width: '100%',
-                          height: '100%',
-                          resizeMode: 'cover',
-                          marginVertical: hp(22),
-                        }
-                      : styles.logoImg
-                  }
-                />
-              </TouchableOpacity>
-              {Object.keys(logo)?.length && (
-                <Pressable
-                  onPress={() => {
-                    dispatch(setCompanyProfileData({logo: {}}));
-                  }}
-                  style={styles.closeContainer}>
-                  <Image
-                    tintColor={'red'}
-                    style={styles.close}
-                    source={IMAGES.close_icon}
-                  />
-                </Pressable>
-              )}
-              <Text style={styles.logolabel}>
-                {t(
-                  'Your logo helps job seekers recognise and trust your brand.',
+              <BaseText style={styles.title}>
+                {('Build trust with your company profile')}
+              </BaseText>
+
+              {/* Cover Images Section */}
+              <View style={{ position: 'relative', marginTop: hp(33) }}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Cover Images</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowCoverTooltip(!showCoverTooltip)}
+                    style={{ marginLeft: wp(8) }}>
+                    <Image source={IMAGES.info} style={styles.iBtn} />
+                  </TouchableOpacity>
+                </View>
+
+                {showCoverTooltip && (
+                  <View style={styles.tooltipCase11}>
+                    <Text style={styles.txtColor}>
+                      {'Recommended size: 1200x400px, shows up on your company profile.'}
+                    </Text>
+                  </View>
                 )}
-              </Text>
-              <View style={styles.coverContainer}>
-                {/* Static upload placeholder */}
+
+                <View style={styles.coverContainer}>
+                  <TouchableOpacity
+                    onPress={() => (setType('cover'), setImageModal(true))}
+                    style={styles.uploadPlaceholder}>
+                    <Image
+                      source={IMAGES.uploadImg}
+                      style={{ width: wp(72), height: hp(72) }}
+                    />
+                  </TouchableOpacity>
+
+                  <View style={styles.coverGrid}>
+                    {(cover_images || [])?.map((img: any, index: number) => (
+                      <View style={styles.coverImageWrapper}>
+                        <Image
+                          source={{ uri: img?.uri }}
+                          style={styles.coverImage}
+                        />
+                        <TouchableOpacity
+                          style={styles.closeIcon}
+                          onPress={() => handleRemoveCoverImage(index)}>
+                          <Image
+                            tintColor={'red'}
+                            style={styles.close}
+                            source={IMAGES.close_icon}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                <Text style={styles.logolabel}>
+                  {t('Your cover image showcases your workplace or atmosphere')}
+                </Text>
+              </View>
+
+              {/* Logo Section */}
+              <View style={{ marginTop: hp(20) }}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Company Logo</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowLogoTooltip(!showLogoTooltip)}
+                    style={{ marginLeft: wp(8) }}>
+                    <Image source={IMAGES.info} style={styles.iBtn} />
+                  </TouchableOpacity>
+                </View>
+
+                {showLogoTooltip && (
+                  <View style={styles.tooltipCase11}>
+                    <Text style={styles.txtColor}>
+                      {'Recommended size: 500x500px, PNG or JPG.'}
+                    </Text>
+                  </View>
+                )}
+
                 <TouchableOpacity
-                  onPress={() => (setType('cover'), setImageModal(true))}
-                  style={styles.uploadPlaceholder}>
+                  onPress={() => (setType('logo'), setImageModal(!imageModal))}
+                  style={styles.logoConatiner}>
                   <Image
-                    source={IMAGES.uploadImg}
-                    style={{width: wp(72), height: hp(72)}}
+                    source={
+                      Object.keys(logo)?.length
+                        ? { uri: logo?.uri }
+                        : IMAGES.logoImg
+                    }
+                    style={styles.logoImg}
                   />
                 </TouchableOpacity>
 
-                <View style={styles.coverGrid}>
-                  {(cover_images || [])?.map((img: any, index: number) => (
-                    <View key={index} style={styles.coverImageWrapper}>
-                      <Image
-                        source={{uri: img?.uri}}
-                        style={styles.coverImage}
-                      />
-                      <TouchableOpacity
-                        style={styles.closeIcon}
-                        onPress={() => handleRemoveCoverImage(index)}>
-                        <Image
-                          tintColor={'red'}
-                          style={styles.close}
-                          source={IMAGES.close_icon}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              </View>
+                {Object.keys(logo)?.length && (
+                  <Pressable
+                    onPress={() => {
+                      dispatch(setCompanyProfileData({ logo: {} }));
+                    }}
+                    style={styles.closeContainer}>
+                    <Image
+                      tintColor={'red'}
+                      style={styles.close}
+                      source={IMAGES.close_icon}
+                    />
+                  </Pressable>
+                )}
 
-              <Text style={styles.logolabel}>
-                {t('Your cover image showcases your workplace or atmosphere')}
-              </Text>
+                <Text style={styles.logolabel}>
+                  {t('Your logo helps job seekers recognise and trust your brand.')}
+                </Text>
+              </View>
             </View>
+
             <View>
               <GradientButton
                 style={styles.btn}
@@ -1427,9 +1528,9 @@ const CreateAccount = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top', 'bottom']}}
+      SafeAreaProps={{ edges: ['top', 'bottom'] }}
       colors={['#FFF8E6', '#F3E1B7']}>
-      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <KeyboardAwareScrollView
           enableAutomaticScroll
           // scrollEnabled={false}
@@ -1450,7 +1551,7 @@ const CreateAccount = () => {
                   : prevStep(companyRegistrationStep);
               }}
               hitSlop={8}
-              style={[styles.backBtn, {flex: 1}]}>
+              style={[styles.backBtn, { flex: 1 }]}>
               <Image
                 resizeMode="contain"
                 source={IMAGES.leftSide}
@@ -1471,7 +1572,7 @@ const CreateAccount = () => {
           visible={registerSuccessModal}
           onClose={() => {
             dispatch(setRegisterSuccessModal(false));
-            dispatch(setCompanyProfileData({otp: new Array(4).fill('')}));
+            dispatch(setCompanyProfileData({ otp: new Array(4).fill('') }));
             nextStep();
           }}
           ButtonContainer={
@@ -1762,30 +1863,29 @@ const styles = StyleSheet.create({
     paddingVertical: hp(15),
   },
   logoConatiner: {
-    width: '100%',
+    width: hp(150),
     height: hp(150),
-    marginTop: hp(33),
     overflow: 'hidden',
     borderWidth: hp(1),
-    borderRadius: hp(10),
+    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: hp(150 / 2),
     borderColor: colors._EBDCB8,
     backgroundColor: colors.white,
   },
   logoImg: {
-    width: wp(113),
-    height: wp(113),
-    resizeMode: 'contain',
-    marginVertical: hp(22),
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   logolabel: {
     marginVertical: hp(14),
     ...commonFontStyle(400, 15, colors._050505),
   },
   closeContainer: {
-    top: hp(95),
-    right: wp(-7),
+    top: '20%',
+    right: '30%',
     zIndex: 9999,
     overflow: 'visible',
     borderRadius: hp(100),
@@ -1849,40 +1949,39 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     ...commonFontStyle(400, 18, colors._181818),
   },
-  coverContainer: {
-    backgroundColor: '#fff',
-    padding: wp(10),
-    borderRadius: 8,
-  },
   uploadPlaceholder: {
     width: '100%',
     alignItems: 'center',
     paddingVertical: hp(35),
     justifyContent: 'center',
   },
+  coverContainer: {
+    backgroundColor: '#fff',
+    padding: wp(10),
+    borderRadius: 8,
+    width: '100%',
+  },
   coverGrid: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
     gap: wp(10),
   },
   coverImage: {
-    width: SCREEN_WIDTH / 4.5,
+    width: wp(300),
     height: hp(100),
     borderRadius: 8,
-    marginBottom: hp(10),
     resizeMode: 'cover',
   },
   coverImageWrapper: {
     position: 'relative',
-    marginBottom: hp(10),
   },
   closeIcon: {
     position: 'absolute',
-    top: '-5%',
-    right: '-5%',
+    top: '-10%',
+    right: '-2%',
     width: wp(20),
     height: wp(20),
     borderRadius: wp(10),
@@ -1918,9 +2017,71 @@ const styles = StyleSheet.create({
     marginTop: hp(10),
     fontSize: wp(16),
   },
-  linkedTxt: {color: 'black', textDecorationLine: 'underline'},
+  linkedTxt: { color: 'black', textDecorationLine: 'underline' },
   txt: {
     ...commonFontStyle(500, 12, colors.black),
   },
-  checkBox: {marginTop: hp(20)},
+  checkBox: { marginTop: hp(20) },
+  suggestionContainer: {
+    borderRadius: 10,
+    maxHeight: hp(180),
+    backgroundColor: colors.white,
+  },
+  suggestionItem: {
+    paddingVertical: hp(5),
+    paddingHorizontal: wp(5),
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors._7B7878,
+  },
+  suggestionText: {
+    ...commonFontStyle(500, 16, colors.black),
+  },
+  tooltipCase10: {
+    position: 'absolute',
+    right: wp(25),
+    top: hp(50),
+    backgroundColor: '#FFF3CD',
+    borderRadius: 8,
+    padding: wp(10),
+    borderWidth: hp(1),
+    borderColor: '#7e7251ff',
+    maxWidth: wp(200),
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp(10),
+  },
+  sectionTitle: {
+    ...commonFontStyle(500, 20, colors._0B3970),
+  },
+  tooltipCase11: {
+    position: 'absolute',
+    right: wp(0),
+    top: hp(35),
+    backgroundColor: '#FFF3CD',
+    borderRadius: 8,
+    padding: wp(10),
+    borderWidth: hp(1),
+    borderColor: '#7e7251ff',
+    maxWidth: wp(250),
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
 });

@@ -8,19 +8,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useMemo, useState, useCallback} from 'react';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
   LinearContainer,
   ParallaxContainer,
   ShareModal,
 } from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
-import {useAppDispatch} from '../../../redux/hooks';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import { useAppDispatch } from '../../../redux/hooks';
 import {
   setCompanyProfileAllData,
   setCompanyProfileData,
@@ -33,25 +33,26 @@ import {
   useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
-import {useNavigation} from '@react-navigation/native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from '../../../component/common/CustomImage';
+import ExpandableText from '../../../component/common/ExpandableText';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
 const CompanyProfile = () => {
-  const {data: JobData} = useGetCompanyJobsQuery({});
+  const { data: JobData } = useGetCompanyJobsQuery({});
   const jobsList = JobData?.data?.jobs;
 
-  const {companyProfileData, companyProfileAllData, userInfo} = useSelector(
+  const { companyProfileData, companyProfileAllData, userInfo } = useSelector(
     (state: RootState) => state.auth,
   );
 
-  const {data: getPost} = useGetCompanyPostsQuery({});
+  const { data: getPost } = useGetCompanyPostsQuery({});
   const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
-  const {data} = useGetProfileQuery();
+  const { data } = useGetProfileQuery();
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
 
@@ -82,7 +83,7 @@ const CompanyProfile = () => {
       })
       .map((img: any) => {
         if (typeof img === 'string') {
-          return {uri: img};
+          return { uri: img };
         }
         return img;
       });
@@ -99,7 +100,7 @@ const CompanyProfile = () => {
     if (!state?.routes || state.routes.length < 2) {
       navigation.reset({
         index: 0,
-        routes: [{name: SCREENS.CoTabNavigator as never}],
+        routes: [{ name: SCREENS.CoTabNavigator as never }],
       });
       return;
     }
@@ -113,7 +114,7 @@ const CompanyProfile = () => {
     } else {
       navigation.reset({
         index: 0,
-        routes: [{name: SCREENS.CoTabNavigator as never}],
+        routes: [{ name: SCREENS.CoTabNavigator as never }],
       });
     }
   }, [navigation]);
@@ -123,7 +124,7 @@ const CompanyProfile = () => {
   }, []);
 
   const renderPostItem = useCallback(
-    ({item}: {item: any}) => (
+    ({ item }: { item: any }) => (
       <CustomPostCard title={item?.title} image={item?.images} />
     ),
     [],
@@ -137,7 +138,7 @@ const CompanyProfile = () => {
         <Text
           style={[
             commonFontStyle(500, 16, colors._3D3D3D),
-            {textAlign: 'center', marginTop: hp(20)},
+            { textAlign: 'center', marginTop: hp(20) },
           ]}>
           No Jobs Found
         </Text>
@@ -146,7 +147,7 @@ const CompanyProfile = () => {
 
     return jobsList?.map((item: any, index: number) => (
       <ScrollView
-        style={{marginBottom: hp(15)}}
+        style={{ marginBottom: hp(15) }}
         key={`job-${item.id || index}`}>
         <MyJobCard
           item={item}
@@ -166,13 +167,13 @@ const CompanyProfile = () => {
 
   return (
     <SafeAreaView
-      style={{flex: 1, backgroundColor: colors._F3E1B7}}
+      style={{ flex: 1, backgroundColor: colors._F3E1B7 }}
       edges={['bottom']}>
       <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
         <Image source={IMAGES.backArrow} style={styles.backArrow} />
       </TouchableOpacity>
       <ScrollView
-        contentContainerStyle={{paddingBottom: hp(40)}}
+        contentContainerStyle={{ paddingBottom: hp(40) }}
         showsVerticalScrollIndicator={false}>
         <ParallaxContainer
           imagePath={coverImages}
@@ -181,7 +182,7 @@ const CompanyProfile = () => {
           showLoader={shouldShowCoverLoader}
           loaderColor={colors._0B3970}>
           <LinearContainer
-            SafeAreaProps={{edges: ['bottom']}}
+            SafeAreaProps={{ edges: ['bottom'] }}
             containerStyle={styles.linearContainer}
             colors={['#FFF8E6', '#F3E1B7']}>
             <View style={styles.profileHeader}>
@@ -191,30 +192,43 @@ const CompanyProfile = () => {
                     ? companyProfileData?.logo
                     : 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png'
                 }
-                imageStyle={{height: '100%', width: '100%'}}
+                imageStyle={{ height: '100%', width: '100%' }}
                 containerStyle={styles.logoContainer}
                 resizeMode="cover"
               />
 
               <View style={styles.titleTextContainer}>
                 <Text style={styles.companyName}>
-                  {companyProfileData?.company_name || 'N/A'}
+                  {companyProfileData?.company_name
+                    ? companyProfileData.company_name
+                      .split(' ')
+                      .map(word =>
+                        /[A-Z]/.test(word.slice(1))
+                          ? word
+                          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                      )
+                      .join(' ')
+                    : 'N/A'}
                 </Text>
+
                 {companyProfileData?.mission && (
                   <Text style={styles.tagline}>
                     {companyProfileData?.mission || 'N/A'}
                   </Text>
                 )}
-                <Text style={styles.industry}>
+                {/* <Text style={styles.industry}>
                   {companyProfileData?.address || 'N/A'}
-                </Text>
+                </Text> */}
               </View>
             </View>
 
             {companyProfileData?.about && (
-              <Text style={styles.description}>
-                {companyProfileData?.about || 'N/A'}
-              </Text>
+              <ExpandableText
+                maxLines={3}
+                showStyle={{ paddingHorizontal: 0 }}
+                descriptionStyle={styles.description}
+                description={companyProfileData?.about || 'N/A'}
+              />
             )}
 
             {companyProfileData?.values && (
@@ -250,15 +264,15 @@ const CompanyProfile = () => {
               <FlatList
                 numColumns={2}
                 data={allPosts}
-                style={{marginTop: hp(10)}}
+                style={{ marginTop: hp(10) }}
                 renderItem={renderPostItem}
                 keyExtractor={item => `post-${item.id}`}
-                columnWrapperStyle={{justifyContent: 'space-between'}}
+                columnWrapperStyle={{ justifyContent: 'space-between' }}
                 ListEmptyComponent={() => (
                   <Text
                     style={[
                       commonFontStyle(500, 16, colors._3D3D3D),
-                      {textAlign: 'center', marginTop: hp(20)},
+                      { textAlign: 'center', marginTop: hp(20) },
                     ]}>
                     No Posts Found
                   </Text>
@@ -307,8 +321,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoContainer: {
-    width: wp(82),
-    height: wp(82),
+    width: wp(90),
+    height: wp(90),
     borderRadius: 100,
     overflow: 'hidden',
   },

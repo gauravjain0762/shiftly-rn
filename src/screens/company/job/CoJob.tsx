@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -14,38 +14,38 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../../theme/fonts';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, SCREEN_WIDTH, wp } from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import MyJobCard from '../../../component/common/MyJobCard';
-import {errorToast, goBack, navigateTo} from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
+import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
-import {Dropdown} from 'react-native-element-dropdown';
-import {useGetCompanyJobsQuery} from '../../../api/dashboardApi';
+import { Dropdown } from 'react-native-element-dropdown';
+import { useGetCompanyJobsQuery } from '../../../api/dashboardApi';
 import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   resetJobFormState,
   setFilters,
   resetFilters,
 } from '../../../features/companySlice';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 const jobTypes = [
-  {label: 'Full Time', value: 'Full Time'},
-  {label: 'Part Time', value: 'Part Time'},
-  {label: 'Freelance', value: 'Freelance'},
-  {label: 'Internship', value: 'Internship'},
-  {label: 'Temporary', value: 'Temporary'},
+  { label: 'Full Time', value: 'Full Time' },
+  { label: 'Part Time', value: 'Part Time' },
+  { label: 'Freelance', value: 'Freelance' },
+  { label: 'Internship', value: 'Internship' },
+  { label: 'Temporary', value: 'Temporary' },
 ];
 export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
 
 const CoJob = () => {
-  const {t} = useTranslation<any>();
+  const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
 
@@ -67,8 +67,9 @@ const CoJob = () => {
     setLocation(filters.location || '');
   }, [filters]);
 
-  const {data, isLoading, refetch} = useGetCompanyJobsQuery(filters);
+  const { data, isLoading, refetch } = useGetCompanyJobsQuery(filters);
   const [jobs, setJobs] = useState<any[]>([]);
+  console.log("🔥 ~ CoJob ~ jobs:", jobs)
 
   useFocusEffect(
     useCallback(() => {
@@ -107,6 +108,25 @@ const CoJob = () => {
     setIsFilterModalVisible(false);
   };
 
+  const renderPostJobButton = () => {
+    return <LinearGradient
+      colors={['#024AA1', '#041428']}
+      style={styles.gradient}>
+      <TouchableOpacity
+        activeOpacity={0.5}
+        onPress={() => {
+          dispatch(resetJobFormState());
+          navigateTo(SCREENS.PostJob);
+        }}
+        style={styles.postJobButton}>
+        <View style={styles.plusIconContainer}>
+          <Image source={IMAGES.pluse} style={styles.plusIcon} />
+        </View>
+        <Text style={styles.postJobText}>{t('Post Job')}</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+  }
+
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       <View style={styles.header}>
@@ -125,22 +145,7 @@ const CoJob = () => {
         </View>
 
         <View style={styles.rightSection}>
-          <LinearGradient
-            colors={['#024AA1', '#041428']}
-            style={styles.gradient}>
-            <TouchableOpacity
-              activeOpacity={0.5}
-              onPress={() => {
-                dispatch(resetJobFormState());
-                navigateTo(SCREENS.PostJob);
-              }}
-              style={styles.postJobButton}>
-              <View style={styles.plusIconContainer}>
-                <Image source={IMAGES.pluse} style={styles.plusIcon} />
-              </View>
-              <Text style={styles.postJobText}>{t('Post Job')}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {renderPostJobButton()}
 
           {data && (
             <Pressable
@@ -168,8 +173,8 @@ const CoJob = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
             keyExtractor={(_, index) => index.toString()}
-            renderItem={({item, index}) => (
-              <View key={index} style={{marginBottom: hp(10)}}>
+            renderItem={({ item, index }) => (
+              <View key={index} style={{ marginBottom: hp(10) }}>
                 <MyJobCard
                   item={item}
                   onPressShare={() => setIsShareModalVisible(true)}
@@ -181,13 +186,14 @@ const CoJob = () => {
             refreshing={isLoading}
             ListEmptyComponent={() => (
               <View style={styles.emptyContainer}>
+                {renderPostJobButton()}
                 <Text style={styles.emptyText}>
                   {filters?.location ||
-                  filters?.job_types ||
-                  filters?.salary_from !== 1000 ||
-                  filters?.salary_to !== 50000
+                    filters?.job_types ||
+                    filters?.salary_from !== 1000 ||
+                    filters?.salary_to !== 50000
                     ? 'No filtered jobs found'
-                    : 'There is no job posted yet'}
+                    : 'Create your first job to start hiring talent.'}
                 </Text>
               </View>
             )}
@@ -240,7 +246,7 @@ const CoJob = () => {
               onPress={handleApplyFilter}
             />
             <Pressable style={styles.resetButton} onPress={handleResetFilters}>
-              <Text style={{...commonFontStyle(600, 18, colors._4D4D4D)}}>
+              <Text style={{ ...commonFontStyle(600, 18, colors._4D4D4D) }}>
                 {'Reset Filters'}
               </Text>
             </Pressable>
@@ -400,8 +406,10 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
+    gap: hp(10),
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: wp(5),
   },
   emptyText: {
     textAlign: 'center',

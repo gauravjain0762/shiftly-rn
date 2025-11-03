@@ -1,18 +1,36 @@
 import React from 'react';
-import {Image, Linking, StyleSheet, Text, View} from 'react-native';
+import { Image, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import {AppStyles} from '../../theme/appStyles';
-import {IMAGES} from '../../assets/Images';
+import { AppStyles } from '../../theme/appStyles';
+import { IMAGES } from '../../assets/Images';
 import LocationContainer from './LocationContainer';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
 
 type Props = {
   companyProfileData?: any;
   companyProfileAllData?: any;
 };
 
-const CoAboutTab = ({companyProfileData}: Props) => {
+const CoAboutTab = ({ companyProfileData }: Props) => {
+
+  const openInMaps = (lat, lng, address) => {
+    if (!lat || !lng) return;
+
+    const encodedAddress = encodeURIComponent(address || '');
+    let url = '';
+
+    if (Platform.OS === 'ios') {
+      url = `http://maps.apple.com/?ll=${lat},${lng}&q=${encodedAddress}`;
+    } else {
+      url = `geo:${lat},${lng}?q=${lat},${lng}(${encodedAddress})`;
+    }
+
+    Linking.openURL(url).catch(err =>
+      console.error('Failed to open maps:', err),
+    );
+  };
+
   return (
     <View>
       <View style={styles.infoRow}>
@@ -57,12 +75,20 @@ const CoAboutTab = ({companyProfileData}: Props) => {
       </View> */}
 
       {companyProfileData && (
-        <LocationContainer
-          containerStyle={styles.map}
-          lat={companyProfileData?.lat}
-          lng={companyProfileData?.lng}
-          address={companyProfileData?.address}
-        />
+        <Pressable onPress={() => {
+          openInMaps(
+            companyProfileData?.lat,
+            companyProfileData?.lng,
+            companyProfileData?.address,
+          )
+        }} >
+          <LocationContainer
+            containerStyle={styles.map}
+            lat={companyProfileData?.lat}
+            lng={companyProfileData?.lng}
+            address={companyProfileData?.address}
+          />
+        </Pressable>
       )}
     </View>
   );

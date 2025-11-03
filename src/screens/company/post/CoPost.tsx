@@ -1,18 +1,18 @@
-import React, {useState} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   BackHeader,
   CustomTextInput,
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {useTranslation} from 'react-i18next';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { useTranslation } from 'react-i18next';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {AppStyles} from '../../../theme/appStyles';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { AppStyles } from '../../../theme/appStyles';
 import {
   errorToast,
   goBack,
@@ -20,9 +20,9 @@ import {
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useCreateCompanyPostMutation} from '../../../api/dashboardApi';
-import {useAppDispatch, useAppSelector} from '../../../redux/hooks';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useCreateCompanyPostMutation } from '../../../api/dashboardApi';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import {
   incrementCoPostSteps,
   resetPostFormState,
@@ -35,7 +35,7 @@ import ExpandableText from '../../../component/common/ExpandableText';
 import CharLength from '../../../component/common/CharLength';
 
 const CoPost = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [companyPost] = useCreateCompanyPostMutation();
   const steps = useAppSelector((state: any) => state.company.coPostSteps);
@@ -47,7 +47,7 @@ const CoPost = () => {
     title,
     isPostUploading,
   } = useAppSelector(state => selectPostForm(state as any));
-  const {updatePostForm} = usePostFormUpdater();
+  const { updatePostForm } = usePostFormUpdater();
 
   const nextStep = () => dispatch(setCoPostSteps(steps + 1));
 
@@ -56,7 +56,7 @@ const CoPost = () => {
   };
 
   const resetUploadImages = () => {
-    updatePostForm({uploadedImages: []});
+    updatePostForm({ uploadedImages: [] });
     dispatch(setCoPostSteps(1));
   };
 
@@ -76,7 +76,7 @@ const CoPost = () => {
         };
         console.log(data, 'handleUploadPost datadatadata >>>>>>>>');
 
-        updatePostForm({isPostUploading: true});
+        updatePostForm({ isPostUploading: true });
 
         const formData = new FormData();
         formData.append('title', title.trim());
@@ -91,14 +91,14 @@ const CoPost = () => {
         console.log(response, 'response----companyPost');
         if (response?.status) {
           successToast(response?.message);
-          updatePostForm({isPostModalVisible: true});
+          updatePostForm({ isPostModalVisible: true });
         }
       }
     } catch (e: any) {
       console.error('handleUploadPost error', e);
       errorToast(e?.data?.message);
     } finally {
-      updatePostForm({isPostUploading: false});
+      updatePostForm({ isPostUploading: false });
     }
   };
 
@@ -119,7 +119,7 @@ const CoPost = () => {
     const updatedImages =
       uploadedImages.length > 0 ? [imageObject] : [imageObject];
 
-    updatePostForm({uploadedImages: updatedImages});
+    updatePostForm({ uploadedImages: updatedImages });
 
     setTimeout(() => {
       setImageModal(false);
@@ -142,14 +142,14 @@ const CoPost = () => {
     switch (steps || 1) {
       case 1:
         return (
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             {uploadedImages?.length < 1 && (
               <BackHeader
                 onBackPress={goBack}
                 type="company"
                 title=""
                 isRight={false}
-                containerStyle={{paddingHorizontal: wp(33), marginTop: hp(15)}}
+                containerStyle={{ paddingHorizontal: wp(33), marginTop: hp(15) }}
               />
             )}
 
@@ -162,13 +162,13 @@ const CoPost = () => {
                 <TouchableOpacity onPress={resetUploadImages}>
                   <Image
                     source={IMAGES.close}
-                    style={[styles.close, {marginVertical: hp(30)}]}
+                    style={[styles.close, { marginVertical: hp(30) }]}
                   />
                 </TouchableOpacity>
               )}
               {uploadedImages?.length > 0 ? (
                 <Image
-                  source={{uri: uploadedImages[0]?.uri}}
+                  source={{ uri: uploadedImages[0]?.uri }}
                   style={styles.uploadImg}
                 />
               ) : (
@@ -231,17 +231,17 @@ const CoPost = () => {
               </View>
               <CustomTextInput
                 value={title}
-                maxLength={50}
+                maxLength={60}
                 inputStyle={styles.input1}
                 placeholderTextColor={colors._7B7878}
                 placeholder={t('Enter the post title')}
-                onChangeText={(e: any) => updatePostForm({title: e})}
+                onChangeText={(e: any) => updatePostForm({ title: e })}
                 containerStyle={[styles.Inputcontainer, postInputContainer]}
               />
               <CharLength
-                chars={50}
+                chars={60}
                 value={title}
-                style={{paddingHorizontal: wp(30)}}
+                style={{ paddingHorizontal: wp(30) }}
               />
             </View>
             <GradientButton
@@ -280,7 +280,7 @@ const CoPost = () => {
                   }
                 />
                 <Text style={styles.createPost}>
-                  {t('Would you like to add a short description?')}
+                  {t('What do you want to share with job seekers?')}
                 </Text>
               </View>
               <CustomTextInput
@@ -288,18 +288,18 @@ const CoPost = () => {
                 value={description}
                 placeholderTextColor={colors._7B7878}
                 placeholder={t('Enter the description')}
-                onChangeText={(e: any) => updatePostForm({description: e})}
-                inputStyle={[styles.input1, {maxHeight: hp(180)}]}
+                onChangeText={(e: any) => updatePostForm({ description: e })}
+                inputStyle={[styles.input1, { maxHeight: hp(180) }]}
                 containerStyle={[
                   styles.Inputcontainer,
-                  {marginTop: hp(65), marginHorizontal: wp(35)},
+                  { marginTop: hp(65), marginHorizontal: wp(35) },
                 ]}
                 maxLength={200}
               />
               <CharLength
                 chars={200}
                 value={description}
-                style={{paddingHorizontal: wp(30)}}
+                style={{ paddingHorizontal: wp(30) }}
               />
             </View>
             <GradientButton
@@ -332,23 +332,25 @@ const CoPost = () => {
                       }}>
                       <Image
                         source={IMAGES.close}
-                        style={[styles.close, {marginVertical: hp(20)}]}
+                        style={[styles.close, { marginVertical: hp(20) }]}
                       />
                     </TouchableOpacity>
                   }
                 />
-                <Text style={styles.post}>{title}</Text>
+                <Text style={[styles.post, {
+                  ...commonFontStyle(600, 22, colors._181818),
+                }]}>{title}</Text>
               </View>
               {hasValidImage() && (
                 <Image
-                  source={{uri: uploadedImages[0]?.uri}}
-                  style={[styles.uploadImg, {marginTop: hp(20)}]}
+                  source={{ uri: uploadedImages[0]?.uri }}
+                  style={[styles.uploadImg, { marginTop: hp(20) }]}
                 />
               )}
               <ExpandableText
                 descriptionStyle={[
                   styles.post,
-                  {marginHorizontal: wp(26), marginTop: hp(20)},
+                  { marginHorizontal: wp(26), marginTop: hp(20) },
                 ]}
                 description={description}
                 maxLines={5}
@@ -363,7 +365,7 @@ const CoPost = () => {
               style={styles.btn}
               disabled={isPostUploading}
               onPress={handleUploadPost}
-              title={t(isPostUploading ? 'Creating...' : 'Create Post')}
+              title={t('Publish Post')}
             />
           </View>
         );
@@ -398,7 +400,7 @@ const CoPost = () => {
       <BottomModal
         visible={isPostModalVisible}
         backgroundColor={colors._FAEED2}
-        onClose={() => {}}>
+        onClose={() => { }}>
         <View style={styles.modalIconWrapper}>
           <Image
             source={IMAGES.check}

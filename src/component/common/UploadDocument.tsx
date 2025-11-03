@@ -1,57 +1,62 @@
 import React from 'react';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
-
-import DocumentPicker from 'react-native-document-picker';
-import {IMAGES} from '../../assets/Images';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { pick, types, isErrorWithCode } from '@react-native-documents/picker';
+import { IMAGES } from '../../assets/Images';
 import BaseText from './BaseText';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
 
 type Props = {
   value: any;
-  onSelect?: (text: any) => void;
-  title?: any;
+  onSelect?: (file: any) => void;
+  title?: string;
 };
 
-const UploadDocument = ({value, onSelect = () => {}, title}: Props) => {
+const UploadDocument = ({ value, onSelect = () => {}, title }: Props) => {
   const openDocPicker = async () => {
     try {
-      const pickerResult = await DocumentPicker.pickSingle({
+      const result = await pick({
         presentationStyle: 'fullScreen',
         type: [
-          DocumentPicker.types.doc,
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.images,
-          DocumentPicker.types.zip,
-          DocumentPicker.types.docx,
-          DocumentPicker.types.ppt,
-          DocumentPicker.types.pptx,
-          DocumentPicker.types.xls,
-          DocumentPicker.types.xlsx,
-          DocumentPicker.types.plainText,
+          types.doc,
+          types.docx,
+          types.pdf,
+          types.images,
+          types.zip,
+          types.ppt,
+          types.pptx,
+          types.xls,
+          types.xlsx,
+          types.plainText,
         ],
       });
-      console.log('pickerResult', pickerResult);
-      const newFile = {
-        uri: pickerResult.uri,
-        name: pickerResult.name,
-        type: pickerResult.type,
+
+      if (!result?.uri) return;
+
+      const file = {
+        uri: result.uri,
+        name: result.name ?? 'Document',
+        type: result.type ?? 'application/octet-stream',
       };
-      onSelect(newFile);
-    } catch (e) {
-      console.log('error--', e);
+
+      console.log('📄 File selected:', file);
+      onSelect(file);
+    } catch (e: any) {
+      if (isErrorWithCode(e) && e.code === 'DOCUMENTS_PICKER_CANCELED') {
+        console.log('User canceled document picker');
+      } else {
+        console.error('❌ Document picker error:', e);
+      }
     }
   };
 
   return (
-    <TouchableOpacity
-      style={styles.innerUploadView}
-      onPress={() => openDocPicker()}>
+    <TouchableOpacity style={styles.innerUploadView} onPress={openDocPicker}>
       {value ? (
-        value?.type.includes('image') ? (
+        value?.type?.includes('image') ? (
           <Image
             style={styles.uploadMultiImagePic}
-            source={{uri: value?.uri || ''}}
+            source={{ uri: value.uri }}
           />
         ) : (
           <Image style={styles.pdfIcon} source={IMAGES.pdfIcon} />
@@ -61,7 +66,7 @@ const UploadDocument = ({value, onSelect = () => {}, title}: Props) => {
           <View style={styles.boxContainer}>
             <Image
               style={styles.uploadImage}
-              source={value ? {uri: value.path} : IMAGES.upload}
+              source={IMAGES.upload}
             />
           </View>
           <BaseText style={styles.uploadText} text={title} />
@@ -112,7 +117,6 @@ const styles = StyleSheet.create({
   uploadText: {
     ...commonFontStyle(500, 1.8, colors._525252),
   },
-
   pdfIcon: {
     height: hp(50),
     width: hp(50),

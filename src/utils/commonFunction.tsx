@@ -1,15 +1,15 @@
 import Toast from 'react-native-toast-message';
-import {navigationRef} from '../navigation/RootContainer';
-import {CommonActions} from '@react-navigation/native';
+import { navigationRef } from '../navigation/RootContainer';
+import { CommonActions } from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
 import moment from 'moment';
 
 export const successToast = (message: string) => {
-  Toast.show({type: 'success', text1: message});
+  Toast.show({ type: 'success', text1: message });
 };
 
 export const errorToast = (message: string) => {
-  Toast.show({type: 'error', text1: message});
+  Toast.show({ type: 'error', text1: message });
 };
 
 export const emailCheck = (email: string) => {
@@ -95,9 +95,9 @@ export const resetNavigation = (
         name: parentRouteName,
         state: childRouteName
           ? {
-              index: 0,
-              routes: [{name: childRouteName, params}],
-            }
+            index: 0,
+            routes: [{ name: childRouteName, params }],
+          }
           : undefined,
         params: !childRouteName ? params : undefined,
       },
@@ -116,7 +116,7 @@ export const goBack = () => {
 type ImagePickerProps = {
   params?: object;
   onSucess: (params: object) => void;
-  onFail?: (params: {message: string}) => void | undefined;
+  onFail?: (params: { message: string }) => void | undefined;
 };
 export const openImagePicker = ({
   params,
@@ -142,7 +142,7 @@ export const openImagePicker = ({
       .catch(err => {
         onFail?.(err);
       });
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const getImageUrl = (imagePath: string | null): string | null => {
@@ -156,6 +156,22 @@ export const getImageUrl = (imagePath: string | null): string | null => {
 
 export const IMAGE_URL =
   'https://images.unsplash.com/photo-1750912228794-92ec92276a50?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDV8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D';
+
+export const getPostedTime = (isoDate: string) => {
+  if (!isoDate) return '';
+
+  const now = moment();
+  const postDate = moment(isoDate);
+
+  const diffInDays = now.diff(postDate, 'days');
+
+  if (diffInDays === 0) return 'today';
+  if (diffInDays === 1) return '1 day ago';
+  if (diffInDays < 30) return `${diffInDays} days ago`;
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} month${diffInDays >= 60 ? 's' : ''} ago`;
+
+  return `${Math.floor(diffInDays / 365)} year${diffInDays >= 730 ? 's' : ''} ago`;
+};
 
 export const getTimeAgo = (createdAt: string): string => {
   const createdDate = new Date(createdAt);
@@ -174,7 +190,7 @@ export const getTimeAgo = (createdAt: string): string => {
 };
 
 export const passwordRules = [
-  {label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8},
+  { label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8 },
   {
     label: 'At least 1 uppercase letter',
     test: (pw: string) => /[A-Z]/.test(pw),
@@ -183,7 +199,7 @@ export const passwordRules = [
     label: 'At least 1 lowercase letter',
     test: (pw: string) => /[a-z]/.test(pw),
   },
-  {label: 'At least 1 number', test: (pw: string) => /\d/.test(pw)},
+  { label: 'At least 1 number', test: (pw: string) => /\d/.test(pw) },
   {
     label: 'At least 1 special character (e.g. @, #, $, !)',
     test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw),

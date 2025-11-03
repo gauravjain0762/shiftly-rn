@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -16,42 +16,53 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {IMAGES} from '../../../assets/Images';
-import {useTranslation} from 'react-i18next';
-import {colors} from '../../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { useTranslation } from 'react-i18next';
+import { colors } from '../../../theme/colors';
 import ApplicantCard from '../../../component/common/ApplicantCard';
 import {
   useAddShortlistEmployeeMutation,
   useGetCompanyJobDetailsQuery,
   useUnshortlistEmployeeMutation,
 } from '../../../api/dashboardApi';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import {
   errorToast,
+  getPostedTime,
   navigateTo,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useDispatch} from 'react-redux';
-import {setJobFormState} from '../../../features/companySlice';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useDispatch } from 'react-redux';
+import { setJobFormState } from '../../../features/companySlice';
 import moment from 'moment';
 import BaseText from '../../../component/common/BaseText';
+import ExpandableText from '../../../component/common/ExpandableText';
+import {
+  Briefcase,
+  Wallet,
+  CalendarDays,
+  Timer,
+  Building2,
+  Users,
+} from 'lucide-react-native';
 
-const Tabs = ['Applicants', 'Invited', 'Shortlisted'];
+const Tabs = ['Applicants', 'Invited', 'Shortlisted', 'Suggested Matches (AI)'];
 
 const CoJobDetails = () => {
-  const {t} = useTranslation();
-  const {params} = useRoute<any>();
+  const { t } = useTranslation();
+  const { params } = useRoute<any>();
   const dispatch = useDispatch();
   const job_id = params?._id as any;
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-  const {data, refetch, isLoading} = useGetCompanyJobDetailsQuery(job_id);
+  const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const jobDetail = data?.data;
+  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
 
   useFocusEffect(
     useCallback(() => {
@@ -59,17 +70,42 @@ const CoJobDetails = () => {
     }, [refetch]),
   );
 
-  const JobDetailsArr = {
-    'Job Type': jobDetail?.job_type,
-    Salary: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
-    'Expiry Date':
-      jobDetail?.expiry_date !== null
-        ? moment(jobDetail?.expiry_date).format('D MMMM')
-        : '-',
-    Duration: jobDetail?.duration,
-    'Job Industry': jobDetail?.job_sector,
-    Vacancy: jobDetail?.no_positions,
-  };
+  const JobDetailsArr = [
+    {
+      key: 'Job Type',
+      value: jobDetail?.job_type,
+      icon: <Briefcase size={18} color={colors._0B3970} />,
+    },
+    {
+      key: 'Salary',
+      value: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
+      icon: <Wallet size={18} color={colors._0B3970} />,
+    },
+    {
+      key: 'Expiry Date',
+      value:
+        jobDetail?.expiry_date !== null
+          ? moment(jobDetail?.expiry_date).format('D MMMM')
+          : 'Open until filled',
+      icon: <CalendarDays size={18} color={colors._0B3970} />,
+    },
+    {
+      key: 'Duration',
+      value: jobDetail?.duration,
+      icon: <Timer size={18} color={colors._0B3970} />,
+    },
+    {
+      key: 'Department',
+      value: jobDetail?.job_sector,
+      icon: <Building2 size={18} color={colors._0B3970} />,
+    },
+    {
+      key: 'Vacancy',
+      value: jobDetail?.no_positions,
+      icon: <Users size={18} color={colors._0B3970} />,
+    },
+  ];
+
   const keyValueArray = Object.entries(JobDetailsArr);
 
   const handleShortListEmployee = async (item: any) => {
@@ -113,15 +149,15 @@ const CoJobDetails = () => {
   return (
     <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
       {isLoading ? (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator size={'large'} />
         </View>
       ) : (
         <>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            style={{flex: 1}}
-            contentContainerStyle={{paddingBottom: hp(120)}}>
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: hp(120) }}>
             <BackHeader
               type="company"
               isRight={false}
@@ -144,16 +180,25 @@ const CoJobDetails = () => {
             />
 
             <View style={styles.bodyContainer}>
-              <Text style={styles.jobId}>{`Job ID: ${
-                jobDetail?._id || '-'
-              }`}</Text>
+              {/* <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id || '-'
+                }`}</Text> */}
 
-              <View style={styles.addressContainer}>
-                <Image source={IMAGES.location} style={styles.locationIcon} />
-                <Text style={styles.location}>{jobDetail?.address}</Text>
+              <View style={{ paddingHorizontal: wp(30), flexDirection: 'row', alignItems: 'center', gap: wp(10) }}>
+                <Text style={{ ...commonFontStyle(400, 14, colors.greyOpacity) }}>{getPostedTime(jobDetail?.createdAt)}</Text>
+                <View style={styles.addressContainer}>
+                  <Image source={IMAGES.location} style={styles.locationIcon} />
+                  <Text style={styles.location}>{jobDetail?.address}</Text>
+                </View>
               </View>
 
-              <Text style={styles.description}>{jobDetail?.description}</Text>
+
+              {/* <Text style={styles.description}>{jobDetail?.description}</Text> */}
+              <ExpandableText
+                maxLines={5}
+                description={jobDetail?.description || '-'}
+                descriptionStyle={styles.description}
+                showStyle={{ paddingHorizontal: 0 }}
+              />
 
               <View style={styles.jobDetailsContainer}>
                 <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
@@ -161,27 +206,18 @@ const CoJobDetails = () => {
                 <FlatList
                   numColumns={3}
                   scrollEnabled={false}
-                  data={keyValueArray}
-                  style={styles.flatlist}
+                  data={JobDetailsArr}
                   keyExtractor={(_, index) => index.toString()}
                   contentContainerStyle={styles.flatListContent}
-                  renderItem={({item, index}) => {
-                    const [key, value] = item;
-
-                    return (
-                      <View key={index} style={styles.detailItem}>
-                        <Text style={styles.detailKey}>{key}</Text>
-
-                        <View style={styles.valueWrapper}>
-                          {key === 'Salary' && (
-                            <Image source={IMAGES.currency} />
-                          )}
-                          <Text style={styles.detailValue}>{value || '-'}</Text>
-                        </View>
-                      </View>
-                    );
-                  }}
+                  renderItem={({ item }) => (
+                    <View style={styles.detailItem}>
+                      <View style={styles.iconWrapper}>{item.icon}</View>
+                      <Text style={styles.detailKey}>{item.key}</Text>
+                      <Text style={styles.detailValue}>{item.value || '-'}</Text>
+                    </View>
+                  )}
                 />
+
               </View>
 
               <View style={styles.bottomContainer}>
@@ -300,20 +336,20 @@ const CoJobDetails = () => {
                   job_type:
                     typeof jobDetail?.job_type === 'string'
                       ? {
-                          label: jobDetail?.job_type,
-                          value: jobDetail?.job_type,
-                        }
+                        label: jobDetail?.job_type,
+                        value: jobDetail?.job_type,
+                      }
                       : jobDetail?.job_type,
                   area:
                     typeof jobDetail?.area === 'string'
-                      ? {label: jobDetail?.area, value: jobDetail?.area}
+                      ? { label: jobDetail?.area, value: jobDetail?.area }
                       : jobDetail?.area,
                   duration:
                     typeof jobDetail?.duration === 'string'
                       ? {
-                          label: jobDetail?.duration,
-                          value: jobDetail?.duration,
-                        }
+                        label: jobDetail?.duration,
+                        value: jobDetail?.duration,
+                      }
                       : jobDetail?.duration,
                   expiry_date: moment(jobDetail?.expiry_date).format(
                     'YYYY-MM-DD',
@@ -321,23 +357,23 @@ const CoJobDetails = () => {
                   job_sector:
                     typeof jobDetail?.job_sector === 'string'
                       ? {
-                          label: jobDetail?.job_sector,
-                          value: jobDetail?.job_sector,
-                        }
+                        label: jobDetail?.job_sector,
+                        value: jobDetail?.job_sector,
+                      }
                       : jobDetail?.job_sector,
                   startDate:
                     typeof jobDetail?.start_date === 'string'
                       ? {
-                          label: jobDetail?.start_date,
-                          value: jobDetail?.start_date,
-                        }
+                        label: jobDetail?.start_date,
+                        value: jobDetail?.start_date,
+                      }
                       : jobDetail?.start_date,
                   contract:
                     typeof jobDetail?.contract_type === 'string'
                       ? {
-                          label: jobDetail?.contract_type,
-                          value: jobDetail?.contract_type,
-                        }
+                        label: jobDetail?.contract_type,
+                        value: jobDetail?.contract_type,
+                      }
                       : jobDetail?.contract_type,
                   salary: {
                     label: `${Number(
@@ -389,6 +425,7 @@ const styles = StyleSheet.create({
   },
   title: {
     width: '75%',
+    ...commonFontStyle(700, 24, colors._0B3970),
   },
   iconButton: {
     width: wp(32),
@@ -413,19 +450,18 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors.black),
   },
   addressContainer: {
-    gap: wp(14),
-    marginTop: hp(32),
+    gap: wp(5),
     flexDirection: 'row',
     alignItems: 'center',
   },
   locationIcon: {
-    width: wp(20),
-    height: hp(20),
-    tintColor: colors.black,
+    width: wp(16),
+    height: hp(16),
+    tintColor: colors.greyOpacity,
   },
   location: {
     paddingRight: wp(15),
-    ...commonFontStyle(400, 15, colors.black),
+    ...commonFontStyle(400, 14, colors.greyOpacity),
   },
   description: {
     marginTop: hp(13),
@@ -435,6 +471,7 @@ const styles = StyleSheet.create({
     marginTop: hp(32),
   },
   sectionTitle: {
+    marginBottom: hp(10),
     ...commonFontStyle(600, 20, colors._0B3970),
   },
   flatlist: {
@@ -443,52 +480,61 @@ const styles = StyleSheet.create({
   flatListContent: {
     gap: hp(34),
   },
-  detailItem: {
-    gap: hp(8),
-    width: '34%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // marginHorizontal: wp(10),
-    // width: SCREEN_WIDTH / 4.2,
-  },
   valueWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     // flexWrap: 'wrap',
   },
+  iconWrapper: {
+    width: wp(30),
+    height: hp(30),
+    borderRadius: 8,
+    backgroundColor: '#E7EEF6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: hp(6),
+  },
+  detailItem: {
+    width: '33%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: hp(10),
+  },
   detailKey: {
-    ...commonFontStyle(600, 17, colors._0B3970),
+    ...commonFontStyle(600, 15, colors._0B3970),
     textAlign: 'center',
   },
   detailValue: {
-    ...commonFontStyle(400, 16, colors.black),
+    ...commonFontStyle(400, 14, colors.black),
     textAlign: 'center',
   },
   bottomContainer: {
-    marginTop: hp(48),
+    marginTop: hp(45),
   },
   tabContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: wp(10),
-    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginHorizontal: wp(0),
+    // justifyContent: 'space-between',
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
   },
   tabText: {
-    ...commonFontStyle(600, 17, colors._0B3970),
+    textAlign: 'center',
+    ...commonFontStyle(600, 13, colors._0B3970),
   },
   tabIndicator: {
-    bottom: '-85%',
+    bottom: '-65%',
     height: hp(4),
     width: '50%',
     alignSelf: 'center',
     position: 'absolute',
     borderRadius: hp(20),
     backgroundColor: colors._0B3970,
+    zIndex: 999
   },
   divider: {
     height: 1,

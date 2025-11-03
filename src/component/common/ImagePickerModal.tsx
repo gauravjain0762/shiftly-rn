@@ -10,14 +10,14 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import DocumentPicker from 'react-native-document-picker';
-import {colors} from '../../theme/colors';
-import {hp, wp} from '../../theme/fonts';
+import { pick, types, isErrorWithCode } from '@react-native-documents/picker';
+import { colors } from '../../theme/colors';
+import { hp, wp } from '../../theme/fonts';
 
 const ImagePickerModal = ({
   actionSheet,
-  setActionSheet = () => {},
-  onUpdate = () => {},
+  setActionSheet = () => { },
+  onUpdate = () => { },
   allowDocument = false,
   isGalleryEnable = true,
 }: {
@@ -42,7 +42,7 @@ const ImagePickerModal = ({
             image.sourceURL = image.path;
           }
         }
-        let temp = {...image, name: 'image_' + new Date().getTime() + '.png'};
+        let temp = { ...image, name: 'image_' + new Date().getTime() + '.png' };
         closeActionSheet();
         onUpdate(temp);
 
@@ -75,7 +75,7 @@ const ImagePickerModal = ({
   };
 
   const openDocument = async () => {
-    console.log('opening document>>>>>>');
+    console.log('opening document >>>>>>');
     try {
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
@@ -87,29 +87,31 @@ const ImagePickerModal = ({
         }
       }
 
-      const res = await DocumentPicker.pick({
-        type: [
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.doc,
-          DocumentPicker.types.docx,
-        ],
+      const file = await pick({
+        type: [types.pdf, types.doc, types.docx],
       });
 
-      const file = res[0];
-      console.log('🔥 ~ openDocument ~ file:', file);
+      if (!file?.uri) {
+        console.log('❌ No file selected');
+        return;
+      }
+
       const temp = {
         uri: file.uri,
-        name: file.name,
-        type: file.type,
-        size: file.size,
+        name: file.name ?? 'document',
+        type: file.type ?? 'application/octet-stream',
+        size: file.size ?? 0,
       };
-      closeActionSheet();
-      onUpdate(temp);
-    } catch (err: any) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log('Document picker cancelled');
+
+      console.log('🔥 ~ openDocument ~ file:', temp);
+
+      closeActionSheet?.();
+      onUpdate?.(temp);
+    } catch (err) {
+      if (isErrorWithCode(err) && err.code === 'DOCUMENTS_PICKER_CANCELED') {
+        console.log('📄 Document picker cancelled');
       } else {
-        console.log('Document picker error', err);
+        console.log('❌ Document picker error:', err);
       }
     }
   };
@@ -155,8 +157,8 @@ const ImagePickerModal = ({
 };
 
 const styles = StyleSheet.create({
-  modal: {justifyContent: 'flex-end', margin: 0},
-  container: {padding: wp(16)},
+  modal: { justifyContent: 'flex-end', margin: 0 },
+  container: { padding: wp(16) },
   optionGroup: {
     backgroundColor: colors._FAEED2,
     alignItems: 'center',
@@ -164,8 +166,8 @@ const styles = StyleSheet.create({
     marginBottom: hp(12),
     overflow: 'hidden',
   },
-  optionButton: {paddingVertical: hp(20), alignItems: 'center', width: '100%'},
-  separator: {height: 1, backgroundColor: colors._050505, width: '100%'},
+  optionButton: { paddingVertical: hp(20), alignItems: 'center', width: '100%' },
+  separator: { height: 1, backgroundColor: colors._050505, width: '100%' },
   cancelButton: {
     backgroundColor: colors._FAEED2,
     paddingVertical: hp(18),
@@ -173,8 +175,8 @@ const styles = StyleSheet.create({
     borderRadius: wp(16),
     marginTop: hp(8),
   },
-  text: {color: colors.black, fontSize: wp(16)},
-  cancelText: {fontWeight: '600'},
+  text: { color: colors.black, fontSize: wp(16) },
+  cancelText: { fontWeight: '600' },
 });
 
 export default ImagePickerModal;

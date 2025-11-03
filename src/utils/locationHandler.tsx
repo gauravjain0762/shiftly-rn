@@ -1,8 +1,8 @@
 import Geolocation from '@react-native-community/geolocation';
-import {Alert, Linking, PermissionsAndroid, Platform} from 'react-native';
-import {API} from './apiConstant';
-import {errorToast} from './commonFunction';
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import { Alert, Linking, PermissionsAndroid, Platform } from 'react-native';
+import { API } from './apiConstant';
+import { errorToast } from './commonFunction';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 
 // export const requestLocationPermission = async (
@@ -157,7 +157,7 @@ const requestAndroidPermission = async (
 const getCurrentLocation = (onSuccess: (location: any) => void) => {
   Geolocation?.getCurrentPosition(
     position => {
-      const {latitude, longitude} = position.coords;
+      const { latitude, longitude } = position.coords;
       console.log('latitude, longitude', latitude, longitude);
       const location = {
         latitude,
@@ -170,7 +170,7 @@ const getCurrentLocation = (onSuccess: (location: any) => void) => {
     error => {
       console.warn(error);
     },
-    {enableHighAccuracy: true, timeout: 60000},
+    { enableHighAccuracy: true, timeout: 60000 },
   );
 };
 
@@ -179,7 +179,7 @@ const showPermissionDeniedAlert = (onFail: any) => {
     'Location Permission Required',
     'This feature requires location permissions.',
     [
-      {text: 'cancel', onPress: () => onFail()},
+      { text: 'cancel', onPress: () => onFail() },
       {
         text: 'Settings',
         onPress: () => Linking.openSettings(),
@@ -193,7 +193,7 @@ const showEnableLocationAlert = (onFail: any) => {
     'Enable Location Services',
     'Location services are turned off. Please enable them to proceed.',
     [
-      {text: 'cancel', onPress: () => onFail()},
+      { text: 'cancel', onPress: () => onFail() },
       {
         text: 'Enable',
         onPress: () => promptForEnableLocationIfNeeded(),
@@ -301,4 +301,45 @@ export const getAddress = async (
       console.log('error------', error);
       onFailure(error);
     });
+};
+
+export const getAddressList = async (query: string) => {
+  if (!query || query.length < 3) return;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+      query
+    )}&key=${API?.GOOGLE_MAP_API_KEY}&components=country:in`;
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (result?.predictions) {
+      console.log('Address suggestions >>>>>>>>>>:', result.predictions);
+      return result.predictions;
+    }
+  } catch (error) {
+    console.error('Error fetching address suggestions:', error);
+  }
+};
+
+export const getPlaceDetails = async (placeId) => {
+  if (!placeId) return;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${API?.GOOGLE_MAP_API_KEY}`;
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (result?.result?.geometry?.location) {
+      const { lat, lng } = result.result.geometry.location;
+
+      console.log('📍 Selected Place Coordinates:', lat, lng);
+
+      return { lat, lng };
+    }
+  } catch (error) {
+    console.error('Error fetching place details:', error);
+  }
 };

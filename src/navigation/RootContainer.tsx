@@ -17,7 +17,7 @@ import {
   requestNotificationUserPermission,
 } from '../hooks/notificationHandler';
 import {Linking} from 'react-native';
-import SplashScreen from 'react-native-splash-screen';
+import Splash from "react-native-splash-screen";
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -66,7 +66,7 @@ const RootContainer: FC = () => {
 
   return (
     <NavigationContainer
-      // onReady={() => SplashScreen.hide()}
+      onReady={() => Splash.hide()}
       linking={linking}
       theme={DefaultThemeColor as any}
       ref={navigationRef}>

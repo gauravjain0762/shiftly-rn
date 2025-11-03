@@ -1,10 +1,10 @@
 import React from 'react';
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import ShareModal from '../employe/ShareModal';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { getPostedTime } from '../../utils/commonFunction';
 
 type JobCardProps = {
   item?: any;
@@ -13,13 +13,16 @@ type JobCardProps = {
 };
 
 const MyJobCard = (props: JobCardProps) => {
-  const {onPressShare, onPressCard, item} = props;
+  const { onPressShare, onPressCard, item } = props;
+  console.log("🔥 ~ MyJobCard ~ item:", item)
+
+
 
   return (
     <>
       <Pressable onPress={onPressCard} style={styles.card}>
         <View style={styles.headerRow}>
-          <View style={{width: '85%'}}>
+          <View style={{ width: '85%' }}>
             <Text style={styles.locationText}>{`${item?.address}`}</Text>
             <Text style={styles.titleText}>{`${item?.title}`}</Text>
           </View>
@@ -41,10 +44,13 @@ const MyJobCard = (props: JobCardProps) => {
               }>{`${item?.applicants?.length}  Applicants`}</Text>
           )}
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{`${
-              item?.job_type || 'Full Time'
-            }`}</Text>
+            <Text style={styles.badgeText}>{`${item?.job_type || 'Full Time'
+              }`}</Text>
           </View>
+
+          <Text style={{ ...commonFontStyle(400, 14, colors.greyOpacity) }}>
+            {`Posted ${getPostedTime(item?.createdAt)}`}
+          </Text>
         </View>
       </Pressable>
     </>

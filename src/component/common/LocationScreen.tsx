@@ -37,10 +37,7 @@ const LocationScreen = () => {
   const mapRef = useRef<any | null>(null);
 
   const {userInfo} = useSelector((state: RootState) => state.auth);
-  // console.log('🔥🔥🔥 ~ LocationScreen ~ userInfo:', userInfo);
-
   const [search, setSearch] = useState(userInfo?.address || '');
-  // console.log('🔥🔥🔥 ~ LocationScreen ~ search:', search);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
     latitude: number;
@@ -55,7 +52,6 @@ const LocationScreen = () => {
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-  // console.log('🔥 ~ LocationScreen ~ position:', position);
   const [isMapMoving, setIsMapMoving] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);

@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React, {FC} from 'react';
+import React, {FC, useEffect} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {useAppDispatch} from '../redux/hooks';
 import {colors} from '../theme/colors';
@@ -179,7 +179,6 @@ const StackNavigator: FC = () => {
   //     },
   //   });
   // }
-
   const EmployeeStack = () => {
     const initialRoute = isAuthenticated
       ? SCREENS.TabNavigator
