@@ -50,7 +50,7 @@ const CoLogin = () => {
       };
 
       try {
-        const response = await companyLogin(data).unwrap();
+        const response = await companyLogin(data).unwrap() as any;
 
         if (response?.status) {
           console.log('✅ Login success:', response);
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors._181818),
   },
   eye: {
-    tintColor: '#CDB682',
+    tintColor: colors._0B3970,
   },
   forgote: {
     ...commonFontStyle(400, 18, colors._0D468C),

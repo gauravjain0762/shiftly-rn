@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, } from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,18 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {useTranslation} from 'react-i18next';
+import { IMAGES } from '../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { useTranslation } from 'react-i18next';
 import {
   errorToast,
   navigateTo,
   resetNavigation,
 } from '../../utils/commonFunction';
-import {SCREENS} from '../../navigation/screenNames';
+import { SCREENS } from '../../navigation/screenNames';
 import Onboarding from '../../component/common/Onboarding';
-import {BackHeader, LinearContainer} from '../../component';
+import { BackHeader, LinearContainer } from '../../component';
 import useRole from '../../hooks/useRole';
 import {
   GoogleSignin,
@@ -30,12 +30,12 @@ import {
   useEmployeeAppleSignInMutation,
   useEmployeeGoogleSignInMutation,
 } from '../../api/authApi';
-import {appleAuth} from '@invertase/react-native-apple-authentication';
-import {jwtDecode} from 'jwt-decode';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
+import { jwtDecode } from 'jwt-decode';
 import auth from '@react-native-firebase/auth';
-import {useDispatch, useSelector} from 'react-redux';
-import {setCreateEmployeeAccount, setUserInfo} from '../../features/authSlice';
-import {RootState} from '../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice';
+import { RootState } from '../../store';
 
 const AppOnboardingData = [
   {
@@ -61,10 +61,10 @@ const AppOnboardingData = [
 ];
 
 const WelcomeScreen = () => {
-  const {role} = useRole();
-  const {t} = useTranslation();
+  const { role } = useRole();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const {fcmToken} = useSelector((state: RootState) => state.auth);
+  const { fcmToken } = useSelector((state: RootState) => state.auth);
   const [employeeGoogleSignIn] = useEmployeeGoogleSignInMutation({});
   const [employeeAppleSignIn] = useEmployeeAppleSignInMutation({});
 
@@ -123,8 +123,8 @@ const WelcomeScreen = () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      const {data}: any = userInfo;
-      const {idToken} = data;
+      const { data }: any = userInfo;
+      const { idToken } = data;
       if (idToken) {
         let socialObj: any = {
           name: data.user.name,
@@ -139,8 +139,7 @@ const WelcomeScreen = () => {
           ...socialObj,
         });
 
-        const response = await employeeGoogleSignIn(socialObj).unwrap();
-        console.log('🔥🔥 ~ handleFinishSetup ~ Google res:', response?.data);
+        const response = await employeeGoogleSignIn(socialObj).unwrap() as any;
 
         if (response?.data?.user?.phone_verified_at !== null) {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
@@ -175,7 +174,7 @@ const WelcomeScreen = () => {
       if (!appleAuthRequestResponse.identityToken) {
         throw new Error('Apple Sign-In failed - no identify token returned');
       }
-      const {identityToken, fullName, email} = appleAuthRequestResponse;
+      const { identityToken, fullName, email } = appleAuthRequestResponse;
 
       if (identityToken) {
         const decoded: any = jwtDecode(identityToken);
@@ -195,8 +194,7 @@ const WelcomeScreen = () => {
           ...socialObj,
         });
 
-        const response = await employeeAppleSignIn(socialObj).unwrap();
-        console.log('🔥🔥 ~ handleAppleSignIn ~ response:', response);
+        const response = await employeeAppleSignIn(socialObj).unwrap() as any;
         if (response?.data?.user?.phone_verified_at !== null) {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
         } else {
@@ -216,10 +214,10 @@ const WelcomeScreen = () => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#00204A" />
+      <StatusBar barStyle="light-content" backgroundColor={colors._0B3970} />
       <LinearContainer
         containerStyle={styles.gradient}
-        colors={['#0D468C', '#041326']}>
+        colors={[colors._F7F7F7, colors._F7F7F7]}>
         <BackHeader
           title={t('')}
           type="employe"
@@ -228,8 +226,8 @@ const WelcomeScreen = () => {
         />
 
         <ScrollView
-          style={styles.scrollView}
           bounces={false}
+          style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
           <Onboarding data={AppOnboardingData} role={role ?? undefined} />
@@ -237,14 +235,14 @@ const WelcomeScreen = () => {
           <View
             style={[
               styles.buttonWrapper,
-              {bottom: role === 'company' ? '15%' : '3%'},
+              { bottom: role === 'company' ? '15%' : '3%' },
             ]}>
             <TouchableOpacity
               style={styles.emailButton}
               onPress={() => {
                 onLogin();
               }}>
-              <Image source={IMAGES.e_icon} style={styles.icon} />
+              <Image source={IMAGES.e_icon} style={styles.icon} tintColor={colors.white} />
               <Text style={styles.emailText}>{t('Continue with email')}</Text>
             </TouchableOpacity>
 
@@ -253,7 +251,7 @@ const WelcomeScreen = () => {
                 <TouchableOpacity
                   onPress={handleAppleSignIn}
                   style={styles.whiteButton}>
-                  <Image source={IMAGES.a_icon} style={styles.icon} />
+                  <Image source={IMAGES.a_icon} style={styles.icon} tintColor={colors.white} />
                   <Text style={styles.whiteText}>
                     {t('Continue with Apple')}
                   </Text>
@@ -326,7 +324,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.coPrimary,
   },
   emailButton: {
-    backgroundColor: colors.coPrimary,
+    backgroundColor: colors._0B3970,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
@@ -338,10 +336,10 @@ const styles = StyleSheet.create({
     gap: wp(14),
   },
   emailText: {
-    ...commonFontStyle(400, 18, colors.black),
+    ...commonFontStyle(400, 18, colors.white),
   },
   whiteButton: {
-    backgroundColor: colors.white,
+    backgroundColor: colors._0B3970,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
@@ -353,7 +351,7 @@ const styles = StyleSheet.create({
     gap: wp(14),
   },
   whiteText: {
-    ...commonFontStyle(400, 18, colors.black),
+    ...commonFontStyle(400, 18, colors.white),
   },
   icon: {
     width: wp(24),

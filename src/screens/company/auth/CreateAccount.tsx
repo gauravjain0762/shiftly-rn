@@ -1,4 +1,5 @@
 import {
+  Animated,
   FlatList,
   Image,
   Platform,
@@ -140,6 +141,10 @@ const CreateAccount = () => {
   const [showLogoTooltip, setShowLogoTooltip] = useState(false);
   const [showCoverTooltip, setShowCoverTooltip] = useState(false);
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       dispatch(clearCompanyRegisterData());
@@ -189,18 +194,71 @@ const CreateAccount = () => {
   // }, []);
 
   const nextStep = () => {
-    setTimeout(() => {
+    // Fade out and slide left
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: -50,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
       dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) + 1));
-    }, 100);
+      // Reset and fade in from right
+      slideAnim.setValue(50);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
   };
 
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
     } else {
-      dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) - 1));
+      // Fade out and slide right
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 50,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        dispatch(setCompanyRegistrationStep(Number(companyRegistrationStep) - 1));
+        // Reset and fade in from left
+        slideAnim.setValue(-50);
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
     }
-    // setStep(prev => prev - 1);
   };
   const { t } = useTranslation();
 
@@ -525,10 +583,15 @@ const CreateAccount = () => {
   );
 
   const renderStep = () => {
+    const animatedStyle = {
+      opacity: fadeAnim,
+      transform: [{ translateX: slideAnim }],
+    };
+
     switch (companyRegistrationStep || 1) {
       case 1:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('What type of business are you?')}
@@ -581,11 +644,11 @@ const CreateAccount = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 2:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Business Name')}</Text>
               <View style={styles.row}>
@@ -644,11 +707,11 @@ const CreateAccount = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 3:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Account Manager’s Name')}</Text>
               <View style={styles.row}>
@@ -705,11 +768,11 @@ const CreateAccount = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 4:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('What is your company email address?')}
@@ -773,11 +836,11 @@ const CreateAccount = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 5:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               <CustomTextInput
@@ -868,11 +931,11 @@ const CreateAccount = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 6:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('What is your phone number?')}
@@ -918,11 +981,11 @@ const CreateAccount = () => {
                 handleSignup();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 7: {
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
               {timer !== 0 && (
@@ -993,12 +1056,12 @@ const CreateAccount = () => {
                 verifyOTP();
               }}
             />
-          </View>
+          </Animated.View>
         );
       }
       case 8:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('What is your company website?')}
@@ -1069,11 +1132,11 @@ const CreateAccount = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
       case 9:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('Confirm your business address')}
@@ -1198,12 +1261,12 @@ const CreateAccount = () => {
                 }}
               />
             </View>
-          </View>
+          </Animated.View>
         );
 
       case 10:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View style={AppStyles.flex}>
               <View style={styles.titleRow}>
                 <Text style={styles.title}>
@@ -1301,11 +1364,11 @@ const CreateAccount = () => {
                 nextStep()
               }}
             />
-          </View>
+          </Animated.View>
         );
       // case 11:
       //   return (
-      //     <View style={styles.innerConrainer}>
+      //     <Animated.View style={[styles.innerConrainer, animatedStyle]}>
       //       <View style={AppStyles.flex}>
       //         <Text style={styles.title}>
       //           {t('Select your industry sectors')}
@@ -1391,11 +1454,11 @@ const CreateAccount = () => {
       //         title={t('Next')}
       //         onPress={() => nextStep()}
       //       />
-      //     </View>
+      //     </Animated.View>
       //   );
       case 11:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <BaseText style={styles.title}>
                 {('Build trust with your company profile')}
@@ -1521,7 +1584,7 @@ const CreateAccount = () => {
                 <Text style={styles.skipNow}>{t('Skip for now')}</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
         );
     }
   };

@@ -45,12 +45,12 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
   const renderItem = ({item}: {item: OnboardingDataItem}) => {
     return (
       <View style={[styles.slide, {width}]}>
-        <CustomImage
+        {/* <CustomImage
           size={hp(140)}
           resizeMode="contain"
           source={IMAGES.newlogo}
           containerStyle={styles.logo}
-        />
+        /> */}
         <ImageBackground
           source={item?.image}
           style={styles.illustration}
@@ -64,7 +64,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
         <View
           style={{
             gap: hp(5),
-            marginTop: hp(29),
+            marginTop: hp(50),
           }}>
           <Text style={styles.subtitle}>{item?.title}</Text>
           <Text style={styles.subtitle}>{item?.description}</Text>
@@ -91,14 +91,14 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
       <View
         style={[
           styles.paginationContainer,
-          {bottom: role === 'company' ? '10%' : '3%'},
+          {bottom: role === 'company' ? '20%' : '10%'},
         ]}>
         <ScrollingPaginationDots
           scrollX={scrollX}
           count={data?.length}
           slideWidth={width}
           dotColor={'red'}
-          inactiveDotColor={colors._DADADA}
+          inactiveDotColor={colors._F4E2B8}
           dotSize={10}
           spacing={12}
           inactiveDotOpacity={0.3}
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     lineHeight: hp(20),
-    ...commonFontStyle(600, 17, colors._DADADA),
+    ...commonFontStyle(500, 17, colors._0B3970),
   },
   dots: {
     flexDirection: 'row',
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors._0B3970,
   },
 });
 

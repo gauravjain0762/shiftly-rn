@@ -15,7 +15,7 @@ const SelectRollScreen = () => {
 
   return (
     <LinearGradient
-      colors={[colors._FBFBFB, colors._FBFBFB]}
+      colors={[colors._F7F7F7, colors._F7F7F7]}
       style={styles.gradient}>
       <View style={styles.container}>
         <Image source={IMAGES.newlogo1} style={styles.logo} />

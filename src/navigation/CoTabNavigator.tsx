@@ -39,7 +39,7 @@ const CustomTabBar = ({state, navigation}: any) => {
             iconName = isFocused ? IMAGES.Jobs_on : IMAGES.Jobs_off;
             break;
           case SCREENS.CoPost:
-            iconName = isFocused ? IMAGES.postFill : IMAGES.post_1;
+            iconName = isFocused ? IMAGES.postFill : IMAGES.postFill;
             break;
 
           case SCREENS.CoActivity:

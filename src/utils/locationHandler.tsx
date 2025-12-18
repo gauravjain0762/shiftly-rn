@@ -309,7 +309,7 @@ export const getAddressList = async (query: string) => {
   try {
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
       query
-    )}&key=${API?.GOOGLE_MAP_API_KEY}&components=country:in`;
+    )}&key=${API?.GOOGLE_MAP_API_KEY}`;
 
     const response = await fetch(url);
     const result = await response.json();

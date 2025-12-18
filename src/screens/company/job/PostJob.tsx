@@ -1,4 +1,5 @@
 import {
+  Animated,
   FlatList,
   Image,
   Keyboard,
@@ -175,6 +176,10 @@ const PostJob = () => {
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
     value: item.title,
@@ -210,6 +215,12 @@ const PostJob = () => {
       getUserLocation();
     }, []),
   );
+
+  // Reset animation when component mounts or steps change
+  useEffect(() => {
+    fadeAnim.setValue(1);
+    slideAnim.setValue(0);
+  }, []);
 
   const hasInitializedJobSectorRef = useRef<boolean>(false);
 
@@ -276,7 +287,7 @@ const PostJob = () => {
         response = await editJob({ job_id: job_id, ...params }).unwrap();
         console.log('Job updated:', response?.data);
       } else {
-        response = await createJob(params).unwrap();
+        response = await createJob(params).unwrap() as any;
         console.log('Job created:', response?.data);
       }
 
@@ -306,13 +317,71 @@ const PostJob = () => {
     updateJobForm({ selected: updatedList });
   };
 
-  const nextStep = () => dispatch(setCoPostJobSteps(steps + 1));
+  const nextStep = () => {
+    // Fade out and slide left
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: -50,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      dispatch(setCoPostJobSteps(steps + 1));
+      // Reset and fade in from right
+      slideAnim.setValue(50);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  };
 
   const prevStep = (num?: any) => {
     if (num == 1) {
       navigationRef.goBack();
     } else {
-      dispatch(setCoPostJobSteps(steps - 1));
+      // Fade out and slide right
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 50,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        dispatch(setCoPostJobSteps(steps - 1));
+        // Reset and fade in from left
+        slideAnim.setValue(-50);
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
     }
   };
 
@@ -359,10 +428,15 @@ const PostJob = () => {
   };
 
   const render = () => {
+    const animatedStyle = {
+      opacity: fadeAnim,
+      transform: [{ translateX: slideAnim }],
+    };
+
     switch (steps) {
       case 1:
         return (
-          <>
+          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -403,11 +477,11 @@ const PostJob = () => {
                 }}
               />
             </View>
-          </>
+          </Animated.View>
         );
       case 2:
         return (
-          <>
+          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -483,11 +557,11 @@ const PostJob = () => {
                 }}
               />
             </View>
-          </>
+          </Animated.View>
         );
       case 3:
         return (
-          <>
+          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -623,11 +697,11 @@ const PostJob = () => {
                 onPress={handleAddRequirements}
               />
             </BottomModal>
-          </>
+          </Animated.View>
         );
       case 4:
         return (
-          <>
+          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -679,11 +753,11 @@ const PostJob = () => {
                 onPress={() => nextStep()}
               />
             </View>
-          </>
+          </Animated.View>
         );
       case 5:
         return (
-          <>
+          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.empContainer}>
               <View style={styles.empHeader}>
                 <BackHeader
@@ -767,7 +841,7 @@ const PostJob = () => {
                 }}
               />
             </View>
-          </>
+          </Animated.View>
         );
       default:
         break;
@@ -796,7 +870,14 @@ const PostJob = () => {
         contentContainerStyle={styles.scrollContainer}>
         {/* <AnimatedSwitcher index={steps}> */}
         {steps == 0 && (
-          <>
+          <Animated.View
+            style={[
+              { flex: 1 },
+              {
+                opacity: fadeAnim,
+                transform: [{ translateX: slideAnim }],
+              },
+            ]}>
             <View>
               <View style={styles.field}>
                 <Text style={styles.label}>{t('Job Title')}</Text>
@@ -1053,7 +1134,7 @@ const PostJob = () => {
                 nextStep();
               }}
             />
-          </>
+          </Animated.View>
         )}
         {steps !== 0 && render()}
         {/* </AnimatedSwitcher> */}

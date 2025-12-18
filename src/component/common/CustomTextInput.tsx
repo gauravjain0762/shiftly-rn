@@ -11,7 +11,6 @@ import {
   ImageStyle,
 } from 'react-native';
 import {commonFontStyle} from '../../theme/fonts';
-import {useTheme} from '@react-navigation/native';
 import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
 
@@ -37,7 +36,6 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   onShow = () => {},
   ...rest
 }) => {
-  const {colors} = useTheme();
   const styles = React.useMemo(() => getGlobalStyles({colors}), [colors]);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -46,7 +44,6 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
       <TextInput
         style={[styles.input, inputStyle]}
         secureTextEntry={isPassword && !showPassword}
-        // placeholderTextColor={colors._F4E2B8}
         {...rest}
       />
       {showRightIcon && (
@@ -61,7 +58,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
               width: 24,
               height: 24,
               resizeMode: 'contain',
-              tintColor: '#F4E2B8',
+              tintColor: colors._0B3970,
               ...imgStyle,
             }}
           />
