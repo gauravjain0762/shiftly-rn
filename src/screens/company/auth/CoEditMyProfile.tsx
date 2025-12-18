@@ -388,7 +388,7 @@ const CoEditMyProfile = () => {
               <TouchableOpacity
                 style={styles.changeLocationBtn}
                 onPress={() => {
-                  navigateTo(SCREENS.LocationScreen);
+                  navigateTo(SCREENS.CoProfileLocationScreen);
                 }}>
                 <Image
                   source={IMAGES.location}

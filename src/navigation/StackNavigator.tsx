@@ -29,7 +29,6 @@ import CoTabNavigator from './CoTabNavigator';
 import CoMessage from '../screens/company/chat/CoMessage';
 import CoChat from '../screens/company/chat/CoChat';
 import CoNotification from '../screens/company/notification/CoNotification';
-import SuggestedEmployee from '../screens/company/job/SuggestedEmployee';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store';
 import PostJob from '../screens/company/job/PostJob';
@@ -40,6 +39,8 @@ import CoPost from '../screens/company/post/CoPost';
 import CoHome from '../screens/company/home/CoHome';
 import CoJobDetails from '../screens/company/job/JobDetails';
 import LocationScreen from '../component/common/LocationScreen';
+import CoPostJobLocationScreen from '../screens/company/location/CoPostJobLocationScreen';
+import CoProfileLocationScreen from '../screens/company/location/CoProfileLocationScreen';
 import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
 import EmpChangePassword from '../screens/employer/auth/EmpChangePassword';
 import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
@@ -335,11 +336,6 @@ const StackNavigator: FC = () => {
         />
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}
-          name={SCREENS.SuggestedEmployee}
-          component={SuggestedEmployee}
-        />
-        <Stack.Screen
-          options={({navigation}) => ({headerShown: false})}
           name={SCREENS.PostJob}
           component={PostJob}
         />
@@ -400,6 +396,16 @@ const StackNavigator: FC = () => {
       <Stack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
       <Stack.Screen name={SCREENS.LocationScreen} component={LocationScreen} />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.CoPostJobLocationScreen}
+        component={CoPostJobLocationScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.CoProfileLocationScreen}
+        component={CoProfileLocationScreen}
+      />
       <Stack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
       <Stack.Screen
         options={({navigation}) => ({headerShown: false})}

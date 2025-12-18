@@ -62,7 +62,11 @@ const CoJobDetails = () => {
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const jobDetail = data?.data;
-  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
+  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail);
+  
+  // Capitalize first letter of posted time
+  const postedTime = getPostedTime(jobDetail?.createdAt);
+  const capitalizedPostedTime = postedTime ? postedTime.charAt(0).toUpperCase() + postedTime.slice(1) : '';
 
   useFocusEffect(
     useCallback(() => {
@@ -73,7 +77,7 @@ const CoJobDetails = () => {
   const JobDetailsArr = [
     {
       key: 'Job Type',
-      value: jobDetail?.job_type,
+      value: jobDetail?.contract_type,
       icon: <Briefcase size={18} color={colors._0B3970} />,
     },
     {
@@ -183,8 +187,8 @@ const CoJobDetails = () => {
               {/* <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id || '-'
                 }`}</Text> */}
 
-              <View style={{ paddingHorizontal: wp(30), flexDirection: 'row', alignItems: 'center', gap: wp(10) }}>
-                <Text style={{ ...commonFontStyle(400, 14, colors.greyOpacity) }}>{getPostedTime(jobDetail?.createdAt)}</Text>
+              <View style={styles.dateAndLocationContainer}>
+                <Text style={styles.postedTime}>{capitalizedPostedTime}</Text>
                 <View style={styles.addressContainer}>
                   <Image source={IMAGES.location} style={styles.locationIcon} />
                   <Text style={styles.location}>{jobDetail?.address}</Text>
@@ -339,7 +343,10 @@ const CoJobDetails = () => {
                         label: jobDetail?.job_type,
                         value: jobDetail?.job_type,
                       }
-                      : jobDetail?.job_type,
+                      : jobDetail?.job_type || {
+                        label: 'Full Time',
+                        value: 'Full Time',
+                      },
                   area:
                     typeof jobDetail?.area === 'string'
                       ? { label: jobDetail?.area, value: jobDetail?.area }
@@ -449,18 +456,34 @@ const styles = StyleSheet.create({
     marginLeft: '10%',
     ...commonFontStyle(400, 18, colors.black),
   },
-  addressContainer: {
-    gap: wp(5),
+  dateAndLocationContainer: {
+    paddingHorizontal: wp(30),
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: wp(10),
+    marginTop: hp(8),
+    marginBottom: hp(8),
+  },
+  postedTime: {
+    ...commonFontStyle(400, 14, colors.greyOpacity),
+  },
+  addressContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: wp(5),
+    flexShrink: 1,
   },
   locationIcon: {
     width: wp(16),
     height: hp(16),
     tintColor: colors.greyOpacity,
+    marginTop: hp(2),
+    flexShrink: 0,
   },
   location: {
-    paddingRight: wp(15),
+    flex: 1,
+    flexShrink: 1,
     ...commonFontStyle(400, 14, colors.greyOpacity),
   },
   description: {

@@ -43,6 +43,8 @@ interface Props extends DropdownProps<any> {
   dateMode?: string;
   renderRightIcon?: ImageURISource;
   RightIconStyle?: ImageStyle;
+  onDropdownOpen?: () => void;
+  onDropdownClose?: () => void;
 }
 
 const CustomDropdown = ({
@@ -74,11 +76,15 @@ const CustomDropdown = ({
   required,
   renderRightIcon,
   RightIconStyle,
+  onDropdownOpen,
+  onDropdownClose,
   ...props
 }: Props) => {
   const handleChange = (item: any) => {
     // set?.(item.value);
     onChange(item);
+    // Call onDropdownClose when item is selected (dropdown closes)
+    onDropdownClose?.();
   };
 
   return (
@@ -93,10 +99,11 @@ const CustomDropdown = ({
         <DropdownElement
           onFocus={() => {
             Keyboard.dismiss();
+            onDropdownOpen?.();
           }}
           data={data}
           value={String(value)}
-          onChange={item => onChange(item)}
+          onChange={handleChange}
           disable={disable}
           dropdownPosition={'bottom'}
           style={[styles.dropdownStyle, dropdownStyle]}
@@ -112,7 +119,6 @@ const CustomDropdown = ({
           autoScroll={false}
           maxHeight={200}
           minHeight={30}
-          keyboardAvoiding={true}
           activeColor={'transparent'}
           renderRightIcon={() => {
             return (

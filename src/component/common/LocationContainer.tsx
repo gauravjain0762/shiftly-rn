@@ -57,9 +57,11 @@ const LocationContainer: FC<map> = ({
               <Text style={styles.primary}>{'Primary'}</Text>
             </View>
           </View>
-          <Text style={styles.locationText}>
-            {address || `No location found`}
-          </Text>
+          {address && (
+            <Text style={styles.locationText}>
+              {address}
+            </Text>
+          )}
         </View>
       )}
       <Pressable onPress={onPressMap}>

@@ -1218,7 +1218,7 @@ const CreateAccount = () => {
               <LocationContainer
                 address={userInfo?.address}
                 onPressMap={() => {
-                  navigateTo(SCREENS.LocationScreen);
+                  navigateTo(SCREENS.CoProfileLocationScreen);
                 }}
                 containerStyle={styles.map}
                 lat={userInfo?.lat}
@@ -1229,7 +1229,7 @@ const CreateAccount = () => {
             <View>
               <TouchableOpacity
                 onPress={() => {
-                  navigateTo(SCREENS.LocationScreen);
+                  navigateTo(SCREENS.CoProfileLocationScreen);
                 }}
                 style={styles.diffButton}>
                 <Text style={styles.btnTitle}>

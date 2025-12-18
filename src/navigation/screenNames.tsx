@@ -48,6 +48,8 @@ export const SCREENS = {
   ChangePassword: 'ChangePassword',
   CoJobDetails: 'CoJobDetails',
   LocationScreen: 'LocationScreen',
+  CoPostJobLocationScreen: 'CoPostJobLocationScreen',
+  CoProfileLocationScreen: 'CoProfileLocationScreen',
   CoEditMyProfile: 'CoEditMyProfile',
   EmpChangePassword: 'EmpChangePassword',
   EmpProfile: 'EmpProfile',
@@ -100,6 +102,8 @@ export interface ScreenNames {
   ChangePassword: string;
   CoJobDetails: string;
   LocationScreen: string;
+  CoPostJobLocationScreen: string;
+  CoProfileLocationScreen: string;
   CoEditMyProfile: string;
 }
 

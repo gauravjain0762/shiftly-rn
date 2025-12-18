@@ -47,6 +47,7 @@ import BottomModal from '../../../component/common/BottomModal';
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
 import { useCreateJobMutation } from '../../../api/authApi';
 import { getAsyncUserLocation } from '../../../utils/asyncStorage';
+import { getAddress } from '../../../utils/locationHandler';
 import {
   useEditCompanyJobMutation,
   useGetBusinessTypesQuery,
@@ -175,14 +176,36 @@ const PostJob = () => {
   });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
+  const { userInfo } = useAppSelector((state: any) => state.auth);
+  const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] = useState(false);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  
+  // Refs for scroll control
+  const scrollViewRef = useRef<any>(null);
+  const jobDepartmentFieldRef = useRef<View>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Handle dropdown focus - prevent scroll to keep dropdown positioned correctly
+  const handleJobDepartmentFocus = () => {
+    // Disable scroll immediately to prevent any auto-scrolling
+    setIsDropdownOpen(true);
+  };
+
+  // Re-enable scroll when dropdown closes
+  const handleJobDepartmentBlur = () => {
+    setIsDropdownOpen(false);
+    if (scrollViewRef.current?.setNativeProps) {
+      scrollViewRef.current.setNativeProps({ scrollEnabled: true });
+    }
+  };
 
   const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
     label: item.title,
-    value: item.title,
+    value: item._id, // Use _id for department_id
+    title: item.title, // Keep title for display
   }));
   const [userAddress, setUserAddress] = useState<
     | {
@@ -197,12 +220,81 @@ const PostJob = () => {
 
   const getUserLocation = async () => {
     try {
+      // Priority 1: Check AsyncStorage first (selected address from location screen - has state/country)
       const locationString = await AsyncStorage.getItem('user_location');
       if (locationString !== null) {
         const location = JSON.parse(locationString);
-        setUserAddress(location);
-        console.log('Retrieved location:', location);
-        return location;
+        if (location.address && location.lat && location.lng) {
+          setUserAddress({
+            address: location.address,
+            lat: location.lat,
+            lng: location.lng,
+            state: location.state || '',
+            country: location.country || '',
+          });
+          console.log('Retrieved location from AsyncStorage:', location);
+          return {
+            address: location.address,
+            lat: location.lat,
+            lng: location.lng,
+            state: location.state || '',
+            country: location.country || '',
+          };
+        }
+      }
+
+      // Priority 2: Use registered company location from userInfo (fallback)
+      if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
+        setUserAddress({
+          address: userInfo.address,
+          lat: userInfo.lat,
+          lng: userInfo.lng,
+          state: userInfo.state || '',
+          country: userInfo.country || '',
+        });
+        console.log('Using registered company location:', userInfo.address);
+        return {
+          address: userInfo.address,
+          lat: userInfo.lat,
+          lng: userInfo.lng,
+          state: userInfo.state || '',
+          country: userInfo.country || '',
+        };
+      }
+
+      // Priority 3: Only if no registered location, try to get current GPS location
+      const coordinates = await getAsyncUserLocation();
+      if (coordinates) {
+        getAddress(
+          coordinates,
+          (data: any) => {
+            const address = data?.results?.[0]?.formatted_address;
+            const components = data?.results?.[0]?.address_components || [];
+            
+            const stateObj = components.find((c: any) =>
+              c.types.includes('administrative_area_level_1'),
+            );
+            const countryObj = components.find((c: any) =>
+              c.types.includes('country'),
+            );
+
+            const state = stateObj?.long_name || '';
+            const country = countryObj?.long_name || '';
+
+            if (address) {
+              setUserAddress({
+                address,
+                lat: coordinates.latitude,
+                lng: coordinates.longitude,
+                state,
+                country,
+              });
+            }
+          },
+          (error: any) => {
+            console.error('Failed to get address from coordinates:', error);
+          },
+        );
       }
     } catch (error) {
       console.error('Failed to retrieve user location:', error);
@@ -216,13 +308,64 @@ const PostJob = () => {
     }, []),
   );
 
-  // Reset animation when component mounts or steps change
+  // Refresh address when screen comes into focus (e.g., returning from location screen)
+  useFocusEffect(
+    useCallback(() => {
+      const refreshAddress = async () => {
+        try {
+          // Check AsyncStorage for the latest selected address
+          const locationString = await AsyncStorage.getItem('user_location');
+          if (locationString !== null) {
+            const location = JSON.parse(locationString);
+            if (location.address && location.lat && location.lng) {
+              setUserAddress({
+                address: location.address,
+                lat: location.lat,
+                lng: location.lng,
+                state: location.state || '',
+                country: location.country || '',
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to refresh address:', error);
+        }
+      };
+      refreshAddress();
+    }, []),
+  );
+
+  // Reset animation when component mounts
   useEffect(() => {
     fadeAnim.setValue(1);
     slideAnim.setValue(0);
   }, []);
 
+
+  // Auto-calculate expiry date on mount if duration is set but expiry_date is not
+  useEffect(() => {
+    if (duration?.value && !expiry_date) {
+      const calculatedExpiryDate = calculateExpiryDate(duration.value);
+      updateJobForm({ expiry_date: calculatedExpiryDate });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Disable/enable scroll based on dropdown state
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      // Use setNativeProps to disable scroll when dropdown is open
+      if (isDropdownOpen) {
+        scrollViewRef.current.setNativeProps?.({ scrollEnabled: false });
+      } else {
+        scrollViewRef.current.setNativeProps?.({ scrollEnabled: true });
+      }
+    }
+  }, [isDropdownOpen]);
+
   const hasInitializedJobSectorRef = useRef<boolean>(false);
+  const hasInitializedJobTypeRef = useRef<boolean>(false);
+  const hasCleanedRequirementsRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (
@@ -234,6 +377,31 @@ const PostJob = () => {
       hasInitializedJobSectorRef.current = true;
     }
   }, [dropdownBusinessTypesOptions, job_sector, updateJobForm]);
+
+  // Initialize job_type if not set (only for new jobs, not edit mode)
+  useEffect(() => {
+    if (
+      !hasInitializedJobTypeRef.current &&
+      !editMode &&
+      jobTypeData?.length > 0 &&
+      !job_type
+    ) {
+      updateJobForm({ job_type: jobTypeData[0] }); // Default to "Full Time"
+      hasInitializedJobTypeRef.current = true;
+    }
+  }, [editMode, job_type, updateJobForm]);
+
+  // Clean up empty/blank requirements when creating a new job (only on mount)
+  useEffect(() => {
+    if (!editMode && !hasCleanedRequirementsRef.current && requirements && requirements.length > 0) {
+      const validRequirements = requirements.filter((req: string) => req && req.trim().length > 0);
+      if (validRequirements.length !== requirements.length) {
+        // Only update if there were empty requirements to remove
+        updateJobForm({ requirements: validRequirements });
+      }
+      hasCleanedRequirementsRef.current = true;
+    }
+  }, [editMode, requirements, updateJobForm]);
 
   const [location, setLocation] = useState<
     | {
@@ -247,6 +415,47 @@ const PostJob = () => {
     getLocation();
   }, []);
 
+  // Fetch address when location is available but address is not (only if no registered location)
+  useEffect(() => {
+    // Don't override if we already have registered company location
+    if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
+      return;
+    }
+    
+    if (location && !userAddress?.address) {
+      getAddress(
+        location,
+        (data: any) => {
+          const address = data?.results?.[0]?.formatted_address;
+          const components = data?.results?.[0]?.address_components || [];
+          
+          const stateObj = components.find((c: any) =>
+            c.types.includes('administrative_area_level_1'),
+          );
+          const countryObj = components.find((c: any) =>
+            c.types.includes('country'),
+          );
+
+          const state = stateObj?.long_name || '';
+          const country = countryObj?.long_name || '';
+
+          if (address) {
+            setUserAddress({
+              address,
+              lat: location.latitude,
+              lng: location.longitude,
+              state,
+              country,
+            });
+          }
+        },
+        (error: any) => {
+          console.error('Failed to get address from coordinates:', error);
+        },
+      );
+    }
+  }, [location, userInfo?.address]);
+
   const getLocation = async () => {
     const res = await getAsyncUserLocation();
     if (res) {
@@ -254,41 +463,54 @@ const PostJob = () => {
     }
   };
 
-  const [from, to] = salary?.value?.split('-') || [];
-
-  const params = {
-    title: title,
-    job_type: job_type?.label,
-    area: area?.value,
-    description: describe,
-    address: userAddress?.address || 'UAE, Dubai',
-    lat: location?.latitude,
-    lng: location?.longitude,
-    people_anywhere: canApply,
-    duration: duration?.value,
-    job_sector: job_sector?.value,
-    expiry_date: expiry_date,
-    start_date: startDate?.value,
-    contract_type: contract?.value,
-    monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
-    monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
-    no_positions: position?.value,
-    skills: skillId?.join(','),
-    facilities: selected?.map((item: any) => item._id).join(','),
-    requirements: requirements?.join(','),
-    invite_users: selectedEmployeeIds?.join(','),
-  };
-  console.log('~ >>>> handleCreateJob ~ params:', params);
   const handleCreateJob = async () => {
+    // Validate required fields - check if job_sector exists and has a valid value
+    if (!job_sector || !job_sector.value || (typeof job_sector.value === 'string' && job_sector.value.trim() === '')) {
+      errorToast(t('Please select a job department'));
+      return;
+    }
+
+    // Calculate salary range
+    const [from, to] = salary?.value?.split('-') || [];
+
+    // Build params with latest values
+    const params = {
+      title: title,
+      job_type: job_type?.label,
+      area: area?.value,
+      description: describe,
+      address: userAddress?.address || 'UAE, Dubai',
+      lat: location?.latitude,
+      lng: location?.longitude,
+      people_anywhere: canApply,
+      duration: duration?.value,
+      department_id: job_sector?.value, // Backend expects department_id
+      job_sector: job_sector?.value, // Backend also expects job_sector (for validation)
+      expiry_date: expiry_date,
+      start_date: startDate?.value,
+      contract_type: contract?.value,
+      monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
+      monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
+      no_positions: position?.value,
+      skills: skillId?.join(','),
+      facilities: selected?.map((item: any) => item._id).join(','),
+      requirements: requirements?.join(','),
+      invite_users: selectedEmployeeIds?.join(','),
+    };
+
+    console.log('~ >>>> handleCreateJob ~ params:', params);
+    console.log('~ >>>> handleCreateJob ~ job_sector:', job_sector);
+    console.log('~ >>>> handleCreateJob ~ department_id:', job_sector?.value);
+
     try {
       let response;
 
       if (editMode) {
         response = await editJob({ job_id: job_id, ...params }).unwrap();
-        console.log('Job updated:', response?.data);
+        console.log('Job updated: >>>>>>>>', response?.data);
       } else {
         response = await createJob(params).unwrap() as any;
-        console.log('Job created:', response?.data);
+        console.log('Job created: >>>>>>>>', response?.data);
       }
 
       if (response?.status) {
@@ -299,11 +521,17 @@ const PostJob = () => {
         }, 150);
         successToast(response?.message);
       } else {
-        errorToast(response?.message);
+        errorToast(response?.message || 'Failed to submit job');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to submit job:', err);
-      errorToast('Something went wrong!');
+      // Extract error message from response
+      const errorMessage = 
+        err?.data?.message || 
+        err?.data?.error || 
+        err?.message || 
+        'Something went wrong!';
+      errorToast(errorMessage);
     } finally {
     }
   };
@@ -331,21 +559,26 @@ const PostJob = () => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      dispatch(setCoPostJobSteps(steps + 1));
-      // Reset and fade in from right
-      slideAnim.setValue(50);
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      const nextStepValue = steps + 1;
+      dispatch(setCoPostJobSteps(nextStepValue));
+      // Small delay to ensure state update is processed before starting new animation
+      setTimeout(() => {
+        // Reset and fade in from right
+        slideAnim.setValue(50);
+        fadeAnim.setValue(0);
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 50);
     });
   };
 
@@ -366,9 +599,49 @@ const PostJob = () => {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        dispatch(setCoPostJobSteps(steps - 1));
-        // Reset and fade in from left
+        const prevStepValue = steps - 1;
+        dispatch(setCoPostJobSteps(prevStepValue));
+        // Small delay to ensure state update is processed before starting new animation
+        setTimeout(() => {
+          // Reset and fade in from left
+          slideAnim.setValue(-50);
+          fadeAnim.setValue(0);
+          Animated.parallel([
+            Animated.timing(fadeAnim, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }, 50);
+      });
+    }
+  };
+
+  const resetToFirstStep = () => {
+    // Animate out current step
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 50,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      dispatch(setCoPostJobSteps(0));
+      // Reset and fade in step 0
+      setTimeout(() => {
         slideAnim.setValue(-50);
+        fadeAnim.setValue(0);
         Animated.parallel([
           Animated.timing(fadeAnim, {
             toValue: 1,
@@ -381,11 +654,38 @@ const PostJob = () => {
             useNativeDriver: true,
           }),
         ]).start();
-      });
-    }
+      }, 50);
+    });
   };
 
-  const resetToFirstStep = () => dispatch(setCoPostJobSteps(0));
+  // Calculate expiry date based on duration
+  const calculateExpiryDate = (durationValue: string): string => {
+    const today = new Date();
+    const expiryDate = new Date(today);
+
+    switch (durationValue) {
+      case '7 Days':
+        expiryDate.setDate(today.getDate() + 7);
+        break;
+      case '14 Days':
+        expiryDate.setDate(today.getDate() + 14);
+        break;
+      case '1 Month':
+        expiryDate.setMonth(today.getMonth() + 1);
+        break;
+      case '3 Months':
+        expiryDate.setMonth(today.getMonth() + 3);
+        break;
+      case 'Until Filled':
+        expiryDate.setFullYear(today.getFullYear() + 1);
+        break;
+      default:
+        expiryDate.setMonth(today.getMonth() + 1);
+        break;
+    }
+
+    return expiryDate.toISOString().split('T')[0];
+  };
 
   const handleAddRequirements = () => {
     if (!requirementText.trim()) {
@@ -436,7 +736,7 @@ const PostJob = () => {
     switch (steps) {
       case 1:
         return (
-          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-1" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -481,7 +781,7 @@ const PostJob = () => {
         );
       case 2:
         return (
-          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-2" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -561,7 +861,7 @@ const PostJob = () => {
         );
       case 3:
         return (
-          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-3" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -588,40 +888,45 @@ const PostJob = () => {
                   //   :
                   //   {flexGrow: 1}
                 }>
-                {requirements?.length ? (
-                  <FlatList
-                    data={requirements}
-                    contentContainerStyle={{ flexGrow: 1, paddingRight: wp(10) }}
-                    keyExtractor={(_, index) => index.toString()}
-                    style={{ flex: 1 }}
-                    renderItem={({ item }) => (
-                      <View style={styles.boxContainer}>
-                        <View style={styles.checkRound}>
-                          <Image source={IMAGES.mark} style={styles.markIcon} />
+                {(() => {
+                  // Filter out empty/blank requirements
+                  const validRequirements = requirements?.filter((req: string) => req && req.trim().length > 0) || [];
+                  
+                  return validRequirements.length > 0 ? (
+                    <FlatList
+                      data={validRequirements}
+                      contentContainerStyle={{ flexGrow: 1, paddingRight: wp(10) }}
+                      keyExtractor={(_, index) => index.toString()}
+                      style={{ flex: 1 }}
+                      renderItem={({ item }) => (
+                        <View style={styles.boxContainer}>
+                          <View style={styles.checkRound}>
+                            <Image source={IMAGES.mark} style={styles.markIcon} />
+                          </View>
+                          <Text style={styles.requirementText} numberOfLines={2}>
+                            {item}
+                          </Text>
                         </View>
-                        <Text style={styles.requirementText} numberOfLines={2}>
-                          {item}
-                        </Text>
-                      </View>
-                    )}
-                    ListEmptyComponent={() => (
-                      <View style={styles.emptyReqContainer}>
-                        <BaseText
-                          style={{ ...commonFontStyle(400, 16, colors.black) }}>
-                          {'No requirements added yet'}
-                        </BaseText>
-                      </View>
-                    )}
-                    showsVerticalScrollIndicator={true}
-                  />
-                ) : (
-                  <View style={styles.emptyReqContainer}>
-                    <BaseText
-                      style={{ ...commonFontStyle(400, 16, colors.black) }}>
-                      {'No requirements added yet'}
-                    </BaseText>
-                  </View>
-                )}
+                      )}
+                      ListEmptyComponent={() => (
+                        <View style={styles.emptyReqContainer}>
+                          <BaseText
+                            style={{ ...commonFontStyle(400, 16, colors.black) }}>
+                            {'No requirements added yet'}
+                          </BaseText>
+                        </View>
+                      )}
+                      showsVerticalScrollIndicator={true}
+                    />
+                  ) : (
+                    <View style={styles.emptyReqContainer}>
+                      <BaseText
+                        style={{ ...commonFontStyle(400, 16, colors.black) }}>
+                        {'No requirements added yet'}
+                      </BaseText>
+                    </View>
+                  );
+                })()}
               </View>
 
               <View
@@ -701,7 +1006,7 @@ const PostJob = () => {
         );
       case 4:
         return (
-          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-4" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -757,7 +1062,7 @@ const PostJob = () => {
         );
       case 5:
         return (
-          <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-5" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.empContainer}>
               <View style={styles.empHeader}>
                 <BackHeader
@@ -864,13 +1169,19 @@ const PostJob = () => {
         />
       )}
       <KeyboardAwareScrollView
+        ref={scrollViewRef}
         style={AppStyles.flex}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}>
+        contentContainerStyle={styles.scrollContainer}
+        enableOnAndroid={true}
+        enableAutomaticScroll={false}
+        scrollEnabled={!isDropdownOpen}
+        nestedScrollEnabled={!isDropdownOpen}>
         {/* <AnimatedSwitcher index={steps}> */}
         {steps == 0 && (
           <Animated.View
+            key="step-0"
             style={[
               { flex: 1 },
               {
@@ -925,11 +1236,11 @@ const PostJob = () => {
               <LocationContainer
                 address={userAddress?.address}
                 onPressMap={() => {
-                  navigateTo(SCREENS.LocationScreen, { userAddress });
+                  navigateTo(SCREENS.CoPostJobLocationScreen, { userAddress });
                 }}
                 containerStyle={styles.map}
-                lat={userAddress?.lat}
-                lng={userAddress?.lng}
+                lat={userAddress?.lat || location?.latitude}
+                lng={userAddress?.lng || location?.longitude}
               />
               <Pressable
                 onPress={() => {
@@ -958,6 +1269,11 @@ const PostJob = () => {
                   value={duration?.value}
                   onChange={(e: any) => {
                     updateJobForm({ duration: { label: e.label, value: e.value } });
+                    // Automatically calculate expiry date if not manually changed
+                    if (!isExpiryDateManuallyChanged) {
+                      const calculatedExpiryDate = calculateExpiryDate(e.value);
+                      updateJobForm({ expiry_date: calculatedExpiryDate });
+                    }
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -1008,11 +1324,16 @@ const PostJob = () => {
                       expiry_date: formattedDate,
                       isModalVisible: false,
                     });
+                    // Mark as manually changed so duration changes don't override it
+                    setIsExpiryDateManuallyChanged(true);
                   }}
                   onCancel={() => updateJobForm({ isModalVisible: false })}
                 />
               </View>
-              <View style={styles.field}>
+              <View 
+                ref={jobDepartmentFieldRef} 
+                style={styles.field}
+                collapsable={false}>
                 <Text style={styles.label}>{t('Job Department')}</Text>
                 <CustomDropdown
                   data={dropdownBusinessTypesOptions}
@@ -1028,6 +1349,8 @@ const PostJob = () => {
                   renderRightIcon={IMAGES.ic_down}
                   RightIconStyle={styles.rightIcon}
                   selectedTextStyle={styles.selectedTextStyle}
+                  onDropdownOpen={handleJobDepartmentFocus}
+                  onDropdownClose={handleJobDepartmentBlur}
                 />
               </View>
               <View style={styles.field}>

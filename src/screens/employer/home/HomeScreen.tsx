@@ -15,8 +15,6 @@ import PostSkeleton from '../../../component/skeletons/PostSkeleton';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {
-  clearEmployeeAccount,
-  setCreateEmployeeAccount,
   setUserInfo,
 } from '../../../features/authSlice';
 import {useAppDispatch} from '../../../redux/hooks';
@@ -29,6 +27,7 @@ const HomeScreen = () => {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {userInfo}: any = useSelector((state: RootState) => state.auth);
+  console.log("🔥 ~ HomeScreen ~ userInfo:", userInfo)
   const {data: profileData} = useGetEmployeeProfileQuery({});
 
   const {

@@ -49,7 +49,7 @@ const HomeHeader: FC<props> = ({
               styles.name,
               {color: type == 'company' ? colors._0B3970 : colors.white},
             ]}>
-            {companyProfile?.name || 'N/A'}
+            {companyProfile?.company_name || 'N/A'}
           </Text>
 
           <View
