@@ -16,13 +16,13 @@ import {SCREENS} from '../../../navigation/screenNames';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const CoSignUp = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const [on, setOn] = useState(false);
 
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
-      colors={['#FFF8E6', '#F3E1B7']}>
+      colors={[colors.coPrimary, colors.white]}>
       <KeyboardAwareScrollView>
         <Image source={IMAGES.logo1} style={styles.logo} />
         <View style={styles.logincontainer}>

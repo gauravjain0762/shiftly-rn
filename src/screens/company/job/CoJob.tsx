@@ -128,7 +128,7 @@ const CoJob = () => {
   }
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={[colors.coPrimary, colors.white]}>
       <View style={styles.header}>
         <View style={styles.leftSection}>
           <TouchableOpacity

@@ -319,7 +319,7 @@ const ForgotPassword = () => {
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
-      colors={['#FFF8E6', '#F3E1B7']}>
+      colors={['#F7F7F7', '#FFFFFF']}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
         // scrollEnabled={false}

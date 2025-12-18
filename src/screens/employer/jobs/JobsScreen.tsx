@@ -281,7 +281,7 @@ const JobsScreen = () => {
 
         <BottomModal
           visible={isFilterModalVisible}
-          backgroundColor={colors._FBE7BD}
+          backgroundColor={colors._F7F7F7}
           onClose={() => setIsFilterModalVisible(false)}>
           <View style={styles.modalContent}>
             <View style={styles.filterContainer}>
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     borderColor: colors._1F1F1F,
-    backgroundColor: colors._FBE7BD,
+    backgroundColor: colors._F7F7F7,
   },
   pillText: {
     ...commonFontStyle(400, 14, colors.black),

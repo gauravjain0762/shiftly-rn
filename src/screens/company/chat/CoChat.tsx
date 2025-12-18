@@ -285,7 +285,7 @@ const CoChat = () => {
   }, []);
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <KeyboardAvoidingView
           style={{flex: 1}}

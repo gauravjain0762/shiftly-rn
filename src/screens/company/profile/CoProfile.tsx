@@ -185,7 +185,7 @@ const CoProfile = () => {
   };
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
         <BackHeader
           type="company"

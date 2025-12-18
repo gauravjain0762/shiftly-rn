@@ -71,7 +71,7 @@ const CoNotification = () => {
   );
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <BackHeader
         type="company"
         isRight={true}
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     padding: wp(16),
     marginBottom: hp(16),
     borderWidth: 1.5,
-    borderColor: '#C9B68B',
+    borderColor: '#F7F7F7',
   },
   cardContent: {
     flexDirection: 'row',

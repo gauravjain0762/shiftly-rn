@@ -94,6 +94,7 @@ const PhoneInput: FC<picker> = ({
         {valid && phone?.length > 8 && (
           <Image
             source={IMAGES.right}
+            tintColor={colors.green}
             style={{width: 22, height: 22, resizeMode: 'contain'}}
           />
         )}
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   input: {
-    ...commonFontStyle(400, 22, colors._FBE7BD),
+    ...commonFontStyle(400, 22, colors._F7F7F7),
     flex: 1,
     marginLeft: 24,
   },

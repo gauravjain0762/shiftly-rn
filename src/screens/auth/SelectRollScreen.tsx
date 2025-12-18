@@ -11,14 +11,14 @@ import useRole from '../../hooks/useRole';
 
 const SelectRollScreen = () => {
   const {t} = useTranslation();
-  const {role, setRole} = useRole();
+  const {setRole} = useRole();
 
   return (
     <LinearGradient
-      colors={[colors._0D468C, colors._041326]}
+      colors={[colors._FBFBFB, colors._FBFBFB]}
       style={styles.gradient}>
       <View style={styles.container}>
-        <Image source={IMAGES.logoText} style={styles.logo} />
+        <Image source={IMAGES.newlogo1} style={styles.logo} />
 
         <View style={styles.cardEmployer}>
           <Image source={IMAGES.Seeker} style={styles.icon} />
@@ -86,7 +86,12 @@ const styles = StyleSheet.create({
     marginBottom: hp(35),
     borderRadius: hp(20),
     paddingVertical: hp(21),
-    backgroundColor: colors._FBE7BD,
+    backgroundColor: colors.white,
+    shadowColor: colors.black,
+    shadowOffset: {width: 0, height: 1.5},
+    shadowOpacity: 0.1,
+    shadowRadius: 3.5,
+    elevation: 3,
   },
   cardJobSeeker: {
     width: '94%',

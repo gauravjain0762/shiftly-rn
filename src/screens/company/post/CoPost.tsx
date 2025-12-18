@@ -376,7 +376,7 @@ const CoPost = () => {
   };
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
         automaticallyAdjustContentInsets

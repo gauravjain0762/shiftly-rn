@@ -775,7 +775,7 @@ const PostJob = () => {
   };
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       {steps == 0 && (
         <BackHeader
           type="company"

@@ -1529,7 +1529,7 @@ const CreateAccount = () => {
   return (
     <LinearContainer
       SafeAreaProps={{ edges: ['top', 'bottom'] }}
-      colors={['#FFF8E6', '#F3E1B7']}>
+      colors={['#F7F7F7', '#FFFFFF']}>
       <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <KeyboardAwareScrollView
           enableAutomaticScroll
@@ -2004,7 +2004,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     bottom: hp(45),
-    backgroundColor: '#FFF3CD',
+    backgroundColor: colors._F4E2B8,
     borderRadius: 8,
     padding: 8,
     borderWidth: hp(1),
@@ -2040,7 +2040,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: wp(25),
     top: hp(50),
-    backgroundColor: '#FFF3CD',
+    backgroundColor: colors._F4E2B8,
     borderRadius: 8,
     padding: wp(10),
     borderWidth: hp(1),

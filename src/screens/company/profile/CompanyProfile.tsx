@@ -135,13 +135,15 @@ const CompanyProfile = () => {
 
     if (jobsList?.length === 0) {
       return (
-        <Text
-          style={[
-            commonFontStyle(500, 16, colors._3D3D3D),
-            { textAlign: 'center', marginTop: hp(20) },
-          ]}>
-          No Jobs Found
-        </Text>
+        <View style={styles.emptyContainer}>
+          <Text
+            style={[
+              commonFontStyle(500, 16, colors._3D3D3D),
+              { textAlign: 'center', marginTop: hp(20) },
+            ]}>
+            No Jobs Found
+          </Text>
+        </View>
       );
     }
 
@@ -167,7 +169,7 @@ const CompanyProfile = () => {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors._F3E1B7 }}
+      style={{ flex: 1, backgroundColor: colors.coPrimary }}
       edges={['bottom']}>
       <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
         <Image source={IMAGES.backArrow} style={styles.backArrow} />
@@ -184,7 +186,7 @@ const CompanyProfile = () => {
           <LinearContainer
             SafeAreaProps={{ edges: ['bottom'] }}
             containerStyle={styles.linearContainer}
-            colors={['#FFF8E6', '#F3E1B7']}>
+            colors={['#F7F7F7', '#FFFFFF']}>
             <View style={styles.profileHeader}>
               <CustomImage
                 uri={
@@ -269,13 +271,15 @@ const CompanyProfile = () => {
                 keyExtractor={item => `post-${item.id}`}
                 columnWrapperStyle={{ justifyContent: 'space-between' }}
                 ListEmptyComponent={() => (
-                  <Text
-                    style={[
-                      commonFontStyle(500, 16, colors._3D3D3D),
-                      { textAlign: 'center', marginTop: hp(20) },
-                    ]}>
-                    No Posts Found
-                  </Text>
+                  <View style={styles.emptyContainer}>
+                    <Text
+                      style={[
+                        commonFontStyle(500, 16, colors._3D3D3D),
+                        { textAlign: 'center', marginTop: hp(20) },
+                      ]}>
+                      No Posts Found
+                    </Text>
+                  </View>
                 )}
               />
             )}
@@ -298,10 +302,11 @@ export default CompanyProfile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E1B7',
+    backgroundColor: colors.coPrimary,
   },
   linearContainer: {
     paddingHorizontal: wp(21),
+    backgroundColor: colors.coPrimary
   },
   backButton: {
     position: 'absolute',
@@ -387,9 +392,14 @@ const styles = StyleSheet.create({
     width: '150%',
     alignSelf: 'center',
     marginVertical: hp(16),
-    backgroundColor: '#D9D9D9',
+    backgroundColor: colors.coPrimary,
   },
   button: {
     marginVertical: hp(26),
+  },
+  emptyContainer: {
+    flex: 1,
+    backgroundColor: colors.coPrimary,
+    paddingVertical: hp(20),
   },
 });

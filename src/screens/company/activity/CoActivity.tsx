@@ -6,7 +6,7 @@ import BaseText from '../../../component/common/BaseText';
 const CoActivity = () => {
   return (
     <LinearContainer
-      colors={['#FFF8E6', '#F3E1B7']}
+      colors={['#F7F7F7', '#FFFFFF']}
       containerStyle={{
         flex: 1,
         alignItems: 'center',

@@ -379,8 +379,8 @@ const styles = StyleSheet.create({
     height: 50,
     textAlign: 'center',
     borderBottomWidth: 2,
-    borderColor: colors._FBE7BD,
-    ...commonFontStyle(700, 30, colors._FBE7BD),
+    borderColor: colors._F7F7F7,
+    ...commonFontStyle(700, 30, colors._F7F7F7),
   },
   secText: {
     ...commonFontStyle(500, 25, colors.white),

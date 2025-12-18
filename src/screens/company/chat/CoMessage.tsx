@@ -17,7 +17,7 @@ const CoMessage = () => {
   const chatList = chats?.data?.chats || [];
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <View style={styles.headerContainer}>
         <BackHeader
           title={t('Messages')}

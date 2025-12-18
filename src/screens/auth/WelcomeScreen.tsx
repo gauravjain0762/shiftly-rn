@@ -323,10 +323,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors.coPrimary,
   },
   emailButton: {
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors.coPrimary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',

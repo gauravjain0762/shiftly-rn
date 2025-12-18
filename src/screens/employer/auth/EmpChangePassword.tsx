@@ -239,22 +239,22 @@ export const passwordStyles = StyleSheet.create({
     marginTop: hp(50),
   },
   label: {
-    ...commonFontStyle(400, 18, colors._FBE7BD),
+    ...commonFontStyle(400, 18, colors._F7F7F7),
   },
   inputcontainer: {
     borderWidth: hp(1),
     borderRadius: hp(10),
     paddingVertical: hp(16),
     paddingHorizontal: wp(23),
-    borderColor: colors._FBE7BD,
+    borderColor: colors._F7F7F7,
     justifyContent: 'space-between',
   },
   emailText: {
     flex: 1,
-    ...commonFontStyle(400, 18, colors._FBE7BD),
+    ...commonFontStyle(400, 18, colors._F7F7F7),
   },
   button: {
     marginTop: hp(50),
-    // backgroundColor: colors._FBE7BD
+    // backgroundColor: colors._F7F7F7
   },
 });

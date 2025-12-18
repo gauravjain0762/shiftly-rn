@@ -55,8 +55,18 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
         styles.wrapper,
         style,
         {
-          borderWidth: type == 'Employee' ? 2.5 : 0,
+          borderWidth: type == 'Employee' ? 2.5 : 1,
+          backgroundColor: type == 'Company' ? colors.coPrimary : colors.white,
           opacity: rest.disabled ? 0.6 : 1,
+          ...(type == 'Company' && {
+            borderWidth: 1,
+            borderColor: colors._0B3970,
+            shadowColor: 'transparent',
+            shadowOffset: {width: 0, height: 0},
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0,
+          }),
         },
       ]}>
       {type == 'Employee' ? (
@@ -93,38 +103,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
           />
         </Svg>
       ) : (
-        <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
-          <Defs>
-            <RadialGradient
-              id="diamond"
-              cx={cx || '50%'}
-              cy={cy || '50%'}
-              rx={rx || '60%'}
-              ry={ry || '90%'}
-              fx={fx || '10%'}
-              fy={fy || '50%'}>
-              <Stop
-                offset="0%"
-                stopColor={stopColor || '#024AA1'}
-                stopOpacity="1"
-              />
-              <Stop
-                offset="100%"
-                stopColor={stopColor || '#041428'}
-                stopOpacity="1"
-              />
-            </RadialGradient>
-          </Defs>
-          <Rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            rx="0"
-            ry="0"
-            fill="url(#diamond)"
-          />
-        </Svg>
+        <View style={StyleSheet.absoluteFill} />
       )}
       <View style={[styles.content, textContainerStyle]}>
         <Text
@@ -153,7 +132,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 10,
     elevation: 8,
-    backgroundColor: colors.white,
   },
   content: {
     paddingVertical: 14,
@@ -162,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   CombuttonText: {
-    ...commonFontStyle(600, 20, colors.white),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
 });
 

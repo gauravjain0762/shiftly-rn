@@ -68,11 +68,11 @@ const styles = StyleSheet.create({
   },
   tooltipBox: {
     position: 'absolute',
-    backgroundColor: '#FFF3CD',
+    backgroundColor: colors._F4E2B8,
     paddingVertical: hp(8),
     paddingHorizontal: wp(10),
     borderRadius: 8,
-    width: wp(250), // ✅ fixed width instead of maxWidth for proper wrapping
+    width: wp(250),
     zIndex: 10,
     shadowColor: '#000',
     shadowOpacity: 0.2,
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   tooltipText: {
     ...commonFontStyle(400, 13, colors._7B7878),
     flexShrink: 1,
-    flexWrap: 'wrap', // ✅ ensures multi-line wrapping
+    flexWrap: 'wrap',
     lineHeight: hp(18),
   },
 });

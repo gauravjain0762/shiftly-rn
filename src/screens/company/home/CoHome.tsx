@@ -96,7 +96,7 @@ const CoHome = () => {
   };
 
   return (
-    <LinearContainer colors={['#FFF8E6', '#F3E1B7']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       {isLoading && currentPage === 1 ? (
         <PostSkeleton backgroundColor={colors.coPrimary} />
       ) : (

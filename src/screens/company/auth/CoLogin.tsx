@@ -13,29 +13,29 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {useTranslation} from 'react-i18next';
-import {colors} from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { useTranslation } from 'react-i18next';
+import { colors } from '../../../theme/colors';
 import {
   emailCheck,
   errorToast,
   navigateTo,
 } from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useCompanyLoginMutation} from '../../../api/authApi';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {RootState} from '../../../store';
-import {useDispatch, useSelector} from 'react-redux';
-import {setAuthData} from '../../../features/companySlice';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useCompanyLoginMutation } from '../../../api/authApi';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { RootState } from '../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setAuthData } from '../../../features/companySlice';
 
 const CoLogin = () => {
-  const {t} = useTranslation();
-  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  const { t } = useTranslation();
+  const { fcmToken, } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const [companyLogin] = useCompanyLoginMutation();
-  const {auth} = useSelector((state: RootState) => state.company);
-  const {email, password} = auth;
+  const { auth } = useSelector((state: RootState) => state.company);
+  const { email, password } = auth;
 
   const handleLogin = async () => {
     if (!emailCheck(email)) {
@@ -54,7 +54,7 @@ const CoLogin = () => {
 
         if (response?.status) {
           console.log('✅ Login success:', response);
-          dispatch(setAuthData({email: '', password: ''}));
+          dispatch(setAuthData({ email: '', password: '' }));
         } else {
           errorToast(t(response?.message));
         }
@@ -66,12 +66,12 @@ const CoLogin = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top', 'bottom']}}
-      colors={['#FFF8E6', '#F3E1B7']}>
+      SafeAreaProps={{ edges: ['top', 'bottom'] }}
+      colors={['#F7F7F7', '#FFFFFF']}>
       <KeyboardAwareScrollView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         enableOnAndroid={true}
-        contentContainerStyle={{flexGrow: 1, paddingBottom: hp(30)}}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: hp(30) }}
         showsVerticalScrollIndicator={false}>
         <BackHeader
           title={''}
@@ -89,7 +89,7 @@ const CoLogin = () => {
               placeholderTextColor={colors._7B7878}
               value={email}
               onChangeText={e => {
-                dispatch(setAuthData({email: e, password}));
+                dispatch(setAuthData({ email: e, password }));
               }}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -104,7 +104,7 @@ const CoLogin = () => {
               imgStyle={styles.eye}
               placeholder="* * * * * * * * *"
               onChangeText={e => {
-                dispatch(setAuthData({email, password: e}));
+                dispatch(setAuthData({ email, password: e }));
               }}
               isPassword
             />
