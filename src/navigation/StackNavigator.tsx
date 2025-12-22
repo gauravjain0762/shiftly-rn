@@ -50,6 +50,7 @@ import CoProfile from '../screens/company/profile/CoProfile';
 import EditAccountScreen from '../screens/employer/profile/EditAccount';
 import SearchJob from '../screens/employer/jobs/SearchJob';
 import FavoriteJobList from '../screens/employer/jobs/FavoriteJobList';
+import CreateQuestion from '../screens/company/job/CreateQuestion';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -368,6 +369,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoEditMyProfile}
           component={CoEditMyProfile}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CreateQuestion}
+          component={CreateQuestion}
         />
       </Stack.Navigator>
     );

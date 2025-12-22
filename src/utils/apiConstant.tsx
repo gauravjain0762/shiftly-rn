@@ -45,6 +45,9 @@ export const API = {
   //Notifications
   getCompanyNotifications: '/company/getNotifications',
 
+  // Notifications
+  sendInterviewInvites: '/company/sendInterviewInvites',
+
   // CompanyLogin: '',
 
   //  -------   Employee    --------

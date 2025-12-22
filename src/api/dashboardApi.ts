@@ -745,6 +745,14 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    sendInterviewInvites: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.sendInterviewInvites,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+        data: credentials,
+      }),
+    }),
   }),
 });
 
@@ -793,4 +801,5 @@ export const {
   useRemoveResumeMutation,
   useGetActivitiesQuery,
   useUnshortlistEmployeeMutation,
+  useSendInterviewInvitesMutation,
 } = dashboardApi;

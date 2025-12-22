@@ -60,8 +60,8 @@ const LoginScreen = () => {
           deviceType: Platform.OS,
         };
 
-        const response = await employeeLogin(data).unwrap();
-        if (response?.status) {
+        const response: any = await employeeLogin(data).unwrap();
+        if (response && response.status) {
           dispatch(setAuthData({email: '', password: ''}));
           console.log(response, 'response----');
         }
@@ -87,11 +87,11 @@ const LoginScreen = () => {
         />
         <Image source={IMAGES.logoText} style={styles.logo} />
 
-        <View style={[styles.inputWrapper, {marginBottom: hp(60)}]}>
-          <Text style={styles.labelText}>Enter your email to login</Text>
+        <View style={styles.inputWrapper}>
+          <Text style={styles.labelText}>Email</Text>
 
           <CustomTextInput
-            placeholder="Email"
+            placeholder="Enter your email"
             placeholderTextColor={colors._F4E2B8}
             value={email}
             inputStyle={{color: colors._F4E2B8, textTransform: 'lowercase'}}
@@ -103,10 +103,10 @@ const LoginScreen = () => {
           />
         </View>
 
-        <View style={[styles.inputWrapper, {marginBottom: hp(67)}]}>
-          <Text style={styles.labelText}>Enter your password</Text>
+        <View style={styles.inputWrapper}>
+          <Text style={styles.labelText}>Password</Text>
           <CustomTextInput
-            placeholder="Password"
+            placeholder="Enter your password"
             placeholderTextColor={colors._F4E2B8}
             showRightIcon={true}
             inputStyle={{color: colors._F4E2B8}}
@@ -124,20 +124,24 @@ const LoginScreen = () => {
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
 
-        <View style={{marginHorizontal: 35}}>
-          {/* <CustomBtn label={t('Login')} onPress={() => {}} /> */}
+        <View style={styles.buttonContainer}>
+          {/* Primary Login Button */}
           <GradientButton
             title={t('Login')}
-            onPress={handleLogin} //() => navigateTo(SCREENS.TabNavigator)}
+            onPress={handleLogin}
+            style={styles.primaryButton}
           />
           <Text style={styles.orText}>Or</Text>
-          <GradientButton
-            title={t('Sign Up')}
+          {/* Secondary Sign Up Button */}
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            activeOpacity={0.7}
             onPress={() => {
               dispatch(clearEmployeeAccount());
               navigateTo(SCREENS.SignUp);
-            }}
-          />
+            }}>
+            <Text style={styles.secondaryButtonText}>{t('Sign Up')}</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
     </LinearContainer>
@@ -160,11 +164,11 @@ const styles = StyleSheet.create({
     height: hp(110),
     width: wp(110),
     resizeMode: 'contain',
-    marginBottom: hp(70),
-    marginTop: hp(25),
+    marginBottom: hp(40),
+    marginTop: hp(15),
   },
   inputWrapper: {
-    marginBottom: 25,
+    marginBottom: hp(30),
     borderBottomWidth: 1,
     borderBottomColor: colors._F4E2B8,
     marginHorizontal: 35,
@@ -185,27 +189,32 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     textAlign: 'center',
-    marginBottom: hp(38),
+    marginBottom: hp(25),
     ...commonFontStyle(400, 18, '#DCDCDC'),
   },
-  primaryButton: {
-    backgroundColor: '#FBE7BD',
-    borderRadius: 50,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowOffset: {width: 0, height: 4},
-    shadowRadius: 6,
-    elevation: 5,
+  buttonContainer: {
+    marginHorizontal: 35,
+    marginTop: hp(10),
   },
-  primaryButtonText: {
-    ...commonFontStyle(700, 17, '#000'),
+  primaryButton: {
+    marginBottom: hp(12),
+  },
+  secondaryButton: {
+    borderWidth: 2,
+    borderColor: colors._F4E2B8,
+    borderRadius: 100,
+    paddingVertical: hp(14),
+    paddingHorizontal: wp(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  secondaryButtonText: {
+    ...commonFontStyle(400, 22, colors._F4E2B8),
   },
   orText: {
     textAlign: 'center',
-    marginVertical: 10,
+    marginVertical: hp(12),
     ...commonFontStyle(500, 15, '#FFFFFF'),
   },
 });

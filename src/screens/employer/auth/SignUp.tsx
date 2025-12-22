@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import {
+  Animated,
   Dimensions,
   Image,
   NativeSyntheticEvent,
@@ -59,6 +60,7 @@ import CountryPicker, {Country} from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
 import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
 import {useRoute} from '@react-navigation/native';
+import Tooltip from '../../../component/common/Tooltip';
 
 const {width} = Dimensions.get('window');
 
@@ -109,6 +111,10 @@ const SignUp = () => {
   const [timer, setTimer] = useState(30);
 
   const [isVisible, setIsVisible] = useState<null | string>(null);
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   const options = [
     "I'm currently working in hospitality",
@@ -290,17 +296,73 @@ const SignUp = () => {
   };
 
   const nextStep = () => {
-    dispatch(
-      setCreateEmployeeAccount({
-        step: signupData.step + 1,
+    // Fade out and slide left
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
       }),
-    );
+      Animated.timing(slideAnim, {
+        toValue: -50,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      dispatch(
+        setCreateEmployeeAccount({
+          step: signupData.step + 1,
+        }),
+      );
+      // Reset and fade in from right
+      slideAnim.setValue(50);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
   };
   const prevStep = (num: number) => {
     if (num == 1) {
       navigationRef.goBack();
     } else {
-      updateSignupData({step: step - 1});
+      // Fade out and slide right
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 50,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        updateSignupData({step: step - 1});
+        // Reset and fade in from left
+        slideAnim.setValue(-50);
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
     }
   };
 
@@ -372,14 +434,19 @@ const SignUp = () => {
   };
 
   const renderStep = () => {
+    const animatedStyle = {
+      opacity: fadeAnim,
+      transform: [{ translateX: slideAnim }],
+    };
+
     switch (step || 1) {
       case 1:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
-              <Text style={styles.title}>{t(`What's your full name?`)}</Text>
+              <Text style={styles.title}>{t(`Hi! Let’s start with your full name 🙂 Please enter your first and last name`)}</Text>
               <CustomTextInput
-                placeholder={t('Type your name here')}
+                placeholder={t('ex. John smith')}
                 placeholderTextColor={colors._F4E2B8}
                 onChangeText={text => updateSignupData({name: text})}
                 value={name}
@@ -400,15 +467,15 @@ const SignUp = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 2:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
-                {t('What is your email address?')}
+                {t('Great! Can you share your email so we can create your account?')}
               </Text>
               <CustomTextInput
                 placeholder={t('Type your email here')}
@@ -435,12 +502,12 @@ const SignUp = () => {
                 handleRegister(true);
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 3:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               {/* <View style={styles.info_row}>
@@ -522,12 +589,12 @@ const SignUp = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 4:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('What is your phone number?')}
@@ -564,12 +631,12 @@ const SignUp = () => {
                 handleRegister();
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 5:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
               {timer !== 0 && (
@@ -625,12 +692,12 @@ const SignUp = () => {
                 handleOTPVerify();
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 6:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Which best describes you?')}</Text>
               <CustomTextInput
@@ -674,12 +741,12 @@ const SignUp = () => {
               title={'Next'}
               onPress={nextStep}
             />
-          </View>
+          </Animated.View>
         );
 
       case 7:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('What is your date of birth?')}
@@ -731,7 +798,7 @@ const SignUp = () => {
                       marginLeft: 0,
                     },
                   ]}>
-                  {selected1 ? selected1 : t('What is your gender?')}
+                  {selected1 ? selected1 : t('Choose the option that best fits you')}
                 </Text>
               </Pressable>
               <View style={styles.underline} />
@@ -770,16 +837,24 @@ const SignUp = () => {
                 nextStep();
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 8:
         return (
-          <View style={[styles.innerConrainer, {}]}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <ScrollView
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}>
-              <Text style={styles.title}>{t('Select your nationality ')}</Text>
+              <View style={styles.fieldHeader}>
+                <Text style={styles.fieldHeaderText}>{t('Select your nationality ')}</Text>
+                <Tooltip
+                  message={t('This helps hotels understand your background and visa options.')}
+                  position="bottom"
+                  containerStyle={styles.tooltipIcon}
+                  tooltipBoxStyle={{right: wp(-10), top: hp(30), width: wp(280), maxWidth: wp(280)}}
+                />
+              </View>
               <TouchableOpacity
                 style={[styles.dateRow, {alignItems: 'center'}]}
                 onPress={() => {
@@ -799,9 +874,15 @@ const SignUp = () => {
 
               <View style={styles.underline} />
 
-              <Text style={[styles.title, {marginTop: 27}]}>
-                {t('Where are you currently residing?')}
-              </Text>
+              <View style={[styles.fieldHeader, {marginTop: hp(27)}]}>
+                <Text style={styles.fieldHeaderText}>{t('Where are you currently residing?')}</Text>
+                <Tooltip
+                  message={t('Used to match you with jobs near you or offering relocation support.')}
+                  position="bottom"
+                  containerStyle={styles.tooltipIcon}
+                  tooltipBoxStyle={{right: wp(-10), top: hp(30), width: wp(280), maxWidth: wp(280)}}
+                />
+              </View>
               <TouchableOpacity
                 style={[styles.dateRow, {alignItems: 'center', marginTop: 27}]}
                 onPress={() => {
@@ -861,12 +942,12 @@ const SignUp = () => {
                 }
               }}
             />
-          </View>
+          </Animated.View>
         );
 
       case 9:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
                 {t('How about adding your photo?')}
@@ -908,12 +989,12 @@ const SignUp = () => {
               title={t('Finish Setup')}
               onPress={handleFinishSetup}
             />
-          </View>
+          </Animated.View>
         );
 
       case 10:
         return (
-          <View style={styles.innerConrainer}>
+          <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Completion Acknowledgment')}</Text>
               <Text style={styles.infotext1}>
@@ -937,23 +1018,32 @@ const SignUp = () => {
                 }}
               />
             </View>
-          </View>
+          </Animated.View>
         );
       default:
         return null;
     }
   };
+  const totalSteps = 10;
+
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
-      <Progress.Bar
-        progress={(step * 12) / 100}
-        width={SCREEN_WIDTH}
-        borderRadius={0}
-        animated
-        height={13}
-        borderWidth={0}
-        color={colors._F3E1B7}
-      />
+      <View style={styles.progressContainer}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.progressText}>
+            {t('Step')} {step} {t('of')} {totalSteps}
+          </Text>
+        </View>
+        <Progress.Bar
+          progress={step / totalSteps}
+          width={SCREEN_WIDTH - wp(70)}
+          borderRadius={0}
+          animated
+          height={13}
+          borderWidth={0}
+          color={colors._F3E1B7}
+        />
+      </View>
       <KeyboardAwareScrollView
         enableAutomaticScroll
         scrollEnabled={false}
@@ -1009,6 +1099,19 @@ const SignUp = () => {
 export default SignUp;
 
 const styles = StyleSheet.create({
+  progressContainer: {
+    paddingTop: hp(8),
+    paddingHorizontal: wp(35),
+    marginBottom: hp(10),
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: hp(6),
+  },
+  progressText: {
+    ...commonFontStyle(500, 14, colors.white),
+  },
   rowView: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1037,6 +1140,21 @@ const styles = StyleSheet.create({
   scrollcontainer: {
     flex: 1,
     // justifyContent: 'space-between',
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    columnGap: wp(8),
+  },
+  fieldHeaderText: {
+    flex: 1,
+    flexWrap: 'wrap',
+    ...commonFontStyle(500, 25, colors.white),
+    paddingTop: hp(30),
+  },
+  tooltipIcon: {
+    marginTop: hp(6),
   },
   backBtn: {
     alignSelf: 'flex-start',
@@ -1184,7 +1302,7 @@ const styles = StyleSheet.create({
     marginTop: 67,
   },
   dateText: {
-    ...commonFontStyle(400, 22, colors._F4E2B8),
+    ...commonFontStyle(400, 20, colors._F4E2B8),
     marginLeft: 10,
   },
   underline: {

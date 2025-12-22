@@ -2,7 +2,6 @@ import {
   Animated,
   FlatList,
   Image,
-  Keyboard,
   Platform,
   Pressable,
   ScrollView,
@@ -21,7 +20,6 @@ import {
   LocationContainer,
 } from '../../../component';
 import { useTranslation } from 'react-i18next';
-import AnimatedSwitcher from '../../../component/common/AnimatedSwitcher';
 import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
@@ -67,7 +65,6 @@ import {
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import BaseText from '../../../component/common/BaseText';
 import CharLength from '../../../component/common/CharLength';
-import CustomDatePicker from '../../../component/common/CustomDatePicker';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Tooltip from '../../../component/common/Tooltip';
 

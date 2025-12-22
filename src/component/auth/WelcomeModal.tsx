@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import {IMAGES} from '../../assets/Images';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {useTranslation} from 'react-i18next';
 import Modal from 'react-native-modal';
@@ -12,7 +12,6 @@ const WelcomeModal = ({
   onClose,
   description,
   ButtonContainer,
-  style,
 }: {
   visible: boolean;
   name?: string;
@@ -40,13 +39,13 @@ const WelcomeModal = ({
         />
 
         <Text style={styles.welcomeText}>
-          {t('Welcome')} {name}
+          {t('Welcome')}, {name} 👋
         </Text>
 
         <Text style={styles.messageText}>
           {description ||
             t(
-              'Your account has been created successfully! You’re all set to explore hospitality opportunities tailored just for you.',
+              'Your account has been created successfully. You\'re ready to explore hospitality opportunities tailored for you.',
             )}
         </Text>
         {/* <Text style={styles.messageText}>
@@ -56,7 +55,7 @@ const WelcomeModal = ({
 
         {ButtonContainer || (
           <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>{t('Lets get your job!')}</Text>
+            <Text style={styles.buttonText}>{t("Let's find your job!")}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -103,8 +102,10 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginTop: 24,
     height: 63,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(20),
+    width: '100%',
   },
   buttonText: {
     ...commonFontStyle(400, 22, colors.white),

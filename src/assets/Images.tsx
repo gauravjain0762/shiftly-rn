@@ -133,6 +133,10 @@ export const IMAGES = {
   postFill: require('./image/postFill.png'),
   post_off: require('./image/post.png'),
   post_1: require('./image/post_1.png'),
+  appliedjob: require('./image/appliedjob.png'),
+  jobview: require('./image/jobview.png'),
+  shortlisted: require('./image/shortlisted.png'),
+  suggested_candidate: require('./image/suggested_candidate.png'),
 
   //extra
   logo: require('./extra/logo.png'),

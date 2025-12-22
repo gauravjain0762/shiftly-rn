@@ -1,9 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,7 +18,6 @@ import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { IMAGES } from '../../../assets/Images';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../../theme/colors';
-import ApplicantCard from '../../../component/common/ApplicantCard';
 import {
   useAddShortlistEmployeeMutation,
   useGetCompanyJobDetailsQuery,
@@ -38,7 +35,7 @@ import { useDispatch } from 'react-redux';
 import { setJobFormState } from '../../../features/companySlice';
 import moment from 'moment';
 import BaseText from '../../../component/common/BaseText';
-import ExpandableText from '../../../component/common/ExpandableText';
+import CustomImage from '../../../component/common/CustomImage';
 import {
   Briefcase,
   Wallet,
@@ -48,8 +45,6 @@ import {
   Users,
 } from 'lucide-react-native';
 
-const Tabs = ['Applicants', 'Invited', 'Shortlisted', 'Suggested Matches (AI)'];
-
 const CoJobDetails = () => {
   const { t } = useTranslation();
   const { params } = useRoute<any>();
@@ -57,13 +52,21 @@ const CoJobDetails = () => {
   const job_id = params?._id as any;
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
-  const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+  const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(3);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+
+  const metricOptions = [
+    { key: 'job_view', label: 'Total', subLabel: 'Job View', icon: IMAGES.jobview },
+    { key: 'applied', label: 'Total Job', subLabel: 'Applied', icon: IMAGES.appliedjob },
+    { key: 'suggested', label: 'Suggested', subLabel: 'Candidate', icon: IMAGES.suggested_candidate },
+    { key: 'shortlisted', label: 'Total', subLabel: 'Shortlisted', icon: IMAGES.shortlisted },
+  ];
   const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const jobDetail = data?.data;
   console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail);
-  
+
   // Capitalize first letter of posted time
   const postedTime = getPostedTime(jobDetail?.createdAt);
   const capitalizedPostedTime = postedTime ? postedTime.charAt(0).toUpperCase() + postedTime.slice(1) : '';
@@ -165,164 +168,266 @@ const CoJobDetails = () => {
             <BackHeader
               type="company"
               isRight={false}
-              title={jobDetail?.title || 'N/A'}
+              title="Jobs Detail"
               titleStyle={styles.title}
               containerStyle={styles.header}
-              RightIcon={
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsShareModalVisible(true);
-                  }}
-                  style={styles.iconButton}>
-                  <Image
-                    source={IMAGES.share}
-                    resizeMode="contain"
-                    style={styles.icon}
-                  />
-                </TouchableOpacity>
-              }
             />
 
             <View style={styles.bodyContainer}>
-              {/* <Text style={styles.jobId}>{`Job ID: ${jobDetail?._id || '-'
-                }`}</Text> */}
+              {/* Job Posting Card */}
+              <View style={styles.jobPostCard}>
+                <View style={styles.jobPostHeader}>
+                  <View style={styles.companyLogoContainer}>
+                    <CustomImage
+                      uri={jobDetail?.company_id?.logo}
+                      source={IMAGES.dummy_cover}
+                      containerStyle={styles.companyLogo}
+                      imageStyle={{ width: '100%', height: '100%' }}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <View style={styles.jobPostHeaderRight}>
+                    <Text style={styles.companyName}>
+                      {jobDetail?.company_id?.company_name || 'N/A'}
+                    </Text>
+                    <Text style={styles.companyLocation}>
+                      {jobDetail?.address || 'N/A'}
+                    </Text>
+                  </View>
+                  <View style={styles.jobPostActions}>
+                    <TouchableOpacity
+                      onPress={() => setIsShareModalVisible(true)}
+                      style={styles.actionIconButton}>
+                      <Image
+                        source={IMAGES.share}
+                        resizeMode="contain"
+                        style={styles.actionIcon}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setIsFavorite(!isFavorite)}
+                      style={styles.actionIconButton}>
+                      <Image
+                        source={isFavorite ? IMAGES.like : IMAGES.hart}
+                        resizeMode="contain"
+                        style={styles.actionIcon}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-              <View style={styles.dateAndLocationContainer}>
-                <Text style={styles.postedTime}>{capitalizedPostedTime}</Text>
-                <View style={styles.addressContainer}>
-                  <Image source={IMAGES.location} style={styles.locationIcon} />
-                  <Text style={styles.location}>{jobDetail?.address}</Text>
+                <Text style={styles.jobTitle}>{jobDetail?.title || 'N/A'}</Text>
+
+                <Text numberOfLines={3} style={styles.jobDescriptionSnippet}>
+                  {jobDetail?.description || 'N/A'}
+                </Text>
+
+                <View style={styles.jobPostFooter}>
+                  <View style={styles.applicantCountContainer}>
+                    {jobDetail?.applicants?.slice(0, 3).map((item: any, index: number) => (
+                      <View key={index} style={[styles.applicantAvatar, { marginLeft: index > 0 ? wp(-8) : 0 }]}>
+                        <CustomImage
+                          uri={item?.user_id?.picture}
+                          source={IMAGES.avatar}
+                          containerStyle={styles.applicantAvatarImage}
+                          imageStyle={{ width: '100%', height: '100%' }}
+                          resizeMode="cover"
+                        />
+                      </View>
+                    ))}
+                    <Text style={styles.applicantCountText}>
+                      +{jobDetail?.applicants?.length || 0} Applicants
+                    </Text>
+                  </View>
+                  <View style={styles.jobTypeTag}>
+                    <Text style={styles.jobTypeText}>
+                      {jobDetail?.job_type || 'Full Time'}
+                    </Text>
+                  </View>
                 </View>
               </View>
 
-
-              {/* <Text style={styles.description}>{jobDetail?.description}</Text> */}
-              <ExpandableText
-                maxLines={5}
-                description={jobDetail?.description || '-'}
-                descriptionStyle={styles.description}
-                showStyle={{ paddingHorizontal: 0 }}
-              />
-
-              <View style={styles.jobDetailsContainer}>
-                <Text style={styles.sectionTitle}>{t('Job Details')}</Text>
-
-                <FlatList
-                  numColumns={3}
-                  scrollEnabled={false}
-                  data={JobDetailsArr}
-                  keyExtractor={(_, index) => index.toString()}
-                  contentContainerStyle={styles.flatListContent}
-                  renderItem={({ item }) => (
-                    <View style={styles.detailItem}>
-                      <View style={styles.iconWrapper}>{item.icon}</View>
-                      <Text style={styles.detailKey}>{item.key}</Text>
-                      <Text style={styles.detailValue}>{item.value || '-'}</Text>
-                    </View>
-                  )}
-                />
-
-              </View>
-
-              <View style={styles.bottomContainer}>
-                <View style={styles.tabContainer}>
-                  {Tabs?.map((item, index) => (
-                    <Pressable
+              {/* Metric Cards */}
+              <View style={styles.metricCardsContainer}>
+                {metricOptions.map((option, index) => {
+                  const isSelected = selectedMetricIndex === index;
+                  return (
+                    <TouchableOpacity
                       key={index}
-                      style={styles.tabItem}
-                      onPress={() => setSelectedTabIndex(index)}>
-                      <Text style={styles.tabText}>{item}</Text>
-                      {selectedTabIndex === index && (
-                        <View style={styles.tabIndicator} />
-                      )}
-                    </Pressable>
-                  ))}
-                </View>
+                      activeOpacity={0.7}
+                      onPress={() => setSelectedMetricIndex(index)}
+                      style={[
+                        styles.metricCard,
+                        isSelected && styles.metricCardHighlighted,
+                      ]}>
+                      <Image
+                        source={option.icon}
+                        resizeMode="contain"
+                        style={[
+                          styles.metricIcon,
+                          { tintColor: isSelected ? colors.white : '#CDA953' }
+                        ]}
+                      />
+                      <View style={styles.metricTextContainer}>
+                        <Text
+                          style={
+                            isSelected
+                              ? styles.metricLabelBoldWhite
+                              : styles.metricLabelBold
+                          }>
+                          {option.label}
+                        </Text>
+                        <Text
+                          style={
+                            isSelected
+                              ? styles.metricLabelBoldWhite
+                              : styles.metricLabelBold
+                          }>
+                          {option.subLabel}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
 
-                <View style={styles.divider} />
-                {selectedTabIndex === 0 ? (
+              {/* Candidate List */}
+              <View style={styles.candidateListContainer}>
+                {selectedMetricIndex === 0 && (
+                  // Total Job View - Show empty or placeholder
+                  <View style={styles.emptyState}>
+                    <BaseText>No job viewers</BaseText>
+                  </View>
+                )}
+
+                {selectedMetricIndex === 1 && (
+                  // Total Job Applied - Show applicants
                   jobDetail?.applicants?.length > 0 ? (
-                    jobDetail?.applicants?.map((item: any, index: number) => {
+                    jobDetail.applicants.map((item: any, index: number) => {
                       if (item === null) return null;
                       return (
-                        <ApplicantCard
-                          key={index}
-                          item={item}
-                          handleShortListEmployee={() =>
-                            handleShortListEmployee(item)
-                          }
-                          onPressChat={() => {
-                            navigateTo(SCREENS.CoChat, {
-                              data: item,
-                              mainjob_data: jobDetail,
-                              isFromJobDetail: true,
-                            });
-                          }}
-                        />
+                        <View key={index} style={styles.candidateCard}>
+                          <CustomImage
+                            uri={item?.user_id?.picture}
+                            source={IMAGES.avatar}
+                            containerStyle={styles.candidateAvatar}
+                            imageStyle={{ width: '100%', height: '100%' }}
+                            resizeMode="cover"
+                          />
+                          <View style={styles.candidateInfo}>
+                            <Text style={styles.candidateName}>
+                              {item?.user_id?.name || 'N/A'}
+                            </Text>
+                            <Text style={styles.candidateRole}>
+                              {item?.user_id?.responsibility || 'N/A'}
+                            </Text>
+                            <Text style={styles.candidateExperience}>
+                              {item?.user_id?.years_of_experience || item?.user_id?.experience || '0'}y Experience
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.inviteButton}
+                            onPress={() => {
+                              // TODO: Handle invite action
+                              console.log('Invite pressed for:', item?.user_id?.name);
+                            }}>
+                            <Text style={styles.inviteButtonText}>Invite</Text>
+                          </TouchableOpacity>
+                        </View>
                       );
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText>There are no applicants</BaseText>
+                      <BaseText>No applicants</BaseText>
                     </View>
                   )
-                ) : null}
+                )}
 
-                {selectedTabIndex === 1 &&
-                  (jobDetail?.invited_users?.length > 0 ? (
-                    jobDetail?.invited_users?.map(
-                      (item: any, index: number) => {
-                        if (item === null) return null;
-                        return (
-                          <ApplicantCard
-                            key={index}
-                            item={item}
-                            showShortListButton={false}
-                            onPressChat={() => {
-                              navigateTo(SCREENS.CoChat, {
-                                data: item,
-                                mainjob_data: jobDetail,
-                                isFromJobDetail: true,
-                              });
-                            }}
-                            selectedTabIndex={selectedTabIndex}
+                {selectedMetricIndex === 2 && (
+                  // Suggested Candidate - Show suggested matches (from lines 381-382 area)
+                  jobDetail?.suggested_matches?.length > 0 ? (
+                    jobDetail.suggested_matches.map((item: any, index: number) => {
+                      if (item === null) return null;
+                      return (
+                        <View key={index} style={styles.candidateCard}>
+                          <CustomImage
+                            resizeMode="cover"
+                            source={IMAGES.avatar}
+                            containerStyle={styles.candidateAvatar}
+                            uri={item?.user_id?.picture || item?.picture}
+                            imageStyle={{ width: '100%', height: '100%' }}
                           />
-                        );
-                      },
-                    )
+                          <View style={styles.candidateInfo}>
+                            <Text style={styles.candidateName}>
+                              {item?.user_id?.name || item?.name || 'N/A'}
+                            </Text>
+                            <Text style={styles.candidateRole}>
+                              {item?.user_id?.responsibility || item?.responsibility || 'N/A'}
+                            </Text>
+                            <Text style={styles.candidateExperience}>
+                              {item?.user_id?.years_of_experience || item?.years_of_experience || item?.experience || '0'}y Experience
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.inviteButton}
+                            onPress={() => {
+                              // TODO: Handle invite action
+                              console.log('Invite pressed for:', item?.user_id?.name || item?.name);
+                            }}>
+                            <Text style={styles.inviteButtonText}>Invite</Text>
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText>There are no invited users</BaseText>
+                      <BaseText>No suggested candidates</BaseText>
                     </View>
-                  ))}
+                  )
+                )}
 
-                {selectedTabIndex === 2 &&
-                  (jobDetail?.shortlisted?.length > 0 ? (
+                {selectedMetricIndex === 3 && (
+                  // Total Shortlisted - Show shortlisted employees
+                  jobDetail?.shortlisted?.length > 0 ? (
                     jobDetail.shortlisted.map((item: any, index: number) => {
                       if (item === null) return null;
                       return (
-                        <ApplicantCard
-                          key={index}
-                          item={item}
-                          showShortListButton={false}
-                          handleRemoveShortListEmployee={() => {
-                            handleRemoveShortListEmployee(item);
-                          }}
-                          onPressChat={() => {
-                            navigateTo(SCREENS.CoChat, {
-                              data: item,
-                              mainjob_data: jobDetail,
-                              isFromJobDetail: true,
-                            });
-                          }}
-                        />
+                        <View key={index} style={styles.candidateCard}>
+                          <CustomImage
+                            uri={item?.user_id?.picture}
+                            source={IMAGES.avatar}
+                            containerStyle={styles.candidateAvatar}
+                            imageStyle={{ width: '100%', height: '100%' }}
+                            resizeMode="cover"
+                          />
+                          <View style={styles.candidateInfo}>
+                            <Text style={styles.candidateName}>
+                              {item?.user_id?.name || 'N/A'}
+                            </Text>
+                            <Text style={styles.candidateRole}>
+                              {item?.user_id?.responsibility || 'N/A'}
+                            </Text>
+                            <Text style={styles.candidateExperience}>
+                              {item?.user_id?.years_of_experience || item?.user_id?.experience || '0'}y Experience
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            style={styles.inviteButton}
+                            onPress={() => {
+                              // TODO: Handle invite action
+                              console.log('Invite pressed for:', item?.user_id?.name);
+                            }}>
+                            <Text style={styles.inviteButtonText}>Invite</Text>
+                          </TouchableOpacity>
+                        </View>
                       );
                     })
                   ) : (
                     <View style={styles.emptyState}>
                       <BaseText>No shortlisted applicants</BaseText>
                     </View>
-                  ))}
+                  )
+                )}
               </View>
             </View>
           </ScrollView>
@@ -582,5 +687,189 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
+  },
+  jobPostCard: {
+    backgroundColor: colors.white,
+    borderRadius: wp(20),
+    padding: hp(15),
+    marginTop: hp(15),
+    marginBottom: hp(20),
+  },
+  jobPostHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp(12),
+  },
+  companyLogoContainer: {
+    width: wp(60),
+    height: hp(60),
+    borderRadius: wp(30),
+    overflow: 'hidden',
+    backgroundColor: colors._F4E2B8,
+  },
+  companyLogo: {
+    width: '100%',
+    height: '100%',
+    borderRadius: wp(30),
+  },
+  jobPostHeaderRight: {
+    flex: 1,
+    marginLeft: wp(12),
+  },
+  companyName: {
+    ...commonFontStyle(600, 16, colors._0B3970),
+    marginBottom: hp(4),
+  },
+  companyLocation: {
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+  },
+  jobPostActions: {
+    flexDirection: 'row',
+    gap: wp(8),
+  },
+  actionIconButton: {
+    width: wp(32),
+    height: hp(32),
+    borderRadius: hp(16),
+    backgroundColor: colors._F4E2B8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionIcon: {
+    width: wp(16),
+    height: hp(16),
+    tintColor: colors._0B3970,
+  },
+  jobTitle: {
+    ...commonFontStyle(700, 20, colors._0B3970),
+    marginBottom: hp(8),
+  },
+  jobDescriptionSnippet: {
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+    marginBottom: hp(12),
+    lineHeight: hp(20),
+  },
+  jobPostFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  applicantCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  applicantAvatar: {
+    width: wp(28),
+    height: hp(28),
+    borderRadius: wp(14),
+    borderWidth: 2,
+    borderColor: colors.white,
+    overflow: 'hidden',
+  },
+  applicantAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  applicantCountText: {
+    marginLeft: wp(8),
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+  },
+  jobTypeTag: {
+    backgroundColor: colors._0B3970,
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(16),
+    borderRadius: hp(20),
+  },
+  jobTypeText: {
+    ...commonFontStyle(500, 12, colors.white),
+  },
+  metricCardsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: wp(12),
+    marginBottom: hp(20),
+  },
+  metricCard: {
+    width: '47%',
+    backgroundColor: colors.white,
+    borderRadius: wp(15),
+    padding: hp(15),
+    paddingVertical: hp(20),
+    alignItems: 'center',
+    borderWidth: 1,
+    flexDirection: 'row',
+    borderColor: '#CDA953',
+    justifyContent: 'flex-start',
+    gap: wp(12),
+  },
+  metricCardHighlighted: {
+    backgroundColor: colors._0B3970,
+    borderColor: colors._0B3970,
+  },
+  metricIcon: {
+    width: wp(34),
+    height: hp(34),
+  },
+  metricTextContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  metricLabelBold: {
+    ...commonFontStyle(700, 14, colors.black),
+    marginBottom: hp(2),
+  },
+  metricLabel: {
+    ...commonFontStyle(500, 16, colors.black),
+  },
+  metricLabelBoldWhite: {
+    ...commonFontStyle(500, 16, colors.white),
+    marginBottom: hp(2),
+  },
+  metricLabelWhite: {
+    ...commonFontStyle(500, 12, colors.white),
+  },
+  candidateListContainer: {
+    marginTop: hp(20),
+  },
+  candidateCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: wp(20),
+    padding: hp(12),
+    marginBottom: hp(10),
+    borderWidth: 1,
+    borderColor: colors._C9B68B,
+  },
+  candidateAvatar: {
+    width: wp(60),
+    height: hp(60),
+    borderRadius: wp(30),
+    overflow: 'hidden',
+  },
+  candidateInfo: {
+    flex: 1,
+    marginLeft: wp(12),
+  },
+  candidateName: {
+    ...commonFontStyle(700, 18, colors._0B3970),
+    marginBottom: hp(4),
+  },
+  candidateRole: {
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+    marginBottom: hp(2),
+  },
+  candidateExperience: {
+    ...commonFontStyle(400, 13, colors._939393),
+  },
+  inviteButton: {
+    backgroundColor: colors._0B3970,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(20),
+    borderRadius: hp(50),
+  },
+  inviteButtonText: {
+    ...commonFontStyle(500, 12, colors.white),
   },
 });

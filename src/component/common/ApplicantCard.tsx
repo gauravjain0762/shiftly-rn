@@ -12,6 +12,7 @@ import {IMAGES} from '../../assets/Images';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import BaseText from './BaseText';
+import {Video} from 'lucide-react-native';
 
 type Props = {
   item: any;
@@ -20,6 +21,8 @@ type Props = {
   showShortListButton?: boolean;
   handleShortListEmployee?: () => void;
   handleRemoveShortListEmployee?: () => void;
+  onPressInterview?: () => void;
+  onPressRating?: () => void;
 };
 
 const ApplicantCard = ({
@@ -29,8 +32,13 @@ const ApplicantCard = ({
   handleShortListEmployee,
   showShortListButton = true,
   handleRemoveShortListEmployee,
+  onPressInterview,
+  onPressRating,
 }: Props) => {
   const {t} = useTranslation();
+  
+  // Get rating from item (assuming it might be in item.rating or item.user_id.rating)
+  const rating = item?.rating || item?.user_id?.rating || 80;
 
   return (
     <View style={styles.cardContainer}>
@@ -58,32 +66,58 @@ const ApplicantCard = ({
           </BaseText> */}
         </View>
         <View style={styles.actionContainer}>
-          <Pressable onPress={onPressChat} style={styles.chatButton}>
-            <Image source={IMAGES.chat} />
-          </Pressable>
-          {selectedTabIndex !== 1 && (
-            <TouchableOpacity
-              activeOpacity={0.5}
-              onPress={
-                !showShortListButton
-                  ? handleRemoveShortListEmployee
-                  : handleShortListEmployee
-              }
-              style={styles.actionButton}>
-              <BaseText style={styles.actionText}>
-                {t(!showShortListButton ? 'Remove' : 'Shortlist')}
-              </BaseText>
-            </TouchableOpacity>
+          {selectedTabIndex === 2 ? (
+            // Shortlisted tab - Show Interview and Rating buttons
+            <>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={onPressInterview || (() => {})}
+                style={styles.interviewButton}>
+                <Video size={16} color={colors._0B3970} />
+                <BaseText style={styles.interviewButtonText}>
+                  {t('Interview')}
+                </BaseText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={onPressRating || (() => {})}
+                style={styles.ratingButton}>
+                <BaseText style={styles.ratingButtonText}>
+                  {t('Rating')}: {rating}%
+                </BaseText>
+              </TouchableOpacity>
+            </>
+          ) : (
+            // Other tabs - Show chat, shortlist/remove, and view profile
+            <>
+              <Pressable onPress={onPressChat} style={styles.chatButton}>
+                <Image source={IMAGES.chat} />
+              </Pressable>
+              {selectedTabIndex !== 1 && (
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  onPress={
+                    !showShortListButton
+                      ? handleRemoveShortListEmployee
+                      : handleShortListEmployee
+                  }
+                  style={styles.actionButton}>
+                  <BaseText style={styles.actionText}>
+                    {t(!showShortListButton ? 'Remove' : 'Shortlist')}
+                  </BaseText>
+                </TouchableOpacity>
+              )}
+              <View
+                style={[
+                  styles.actionButton,
+                  {
+                    marginTop: hp(4),
+                  },
+                ]}>
+                <BaseText style={styles.actionText}>{t('View Profile')}</BaseText>
+              </View>
+            </>
           )}
-          <View
-            style={[
-              styles.actionButton,
-              {
-                marginTop: hp(4),
-              },
-            ]}>
-            <BaseText style={styles.actionText}>{t('View Profile')}</BaseText>
-          </View>
         </View>
       </View>
     </View>
@@ -147,5 +181,32 @@ const styles = StyleSheet.create({
   },
   actionText: {
     ...commonFontStyle(500, 11, colors.white),
+  },
+  interviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: hp(8),
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    backgroundColor: colors.white,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(16),
+    marginBottom: hp(8),
+    gap: wp(6),
+  },
+  interviewButtonText: {
+    ...commonFontStyle(500, 12, colors._0B3970),
+  },
+  ratingButton: {
+    borderRadius: hp(8),
+    backgroundColor: colors._0B3970,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ratingButtonText: {
+    ...commonFontStyle(500, 12, colors.white),
   },
 });
