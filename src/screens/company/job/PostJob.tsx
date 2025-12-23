@@ -167,12 +167,14 @@ const PostJob = () => {
   const { data: businessTypesData } = useGetBusinessTypesQuery({});
   const businessTypes = businessTypesData?.data?.types as any[];
   const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
-  const shouldSkip = !(steps === 5 && skillId.length > 0);
-  const { data: suggestedData } = useGetSuggestedEmployeesQuery(skillId, {
-    skip: shouldSkip,
+  const shouldSkip = !(steps === 5 && !!job_id);
+  const { data: suggestedData } = useGetSuggestedEmployeesQuery(job_id, {
+    skip: shouldSkip || !job_id,
   });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
+  const [createdJobId, setCreatedJobId] = useState<string>('');
+  const [createdJobData, setCreatedJobData] = useState<any>(null);
   const { userInfo } = useAppSelector((state: any) => state.auth);
   const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] = useState(false);
 
@@ -492,7 +494,6 @@ const PostJob = () => {
       skills: skillId?.join(','),
       facilities: selected?.map((item: any) => item._id).join(','),
       requirements: requirements?.join(','),
-      invite_users: selectedEmployeeIds?.join(','),
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);
@@ -511,6 +512,16 @@ const PostJob = () => {
       }
 
       if (response?.status) {
+        const newJobId =
+          response?.data?.job_id ||
+          response?.data?._id ||
+          response?.data?.id ||
+          response?.data;
+        if (newJobId) {
+          setCreatedJobId(String(newJobId));
+          updateJobForm({ job_id: String(newJobId) });
+        }
+        setCreatedJobData(response?.data || null);
         setTimeout(() => {
           if (!isSuccessModalVisible) {
             updateJobForm({ isSuccessModalVisible: true });
@@ -1051,8 +1062,8 @@ const PostJob = () => {
               <GradientButton
                 style={styles.btn}
                 type="Company"
-                title={t('Review your job resume')}
-                onPress={() => nextStep()}
+                title={t('Post')}
+                onPress={handleCreateJob}
               />
             </View>
           </Animated.View>
@@ -1485,11 +1496,31 @@ const PostJob = () => {
         <GradientButton
           style={styles.btn}
           type="Company"
-          title={t(editMode ? 'View Job Detail' : 'View Listing')}
+          title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
           onPress={() => {
+            updateJobForm({ isSuccessModalVisible: false });
+            if (editMode) {
+              setCreatedJobId('');
+              setCreatedJobData(null);
+              dispatch(resetJobFormState());
+              dispatch(setCoPostJobSteps(0));
+              navigationRef?.current?.goBack();
+              return;
+            }
+            const jobIdToUse = createdJobId || job_id;
+            const jobDataToUse = createdJobData;
             dispatch(resetJobFormState());
             dispatch(setCoPostJobSteps(0));
-            navigationRef?.current?.goBack();
+            setCreatedJobId('');
+            setCreatedJobData(null);
+            if (jobIdToUse) {
+              navigateTo(SCREENS.SuggestedEmployee, {
+                jobId: jobIdToUse,
+                jobData: jobDataToUse,
+              });
+            } else {
+              navigationRef?.current?.goBack();
+            }
           }}
         />
 
@@ -1498,6 +1529,8 @@ const PostJob = () => {
             dispatch(resetJobFormState());
             dispatch(setCoPostJobSteps(0));
             updateJobForm({ isSuccessModalVisible: false });
+            setCreatedJobId('');
+            setCreatedJobData(null);
             resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
           }}
           style={styles.modalHomeText}>
@@ -1520,8 +1553,10 @@ const styles = StyleSheet.create({
     paddingTop: hp(26),
   },
   title: {
-    marginRight: 'auto',
-    marginLeft: wp(((SCREEN_WIDTH - 70) / 2) * 0.5),
+    marginLeft: 0,
+    marginRight: 0,
+    textAlign: 'center',
+    alignSelf: 'center',
   },
   field: {
     gap: hp(12),

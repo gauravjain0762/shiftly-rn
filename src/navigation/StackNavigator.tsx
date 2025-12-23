@@ -32,6 +32,7 @@ import CoNotification from '../screens/company/notification/CoNotification';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store';
 import PostJob from '../screens/company/job/PostJob';
+import SuggestedEmployee from '../screens/company/job/SuggestedEmployee';
 import ForgotPassword from '../screens/company/auth/ForgotPassword';
 import CoMyProfile from '../screens/company/profile/CoMyProfile';
 import ChangePassword from '../screens/company/auth/ChangePassword';
@@ -369,6 +370,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoEditMyProfile}
           component={CoEditMyProfile}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.SuggestedEmployee}
+          component={SuggestedEmployee}
         />
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}

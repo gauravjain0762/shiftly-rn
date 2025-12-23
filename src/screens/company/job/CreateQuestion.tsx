@@ -16,12 +16,32 @@ import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
 import {Plus} from 'lucide-react-native';
-import {goBack} from '../../../utils/commonFunction';
+import {
+  goBack,
+  errorToast,
+  successToast,
+  navigateTo,
+  resetNavigation,
+} from '../../../utils/commonFunction';
+import {useRoute} from '@react-navigation/native';
+import {useSendInterviewInvitesMutation} from '../../../api/dashboardApi';
+import BottomModal from '../../../component/common/BottomModal';
+import {SCREENS} from '../../../navigation/screenNames';
+import {useAppSelector} from '../../../redux/hooks';
+import {selectJobForm} from '../../../features/companySlice';
+import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 
 const CreateQuestion = () => {
   const {t} = useTranslation();
+  const route = useRoute<any>();
+  const {jobId, invitePayload} = route.params || {};
   const [questionText, setQuestionText] = useState('');
   const [addedQuestions, setAddedQuestions] = useState<string[]>([]);
+  const [sendInvites, {isLoading}] = useSendInterviewInvitesMutation();
+  const {updateJobForm} = useJobFormUpdater();
+  const {isSuccessModalVisible} = useAppSelector((state: any) =>
+    selectJobForm(state),
+  );
 
   const predefinedQuestions = [
     'Describe your previous job experience relevant to this role?',
@@ -46,10 +66,57 @@ const CreateQuestion = () => {
     setAddedQuestions(updatedQuestions);
   };
 
-  const handleSubmit = () => {
-    // TODO: Handle submit action
-    console.log('Submitted questions:', addedQuestions);
-    goBack();
+  const handleSubmit = async () => {
+    if (!jobId || !invitePayload) {
+      errorToast(t('Missing invite information. Please try again.'));
+      return;
+    }
+
+    if (addedQuestions.length === 0) {
+      errorToast(t('Please add at least one question'));
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('job_id', jobId);
+    formData.append('invite_to', invitePayload.invite_to || 'specific');
+
+    if (
+      invitePayload.invite_to === 'specific' &&
+      Array.isArray(invitePayload.user_ids)
+    ) {
+      const filteredIds = invitePayload.user_ids.filter(
+        (id: string | null) => !!id,
+      );
+      if (!filteredIds.length) {
+        errorToast(t('Please select at least one employee'));
+        return;
+      }
+      formData.append('user_ids', filteredIds.join(','));
+    }
+
+    addedQuestions.forEach((question, index) => {
+      formData.append(`questions[${index}]`, question);
+    });
+
+    try {
+      const response = await sendInvites(formData).unwrap();
+      if (response?.status) {
+        successToast(response?.message || t('Invites sent successfully'));
+        updateJobForm({isSuccessModalVisible: true});
+        setQuestionText('');
+        setAddedQuestions([]);
+      } else {
+        errorToast(response?.message || t('Failed to send invites'));
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error?.data?.message ||
+        error?.data?.error ||
+        error?.message ||
+        t('Something went wrong. Please try again.');
+      errorToast(errorMessage);
+    }
   };
 
   return (
@@ -128,10 +195,46 @@ const CreateQuestion = () => {
         <GradientButton
           style={styles.submitButton}
           type="Company"
-          title={t('Submit')}
+          title={t('Proceed to AI Interview')}
           onPress={handleSubmit}
+          disabled={isLoading}
         />
       </View>
+
+      <BottomModal
+        visible={isSuccessModalVisible}
+        backgroundColor={colors.white}
+        onClose={() => updateJobForm({isSuccessModalVisible: false})}>
+        <View style={styles.modalIconWrapper}>
+          <View style={styles.modalIconCircle}>
+            <Text style={styles.modalIconCheck}>✓</Text>
+          </View>
+        </View>
+        <Text style={styles.modalTitle}>
+          {t('AI interviews successfully sent')}
+        </Text>
+        <Text style={styles.modalSubtitle}>
+          {t('Candidates will be automatically analyzed and scored')}
+        </Text>
+        <GradientButton
+          style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
+          type="Company"
+          title={t('View pending interviews')}
+          onPress={() => {
+            updateJobForm({isSuccessModalVisible: false});
+            navigateTo(SCREENS.CoJob);
+          }}
+        />
+        <GradientButton
+          style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
+          type="Company"
+          title={t('Back to dashboard')}
+          onPress={() => {
+            updateJobForm({isSuccessModalVisible: false});
+            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
+          }}
+        />
+      </BottomModal>
     </LinearContainer>
   );
 };
@@ -248,11 +351,42 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 20, '#FF4444'),
   },
   buttonContainer: {
-    paddingHorizontal: wp(35),
-    paddingBottom: hp(30),
     paddingTop: hp(10),
+    paddingBottom: hp(40),
+    paddingHorizontal: wp(35),
   },
   submitButton: {
     marginVertical: 0,
+  },
+  modalIconWrapper: {
+    alignItems: 'center',
+    marginBottom: hp(16),
+  },
+  modalIconCircle: {
+    width: wp(72),
+    height: wp(72),
+    borderRadius: wp(36),
+    backgroundColor: colors._0B3970,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalIconCheck: {
+    ...commonFontStyle(700, 28, colors.white),
+  },
+  modalTitle: {
+    textAlign: 'center',
+    marginBottom: hp(25),
+    ...commonFontStyle(700, 20, colors.black),
+  },
+  modalSubtitle: {
+    textAlign: 'center',
+    marginBottom: hp(25),
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+  },
+  modalPrimaryButton: {
+    marginVertical: 0,
+  },
+  modalButtonSpacing: {
+    marginVertical: hp(12),
   },
 });

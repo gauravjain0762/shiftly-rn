@@ -42,10 +42,28 @@ const BackHeader: FC<props> = ({
   leftStyle,
   type = 'employe',
 }) => {
+  const renderRightSection = () => {
+    if (isRight && !RightIcon) {
+      return (
+        <TouchableOpacity
+          style={[styles.rightWrapper, RightIconStyle]}
+          onPress={() => navigateTo(SCREENS.NotificationScreen)}>
+          <Image source={IMAGES.notification} style={styles.bell} />
+        </TouchableOpacity>
+      );
+    }
+
+    if (RightIcon) {
+      return <View style={styles.rightWrapper}>{RightIcon}</View>;
+    }
+
+    return <View style={styles.rightWrapper} />;
+  };
+
   return (
     <View style={[styles.header, containerStyle]}>
       <TouchableOpacity
-        style={[leftStyle]}
+        style={[styles.sideWrapper, leftStyle]}
         onPress={() => (onBackPress ? onBackPress() : navigationRef?.goBack())}>
         <Image
           source={IMAGES.backArrow}
@@ -56,6 +74,7 @@ const BackHeader: FC<props> = ({
         />
       </TouchableOpacity>
       <BaseText
+        numberOfLines={1}
         style={[
           styles.headerTitle,
           {color: type == 'employe' ? colors.white : colors._0B3970},
@@ -63,15 +82,7 @@ const BackHeader: FC<props> = ({
         ]}>
         {title}
       </BaseText>
-      {isRight && !RightIcon ? (
-        <TouchableOpacity
-          style={[styles.bellIcon, RightIconStyle]}
-          onPress={() => navigateTo(SCREENS.NotificationScreen)}>
-          <Image source={IMAGES.notification} style={styles.bell} />
-        </TouchableOpacity>
-      ) : (
-        RightIcon
-      )}
+      {renderRightSection()}
     </View>
   );
 };
@@ -79,7 +90,11 @@ const BackHeader: FC<props> = ({
 export default BackHeader;
 
 const styles = StyleSheet.create({
-  bellIcon: {},
+  rightWrapper: {
+    width: wp(44),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   bell: {
     width: wp(30),
     height: wp(30),
@@ -87,16 +102,22 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: hp(16),
   },
   headerTitle: {
+    flex: 1,
     ...commonFontStyle(600, 22, colors.white),
+    textAlign: 'center',
   },
   back: {
     width: wp(21),
     height: wp(21),
     resizeMode: 'contain',
+  },
+  sideWrapper: {
+    width: wp(44),
+    alignItems: 'flex-start',
+    justifyContent: 'center',
   },
 });

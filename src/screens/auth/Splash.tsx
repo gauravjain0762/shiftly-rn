@@ -1,11 +1,9 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React, {useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {resetNavigation} from '../../utils/commonFunction';
 import {SCREENS} from '../../navigation/screenNames';
-import SplashScreen from 'react-native-splash-screen';
-import {IMAGES} from '../../assets/Images';
 import {SCREEN_HEIGHT, SCREEN_WIDTH} from '../../theme/fonts';
+import LottieView from 'lottie-react-native';
 import useRole, {RoleType} from '../../hooks/useRole';
 import {requestLocationPermission} from '../../utils/locationHandler';
 import {
@@ -20,6 +18,7 @@ import {
   setUserInfo,
 } from '../../features/authSlice';
 import {useAppDispatch} from '../../redux/hooks';
+import { colors } from '../../theme/colors';
 
 type Props = {};
 
@@ -143,10 +142,11 @@ const Splash = (props: Props) => {
 
   return (
     <View style={styles.container}>
-      <Image
-        resizeMode="cover"
-        source={IMAGES.splash_image}
-        style={styles.backgroundImage}
+      <LottieView
+        autoPlay
+        style={styles.lottie}
+        containerStyle={{alignSelf: 'center', justifyContent: 'center', flex: 1}}
+        source={require('../../assets/animation/shiftly_logo_Animation.json')}
       />
     </View>
   );
@@ -157,9 +157,10 @@ export default Splash;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.empPrimary,
   },
-  backgroundImage: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
+  lottie: {
+    width: 600,
+    height: 600,
   },
 });

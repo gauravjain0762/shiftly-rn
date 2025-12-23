@@ -56,22 +56,23 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    sendInterviewInvites: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.sendInterviewInvites,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+    }),
     getSuggestedEmployees: builder.query<any, any>({
-      query: skills => {
-        const queryParam = skills?.length ? `?skills=${skills.join(',')}` : '';
+      query: jobId => {
+        const queryParam = jobId ? `?job_id=${jobId}` : '';
         return {
           url: `${API.getSuggestedEmployees}${queryParam}`,
           method: HTTP_METHOD.GET,
         };
-      },
-      providesTags: ['GetSuggestedEmployees'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
-        try {
-          const {data} = await queryFulfilled;
-          console.log(data, 'GetSuggestedEmployees >>> datadata');
-        } catch (error) {
-          console.log('GetJobs Error', error);
-        }
       },
     }),
     getCompanyPosts: builder.query<any, any>({
@@ -744,14 +745,6 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
-    }),
-    sendInterviewInvites: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.sendInterviewInvites,
-        method: HTTP_METHOD.POST,
-        skipLoader: true,
-        data: credentials,
-      }),
     }),
   }),
 });
