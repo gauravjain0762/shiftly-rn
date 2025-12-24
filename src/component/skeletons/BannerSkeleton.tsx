@@ -7,13 +7,17 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 type Props = {
   backgroundColor?: string;
+  highlightColor?: string;
 };
 
 const BannerSkeleton = (props: Props) => {
+  const background = props?.backgroundColor || '#E0E0E0';
+  const highlight = props?.highlightColor || '#F5F5F5';
   return (
     <View>
       <SkeletonPlaceholder
-        backgroundColor={props.backgroundColor}
+        backgroundColor={background}
+        highlightColor={highlight}
         borderRadius={4}>
         <SkeletonPlaceholder.Item
           alignSelf="center"

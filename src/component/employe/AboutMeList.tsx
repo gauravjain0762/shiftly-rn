@@ -45,13 +45,13 @@ type Props = {
 const getDotColor = (level: string) => {
   switch (level) {
     case 'Native':
-      return '#F4E2B8';
+      return colors._0B3970;
     case 'Fluent':
-      return '#CBC194';
+      return colors._4A4A4A;
     case 'Intermediate':
-      return '#7390B1';
+      return colors._7B7878;
     case 'Basic':
-      return '#024AA1';
+      return colors._D9D9D9;
     default:
       return '#999';
   }
@@ -72,10 +72,12 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
             style={[
               styles.iconContainer,
               {
+                borderWidth:
+                  aboutEdit?.open_for_jobs === true ? hp(1.5) : 0,
                 borderColor:
                   aboutEdit?.open_for_jobs === true
-                    ? colors.coPrimary
-                    : colors._104686,
+                    ? colors._0B3970
+                    : 'transparent',
               },
             ]}>
             <Image source={IMAGES.check} style={styles.checkIcon} />
@@ -94,10 +96,12 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
             style={[
               styles.iconContainer,
               {
+                borderWidth:
+                  aboutEdit?.open_for_jobs === false ? hp(1.5) : 0,
                 borderColor:
                   aboutEdit?.open_for_jobs === false
-                    ? colors.coPrimary
-                    : colors._104686,
+                    ? colors._0B3970
+                    : 'transparent',
               },
             ]}>
             <Image source={IMAGES.close} style={styles.closeIcon} />
@@ -166,7 +170,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         </View>
       )}
 
-      <View>
+      <View style={{marginTop: hp(20)}}>
         <Text style={[styles.headerText, {marginTop: 0}]}>
           Select your language
         </Text>
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 29,
   },
   headerTitle: {
-    ...commonFontStyle(700, 18, '#F4E2B8'),
+    ...commonFontStyle(700, 18, colors._0B3970),
     marginTop: hp(15),
     marginBottom: hp(12),
   },
@@ -255,7 +259,7 @@ const styles = StyleSheet.create({
     gap: 11,
     borderBottomWidth: 1,
     paddingBottom: 28,
-    borderBottomColor: '#FFF8E6',
+    borderBottomColor: '#E6E6E6',
   },
   optionItem: {
     flexDirection: 'row',
@@ -271,7 +275,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: wp(40),
     height: hp(40),
-    borderWidth: hp(1.5),
     borderRadius: hp(40),
     alignItems: 'center',
     justifyContent: 'center',
@@ -280,16 +283,16 @@ const styles = StyleSheet.create({
     width: 18,
     height: 16,
     resizeMode: 'contain',
-    tintColor: colors._F4E2B8,
+    tintColor: colors._0B3970,
   },
   closeIcon: {
     width: 15,
     height: 13,
     resizeMode: 'contain',
-    tintColor: colors._F4E2B8,
+    tintColor: colors._0B3970,
   },
   iconWrapperText: {
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 18, colors._050505),
   },
   dropdownContainer: {
     // marginBottom: 20,
@@ -299,12 +302,12 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   headerText: {
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 18, colors._050505),
     marginBottom: 8,
   },
   skillsText: {
     marginTop: hp(20),
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 18, colors._050505),
   },
   selectedStyle: {
     height: 0,
@@ -313,7 +316,7 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   placeholderStyle: {
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
   languageListContainer: {
     gap: wp(4),
@@ -323,7 +326,8 @@ const styles = StyleSheet.create({
   },
   languageChip: {
     borderWidth: 1,
-    borderColor: '#FBE7BD',
+    borderColor: '#E0D7C8',
+    backgroundColor: colors.white,
     borderRadius: 16,
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -331,7 +335,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   languageChipText: {
-    ...commonFontStyle(400, 14, '#F4E2B8'),
+    ...commonFontStyle(400, 14, colors._0B3970),
   },
   row: {
     flexDirection: 'row',
@@ -340,7 +344,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   language: {
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 18, colors._050505),
     flex: 1,
   },
   dot: {
@@ -362,7 +366,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   legendText: {
-    ...commonFontStyle(400, 13, '#DADADA'),
+    ...commonFontStyle(400, 13, colors._050505),
     marginTop: 6,
   },
   btn: {

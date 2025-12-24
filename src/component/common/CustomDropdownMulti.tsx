@@ -111,6 +111,7 @@ const CustomDropdownMulti = ({
                 source={IMAGES.down1}
                 style={{
                   width: 12,
+                  tintColor: '#0B3970',
                   height: 13,
                   resizeMode: 'contain',
                 }}

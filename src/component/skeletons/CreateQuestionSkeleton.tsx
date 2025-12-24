@@ -6,8 +6,8 @@ import {colors} from '../../theme/colors';
 
 const CreateQuestionSkeleton = () => {
   const questionPlaceholders = [1, 2, 3, 4];
-  const background = colors._F7F7F7;
-  const highlight = '#ECECEC';
+  const background = '#E0E0E0';
+  const highlight = '#F5F5F5';
 
   return (
     <View style={{flex: 1}}>

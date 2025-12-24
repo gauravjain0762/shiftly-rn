@@ -82,7 +82,7 @@ const HomeScreen = () => {
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       {isLoading && currentPage === 1 ? (
-        <PostSkeleton backgroundColor={colors._lightBlueSkeleton} />
+        <PostSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
       ) : (
         <FlatList
           data={allPosts}

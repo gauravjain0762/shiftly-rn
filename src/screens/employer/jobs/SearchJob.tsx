@@ -80,19 +80,25 @@ const SearchJob = () => {
   }, [debouncedSearch, refetch]);
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']} containerStyle={{}}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]} containerStyle={{}}>
       <View style={styles.headerContainer}>
-        <CustomImage onPress={goBack} size={wp(21)} source={IMAGES.backArrow} />
+        <CustomImage 
+          onPress={goBack} 
+          size={wp(21)} 
+          source={IMAGES.backArrow}
+          tintColor={colors._0B3970}
+        />
         <SearchBar
           value={searchText}
           containerStyle={styles.search}
           onChangeText={setSearchText}
           placeholder="Search jobs..."
+          type="company"
         />
       </View>
 
       {isLoading ? (
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator size={'large'} color={colors._0B3970} />
       ) : (
         <KeyboardAwareFlatList
           data={jobList}
@@ -160,6 +166,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(500, 17, colors.white),
+    ...commonFontStyle(500, 17, colors._0B3970),
   },
 });

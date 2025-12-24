@@ -69,7 +69,7 @@ const BackHeader: FC<props> = ({
           source={IMAGES.backArrow}
           style={[
             styles.back,
-            {tintColor: type == 'employe' ? colors.white : colors._0B3970},
+            {tintColor: type == 'employe' ? colors._0B3970 : colors._0B3970},
           ]}
         />
       </TouchableOpacity>
@@ -77,7 +77,7 @@ const BackHeader: FC<props> = ({
         numberOfLines={1}
         style={[
           styles.headerTitle,
-          {color: type == 'employe' ? colors.white : colors._0B3970},
+          {color: type == 'employe' ? colors._0B3970 : colors._0B3970},
           titleStyle,
         ]}>
         {title}

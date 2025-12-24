@@ -21,7 +21,7 @@ import {
   LocationContainer,
 } from '../../../component';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { commonFontStyle, hp, SCREEN_WIDTH, wp } from '../../../theme/fonts';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { IMAGES } from '../../../assets/Images';
 import { navigationRef } from '../../../navigation/RootContainer';
 import { useTranslation } from 'react-i18next';
@@ -31,10 +31,8 @@ import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import {
   companyEmailCheck,
-  emailRegex,
   errorToast,
   fullNameCheck,
-  goBack,
   navigateTo,
   resetNavigation,
   successToast,
@@ -417,8 +415,6 @@ const CreateAccount = () => {
       successToast(response?.message);
       setStart((prev: boolean) => !prev);
       nextStep();
-      // Preserve the email for OTP verification step
-      setEmail2(companyRegisterData?.email || '');
       dispatch(
         setCompanyRegisterData({
           business_type_id: '',
@@ -575,7 +571,7 @@ const CreateAccount = () => {
   };
 
   const debouncedGetAddressList = useCallback(
-    debounce(async text => {
+    debounce(async (text: string) => {
       const result = await getAddressList(text);
       setSuggestions(result?.slice(0, 5) || []);
     }, 500),
@@ -1169,9 +1165,10 @@ const CreateAccount = () => {
                 <View style={styles.suggestionContainer}>
                   <FlatList
                     data={suggestions}
-                    keyExtractor={item => item.place_id}
-                    renderItem={({ item }) => (
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={({ item, index }: any) => (
                       <TouchableWithoutFeedback
+                        key={index}
                         onPress={async () => {
                           try {
                             const location = await getPlaceDetails(item.place_id);

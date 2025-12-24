@@ -75,7 +75,7 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
       </Text>
       <Image
         source={IMAGES.down1}
-        style={{width: 12, height: 13, resizeMode: 'contain'}}
+        style={{width: 12, height: 13, resizeMode: 'contain', tintColor: '#0B3970'}}
       />
     </TouchableOpacity>
   );
@@ -279,10 +279,10 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 18, '#050505'),
   },
   inputStyle: {
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, '#050505'),
     flex: 1,
   },
   placeholderStyle: {

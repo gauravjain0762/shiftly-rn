@@ -8,6 +8,7 @@ import FastImage from 'react-native-fast-image';
 import {commonFontStyle, hp, wp} from '../theme/fonts';
 import {colors} from '../theme/colors';
 import {SCREENS} from './screenNames';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import JobsScreen from '../screens/employer/jobs/JobsScreen';
 import HomeScreen from '../screens/employer/home/HomeScreen';
 import ActivityScreen from '../screens/employer/activity/ActivityScreen';
@@ -16,9 +17,14 @@ import AccountScreen from '../screens/employer/profile/AccountScreen';
 const Tab = createBottomTabNavigator();
 
 const CustomTabBar = ({state, navigation}: any) => {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View>
-      <View style={[styles.tabBarContainer]}>
+    <View
+      style={[
+        styles.tabBarContainer,
+        {paddingBottom: insets.bottom || hp(10)},
+      ]}>
         {state.routes.map((route: any, index: any) => {
           const isFocused = state.index === index;
 
@@ -71,7 +77,7 @@ const CustomTabBar = ({state, navigation}: any) => {
                   defaultSource={iconName}
                   style={styles.carImage}
                   resizeMode="contain"
-                  tintColor={isFocused ? '#F4E2B8' : 'rgba(255,255,255,0.8)'}
+                  tintColor={isFocused ? colors._0B3970 : '#4A4A4AA8'}
                 />
               ) : (
                 <FastImage
@@ -79,20 +85,19 @@ const CustomTabBar = ({state, navigation}: any) => {
                   defaultSource={iconName}
                   style={styles.image}
                   resizeMode="contain"
-                  tintColor={isFocused ? '#F4E2B8' : 'rgba(255,255,255,0.8)'}
+                  tintColor={isFocused ? colors._0B3970 : '#4A4A4AA8'}
                 />
               )}
               <Text
                 style={[
                   styles.labelText,
-                  {color: isFocused ? '#F4E2B8' : 'rgba(255,255,255,0.8)'},
+                  {color: isFocused ? colors._0B3970 : '#4A4A4AA8'},
                 ]}>
                 {labelName}
               </Text>
             </TouchableOpacity>
           );
         })}
-      </View>
     </View>
   );
 };
@@ -120,17 +125,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabBarContainer: {
+    borderTopWidth: 1,
+    paddingTop: hp(8),
     flexDirection: 'row',
-    gap: 15,
-    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'space-around',
-    borderTopWidth: 0,
-    borderColor: 'transparent',
-    backgroundColor: colors._0B3970,
-    width: '100%',
-    paddingVertical: 12,
-    paddingBottom: 16,
+    backgroundColor: colors._F3E1B7,
+    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   tabButton: {
     width: wp(65),
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   labelText: {
-    ...commonFontStyle(400, 10, '#FFFFFF'),
+    ...commonFontStyle(400, 13, '#727D8A'),
     marginTop: 10,
   },
 });

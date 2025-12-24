@@ -92,9 +92,9 @@ const ApplyJob = () => {
     <>
       <LinearContainer
         SafeAreaProps={{edges: ['bottom', 'top']}}
-        colors={['#0D468C', '#041326']}
+        colors={[colors._F7F7F7, colors._F7F7F7]}
         containerStyle={[{paddingBottom: bottom}]}>
-        <BackHeader title={'Apply Job'} containerStyle={styles.header} />
+        <BackHeader type="employe" title={'Apply Job'} containerStyle={styles.header} />
         <View style={styles.container}>
           {/* Job Card */}
           <View style={styles.jobCard}>
@@ -152,7 +152,11 @@ const ApplyJob = () => {
                   <View style={styles.radioCircle}>
                     {selectedDoc?.file_name === doc?.file_name && (
                       <View style={styles.check}>
-                        <Image source={IMAGES.check} style={styles.checked} />
+                        <Image 
+                          source={IMAGES.check} 
+                          style={styles.checked}
+                          tintColor={colors.white}
+                        />
                       </View>
                     )}
                   </View>
@@ -170,7 +174,7 @@ const ApplyJob = () => {
               style={styles.uploadButton}>
               <Text
                 style={{
-                  ...commonFontStyle(400, 22, colors._F4E2B8),
+                  ...commonFontStyle(400, 22, colors._0B3970),
                 }}>
                 {'Upload CV'}
               </Text>
@@ -180,12 +184,13 @@ const ApplyJob = () => {
               style={{
                 marginTop: hp(8),
                 paddingHorizontal: wp(20),
-                ...commonFontStyle(400, 12, colors.white),
+                ...commonFontStyle(400, 12, colors._7B7878),
               }}>
               {'PDF or word document up to 5MB'}
             </Text>
           </View>
           <GradientButton
+            type="Company"
             style={styles.btn}
             onPress={() => {
               handleApplyJob();
@@ -240,7 +245,9 @@ const styles = StyleSheet.create({
     marginBottom: hp(20),
     paddingBottom: hp(15),
     marginHorizontal: wp(25),
-    backgroundColor: '#F4E2B8',
+    backgroundColor: colors.white,
+    borderWidth: 1.2,
+    borderColor: '#E0D7C8',
   },
   logo: {
     width: '100%',
@@ -263,11 +270,11 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: '#E6E6E6',
     marginVertical: 10,
   },
   heading: {
-    ...commonFontStyle(700, 22, colors._F4E2B8),
+    ...commonFontStyle(700, 22, colors._0B3970),
     paddingTop: hp(20),
     paddingBottom: hp(38),
   },
@@ -281,7 +288,7 @@ const styles = StyleSheet.create({
     width: wp(26),
     borderRadius: 100,
     borderWidth: 2,
-    borderColor: '#FBE9C6',
+    borderColor: colors._D9D9D9,
     justifyContent: 'center',
     overflow: 'hidden',
   },
@@ -291,7 +298,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   check: {
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors._0B3970,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -299,7 +306,7 @@ const styles = StyleSheet.create({
   docLabel: {
     flex: 1,
     paddingHorizontal: wp(10),
-    ...commonFontStyle(400, 21, colors.white),
+    ...commonFontStyle(400, 21, colors._050505),
   },
   docIcon: {
     width: wp(37),
@@ -330,6 +337,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: hp(50),
     justifyContent: 'center',
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
+    backgroundColor: colors.white,
   },
 });

@@ -208,12 +208,12 @@ const styles = StyleSheet.create({
   },
   headerText: {
     marginTop: hp(21),
-    ...commonFontStyle(700, wp(20), '#F4E2B8'),
+    ...commonFontStyle(700, wp(20), colors._0B3970),
   },
   label: {
     marginTop: hp(20),
     marginBottom: hp(12),
-    ...commonFontStyle(400, wp(18), '#DADADA'),
+    ...commonFontStyle(400, wp(18), colors._050505),
   },
   countryWrapper: {
     flex: 1,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   countryText: {
-    ...commonFontStyle(400, wp(18), '#F4E2B8'),
+    ...commonFontStyle(400, wp(18), colors._0B3970),
   },
   stillWrapper: {
     flexDirection: 'row',
@@ -245,16 +245,17 @@ const styles = StyleSheet.create({
     width: wp(17),
     height: hp(17),
     resizeMode: 'contain',
-    tintColor: '#F4E2B8',
+    tintColor: colors._0B3970,
   },
   stillText: {
-    ...commonFontStyle(400, wp(18), '#DADADA'),
+    ...commonFontStyle(400, wp(18), colors._050505),
     marginLeft: wp(12),
   },
   btnRow: {
     flexDirection: 'row',
     borderWidth: wp(2),
-    borderColor: '#F4E2B8',
+    borderColor: colors._0B3970,
+    backgroundColor: colors.white,
     borderRadius: wp(50),
     paddingTop: hp(12),
     paddingBottom: hp(12),
@@ -272,10 +273,10 @@ const styles = StyleSheet.create({
     width: wp(22),
     height: hp(22),
     resizeMode: 'contain',
-    tintColor: colors.coPrimary,
+    tintColor: colors._0B3970,
   },
   addEduText: {
-    ...commonFontStyle(500, wp(20), '#F4E2B8'),
+    ...commonFontStyle(500, wp(20), colors._0B3970),
   },
   countryPlaceholder: {
     ...commonFontStyle(400, 18, '#969595'),

@@ -22,7 +22,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   type = 'employe',
 }) => {
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[
+      styles.container, 
+      type === 'company' && styles.companyContainer,
+      containerStyle
+    ]}>
       <Image
         source={IMAGES.search}
         style={[
@@ -39,7 +43,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={type == 'company' ? colors._0B3970 : colors.white}
+        placeholderTextColor={type == 'company' ? colors._7B7878 : colors.white}
       />
     </View>
   );
@@ -55,6 +59,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(24),
     paddingVertical: hp(14),
     gap: wp(12),
+  },
+  companyContainer: {
+    backgroundColor: colors.white,
+    borderColor: colors._0B3970,
   },
   icon: {
     marginRight: 8,

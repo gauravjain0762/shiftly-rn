@@ -8,6 +8,7 @@ import {EducationItem} from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
 import BaseText from '../common/BaseText';
+import {colors} from '../../theme/colors';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -178,7 +179,7 @@ const styles = StyleSheet.create({
   },
   countryText: {
     flex: 1,
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
   countryPlaceholder: {
     flex: 1,
@@ -188,10 +189,11 @@ const styles = StyleSheet.create({
     width: 12,
     height: 13,
     resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 18, colors._050505),
   },
 });

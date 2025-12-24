@@ -1,13 +1,14 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {commonFontStyle, hp} from '../../theme/fonts';
+import {colors} from '../../theme/colors';
 
-const colors = {
-  background: '#002147',
-  activeCircle: '#fdf1cc',
-  inactiveCircleBorder: '#274c7d',
-  textActive: '#fdf1cc',
-  textInactive: '#8da3c1',
+const stepperColors = {
+  background: colors._050505,
+  activeCircle: colors._0B3970,
+  inactiveCircleBorder: colors._0B3970,
+  textActive: colors._F7F7F7,
+  textInactive: colors._050505,
 };
 
 const stepData = [
@@ -63,26 +64,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeCircle: {
-    backgroundColor: colors.activeCircle,
+    backgroundColor: stepperColors.activeCircle,
   },
   inactiveCircle: {
     borderWidth: 1.5,
-    borderColor: '#104686',
-    backgroundColor: '#0B3970',
+    borderColor: stepperColors.inactiveCircleBorder,
+    backgroundColor: colors.white,
   },
   activeText: {
-    ...commonFontStyle(500, 25, colors.background),
+    ...commonFontStyle(500, 25, stepperColors.textActive),
   },
   inactiveText: {
-    ...commonFontStyle(500, 25, colors.inactiveCircleBorder),
+    ...commonFontStyle(500, 25, stepperColors.inactiveCircleBorder),
   },
   activeLabel: {
     marginTop: 15,
-    ...commonFontStyle(500, 15, colors.textActive),
+    ...commonFontStyle(500, 15, stepperColors.textInactive),
   },
   inactiveLabel: {
     marginTop: 15,
-    ...commonFontStyle(500, 15, colors.textInactive),
+    ...commonFontStyle(500, 15, stepperColors.textInactive),
   },
 });
 

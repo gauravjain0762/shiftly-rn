@@ -20,7 +20,7 @@ const NotificationCard: FC<props> = ({
       <View style={[styles.iconWrapper, styles.starIcon]}>
         <Image
           source={IMAGES.bell}
-          style={{width: wp(16), height: hp(16), resizeMode: 'contain'}}
+          style={{width: wp(16), height: hp(16), resizeMode: 'contain', tintColor: colors._0B3970}}
         />
       </View>
       <View style={{flex: 1, gap: hp(5)}}>
@@ -37,16 +37,16 @@ export default NotificationCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors._0B3970,
+    backgroundColor: colors.white,
     borderRadius: 20,
     flexDirection: 'row',
-    borderWidth: 1.5,
-    borderColor: colors._104686,
+    borderWidth: 1.2,
+    borderColor: '#E0D7C8',
     padding: wp(13),
     // justifyContent: 'space-between',
   },
   time: {
-    ...commonFontStyle(500, 16, colors.white),
+    ...commonFontStyle(500, 16, colors._7B7878),
   },
   tagWrapper: {
     backgroundColor: colors.white,
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
 
   iconWrapper: {
-    backgroundColor: '#F4E2B8',
+    backgroundColor: '#EEF2F7',
     // padding: 6,
     borderRadius: 20,
     marginRight: 12,
@@ -69,17 +69,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   starIcon: {
-    backgroundColor: '#FFC325',
+    backgroundColor: '#EEF2F7',
   },
   textWrapper: {
     flex: 1,
   },
   notificationTitle: {
     marginBottom: hp(2),
-    ...commonFontStyle(500, 17, colors._F4E2B8),
+    ...commonFontStyle(500, 17, colors._0B3970),
   },
   message: {
-    ...commonFontStyle(400, 16, colors._F4E2B8),
+    ...commonFontStyle(400, 16, colors._4A4A4A),
     marginBottom: 8,
     lineHeight: 25,
   },

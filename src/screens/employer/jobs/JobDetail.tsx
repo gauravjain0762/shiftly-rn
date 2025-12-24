@@ -8,7 +8,6 @@ import {
   View,
   Dimensions,
   FlatList,
-  Pressable,
   Share,
   ActivityIndicator,
 } from 'react-native';
@@ -184,20 +183,19 @@ const JobDetail = () => {
     <LinearContainer
       SafeAreaProps={{ edges: ['bottom', 'top'] }}
       containerStyle={{ paddingBottom: bottom }}
-      colors={['#1958a7ff', '#041326']}>
+      colors={[colors._F7F7F7, colors._F7F7F7]}>
       <BackHeader
+        type="employe"
         title={'Job Detail'}
         onBackPress={handleGoBack}
         containerStyle={styles.headerContainer}
-        titleStyle={{
-          ...commonFontStyle(600, 22, colors.white),
-        }}
         RightIcon={
           <TouchableOpacity onPress={handleShare} style={styles.right}>
             <Image
               source={IMAGES.share}
               resizeMode="contain"
               style={styles.share}
+              tintColor={colors._0B3970}
             />
           </TouchableOpacity>
         }
@@ -205,7 +203,7 @@ const JobDetail = () => {
       />
 
       {isLoading ? (
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator size={'large'} color={colors._0B3970} />
       ) : (
         <>
           <View style={styles.bannerWrapper}>
@@ -272,12 +270,17 @@ const JobDetail = () => {
                 <Image
                   style={styles.heart}
                   source={isFavorite ? IMAGES.like : IMAGES.hart}
+                  tintColor={colors._0B3970}
                 />
               </TouchableOpacity>
             </View>
 
             <View style={styles.row}>
-              <Image source={IMAGES.location} style={styles.location} />
+              <Image 
+                source={IMAGES.location} 
+                style={styles.location}
+                tintColor={colors._0B3970}
+              />
               <Text style={styles.locationText}>
                 {curr_jobdetails?.address}
               </Text>
@@ -350,12 +353,13 @@ const JobDetail = () => {
               <BaseText
                 style={{
                   textAlign: 'center',
-                  ...commonFontStyle(500, 18, colors.white),
+                  ...commonFontStyle(500, 18, colors._0B3970),
                 }}>{`Applied on ${formatDate(
                   curr_jobdetails?.createdAt,
                 )}`}</BaseText>
             ) : (
               <GradientButton
+                type="Company"
                 onPress={() => {
                   if (curr_jobdetails?.is_applied) {
                     errorToast('You already applied for this job.');
@@ -389,7 +393,7 @@ const styles = StyleSheet.create({
     padding: wp(8),
     borderRadius: 100,
     marginLeft: 'auto',
-    backgroundColor: colors.coPrimary,
+    backgroundColor: 'transparent',
   },
   headerContainer: {
     paddingTop: hp(15),
@@ -457,7 +461,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   noImageText: {
-    ...commonFontStyle(400, 16, colors.white),
+    ...commonFontStyle(400, 16, colors._0B3970),
   },
   container: {
     flex: 1,
@@ -480,10 +484,10 @@ const styles = StyleSheet.create({
     flex: 0.89,
   },
   locationText: {
-    ...commonFontStyle(400, 14, '#fff'),
+    ...commonFontStyle(400, 14, colors._4A4A4A),
   },
   jobTitle: {
-    ...commonFontStyle(700, 18, '#fff'),
+    ...commonFontStyle(700, 18, colors._0B3970),
   },
   heart: {
     width: wp(18),
@@ -491,12 +495,12 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   description: {
-    ...commonFontStyle(400, 14, colors.white),
+    ...commonFontStyle(400, 14, colors._4A4A4A),
     lineHeight: 20,
     marginBottom: hp(12),
   },
   sectionTitle: {
-    ...commonFontStyle(600, 18, colors.white),
+    ...commonFontStyle(600, 18, colors._0B3970),
     marginBottom: hp(8),
   },
   flatlist: {
@@ -518,17 +522,17 @@ const styles = StyleSheet.create({
   },
   detailKey: {
     textAlign: 'center',
-    ...commonFontStyle(600, 17, colors.coPrimary),
+    ...commonFontStyle(600, 17, colors._0B3970),
   },
   detailValue: {
-    ...commonFontStyle(400, 16, colors.white),
+    ...commonFontStyle(400, 16, colors._4A4A4A),
     textAlign: 'center',
   },
   bulletList: {
     marginBottom: hp(20),
   },
   bullet: {
-    ...commonFontStyle(400, 14, colors.white),
+    ...commonFontStyle(400, 14, colors._4A4A4A),
     marginBottom: hp(8),
     lineHeight: 25,
   },

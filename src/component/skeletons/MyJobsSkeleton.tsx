@@ -6,12 +6,16 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 type Props = {
   backgroundColor?: string;
+  highlightColor?: string;
 };
 
 const MyJobsSkeleton = (props: Props) => {
+  const background = props?.backgroundColor || '#E0E0E0';
+  const highlight = props?.highlightColor || '#F5F5F5';
   return (
     <SkeletonPlaceholder
-      backgroundColor={props.backgroundColor}
+      backgroundColor={background}
+      highlightColor={highlight}
       borderRadius={4}>
       {[1, 2, 3, 4].map((_, idx) => (
         <SkeletonPlaceholder.Item

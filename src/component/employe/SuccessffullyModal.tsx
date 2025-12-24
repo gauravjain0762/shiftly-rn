@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
@@ -45,7 +46,13 @@ const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
               onClose();
               resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
             }}>
-            <Text style={styles.buttonText}>{t('Explore Jobs')}</Text>
+            <LinearGradient
+              colors={[colors.white, colors._F7F7F7]}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={styles.buttonGradient}>
+              <Text style={styles.buttonText}>{t('Explore Jobs')}</Text>
+            </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
@@ -53,7 +60,13 @@ const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
               onClose();
               navigateTo(SCREENS.TabNavigator);
             }}>
-            <Text style={styles.buttonText}>{t('Home')}</Text>
+            <LinearGradient
+              colors={[colors.white, colors._F7F7F7]}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={styles.buttonGradient}>
+              <Text style={styles.buttonText}>{t('Home')}</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
@@ -68,7 +81,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   modalContent: {
-    backgroundColor: '#F4E2B8',
+    backgroundColor: colors._F7F7F7,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     padding: 24,
@@ -97,15 +110,21 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#061F3D',
     borderRadius: 50,
     marginTop: 24,
     height: 63,
+    borderWidth: 1.5,
+    borderColor: '#D9D9D9',
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 50,
   },
   buttonText: {
-    ...commonFontStyle(400, 22, colors.white),
+    ...commonFontStyle(400, 22, colors._0B3970),
   },
 });
 

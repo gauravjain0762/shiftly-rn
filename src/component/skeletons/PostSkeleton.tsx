@@ -9,8 +9,8 @@ type Props = {
 };
 
 const PostSkeleton = (props: Props) => {
-  const background = props?.backgroundColor || colors._F7F7F7;
-  const highlight = props?.highlightColor || '#ECECEC';
+  const background = props?.backgroundColor || '#E0E0E0';
+  const highlight = props?.highlightColor || '#F5F5F5';
 
   return (
     <SkeletonPlaceholder

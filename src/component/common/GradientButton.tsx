@@ -59,8 +59,8 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
           backgroundColor: type == 'Company' ? colors.coPrimary : colors.white,
           opacity: rest.disabled ? 0.6 : 1,
           ...(type == 'Company' && {
-            borderWidth: 1,
-            borderColor: colors._0B3970,
+            borderWidth: 1.5,
+            borderColor: '#D9D9D9',
             shadowColor: 'transparent',
             shadowOffset: {width: 0, height: 0},
             shadowOpacity: 0,
@@ -82,12 +82,12 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
               fy={fy || '50%'}>
               <Stop
                 offset="0%"
-                stopColor={stopColor || '#F4E2B8'}
+                stopColor={stopColor || colors.white}
                 stopOpacity="1"
               />
               <Stop
                 offset="100%"
-                stopColor={stopColor || '#CBB580'}
+                stopColor={stopColor || colors.white}
                 stopOpacity="1"
               />
             </RadialGradient>
@@ -102,6 +102,13 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
             fill="url(#diamond)"
           />
         </Svg>
+      ) : type == 'Company' ? (
+        <LinearGradient
+          colors={[colors.white, colors._F7F7F7]}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          style={StyleSheet.absoluteFill}
+        />
       ) : (
         <View style={StyleSheet.absoluteFill} />
       )}

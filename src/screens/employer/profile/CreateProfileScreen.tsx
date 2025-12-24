@@ -254,6 +254,14 @@ const CreateProfileScreen = () => {
         still_working: false,
         experience_type: '',
         isEditing: false,
+        job_start: {
+          month: '',
+          year: ''
+        },
+        job_end: {
+          month: '',
+          year: ''
+        }
       }),
     );
   };
@@ -457,14 +465,16 @@ const CreateProfileScreen = () => {
   return (
     <SafeAreaView
       edges={['bottom']}
-      style={{flex: 1, backgroundColor: colors._041326}}>
+      style={{flex: 1, backgroundColor: colors._F7F7F7}}>
       <LinearContainer
         SafeAreaProps={{edges: ['bottom', 'top']}}
-        colors={['#0D468C', '#041326']}>
+        colors={[colors._F7F7F7, colors._F7F7F7]}>
         {/* Fixed Header */}
         <View style={styles.topConrainer}>
           <BackHeader
+            type="employe"
             isRight={true}
+            titleStyle={{color: colors._0B3970}}
             title={'Create Your Profile'}
             RightIcon={<View />}
             onBackPress={() => {
@@ -698,6 +708,7 @@ const CreateProfileScreen = () => {
           </TouchableOpacity>
 
           <GradientButton
+            type="Company"
             style={styles.btn}
             title="Next"
             onPress={() => {
@@ -736,6 +747,7 @@ const CreateProfileScreen = () => {
           </TouchableOpacity>
 
           <GradientButton
+            type="Company"
             style={styles.btn}
             title={'Next'}
             onPress={() => {
@@ -747,6 +759,7 @@ const CreateProfileScreen = () => {
 
       {activeStep === 3 && (
         <GradientButton
+          type="Company"
           style={[
             styles.btn,
             {
@@ -762,6 +775,7 @@ const CreateProfileScreen = () => {
 
       {activeStep === 4 && (
         <GradientButton
+          type="Company"
           style={[
             styles.btn,
             {
@@ -801,20 +815,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: hp(12),
     marginHorizontal: wp(4),
-    borderColor: '#F4E2B8',
+    borderColor: colors._0B3970,
+    backgroundColor: colors.white,
     justifyContent: 'center',
   },
   btn: {
     marginHorizontal: wp(4),
   },
   addEduText: {
-    ...commonFontStyle(500, 20, '#F4E2B8'),
+    ...commonFontStyle(500, 20, colors._0B3970),
   },
   closeIcon: {
     width: 22,
     height: 22,
     resizeMode: 'contain',
-    tintColor: colors.coPrimary,
+    tintColor: colors._0B3970,
   },
   buttonStyle: {
     paddingHorizontal: wp(25),

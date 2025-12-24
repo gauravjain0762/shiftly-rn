@@ -52,10 +52,11 @@ const NotificationScreen = () => {
   };
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <View style={styles.topConrainer}>
           <BackHeader
+            type="employe"
             isRight={true}
             title={'Notifications'}
             containerStyle={styles.header}
@@ -138,6 +139,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(400, 18, colors.white),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
 });

@@ -101,7 +101,9 @@ const styles = StyleSheet.create({
     borderRadius: hp(6),
     position: 'relative',
     marginHorizontal: wp(25),
-    backgroundColor: '#003366',
+    backgroundColor: colors.white,
+    borderWidth: 1.2,
+    borderColor: '#E0D7C8',
   },
   rowSpaceBetween: {
     flexDirection: 'row',
@@ -109,17 +111,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   degree: {
-    ...commonFontStyle(700, 18, colors._F4E2B8),
+    ...commonFontStyle(700, 18, colors._0B3970),
   },
   duration: {
-    ...commonFontStyle(400, 18, colors._F4E2B8),
+    ...commonFontStyle(400, 18, colors._4A4A4A),
   },
   university: {
     marginTop: 8,
-    ...commonFontStyle(400, 18, colors._F4E2B8),
+    ...commonFontStyle(400, 18, colors._4A4A4A),
   },
   location: {
-    ...commonFontStyle(400, 18, colors._F4E2B8),
+    ...commonFontStyle(400, 18, colors._4A4A4A),
     marginTop: 8,
   },
   actions: {

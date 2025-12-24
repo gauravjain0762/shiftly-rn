@@ -252,7 +252,7 @@ const UploadResume = ({resumes, setResumes}: ResumeProps) => {
                       <CustomImage
                         size={wp(18)}
                         source={IMAGES.close}
-                        tintColor={colors.coPrimary}
+                        tintColor={colors._0B3970}
                       />
                     </TouchableOpacity>
                   </TouchableOpacity>
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(20),
   },
   titleText: {
-    ...commonFontStyle(400, 22, colors._F4E2B8),
+    ...commonFontStyle(400, 22, colors._0B3970),
     marginBottom: hp(10),
   },
   counterContainer: {
@@ -324,19 +324,19 @@ const styles = StyleSheet.create({
     marginBottom: hp(10),
   },
   counterText: {
-    ...commonFontStyle(400, 14, colors.white),
+    ...commonFontStyle(400, 14, colors._050505),
     marginBottom: hp(8),
   },
   progressBar: {
     width: '80%',
     height: 4,
-    backgroundColor: 'rgba(244, 226, 184, 0.3)',
+    backgroundColor: '#E6E6E6',
     borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors._0B3970,
     borderRadius: 2,
   },
   uploadButton: {
@@ -348,23 +348,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: hp(50),
     justifyContent: 'center',
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
+    backgroundColor: colors.white,
   },
   uploadButtonDisabled: {
-    borderColor: 'rgba(244, 226, 184, 0.5)',
-    backgroundColor: 'rgba(244, 226, 184, 0.1)',
+    borderColor: colors._D9D9D9,
+    backgroundColor: colors._F7F7F7,
   },
   uploadText: {
-    ...commonFontStyle(400, 22, colors._F4E2B8),
+    ...commonFontStyle(400, 22, colors._0B3970),
   },
   uploadTextDisabled: {
-    color: 'rgba(244, 226, 184, 0.5)',
+    color: colors._7B7878,
   },
   noteText: {
     marginTop: hp(8),
     textAlign: 'center',
     paddingHorizontal: wp(20),
-    ...commonFontStyle(400, 12, colors.white),
+    ...commonFontStyle(400, 12, colors._7B7878),
   },
   limitWarning: {
     marginTop: hp(8),
@@ -381,17 +382,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(10),
   },
   selectionText: {
-    ...commonFontStyle(400, 14, colors.white),
+    ...commonFontStyle(400, 14, colors._050505),
   },
   clearButton: {
     paddingHorizontal: wp(12),
     paddingVertical: hp(6),
     borderRadius: hp(15),
     borderWidth: 1,
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
+    backgroundColor: colors.white,
   },
   clearButtonText: {
-    ...commonFontStyle(400, 12, colors._F4E2B8),
+    ...commonFontStyle(400, 12, colors._0B3970),
   },
   documentsContainer: {
     marginTop: hp(10),
@@ -400,7 +402,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(25),
   },
   sectionTitle: {
-    ...commonFontStyle(500, 16, colors._F4E2B8),
+    ...commonFontStyle(500, 16, colors._0B3970),
     marginBottom: hp(15),
     paddingHorizontal: wp(5),
   },
@@ -411,25 +413,27 @@ const styles = StyleSheet.create({
     paddingVertical: hp(12),
     paddingHorizontal: wp(12),
     borderRadius: hp(8),
-    backgroundColor: 'rgba(244, 226, 184, 0.05)',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
   },
   docRowSelected: {
-    backgroundColor: 'rgba(244, 226, 184, 0.15)',
-    borderWidth: 1,
-    borderColor: colors._F4E2B8,
+    backgroundColor: colors.white,
+    borderWidth: 1.5,
+    borderColor: colors._0B3970,
   },
   radioCircle: {
     height: wp(24),
     width: wp(24),
     borderRadius: 100,
     borderWidth: 2,
-    borderColor: '#FBE9C6',
+    borderColor: colors._D9D9D9,
     justifyContent: 'center',
     marginRight: wp(12),
     overflow: 'hidden',
   },
   radioCircleSelected: {
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
   },
   uploadedIndicator: {
     height: wp(24),
@@ -447,7 +451,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   check: {
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors._0B3970,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -462,14 +466,14 @@ const styles = StyleSheet.create({
     marginRight: wp(10),
   },
   docLabel: {
-    ...commonFontStyle(500, 16, colors.white),
+    ...commonFontStyle(500, 16, colors._0B3970),
     marginBottom: hp(2),
   },
   uploadedText: {
     ...commonFontStyle(400, 12, '#4CAF50'),
   },
   newDocText: {
-    ...commonFontStyle(400, 12, 'rgba(255, 255, 255, 0.7)'),
+    ...commonFontStyle(400, 12, colors._7B7878),
   },
   deleteButton: {
     padding: wp(8),
@@ -489,14 +493,14 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: wp(40),
     height: wp(40),
-    tintColor: 'rgba(244, 226, 184, 0.5)',
+    tintColor: colors._7B7878,
     marginBottom: hp(10),
   },
   emptyText: {
-    ...commonFontStyle(500, 16, 'rgba(255, 255, 255, 0.8)'),
+    ...commonFontStyle(500, 16, colors._050505),
     marginBottom: hp(5),
   },
   emptySubtext: {
-    ...commonFontStyle(400, 14, 'rgba(255, 255, 255, 0.6)'),
+    ...commonFontStyle(400, 14, colors._7B7878),
   },
 });

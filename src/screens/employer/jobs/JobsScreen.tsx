@@ -211,7 +211,7 @@ const JobsScreen = () => {
 
         <View style={styles.carouselWrapper}>
           {isLoading ? (
-            <BannerSkeleton backgroundColor={colors._lightBlueSkeleton} />
+            <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
           ) : (
             <Carousel
               loop
@@ -239,7 +239,7 @@ const JobsScreen = () => {
         </View>
         <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
         {isLoading ? (
-          <MyJobsSkeleton backgroundColor={colors._lightBlueSkeleton} />
+          <MyJobsSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
         ) : (
           <FlatList
             data={jobList}
