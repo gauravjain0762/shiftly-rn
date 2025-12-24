@@ -10,6 +10,7 @@ import React from 'react';
 import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
+import {useTranslation} from 'react-i18next';
 import {AppStyles} from '../../../theme/appStyles';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
@@ -54,13 +55,18 @@ const activities = [
 ];
 
 const ActivityScreen = () => {
+  const {t} = useTranslation();
   const {data: activitiesData, isLoading, refetch} = useGetActivitiesQuery({});
   const activities = activitiesData?.data?.activities || [];
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <View style={styles.topConrainer}>
-        <BackHeader containerStyle={styles.header} />
+        <BackHeader
+          containerStyle={styles.header}
+          title={t('My Activities')}
+          titleStyle={styles.headerTitle}
+        />
       </View>
       {isLoading ? (
         <ActivityIndicator size={'large'} />
@@ -79,7 +85,7 @@ const ActivityScreen = () => {
             return (
               <NoDataText
                 text="You don’t have any activity yet. Once you post jobs or content, updates will appear here."
-                textStyle={{color: colors.white}}
+                textStyle={{color: colors._0B3970}}
               />
             );
           }}
@@ -122,5 +128,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingVertical: hp(22),
     paddingHorizontal: wp(25),
+  },
+  headerTitle: {
+    ...commonFontStyle(600, 22, colors._0B3970),
   },
 });

@@ -157,11 +157,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(23),
   },
   header: {
-    paddingTop: hp(24),
-    marginBottom: hp(28),
+    paddingTop: hp(8),
+    marginBottom: hp(12),
   },
   title: {
-    right: '60%',
   },
   profileRow: {
     flexDirection: 'row',

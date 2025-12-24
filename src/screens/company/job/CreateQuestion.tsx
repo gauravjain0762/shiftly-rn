@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,14 @@ import {SCREENS} from '../../../navigation/screenNames';
 import {useAppSelector} from '../../../redux/hooks';
 import {selectJobForm} from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
+import CreateQuestionSkeleton from '../../../component/skeletons/CreateQuestionSkeleton';
+
+const QUESTION_PRESETS = [
+  'Describe your previous job experience relevant to this role?',
+  'Can you share an example of a project you successfully completed?',
+  'Describe a challenge you faced at work and how you solved it.',
+  'What kind of work environment helps you perform your best?',
+];
 
 const CreateQuestion = () => {
   const {t} = useTranslation();
@@ -37,18 +45,21 @@ const CreateQuestion = () => {
   const {jobId, invitePayload} = route.params || {};
   const [questionText, setQuestionText] = useState('');
   const [addedQuestions, setAddedQuestions] = useState<string[]>([]);
+  const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([]);
+  const [areQuestionsLoading, setAreQuestionsLoading] = useState(true);
   const [sendInvites, {isLoading}] = useSendInterviewInvitesMutation();
   const {updateJobForm} = useJobFormUpdater();
   const {isSuccessModalVisible} = useAppSelector((state: any) =>
     selectJobForm(state),
   );
 
-  const predefinedQuestions = [
-    'Describe your previous job experience relevant to this role?',
-    'Can you share an example of a project you successfully completed?',
-    'Describe a challenge you faced at work and how you solved it.',
-    'What kind of work environment helps you perform your best?',
-  ];
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPredefinedQuestions(QUESTION_PRESETS);
+      setAreQuestionsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAddQuestion = () => {
     if (questionText.trim()) {
@@ -99,8 +110,11 @@ const CreateQuestion = () => {
       formData.append(`questions[${index}]`, question);
     });
 
+    console.log('Added questions count:', addedQuestions.length);
+    console.log('Questions:', addedQuestions);
     try {
       const response = await sendInvites(formData).unwrap();
+      console.log("🔥 ~ handleSubmit ~ response:", response)
       if (response?.status) {
         successToast(response?.message || t('Invites sent successfully'));
         updateJobForm({isSuccessModalVisible: true});
@@ -130,76 +144,86 @@ const CreateQuestion = () => {
         />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          {/* Question Input Field */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder={t('Write your question here...')}
-              placeholderTextColor={colors.greyOpacity}
-              value={questionText}
-              onChangeText={setQuestionText}
-              multiline
-              textAlignVertical="top"
+      {areQuestionsLoading ? (
+        <CreateQuestionSkeleton />
+      ) : (
+        <>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.container}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder={t('Write your question here...')}
+                  placeholderTextColor={colors.greyOpacity}
+                  value={questionText}
+                  onChangeText={setQuestionText}
+                  multiline
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <TouchableOpacity
+                style={styles.addQuestionButton}
+                onPress={handleAddQuestion}
+                activeOpacity={0.7}>
+                <View style={styles.addButtonIcon}>
+                  <Plus size={20} color={colors.black} />
+                </View>
+                <Text style={styles.addButtonText}>{t('Add New Question')}</Text>
+              </TouchableOpacity>
+
+              <View style={styles.predefinedSection}>
+                {predefinedQuestions.map((question, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.questionCard}
+                    onPress={() => handleSelectPredefinedQuestion(question)}
+                    activeOpacity={0.7}>
+                    <Text style={styles.questionCardText}>{question}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {addedQuestions.length > 0 && (
+                <View style={styles.addedSection}>
+                  <Text style={styles.sectionTitle}>{t('Added Questions')}</Text>
+                  {addedQuestions.map((question, index) => (
+                    <View key={index} style={styles.addedQuestionCard}>
+                      <Text style={styles.addedQuestionText}>{question}</Text>
+                      <TouchableOpacity
+                        onPress={() => handleRemoveQuestion(index)}
+                        style={styles.removeButton}>
+                        <Text style={styles.removeButtonText}>×</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          </ScrollView>
+
+          <View style={styles.buttonContainer}>
+            <GradientButton
+              style={styles.submitButton}
+              type="Company"
+              title={t('Proceed to AI Interview')}
+              onPress={handleSubmit}
+              disabled={isLoading}
             />
           </View>
+        </>
+      )}
 
-          {/* Add New Question Button */}
-          <TouchableOpacity
-            style={styles.addQuestionButton}
-            onPress={handleAddQuestion}
-            activeOpacity={0.7}>
-            <View style={styles.addButtonIcon}>
-              <Plus size={20} color={colors.black} />
-            </View>
-            <Text style={styles.addButtonText}>{t('Add New Question')}</Text>
-          </TouchableOpacity>
-
-          {/* Predefined Questions */}
-          <View style={styles.predefinedSection}>
-            {predefinedQuestions.map((question, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.questionCard}
-                onPress={() => handleSelectPredefinedQuestion(question)}
-                activeOpacity={0.7}>
-                <Text style={styles.questionCardText}>{question}</Text>
-              </TouchableOpacity>
-            ))}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <View pointerEvents="none" style={{flex: 1}}>
+            <CreateQuestionSkeleton />
           </View>
-
-          {/* Added Questions List */}
-          {addedQuestions.length > 0 && (
-            <View style={styles.addedSection}>
-              <Text style={styles.sectionTitle}>{t('Added Questions')}</Text>
-              {addedQuestions.map((question, index) => (
-                <View key={index} style={styles.addedQuestionCard}>
-                  <Text style={styles.addedQuestionText}>{question}</Text>
-                  <TouchableOpacity
-                    onPress={() => handleRemoveQuestion(index)}
-                    style={styles.removeButton}>
-                    <Text style={styles.removeButtonText}>×</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          )}
         </View>
-      </ScrollView>
-
-      <View style={styles.buttonContainer}>
-        <GradientButton
-          style={styles.submitButton}
-          type="Company"
-          title={t('Proceed to AI Interview')}
-          onPress={handleSubmit}
-          disabled={isLoading}
-        />
-      </View>
+      )}
 
       <BottomModal
         visible={isSuccessModalVisible}
@@ -388,5 +412,9 @@ const styles = StyleSheet.create({
   },
   modalButtonSpacing: {
     marginVertical: hp(12),
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
 });

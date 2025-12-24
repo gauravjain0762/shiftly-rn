@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -6,30 +6,30 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
-  ActivityIndicator,
   Pressable,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import {useRoute} from '@react-navigation/native';
 import {
   BackHeader,
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import { colors } from '../../../theme/colors';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { useTranslation } from 'react-i18next';
+import {colors} from '../../../theme/colors';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {useTranslation} from 'react-i18next';
 import CustomImage from '../../../component/common/CustomImage';
 import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
-import { navigateTo, errorToast } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
+import {navigateTo, errorToast} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
 
 const SuggestedEmployeeScreen = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const route = useRoute<any>();
-  const { jobId, jobData } = route.params || {};
+  const {jobId, jobData} = route.params || {};
 
   const {
     data: suggestedResponse,
@@ -40,12 +40,13 @@ const SuggestedEmployeeScreen = () => {
   const {
     data: jobDetailsResponse,
     isLoading: isJobLoading,
-  } = useGetCompanyJobDetailsQuery(jobId, { skip: !jobId });
+  } = useGetCompanyJobDetailsQuery(jobId, {skip: !jobId});
 
   const jobInfo = jobData || jobDetailsResponse?.data || {};
   const employees = suggestedResponse?.data?.users || [];
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
+  const isScreenLoading = isJobLoading || isLoading || isFetching;
 
   const toggleUserSelection = (userId: string) => {
     setSelectedUserIds(prev => {
@@ -225,126 +226,124 @@ const SuggestedEmployeeScreen = () => {
         title={t('Candidates List')}
         containerStyle={styles.header}
       />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <View style={styles.jobCard}>
-          {isJobLoading ? (
-            <ActivityIndicator color={colors._0B3970} />
-          ) : (
-            <View style={styles.jobCardRow}>
-              <View style={styles.companyLogo}>
-                <Text style={styles.companyLogoText}>
-                  {jobInfo?.title?.[0]?.toUpperCase() ||
-                    jobInfo?.company_name?.[0]?.toUpperCase()}
-                </Text>
-              </View>
-            <View style={styles.jobCardInfo}>
-              <Text style={styles.jobTitle}>{jobInfo?.title}</Text>
-              <Text style={styles.jobLocation}>
-                {jobLocation}
-                {jobTypeLabel ? ` - ${jobTypeLabel}` : ''}
-              </Text>
-              {!!salaryRange && (
-                <Text style={styles.jobSalary}>{salaryRange}</Text>
-              )}
-            </View>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.analyticsCard}>
-          <View style={styles.analyticsRow}>
-            <View style={styles.analyticsIcon}>
-              <Text style={styles.analyticsIconText}>✓</Text>
-            </View>
-            <View style={styles.analyticsTextWrapper}>
-              <Text style={styles.analyticsPrimary}>
-                {'142 ' + t('Candidates Analyzed by AI')}
-              </Text>
-              <Text style={styles.analyticsSecondary}>
-                {t('Covers all received profiles')}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.analyticsRow}>
-            <View style={styles.analyticsIcon}>
-              <Text style={styles.analyticsIconText}>✓</Text>
-            </View>
-            <View style={styles.analyticsTextWrapper}>
-              <Text style={styles.analyticsPrimary}>
-                {'6 ' + t('Highly Matched Profiles')}
-              </Text>
-              <Text style={styles.analyticsSecondary}>
-                {t('For profiles above 75% match score')}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
-          <TouchableOpacity
-            style={[
-              styles.inviteAllButton,
-              inviteAllSelected && styles.inviteAllButtonSelected,
-            ]}
-            onPress={handleInviteAll}>
-            <View
-              style={[
-                styles.inviteAllIcon,
-                inviteAllSelected && styles.inviteAllIconSelected,
-              ]}>
-              <Text
-                style={[
-                  styles.inviteAllIconText,
-                  inviteAllSelected && styles.inviteAllIconTextSelected,
-                ]}>
-                ✓
-              </Text>
-            </View>
-            <Text
-              style={[
-                styles.inviteAllText,
-                inviteAllSelected && styles.inviteAllTextSelected,
-              ]}>
-              {inviteAllSelected ? t('Invited') : t('Invite All')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {isLoading || isFetching ? (
-          <ActivityIndicator color={colors._0B3970} style={{ marginTop: hp(20) }} />
-        ) : (
-          <FlatList
-            data={employees}
-            keyExtractor={(item, index) => item?._id || index.toString()}
-            scrollEnabled={false}
-            renderItem={renderEmployee}
-            extraData={{selectedUserIds, inviteAllSelected}}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>
-                  {t('No suggestions available yet')}
-                </Text>
-                <Text style={styles.emptyMessage}>
-                  {t(
-                    'Once candidates start matching your job, they will appear here.',
+      {isScreenLoading ? (
+        <SuggestedEmployeeSkeleton />
+      ) : (
+        <>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.jobCard}>
+              <View style={styles.jobCardRow}>
+                <View style={styles.companyLogo}>
+                  <Text style={styles.companyLogoText}>
+                    {jobInfo?.title?.[0]?.toUpperCase() ||
+                      jobInfo?.company_name?.[0]?.toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.jobCardInfo}>
+                  <Text style={styles.jobTitle}>{jobInfo?.title}</Text>
+                  <Text style={styles.jobLocation}>
+                    {jobLocation}
+                    {jobTypeLabel ? ` - ${jobTypeLabel}` : ''}
+                  </Text>
+                  {!!salaryRange && (
+                    <Text style={styles.jobSalary}>{salaryRange}</Text>
                   )}
-                </Text>
+                </View>
               </View>
-            }
-          />
-        )}
-      </ScrollView>
-      <View style={styles.ctaWrapper}>
-        <GradientButton
-          style={styles.ctaButton}
-          type="Company"
-          title={t('Invite for AI Interview')}
-          onPress={handleBulkInvite}
-        />
-      </View>
+            </View>
+
+            <View style={styles.analyticsCard}>
+              <View style={styles.analyticsRow}>
+                <View style={styles.analyticsIcon}>
+                  <Text style={styles.analyticsIconText}>✓</Text>
+                </View>
+                <View style={styles.analyticsTextWrapper}>
+                  <Text style={styles.analyticsPrimary}>
+                    {'142 ' + t('Candidates Analyzed by AI')}
+                  </Text>
+                  <Text style={styles.analyticsSecondary}>
+                    {t('Covers all received profiles')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.analyticsRow}>
+                <View style={styles.analyticsIcon}>
+                  <Text style={styles.analyticsIconText}>✓</Text>
+                </View>
+                <View style={styles.analyticsTextWrapper}>
+                  <Text style={styles.analyticsPrimary}>
+                    {'6 ' + t('Highly Matched Profiles')}
+                  </Text>
+                  <Text style={styles.analyticsSecondary}>
+                    {t('For profiles above 75% match score')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.inviteAllButton,
+                  inviteAllSelected && styles.inviteAllButtonSelected,
+                ]}
+                onPress={handleInviteAll}>
+                <View
+                  style={[
+                    styles.inviteAllIcon,
+                    inviteAllSelected && styles.inviteAllIconSelected,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.inviteAllIconText,
+                      inviteAllSelected && styles.inviteAllIconTextSelected,
+                    ]}>
+                    ✓
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.inviteAllText,
+                    inviteAllSelected && styles.inviteAllTextSelected,
+                  ]}>
+                  {inviteAllSelected ? t('Invited') : t('Invite All')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={employees}
+              keyExtractor={(item, index) => item?._id || index.toString()}
+              scrollEnabled={false}
+              renderItem={renderEmployee}
+              extraData={{selectedUserIds, inviteAllSelected}}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>
+                    {t('No suggestions available yet')}
+                  </Text>
+                  <Text style={styles.emptyMessage}>
+                    {t(
+                      'Once candidates start matching your job, they will appear here.',
+                    )}
+                  </Text>
+                </View>
+              }
+            />
+          </ScrollView>
+          <View style={styles.ctaWrapper}>
+            <GradientButton
+              style={styles.ctaButton}
+              type="Company"
+              title={t('Invite for AI Interview')}
+              onPress={handleBulkInvite}
+            />
+          </View>
+        </>
+      )}
     </LinearContainer>
   );
 };

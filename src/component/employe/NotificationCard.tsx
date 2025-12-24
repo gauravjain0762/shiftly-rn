@@ -13,9 +13,7 @@ type props = {
 };
 
 const NotificationCard: FC<props> = ({
-  onPress = () => {},
   item,
-  index,
 }: any) => {
   return (
     <View style={styles.card}>

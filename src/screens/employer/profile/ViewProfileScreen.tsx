@@ -38,7 +38,7 @@ const ViewProfileScreen = () => {
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top']}}
-      colors={['#0D468C', '#041326']}>
+      colors={[colors._F7F7F7, colors._F7F7F7]}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Pressable
@@ -46,7 +46,7 @@ const ViewProfileScreen = () => {
             style={{padding: wp(23), paddingBottom: 0}}>
             <Image
               source={IMAGES.backArrow}
-              style={{height: hp(20), width: wp(24)}}
+              style={{height: hp(20), width: wp(24), tintColor: colors._0B3970}}
             />
           </Pressable>
           <View style={styles.container}>
@@ -58,7 +58,10 @@ const ViewProfileScreen = () => {
             />
             <Text style={styles.name}>{userInfo?.name}</Text>
             <View style={styles.locationRow}>
-              <Image source={IMAGES.marker} style={styles.locationicon} />
+              <Image
+                source={IMAGES.marker}
+                style={[styles.locationicon, {tintColor: colors._0B3970}]}
+              />
               <Text style={styles.location}>{userInfo?.location || 'N/A'}</Text>
             </View>
 
@@ -98,7 +101,7 @@ const ViewProfileScreen = () => {
               contentContainerStyle={{gap: hp(23)}}
               renderItem={({item}) => (
                 <View style={{gap: hp(2)}}>
-                  <Text style={{...commonFontStyle(600, 20, colors.white)}}>
+                  <Text style={{...commonFontStyle(600, 20, colors._0B3970)}}>
                     {item.label}
                   </Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -110,7 +113,7 @@ const ViewProfileScreen = () => {
                         countryCode={callingCodeToCountry(countryCode) as any}
                       />
                     )}
-                    <Text style={{...commonFontStyle(400, 18, colors._F4E2B8)}}>
+                    <Text style={{...commonFontStyle(400, 18, colors._4A4A4A)}}>
                       {item.value || '-'}
                     </Text>
                   </View>
@@ -134,7 +137,7 @@ const ViewProfileScreen = () => {
                 styles.editButtonText,
                 {
                   textAlign: 'center',
-                  ...commonFontStyle(400, 18, '#0A376D'),
+                  ...commonFontStyle(400, 18, colors._0B3970),
                 },
               ]}>
               Edit Details
@@ -164,7 +167,7 @@ const styles = StyleSheet.create({
   name: {
     marginTop: hp(8),
     textAlign: 'center',
-    ...commonFontStyle(600, 25, colors.white),
+    ...commonFontStyle(600, 25, colors._0B3970),
   },
   locationRow: {
     flexDirection: 'row',
@@ -172,17 +175,17 @@ const styles = StyleSheet.create({
     marginTop: hp(8),
   },
   location: {
-    ...commonFontStyle(400, 20, colors.white),
+    ...commonFontStyle(400, 20, colors._0B3970),
   },
   editButton: {
     marginTop: hp(25),
     paddingVertical: hp(12),
     paddingHorizontal: wp(21),
     borderRadius: 10,
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: '#E6E6E6',
   },
   editButtonText: {
-    ...commonFontStyle(400, 17, '#0A376D'),
+    ...commonFontStyle(400, 17, colors._0B3970),
   },
   decText: {
     ...commonFontStyle(400, 17, '#E7E7E7'),

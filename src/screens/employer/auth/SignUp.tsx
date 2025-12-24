@@ -447,7 +447,7 @@ const SignUp = () => {
               <Text style={styles.title}>{t(`Hi! Let’s start with your full name 🙂 Please enter your first and last name`)}</Text>
               <CustomTextInput
                 placeholder={t('ex. John smith')}
-                placeholderTextColor={colors._F4E2B8}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={text => updateSignupData({name: text})}
                 value={name}
                 inputStyle={styles.input}
@@ -457,6 +457,7 @@ const SignUp = () => {
               <CharLength chars={20} value={name} type={'employee'} />
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={() => {
@@ -479,7 +480,7 @@ const SignUp = () => {
               </Text>
               <CustomTextInput
                 placeholder={t('Type your email here')}
-                placeholderTextColor={colors._F4E2B8}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={text => updateSignupData({email: text})}
                 value={email}
                 inputStyle={{...styles.input, textTransform: 'lowercase'}}
@@ -487,6 +488,7 @@ const SignUp = () => {
               />
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={() => {
@@ -560,7 +562,7 @@ const SignUp = () => {
                         <Image
                           source={IMAGES.check}
                           style={styles.check}
-                          tintColor={colors.coPrimary}
+                          tintColor={colors._0B3970}
                         />
                       ) : (
                         <View style={styles.point} />
@@ -572,6 +574,7 @@ const SignUp = () => {
               </View>
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={() => {
@@ -603,7 +606,7 @@ const SignUp = () => {
                 phone={phone}
                 callingCode={phone_code}
                 countryCode={countryCode}
-                placeholderTextColor={colors._F4E2B8}
+                placeholderTextColor={colors._7B7878}
                 onPhoneChange={(e: any) => updateSignupData({phone: e})}
                 onCallingCodeChange={(e: any) =>
                   updateSignupData({
@@ -617,6 +620,7 @@ const SignUp = () => {
               />
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={() => {
@@ -686,6 +690,7 @@ const SignUp = () => {
               </>
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={t('Next')}
               onPress={() => {
@@ -702,7 +707,7 @@ const SignUp = () => {
               <Text style={styles.title}>{t('Which best describes you?')}</Text>
               <CustomTextInput
                 placeholder={t(`Select which describe you`)}
-                placeholderTextColor={colors._F4E2B8}
+                placeholderTextColor={colors._7B7878}
                 onChangeText={text => updateSignupData({describe: text})}
                 value={describe}
                 inputStyle={styles.input1}
@@ -729,7 +734,7 @@ const SignUp = () => {
                     {isSelected && (
                       <Image
                         source={IMAGES.mark}
-                        style={{width: 25, height: 22, resizeMode: 'contain'}}
+                        style={{width: 25, height: 22, resizeMode: 'contain', tintColor: colors._0B3970}}
                       />
                     )}
                   </TouchableOpacity>
@@ -737,6 +742,7 @@ const SignUp = () => {
               })}
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={nextStep}
@@ -756,7 +762,7 @@ const SignUp = () => {
                 onPress={() => updateSignupData({open: true})}>
                 <Image
                   source={IMAGES.cake}
-                  style={{width: 24, height: 24, resizeMode: 'contain'}}
+                  style={{width: 24, height: 24, resizeMode: 'contain', tintColor: colors._0B3970}}
                 />
                 <Text style={styles.dateText}>
                   {dob
@@ -819,7 +825,7 @@ const SignUp = () => {
                     {isSelected && (
                       <Image
                         source={IMAGES.mark}
-                        style={{width: 25, height: 22, resizeMode: 'contain'}}
+                        style={{width: 25, height: 22, resizeMode: 'contain', tintColor: colors._0B3970}}
                       />
                     )}
                   </TouchableOpacity>
@@ -827,6 +833,7 @@ const SignUp = () => {
               })}
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={() => {
@@ -866,7 +873,7 @@ const SignUp = () => {
                     width: 18,
                     height: 18,
                     resizeMode: 'contain',
-                    tintColor: '#F4E2B8',
+                    tintColor: colors._0B3970,
                   }}
                 />
                 <Text style={styles.dateText}>{selected2 || 'Select '}</Text>
@@ -894,7 +901,7 @@ const SignUp = () => {
                     width: 18,
                     height: 18,
                     resizeMode: 'contain',
-                    tintColor: '#F4E2B8',
+                    tintColor: colors._0B3970,
                   }}
                 />
                 <Text style={styles.dateText}>{selected3 || 'Select '}</Text>
@@ -932,6 +939,7 @@ const SignUp = () => {
             </ScrollView>
             <View style={{marginBottom: 30}} />
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={'Next'}
               onPress={() => {
@@ -985,6 +993,7 @@ const SignUp = () => {
               </TouchableOpacity>
             </View>
             <GradientButton
+              type="Company"
               style={styles.btn}
               title={t('Finish Setup')}
               onPress={handleFinishSetup}
@@ -1003,14 +1012,15 @@ const SignUp = () => {
                 )}
               </Text>
             </View>
-            <View>
-              <CustomBtn
-                label={t('Complete My Profile')}
+            <View style={{gap: hp(20)}}>
+              <GradientButton
+                type="Company"
+                title={t('Complete My Profile')}
                 onPress={() => navigateTo(SCREENS.CreateProfileScreen)}
-                outline={true}
-                btnStyle={styles.btn1}
+                style={styles.btn}
               />
               <GradientButton
+                type="Company"
                 style={styles.btn}
                 title={t('Explore Jobs')}
                 onPress={() => {
@@ -1027,7 +1037,7 @@ const SignUp = () => {
   const totalSteps = 10;
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <View style={styles.progressContainer}>
         <View style={styles.progressHeader}>
           <Text style={styles.progressText}>
@@ -1041,7 +1051,7 @@ const SignUp = () => {
           animated
           height={13}
           borderWidth={0}
-          color={colors._F3E1B7}
+          color={colors._0B3970}
         />
       </View>
       <KeyboardAwareScrollView
@@ -1100,9 +1110,9 @@ export default SignUp;
 
 const styles = StyleSheet.create({
   progressContainer: {
-    paddingTop: hp(8),
+    paddingTop: hp(4),
     paddingHorizontal: wp(35),
-    marginBottom: hp(10),
+    marginBottom: hp(6),
   },
   progressHeader: {
     flexDirection: 'row',
@@ -1110,7 +1120,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(6),
   },
   progressText: {
-    ...commonFontStyle(500, 14, colors.white),
+    ...commonFontStyle(500, 14, colors._0B3970),
   },
   rowView: {
     flexDirection: 'row',
@@ -1131,11 +1141,12 @@ const styles = StyleSheet.create({
   back: {
     width: wp(21),
     height: wp(21),
+    tintColor: colors._0B3970,
   },
   container: {
     paddingHorizontal: wp(35),
-    paddingVertical: hp(35),
-    paddingTop: hp(40),
+    paddingVertical: hp(24),
+    paddingTop: hp(12),
   },
   scrollcontainer: {
     flex: 1,
@@ -1150,7 +1161,7 @@ const styles = StyleSheet.create({
   fieldHeaderText: {
     flex: 1,
     flexWrap: 'wrap',
-    ...commonFontStyle(500, 25, colors.white),
+    ...commonFontStyle(500, 25, colors._0B3970),
     paddingTop: hp(30),
   },
   tooltipIcon: {
@@ -1160,26 +1171,26 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   title: {
-    ...commonFontStyle(500, 25, colors.white),
-    paddingTop: hp(30),
+    ...commonFontStyle(500, 25, colors._0B3970),
+    paddingTop: hp(16),
   },
   infotext1: {
-    ...commonFontStyle(400, 20, colors.white),
+    ...commonFontStyle(400, 20, colors._0B3970),
     paddingTop: hp(18),
     lineHeight: 28,
   },
   input: {
-    borderBottomWidth: 2,
-    borderColor: colors._F4E2B8,
-    ...commonFontStyle(400, 22, colors._F4E2B8),
     flex: 1,
+    borderBottomWidth: 1.5,
+    borderColor: colors._7B7878,
     paddingBottom: hp(15),
     marginTop: hp(65),
+    ...commonFontStyle(400, 22, colors._050505),
   },
   input1: {
     borderBottomWidth: 2,
-    borderColor: colors._F4E2B8,
-    ...commonFontStyle(700, 22, colors._F4E2B8),
+    borderColor: colors._0B3970,
+    ...commonFontStyle(700, 22, colors._0B3970),
     flex: 1,
     paddingBottom: hp(15),
     marginTop: hp(65),
@@ -1189,6 +1200,7 @@ const styles = StyleSheet.create({
   },
   btn1: {
     marginBottom: hp(38),
+    borderColor: colors._0B3970
   },
   innerConrainer: {
     flex: 1,
@@ -1200,18 +1212,18 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   infotext: {
-    ...commonFontStyle(400, 16, colors.white),
+    ...commonFontStyle(400, 16, colors._0B3970),
     lineHeight: hp(24),
   },
   secText: {
-    ...commonFontStyle(500, 25, colors.white),
+    ...commonFontStyle(500, 25, colors._0B3970),
   },
   secText1: {
     marginVertical: hp(34),
-    ...commonFontStyle(400, 17, colors.white),
+    ...commonFontStyle(400, 17, colors._0B3970),
   },
   resendText: {
-    ...commonFontStyle(600, 20, colors._F4E2B8),
+    ...commonFontStyle(600, 20, colors._0B3970),
     textDecorationLine: 'underline',
     textAlign: 'center',
     marginTop: hp(74),
@@ -1224,14 +1236,14 @@ const styles = StyleSheet.create({
   cellStyle: {
     borderWidth: 0,
     borderBottomWidth: 2,
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
     // marginLeft: 6,
     // marginRight: 6,
   },
   cellStyle1: {
     borderWidth: 0,
     borderBottomWidth: 2,
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
     marginLeft: 6,
     marginRight: 6,
   },
@@ -1239,16 +1251,16 @@ const styles = StyleSheet.create({
     // borderWidth: 0,
   },
   textStyle: {
-    ...commonFontStyle(300, 30, colors._F4E2B8),
+    ...commonFontStyle(300, 30, colors._0B3970),
     // bottom: 9,
   },
   textStyle1: {
-    ...commonFontStyle(300, 30, colors._F4E2B8),
+    ...commonFontStyle(300, 30, colors._0B3970),
     bottom: -2,
     // paddingBottom: hp(-10),
   },
   foc_textStyle: {
-    ...commonFontStyle(300, 60, colors._F4E2B8),
+    ...commonFontStyle(300, 60, colors._0B3970),
   },
   pinconatiner: {
     marginTop: hp(40),
@@ -1271,7 +1283,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginLeft: 13,
-    ...commonFontStyle(400, 18, colors.white),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
 
   optionContainer: {
@@ -1282,14 +1294,14 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   selectedOptionContainer: {
-    borderBottomColor: colors._F4E2B8,
+    borderBottomColor: colors._0B3970,
   },
   optionText: {
-    ...commonFontStyle(400, 21, colors._F4E2B8),
+    ...commonFontStyle(400, 21, colors._0B3970),
     flex: 1,
   },
   selectedText: {
-    ...commonFontStyle(500, 21, colors._F4E2B8),
+    ...commonFontStyle(500, 21, colors._0B3970),
   },
   checkIcon: {
     marginLeft: 10,
@@ -1302,29 +1314,28 @@ const styles = StyleSheet.create({
     marginTop: 67,
   },
   dateText: {
-    ...commonFontStyle(400, 20, colors._F4E2B8),
+    ...commonFontStyle(400, 20, colors._0B3970),
     marginLeft: 10,
   },
   underline: {
     height: 2,
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors._0B3970,
     marginBottom: 20,
   },
   otpBox1: {
     width: wp(64),
     height: hp(50),
-    borderBottomWidth: 2,
-    borderColor: '#ffeecf',
     textAlign: 'center',
-    ...commonFontStyle(700, 30, '#F4E2B8'),
+    borderBottomWidth: 2,
+    borderColor: colors._0B3970,
+    ...commonFontStyle(700, 30, colors._050505),
   },
   otpBox: {
     width: (width - 48 - 14 * 7) / 8,
     height: 50,
     borderBottomWidth: 2,
-    borderColor: '#ffeecf',
     textAlign: 'center',
-    ...commonFontStyle(700, 30, '#F4E2B8'),
+    ...commonFontStyle(700, 30, colors._0B3970),
   },
   otpContainer: {
     flexDirection: 'row',
@@ -1356,7 +1367,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   uploadText: {
-    ...commonFontStyle(400, 18, colors.white),
+    ...commonFontStyle(400, 18, colors._0B3970),
     marginTop: 12,
   },
   profileImage: {
@@ -1390,11 +1401,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   passinput: {
-    ...commonFontStyle(700, 24, '#F4E2B8'),
+    ...commonFontStyle(700, 24, colors._0B3970),
     paddingTop: 8,
   },
   eye: {
-    tintColor: '#e1ba60ff',
+    tintColor: colors._0B3970,
   },
   passlableCon: {
     flexDirection: 'row',
@@ -1407,15 +1418,15 @@ const styles = StyleSheet.create({
     width: wp(27),
     height: wp(27),
     resizeMode: 'contain',
-    tintColor: colors.coPrimary,
+    tintColor: colors._0B3970,
   },
   passRule: {
-    ...commonFontStyle(500, 25, colors.white),
+    ...commonFontStyle(500, 25, colors._0B3970),
   },
   point: {
     width: wp(9),
     height: wp(9),
-    backgroundColor: '#1C1B1F',
+    backgroundColor: colors._0B3970,
     borderRadius: 100,
   },
   rules: {
@@ -1426,12 +1437,12 @@ const styles = StyleSheet.create({
     paddingBottom: hp(2),
   },
   ruleTitle: {
-    ...commonFontStyle(400, 15, colors.white),
+    ...commonFontStyle(400, 15, colors._0B3970),
   },
   check: {
     width: wp(12),
     height: wp(12),
     resizeMode: 'contain',
-    tintColor: colors.coPrimary,
+    tintColor: colors._0B3970,
   },
 });

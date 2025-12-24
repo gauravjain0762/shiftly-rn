@@ -80,10 +80,10 @@ export default ActivitiesCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors._0B3970,
+    backgroundColor: colors.white,
     borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: colors._104686,
+    borderWidth: 1.2,
+    borderColor: '#E0D7C8',
     padding: wp(16),
   },
 
@@ -114,12 +114,11 @@ const styles = StyleSheet.create({
   },
 
   companyName: {
-    ...commonFontStyle(600, 20, colors.white),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
 
   jobSector: {
-    ...commonFontStyle(400, 14, colors.white),
-    opacity: 0.8,
+    ...commonFontStyle(400, 14, colors._4A4A4A),
   },
 
   locationRow: {
@@ -130,8 +129,7 @@ const styles = StyleSheet.create({
   },
 
   locationText: {
-    ...commonFontStyle(400, 14, colors.white),
-    opacity: 0.7,
+    ...commonFontStyle(400, 14, colors._4A4A4A),
     flex: 1,
   },
 
@@ -141,8 +139,7 @@ const styles = StyleSheet.create({
   },
 
   timeText: {
-    ...commonFontStyle(400, 13, colors.white),
-    opacity: 0.7,
+    ...commonFontStyle(400, 13, colors._7B7878),
   },
 
   footer: {
@@ -151,7 +148,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: hp(12),
     borderTopWidth: 1,
-    borderTopColor: colors._104686,
+    borderTopColor: '#E6E6E6',
   },
 
   jobTypeContainer: {
@@ -159,8 +156,7 @@ const styles = StyleSheet.create({
   },
 
   jobTypeText: {
-    ...commonFontStyle(400, 13, colors.white),
-    opacity: 0.8,
+    ...commonFontStyle(400, 13, colors._4A4A4A),
   },
 
   tagsContainer: {
@@ -170,7 +166,7 @@ const styles = StyleSheet.create({
   },
 
   statusTag: {
-    backgroundColor: colors.white,
+    backgroundColor: '#EEF2F7',
     borderRadius: hp(20),
     paddingVertical: hp(8),
     paddingHorizontal: wp(16),
@@ -179,11 +175,11 @@ const styles = StyleSheet.create({
   },
 
   statusText: {
-    ...commonFontStyle(600, 12, '#003C8F'),
+    ...commonFontStyle(600, 12, colors._0B3970),
   },
 
   chatTag: {
-    backgroundColor: colors.white,
+    backgroundColor: '#EEF2F7',
     borderRadius: hp(20),
     paddingVertical: hp(8),
     paddingHorizontal: wp(16),
@@ -192,6 +188,6 @@ const styles = StyleSheet.create({
   },
 
   chatText: {
-    ...commonFontStyle(600, 12, '#003C8F'),
+    ...commonFontStyle(600, 12, colors._0B3970),
   },
 });

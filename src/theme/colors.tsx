@@ -16,7 +16,7 @@ export const colors = {
   _041326: '#041326',
   _F4E2B8: '#C1BFBF',
   _F3E1B7: '#F7F7F7',
-  _050505: '#050505',
+  _050505: '#050505',  //text color
   _2F2F2F: '#2F2F2F',
   _A3A3A3: '#A3A3A3',
   _1F1F1F: '#1F1F1F',

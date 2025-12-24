@@ -109,7 +109,7 @@ const PhoneInput: FC<picker> = ({
           <Text
             style={[
               styles.errorText,
-              {color: category === 'Employee' ? colors.white : colors._3D3D3D},
+              {color: category === 'Employee' ? colors._3D3D3D : colors._3D3D3D},
             ]}>
             {t('Please enter a valid phone number')}
           </Text>
@@ -133,11 +133,11 @@ const styles = StyleSheet.create({
     marginRight: -4,
   },
   callingCode: {
-    ...commonFontStyle(400, 22, colors._F4E2B8),
     marginRight: 8,
+    ...commonFontStyle(400, 22, colors._050505),
   },
   input: {
-    ...commonFontStyle(400, 22, colors._F7F7F7),
+    ...commonFontStyle(400, 22, colors._050505),
     flex: 1,
     marginLeft: 24,
   },

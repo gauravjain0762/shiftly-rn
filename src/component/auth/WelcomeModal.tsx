@@ -1,9 +1,9 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {useTranslation} from 'react-i18next';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { IMAGES } from '../../assets/Images';
+import { commonFontStyle, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { useTranslation } from 'react-i18next';
 import Modal from 'react-native-modal';
 
 const WelcomeModal = ({
@@ -19,7 +19,7 @@ const WelcomeModal = ({
   description?: string;
   ButtonContainer?: React.ReactNode;
 }) => {
-  const {t, i18n} = useTranslation();
+  const { t, } = useTranslation();
 
   return (
     <Modal
@@ -48,11 +48,6 @@ const WelcomeModal = ({
               'Your account has been created successfully. You\'re ready to explore hospitality opportunities tailored for you.',
             )}
         </Text>
-        {/* <Text style={styles.messageText}>
-            You're all set to explore hospitality{'\n'}
-            opportunities tailored just for you.
-          </Text> */}
-
         {ButtonContainer || (
           <TouchableOpacity style={styles.button} onPress={onClose}>
             <Text style={styles.buttonText}>{t("Let's find your job!")}</Text>

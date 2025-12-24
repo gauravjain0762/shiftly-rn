@@ -11,12 +11,14 @@ import Carousel from 'react-native-reanimated-carousel';
 import {colors} from '../../theme/colors';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CustomImage from './CustomImage';
+import {IMAGES} from '../../assets/Images';
 
 type SimpleCarouselProps = {
   imagePath?: string | {uri: string} | (string | {uri: string})[];
   ContainerStyle?: ViewStyle;
   ChildrenStyle?: ViewStyle;
   IMG_HEIGHT?: number;
+  IMG_WIDTH?: number;
   children?: ReactNode;
   ImageChildren?: ReactNode;
   showLoader?: boolean;
@@ -27,7 +29,11 @@ const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {flex: 1},
-  imageContainer: {position: 'relative'},
+  imageContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
   loaderContainer: {
     position: 'absolute',
     top: 0,
@@ -72,37 +78,36 @@ const SimpleImage: FC<{
   loaderColor: string;
 }> = ({source, style, children, showLoader, loaderColor}) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   React.useEffect(() => {
     const timeout = setTimeout(() => setIsLoading(false), 5000);
     return () => clearTimeout(timeout);
   }, []);
 
-  const hasValidSource = source && (typeof source === 'string' || source.uri);
-  if (!hasValidSource) return null;
+  // Handle string URIs, objects with uri, and local require() assets (numbers)
+  const hasValidSource = source && (
+    typeof source === 'string' || 
+    typeof source === 'number' || 
+    (typeof source === 'object' && source.uri)
+  );
+  
+  // If no valid source or error occurred, use dummy image
+  const finalSource = !hasValidSource || hasError ? IMAGES.dummy_cover : source;
 
   return (
-    // <View style={styles.imageContainer}>
-    //   <ImageBackground
-    //     source={source}
-    //     resizeMode="cover"
-    //     style={style}
-    //     onLoadEnd={() => setIsLoading(false)}
-    //     onError={() => setIsLoading(false)}>
-    //     {children}
-    //   </ImageBackground>
-
-    //   {showLoader && isLoading && (
-    //     <View style={[styles.loaderContainer, style]}>
-    //       <ActivityIndicator size="large" color={loaderColor} />
-    //     </View>
-    //   )}
-    // </View>
     <CustomImage
-      source={source}
+      source={finalSource}
       imageStyle={style}
       containerStyle={styles.imageContainer}
-      resizeMode="cover">
+      resizeMode="cover"
+      props={{
+        onError: () => {
+          setHasError(true);
+          setIsLoading(false);
+        },
+        onLoad: () => setIsLoading(false),
+      }}>
       {children}
     </CustomImage>
   );
@@ -131,7 +136,8 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
   imagePath = '',
   ContainerStyle,
   ChildrenStyle,
-  IMG_HEIGHT = 300,
+  IMG_HEIGHT = 250,
+  IMG_WIDTH,
   ImageChildren,
   showLoader = true,
   loaderColor = colors._0B3970,
@@ -140,10 +146,16 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
 
   const normalizedImages = Array.isArray(imagePath) ? imagePath : [imagePath];
   const hasMultipleImages = normalizedImages.length > 1;
+  const imageWidth = IMG_WIDTH || width;
 
   const renderCarouselItem = useCallback(
     ({item}: {item: any}) => {
-      const hasValidSource = item && (typeof item === 'string' || item.uri);
+      // Handle string URIs, objects with uri, and local require() assets (numbers)
+      const hasValidSource = item && (
+        typeof item === 'string' || 
+        typeof item === 'number' || 
+        (typeof item === 'object' && item.uri)
+      );
       const source = hasValidSource
         ? item
         : {
@@ -153,21 +165,21 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
       return (
         <SimpleImage
           source={source}
-          style={{width, height: IMG_HEIGHT}}
+          style={{width: imageWidth, height: IMG_HEIGHT}}
           showLoader={showLoader && hasValidSource}
           loaderColor={loaderColor}>
           {ImageChildren}
         </SimpleImage>
       );
     },
-    [IMG_HEIGHT, ImageChildren, showLoader, loaderColor],
+    [imageWidth, IMG_HEIGHT, ImageChildren, showLoader, loaderColor],
   );
 
   return (
     <SafeAreaView edges={['bottom']} style={[styles.container, ContainerStyle]}>
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, {width: imageWidth}]}>
         <Carousel
-          width={width}
+          width={imageWidth}
           height={IMG_HEIGHT}
           data={normalizedImages}
           scrollAnimationDuration={300}

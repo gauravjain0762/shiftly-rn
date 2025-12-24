@@ -144,6 +144,7 @@ const Splash = (props: Props) => {
     <View style={styles.container}>
       <LottieView
         autoPlay
+        duration={2500}
         style={styles.lottie}
         containerStyle={{alignSelf: 'center', justifyContent: 'center', flex: 1}}
         source={require('../../assets/animation/shiftly_logo_Animation.json')}

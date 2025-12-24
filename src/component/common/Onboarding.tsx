@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, { useRef } from 'react';
 import {
   StyleSheet,
   FlatList,
@@ -12,13 +12,11 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
 import ScrollingPaginationDots from './ScrollingPaginationDots';
-import CustomImage from './CustomImage';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export type OnboardingDataItem = {
   id: string;
@@ -34,7 +32,7 @@ type OnboardingProps = {
   role?: 'company' | 'employee';
 };
 
-const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
+const Onboarding: React.FC<OnboardingProps> = ({ data, role }) => {
   const flatListRef = useRef<FlatList<OnboardingDataItem>>(null);
   const scrollX = useSharedValue(0);
 
@@ -42,30 +40,16 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
     scrollX.value = event.contentOffset.x;
   });
 
-  const renderItem = ({item}: {item: OnboardingDataItem}) => {
+  const renderItem = ({ item }: { item: OnboardingDataItem }) => {
     return (
-      <View style={[styles.slide, {width}]}>
-        {/* <CustomImage
-          size={hp(140)}
-          resizeMode="contain"
-          source={IMAGES.newlogo}
-          containerStyle={styles.logo}
-        /> */}
+      <View style={[styles.slide, { width }]}>
         <ImageBackground
           source={item?.image}
           style={styles.illustration}
-          resizeMode="contain">
-          {/* <View style={styles.innerImages}>
-            <Image source={IMAGES.login_bg1} />
-            <Image source={IMAGES.login_bg2} />
-          </View> */}
-        </ImageBackground>
+          resizeMode="cover"
+        />
 
-        <View
-          style={{
-            gap: hp(5),
-            marginTop: hp(50),
-          }}>
+        <View style={styles.textWrapper}>
           <Text style={styles.subtitle}>{item?.title}</Text>
           <Text style={styles.subtitle}>{item?.description}</Text>
         </View>
@@ -91,7 +75,7 @@ const Onboarding: React.FC<OnboardingProps> = ({data, role}) => {
       <View
         style={[
           styles.paginationContainer,
-          {bottom: role === 'company' ? '20%' : '10%'},
+          { bottom: role === 'company' ? '20%' : '10%' },
         ]}>
         <ScrollingPaginationDots
           scrollX={scrollX}
@@ -117,7 +101,6 @@ const styles = StyleSheet.create({
   },
   slide: {
     alignItems: 'center',
-    paddingHorizontal: wp(20),
   },
   description: {
     fontSize: 16,
@@ -153,12 +136,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logo: {
+    alignSelf: 'center',
     marginBottom: hp(12),
-    resizeMode: 'contain',
   },
   illustration: {
     width: '100%',
-    height: hp(200),
+    height: hp(260),
+  },
+  textWrapper: {
+    gap: hp(5),
+    marginTop: hp(40),
+    paddingHorizontal: wp(20),
   },
   innerImages: {
     gap: '30%',

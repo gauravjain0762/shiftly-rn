@@ -187,12 +187,13 @@ const AccountScreen = () => {
   };
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <View style={styles.topConrainer}>
         <BackHeader
           containerStyle={styles.header}
           isRight={true}
           title={'Account'}
+          titleStyle={styles.headerTitle}
           RightIcon={
             <CustomImage
               source={
@@ -239,7 +240,7 @@ const AccountScreen = () => {
                       height: 22,
                       resizeMode: 'contain',
                       marginRight: 14,
-                      tintColor: '#D6D6D6',
+                      tintColor: colors._0B3970,
                     }}
                   />
                 )}
@@ -254,7 +255,12 @@ const AccountScreen = () => {
                 {item.label !== 'Logout' && (
                   <Image
                     source={IMAGES.right_icon}
-                    style={{width: 12, height: 12, resizeMode: 'contain'}}
+                    style={{
+                      width: 12,
+                      height: 12,
+                      resizeMode: 'contain',
+                      tintColor: colors._0B3970,
+                    }}
                   />
                 )}
               </TouchableOpacity>
@@ -339,7 +345,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: 29,
-    ...commonFontStyle(600, 20, '#F4E2B8'),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
   row: {
     flexDirection: 'row',
@@ -352,9 +358,12 @@ const styles = StyleSheet.create({
   },
   label: {
     flex: 1,
-    ...commonFontStyle(400, 18, '#D6D6D6'),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
   chevron: {
     marginLeft: 8,
+  },
+  headerTitle: {
+    ...commonFontStyle(600, 22, colors._0B3970),
   },
 });

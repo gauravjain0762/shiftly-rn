@@ -6,6 +6,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {IMAGES} from '../assets/Images';
 import FastImage from 'react-native-fast-image';
 import {commonFontStyle, hp, wp} from '../theme/fonts';
+import {colors} from '../theme/colors';
 import {SCREENS} from './screenNames';
 import JobsScreen from '../screens/employer/jobs/JobsScreen';
 import HomeScreen from '../screens/employer/home/HomeScreen';
@@ -14,7 +15,6 @@ import AccountScreen from '../screens/employer/profile/AccountScreen';
 
 const Tab = createBottomTabNavigator();
 
-// Custom Tab Bar Component
 const CustomTabBar = ({state, navigation}: any) => {
   return (
     <View>
@@ -71,7 +71,7 @@ const CustomTabBar = ({state, navigation}: any) => {
                   defaultSource={iconName}
                   style={styles.carImage}
                   resizeMode="contain"
-                  tintColor={isFocused ? '#F4E2B8' : '#727D8A'}
+                  tintColor={isFocused ? '#F4E2B8' : 'rgba(255,255,255,0.8)'}
                 />
               ) : (
                 <FastImage
@@ -79,13 +79,13 @@ const CustomTabBar = ({state, navigation}: any) => {
                   defaultSource={iconName}
                   style={styles.image}
                   resizeMode="contain"
-                  tintColor={isFocused ? '#F4E2B8' : '#727D8A'}
+                  tintColor={isFocused ? '#F4E2B8' : 'rgba(255,255,255,0.8)'}
                 />
               )}
               <Text
                 style={[
                   styles.labelText,
-                  {color: isFocused ? '#F4E2B8' : '#727D8A'},
+                  {color: isFocused ? '#F4E2B8' : 'rgba(255,255,255,0.8)'},
                 ]}>
                 {labelName}
               </Text>
@@ -125,10 +125,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    backgroundColor: '#041326',
-    // paddingVertical: Platform.OS == 'ios' ? 0 : hp(0),
+    borderTopWidth: 0,
+    borderColor: 'transparent',
+    backgroundColor: colors._0B3970,
     width: '100%',
     paddingVertical: 12,
     paddingBottom: 16,
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   labelText: {
-    ...commonFontStyle(400, 10, '#727D8A'),
+    ...commonFontStyle(400, 10, '#FFFFFF'),
     marginTop: 10,
   },
 });

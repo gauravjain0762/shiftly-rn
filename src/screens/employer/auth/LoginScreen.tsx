@@ -32,7 +32,6 @@ import {RootState} from '../../../store';
 import {setAuthData} from '../../../features/employeeSlice';
 import {
   clearEmployeeAccount,
-  setCreateEmployeeAccount,
 } from '../../../features/authSlice';
 
 const LoginScreen = () => {
@@ -40,6 +39,7 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
 
   const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  console.log(">>>>>>>>>>>>>>>>>>>>>>>. ~ LoginScreen ~ fcmToken:", fcmToken)
   const [employeeLogin] = useEmployeeLoginMutation({});
 
   const {auth} = useSelector((state: RootState) => state.employee);
@@ -59,6 +59,7 @@ const LoginScreen = () => {
           deviceToken: fcmToken ?? 'ddd',
           deviceType: Platform.OS,
         };
+        console.log(">>>>>>>>>>>>> ~ handleLogin ~ data:", data)
 
         const response: any = await employeeLogin(data).unwrap();
         if (response && response.status) {
@@ -73,7 +74,7 @@ const LoginScreen = () => {
 
   return (
     <LinearContainer
-      colors={['#043379', '#041F50']}
+      colors={[colors._F7F7F7, colors._F7F7F7]}
       containerStyle={styles.container}>
       <KeyboardAwareScrollView
         keyboardShouldPersistTaps="handled"
@@ -81,7 +82,7 @@ const LoginScreen = () => {
         showsVerticalScrollIndicator={false}>
         <BackHeader
           title={''}
-          type="employe"
+          type="company"
           isRight={false}
           containerStyle={styles.header}
         />
@@ -92,9 +93,9 @@ const LoginScreen = () => {
 
           <CustomTextInput
             placeholder="Enter your email"
-            placeholderTextColor={colors._F4E2B8}
+            placeholderTextColor={colors._7B7878}
             value={email}
-            inputStyle={{color: colors._F4E2B8, textTransform: 'lowercase'}}
+            inputStyle={{color: colors._0B3970, textTransform: 'lowercase'}}
             onChangeText={e => {
               dispatch(setAuthData({email: e, password}));
             }}
@@ -107,9 +108,9 @@ const LoginScreen = () => {
           <Text style={styles.labelText}>Password</Text>
           <CustomTextInput
             placeholder="Enter your password"
-            placeholderTextColor={colors._F4E2B8}
+            placeholderTextColor={colors._7B7878}
             showRightIcon={true}
-            inputStyle={{color: colors._F4E2B8}}
+            inputStyle={{color: colors._0B3970}}
             value={password}
             onChangeText={e => {
               dispatch(setAuthData({password: e, email}));
@@ -129,6 +130,7 @@ const LoginScreen = () => {
           <GradientButton
             title={t('Login')}
             onPress={handleLogin}
+            type="Company"
             style={styles.primaryButton}
           />
           <Text style={styles.orText}>Or</Text>
@@ -170,11 +172,11 @@ const styles = StyleSheet.create({
   inputWrapper: {
     marginBottom: hp(30),
     borderBottomWidth: 1,
-    borderBottomColor: colors._F4E2B8,
+    borderBottomColor: colors._0B3970,
     marginHorizontal: 35,
   },
   labelText: {
-    ...commonFontStyle(400, 22, colors.white),
+    ...commonFontStyle(400, 22, colors._0B3970),
     marginBottom: 11,
   },
   inputLabel: {
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
   forgotText: {
     textAlign: 'center',
     marginBottom: hp(25),
-    ...commonFontStyle(400, 18, '#DCDCDC'),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
   buttonContainer: {
     marginHorizontal: 35,
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     borderWidth: 2,
-    borderColor: colors._F4E2B8,
+    borderColor: colors._0B3970,
     borderRadius: 100,
     paddingVertical: hp(14),
     paddingHorizontal: wp(40),
@@ -210,11 +212,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   secondaryButtonText: {
-    ...commonFontStyle(400, 22, colors._F4E2B8),
+    ...commonFontStyle(400, 22, colors._0B3970),
   },
   orText: {
     textAlign: 'center',
     marginVertical: hp(12),
-    ...commonFontStyle(500, 15, '#FFFFFF'),
+    ...commonFontStyle(500, 15, colors._0B3970),
   },
 });

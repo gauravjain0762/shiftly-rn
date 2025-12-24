@@ -47,7 +47,7 @@ const ProfileScreen = () => {
   );
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <ScrollView
         contentContainerStyle={styles.scrollContiner}
         showsVerticalScrollIndicator={false}>
@@ -56,7 +56,7 @@ const ProfileScreen = () => {
           style={{padding: wp(23), paddingBottom: 0}}>
           <Image
             source={IMAGES.backArrow}
-            style={{height: hp(20), width: wp(24)}}
+            style={{height: hp(20), width: wp(24), tintColor: colors._0B3970}}
           />
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   name: {
-    ...commonFontStyle(600, 25, colors.white),
+    ...commonFontStyle(600, 25, colors._0B3970),
     marginTop: 8,
   },
   locationRow: {
@@ -207,7 +207,13 @@ const styles = StyleSheet.create({
     marginTop: hp(8),
   },
   location: {
-    ...commonFontStyle(400, 20, colors.white),
+    ...commonFontStyle(400, 20, colors._0B3970),
+  },
+  locationicon: {
+    width: wp(24),
+    height: wp(24),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
   editButton: {
     marginTop: hp(25),
@@ -215,10 +221,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(30),
     borderWidth: 1,
     borderRadius: 10,
-    borderColor: colors._F4E2B8,
+    borderColor: '#E6E6E6',
+    backgroundColor: '#E6E6E6',
   },
   editButtonText: {
-    ...commonFontStyle(400, 17, colors._F4E2B8),
+    ...commonFontStyle(400, 17, colors._0B3970),
   },
   statsRow: {
     flexDirection: 'row',
@@ -234,14 +241,16 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 15, colors._F4E2B8),
   },
   completionCard: {
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 14,
     marginTop: 16,
     margin: wp(20),
+    borderWidth: 1.2,
+    borderColor: '#E0D7C8',
   },
   completionTitle: {
-    ...commonFontStyle(600, 18, colors._051C38),
+    ...commonFontStyle(600, 18, colors._0B3970),
     marginBottom: hp(4),
   },
   progressBarBg: {
@@ -249,10 +258,10 @@ const styles = StyleSheet.create({
     height: hp(6),
     borderRadius: 6,
     marginVertical: 8,
-    backgroundColor: 'rgba(209, 197, 166, 0.8)',
+    backgroundColor: '#E6E6E6',
   },
   progressBarFill: {
-    backgroundColor: '#111827',
+    backgroundColor: colors._0B3970,
     height: 6,
     borderRadius: 6,
   },
@@ -261,10 +270,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   progressText: {
-    ...commonFontStyle(500, 15, colors._4F4F4F),
+    ...commonFontStyle(500, 15, colors._4A4A4A),
   },
   percentage: {
-    ...commonFontStyle(500, 25, '#051D3A'),
+    ...commonFontStyle(500, 25, colors._0B3970),
   },
   ctaCard: {
     marginTop: 16,
@@ -311,13 +320,13 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '90%',
-    backgroundColor: '#0B3970',
+    backgroundColor: colors.white,
     borderRadius: 20,
     paddingHorizontal: wp(18),
     marginBottom: hp(15),
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: '#104686',
+    borderWidth: 1.2,
+    borderColor: '#E0D7C8',
     paddingBottom: hp(26),
     marginHorizontal: wp(21),
   },
@@ -329,7 +338,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(16),
   },
   title: {
-    ...commonFontStyle(700, 22, colors.white),
+    ...commonFontStyle(700, 22, colors._0B3970),
   },
   plus: {
     width: wp(14),
@@ -345,7 +354,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
   },
   content: {
-    ...commonFontStyle(400, 16, '#E7E7E7'),
+    ...commonFontStyle(400, 16, colors._4A4A4A),
     lineHeight: hp(25),
     marginTop: hp(6),
   },
@@ -375,15 +384,16 @@ const styles = StyleSheet.create({
   },
   skillBadge: {
     borderWidth: 1,
-    borderColor: '#FBE7BD',
+    borderColor: '#E0D7C8',
     borderRadius: 8,
     paddingVertical: hp(10),
     paddingHorizontal: wp(16),
     marginRight: wp(5),
     marginBottom: 8,
+    backgroundColor: '#F5F5F5',
   },
   skillText: {
-    ...commonFontStyle(400, 16, '#F4E2B8'),
+    ...commonFontStyle(400, 16, colors._0B3970),
   },
   certRow: {
     flexDirection: 'row',

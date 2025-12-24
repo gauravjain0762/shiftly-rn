@@ -1,17 +1,22 @@
 import React from 'react';
 import {hp, wp} from '../../theme/fonts';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import {colors} from '../../theme/colors';
 
 type Props = {
   backgroundColor?: string;
+  highlightColor?: string;
 };
 
 const PostSkeleton = (props: Props) => {
+  const background = props?.backgroundColor || colors._F7F7F7;
+  const highlight = props?.highlightColor || '#ECECEC';
+
   return (
     <SkeletonPlaceholder
       borderRadius={4}
-      highlightColor="#f0f0f0"
-      backgroundColor={props?.backgroundColor || '#e0e0e0'}>
+      highlightColor={highlight}
+      backgroundColor={background}>
       {[1, 2, 3, 4].map((_, idx) => (
         <SkeletonPlaceholder.Item
           key={idx}

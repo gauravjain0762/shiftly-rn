@@ -19,7 +19,6 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
   companyProfile,
 }) => {
-  console.log("🔥 ~ HomeHeader ~ companyProfile:", companyProfile)
   return (
     <View style={styles.header}>
       <View style={styles.row}>
@@ -47,7 +46,7 @@ const HomeHeader: FC<props> = ({
           <Text
             style={[
               styles.name,
-              {color: type == 'company' ? colors._0B3970 : colors.white},
+              {color: type == 'company' ? colors._0B3970 : colors._0B3970},
             ]}>
             {companyProfile?.company_name || 'N/A'}
           </Text>
@@ -57,12 +56,12 @@ const HomeHeader: FC<props> = ({
             <CustomImage
               size={wp(18)}
               source={IMAGES.marker}
-              tintColor={type == 'company' ? colors.empPrimary : colors.white}
+              tintColor={type == 'company' ? colors.empPrimary : colors._0B3970}
             />
             <Text
               style={[
                 styles.location,
-                {color: type == 'company' ? colors._0B3970 : colors.white},
+                {color: type == 'company' ? colors._0B3970 : colors._0B3970},
               ]}>
               {companyProfile?.location || 'N/A'}
             </Text>
@@ -76,7 +75,7 @@ const HomeHeader: FC<props> = ({
           source={IMAGES.notification}
           style={[
             styles.bell,
-            {tintColor: type == 'company' ? colors._0B3970 : colors.white},
+            {tintColor: type == 'company' ? colors._0B3970 : colors._0B3970},
           ]}
         />
       </TouchableOpacity>

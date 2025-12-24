@@ -69,7 +69,6 @@ const CoJob = () => {
 
   const { data, isLoading, refetch } = useGetCompanyJobsQuery(filters);
   const [jobs, setJobs] = useState<any[]>([]);
-  console.log("🔥 ~ CoJob ~ jobs:", jobs)
 
   useFocusEffect(
     useCallback(() => {

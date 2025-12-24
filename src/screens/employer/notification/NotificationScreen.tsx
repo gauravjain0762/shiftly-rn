@@ -13,6 +13,7 @@ import {useGetEmployeeNotificationsQuery} from '../../../api/dashboardApi';
 const NotificationScreen = () => {
   const [page, setPage] = useState<number>(1);
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
+  console.log("🔥 ~ NotificationScreen ~ allNotifications:", allNotifications)
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
 
   const {
@@ -24,6 +25,7 @@ const NotificationScreen = () => {
     {refetchOnMountOrArgChange: true},
   );
   const notificationList = notificationsData?.data?.notifications || [];
+  console.log("🔥 ~ NotificationScreen ~ notificationList:", notificationList)
   const pagination = notificationsData?.data?.pagination;
 
   useEffect(() => {

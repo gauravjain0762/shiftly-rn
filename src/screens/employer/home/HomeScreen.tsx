@@ -27,7 +27,6 @@ const HomeScreen = () => {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {userInfo}: any = useSelector((state: RootState) => state.auth);
-  console.log("🔥 ~ HomeScreen ~ userInfo:", userInfo)
   const {data: profileData} = useGetEmployeeProfileQuery({});
 
   const {
@@ -81,7 +80,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       {isLoading && currentPage === 1 ? (
         <PostSkeleton backgroundColor={colors._lightBlueSkeleton} />
       ) : (

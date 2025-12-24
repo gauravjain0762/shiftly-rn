@@ -65,18 +65,45 @@ const CompanyProfile = () => {
 
   // Memoize cover images to prevent recreation on tab changes
   const coverImages = useMemo(() => {
-    if (!userInfo?.cover_images?.length) return [IMAGES.dummy_cover];
+    const images = companyProfileData?.cover_images || userInfo?.cover_images;
+    
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return [IMAGES.dummy_cover];
+    }
 
-    return userInfo.cover_images
+    // Helper function to validate and clean URLs
+    const isValidImageUrl = (url: string): boolean => {
+      if (!url || typeof url !== 'string') return false;
+      
+      const trimmed = url.trim();
+      if (trimmed === '') return false;
+      
+      // Check if URL has the base URL repeated (malformed)
+      const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
+      const repeatedPattern = baseUrl + baseUrl;
+      if (trimmed.includes(repeatedPattern)) {
+        return false;
+      }
+      
+      // Check if it's a valid URL format
+      try {
+        new URL(trimmed);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const filteredImages = images
       .filter((img: any) => {
         if (!img) return false;
 
         if (typeof img === 'string') {
-          return img.trim() !== '';
+          return isValidImageUrl(img);
         }
 
         if (typeof img === 'object' && img.uri) {
-          return img.uri.trim() !== '';
+          return isValidImageUrl(img.uri);
         }
 
         return false;
@@ -87,7 +114,14 @@ const CompanyProfile = () => {
         }
         return img;
       });
-  }, [companyProfileData?.cover_images]);
+
+    // If no valid images after filtering, return dummy image
+    if (filteredImages.length === 0) {
+      return [IMAGES.dummy_cover];
+    }
+
+    return filteredImages;
+  }, [companyProfileData?.cover_images, userInfo?.cover_images]);
 
   const shouldShowCoverLoader = useMemo(() => {
     return coverImages.length > 0;
@@ -181,6 +215,7 @@ const CompanyProfile = () => {
           imagePath={coverImages}
           // ImageChildren={imageChildren}
           ContainerStyle={styles.container}
+          // IMG_WIDTH={wp(380)}
           showLoader={shouldShowCoverLoader}
           loaderColor={colors._0B3970}>
           <LinearContainer

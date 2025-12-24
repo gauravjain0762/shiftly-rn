@@ -61,9 +61,6 @@ export const dashboardApi = createApi({
         url: API.sendInterviewInvites,
         method: HTTP_METHOD.POST,
         data: credentials,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
       }),
     }),
     getSuggestedEmployees: builder.query<any, any>({

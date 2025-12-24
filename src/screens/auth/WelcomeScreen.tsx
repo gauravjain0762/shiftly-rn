@@ -36,6 +36,7 @@ import auth from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice';
 import { RootState } from '../../store';
+import CustomImage from '../../component/common/CustomImage';
 
 const AppOnboardingData = [
   {
@@ -230,6 +231,10 @@ const WelcomeScreen = () => {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
+          <CustomImage
+            size={110}
+            source={IMAGES.newlogo1}
+          />
           <Onboarding data={AppOnboardingData} role={role ?? undefined} />
 
           <View
@@ -286,6 +291,7 @@ const styles = StyleSheet.create({
     paddingTop: hp(12),
     alignSelf: 'flex-start',
     paddingHorizontal: wp(35),
+    tintColor: colors._0B3970,
   },
   scrollView: {
     flex: 1,

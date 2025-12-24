@@ -49,8 +49,8 @@ const CustomBtn: React.FC<CustomTextInputProps> = ({
 const styles = StyleSheet.create({
   btnStyle: {
       height: 59,
-      justifyContent: 'center',
       alignItems: 'center',
+      justifyContent: 'center',
     },
     label: {
       ...commonFontStyle(500, 20, '#051A33'),

@@ -186,7 +186,7 @@ const JobsScreen = () => {
   );
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <ScrollView style={{flex: 1}}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
@@ -400,15 +400,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: wp(25),
-    paddingVertical: hp(32),
+    paddingVertical: hp(24),
   },
   headerTitle: {
-    ...commonFontStyle(600, 22, colors.white),
+    ...commonFontStyle(600, 22, colors._0B3970),
   },
   headerIcons: {
     width: wp(26),
     height: wp(26),
-    tintColor: '#F4E2B8',
+    tintColor: colors._0B3970,
   },
   icon: {
     fontSize: 20,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     gap: wp(18),
   },
   sectionTitle: {
-    ...commonFontStyle(500, 20, colors.white),
+    ...commonFontStyle(500, 20, colors._0B3970),
     paddingVertical: hp(12),
     paddingHorizontal: wp(25),
   },

@@ -26,7 +26,6 @@ const JobCard: FC<props> = ({
   onPressShare = () => { },
   isShowFavIcon = true,
 }) => {
-  console.log("🔥🔥🔥 ~ JobCard ~ item:", item)
   const isValidImageUrl = (url?: string) => {
     if (!url || typeof url !== 'string') return false;
     return /\.(jpeg|jpg|png|gif|webp)$/i.test(url);

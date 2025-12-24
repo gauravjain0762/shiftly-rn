@@ -45,7 +45,7 @@ const SelectRollScreen = () => {
         </View>
 
         <View style={styles.cardJobSeeker}>
-          <Image source={IMAGES.Employer} style={styles.icon} />
+          <Image source={IMAGES.Employer} tintColor={colors.black} style={styles.icon} />
           <Text style={styles.titleWhite}>
             {t('Find Your Next Hospitality Job  Fast & Easy.')}
           </Text>
@@ -94,13 +94,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardJobSeeker: {
-    width: '94%',
+    width: '92%',
     alignItems: 'center',
     borderRadius: hp(20),
-    borderWidth: hp(1.5),
-    paddingVertical: hp(17),
-    borderColor: colors._104686,
-    backgroundColor: colors._0B3970,
+    paddingVertical: hp(21),
+    backgroundColor: colors.white,
+    shadowColor: colors.black,
+    shadowOffset: {width: 0, height: 1.5},
+    shadowOpacity: 0.1,
+    shadowRadius: 3.5,
+    elevation: 3,
   },
   icon: {
     width: wp(41),
@@ -117,7 +120,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: hp(5),
     marginHorizontal: hp(23),
-    ...commonFontStyle(700, 19, colors.white),
+    ...commonFontStyle(700, 19, colors.black),
   },
   desc: {
     textAlign: 'center',
@@ -127,17 +130,17 @@ const styles = StyleSheet.create({
   descWhite: {
     textAlign: 'center',
     marginBottom: hp(16),
-    ...commonFontStyle(400, 18, colors.white),
+    ...commonFontStyle(400, 18, colors.black),
   },
   button: {
     width: '100%',
-    borderTopWidth: 1,
+    borderTopWidth: 0.3,
     alignItems: 'center',
     borderTopColor: colors._104686,
   },
   buttonText: {
     marginTop: hp(14),
-    ...commonFontStyle(500, 18, colors.white),
+    ...commonFontStyle(500, 18, colors.black),
   },
   buttonTextDark: {
     marginTop: hp(14),
