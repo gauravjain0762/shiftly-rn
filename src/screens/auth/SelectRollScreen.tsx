@@ -32,7 +32,7 @@ const SelectRollScreen = () => {
           <TouchableOpacity
             onPress={() => {
               setRole('company');
-              navigateTo(SCREENS.WelcomeScreen);
+              navigateTo(SCREENS.CompanyWelcomeScreen);
             }}
             style={[
               styles.button,
@@ -53,7 +53,7 @@ const SelectRollScreen = () => {
           <TouchableOpacity
             onPress={() => {
               setRole('employee');
-              navigateTo(SCREENS.WelcomeScreen);
+              navigateTo(SCREENS.EmployeeWelcomeScreen);
             }}
             style={styles.button}>
             <Text style={styles.buttonText}>{t('Continue as Job Seeker')}</Text>

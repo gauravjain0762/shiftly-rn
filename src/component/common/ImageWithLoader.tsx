@@ -24,7 +24,7 @@ const ImageWithLoader: React.FC<ImageWithLoaderProps> = ({
   style,
   containerStyle,
   loaderSize = 'small',
-  loaderColor = colors._0B3970,
+  loaderColor = colors._D5D5D5,
   resizeMode = 'cover',
   placeholder,
 }) => {

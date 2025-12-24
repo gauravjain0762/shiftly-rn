@@ -7,6 +7,7 @@ import MessageList from '../../../component/employe/MessageList';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {hp, wp} from '../../../theme/fonts';
+import {colors} from '../../../theme/colors';
 import {useGetCompanyChatsQuery} from '../../../api/dashboardApi';
 import NoDataText from '../../../component/common/NoDataText';
 
@@ -33,7 +34,7 @@ const CoMessage = () => {
         />
       </View>
       {isLoading ? (
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator size={'large'} color={colors._D5D5D5} />
       ) : (
         <FlatList
           data={chatList}

@@ -7,6 +7,8 @@ export const SCREENS = {
   LoginScreen: 'LoginScreen',
   SplashScreen: 'SplashScreen',
   WelcomeScreen: 'WelcomeScreen',
+  EmployeeWelcomeScreen: 'EmployeeWelcomeScreen',
+  CompanyWelcomeScreen: 'CompanyWelcomeScreen',
   SelectRollScreen: 'SelectRollScreen',
   SignUp: 'SignUp',
   TabNavigator: 'TabNavigator',
@@ -63,6 +65,8 @@ export interface ScreenNames {
   LoginScreen: string;
   SplashScreen: string;
   WelcomeScreen: string;
+  EmployeeWelcomeScreen: string;
+  CompanyWelcomeScreen: string;
   SelectRollScreen: string;
   SignUp: string;
   TabNavigator: string;

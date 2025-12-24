@@ -6,15 +6,16 @@ import {
   ViewStyle,
   ActivityIndicator,
 } from 'react-native';
-import React, {FC, ReactNode, useState, useCallback} from 'react';
+import React, { FC, ReactNode, useState, useCallback } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
-import {colors} from '../../theme/colors';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { colors } from '../../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from './CustomImage';
-import {IMAGES} from '../../assets/Images';
+import { IMAGES } from '../../assets/Images';
+import { hp, wp } from '../../theme/fonts';
 
 type SimpleCarouselProps = {
-  imagePath?: string | {uri: string} | (string | {uri: string})[];
+  imagePath?: string | { uri: string } | (string | { uri: string })[];
   ContainerStyle?: ViewStyle;
   ChildrenStyle?: ViewStyle;
   IMG_HEIGHT?: number;
@@ -25,10 +26,10 @@ type SimpleCarouselProps = {
   loaderColor?: string;
 };
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: {flex: 1},
+  container: { flex: 1 },
   imageContainer: {
     position: 'relative',
     alignItems: 'center',
@@ -76,7 +77,7 @@ const SimpleImage: FC<{
   children: ReactNode;
   showLoader: boolean;
   loaderColor: string;
-}> = ({source, style, children, showLoader, loaderColor}) => {
+}> = ({ source, style, children, showLoader, loaderColor }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -85,22 +86,20 @@ const SimpleImage: FC<{
     return () => clearTimeout(timeout);
   }, []);
 
-  // Handle string URIs, objects with uri, and local require() assets (numbers)
   const hasValidSource = source && (
-    typeof source === 'string' || 
-    typeof source === 'number' || 
+    typeof source === 'string' ||
+    typeof source === 'number' ||
     (typeof source === 'object' && source.uri)
   );
-  
-  // If no valid source or error occurred, use dummy image
-  const finalSource = !hasValidSource || hasError ? IMAGES.dummy_cover : source;
+
+  const finalSource = !hasValidSource || hasError ? IMAGES.newlogo : source;
 
   return (
     <CustomImage
       source={finalSource}
       imageStyle={style}
       containerStyle={styles.imageContainer}
-      resizeMode="cover"
+      resizeMode="contain"
       props={{
         onError: () => {
           setHasError(true);
@@ -113,7 +112,7 @@ const SimpleImage: FC<{
   );
 };
 
-const PaginationDots: FC<{data: any[]; currentIndex: number}> = ({
+const PaginationDots: FC<{ data: any[]; currentIndex: number }> = ({
   data,
   currentIndex,
 }) => {
@@ -140,32 +139,42 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
   IMG_WIDTH,
   ImageChildren,
   showLoader = true,
-  loaderColor = colors._0B3970,
+  loaderColor = colors._D5D5D5,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const normalizedImages = Array.isArray(imagePath) ? imagePath : [imagePath];
-  const hasMultipleImages = normalizedImages.length > 1;
+
+  // Filter out invalid/empty images
+  const validImages = normalizedImages.filter(item => {
+    if (!item) return false;
+    if (typeof item === 'string' && item.trim() !== '') return true;
+    if (typeof item === 'number') return true;
+    if (typeof item === 'object' && item.uri && item.uri.trim() !== '') return true;
+    return false;
+  });
+
+  const hasValidImages = validImages.length > 0;
+  const hasMultipleImages = validImages.length > 1;
   const imageWidth = IMG_WIDTH || width;
 
   const renderCarouselItem = useCallback(
-    ({item}: {item: any}) => {
-      // Handle string URIs, objects with uri, and local require() assets (numbers)
+    ({ item }: { item: any }) => {
       const hasValidSource = item && (
-        typeof item === 'string' || 
-        typeof item === 'number' || 
+        typeof item === 'string' ||
+        typeof item === 'number' ||
         (typeof item === 'object' && item.uri)
       );
       const source = hasValidSource
         ? item
         : {
-            uri: 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png',
-          };
+          uri: 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png',
+        };
 
       return (
         <SimpleImage
           source={source}
-          style={{width: imageWidth, height: IMG_HEIGHT}}
+          style={{ width: imageWidth, height: IMG_HEIGHT }}
           showLoader={showLoader && hasValidSource}
           loaderColor={loaderColor}>
           {ImageChildren}
@@ -177,26 +186,38 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
 
   return (
     <SafeAreaView edges={['bottom']} style={[styles.container, ContainerStyle]}>
-      <View style={[styles.imageContainer, {width: imageWidth}]}>
-        <Carousel
-          width={imageWidth}
-          height={IMG_HEIGHT}
-          data={normalizedImages}
-          scrollAnimationDuration={300}
-          onSnapToItem={setCurrentImageIndex}
-          renderItem={renderCarouselItem}
-          loop={hasMultipleImages}
-          autoPlay={hasMultipleImages}
-          autoPlayInterval={3000}
-          pagingEnabled={hasMultipleImages}
-          snapEnabled={hasMultipleImages}
-          enabled={hasMultipleImages}
-        />
+      <View style={[styles.imageContainer, { width: imageWidth }]}>
+        {hasValidImages ? (
+          <>
+            <Carousel
+              width={imageWidth}
+              height={IMG_HEIGHT}
+              data={validImages}
+              scrollAnimationDuration={300}
+              onSnapToItem={setCurrentImageIndex}
+              renderItem={renderCarouselItem}
+              loop={hasMultipleImages}
+              autoPlay={hasMultipleImages}
+              autoPlayInterval={3000}
+              pagingEnabled={hasMultipleImages}
+              snapEnabled={hasMultipleImages}
+              enabled={hasMultipleImages}
+            />
 
-        <PaginationDots
-          data={normalizedImages}
-          currentIndex={currentImageIndex}
-        />
+            <PaginationDots
+              data={validImages}
+              currentIndex={currentImageIndex}
+            />
+          </>
+        ) : (
+          <CustomImage
+            size={150}
+            source={IMAGES.newlogo}
+            imageStyle={{ width: 150, height: 150 }}
+            resizeMode="contain">
+            {ImageChildren}
+          </CustomImage>
+        )}
       </View>
 
       <View style={[styles.container, ChildrenStyle]}>{children}</View>

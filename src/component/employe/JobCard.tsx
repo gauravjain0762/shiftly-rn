@@ -26,27 +26,30 @@ const JobCard: FC<props> = ({
   onPressShare = () => { },
   isShowFavIcon = true,
 }) => {
-  const isValidImageUrl = (url?: string) => {
-    if (!url || typeof url !== 'string') return false;
-    return /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
-  };
+  const isCoverImage = item?.company_id?.cover_images?.length > 0;
 
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       <CustomImage
-        tintColor={item?.company_id?.cover_images?.[0] ? '' : 'lightgrey'}
+        tintColor={item?.company_id?.cover_images?.[0] ? '' : ''}
         uri={item?.company_id?.cover_images?.[0] || ''}
         imageStyle={{
           opacity: 1,
           width: '100%',
           height: '100%',
         }}
-        resizeMode={item?.company_id?.cover_images?.[0] ? 'cover' : 'cover'}
-        containerStyle={styles.jobImage}>
+        resizeMode={isCoverImage? "cover" : "contain"}
+        containerStyle={{
+          height: hp(140),
+          overflow: 'hidden',
+          alignSelf: 'center',
+          justifyContent: 'flex-end',
+          width: isCoverImage? '100%' : '100%',
+        }}>
         <View style={styles.logo}>
           <CustomImage
             resizeMode="stretch"
-            source={IMAGES.dummy_cover}
+            source={IMAGES.logoText}
             uri={item?.company_id?.logo}
             containerStyle={styles.companyLogo}
             imageStyle={{
@@ -92,9 +95,9 @@ const JobCard: FC<props> = ({
         </View>
         <View style={styles.titleRow}>
           <Text style={styles.jobTitle}>{item?.title}</Text>
-          <View style={styles.badge}>
+          {item?.job_type && <View style={styles.badge}>
             <Text style={styles.badgeText}>{item?.job_type}</Text>
-          </View>
+          </View>}
         </View>
         <ExpandableText
           maxLines={2}
@@ -116,10 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors._EFEFEF,
   },
   jobImage: {
-    width: '100%',
-    height: hp(140),
-    overflow: 'hidden',
-    justifyContent: 'flex-end',
+
   },
   cardContent: {
     gap: hp(2),
@@ -137,8 +137,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   companyLogo: {
-    width: wp(75),
-    height: hp(75),
+    width: wp(50),
+    height: wp(50),
     borderRadius: hp(80),
     overflow: 'hidden',
   },
@@ -180,8 +180,8 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     backgroundColor: colors.white,
-    width: wp(40),
-    height: wp(40),
+    width: wp(36),
+    height: wp(36),
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   logo: {
-    width: wp(80),
-    height: wp(80),
+    width: wp(55),
+    height: wp(55),
     bottom: hp(10),
     borderRadius: 100,
     position: 'absolute',
@@ -219,8 +219,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   icon: {
-    width: wp(24),
-    height: wp(24),
+    width: wp(22),
+    height: wp(22),
   },
   iconFilled: {
     width: wp(28),

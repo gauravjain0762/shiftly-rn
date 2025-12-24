@@ -98,7 +98,7 @@ const CoHome = () => {
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       {isLoading && currentPage === 1 ? (
-        <PostSkeleton backgroundColor={colors.coPrimary} />
+        <PostSkeleton backgroundColor={colors._DADADA} />
       ) : (
         <FlatList
           data={allPosts}
@@ -119,7 +119,7 @@ const CoHome = () => {
                 <BaseText
                   style={{
                     textAlign: 'center',
-                    ...commonFontStyle(400, 18, colors.black),
+                    ...commonFontStyle(400, 18, colors._2F2F2F),
                   }}>
                   {t('There is no post available')}
                 </BaseText>
@@ -130,6 +130,7 @@ const CoHome = () => {
             isLoadingMore ? (
               <ActivityIndicator
                 size="large"
+                color={colors._D5D5D5}
                 style={{marginVertical: hp(10)}}
               />
             ) : null

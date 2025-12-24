@@ -121,10 +121,6 @@ const JobDetail = () => {
       : [curr_jobdetails?.company_id?.logo];
 
   const renderCarouselItem = ({ item, index }: any) => {
-    const isValidImage =
-      item &&
-      item.startsWith('http') &&
-      /\.(jpeg|jpg|png|gif|webp)$/i.test(item);
 
     return (
       <View key={index} style={styles.carouselItemContainer}>
@@ -132,8 +128,7 @@ const JobDetail = () => {
           resizeMode="cover"
           imageStyle={styles.imageStyle}
           containerStyle={styles.carouselImage}
-          source={item ? { uri: item } : IMAGES.dummy_image}
-        // url={item}
+          source={item ? { uri: item } : IMAGES.newlogo}
         />
       </View>
     );
@@ -203,7 +198,7 @@ const JobDetail = () => {
       />
 
       {isLoading ? (
-        <ActivityIndicator size={'large'} color={colors._0B3970} />
+        <ActivityIndicator size={'large'} color={colors._D5D5D5} />
       ) : (
         <>
           <View style={styles.bannerWrapper}>

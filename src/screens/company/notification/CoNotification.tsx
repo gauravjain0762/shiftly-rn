@@ -82,7 +82,7 @@ const CoNotification = () => {
 
       {isLoading ? (
         <View style={AppStyles.centeredContainer}>
-          <ActivityIndicator size={'large'} />
+          <ActivityIndicator size={'large'} color={colors._D5D5D5} />
         </View>
       ) : (
         <FlatList
@@ -104,7 +104,7 @@ const CoNotification = () => {
           onEndReachedThreshold={0.2}
           ListFooterComponent={() =>
             isFetching && pagination?.current_page < pagination?.total_pages ? (
-              <ActivityIndicator style={{marginVertical: 10}} />
+              <ActivityIndicator color={colors._D5D5D5} style={{marginVertical: 10}} />
             ) : null
           }
         />
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(400, 18, colors.black),
+    ...commonFontStyle(400, 18, colors._2F2F2F),
   },
   iconWrapper: {
     backgroundColor: '#0D468C',

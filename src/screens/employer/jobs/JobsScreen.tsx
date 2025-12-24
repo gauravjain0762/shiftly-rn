@@ -25,7 +25,6 @@ import Carousel from 'react-native-reanimated-carousel';
 import {
   errorToast,
   navigateTo,
-  successToast,
 } from '../../../utils/commonFunction';
 import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
 import {useTranslation} from 'react-i18next';

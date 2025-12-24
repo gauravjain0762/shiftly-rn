@@ -8,6 +8,7 @@ export const colors = {
   _DADADA: '#DADADA',
   _F7F7F7: '#F7F7F7',
   _FBFBFB: '#FBFBFB',
+  _FEFEFE: "#FEFEFE",
 
   _0B3970: '#0B3970',
   _104686: '#104686',

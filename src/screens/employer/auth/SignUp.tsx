@@ -56,7 +56,7 @@ import {
 } from '../../../api/authApi';
 import {RootState} from '../../../store';
 import CustomImage from '../../../component/common/CustomImage';
-import CountryPicker, {Country} from 'react-native-country-picker-modal';
+import CountryPicker, {Country, Flag} from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
 import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
 import {useRoute} from '@react-navigation/native';
@@ -87,6 +87,8 @@ const SignUp = () => {
     selected1,
     selected2,
     selected3,
+    selected2Code,
+    selected3Code,
     dob,
     open,
     full_password,
@@ -136,6 +138,8 @@ const SignUp = () => {
       selected1: string;
       selected2: string;
       selected3: string;
+      selected2Code: string;
+      selected3Code: string;
       dob: string;
       isPickerVisible: boolean;
       open: boolean;
@@ -867,15 +871,24 @@ const SignUp = () => {
                 onPress={() => {
                   setIsVisible('1');
                 }}>
-                <Image
-                  source={IMAGES.close}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    resizeMode: 'contain',
-                    tintColor: colors._0B3970,
-                  }}
-                />
+                {selected2Code ? (
+                  <Flag
+                    withFlagButton
+                    flagSize={wp(20)}
+                    withEmoji={true}
+                    countryCode={selected2Code as any}
+                  />
+                ) : (
+                  <Image
+                    source={IMAGES.close}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      resizeMode: 'contain',
+                      tintColor: colors._0B3970,
+                    }}
+                  />
+                )}
                 <Text style={styles.dateText}>{selected2 || 'Select '}</Text>
               </TouchableOpacity>
 
@@ -895,15 +908,24 @@ const SignUp = () => {
                 onPress={() => {
                   setIsVisible('2');
                 }}>
-                <Image
-                  source={IMAGES.close}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    resizeMode: 'contain',
-                    tintColor: colors._0B3970,
-                  }}
-                />
+                {selected3Code ? (
+                  <Flag
+                    withFlagButton
+                    flagSize={wp(20)}
+                    withEmoji={true}
+                    countryCode={selected3Code as any}
+                  />
+                ) : (
+                  <Image
+                    source={IMAGES.close}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      resizeMode: 'contain',
+                      tintColor: colors._0B3970,
+                    }}
+                  />
+                )}
                 <Text style={styles.dateText}>{selected3 || 'Select '}</Text>
               </TouchableOpacity>
 
@@ -912,19 +934,32 @@ const SignUp = () => {
               {isVisible && (
                 <CountryPicker
                   visible={isVisible ? true : false}
+                  countryCode={
+                    isVisible === '1'
+                      ? (selected2Code as any) || 'US'
+                      : (selected3Code as any) || 'US'
+                  }
                   withFilter
                   withCountryNameButton
                   withCallingCode={false}
                   withFlag
                   withEmoji={false}
                   onSelect={(item: Country) => {
+                    const countryName =
+                      typeof item?.name === 'string'
+                        ? item.name
+                        : item?.name?.common || '';
+                    const countryCode = item?.cca2 || '';
+
                     if (isVisible === '1') {
                       updateSignupData({
-                        selected2: (item?.name && item?.name.toString()) || '',
+                        selected2: countryName,
+                        selected2Code: countryCode,
                       });
                     } else {
                       updateSignupData({
-                        selected3: (item?.name && item?.name.toString()) || '',
+                        selected3: countryName,
+                        selected3Code: countryCode,
                       });
                     }
 
@@ -958,7 +993,7 @@ const SignUp = () => {
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>
-                {t('How about adding your photo?')}
+                {t('Want to make your profile stand out? Add a photo 📸')}
               </Text>
               <Text style={styles.infotext1}>
                 {t(
@@ -1066,7 +1101,7 @@ const SignUp = () => {
             onPress={() => {
               if (isAppleAuth || isGoogleAuth) {
                 if (step === 4) {
-                  resetNavigation(SCREENS.WelcomeScreen);
+                  resetNavigation(SCREENS.EmployeeWelcomeScreen);
                 } else {
                   prevStep(step);
                 }
@@ -1127,7 +1162,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skipBtn: {
-    backgroundColor: '#FDE9B6',
+    backgroundColor: colors._0B3970,
     borderRadius: 20,
     width: 65,
     height: 34,
@@ -1136,7 +1171,7 @@ const styles = StyleSheet.create({
     top: -10,
   },
   skipText: {
-    ...commonFontStyle(500, 14, colors.black),
+    ...commonFontStyle(500, 14, colors.white),
   },
   back: {
     width: wp(21),

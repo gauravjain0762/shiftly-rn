@@ -29,6 +29,6 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    ...commonFontStyle(500, 16, colors.black),
+    ...commonFontStyle(500, 16, colors._2F2F2F),
   },
 });

@@ -43,6 +43,7 @@ const SuggestedEmployeeScreen = () => {
   } = useGetCompanyJobDetailsQuery(jobId, {skip: !jobId});
 
   const jobInfo = jobData || jobDetailsResponse?.data || {};
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobInfo:", jobInfo)
   const employees = suggestedResponse?.data?.users || [];
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
@@ -153,8 +154,8 @@ const SuggestedEmployeeScreen = () => {
   }, [jobInfo]);
 
   const jobLocation = useMemo(() => {
-    if (jobInfo?.address) {
-      return jobInfo.address;
+    if (jobInfo?.area) {
+      return jobInfo.area;
     }
     if (jobInfo?.city || jobInfo?.country) {
       return `${jobInfo?.city || ''}${jobInfo?.city && jobInfo?.country ? ', ' : ''
@@ -558,10 +559,10 @@ const styles = StyleSheet.create({
     gap: hp(8),
   },
   emptyTitle: {
-    ...commonFontStyle(600, 16, colors._0B3970),
+    ...commonFontStyle(600, 16, colors._2F2F2F),
   },
   emptyMessage: {
-    ...commonFontStyle(400, 14, colors._4A4A4A),
+    ...commonFontStyle(400, 14, colors._2F2F2F),
     textAlign: 'center',
     lineHeight: hp(20),
     paddingHorizontal: wp(10),
@@ -570,7 +571,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: wp(20),
     right: wp(20),
-    bottom: hp(20),
+    bottom: hp(40),
   },
   ctaButton: {
     borderRadius: wp(22),

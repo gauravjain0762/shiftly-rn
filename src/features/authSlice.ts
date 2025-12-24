@@ -61,6 +61,8 @@ interface AppState {
     selected1: string;
     selected2: string;
     selected3: string;
+    selected2Code: string;
+    selected3Code: string;
     dob: string;
     isPickerVisible: boolean;
     open: boolean;
@@ -134,6 +136,8 @@ const initialState: AppState = {
     selected1: '',
     selected2: '',
     selected3: '',
+    selected2Code: '',
+    selected3Code: '',
     dob: new Date(
       new Date().setFullYear(new Date().getFullYear() - 16),
     ).toISOString(),

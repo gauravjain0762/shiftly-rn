@@ -24,7 +24,7 @@ const CustomInput = ({
 }: any) => {
   return (
     <View style={{flex: 1}}>
-      <Text style={styles.label}>{label}</Text>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
         placeholder={placeholder}
         value={value}
@@ -57,12 +57,12 @@ const styles = StyleSheet.create({
     borderColor: '#225797',
     flexDirection: 'row',
     // alignItems: 'center',
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, colors._050505),
   },
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(400, 18, '#050505'),
+    ...commonFontStyle(600, 18, colors._050505),
   },
   required: {
     color: 'red',
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputStyle: {
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, colors._050505),
     flex: 1,
   },
   placeholderStyle: {

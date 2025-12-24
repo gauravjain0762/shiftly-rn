@@ -141,6 +141,8 @@ const styles = StyleSheet.create({
     marginTop: hp(10),
     alignSelf: 'center',
     resizeMode: 'contain',
+    height: hp(140),
+    width: wp(140),
   },
   container: {
     marginTop: hp(30),

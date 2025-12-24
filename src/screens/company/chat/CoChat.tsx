@@ -285,7 +285,7 @@ const CoChat = () => {
   }, []);
 
   return (
-    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
+    <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         <KeyboardAvoidingView
           style={{flex: 1}}
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 0,
   },
   userBubble: {
-    backgroundColor: colors._E8CE92,
+    backgroundColor: colors._FEFEFE,
     borderTopRightRadius: 0,
     alignSelf: 'flex-end',
   },

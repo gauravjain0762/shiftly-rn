@@ -19,6 +19,7 @@ const HomeHeader: FC<props> = ({
   onPressAvatar,
   companyProfile,
 }) => {
+  console.log("🔥 ~ HomeHeader ~ companyProfile:", companyProfile)
   return (
     <View style={styles.header}>
       <View style={styles.row}>
@@ -48,7 +49,7 @@ const HomeHeader: FC<props> = ({
               styles.name,
               {color: type == 'company' ? colors._0B3970 : colors._0B3970},
             ]}>
-            {companyProfile?.company_name || 'N/A'}
+            {companyProfile?.company_name || companyProfile?.name || 'N/A'}
           </Text>
 
           <View

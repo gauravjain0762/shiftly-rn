@@ -5,20 +5,19 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Text,
 } from 'react-native';
 import React, {FC, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import GradientButton from '../common/GradientButton';
 import CustomDropdown from '../common/CustomDropdown';
 import CustomDatePicker from '../common/CustomDatePicker';
 import {IMAGES} from '../../assets/Images';
-import moment from 'moment';
 import CustomInput from '../common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
 import BaseText from '../common/BaseText';
 import {ExperienceItem} from '../../features/employeeSlice';
-import {errorToast} from '../../utils/commonFunction';
 import {colors} from '../../theme/colors';
+import Tooltip from '../common/Tooltip';
 
 const experienceOptions = [
   {label: 'Internship', value: 'internship'},
@@ -26,6 +25,24 @@ const experienceOptions = [
   {label: 'Full-time', value: 'full_time'},
   {label: 'Freelance', value: 'freelance'},
   {label: 'Contract', value: 'contract'},
+];
+
+const departmentOptions = [
+  {label: 'Front Office', value: 'Front Office'},
+  {label: 'Housekeeping', value: 'Housekeeping'},
+  {label: 'Food & Beverage', value: 'Food & Beverage'},
+  {label: 'Kitchen', value: 'Kitchen'},
+  {label: 'Reception', value: 'Reception'},
+  {label: 'Concierge', value: 'Concierge'},
+  {label: 'Guest Services', value: 'Guest Services'},
+  {label: 'Maintenance', value: 'Maintenance'},
+  {label: 'Security', value: 'Security'},
+  {label: 'Spa & Wellness', value: 'Spa & Wellness'},
+  {label: 'Events & Banquets', value: 'Events & Banquets'},
+  {label: 'Sales & Marketing', value: 'Sales & Marketing'},
+  {label: 'Human Resources', value: 'Human Resources'},
+  {label: 'Finance & Accounting', value: 'Finance & Accounting'},
+  {label: 'Other', value: 'Other'},
 ];
 
 export const isEmptyExperience = (exp: ExperienceItem) => {
@@ -50,9 +67,17 @@ const ExperienceList: FC<any> = ({
 
   return (
     <View style={styles.wrapper}>
+      <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+        <Text style={styles.fieldLabel}>Desired Job Title</Text>
+        <Tooltip
+          message="Select the job title you are looking for (e.g., Receptionist, Waiter, Housekeeping Attendant). This helps us match you with the right employers."
+          position="bottom"
+          containerStyle={styles.tooltipIcon}
+          tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+        />
+      </View>
       <CustomInput
-        label="Preferred Position"
-        placeholder={'Enter Preferred Position'}
+        placeholder={'Enter Desired Job Title'}
         value={experienceListEdit.preferred_position}
         onChange={(text: any) =>
           setExperienceListEdit({
@@ -60,33 +85,48 @@ const ExperienceList: FC<any> = ({
             preferred_position: text,
           })
         }
+        label=""
       />
 
       <BaseText style={styles.headerText}>Past Job Experience</BaseText>
+      <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+        <Text style={styles.fieldLabel}>Job Title</Text>
+        <Tooltip
+          message="Enter the position you held (e.g., Waiter, Receptionist). This helps us match your skills and salary expectations."
+          position="bottom"
+          containerStyle={styles.tooltipIcon}
+          tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+        />
+      </View>
       <CustomInput
-        label="Title"
-        placeholder={'Enter Title'}
+        placeholder={'Enter Job Title'}
         value={experienceListEdit.title}
         onChange={(text: any) =>
           setExperienceListEdit({...experienceListEdit, title: text})
         }
+        label=""
       />
       <CustomInput
-        label="Company"
-        placeholder={'Enter Company'}
+        label="Company Name"
+        placeholder={'Enter Company Name'}
         value={experienceListEdit.company}
         onChange={(text: any) =>
           setExperienceListEdit({...experienceListEdit, company: text})
         }
       />
 
-      <CustomInput
+      <CustomDropdown
+        data={departmentOptions}
         label="Department"
-        placeholder={'Enter Department'}
+        placeholder={'Select Department'}
         value={experienceListEdit?.department}
-        onChange={(text: any) =>
-          setExperienceListEdit({...experienceListEdit, department: text})
-        }
+        container={{marginBottom: 15}}
+        onChange={(selectedItem: {label: string; value: string} | any) => {
+          setExperienceListEdit({
+            ...experienceListEdit,
+            department: selectedItem?.value || selectedItem?.label,
+          });
+        }}
       />
 
       <View style={styles.countryWrapper}>
@@ -109,6 +149,7 @@ const ExperienceList: FC<any> = ({
       {isVisible && (
         <CountryPicker
           visible={isVisible}
+          countryCode="US"
           withFilter
           withCountryNameButton
           withCallingCode={false}
@@ -164,7 +205,7 @@ const ExperienceList: FC<any> = ({
               )}
             </ImageBackground>
           </TouchableOpacity>
-          <BaseText style={styles.stillText}>Still working here</BaseText>
+          <BaseText style={styles.stillText}>I currently work here</BaseText>
         </Pressable>
 
         {!experienceListEdit?.still_working && (
@@ -205,6 +246,7 @@ export default ExperienceList;
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: wp(29),
+    overflow: 'visible',
   },
   headerText: {
     marginTop: hp(21),
@@ -227,7 +269,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   countryText: {
-    ...commonFontStyle(400, wp(18), colors._0B3970),
+    ...commonFontStyle(400, wp(18), colors._050505),
   },
   stillWrapper: {
     flexDirection: 'row',
@@ -280,5 +322,18 @@ const styles = StyleSheet.create({
   },
   countryPlaceholder: {
     ...commonFontStyle(400, 18, '#969595'),
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 12,
+    gap: wp(8),
+  },
+  fieldLabel: {
+    ...commonFontStyle(600, 18, colors._050505),
+  },
+  tooltipIcon: {
+    marginTop: hp(0),
   },
 });

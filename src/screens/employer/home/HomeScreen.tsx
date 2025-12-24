@@ -103,6 +103,7 @@ const HomeScreen = () => {
             isLoadingMore ? (
               <ActivityIndicator
                 size="large"
+                color={colors._D5D5D5}
                 style={{marginVertical: hp(10)}}
               />
             ) : null

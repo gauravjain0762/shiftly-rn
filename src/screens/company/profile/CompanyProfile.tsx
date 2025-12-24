@@ -68,7 +68,7 @@ const CompanyProfile = () => {
     const images = companyProfileData?.cover_images || userInfo?.cover_images;
     
     if (!images || !Array.isArray(images) || images.length === 0) {
-      return [IMAGES.dummy_cover];
+      return [IMAGES.newlogo];
     }
 
     // Helper function to validate and clean URLs
@@ -172,7 +172,7 @@ const CompanyProfile = () => {
         <View style={styles.emptyContainer}>
           <Text
             style={[
-              commonFontStyle(500, 16, colors._3D3D3D),
+              commonFontStyle(500, 16, colors._2F2F2F),
               { textAlign: 'center', marginTop: hp(20) },
             ]}>
             No Jobs Found
@@ -213,9 +213,7 @@ const CompanyProfile = () => {
         showsVerticalScrollIndicator={false}>
         <ParallaxContainer
           imagePath={coverImages}
-          // ImageChildren={imageChildren}
           ContainerStyle={styles.container}
-          // IMG_WIDTH={wp(380)}
           showLoader={shouldShowCoverLoader}
           loaderColor={colors._0B3970}>
           <LinearContainer
@@ -309,7 +307,7 @@ const CompanyProfile = () => {
                   <View style={styles.emptyContainer}>
                     <Text
                       style={[
-                        commonFontStyle(500, 16, colors._3D3D3D),
+                        commonFontStyle(500, 16, colors._2F2F2F),
                         { textAlign: 'center', marginTop: hp(20) },
                       ]}>
                       No Posts Found

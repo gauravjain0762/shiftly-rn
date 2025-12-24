@@ -157,7 +157,7 @@ const CoJobDetails = () => {
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       {isLoading ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator size={'large'} />
+          <ActivityIndicator size={'large'} color={colors._D5D5D5} />
         </View>
       ) : (
         <>
@@ -296,7 +296,7 @@ const CoJobDetails = () => {
                 {selectedMetricIndex === 0 && (
                   // Total Job View - Show empty or placeholder
                   <View style={styles.emptyState}>
-                    <BaseText>No job viewers</BaseText>
+                    <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No job viewers</BaseText>
                   </View>
                 )}
 
@@ -338,7 +338,7 @@ const CoJobDetails = () => {
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText>No applicants</BaseText>
+                      <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No applicants</BaseText>
                     </View>
                   )
                 )}
@@ -381,7 +381,7 @@ const CoJobDetails = () => {
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText>No suggested candidates</BaseText>
+                      <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No suggested candidates</BaseText>
                     </View>
                   )
                 )}
@@ -424,7 +424,7 @@ const CoJobDetails = () => {
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText>No shortlisted applicants</BaseText>
+                      <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No shortlisted applicants</BaseText>
                     </View>
                   )
                 )}

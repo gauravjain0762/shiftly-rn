@@ -11,6 +11,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
 import {errorToast} from '../../utils/commonFunction';
+import {colors} from '../../theme/colors';
 
 const months = [
   'January',
@@ -279,10 +280,10 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(400, 18, '#050505'),
+    ...commonFontStyle(600, 18, colors._050505),
   },
   inputStyle: {
-    ...commonFontStyle(400, 18, '#050505'),
+    ...commonFontStyle(400, 18, colors._050505),
     flex: 1,
   },
   placeholderStyle: {

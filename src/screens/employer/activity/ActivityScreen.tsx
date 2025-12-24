@@ -69,7 +69,7 @@ const ActivityScreen = () => {
         />
       </View>
       {isLoading ? (
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator size={'large'} color={colors._D5D5D5} />
       ) : (
         <FlatList
           data={activities}

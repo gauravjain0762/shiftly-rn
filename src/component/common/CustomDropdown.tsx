@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputStyle: {
-    ...commonFontStyle(400, 18, '#F4E2B8'),
+    ...commonFontStyle(400, 18, colors._050505),
   },
   placeholderStyle: {
     flex: 1,

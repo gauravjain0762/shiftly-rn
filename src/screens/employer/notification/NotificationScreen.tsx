@@ -65,7 +65,7 @@ const NotificationScreen = () => {
         </View>
         {isLoading && page === 1 ? (
           <View style={AppStyles.centeredContainer}>
-            <ActivityIndicator size={'large'} />
+            <ActivityIndicator size={'large'} color={colors._D5D5D5} />
           </View>
         ) : (
           <FlatList
@@ -90,7 +90,7 @@ const NotificationScreen = () => {
             ListFooterComponent={
               isFetching &&
               pagination?.current_page < pagination?.total_pages ? (
-                <ActivityIndicator style={{marginVertical: hp(16)}} />
+                <ActivityIndicator color={colors._D5D5D5} style={{marginVertical: hp(16)}} />
               ) : null
             }
           />

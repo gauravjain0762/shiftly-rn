@@ -8,6 +8,8 @@ import HomeScreen from '../screens/employer/home/HomeScreen';
 import {ScreenNames, SCREENS} from './screenNames';
 import SplashScreen from '../screens/auth/Splash';
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
+import EmployeeWelcomeScreen from '../screens/auth/EmployeeWelcomeScreen';
+import CompanyWelcomeScreen from '../screens/auth/CompanyWelcomeScreen';
 import SelectRollScreen from '../screens/auth/SelectRollScreen';
 import LoginScreen from '../screens/employer/auth/LoginScreen';
 import SignUp from '../screens/employer/auth/SignUp';
@@ -404,6 +406,16 @@ const StackNavigator: FC = () => {
         options={({navigation}) => ({headerShown: false})}
         name={SCREENS.WelcomeScreen}
         component={WelcomeScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.EmployeeWelcomeScreen}
+        component={EmployeeWelcomeScreen}
+      />
+      <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.CompanyWelcomeScreen}
+        component={CompanyWelcomeScreen}
       />
       <Stack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />

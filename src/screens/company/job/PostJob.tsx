@@ -919,7 +919,7 @@ const PostJob = () => {
                       ListEmptyComponent={() => (
                         <View style={styles.emptyReqContainer}>
                           <BaseText
-                            style={{ ...commonFontStyle(400, 16, colors.black) }}>
+                            style={{ ...commonFontStyle(400, 16, colors._2F2F2F) }}>
                             {'No requirements added yet'}
                           </BaseText>
                         </View>
@@ -1725,11 +1725,11 @@ const styles = StyleSheet.create({
     marginTop: hp(17),
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: hp(1.5),
+    borderWidth: hp(1),
     borderRadius: hp(10),
     paddingVertical: hp(17),
     paddingHorizontal: wp(18),
-    borderColor: colors._C9B68B,
+    borderColor: colors._D9D9D9,
   },
   checkRound: {
     width: wp(24),
@@ -1752,14 +1752,15 @@ const styles = StyleSheet.create({
   },
   addRequirementButton: {
     marginTop: hp(40),
+    flexDirection: 'row',
+    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
     borderWidth: hp(1.5),
     borderRadius: hp(10),
     paddingVertical: hp(17),
     paddingHorizontal: wp(18),
-    borderColor: colors._C9B68B,
+    borderColor: colors._D9D9D9,
   },
   emptyReqContainer: {
     flex: 1,
@@ -1914,7 +1915,7 @@ const styles = StyleSheet.create({
   modalHomeText: {
     marginBottom: hp(20),
     textAlign: 'center',
-    ...commonFontStyle(400, 19, colors._B4B4B4),
+    ...commonFontStyle(400, 19, colors._050505),
   },
   selectedSkillsContainer: {
     flexDirection: 'row',

@@ -55,7 +55,7 @@ const CustomImage = ({
         resizeMode={resizeMode}
         source={uri ? {uri: uri} : source}
         tintColor={tintColor}
-        defaultSource={source ? source : IMAGES.dummy_image}
+        defaultSource={source ? source : IMAGES.logoText}
         style={[{width: size, height: size}, imageStyle]}
         {...props}>
         {children}

@@ -22,11 +22,11 @@ const FeedCard: FC<card> = ({onPressCard = () => {}, item}) => {
       style={styles.card}>
       <View style={styles.cardHeader}>
         <CustomImage
-          uri={item?.company_id?.logo}
-          source={IMAGES.logoImg}
-          imageStyle={{height: '100%', width: '100%'}}
-          containerStyle={styles.logo}
           resizeMode="cover"
+          source={IMAGES.logoImg}
+          uri={item?.company_id?.logo}
+          containerStyle={styles.logo}
+          imageStyle={{height: '100%', width: '100%'}}
         />
         <View>
           <Text style={styles.hotelName}>
@@ -47,9 +47,9 @@ const FeedCard: FC<card> = ({onPressCard = () => {}, item}) => {
         <CustomImage
           containerStyle={styles.post}
           uri={item?.images?.length > 0 ? item?.images[0] : ''}
+          tintColor={item?.images?.length > 0 ? '' : 'lightgrey'}
           imageStyle={{height: '100%', width: '100%', opacity: 1}}
           resizeMode={item?.images?.length > 0 ? 'cover' : 'contain'}
-          tintColor={item?.images?.length > 0 ? '' : 'lightgrey'}
         />
       </View>
 

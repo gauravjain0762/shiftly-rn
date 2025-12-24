@@ -6,6 +6,7 @@ import {IMAGES} from '../../assets/Images';
 import CustomInput from '../common/CustomInput';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
+import Tooltip from '../common/Tooltip';
 
 type MessageItem = {
   id: string;
@@ -61,7 +62,7 @@ const proficiencyLevels = ['Native', 'Fluent', 'Intermediate', 'Basic'];
 
 const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
   return (
-    <View style={styles.containerWrapper}>
+    <View style={[styles.containerWrapper, {overflow: 'visible'}]}>
       <View style={styles.optionWrapper}>
         <TouchableOpacity
           style={styles.optionItem}
@@ -112,14 +113,25 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         </TouchableOpacity>
       </View>
 
-      <CustomInput
-        label="Location"
-        placeholder={'Enter Location'}
-        value={aboutEdit?.location}
-        onChange={(text: any) => {
-          setAboutEdit({...aboutEdit, location: text});
-        }}
-      />
+      <View style={{overflow: 'visible'}}>
+        <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+          <Text style={styles.fieldLabel}>Location</Text>
+          <Tooltip
+            message="Choose your current location. This helps us match you with nearby employers."
+            position="bottom"
+            containerStyle={styles.tooltipIcon}
+            tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+          />
+        </View>
+        <CustomInput
+          placeholder={'Enter Location'}
+          value={aboutEdit?.location}
+          onChange={(text: any) => {
+            setAboutEdit({...aboutEdit, location: text});
+          }}
+          label=""
+        />
+      </View>
 
       <CustomInput
         label="Key Responsibilities"
@@ -140,7 +152,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
             label: skill?.title,
             value: skill?._id,
           }))}
-          placeholder={'Select more than one'}
+          placeholder={'Select languages you speak'}
           value={aboutEdit?.selectedSkills}
           selectedStyle={styles.selectedStyle}
           container={styles.multiDropdownContainer}
@@ -170,14 +182,20 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         </View>
       )}
 
-      <View style={{marginTop: hp(20)}}>
-        <Text style={[styles.headerText, {marginTop: 0}]}>
-          Select your language
-        </Text>
+      <View style={{marginTop: hp(0), overflow: 'visible'}}>
+        <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+          <Text style={styles.fieldLabel}>Select your language</Text>
+          <Tooltip
+            message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
+            position="bottom"
+            containerStyle={styles.tooltipIcon}
+            tooltipBoxStyle={{left: wp(-65), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+          />
+        </View>
         <CustomDropdownMulti
           disable={false}
           data={languages.map(lang => ({label: lang, value: lang}))}
-          placeholder={'Select more than one'}
+          placeholder={'Select languages you speak'}
           value={aboutEdit?.selectedLanguages.map((l: any) => l.name)} // dropdown expects array of strings
           container={styles.multiDropdownContainer}
           selectedStyle={styles.selectedStyle}
@@ -249,6 +267,7 @@ const styles = StyleSheet.create({
   containerWrapper: {
     marginTop: hp(16),
     paddingHorizontal: 29,
+    overflow: 'visible',
   },
   headerTitle: {
     ...commonFontStyle(700, 18, colors._0B3970),
@@ -372,5 +391,19 @@ const styles = StyleSheet.create({
   btn: {
     marginHorizontal: wp(4),
     marginTop: 40,
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 12,
+    gap: wp(8),
+    overflow: 'visible',
+  },
+  fieldLabel: {
+    ...commonFontStyle(600, 18, colors._050505),
+  },
+  tooltipIcon: {
+    marginTop: hp(0),
   },
 });

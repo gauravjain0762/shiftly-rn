@@ -1,4 +1,4 @@
-import React, { useEffect, } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,9 +19,8 @@ import {
   resetNavigation,
 } from '../../utils/commonFunction';
 import { SCREENS } from '../../navigation/screenNames';
-import Onboarding from '../../component/common/Onboarding';
+import EmployeeOnboarding from '../../component/common/EmployeeOnboarding';
 import { BackHeader, LinearContainer } from '../../component';
-import useRole from '../../hooks/useRole';
 import {
   GoogleSignin,
   statusCodes,
@@ -38,38 +37,37 @@ import { setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice'
 import { RootState } from '../../store';
 import CustomImage from '../../component/common/CustomImage';
 
-const AppOnboardingData = [
+const EmployeeOnboardingData = [
   {
     id: '1',
-    image: IMAGES.illustration1,
+    image: IMAGES.illustration5,
     title: 'Smart matching. Hires.',
     description: `Automatically match the right profiles based on real job requirements, not just CVs.`,
   },
   {
     id: '2',
-    image: IMAGES.illustration2,
+    image: IMAGES.illustration6,
     title: 'Interview smarter & faster.',
     description:
       'AI video interview remove scheduling constraints and reduce hiring time',
   },
   {
     id: '3',
-    image: IMAGES.illustration3,
+    image: IMAGES.illustration7,
     title: 'Advanced assessment technology',
     description:
       'evaluates skills,behavior & cultural fit helping teams hire for long-term success.',
   },
   {
     id: '4',
-    image: IMAGES.illustration4,
+    image: IMAGES.illustration8,
     title: 'Identify motivated interns and juniors talent',
     description:
       'through behavior, attitude, and soft skills even with limited experience.',
   },
 ];
 
-const WelcomeScreen = () => {
-  const { role } = useRole();
+const EmployeeWelcomeScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { fcmToken } = useSelector((state: RootState) => state.auth);
@@ -109,10 +107,7 @@ const WelcomeScreen = () => {
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((user: any) => {
       if (user) {
-        resetNavigation(
-          role === 'company' ? SCREENS.CoStack : SCREENS.EmployeeStack,
-          role === 'company' ? SCREENS.CoTabNavigator : SCREENS.TabNavigator,
-        );
+        resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
       }
     });
 
@@ -120,11 +115,7 @@ const WelcomeScreen = () => {
   }, []);
 
   const onLogin = () => {
-    if (role === 'company') {
-      navigateTo(SCREENS.CoStack);
-    } else {
-      navigateTo(SCREENS.EmployeeStack);
-    }
+    navigateTo(SCREENS.EmployeeStack);
   };
 
   const handleGoogleSignIn = async () => {
@@ -242,13 +233,9 @@ const WelcomeScreen = () => {
             size={110}
             source={IMAGES.newlogo1}
           />
-          <Onboarding data={AppOnboardingData} role={role ?? undefined} />
+          <EmployeeOnboarding data={EmployeeOnboardingData} />
 
-          <View
-            style={[
-              styles.buttonWrapper,
-              { bottom: role === 'company' ? '15%' : '3%' },
-            ]}>
+          <View style={styles.buttonWrapper}>
             <TouchableOpacity
               style={styles.emailButton}
               onPress={() => {
@@ -258,29 +245,25 @@ const WelcomeScreen = () => {
               <Text style={styles.emailText}>{t('Continue with email')}</Text>
             </TouchableOpacity>
 
-            <>
-              {role === 'employee' && Platform.OS === 'ios' && (
-                <TouchableOpacity
-                  onPress={handleAppleSignIn}
-                  style={styles.whiteButton}>
-                  <Image source={IMAGES.a_icon} style={styles.icon} tintColor={colors.white} />
-                  <Text style={styles.whiteText}>
-                    {t('Continue with Apple')}
-                  </Text>
-                </TouchableOpacity>
-              )}
+            {Platform.OS === 'ios' && (
+              <TouchableOpacity
+                onPress={handleAppleSignIn}
+                style={styles.whiteButton}>
+                <Image source={IMAGES.a_icon} style={styles.icon} tintColor={colors.white} />
+                <Text style={styles.whiteText}>
+                  {t('Continue with Apple')}
+                </Text>
+              </TouchableOpacity>
+            )}
 
-              {role === 'employee' && (
-                <TouchableOpacity
-                  onPress={handleGoogleSignIn}
-                  style={styles.whiteButton}>
-                  <Image source={IMAGES.g_icon} style={styles.icon} />
-                  <Text style={styles.whiteText}>
-                    {t('Continue with Google')}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </>
+            <TouchableOpacity
+              onPress={handleGoogleSignIn}
+              style={styles.whiteButton}>
+              <Image source={IMAGES.g_icon} style={styles.icon} />
+              <Text style={styles.whiteText}>
+                {t('Continue with Google')}
+              </Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </LinearContainer>
@@ -310,6 +293,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     width: '90%',
     alignItems: 'center',
+    bottom: '3%',
   },
   title: {
     marginTop: 20,
@@ -373,4 +357,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WelcomeScreen;
+export default EmployeeWelcomeScreen;
+

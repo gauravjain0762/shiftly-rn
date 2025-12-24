@@ -1,5 +1,5 @@
 import React, {FC, useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Image, StyleSheet, TouchableOpacity, View, Text} from 'react-native';
 
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import CustomDatePicker from '../common/CustomDatePicker';
@@ -9,6 +9,7 @@ import CustomInput from '../common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
 import BaseText from '../common/BaseText';
 import {colors} from '../../theme/colors';
+import Tooltip from '../common/Tooltip';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -40,13 +41,23 @@ const EducationList: FC<Props> = ({
 
   return (
     <View style={styles.wrapper}>
+      <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+        <Text style={styles.fieldLabel}>Degree</Text>
+        <Tooltip
+          message="We use your education info to better match you with employers who value specific qualifications."
+          position="bottom"
+          containerStyle={styles.tooltipIcon}
+          tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+        />
+      </View>
       <CustomInput
-        label="Degree"
         placeholder="Enter Degree"
         value={educationListEdit?.degree}
         onChange={(text: any) =>
           setEducationListEdit({...educationListEdit, degree: text})
         }
+        label=""
+        inputStyle={{color: colors._050505}}
       />
       <CustomInput
         label="University"
@@ -55,6 +66,7 @@ const EducationList: FC<Props> = ({
         onChange={(text: any) =>
           setEducationListEdit({...educationListEdit, university: text})
         }
+        inputStyle={{color: colors._050505}}
       />
       <View style={styles.dateContainer}>
         <CustomDatePicker
@@ -103,8 +115,8 @@ const EducationList: FC<Props> = ({
         </View>
         <View style={styles.halfWidth}>
           <CustomInput
-            label="Province"
-            placeholder="Enter Province"
+            label="City/Region"
+            placeholder="Enter City/Region"
             value={educationListEdit?.province}
             onChange={(text: string) => {
               const onlyLetters = text.replace(/[^A-Za-z ]/g, '');
@@ -114,6 +126,7 @@ const EducationList: FC<Props> = ({
               });
             }}
             containerStyle={styles.flex1}
+            inputStyle={{color: colors._050505}}
           />
         </View>
       </View>
@@ -121,6 +134,7 @@ const EducationList: FC<Props> = ({
       {isVisible && (
         <CountryPicker
           visible={isVisible}
+          countryCode="US"
           withFilter
           withCountryNameButton
           withCallingCode={false}
@@ -148,6 +162,7 @@ export default EducationList;
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: 29,
+    overflow: 'visible',
   },
   dateContainer: {
     marginBottom: 20,
@@ -179,7 +194,7 @@ const styles = StyleSheet.create({
   },
   countryText: {
     flex: 1,
-    ...commonFontStyle(400, 18, colors._0B3970),
+    ...commonFontStyle(400, 18, colors._050505),
   },
   countryPlaceholder: {
     flex: 1,
@@ -194,6 +209,19 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(400, 18, colors._050505),
+    ...commonFontStyle(500, 18, colors._050505),
+  },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 12,
+    gap: wp(8),
+  },
+  fieldLabel: {
+    ...commonFontStyle(600, 18, colors._050505),
+  },
+  tooltipIcon: {
+    marginTop: hp(0),
   },
 });

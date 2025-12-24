@@ -60,7 +60,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
           opacity: rest.disabled ? 0.6 : 1,
           ...(type == 'Company' && {
             borderWidth: 1.5,
-            borderColor: '#D9D9D9',
+            borderColor: colors._0B3970,
             shadowColor: 'transparent',
             shadowOffset: {width: 0, height: 0},
             shadowOpacity: 0,

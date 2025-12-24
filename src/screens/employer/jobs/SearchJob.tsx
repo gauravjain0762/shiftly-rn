@@ -98,7 +98,7 @@ const SearchJob = () => {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator size={'large'} color={colors._0B3970} />
+        <ActivityIndicator size={'large'} color={colors._D5D5D5} />
       ) : (
         <KeyboardAwareFlatList
           data={jobList}
