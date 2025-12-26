@@ -13,6 +13,7 @@ type props = {
 };
 
 const ActivitiesCard: FC<props> = ({item}) => {
+  console.log("🔥 ~ ActivitiesCard ~ item:", item)
   return (
     <Pressable style={styles.card}>
       <View style={styles.header}>
@@ -27,7 +28,7 @@ const ActivitiesCard: FC<props> = ({item}) => {
               {item?.company_name}
             </Text>
             <Text style={styles.jobSector} numberOfLines={1}>
-              {item?.job_sector}
+              {item?.job_title}
             </Text>
             <View style={styles.locationRow}>
               <CustomImage
@@ -168,26 +169,27 @@ const styles = StyleSheet.create({
   statusTag: {
     backgroundColor: '#EEF2F7',
     borderRadius: hp(20),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  statusText: {
+    ...commonFontStyle(500, 12, colors._0B3970),
+  },
+
+  chatTag: {
+    backgroundColor: colors._0B3970,
+    borderRadius: hp(20),
     paddingVertical: hp(8),
     paddingHorizontal: wp(16),
     minWidth: wp(70),
     alignItems: 'center',
-  },
-
-  statusText: {
-    ...commonFontStyle(600, 12, colors._0B3970),
-  },
-
-  chatTag: {
-    backgroundColor: '#EEF2F7',
-    borderRadius: hp(20),
-    paddingVertical: hp(8),
-    paddingHorizontal: wp(16),
-    minWidth: wp(60),
-    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   chatText: {
-    ...commonFontStyle(600, 12, colors._0B3970),
+    ...commonFontStyle(600, 12, colors.white),
   },
 });

@@ -6,46 +6,54 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   ApplicationSuccessModal,
   BackHeader,
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
-import {useRoute} from '@react-navigation/native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useEmployeeApplyJobMutation} from '../../../api/dashboardApi';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
+import { useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useEmployeeApplyJobMutation } from '../../../api/dashboardApi';
 import {
   errorToast,
   resetNavigation,
-  successToast,
 } from '../../../utils/commonFunction';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {SCREENS} from '../../../navigation/screenNames';
-import {RootState} from '../../../store';
-import {useDispatch, useSelector} from 'react-redux';
-import {setIsSuccessModalVisible} from '../../../features/employeeSlice';
+import { SCREENS } from '../../../navigation/screenNames';
+import { RootState } from '../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsSuccessModalVisible } from '../../../features/employeeSlice';
+import Tooltip from '../../../component/common/Tooltip';
 
 const ApplyJob = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const {params} = useRoute<any>();
+  const { params } = useRoute<any>();
   const data = params?.data as any;
   const [imageModal, setImageModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<any>([]);
   const resumeList = params?.resumeList as any;
   const [visible, setVisible] = useState<boolean>(false);
-  const {bottom} = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
-  const {isSuccessModalVisible} = useSelector(
+  const { isSuccessModalVisible } = useSelector(
     (state: RootState) => state.employee,
   );
+
+  const showTooltip = () => {
+    setVisible(true);
+
+    setTimeout(() => {
+      setVisible(false);
+    }, 3500);
+  };
 
   const handleApplyJob = async () => {
     if (!selectedDoc) {
@@ -91,10 +99,10 @@ const ApplyJob = () => {
   return (
     <>
       <LinearContainer
-        SafeAreaProps={{edges: ['bottom', 'top']}}
+        SafeAreaProps={{ edges: ['bottom', 'top'] }}
         colors={[colors._F7F7F7, colors._F7F7F7]}
-        containerStyle={[{paddingBottom: bottom}]}>
-        <BackHeader type="employe" title={'Apply Job'} containerStyle={styles.header} />
+        containerStyle={[{ paddingBottom: bottom }]}>
+        <BackHeader type="employe" title={`Apply for ${data?.title}`} containerStyle={styles.header} />
         <View style={styles.container}>
           {/* Job Card */}
           <View style={styles.jobCard}>
@@ -103,17 +111,17 @@ const ApplyJob = () => {
                 source={
                   data?.company_id?.logo
                     ? {
-                        uri: data?.company_id?.logo,
-                      }
+                      uri: data?.company_id?.logo,
+                    }
                     : IMAGES.dummy_cover
                 }
                 style={styles.logo}
               />
             </View>
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
               <Text style={styles.location}>{data?.address}</Text>
-              <Text style={[styles.meta, {flex: 0}]}>{data?.area}</Text>
+              <Text style={[styles.meta, { flex: 0 }]}>{data?.area}</Text>
               <View
                 style={{
                   marginTop: hp(5),
@@ -134,12 +142,22 @@ const ApplyJob = () => {
 
           {/* Heading */}
           <View style={styles.Doccontainer}>
-            <Text style={styles.heading}>{t('Choose documents to apply')}</Text>
+            <View style={styles.headingContainer}>
+              <Text style={styles.heading}>{t('Upload CV (PDF or Word up to 5MB)')}</Text>
+
+              <Tooltip
+                message="You only need to upload your CV once. It will be saved for future applications."
+                position="bottom"
+                containerStyle={styles.tooltipIcon}
+                tooltipBoxStyle={{ left: '-1100%', top: hp(28), width: wp(320), maxWidth: wp(320), zIndex: 1000 }}
+              />
+            </View>
 
             {/* Document List */}
             {resumes?.map((doc: any, index: number) => {
               return (
                 <TouchableOpacity
+
                   key={index}
                   style={styles.docRow}
                   onPress={() => {
@@ -152,8 +170,8 @@ const ApplyJob = () => {
                   <View style={styles.radioCircle}>
                     {selectedDoc?.file_name === doc?.file_name && (
                       <View style={styles.check}>
-                        <Image 
-                          source={IMAGES.check} 
+                        <Image
+                          source={IMAGES.check}
                           style={styles.checked}
                           tintColor={colors.white}
                         />
@@ -162,7 +180,7 @@ const ApplyJob = () => {
                   </View>
                   <Text style={styles.docLabel}>{doc?.file_name}</Text>
                   <Image
-                    source={doc?.file ? {uri: doc?.file} : IMAGES.dummy_cover}
+                    source={doc?.file ? { uri: doc?.file } : IMAGES.dummy_cover}
                     style={styles.docIcon}
                   />
                 </TouchableOpacity>
@@ -273,10 +291,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6E6E6',
     marginVertical: 10,
   },
-  heading: {
-    ...commonFontStyle(700, 22, colors._0B3970),
+  headingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingTop: hp(20),
     paddingBottom: hp(38),
+    gap: wp(8),
+    overflow: 'visible',
+    paddingHorizontal: wp(20)
+  },
+  heading: {
+    ...commonFontStyle(700, 22, colors._0B3970),
+  },
+  tooltipIcon: {
+    marginTop: hp(0),
   },
   docRow: {
     flexDirection: 'row',

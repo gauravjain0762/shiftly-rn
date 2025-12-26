@@ -44,6 +44,8 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
       <TextInput
         style={[styles.input, inputStyle]}
         secureTextEntry={isPassword && !showPassword}
+        includeFontPadding={false}
+        textAlignVertical="center"
         {...rest}
       />
       {showRightIcon && (

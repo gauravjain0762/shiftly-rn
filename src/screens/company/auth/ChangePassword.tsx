@@ -185,15 +185,19 @@ export const passwordStyles = StyleSheet.create({
   inputcontainer: {
     borderWidth: hp(1),
     borderRadius: hp(10),
-    paddingVertical: hp(16),
+    paddingVertical: hp(12),
     paddingHorizontal: wp(23),
+    minHeight: hp(50),
     borderColor: colors._234F86,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
   },
   emailText: {
     flex: 1,
     paddingRight: wp(10),
     ...commonFontStyle(400, 18, colors._3D3D3D),
+    padding: 0,
+    margin: 0,
   },
   button: {
     marginTop: hp(50),

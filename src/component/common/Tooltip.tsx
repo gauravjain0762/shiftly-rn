@@ -10,7 +10,8 @@ interface TooltipProps {
   textStyle?: TextStyle;
   iconStyle?: ViewStyle;
   position?: 'top' | 'bottom';
-  tooltipBoxStyle?: ViewStyle
+  tooltipBoxStyle?: ViewStyle;
+  visible?: boolean;
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -19,9 +20,11 @@ const Tooltip: React.FC<TooltipProps> = ({
   textStyle,
   iconStyle,
   position = 'top',
-  tooltipBoxStyle
+  tooltipBoxStyle,
+  visible: visibleProp
 }) => {
   const [visible, setVisible] = useState(false);
+  const isVisible = visibleProp !== undefined ? visibleProp : visible;
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -32,7 +35,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         <Image source={IMAGES.info} style={styles.icon} tintColor={colors._7B7878} />
       </TouchableOpacity>
 
-      {visible && (
+      {isVisible && (
         <View
           style={[
             styles.tooltipBox,

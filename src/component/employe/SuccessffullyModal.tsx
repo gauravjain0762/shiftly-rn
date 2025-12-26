@@ -37,36 +37,24 @@ const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
           />
 
           <Text style={styles.messageText}>
-            {t('Awsome! your profile is completed successffully')}
+            {t('Great job! Your profile is ready — let’s find you a role.')}
           </Text>
 
           <TouchableOpacity
-            style={styles.button}
+            style={styles.primaryButton}
             onPress={() => {
               onClose();
               resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
             }}>
-            <LinearGradient
-              colors={[colors.white, colors._F7F7F7]}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}
-              style={styles.buttonGradient}>
-              <Text style={styles.buttonText}>{t('Explore Jobs')}</Text>
-            </LinearGradient>
+            <Text style={styles.primaryButtonText}>{t('Explore Jobs')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.button}
+            style={styles.secondaryButton}
             onPress={() => {
               onClose();
               navigateTo(SCREENS.TabNavigator);
             }}>
-            <LinearGradient
-              colors={[colors.white, colors._F7F7F7]}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}
-              style={styles.buttonGradient}>
-              <Text style={styles.buttonText}>{t('Home')}</Text>
-            </LinearGradient>
+            <Text style={styles.secondaryButtonText}>{t('Home')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -109,21 +97,28 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginTop: 20,
   },
-  button: {
+  primaryButton: {
     borderRadius: 50,
     marginTop: 24,
     height: 63,
-    borderWidth: 1.5,
-    borderColor: '#D9D9D9',
-    overflow: 'hidden',
-  },
-  buttonGradient: {
-    flex: 1,
+    backgroundColor: colors._0B3970,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 50,
   },
-  buttonText: {
+  primaryButtonText: {
+    ...commonFontStyle(400, 22, colors.white),
+  },
+  secondaryButton: {
+    borderRadius: 50,
+    marginTop: 16,
+    height: 63,
+    borderWidth: 1.5,
+    borderColor: colors._0B3970,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
     ...commonFontStyle(400, 22, colors._0B3970),
   },
 });

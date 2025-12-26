@@ -7,7 +7,6 @@ import {Text} from 'react-native';
 import HomeScreen from '../screens/employer/home/HomeScreen';
 import {ScreenNames, SCREENS} from './screenNames';
 import SplashScreen from '../screens/auth/Splash';
-import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import EmployeeWelcomeScreen from '../screens/auth/EmployeeWelcomeScreen';
 import CompanyWelcomeScreen from '../screens/auth/CompanyWelcomeScreen';
 import SelectRollScreen from '../screens/auth/SelectRollScreen';
@@ -401,11 +400,6 @@ const StackNavigator: FC = () => {
       <Stack.Screen
         name={SCREENS.SelectRollScreen}
         component={SelectRollScreen}
-      />
-      <Stack.Screen
-        options={({navigation}) => ({headerShown: false})}
-        name={SCREENS.WelcomeScreen}
-        component={WelcomeScreen}
       />
       <Stack.Screen
         options={({navigation}) => ({headerShown: false})}

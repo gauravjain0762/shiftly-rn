@@ -36,6 +36,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice';
 import { RootState } from '../../store';
 import CustomImage from '../../component/common/CustomImage';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const EmployeeOnboardingData = [
   {
@@ -214,59 +215,61 @@ const EmployeeWelcomeScreen = () => {
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor={colors._0B3970} />
-      <LinearContainer
-        containerStyle={styles.gradient}
-        colors={[colors._F7F7F7, colors._F7F7F7]}>
-        <BackHeader
-          title={t('')}
-          type="employe"
-          isRight={false}
-          containerStyle={styles.backHeaderContainer}
-        />
-
-        <ScrollView
-          bounces={false}
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
-          <CustomImage
-            size={100}
-            source={IMAGES.newlogo1}
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+        <LinearContainer
+          containerStyle={styles.gradient}
+          colors={[colors._F7F7F7, colors._F7F7F7]}>
+          <BackHeader
+            title={t('')}
+            type="employe"
+            isRight={false}
+            containerStyle={styles.backHeaderContainer}
           />
-          <EmployeeOnboarding data={EmployeeOnboardingData} />
 
-          <View style={styles.buttonWrapper}>
-            <TouchableOpacity
-              style={styles.emailButton}
-              onPress={() => {
-                onLogin();
-              }}>
-              <Image source={IMAGES.e_icon} style={styles.icon} tintColor={colors.white} />
-              <Text style={styles.emailText}>{t('Continue with email')}</Text>
-            </TouchableOpacity>
+          <ScrollView
+            bounces={false}
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}>
+            <CustomImage
+              size={100}
+              source={IMAGES.newlogo1}
+            />
+            <EmployeeOnboarding data={EmployeeOnboardingData} />
 
-            {Platform.OS === 'ios' && (
+            <View style={styles.buttonWrapper}>
               <TouchableOpacity
-                onPress={handleAppleSignIn}
+                style={styles.emailButton}
+                onPress={() => {
+                  onLogin();
+                }}>
+                <Image source={IMAGES.e_icon} style={styles.icon} tintColor={colors.white} />
+                <Text style={styles.emailText}>{t('Continue with email')}</Text>
+              </TouchableOpacity>
+
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity
+                  onPress={handleAppleSignIn}
+                  style={styles.whiteButton}>
+                  <Image source={IMAGES.a_icon} style={styles.icon} tintColor={colors.white} />
+                  <Text style={styles.whiteText}>
+                    {t('Continue with Apple')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                onPress={handleGoogleSignIn}
                 style={styles.whiteButton}>
-                <Image source={IMAGES.a_icon} style={styles.icon} tintColor={colors.white} />
+                <Image source={IMAGES.g_icon} style={styles.icon} />
                 <Text style={styles.whiteText}>
-                  {t('Continue with Apple')}
+                  {t('Continue with Google')}
                 </Text>
               </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              onPress={handleGoogleSignIn}
-              style={styles.whiteButton}>
-              <Image source={IMAGES.g_icon} style={styles.icon} />
-              <Text style={styles.whiteText}>
-                {t('Continue with Google')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </LinearContainer>
+            </View>
+          </ScrollView>
+        </LinearContainer>
+      </SafeAreaView>
     </>
   );
 };

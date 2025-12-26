@@ -316,7 +316,7 @@ const EmpForgotPassword = () => {
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
-      colors={['#043379', '#041F50']}>
+      colors={[colors._F7F7F7, colors.white]}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
         // scrollEnabled={false}
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   title: {
     paddingTop: hp(10),
-    ...commonFontStyle(500, 25, colors.white),
+    ...commonFontStyle(500, 25, colors._2F2F2F),
   },
   btn: {
     marginVertical: wp(30),
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   infotext: {
     top: -8,
     lineHeight: hp(28),
-    ...commonFontStyle(400, 20, colors.white),
+    ...commonFontStyle(400, 20, colors._2F2F2F),
   },
   otpContainer: {
     marginTop: hp(40),
@@ -379,20 +379,20 @@ const styles = StyleSheet.create({
     height: 50,
     textAlign: 'center',
     borderBottomWidth: 2,
-    borderColor: colors._F7F7F7,
-    ...commonFontStyle(700, 30, colors._F7F7F7),
+    borderColor: colors._D9D9D9,
+    ...commonFontStyle(700, 30, colors._0B3970),
   },
   secText: {
-    ...commonFontStyle(500, 25, colors.white),
+    ...commonFontStyle(500, 25, colors._2F2F2F),
     marginVertical: hp(34),
   },
   secText1: {
-    ...commonFontStyle(400, 20, colors.white),
+    ...commonFontStyle(400, 20, colors._2F2F2F),
   },
   resendText: {
     marginTop: hp(74),
     textAlign: 'center',
     textDecorationLine: 'underline',
-    ...commonFontStyle(600, 20, colors.white),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
 });

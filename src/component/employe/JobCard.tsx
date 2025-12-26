@@ -38,13 +38,13 @@ const JobCard: FC<props> = ({
           width: '100%',
           height: '100%',
         }}
-        resizeMode={isCoverImage? "cover" : "contain"}
+        resizeMode={isCoverImage ? "cover" : "contain"}
         containerStyle={{
           height: hp(140),
           overflow: 'hidden',
           alignSelf: 'center',
           justifyContent: 'flex-end',
-          width: isCoverImage? '100%' : '100%',
+          width: isCoverImage ? '100%' : '100%',
         }}>
         <View style={styles.logo}>
           <CustomImage
@@ -99,12 +99,22 @@ const JobCard: FC<props> = ({
             <Text style={styles.badgeText}>{item?.job_type}</Text>
           </View>}
         </View>
+
+
         <ExpandableText
           maxLines={2}
           description={item?.description}
           descriptionStyle={styles.jobDescription}
           showStyle={{ paddingHorizontal: 0, fontSize: 15 }}
         />
+        {(item?.monthly_salary_from || item?.monthly_salary_to) && (
+          <View style={styles.salaryContainer}>
+            <Text style={styles.salaryLabel}>Salary range: </Text>
+            <Text style={styles.salaryAmount}>
+              AED {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()}
+            </Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -150,6 +160,17 @@ const styles = StyleSheet.create({
   },
   jobTitle: {
     ...commonFontStyle(600, 18, colors.black),
+  },
+  salaryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(2),
+  },
+  salaryLabel: {
+    ...commonFontStyle(500, 14, colors._656464),
+  },
+  salaryAmount: {
+    ...commonFontStyle(700, 13, colors.empPrimary),
   },
   jobDescription: {
     ...commonFontStyle(400, 13, colors._656464),

@@ -1,4 +1,4 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 import {colors} from '../../theme/colors';
@@ -49,7 +49,7 @@ const getDotColor = (level: string) => {
       return colors._0B3970;
     case 'Fluent':
       return colors._4A4A4A;
-    case 'Intermediate':
+    case 'Conversational':
       return colors._7B7878;
     case 'Basic':
       return colors._D9D9D9;
@@ -58,9 +58,18 @@ const getDotColor = (level: string) => {
   }
 };
 
-const proficiencyLevels = ['Native', 'Fluent', 'Intermediate', 'Basic'];
+const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+const proficiencyLabels: {[key: string]: string} = {
+  'Basic': 'Basic',
+  'Conversational': 'Conversational',
+  'Fluent': 'Fluent',
+  'Native': 'Native',
+};
 
 const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
+  const [pressedDot, setPressedDot] = useState<{langName: string; level: string} | null>(null);
+
   return (
     <View style={[styles.containerWrapper, {overflow: 'visible'}]}>
       <View style={styles.optionWrapper}>
@@ -186,7 +195,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
           <Text style={styles.fieldLabel}>Select your language</Text>
           <Tooltip
-            message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
+            message="Add all the languages you can work in. Choose your level from Basic to Native."
             position="bottom"
             containerStyle={styles.tooltipIcon}
             tooltipBoxStyle={{left: wp(-65), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
@@ -217,43 +226,47 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
       </View>
 
       {aboutEdit?.selectedLanguages?.length > 0 && (
-        <>
-          {/* Chips */}
-          <View style={styles.languageListContainer}>
-            {aboutEdit.selectedLanguages.map((lang: any, index: number) => (
-              <View key={`${lang.name}-${index}`} style={styles.languageChip}>
-                <Text style={styles.languageChipText}>{lang.name}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Language proficiency selector */}
+        <View style={styles.languageListContainer}>
           {aboutEdit.selectedLanguages.map((lang: any, index: number) => (
-            <View style={styles.row} key={`${lang.name}-${index}`}>
-              <Text style={styles.language}>{lang.name}</Text>
-              {proficiencyLevels.map(level => (
-                <TouchableOpacity
-                  key={level}
-                  style={[
-                    styles.dot,
-                    lang.level === level && styles.selectedDot,
-                    {backgroundColor: getDotColor(level)},
-                  ]}
-                  onPress={() => {
-                    const updatedLanguages = aboutEdit.selectedLanguages.map(
-                      l => (l.name === lang.name ? {...l, level} : l),
-                    );
+            <View key={`${lang.name}-${index}`} style={styles.languageChipWithDots}>
+              <Text style={styles.languageChipText}>{lang.name}</Text>
+              <Text style={styles.separator}>•</Text>
+              <View style={styles.dotsContainer}>
+                {proficiencyLevels.map((level, dotIndex) => (
+                  <View key={level} style={styles.dotContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.dot,
+                        lang.level === level && styles.selectedDot,
+                        {backgroundColor: getDotColor(level)},
+                      ]}
+                      onPress={() => {
+                        const updatedLanguages = aboutEdit.selectedLanguages.map(
+                          l => (l.name === lang.name ? {...l, level} : l),
+                        );
 
-                    setAboutEdit({
-                      ...aboutEdit,
-                      selectedLanguages: updatedLanguages,
-                    });
-                  }}
-                />
-              ))}
+                        setAboutEdit({
+                          ...aboutEdit,
+                          selectedLanguages: updatedLanguages,
+                        });
+                        // Show label on tap
+                        setPressedDot({langName: lang.name, level});
+                        // Hide label after 2 seconds
+                        setTimeout(() => setPressedDot(null), 2000);
+                      }}
+                    />
+                    {/* Show label when this dot is pressed */}
+                    {pressedDot?.langName === lang.name && pressedDot?.level === level && (
+                      <View style={styles.dotLabelContainer}>
+                        <Text style={styles.dotLabel}>{proficiencyLabels[level]}</Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
             </View>
           ))}
-        </>
+        </View>
       )}
 
       {/* <CustomSwitch isOn={aboutEdit?.open_for_jobs} setIsOn={setAboutEdit}  /> */}
@@ -266,8 +279,9 @@ export default AboutMeList;
 const styles = StyleSheet.create({
   containerWrapper: {
     marginTop: hp(16),
-    paddingHorizontal: 29,
     overflow: 'visible',
+    paddingHorizontal: 29,
+    paddingBottom: hp(20)
   },
   headerTitle: {
     ...commonFontStyle(700, 18, colors._0B3970),
@@ -342,6 +356,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flexDirection: 'row',
     marginBottom: hp(5),
+    marginTop: hp(10),
   },
   languageChip: {
     borderWidth: 1,
@@ -353,8 +368,33 @@ const styles = StyleSheet.create({
     marginRight: 6,
     marginBottom: 6,
   },
+  languageChipWithDots: {
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(12),
+    marginRight: wp(6),
+    marginBottom: hp(6),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
   languageChipText: {
     ...commonFontStyle(400, 14, colors._0B3970),
+  },
+  separator: {
+    ...commonFontStyle(400, 14, colors._050505),
+    marginHorizontal: wp(4),
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  proficiencyRowContainer: {
+    marginBottom: hp(20),
   },
   row: {
     flexDirection: 'row',
@@ -366,27 +406,35 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors._050505),
     flex: 1,
   },
+  dotContainer: {
+    position: 'relative',
+    marginHorizontal: 8,
+  },
   dot: {
-    width: 24,
-    height: 24,
-    borderRadius: 24,
-    marginHorizontal: 16,
+    width: 16,
+    height: 16,
+    borderRadius: 16,
   },
   selectedDot: {
     borderWidth: 2,
     borderColor: 'white',
   },
-  legend: {
-    marginTop: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  legendItem: {
+  dotLabelContainer: {
+    position: 'absolute',
+    bottom: hp(32),
+    backgroundColor: colors._0B3970,
+    paddingHorizontal: wp(10),
+    paddingVertical: hp(4),
+    borderRadius: hp(6),
+    zIndex: 1000,
     alignItems: 'center',
+    justifyContent: 'center',
+    width: wp(90),
+    marginLeft: wp(-33),
   },
-  legendText: {
-    ...commonFontStyle(400, 13, colors._050505),
-    marginTop: 6,
+  dotLabel: {
+    ...commonFontStyle(500, 12, colors.white),
+    textAlign: 'center',
   },
   btn: {
     marginHorizontal: wp(4),

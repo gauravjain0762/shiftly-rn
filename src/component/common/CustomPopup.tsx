@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, Platform} from 'react-native';
 import ReactNativeModal from 'react-native-modal';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -43,7 +43,7 @@ const CustomPopup = ({
         style={[
           styles.modalView,
           {
-            paddingBottom: insets.bottom + hp(20),
+            paddingBottom: Platform.OS === 'ios' ? insets.bottom + hp(5) : hp(20),
             backgroundColor:
               type === 'Company' ? colors.coPrimary : colors._E8CE92,
           },

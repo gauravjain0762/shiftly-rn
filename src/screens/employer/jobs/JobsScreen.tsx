@@ -45,6 +45,7 @@ import BaseText from '../../../component/common/BaseText';
 import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
 import FastImage from 'react-native-fast-image';
 import CustomImage from '../../../component/common/CustomImage';
+import Tooltip from '../../../component/common/Tooltip';
 
 const jobTypes: object[] = [
   {type: 'Full Time', value: 'Full Time'},
@@ -212,31 +213,42 @@ const JobsScreen = () => {
           {isLoading ? (
             <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
           ) : (
-            <Carousel
-              loop
-              autoPlay
-              height={180}
-              data={carouselImages}
-              renderItem={BannerItem}
-              width={SCREEN_WIDTH - 32}
-              scrollAnimationDuration={2500}
-              onSnapToItem={index => setActiveIndex(index)}
-            />
+            <>
+              <Carousel
+                loop
+                autoPlay
+                height={180}
+                data={carouselImages}
+                renderItem={BannerItem}
+                width={SCREEN_WIDTH - 32}
+                scrollAnimationDuration={2500}
+                onSnapToItem={index => setActiveIndex(index)}
+              />
+              {carouselImages && carouselImages.length > 1 && (
+                <View style={styles.paginationContainer}>
+                  {carouselImages?.map((_: any, index: number) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.carouselDot,
+                        index === activeIndex && styles.carouselDotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
+              )}
+            </>
           )}
         </View>
-
-        <View style={styles.innerContainer}>
-          {carouselImages?.map((_: any, index: number) => (
-            <View
-              key={index}
-              style={{
-                ...styles.carouselDot,
-                width: index === activeIndex ? 17 : 6,
-              }}
-            />
-          ))}
+        <View style={styles.sectionTitleContainer}>
+          <Text style={styles.sectionTitle}>{t('Recommended for You')}</Text>
+          <Tooltip
+            position="bottom"
+            containerStyle={styles.tooltipIcon}
+            message="Recommended for you, based on your profile and AI matching."
+            tooltipBoxStyle={{left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+          />
         </View>
-        <Text style={styles.sectionTitle}>{t('Recent Jobs')}</Text>
         {isLoading ? (
           <MyJobsSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
         ) : (
@@ -271,7 +283,7 @@ const JobsScreen = () => {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <BaseText style={styles.emptyText}>
-                  {t('No jobs found')}
+                  We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
                 </BaseText>
               </View>
             }
@@ -418,10 +430,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: wp(18),
   },
-  sectionTitle: {
-    ...commonFontStyle(500, 20, colors._0B3970),
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: hp(12),
     paddingHorizontal: wp(25),
+    gap: wp(8),
+    overflow: 'visible',
+  },
+  sectionTitle: {
+    ...commonFontStyle(500, 20, colors._0B3970),
+  },
+  tooltipIcon: {
+    marginTop: hp(0),
   },
   scrollContainer: {
     flexGrow: 1,
@@ -434,6 +455,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
     alignSelf: 'center',
+    position: 'relative',
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: hp(12),
+    width: '100%',
+    gap: wp(6),
   },
   // carouselImage: {
   //   width: '100%',
@@ -570,9 +601,13 @@ const styles = StyleSheet.create({
     marginVertical: hp(40),
   },
   carouselDot: {
-    height: 6,
-    borderRadius: 5,
-    marginHorizontal: 4,
+    height: hp(6),
+    width: wp(6),
+    borderRadius: hp(3),
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  carouselDotActive: {
+    width: wp(17),
     backgroundColor: colors.white,
   },
   filterContainer: {
@@ -580,19 +615,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  innerContainer: {
-    marginTop: hp(10),
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   emptyContainer: {
     flex: 1,
     marginTop: '40%',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: wp(30),
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(500, 17, colors._0B3970),
+    ...commonFontStyle(400, 16, colors._0B3970),
+    lineHeight: hp(24),
   },
 });

@@ -271,8 +271,8 @@ const JobDetail = () => {
             </View>
 
             <View style={styles.row}>
-              <Image 
-                source={IMAGES.location} 
+              <Image
+                source={IMAGES.location}
                 style={styles.location}
                 tintColor={colors._0B3970}
               />
@@ -282,12 +282,13 @@ const JobDetail = () => {
             </View>
 
             {/* Description */}
+            <Text style={styles.sectionTitle}>Responsibilities</Text>
             <Text style={styles.description}>
               {curr_jobdetails?.description || 'N|A'}
             </Text>
 
             {/* Requirements */}
-            <Text style={styles.sectionTitle}>What we need from you</Text>
+            <Text style={styles.sectionTitle}>Requirements</Text>
             <View style={styles.bulletList}>
               {curr_jobdetails?.requirements?.map(
                 (item: any, index: number) => {
@@ -365,7 +366,7 @@ const JobDetail = () => {
                     resumeList: resumeList,
                   });
                 }}
-                title={curr_jobdetails?.is_applied ? 'Applied' : 'Apply Job'}
+                title={curr_jobdetails?.is_applied ? 'Applied' : 'Apply Now'}
               />
             )}
           </ScrollView>
