@@ -2,7 +2,6 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,7 +18,6 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
   useEmployeeSendMessageMutation,
   useLazyEmployeeGetChatMessagesQuery,
-  useLazyGetCompanyChatMessagesQuery,
 } from '../../../api/dashboardApi';
 import {
   errorToast,
@@ -149,7 +147,7 @@ const Chat = () => {
   }, []);
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
         {/* Header */}
         <View style={styles.container}>
@@ -161,7 +159,7 @@ const Chat = () => {
                   setShowJobCard(prev => !prev);
                 }}
                 size={wp(24)}
-                tintColor={colors.white}
+                tintColor={colors._0B3970}
                 source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
               />
             }
@@ -226,7 +224,7 @@ const Chat = () => {
 
           {showDownIcon && (
             <Pressable onPress={handleChatScrollDown} style={styles.downIcon}>
-              <CustomImage source={IMAGES.down_arrow} size={wp(22)} />
+              <CustomImage source={IMAGES.down_arrow} size={wp(22)} tintColor={colors.white} />
             </Pressable>
           )}
 
@@ -279,17 +277,17 @@ const styles = StyleSheet.create({
     marginHorizontal: wp(22),
   },
   dateText: {
-    ...commonFontStyle(400, 14, '#000'),
+    ...commonFontStyle(400, 14, colors._2F2F2F),
     marginBottom: 5,
     textAlign: 'center',
   },
   jobTitle: {
-    ...commonFontStyle(700, 14, '#000'),
+    ...commonFontStyle(700, 14, colors._2F2F2F),
     marginBottom: hp(4),
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#014389',
+    backgroundColor: colors._0B3970,
     paddingHorizontal: wp(19),
     paddingVertical: hp(9),
     borderRadius: 25,
@@ -313,7 +311,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(20),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.coPrimary,
+    backgroundColor: colors._0B3970,
     elevation: 5,
     shadowColor: '#000',
     shadowOpacity: 0.2,

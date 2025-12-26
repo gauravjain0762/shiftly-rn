@@ -172,7 +172,7 @@ const CompanyProfile = () => {
         <View style={styles.emptyContainer}>
           <Text
             style={[
-              commonFontStyle(500, 16, colors._2F2F2F),
+              commonFontStyle(500, 16, colors._0B3970),
               { textAlign: 'center', marginTop: hp(20) },
             ]}>
             No Jobs Found
@@ -307,7 +307,7 @@ const CompanyProfile = () => {
                   <View style={styles.emptyContainer}>
                     <Text
                       style={[
-                        commonFontStyle(500, 16, colors._2F2F2F),
+                        commonFontStyle(500, 16, colors._0B3970),
                         { textAlign: 'center', marginTop: hp(20) },
                       ]}>
                       No Posts Found

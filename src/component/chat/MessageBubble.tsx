@@ -57,14 +57,14 @@ const MessageBubble: React.FC<{
             <Text
               style={{
                 ...styles.senderName,
-                color: type === 'company' ? colors._0B3970 : colors.white,
+                color: type === 'company' ? colors._0B3970 : colors._2F2F2F,
               }}>
               {recipientName}
             </Text>
             <Text
               style={{
                 ...styles.timeText,
-                color: type === 'company' ? colors._0B3970 : colors.white,
+                color: type === 'company' ? colors._0B3970 : colors._2F2F2F,
               }}>
               {moment(item.createdAt).format('hh:mm A')}
             </Text>
@@ -74,7 +74,7 @@ const MessageBubble: React.FC<{
 
       <View style={{flex: 1}}>
         {isUser && (
-          <Text style={{...styles.timeText, alignSelf: 'flex-end'}}>
+          <Text style={{...styles.timeText, alignSelf: 'flex-end', color: type === 'user' ? colors._2F2F2F : colors.white}}>
             {moment(item?.createdAt).format('hh:mm A')}
           </Text>
         )}
@@ -87,8 +87,7 @@ const MessageBubble: React.FC<{
                 ? styles.userBubble
                 : {
                     ...styles.otherBubble,
-                    backgroundColor:
-                      type === 'user' ? '#234570' : colors?._0B3970,
+                    backgroundColor: colors._0B3970,
                   },
             ]}>
             <Text
@@ -112,15 +111,15 @@ const MessageBubble: React.FC<{
               <TouchableOpacity onPress={openFile}>
                 <FastImage
                   source={IMAGES.document}
-                  defaultSource={IMAGES.document}
-                  tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
                   style={styles.attachment}
+                  defaultSource={IMAGES.document}
                   resizeMode={FastImage.resizeMode.contain}
+                  tintColor={type === 'user' ? colors._E8CE92 : colors._0B3970}
                 />
                 <BaseText
                   style={{
                     marginTop: hp(2),
-                    ...commonFontStyle(500, 13, colors.white),
+                    ...commonFontStyle(500, 13, type === 'user' ? colors._2F2F2F : colors.white),
                   }}>
                   {item?.file?.split('/').pop()}
                 </BaseText>
@@ -191,7 +190,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 0,
   },
   userBubble: {
-    backgroundColor: colors._E8CE92,
+    backgroundColor: colors.white,
     borderTopRightRadius: 0,
     alignSelf: 'flex-end',
   },

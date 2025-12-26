@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   Pressable,
@@ -8,23 +8,23 @@ import {
   View,
   TextInput,
 } from 'react-native';
-import {CustomTextInput, LinearContainer} from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
-import {goBack, successToast, errorToast} from '../../../utils/commonFunction';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {Flag} from 'react-native-country-picker-modal';
-import {callingCodeToCountryCode} from '../../../utils/countryFlags';
+import { CustomTextInput, LinearContainer } from '../../../component';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { goBack, successToast, errorToast } from '../../../utils/commonFunction';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Flag } from 'react-native-country-picker-modal';
+import { callingCodeToCountryCode } from '../../../utils/countryFlags';
 import CustomImage from '../../../component/common/CustomImage';
 import CustomInput from '../../../component/common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
 import GradientButton from '../../../component/common/GradientButton';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useEmpUpdateProfileMutation } from '../../../api/dashboardApi';
 import CharLength from '../../../component/common/CharLength';
 
 export const callingCodeToCountry = (callingCode: any) => {
@@ -35,7 +35,7 @@ export const callingCodeToCountry = (callingCode: any) => {
 };
 
 const EditAccountScreen = () => {
-  const {userInfo}: any = useSelector((state: RootState) => state.auth);
+  const { userInfo }: any = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     picture: '',
     name: '',
@@ -114,9 +114,9 @@ const EditAccountScreen = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top']}}
-      colors={['#0D468C', '#041326']}>
-      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+      SafeAreaProps={{ edges: ['top'] }}
+      colors={[colors._F7F7F7, colors.white]}>
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <KeyboardAwareScrollView
           enableOnAndroid
           showsVerticalScrollIndicator={false}
@@ -127,7 +127,7 @@ const EditAccountScreen = () => {
               <Image source={IMAGES.backArrow} style={styles.backIcon} />
             </Pressable>
             <Text style={styles.headerTitle}>Edit Account</Text>
-            <View style={{width: wp(24)}} />
+            <View style={{ width: wp(24) }} />
           </View>
 
           {/* Profile Section */}
@@ -157,7 +157,7 @@ const EditAccountScreen = () => {
               placeholder="Enter your name"
               value={formData?.name}
               onChange={(text: any) =>
-                setFormData(prev => ({...prev, name: text}))
+                setFormData(prev => ({ ...prev, name: text }))
               }
               containerStyle={styles.inputContainer}
             />
@@ -167,7 +167,7 @@ const EditAccountScreen = () => {
               placeholder="Enter your location"
               value={formData?.location}
               onChange={(text: any) =>
-                setFormData(prev => ({...prev, location: text}))
+                setFormData(prev => ({ ...prev, location: text }))
               }
               containerStyle={styles.inputContainer}
             />
@@ -177,7 +177,7 @@ const EditAccountScreen = () => {
               placeholder="Tell us about yourself"
               value={formData?.about}
               onChange={(text: any) =>
-                setFormData(prev => ({...prev, about: text}))
+                setFormData(prev => ({ ...prev, about: text }))
               }
               inputStyle={[
                 styles.inputContainer,
@@ -188,7 +188,7 @@ const EditAccountScreen = () => {
               multiline={true}
               maxLength={100}
             />
-            <CharLength chars={100} value={formData?.about} type={'employee'} />
+            <CharLength chars={100} value={formData?.about} type={'employee'} style={{ marginTop: 0 }} />
           </View>
 
           {/* Details Section */}
@@ -248,7 +248,7 @@ const EditAccountScreen = () => {
                   placeholderTextColor="#969595"
                   value={formData?.phone}
                   onChangeText={text =>
-                    setFormData(prev => ({...prev, phone: text}))
+                    setFormData(prev => ({ ...prev, phone: text }))
                   }
                   keyboardType="phone-pad"
                   maxLength={10}
@@ -293,7 +293,7 @@ const EditAccountScreen = () => {
                 typeof country?.name === 'string'
                   ? country.name
                   : country?.name?.common || '';
-              setFormData(prev => ({...prev, nationality: countryName}));
+              setFormData(prev => ({ ...prev, nationality: countryName }));
               setShowNationalityPicker(false);
             }}
             onClose={() => setShowNationalityPicker(false)}
@@ -329,10 +329,10 @@ const styles = StyleSheet.create({
   backIcon: {
     height: hp(20),
     width: wp(24),
-    tintColor: colors.white,
+    tintColor: colors._0B3970,
   },
   headerTitle: {
-    ...commonFontStyle(600, 20, colors.white),
+    ...commonFontStyle(600, 20, colors._2F2F2F),
   },
 
   avatarWrapper: {
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginBottom: hp(10),
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(20),
   },
   fieldLabel: {
-    ...commonFontStyle(600, 18, colors.white),
+    ...commonFontStyle(600, 18, colors._2F2F2F),
     marginBottom: hp(8),
   },
   countrySelector: {
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   },
   countryText: {
     flex: 1,
-    ...commonFontStyle(400, 16, '#F4E2B8'),
+    ...commonFontStyle(400, 16, colors._050505),
   },
   countryPlaceholder: {
     flex: 1,
@@ -419,13 +419,13 @@ const styles = StyleSheet.create({
     width: 12,
     height: 13,
     resizeMode: 'contain',
-    tintColor: '#F4E2B8',
+    tintColor: colors._0B3970,
   },
   dropdownIconSmall: {
     width: 10,
     height: 11,
     resizeMode: 'contain',
-    tintColor: '#F4E2B8',
+    tintColor: colors._0B3970,
   },
   nonEditableField: {
     height: hp(59),
@@ -467,13 +467,13 @@ const styles = StyleSheet.create({
   phoneTextInput: {
     flex: 1,
     height: '100%',
-    ...commonFontStyle(400, 16, '#F4E2B8'),
+    ...commonFontStyle(400, 16, colors._050505),
     paddingVertical: 0,
     paddingHorizontal: 0,
     textAlignVertical: 'center',
   },
   countryCodeText: {
-    ...commonFontStyle(400, 14, '#F4E2B8'),
+    ...commonFontStyle(400, 14, colors._050505),
     minWidth: wp(35),
   },
 

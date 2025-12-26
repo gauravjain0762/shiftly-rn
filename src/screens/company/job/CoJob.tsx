@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(500, 18, colors._2F2F2F),
+    ...commonFontStyle(500, 18, colors._0B3970),
   },
   contentContainer: {
     flexGrow: 1,

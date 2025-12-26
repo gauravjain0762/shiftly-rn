@@ -36,8 +36,8 @@ const ChatInput = ({
     <View
       style={{
         ...styles.inputContainer,
-        borderTopColor:
-          type === 'user' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.1)',
+        borderTopColor: 'rgba(0, 0, 0, 0.1)',
+        backgroundColor: colors.white,
       }}>
       {image?.uri ? (
         <View>
@@ -73,12 +73,10 @@ const ChatInput = ({
           value={message}
           style={{
             ...styles.input,
-            color: type === 'company' ? colors.black : colors.white,
+            color: colors._2F2F2F,
           }}
           onChangeText={setMessage}
-          placeholderTextColor={
-            type === 'company' ? colors.black : colors.white
-          }
+          placeholderTextColor={colors._A3A3A3}
           placeholder="Write your message..."
         />
         <TouchableOpacity onPress={onPressAttachment} style={{marginRight: 10}}>
@@ -96,7 +94,7 @@ const ChatInput = ({
             source={IMAGES.send}
             style={styles.sendIcon}
             defaultSource={IMAGES.send}
-            tintColor={type === 'company' ? colors._0B3970 : colors.white}
+            tintColor={colors._0B3970}
           />
         </TouchableOpacity>
       </View>
@@ -111,11 +109,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(14),
     paddingVertical: hp(15),
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: colors.white,
   },
   input: {
     flex: 1,
-    ...commonFontStyle(400, 14, colors.white),
+    ...commonFontStyle(400, 14, colors._2F2F2F),
     marginRight: 4,
     paddingHorizontal: wp(8)
   },

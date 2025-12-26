@@ -88,7 +88,13 @@ const AccountScreen = () => {
             navigateTo(SCREENS.FavoriteJobList);
           },
         },
-        {label: 'Notifications', icon: IMAGES.Notifications},
+        {
+          label: 'Notifications',
+          icon: IMAGES.Notifications,
+          onPress: () => {
+            navigateTo(SCREENS.NotificationScreen);
+          },
+        },
       ],
     },
     // {

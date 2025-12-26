@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(400, 18, colors._2F2F2F),
+    ...commonFontStyle(400, 18, colors._0B3970),
   },
   iconWrapper: {
     backgroundColor: '#0D468C',

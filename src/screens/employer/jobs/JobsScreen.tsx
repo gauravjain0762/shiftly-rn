@@ -593,6 +593,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(500, 17, colors.white),
+    ...commonFontStyle(500, 17, colors._0B3970),
   },
 });

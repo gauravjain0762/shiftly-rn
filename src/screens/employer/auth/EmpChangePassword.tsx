@@ -132,7 +132,7 @@ const ChangePassword = () => {
   return (
     <LinearContainer
       SafeAreaProps={{edges: ['top', 'bottom']}}
-      colors={['#0D468C', '#041326']}>
+      colors={[colors._F7F7F7, colors.white]}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
         // scrollEnabled={false}
@@ -223,35 +223,36 @@ export const passwordStyles = StyleSheet.create({
   back: {
     width: wp(21),
     height: wp(21),
-    tintColor: colors.white,
+    tintColor: colors._0B3970,
   },
   title: {
     marginTop: hp(20),
     paddingTop: hp(10),
-    ...commonFontStyle(500, 25, colors.white),
+    ...commonFontStyle(500, 25, colors._2F2F2F),
   },
   description: {
     marginTop: hp(60),
-    ...commonFontStyle(500, 17, colors.white),
+    ...commonFontStyle(500, 17, colors._2F2F2F),
   },
   inputView: {
     gap: hp(16),
     marginTop: hp(50),
   },
   label: {
-    ...commonFontStyle(400, 18, colors._F7F7F7),
+    ...commonFontStyle(400, 18, colors._2F2F2F),
   },
   inputcontainer: {
     borderWidth: hp(1),
     borderRadius: hp(10),
     paddingVertical: hp(16),
     paddingHorizontal: wp(23),
-    borderColor: colors._F7F7F7,
+    borderColor: colors._D9D9D9,
     justifyContent: 'space-between',
+    backgroundColor: colors.white,
   },
   emailText: {
     flex: 1,
-    ...commonFontStyle(400, 18, colors._F7F7F7),
+    ...commonFontStyle(400, 18, colors._050505),
   },
   button: {
     marginTop: hp(50),

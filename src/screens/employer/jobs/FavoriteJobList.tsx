@@ -20,7 +20,7 @@ const FavoriteJobList = () => {
   const favJobList = getFavoriteJobs?.data?.jobs;
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']} containerStyle={{}}>
+    <LinearContainer colors={[colors._F7F7F7, colors.white]} containerStyle={{}}>
       <BackHeader
         isRight={false}
         title="Favorite Jobs"
@@ -29,7 +29,7 @@ const FavoriteJobList = () => {
       />
 
       <FlatList
-        data={favJobList}
+        data={[]}
         style={AppStyles.flex}
         showsVerticalScrollIndicator={false}
         renderItem={({item, index}: any) => {
@@ -74,12 +74,11 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    marginTop: '40%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyText: {
     textAlign: 'center',
-    ...commonFontStyle(500, 17, colors.white),
+    ...commonFontStyle(500, 17, colors._0B3970),
   },
 });

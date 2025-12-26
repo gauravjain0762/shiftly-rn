@@ -35,7 +35,7 @@ import {
 } from '../../../features/authSlice';
 
 const LoginScreen = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const dispatch = useDispatch();
 
   const {fcmToken, language} = useSelector((state: RootState) => state.auth);
@@ -86,7 +86,7 @@ const LoginScreen = () => {
           isRight={false}
           containerStyle={styles.header}
         />
-        <Image source={IMAGES.logoText} style={styles.logo} />
+        <Image source={IMAGES.newlogo1} style={styles.logo} />
 
         <View style={styles.inputWrapper}>
           <Text style={styles.labelText}>Email</Text>

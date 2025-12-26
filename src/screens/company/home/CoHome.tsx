@@ -119,7 +119,7 @@ const CoHome = () => {
                 <BaseText
                   style={{
                     textAlign: 'center',
-                    ...commonFontStyle(400, 18, colors._2F2F2F),
+                    ...commonFontStyle(400, 18, colors._0B3970),
                   }}>
                   {t('There is no post available')}
                 </BaseText>

@@ -56,7 +56,7 @@ const EmployeeOnboarding: React.FC<EmployeeOnboardingProps> = ({ data }) => {
   };
 
   return (
-    <View style={[styles.container, {}]}>
+    <View style={styles.container}>
       <Animated.FlatList
         ref={flatListRef}
         data={data}
@@ -68,6 +68,7 @@ const EmployeeOnboarding: React.FC<EmployeeOnboardingProps> = ({ data }) => {
         bounces={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
+        style={styles.flatList}
       />
 
       <View style={styles.paginationContainer}>
@@ -93,8 +94,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: hp(24),
   },
+  flatList: {
+    flexGrow: 0,
+  },
   slide: {
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   description: {
     fontSize: 16,
@@ -104,10 +109,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: hp(10),
   },
   paginationContainer: {
-    flex: 1,
     width: '100%',
+    marginTop: hp(20),
     alignSelf: 'center',
-    bottom: '8%',
+    marginBottom: hp(20),
   },
   paginationDot: {
     width: wp(10),
@@ -133,20 +138,20 @@ const styles = StyleSheet.create({
   },
   illustration: {
     width: '100%',
-    height: hp(260),
+    height: hp(235),
   },
   textWrapper: {
     gap: hp(5),
-    marginTop: hp(40),
+    marginTop: hp(15),
     paddingHorizontal: wp(20),
+    marginBottom: 0,
   },
   innerImages: {
-    gap: '30%',
-    left: '22%',
-    bottom: '10%',
+    gap: wp(30),
     flexDirection: 'row',
     alignItems: 'center',
-    position: 'absolute',
+    justifyContent: 'center',
+    marginTop: hp(10),
   },
   title: {
     marginTop: hp(20),

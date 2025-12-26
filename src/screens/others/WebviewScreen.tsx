@@ -28,12 +28,12 @@ const WebViewScreen = () => {
             size={wp(20)}
             onPress={goBack}
             source={IMAGES.backArrow}
-            tintColor={type === 'employe' ? colors.white : colors.empPrimary}
+            tintColor={colors._0B3970}
           />
           <BaseText
             style={[
               styles.headerTitle,
-              { color: type === 'employe' ? colors.white : colors.empPrimary },
+              { color: colors._0B3970 },
             ]}>
             {t(params?.title)}
           </BaseText>
@@ -71,6 +71,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     marginLeft: wp(15),
-    ...commonFontStyle(600, 20, colors.white),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
 });

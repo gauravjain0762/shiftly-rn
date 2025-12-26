@@ -265,7 +265,7 @@ const UploadResume = ({resumes, setResumes}: ResumeProps) => {
           {resumes.length === 0 && (
             <View style={styles.emptyState}>
               <Image source={IMAGES.document} style={styles.emptyIcon} />
-              <BaseText style={styles.emptyText}>
+              <BaseText style={[styles.emptyText, {color: colors._0B3970}]}>
                 No documents uploaded yet
               </BaseText>
               <BaseText style={styles.emptySubtext}>
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(10),
   },
   emptyText: {
-    ...commonFontStyle(500, 16, colors._050505),
+    ...commonFontStyle(500, 16, colors._0B3970),
     marginBottom: hp(5),
   },
   emptySubtext: {

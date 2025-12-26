@@ -559,10 +559,10 @@ const styles = StyleSheet.create({
     gap: hp(8),
   },
   emptyTitle: {
-    ...commonFontStyle(600, 16, colors._2F2F2F),
+    ...commonFontStyle(600, 16, colors._0B3970),
   },
   emptyMessage: {
-    ...commonFontStyle(400, 14, colors._2F2F2F),
+    ...commonFontStyle(400, 14, colors._0B3970),
     textAlign: 'center',
     lineHeight: hp(20),
     paddingHorizontal: wp(10),

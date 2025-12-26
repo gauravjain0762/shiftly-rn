@@ -20,6 +20,8 @@ interface Props {
   bgColor?: string;
   viewRef?: any;
   children?: any;
+  onLoadStart?: () => void;
+  onLoad?: () => void;
 }
 
 const CustomImage = ({

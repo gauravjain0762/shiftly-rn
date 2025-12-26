@@ -41,15 +41,15 @@ const EmployeeOnboardingData = [
   {
     id: '1',
     image: IMAGES.illustration5,
-    title: 'Smart matching. Hires.',
-    description: `Automatically match the right profiles based on real job requirements, not just CVs.`,
+    title: 'Get hired for who you are.',
+    description: `Get hired based on who you are and how you work, not just what’s on your resume.`,
   },
   {
     id: '2',
     image: IMAGES.illustration6,
-    title: 'Interview smarter & faster.',
+    title: 'Interview anytime, anywhere.',
     description:
-      'AI video interview remove scheduling constraints and reduce hiring time',
+      'Complete your interview on your own time with AI no scheduling, no pressure.',
   },
   {
     id: '3',
@@ -61,9 +61,9 @@ const EmployeeOnboardingData = [
   {
     id: '4',
     image: IMAGES.illustration8,
-    title: 'Identify motivated interns and juniors talent',
+    title: 'Your first job starts here.',
     description:
-      'through behavior, attitude, and soft skills even with limited experience.',
+      'Whether you’re a student, intern, or recent graduate, get hired based on your po',
   },
 ];
 
@@ -230,7 +230,7 @@ const EmployeeWelcomeScreen = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
           <CustomImage
-            size={110}
+            size={100}
             source={IMAGES.newlogo1}
           />
           <EmployeeOnboarding data={EmployeeOnboardingData} />
@@ -293,7 +293,8 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     width: '90%',
     alignItems: 'center',
-    bottom: '3%',
+    marginTop: hp(20),
+    marginBottom: hp(20),
   },
   title: {
     marginTop: 20,
