@@ -57,6 +57,7 @@ export const SCREENS = {
   EmpChangePassword: 'EmpChangePassword',
   EmpProfile: 'EmpProfile',
   EmpForgotPassword: 'EmpForgotPassword',
+  EmpLocation: 'EmpLocation',
 };
 
 export interface ScreenNames {

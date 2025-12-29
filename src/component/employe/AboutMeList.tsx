@@ -1,12 +1,14 @@
-import React, {FC, useEffect, useState} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { FC, useEffect, useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
 import CustomInput from '../common/CustomInput';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
 import Tooltip from '../common/Tooltip';
+import { navigateTo } from '../../utils/commonFunction';
+import { SCREENS } from '../../navigation/screenNames';
 
 type MessageItem = {
   id: string;
@@ -60,23 +62,23 @@ const getDotColor = (level: string) => {
 
 const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 
-const proficiencyLabels: {[key: string]: string} = {
+const proficiencyLabels: { [key: string]: string } = {
   'Basic': 'Basic',
   'Conversational': 'Conversational',
   'Fluent': 'Fluent',
   'Native': 'Native',
 };
 
-const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
-  const [pressedDot, setPressedDot] = useState<{langName: string; level: string} | null>(null);
+const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) => {
+  const [pressedDot, setPressedDot] = useState<{ langName: string; level: string } | null>(null);
 
   return (
-    <View style={[styles.containerWrapper, {overflow: 'visible'}]}>
+    <View style={[styles.containerWrapper, { overflow: 'visible' }]}>
       <View style={styles.optionWrapper}>
         <TouchableOpacity
           style={styles.optionItem}
           onPress={() => {
-            setAboutEdit({...aboutEdit, open_for_jobs: true});
+            setAboutEdit({ ...aboutEdit, open_for_jobs: true });
           }}>
           <View
             style={[
@@ -100,7 +102,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         <TouchableOpacity
           style={styles.optionItem}
           onPress={() => {
-            setAboutEdit({...aboutEdit, open_for_jobs: false});
+            setAboutEdit({ ...aboutEdit, open_for_jobs: false });
           }}>
           <View
             style={[
@@ -122,24 +124,41 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         </TouchableOpacity>
       </View>
 
-      <View style={{overflow: 'visible'}}>
-        <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+      <View style={{ overflow: 'visible' }}>
+        <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
           <Text style={styles.fieldLabel}>Location</Text>
           <Tooltip
             message="Choose your current location. This helps us match you with nearby employers."
             position="bottom"
             containerStyle={styles.tooltipIcon}
-            tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+            tooltipBoxStyle={{
+              left: wp(-29),
+              top: hp(28),
+              width: wp(280),
+              maxWidth: wp(280),
+              zIndex: 1000
+            }}
           />
         </View>
-        <CustomInput
-          placeholder={'Enter Location'}
-          value={aboutEdit?.location}
-          onChange={(text: any) => {
-            setAboutEdit({...aboutEdit, location: text});
+
+        <TouchableOpacity
+          onPress={() => {
+            console.log('📍 Navigating to location screen');
+            navigateTo(SCREENS.EmpLocation);
           }}
-          label=""
-        />
+          style={styles.locationInputContainer}
+          activeOpacity={0.7}>
+          <Text
+            style={aboutEdit?.location ? styles.locationText : styles.locationPlaceholder}
+            numberOfLines={2}>
+            {aboutEdit?.location || 'Select your location'}
+          </Text>
+          <Image
+            source={IMAGES.rightArrow}
+            style={styles.arrowIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
       </View>
 
       <CustomInput
@@ -147,12 +166,12 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         placeholder={'Enter Key Responsibilities'}
         value={aboutEdit.responsibilities}
         onChange={(text: any) =>
-          setAboutEdit({...aboutEdit, responsibilities: text})
+          setAboutEdit({ ...aboutEdit, responsibilities: text })
         }
       />
 
       <View>
-        <Text style={[styles.headerText, {marginTop: hp(20)}]}>
+        <Text style={[styles.headerText, { marginTop: hp(20) }]}>
           Select your skills
         </Text>
         <CustomDropdownMulti
@@ -161,7 +180,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
             label: skill?.title,
             value: skill?._id,
           }))}
-          placeholder={'Select languages you speak'}
+          placeholder={'Select language you speak'}
           value={aboutEdit?.selectedSkills}
           selectedStyle={styles.selectedStyle}
           container={styles.multiDropdownContainer}
@@ -176,7 +195,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
 
       {aboutEdit?.selectedSkills?.length > 0 && (
         <View style={styles.languageListContainer}>
-          {aboutEdit?.selectedSkills?.map((id: string) => {
+          {aboutEdit?.selectedSkills?.map((id: any) => {
             const skill = skillsList.find(
               (s: any) => s._id === id || s._id === id?._id,
             );
@@ -191,30 +210,29 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
         </View>
       )}
 
-      <View style={{marginTop: hp(0), overflow: 'visible'}}>
-        <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+      <View style={{ marginTop: hp(0), overflow: 'visible' }}>
+        <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
           <Text style={styles.fieldLabel}>Select your language</Text>
           <Tooltip
-            message="Add all the languages you can work in. Choose your level from Basic to Native."
+            message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
             position="bottom"
             containerStyle={styles.tooltipIcon}
-            tooltipBoxStyle={{left: wp(-65), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+            tooltipBoxStyle={{ left: wp(-65), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
           />
         </View>
         <CustomDropdownMulti
           disable={false}
-          data={languages.map(lang => ({label: lang, value: lang}))}
-          placeholder={'Select languages you speak'}
-          value={aboutEdit?.selectedLanguages.map((l: any) => l.name)} // dropdown expects array of strings
+          data={languages.map(lang => ({ label: lang, value: lang }))}
+          placeholder={'Select language you speak'}
+          value={aboutEdit?.selectedLanguages.map((l: any) => l.name)}
           container={styles.multiDropdownContainer}
           selectedStyle={styles.selectedStyle}
           onChange={(selectedItems: string[]) => {
             const updatedLanguages = selectedItems.map(name => {
-              // keep level if exists, otherwise empty
               const existing = (aboutEdit?.selectedLanguages || []).find(
                 (l: any) => l.name === name,
               );
-              return existing || {name, level: ''};
+              return existing || { name, level: '' };
             });
 
             setAboutEdit({
@@ -238,11 +256,11 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
                       style={[
                         styles.dot,
                         lang.level === level && styles.selectedDot,
-                        {backgroundColor: getDotColor(level)},
+                        { backgroundColor: getDotColor(level) },
                       ]}
                       onPress={() => {
                         const updatedLanguages = aboutEdit.selectedLanguages.map(
-                          l => (l.name === lang.name ? {...l, level} : l),
+                          l => (l.name === lang.name ? { ...l, level } : l),
                         );
 
                         setAboutEdit({
@@ -250,7 +268,7 @@ const AboutMeList: FC<Props> = ({aboutEdit, setAboutEdit, skillsList}: any) => {
                           selectedLanguages: updatedLanguages,
                         });
                         // Show label on tap
-                        setPressedDot({langName: lang.name, level});
+                        setPressedDot({ langName: lang.name, level });
                         // Hide label after 2 seconds
                         setTimeout(() => setPressedDot(null), 2000);
                       }}
@@ -335,8 +353,8 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   headerText: {
-    ...commonFontStyle(400, 18, colors._050505),
     marginBottom: 8,
+    ...commonFontStyle(600, 18, colors._050505),
   },
   skillsText: {
     marginTop: hp(20),
@@ -453,5 +471,31 @@ const styles = StyleSheet.create({
   },
   tooltipIcon: {
     marginTop: hp(0),
+  },
+  locationInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(16),
+    minHeight: hp(65),
+    borderRadius: wp(20),
+    backgroundColor: colors.white,
+    borderWidth: wp(1.5),
+    borderColor: '#225797',
+  },
+  locationText: {
+    flex: 1,
+    ...commonFontStyle(400, 18, colors._050505),
+  },
+  locationPlaceholder: {
+    flex: 1,
+    ...commonFontStyle(400, 18, '#969595'),
+  },
+  arrowIcon: {
+    width: wp(20),
+    height: hp(20),
+    tintColor: colors._0B3970,
+    marginLeft: wp(8),
   },
 });

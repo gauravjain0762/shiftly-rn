@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -17,17 +17,17 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
-import {AppStyles} from '../../../theme/appStyles';
+import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { AppStyles } from '../../../theme/appStyles';
 import Carousel from 'react-native-reanimated-carousel';
 import {
   errorToast,
   navigateTo,
 } from '../../../utils/commonFunction';
-import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
-import {useTranslation} from 'react-i18next';
+import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
+import { useTranslation } from 'react-i18next';
 import {
   useAddRemoveFavouriteMutation,
   useGetFavouritesJobQuery,
@@ -36,11 +36,11 @@ import {
 } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
 import RangeSlider from '../../../component/common/RangeSlider';
-import {SLIDER_WIDTH} from '../../company/job/CoJob';
+import { SLIDER_WIDTH } from '../../company/job/CoJob';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../../../store';
-import {setIsBannerLoaded} from '../../../features/employeeSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import { setIsBannerLoaded } from '../../../features/employeeSlice';
 import BaseText from '../../../component/common/BaseText';
 import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
 import FastImage from 'react-native-fast-image';
@@ -48,28 +48,27 @@ import CustomImage from '../../../component/common/CustomImage';
 import Tooltip from '../../../component/common/Tooltip';
 
 const jobTypes: object[] = [
-  {type: 'Full Time', value: 'Full Time'},
-  {type: 'Part Time', value: 'Part Time'},
-  {type: 'Temporary', value: 'Temporary'},
-  {type: 'Internship', value: 'Internship'},
-  {type: 'Freelance', value: 'Freelance'},
+  { type: 'Full Time', value: 'Full Time' },
+  { type: 'Part Time', value: 'Part Time' },
+  { type: 'Temporary', value: 'Temporary' },
+  { type: 'Internship', value: 'Internship' },
+  { type: 'Freelance', value: 'Freelance' },
 ];
 
-// const departments: string[] = ['Management', 'Marketing', 'Chef', 'Cleaner'];
-
 const JobsScreen = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [modal, setModal] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
-  const {userInfo} = useSelector((state: RootState) => state.auth);
-  const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
-  const {data: getDepartmentData} = useGetFilterDataQuery({});
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
+  const { data: getDepartmentData } = useGetFilterDataQuery({});
   const departments = getDepartmentData?.data?.job_sectors;
   const favJobList = getFavoriteJobs?.data?.jobs;
-  const [trigger, {data, isLoading}] = useLazyGetEmployeeJobsQuery();
+  const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
+  console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
 
@@ -90,6 +89,11 @@ const JobsScreen = () => {
   const [range, setRange] = useState<number[]>([0, 50000]);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    'newest' | 'salary_high_low' | 'salary_low_high' | null
+  >(null);
+  const [sortedJobList, setSortedJobList] = useState<any[]>([]);
 
   useEffect(() => {
     trigger({});
@@ -100,6 +104,39 @@ const JobsScreen = () => {
       setLocalFavorites(favJobList.map((job: any) => job._id));
     }
   }, [favJobList]);
+
+  useEffect(() => {
+    if (!jobList) {
+      setSortedJobList([]);
+      return;
+    }
+
+    let sorted = [...jobList];
+
+    if (sortBy === 'newest') {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime(),
+      );
+    }
+
+    if (sortBy === 'salary_high_low') {
+      sorted.sort(
+        (a, b) =>
+          (b.monthly_salary_to || 0) - (a.monthly_salary_to || 0),
+      );
+    }
+
+    if (sortBy === 'salary_low_high') {
+      sorted.sort(
+        (a, b) =>
+          (a.monthly_salary_from || 0) - (b.monthly_salary_from || 0),
+      );
+    }
+
+    setSortedJobList(sorted);
+  }, [jobList, sortBy]);
 
   const handleApplyFilter = () => {
     const newFilters = {
@@ -171,11 +208,11 @@ const JobsScreen = () => {
     }
   };
 
-  const BannerItem = ({item, index}: any) => (
+  const BannerItem = ({ item, index }: any) => (
     <FastImage
       key={index}
       resizeMode="cover"
-      source={{uri: item?.image}}
+      source={{ uri: item?.image }}
       style={styles.carouselImage}
       onLoadEnd={() => {
         console.log('Banner Loaded >>>>>>>>.');
@@ -187,18 +224,30 @@ const JobsScreen = () => {
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
-      <ScrollView style={{flex: 1}}>
+      <ScrollView style={{ flex: 1 }}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
           <View style={styles.headerImgBar}>
             <TouchableOpacity
               onPress={() => {
                 navigateTo(SCREENS.SearchJob, {
-                  data: jobList,
+                  data: sortedJobList.length > 0 ? sortedJobList : jobList,
                 });
               }}>
               <Image style={styles.headerIcons} source={IMAGES.search} />
             </TouchableOpacity>
+
+            {/* Custom Sort Icon */}
+            <TouchableOpacity
+              onPress={() => setIsSortModalVisible(true)}
+              style={styles.sortButtonContainer}>
+              <View style={styles.sortIconWrapper}>
+                <View style={[styles.sortLine, styles.sortLineTop, sortBy && { backgroundColor: colors.empPrimary }]} />
+                <View style={[styles.sortLine, styles.sortLineMiddle, sortBy && { backgroundColor: colors.empPrimary }]} />
+                <View style={[styles.sortLine, styles.sortLineBottom, sortBy && { backgroundColor: colors.empPrimary }]} />
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
               <Image style={styles.headerIcons} source={IMAGES.filter} />
             </TouchableOpacity>
@@ -246,26 +295,23 @@ const JobsScreen = () => {
             position="bottom"
             containerStyle={styles.tooltipIcon}
             message="Recommended for you, based on your profile and AI matching."
-            tooltipBoxStyle={{left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+            tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
           />
         </View>
         {isLoading ? (
           <MyJobsSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
         ) : (
           <FlatList
-            data={jobList}
+            data={sortedJobList.length > 0 ? sortedJobList : jobList}
             style={AppStyles.flex}
             showsVerticalScrollIndicator={false}
-            renderItem={({item, index}: any) => {
+            renderItem={({ item, index }: any) => {
               const isFavorite = localFavorites.includes(item?._id);
-
               return (
                 <JobCard
                   key={index}
                   item={item}
-                  onPressShare={() => {
-                    setModal(true);
-                  }}
+                  onPressShare={() => setModal(true)}
                   heartImage={isFavorite}
                   onPressFavorite={() => handleToggleFavorite(item)}
                   onPress={() =>
@@ -278,7 +324,7 @@ const JobsScreen = () => {
               );
             }}
             keyExtractor={(_, index) => index.toString()}
-            ItemSeparatorComponent={() => <View style={{height: hp(28)}} />}
+            ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
             contentContainerStyle={styles.scrollContainer}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
@@ -339,7 +385,7 @@ const JobsScreen = () => {
               <CustomTextInput
                 value={filters.location}
                 onChangeText={txt =>
-                  setFilters(prev => ({...prev, location: txt}))
+                  setFilters(prev => ({ ...prev, location: txt }))
                 }
                 placeholder={t('Location')}
                 placeholderTextColor={colors.black}
@@ -386,14 +432,107 @@ const JobsScreen = () => {
                 <Text>{'Clear'}</Text>
               </Pressable>
               <GradientButton
+                type="Employee"
                 style={styles.btn}
-                type="Company"
                 title={t('Apply Filter')}
                 onPress={handleApplyFilter}
               />
             </View>
           </View>
         </BottomModal>
+
+        <BottomModal
+          visible={isSortModalVisible}
+          backgroundColor={colors._F7F7F7}
+          onClose={() => setIsSortModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.filterTitle}>Sort By</Text>
+
+            <View style={styles.sortOptions}>
+              {/* Newest */}
+              <Pressable
+                style={[
+                  styles.sortOption,
+                  sortBy === 'newest' && styles.sortOptionSelected,
+                ]}
+                onPress={() => {
+                  setSortBy('newest');
+                  setIsSortModalVisible(false);
+                }}
+              >
+                <View style={styles.sortOptionContent}>
+                  <Text
+                    style={[
+                      styles.sortOptionText,
+                      sortBy === 'newest' && styles.sortOptionTextSelected,
+                    ]}
+                  >
+                    Newest Jobs
+                  </Text>
+                </View>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.sortOption,
+                  sortBy === 'salary_high_low' && styles.sortOptionSelected,
+                ]}
+                onPress={() => {
+                  setSortBy('salary_high_low');
+                  setIsSortModalVisible(false);
+                }}
+              >
+                <View style={styles.sortOptionContent}>
+                  <Text
+                    style={[
+                      styles.sortOptionText,
+                      sortBy === 'salary_high_low' && styles.sortOptionTextSelected,
+                    ]}
+                  >
+                    Salary: High to Low
+                  </Text>
+                </View>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.sortOption,
+                  sortBy === 'salary_low_high' && styles.sortOptionSelected,
+                ]}
+                onPress={() => {
+                  setSortBy('salary_low_high');
+                  setIsSortModalVisible(false);
+                }}
+              >
+                <View style={styles.sortOptionContent}>
+                  <Text
+                    style={[
+                      styles.sortOptionText,
+                      sortBy === 'salary_low_high' &&
+                      styles.sortOptionTextSelected,
+                    ]}
+                  >
+                    Salary: Low to High
+                  </Text>
+                </View>
+              </Pressable>
+
+              {sortBy && (
+                <Pressable
+                  style={styles.clearSortButton}
+                  onPress={() => {
+                    setSortBy(null);
+                    setIsSortModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.clearSortText}>Clear Sort</Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </BottomModal>
+
         <ShareModal visible={modal} onClose={() => setModal(!modal)} />
       </ScrollView>
     </LinearContainer>
@@ -626,5 +765,78 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     ...commonFontStyle(400, 16, colors._0B3970),
     lineHeight: hp(24),
+  },
+  sortButton: {
+    position: 'relative',
+  },
+  sortOptions: {
+    marginTop: hp(20),
+    gap: hp(12),
+  },
+  sortOption: {
+    paddingVertical: hp(16),
+    paddingHorizontal: wp(16),
+    borderRadius: hp(12),
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
+    backgroundColor: colors.white,
+  },
+  sortOptionSelected: {
+    borderColor: colors.empPrimary,
+    backgroundColor: '#F0F8FF',
+  },
+  sortOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sortOptionText: {
+    ...commonFontStyle(500, 16, colors.black),
+  },
+  sortOptionTextSelected: {
+    ...commonFontStyle(600, 16, colors.empPrimary),
+  },
+  checkIcon: {
+    width: wp(20),
+    height: hp(20),
+    tintColor: colors.empPrimary,
+  },
+  clearSortButton: {
+    marginTop: hp(12),
+    paddingVertical: hp(14),
+    alignItems: 'center',
+    borderRadius: hp(12),
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
+    backgroundColor: colors.white,
+  },
+  clearSortText: {
+    ...commonFontStyle(500, 16, colors._7B7878),
+  },
+  sortButtonContainer: {
+    padding: wp(3),
+  },
+  sortIconWrapper: {
+    width: wp(24),
+    height: wp(24),
+    justifyContent: 'center',
+    gap: hp(4),
+  },
+  sortLine: {
+    height: hp(2.5),
+    borderRadius: hp(1.5),
+    backgroundColor: colors._0B3970,
+  },
+  sortLineTop: {
+    width: wp(20),
+    alignSelf: 'flex-start',
+  },
+  sortLineMiddle: {
+    width: wp(16),
+    alignSelf: 'flex-start',
+  },
+  sortLineBottom: {
+    width: wp(12),
+    alignSelf: 'flex-start',
   },
 });

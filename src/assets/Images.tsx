@@ -142,6 +142,8 @@ export const IMAGES = {
   jobview: require('./image/jobview.png'),
   shortlisted: require('./image/shortlisted.png'),
   suggested_candidate: require('./image/suggested_candidate.png'),
+  save: require('./image/save.png'),
+  saved: require('./image/saved.png'),
 
   //extra
   logo: require('./extra/logo.png'),

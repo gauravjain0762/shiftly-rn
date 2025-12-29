@@ -1,16 +1,16 @@
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   BackHeader,
   GradientButton,
   LinearContainer,
   Loader,
 } from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Stepper from '../../../component/employe/Stepper';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import EducationList, {
   isEmptyEducation,
 } from '../../../component/employe/EducationList';
@@ -20,7 +20,7 @@ import ExperienceList, {
 } from '../../../component/employe/ExperienceList';
 import AboutMeList from '../../../component/employe/AboutMeList';
 import SuccessffullyModal from '../../../component/employe/SuccessffullyModal';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   setActiveStep,
   setEducationList,
@@ -32,7 +32,7 @@ import {
   EducationItem,
   ExperienceItem,
 } from '../../../features/employeeSlice';
-import {RootState} from '../../../store';
+import { RootState } from '../../../store';
 import {
   useAddUpdateEducationMutation,
   useAddUpdateExperienceMutation,
@@ -44,13 +44,11 @@ import {
   useRemoveExperienceMutation,
   useUpdateAboutMeMutation,
 } from '../../../api/dashboardApi';
-import {errorToast, goBack, successToast} from '../../../utils/commonFunction';
-import {setUserInfo} from '../../../features/authSlice';
-import {useFocusEffect} from '@react-navigation/native';
+import { errorToast, goBack, successToast } from '../../../utils/commonFunction';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import BaseText from '../../../component/common/BaseText';
-import {IMAGES} from '../../../assets/Images';
+import { IMAGES } from '../../../assets/Images';
 import UploadResume from '../../../component/employe/UploadResume';
-import {lang} from 'moment';
 
 type Resume = {
   file_name: string;
@@ -60,7 +58,7 @@ type Resume = {
 
 const CreateProfileScreen = () => {
   const dispatch = useDispatch();
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const {
     educationList,
     educationListEdit,
@@ -70,14 +68,14 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
-  const {data: getEducation, refetch: refetchEducation} = useGetEducationsQuery(
+  const { data: getEducation, refetch: refetchEducation } = useGetEducationsQuery(
     {},
     {
       refetchOnFocus: true,
       refetchOnMountOrArgChange: true,
     },
   );
-  const {data: getExperiences, refetch: refetchExperience} =
+  const { data: getExperiences, refetch: refetchExperience } =
     useGetExperiencesQuery(
       {},
       {
@@ -85,7 +83,7 @@ const CreateProfileScreen = () => {
         refetchOnMountOrArgChange: true,
       },
     );
-  const {data: getAboutmeandResumes, refetch: refetchAboutMe} =
+  const { data: getAboutmeandResumes, refetch: refetchAboutMe } =
     useGetEmployeeProfileQuery(
       {},
       {
@@ -93,6 +91,8 @@ const CreateProfileScreen = () => {
         refetchOnMountOrArgChange: true,
       },
     );
+  const route = useRoute<any>();
+  const scrollRef = React.useRef<KeyboardAwareScrollView>(null);
 
   const educationData = getEducation?.data?.educations;
   const experienceData = getExperiences?.data?.experiences;
@@ -103,43 +103,72 @@ const CreateProfileScreen = () => {
   const [isExperienceUpdate, setIsExperienceUpdate] = useState(false);
   const [resumes, setResumes] = useState<Resume[]>(uploadedResumes || []);
 
-  const [addUpdateEducation, {isLoading: isLoadingEducation}] =
+  const [addUpdateEducation, { isLoading: isLoadingEducation }] =
     useAddUpdateEducationMutation({});
-  const [addUpdateExperience, {isLoading: isLoadingExperience}] =
+  const [addUpdateExperience, { isLoading: isLoadingExperience }] =
     useAddUpdateExperienceMutation({});
-  const [updateAboutMe, {isLoading: isLoadingAboutme}] =
+  const [updateAboutMe, { isLoading: isLoadingAboutme }] =
     useUpdateAboutMeMutation({});
   const [removeEducation] = useRemoveEducationMutation({});
   const [removeExperience] = useRemoveExperienceMutation({});
-  const {data: skillsData} = useGetEmployeeSkillsQuery({});
+  const { data: skillsData } = useGetEmployeeSkillsQuery({});
   const skillsList = skillsData?.data?.skills;
 
   useFocusEffect(
     useCallback(() => {
+      refetchEducation();
+      refetchExperience();
+      refetchAboutMe();
+
+      if (route.params?.selectedLocation) {
+        dispatch(setActiveStep(3));
+      }
+
       return () => {
-        dispatch(setActiveStep(1));
+        if (!route.params?.selectedLocation) {
+        }
       };
-    }, []),
+    }, [route.params?.selectedLocation]),
   );
+
+  useEffect(() => {
+    const selectedLocation = route.params?.selectedLocation;
+
+    if (selectedLocation) {
+      dispatch(setActiveStep(3));
+
+      const currentAboutEdit = aboutEdit;
+      dispatch(
+        setAboutEdit({
+          ...currentAboutEdit,
+          location: selectedLocation,
+        })
+      );
+    }
+  }, [route.params?.selectedLocation]);
 
   useEffect(() => {
     if (educationData) {
       dispatch(setEducationList(educationData));
     }
+
     if (experienceData) {
       dispatch(setExperienceList(experienceData));
     }
 
-    console.log(
-      '🔥🔥🔥 ~ CreateProfileScreen ~ aboutmeandResumes:',
-      aboutmeandResumes?.languages,
-    );
     if (aboutmeandResumes) {
+      // Priority: route params > API data > userInfo
+      const locationValue =
+        route.params?.selectedLocation ||
+        aboutmeandResumes?.location ||
+        userInfo?.address ||
+        '';
+
       dispatch(
         setAboutEdit({
-          open_for_jobs: aboutmeandResumes?.open_for_job || '',
+          open_for_jobs: aboutmeandResumes?.open_for_job || false,
           responsibilities: aboutmeandResumes?.responsibility || '',
-          location: aboutmeandResumes?.location || '',
+          location: locationValue,
           selectedSkills: (aboutmeandResumes?.skills || []).map((s: any) =>
             typeof s === 'string' ? s : s._id,
           ),
@@ -147,7 +176,7 @@ const CreateProfileScreen = () => {
         }),
       );
     }
-  }, [educationData, experienceData]);
+  }, [educationData, experienceData, aboutmeandResumes]);
 
   const handleSaveOrAddEducation = () => {
     if (educationListEdit?.isEditing) {
@@ -159,11 +188,11 @@ const CreateProfileScreen = () => {
 
             return edu.isLocal === true
               ? isEditing
-                ? {...educationListEdit, isEditing: false}
+                ? { ...educationListEdit, isEditing: false }
                 : edu
               : edu._id === educationListEdit._id
-              ? {...educationListEdit, isEditing: false}
-              : edu;
+                ? { ...educationListEdit, isEditing: false }
+                : edu;
           }),
         ),
       );
@@ -203,7 +232,7 @@ const CreateProfileScreen = () => {
         setExperienceList(
           experienceList?.map(exp =>
             exp?.experience_id === experienceListEdit?.experience_id
-              ? {...experienceListEdit, isEditing: false}
+              ? { ...experienceListEdit, isEditing: false }
               : exp,
           ),
         ),
@@ -216,11 +245,11 @@ const CreateProfileScreen = () => {
 
             return exp.isLocal === true
               ? isEditing
-                ? {...experienceListEdit, isEditing: false}
+                ? { ...experienceListEdit, isEditing: false }
                 : exp
               : exp._id === experienceListEdit._id
-              ? {...experienceListEdit, isEditing: false}
-              : exp;
+                ? { ...experienceListEdit, isEditing: false }
+                : exp;
           }),
         ),
       );
@@ -465,16 +494,15 @@ const CreateProfileScreen = () => {
   return (
     <SafeAreaView
       edges={['bottom']}
-      style={{flex: 1, backgroundColor: colors._F7F7F7}}>
+      style={{ flex: 1, backgroundColor: colors._F7F7F7 }}>
       <LinearContainer
-        SafeAreaProps={{edges: ['bottom', 'top']}}
         colors={[colors._F7F7F7, colors._F7F7F7]}>
         {/* Fixed Header */}
         <View style={styles.topConrainer}>
           <BackHeader
             type="employe"
             isRight={true}
-            titleStyle={{color: colors._0B3970}}
+            titleStyle={{ color: colors._0B3970 }}
             title={'Create Your Profile'}
             RightIcon={<View />}
             onBackPress={() => {
@@ -497,8 +525,8 @@ const CreateProfileScreen = () => {
                 dispatch(
                   setExperienceListEdit({
                     experience_id: '',
-                    job_end: {month: '', year: ''},
-                    job_start: {month: '', year: ''},
+                    job_end: { month: '', year: '' },
+                    job_start: { month: '', year: '' },
                     preferred_position: '',
                     title: '',
                     company: '',
@@ -544,11 +572,13 @@ const CreateProfileScreen = () => {
 
         {/* Scrollable Content Area */}
         <KeyboardAwareScrollView
-          style={{flex: 1}}
+          ref={scrollRef}
+          style={{ flex: 1 }}
           enableOnAndroid={true}
           enableAutomaticScroll={true}
           automaticallyAdjustContentInsets
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: hp(30) }}
           keyboardShouldPersistTaps="handled">
           {activeStep === 1 && (
             <>
@@ -603,9 +633,9 @@ const CreateProfileScreen = () => {
                     onRemove={() => handleRemoveExperience(item)}
                     onEdit={() => {
                       const parseDate = (
-                        val?: string | {month?: string; year?: string},
+                        val?: string | { month?: string; year?: string },
                       ) => {
-                        if (!val) return {month: '', year: ''};
+                        if (!val) return { month: '', year: '' };
 
                         if (typeof val === 'object') {
                           return {
@@ -622,7 +652,7 @@ const CreateProfileScreen = () => {
                           };
                         }
 
-                        return {month: '', year: ''};
+                        return { month: '', year: '' };
                       };
 
                       const start = parseDate(item?.job_start);
@@ -647,8 +677,9 @@ const CreateProfileScreen = () => {
                 setExperienceListEdit={(val: any) =>
                   dispatch(setExperienceListEdit(val))
                 }
-                addNewExperience={handleSaveOrAddExperience}
-                onSaveExperience={handleSaveOrAddExperience}
+                onExperienceTypePress={() => {
+                  scrollRef.current?.scrollToPosition(0, hp(180), true);
+                }}
               />
             </>
           )}
@@ -690,9 +721,9 @@ const CreateProfileScreen = () => {
             style={[
               styles.btnRow,
               !educationListEdit?.isEditing &&
-                isEmptyEducation(educationListEdit) && {
-                  opacity: 0.5,
-                },
+              isEmptyEducation(educationListEdit) && {
+                opacity: 0.5,
+              },
             ]}>
             <Image
               style={styles.closeIcon}
@@ -729,9 +760,9 @@ const CreateProfileScreen = () => {
             style={[
               styles.btnRow,
               !experienceListEdit?.isEditing &&
-                isEmptyExperience(experienceListEdit) && {
-                  opacity: 0.5,
-                },
+              isEmptyExperience(experienceListEdit) && {
+                opacity: 0.5,
+              },
             ]}>
             <Image
               style={styles.closeIcon}

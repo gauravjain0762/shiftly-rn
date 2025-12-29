@@ -179,53 +179,68 @@ const ExperienceList: FC<any> = ({
         }
       />
 
-      <View>
-        <BaseText style={styles.headerText}>When did it end?</BaseText>
-        <Pressable
-          onPress={() =>
-            setExperienceListEdit({
-              ...experienceListEdit,
-              still_working: !experienceListEdit?.still_working,
-            })
-          }
-          style={styles.stillWrapper}>
-          <TouchableOpacity
-            onPress={() =>
-              setExperienceListEdit({
-                ...experienceListEdit,
-                still_working: !experienceListEdit?.still_working,
-              })
-            }>
-            <ImageBackground
-              source={IMAGES.checkBox}
-              resizeMode="contain"
-              style={styles.checkbox}>
-              {experienceListEdit?.still_working && (
-                <Image source={IMAGES.check} style={styles.checkIcon} />
-              )}
-            </ImageBackground>
-          </TouchableOpacity>
-          <BaseText style={styles.stillText}>I currently work here</BaseText>
-        </Pressable>
-
-        {!experienceListEdit?.still_working && (
-          <CustomDatePicker
-            type={'Experience'}
-            label={'End Date'}
-            dateValue={experienceListEdit}
-            onChange={(date: any) => {
+      <BaseText style={styles.headerText}>When did it end?</BaseText>
+      
+      {/* End Date Field - Disabled when still working */}
+      <View style={experienceListEdit?.still_working && styles.disabledContainer}>
+        <CustomDatePicker
+          type={'Experience'}
+          label={'End Date'}
+          dateValue={experienceListEdit}
+          disabled={experienceListEdit?.still_working}
+          onChange={(date: any) => {
+            if (!experienceListEdit?.still_working) {
               setExperienceListEdit({
                 ...experienceListEdit,
                 jobEnd_month: date?.month?.toString(),
                 jobEnd_year: date?.year?.toString(),
               });
-            }}
-          />
-        )}
+            }
+          }}
+        />
       </View>
+
+      {/* "I currently work here" checkbox - Right below End Date */}
+      <Pressable
+        onPress={() =>
+          setExperienceListEdit({
+            ...experienceListEdit,
+            still_working: !experienceListEdit?.still_working,
+            // Clear end date when checking "still working"
+            ...((!experienceListEdit?.still_working) && {
+              jobEnd_month: '',
+              jobEnd_year: '',
+            }),
+          })
+        }
+        style={styles.stillWrapper}>
+        <TouchableOpacity
+          onPress={() =>
+            setExperienceListEdit({
+              ...experienceListEdit,
+              still_working: !experienceListEdit?.still_working,
+              // Clear end date when checking "still working"
+              ...((!experienceListEdit?.still_working) && {
+                jobEnd_month: '',
+                jobEnd_year: '',
+              }),
+            })
+          }>
+          <ImageBackground
+            source={IMAGES.checkBox}
+            resizeMode="contain"
+            style={styles.checkbox}>
+            {experienceListEdit?.still_working && (
+              <Image source={IMAGES.check} style={styles.checkIcon} />
+            )}
+          </ImageBackground>
+        </TouchableOpacity>
+        <BaseText style={styles.stillText}>I currently work here</BaseText>
+      </Pressable>
 
       <CustomDropdown
         data={experienceOptions}
+        dropdownPosition="top"
         label="What type of experience"
         placeholder={'What type of experience'}
         value={experienceListEdit?.experience_type}
@@ -275,7 +290,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: hp(12),
-    marginBottom: hp(2),
+    marginBottom: hp(20),
   },
   checkbox: {
     width: wp(30),
@@ -335,5 +350,9 @@ const styles = StyleSheet.create({
   },
   tooltipIcon: {
     marginTop: hp(0),
+  },
+  disabledContainer: {
+    opacity: 0.5,
+    pointerEvents: 'none',
   },
 });

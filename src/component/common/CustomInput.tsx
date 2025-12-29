@@ -1,17 +1,12 @@
 import {
-  Image,
   StyleSheet,
   Text,
-  ViewStyle,
-  TouchableOpacity,
   View,
-  Platform,
-  Keyboard,
   TextInput,
 } from 'react-native';
-import React, {useState} from 'react';
-import {colors} from '../../theme/colors';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import React from 'react';
+import { colors } from '../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
 
 const CustomInput = ({
   label,
@@ -23,9 +18,10 @@ const CustomInput = ({
   ...props
 }: any) => {
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
+        onPress={onPress}
         placeholder={placeholder}
         value={value}
         style={[styles.dropdown, inputStyle]}

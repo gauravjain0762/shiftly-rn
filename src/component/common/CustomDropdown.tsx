@@ -45,6 +45,7 @@ interface Props extends DropdownProps<any> {
   RightIconStyle?: ImageStyle;
   onDropdownOpen?: () => void;
   onDropdownClose?: () => void;
+  dropdownPosition?: 'top' | 'bottom' | "auto";
 }
 
 const CustomDropdown = ({
@@ -78,6 +79,7 @@ const CustomDropdown = ({
   RightIconStyle,
   onDropdownOpen,
   onDropdownClose,
+  dropdownPosition,
   ...props
 }: Props) => {
   const handleChange = (item: any) => {
@@ -105,7 +107,7 @@ const CustomDropdown = ({
           value={String(value)}
           onChange={handleChange}
           disable={disable}
-          dropdownPosition={'bottom'}
+          dropdownPosition={dropdownPosition || 'bottom'}
           style={[styles.dropdownStyle, dropdownStyle]}
           flatListProps={flatListProps}
           labelField={labelField === undefined ? 'label' : labelField}

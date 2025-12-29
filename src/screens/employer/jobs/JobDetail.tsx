@@ -174,6 +174,20 @@ const JobDetail = () => {
     }
   };
 
+  const getDaysAgo = (dateString: string) => {
+    if (!dateString) return null;
+    const jobDate = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - jobDate.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  };
+
   return (
     <LinearContainer
       SafeAreaProps={{ edges: ['bottom', 'top'] }}
@@ -258,6 +272,7 @@ const JobDetail = () => {
               />
               <View style={styles.locationTitle}>
                 <Text style={styles.jobTitle}>{curr_jobdetails?.title}</Text>
+                <Text style={styles.coNameTitle}>{curr_jobdetails?.company_id?.company_name}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => handleToggleFavorite(curr_jobdetails)}
@@ -268,6 +283,39 @@ const JobDetail = () => {
                   tintColor={colors._0B3970}
                 />
               </TouchableOpacity>
+            </View>
+
+            {/* Quick Info Snapshot */}
+            <View style={styles.snapshotContainer}>
+              {curr_jobdetails?.contract_type && (
+                <View style={styles.snapshotItem}>
+                  <Text style={styles.snapshotLabel}>Employment Type</Text>
+                  <Text style={styles.snapshotValue}>{curr_jobdetails?.contract_type}</Text>
+                </View>
+              )}
+
+              {/* {curr_jobdetails?.department_id && (
+                <View style={styles.snapshotItem}>
+                  <Text style={styles.snapshotLabel}>Department</Text>
+                  <Text style={styles.snapshotValue}>{curr_jobdetails?.department_id}</Text>
+                </View>
+              )} */}
+
+              {curr_jobdetails?.monthly_salary_from && curr_jobdetails?.monthly_salary_to && (
+                <View style={styles.snapshotItem}>
+                  <Text style={styles.snapshotLabel}>Salary</Text>
+                  <Text style={styles.snapshotValue}>
+                    AED {curr_jobdetails?.monthly_salary_from} - {curr_jobdetails?.monthly_salary_to}
+                  </Text>
+                </View>
+              )}
+
+              {curr_jobdetails?.createdAt && (
+                <View style={styles.snapshotItem}>
+                  <Text style={styles.snapshotLabel}>Posted</Text>
+                  <Text style={styles.snapshotValue}>{getDaysAgo(curr_jobdetails?.createdAt)}</Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.row}>
@@ -485,6 +533,9 @@ const styles = StyleSheet.create({
   jobTitle: {
     ...commonFontStyle(700, 18, colors._0B3970),
   },
+  coNameTitle: {
+    ...commonFontStyle(500, 14, colors._4A4A4A),
+  },
   heart: {
     width: wp(18),
     height: wp(18),
@@ -585,4 +636,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.empPrimary,
   },
   alertText: { ...commonFontStyle(500, 10, colors.white) },
+  snapshotContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    backgroundColor: colors.white,
+    borderRadius: hp(12),
+    padding: wp(16),
+    marginBottom: hp(16),
+    gap: hp(12),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  snapshotItem: {
+    width: '48%',
+    gap: hp(4),
+  },
+  snapshotLabel: {
+    ...commonFontStyle(500, 12, colors._4A4A4A),
+  },
+  snapshotValue: {
+    ...commonFontStyle(600, 14, colors._0B3970),
+  },
 });

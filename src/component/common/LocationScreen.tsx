@@ -417,7 +417,7 @@ const LocationScreen = () => {
     setTimeout(() => {
       if (!isKeyboardVisible) {
         setIsSearchExpanded(false);
-        setIsSearchFocused(false); // Reset search focus when blurred
+        setIsSearchFocused(false);
       }
     }, 200);
   };

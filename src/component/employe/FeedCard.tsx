@@ -10,13 +10,37 @@ import CustomImage from '../common/CustomImage';
 
 type card = {
   onPressCard?: () => void;
-  isFollow?: boolean;
+  onPressLike?: () => void;
+  onPressSave?: () => void;
+  onPressShare?: () => void;
+  isLiked?: boolean;
+  isSaved?: boolean;
   item?: any;
 };
 
-const FeedCard: FC<card> = ({ onPressCard = () => { }, item }) => {
+const FeedCard: FC<card> = ({
+  onPressCard = () => { },
+  onPressLike = () => { },
+  onPressSave = () => { },
+  onPressShare = () => { },
+  isLiked = false,
+  isSaved = false,
+  item
+}) => {
   const hasImage = item?.images?.length > 0;
   const [imageLoading, setImageLoading] = useState(hasImage);
+  const [localLiked, setLocalLiked] = useState(isLiked);
+  const [localSaved, setLocalSaved] = useState(isSaved);
+
+  const handleLike = () => {
+    setLocalLiked(!localLiked);
+    onPressLike();
+  };
+
+  const handleSave = () => {
+    setLocalSaved(!localSaved);
+    onPressSave();
+  };
 
   return (
     <TouchableOpacity
@@ -31,7 +55,7 @@ const FeedCard: FC<card> = ({ onPressCard = () => { }, item }) => {
           containerStyle={styles.logo}
           imageStyle={{ height: '100%', width: '100%' }}
         />
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.hotelName}>
             {item?.company_id?.company_name || 'N/A'}
           </Text>
@@ -46,28 +70,72 @@ const FeedCard: FC<card> = ({ onPressCard = () => { }, item }) => {
       <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
 
       {/* Banner */}
-      <View style={styles.banner}>
-        <View style={styles.post}>
-          {imageLoading && (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" color={colors._D5D5D5} />
-            </View>
-          )}
-          <Image
-            style={styles.post}
-            resizeMode={'cover'}
-            source={{ uri: item?.images[0] }}
-            onLoad={() => setImageLoading(false)}
-            onLoadStart={() => hasImage && setImageLoading(true)}
-          />
+      {hasImage && (
+        <View style={styles.banner}>
+          <View style={styles.post}>
+            {imageLoading && (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color={colors._D5D5D5} />
+              </View>
+            )}
+            <Image
+              style={styles.post}
+              resizeMode={'cover'}
+              source={{ uri: item?.images[0] }}
+              onLoad={() => setImageLoading(false)}
+              onLoadStart={() => hasImage && setImageLoading(true)}
+            />
+          </View>
         </View>
-      </View>
+      )}
 
       <ExpandableText
         maxLines={3}
         descriptionStyle={styles.description}
         description={item?.description || 'N/A'}
       />
+
+      {/* Action Buttons Row */}
+      <View style={styles.actionRow}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={handleLike}
+          activeOpacity={0.7}>
+          <Image
+            source={localLiked ? IMAGES.like : IMAGES.hart}
+            style={[styles.actionIcon, localLiked && styles.likedIcon]}
+          />
+          <Text style={[styles.actionText, localLiked && styles.likedText]}>
+            Like
+          </Text>
+        </TouchableOpacity>
+
+        {/* <TouchableOpacity
+          style={styles.actionButton}
+          onPress={handleSave}
+          activeOpacity={0.7}>
+          <Image
+            source={localSaved ? IMAGES.saved : IMAGES.save}
+            style={[
+              styles.actionIcon,
+            ]}
+          />
+          <Text style={[styles.actionText]}>
+            Save
+          </Text>
+        </TouchableOpacity> */}
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={onPressShare}
+          activeOpacity={0.7}>
+          <Image
+            source={IMAGES.share}
+            style={styles.actionIcon}
+          />
+          <Text style={styles.actionText}>Share</Text>
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -146,5 +214,39 @@ const styles = StyleSheet.create({
   followBtn: {
     backgroundColor: colors._0B3970,
     borderRadius: 5,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: wp(14),
+    paddingVertical: hp(12),
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    marginTop: hp(4),
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(6),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+  },
+  actionIcon: {
+    width: wp(20),
+    height: wp(20),
+    tintColor: colors._6A6A6A,
+  },
+  likedIcon: {
+    tintColor: '#FF4458',
+  },
+  actionText: {
+    ...commonFontStyle(500, 15, colors._6A6A6A),
+  },
+  likedText: {
+    color: '#FF4458',
+  },
+  savedText: {
+    color: colors._0B3970,
   },
 });
