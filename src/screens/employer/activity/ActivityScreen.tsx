@@ -2,62 +2,22 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import React from 'react';
-import {ActivitiesCard, BackHeader, LinearContainer} from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {useTranslation} from 'react-i18next';
-import {AppStyles} from '../../../theme/appStyles';
-import {navigateTo} from '../../../utils/commonFunction';
-import {SCREEN_NAMES} from '../../../navigation/screenNames';
+import { ActivitiesCard, BackHeader, LinearContainer } from '../../../component';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { useTranslation } from 'react-i18next';
+import { AppStyles } from '../../../theme/appStyles';
 import NoDataText from '../../../component/common/NoDataText';
-import {useGetActivitiesQuery} from '../../../api/dashboardApi';
-
-const activities = [
-  {
-    id: '1',
-    name: 'Marriot Hotel',
-    subtitle: 'Restaurant Manager',
-    startDetails: 'Full Time',
-    endDetails: 'Dubai',
-    time: '1 Hour ago',
-    tag: 'Shortlisted',
-  },
-  {
-    id: '2',
-    name: 'Donald Christain',
-    subtitle: 'Marriot Group Dubai',
-    details: 'Interview Request',
-    time: '2 Hour ago',
-    tag: 'Chat',
-  },
-  {
-    id: '3',
-    name: 'Marriot Hotel',
-    subtitle: 'Restaurant Manager',
-    startDetails: 'Full Time',
-    endDetails: 'Dubai',
-    time: '1 Hour ago',
-    tag: 'Shortlisted',
-  },
-  {
-    id: '4',
-    name: 'Donald Christain',
-    subtitle: 'Marriot Group Dubai',
-    details: 'Interview Request',
-    time: '2 Hour ago',
-    tag: 'Chat',
-  },
-];
+import { useGetActivitiesQuery } from '../../../api/dashboardApi';
 
 const ActivityScreen = () => {
-  const {t} = useTranslation();
-  const {data: activitiesData, isLoading, refetch} = useGetActivitiesQuery({});
+  const { t } = useTranslation();
+  const { data: activitiesData, isLoading, refetch } = useGetActivitiesQuery({});
   const activities = activitiesData?.data?.activities || [];
+  console.log("🔥 ~ ActivityScreen ~ activities:", activities)
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
@@ -77,7 +37,7 @@ const ActivityScreen = () => {
           keyExtractor={(_, index) => index.toString()}
           renderItem={(item: any) => <ActivitiesCard {...item} />}
           contentContainerStyle={styles.scrollContainer}
-          ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
+          ItemSeparatorComponent={() => <View style={{ height: hp(22) }} />}
           showsVerticalScrollIndicator={false}
           refreshing={isLoading}
           onRefresh={refetch}
@@ -85,7 +45,7 @@ const ActivityScreen = () => {
             return (
               <NoDataText
                 text="You don’t have any activity yet. Once you post jobs or content, updates will appear here."
-                textStyle={{color: colors._0B3970}}
+                textStyle={{ color: colors._0B3970 }}
               />
             );
           }}

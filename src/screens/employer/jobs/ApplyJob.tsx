@@ -36,24 +36,16 @@ const ApplyJob = () => {
   const dispatch = useDispatch();
   const { params } = useRoute<any>();
   const data = params?.data as any;
+  console.log("🔥 ~ ApplyJob ~ data:", data)
   const [imageModal, setImageModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<any>([]);
   const resumeList = params?.resumeList as any;
-  const [visible, setVisible] = useState<boolean>(false);
   const { bottom } = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
   const { isSuccessModalVisible } = useSelector(
     (state: RootState) => state.employee,
   );
-
-  const showTooltip = () => {
-    setVisible(true);
-
-    setTimeout(() => {
-      setVisible(false);
-    }, 3500);
-  };
 
   const handleApplyJob = async () => {
     if (!selectedDoc) {
@@ -120,15 +112,17 @@ const ApplyJob = () => {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
+              <Text style={{...commonFontStyle(400, 15, colors._050505)}}>{data?.job_sector || "N/A"}</Text>
               <Text style={styles.location}>{data?.address}</Text>
               <Text style={[styles.meta, { flex: 0 }]}>{data?.area}</Text>
               <View
                 style={{
+                  gap: wp(10),
                   marginTop: hp(5),
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <Text style={styles.meta}>{`${data?.job_type}`}</Text>
+                <Text numberOfLines={2} style={[styles.meta, { maxWidth: '50%' }]}>{`${data?.contract_type}`}</Text>
                 <Text
                   style={
                     styles.salary
@@ -284,7 +278,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 14, '#33485B'),
   },
   salary: {
-    ...commonFontStyle(700, 16, '#33485B'),
+    ...commonFontStyle(700, 15, '#33485B'),
   },
   divider: {
     height: 1,

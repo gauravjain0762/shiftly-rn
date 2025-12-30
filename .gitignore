@@ -37,6 +37,8 @@ local.properties
 *.keystore
 !debug.keystore
 .kotlin/
+*.aab
+*.apk
 
 # node.js
 #

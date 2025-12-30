@@ -1,22 +1,30 @@
-import React, {FC} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import React, { FC } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
+import { colors } from '../../theme/colors';
 import CustomImage from '../common/CustomImage';
-import {getTimeAgo, navigateTo} from '../../utils/commonFunction';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {SCREENS} from '../../navigation/screenNames';
+import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { SCREENS } from '../../navigation/screenNames';
+import { IMAGES } from '../../assets/Images';
 
 type props = {
   item?: any;
 };
 
-const ActivitiesCard: FC<props> = ({item}) => {
-  console.log("🔥 ~ ActivitiesCard ~ item:", item)
+const ActivitiesCard: FC<props> = ({ item }) => {
+  console.log(">>>>>>>>>>>>>>... ~ ActivitiesCard ~ item:", item)
+  const getStatusText = () => {
+    if (item?.type) {
+      return item.type.charAt(0).toUpperCase() + item.type.slice(1);
+    }
+    return '';
+  };
+
   return (
     <Pressable style={styles.card}>
-      <View style={styles.header}>
+      {/* Header with Logo, Company Name and Time */}
+      <View style={styles.headerRow}>
         <View style={styles.leftSection}>
           <CustomImage
             resizeMode="cover"
@@ -27,50 +35,61 @@ const ActivitiesCard: FC<props> = ({item}) => {
             <Text style={styles.companyName} numberOfLines={1}>
               {item?.company_name}
             </Text>
-            <Text style={styles.jobSector} numberOfLines={1}>
-              {item?.job_title}
-            </Text>
-            <View style={styles.locationRow}>
-              <CustomImage
-                size={wp(16)}
-                resizeMode="contain"
-                source={IMAGES.distance}
-              />
-              <Text style={styles.locationText} numberOfLines={1}>
-                {item?.area}
-              </Text>
-            </View>
           </View>
         </View>
-
-        <View style={styles.rightSection}>
-          <Text style={styles.timeText}>
-            {`${getTimeAgo(item?.created_at)} ago`}
-          </Text>
-        </View>
+        <Text style={styles.timeAgo}>
+          {getTimeAgo(item?.created_at)} ago
+        </Text>
       </View>
 
-      <View style={styles.footer}>
-        <View style={styles.jobTypeContainer}>
-          <Text style={styles.jobTypeText}>{item?.job_type}</Text>
-        </View>
+      <View style={styles.bottomRow}>
 
-        <View style={styles.tagsContainer}>
-          <View style={styles.statusTag}>
-            <Text style={styles.statusText}>
-              {item?.type?.charAt(0)?.toUpperCase() + item?.type?.slice(1)}
+        <View style={{ gap: hp(15) }}>
+          <Text style={styles.jobTitle} numberOfLines={1}>
+            {item?.job_title} - {item?.job_type || "N/A"}
+          </Text>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: colors.white }
+            ]}>
+            <Text
+              style={[
+                styles.statusText,
+                { color: colors._0B3970 }
+              ]}>
+              {getStatusText()}
             </Text>
           </View>
+        </View>
 
+        <View style={styles.actionButtons}>
           {item?.chat_status === 'chat' && (
             <Pressable
               onPress={() => {
-                navigateTo(SCREENS.Chat, {data: item});
+                navigateTo(SCREENS.Chat, { data: item });
               }}
-              style={styles.chatTag}>
-              <Text style={styles.chatText}>Chat</Text>
+              style={styles.button}>
+              <Image
+                source={IMAGES.chat2}
+                style={styles.buttonIcon}
+              />
+              <Text style={styles.chatButtonText}>Chat</Text>
             </Pressable>
           )}
+
+          <Pressable
+            onPress={() => {
+              navigateTo(SCREENS.JobDetail, { jobId: item?.job_id });
+            }}
+            style={styles.button}>
+            <Image
+              source={IMAGES.eye_on}
+              style={styles.buttonIcon}
+              tintColor={colors.white}
+            />
+            <Text style={styles.viewButtonText}>View</Text>
+          </Pressable>
         </View>
       </View>
     </Pressable>
@@ -82,114 +101,79 @@ export default ActivitiesCard;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
-    borderRadius: 20,
-    borderWidth: 1.2,
-    borderColor: '#E0D7C8',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
     padding: wp(16),
+    gap: hp(10),
   },
-
-  header: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: hp(16),
+    alignItems: 'center',
   },
-
   leftSection: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
     marginRight: wp(12),
   },
-
   logo: {
-    width: wp(60),
-    height: wp(60),
-    borderRadius: wp(12),
-    marginRight: wp(16),
+    width: wp(42),
+    height: wp(42),
+    marginRight: wp(12),
+    borderRadius: wp(40),
   },
-
   companyInfo: {
     flex: 1,
-    gap: hp(4),
   },
-
   companyName: {
-    ...commonFontStyle(600, 20, colors._0B3970),
+    ...commonFontStyle(600, 16, colors._0B3970),
   },
-
-  jobSector: {
-    ...commonFontStyle(400, 14, colors._4A4A4A),
+  timeAgo: {
+    ...commonFontStyle(400, 12, colors._7B7878),
   },
-
-  locationRow: {
+  jobTitle: {
+    ...commonFontStyle(400, 14, colors._0B3970),
+    marginTop: hp(4),
+  },
+  bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: wp(6),
-    marginTop: hp(2),
-  },
-
-  locationText: {
-    ...commonFontStyle(400, 14, colors._4A4A4A),
-    flex: 1,
-  },
-
-  rightSection: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-  },
-
-  timeText: {
-    ...commonFontStyle(400, 13, colors._7B7878),
-  },
-
-  footer: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: hp(12),
-    borderTopWidth: 1,
-    borderTopColor: '#E6E6E6',
   },
-
-  jobTypeContainer: {
-    flex: 1,
-  },
-
-  jobTypeText: {
-    ...commonFontStyle(400, 13, colors._4A4A4A),
-  },
-
-  tagsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp(8),
-  },
-
-  statusTag: {
-    backgroundColor: '#EEF2F7',
-    borderRadius: hp(20),
+  statusBadge: {
     paddingVertical: hp(6),
     paddingHorizontal: wp(12),
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: hp(7),
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: colors._0B3970,
   },
-
   statusText: {
     ...commonFontStyle(500, 12, colors._0B3970),
   },
-
-  chatTag: {
-    backgroundColor: colors._0B3970,
-    borderRadius: hp(20),
-    paddingVertical: hp(8),
-    paddingHorizontal: wp(16),
-    minWidth: wp(70),
-    alignItems: 'center',
-    justifyContent: 'center',
+  actionButtons: {
+    gap: wp(8),
   },
-
-  chatText: {
-    ...commonFontStyle(600, 12, colors.white),
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors._0B3970,
+    borderRadius: hp(50),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+    gap: wp(6),
+  },
+  chatButtonText: {
+    ...commonFontStyle(500, 12, colors.white),
+  },
+  viewButtonText: {
+    ...commonFontStyle(500, 12, colors.white),
+  },
+  buttonIcon: {
+    width: wp(14),
+    height: wp(14),
+    tintColor: colors.white,
   },
 });

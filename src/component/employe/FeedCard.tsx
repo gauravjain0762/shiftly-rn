@@ -11,35 +11,24 @@ import CustomImage from '../common/CustomImage';
 type card = {
   onPressCard?: () => void;
   onPressLike?: () => void;
-  onPressSave?: () => void;
-  onPressShare?: () => void;
   isLiked?: boolean;
-  isSaved?: boolean;
   item?: any;
 };
 
 const FeedCard: FC<card> = ({
   onPressCard = () => { },
   onPressLike = () => { },
-  onPressSave = () => { },
-  onPressShare = () => { },
   isLiked = false,
-  isSaved = false,
   item
 }) => {
+  console.log("🔥 ~ FeedCard ~ item:", item)
   const hasImage = item?.images?.length > 0;
   const [imageLoading, setImageLoading] = useState(hasImage);
   const [localLiked, setLocalLiked] = useState(isLiked);
-  const [localSaved, setLocalSaved] = useState(isSaved);
 
   const handleLike = () => {
     setLocalLiked(!localLiked);
     onPressLike();
-  };
-
-  const handleSave = () => {
-    setLocalSaved(!localSaved);
-    onPressSave();
   };
 
   return (
@@ -65,6 +54,16 @@ const FeedCard: FC<card> = ({
             </Text>
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={handleLike}
+          style={styles.actionButton}
+        >
+          <CustomImage
+            size={wp(26)}
+            resizeMode={!localLiked ? "cover" : "contain"}
+            source={localLiked ? IMAGES.like : IMAGES.hart}
+          />
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
@@ -96,34 +95,8 @@ const FeedCard: FC<card> = ({
       />
 
       {/* Action Buttons Row */}
-      <View style={styles.actionRow}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleLike}
-          activeOpacity={0.7}>
-          <Image
-            source={localLiked ? IMAGES.like : IMAGES.hart}
-            style={[styles.actionIcon, localLiked && styles.likedIcon]}
-          />
-          <Text style={[styles.actionText, localLiked && styles.likedText]}>
-            Like
-          </Text>
-        </TouchableOpacity>
-
-        {/* <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleSave}
-          activeOpacity={0.7}>
-          <Image
-            source={localSaved ? IMAGES.saved : IMAGES.save}
-            style={[
-              styles.actionIcon,
-            ]}
-          />
-          <Text style={[styles.actionText]}>
-            Save
-          </Text>
-        </TouchableOpacity> */}
+      {/* <View style={styles.actionRow}>
+        
 
         <TouchableOpacity
           style={styles.actionButton}
@@ -135,7 +108,7 @@ const FeedCard: FC<card> = ({
           />
           <Text style={styles.actionText}>Share</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </TouchableOpacity>
   );
 };
@@ -148,14 +121,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   description: {
-    marginTop: hp(8),
     lineHeight: hp(20),
-    paddingBottom: hp(10),
+    paddingVertical: hp(15),
     paddingHorizontal: wp(14),
     ...commonFontStyle(400, 16, colors._6A6A6A),
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F4F3F3',
     borderRadius: 10,
   },
   cardHeader: {
@@ -226,19 +198,16 @@ const styles = StyleSheet.create({
     marginTop: hp(4),
   },
   actionButton: {
+    gap: wp(6),
     flexDirection: 'row',
     alignItems: 'center',
-    gap: wp(6),
     paddingVertical: hp(6),
     paddingHorizontal: wp(12),
   },
   actionIcon: {
-    width: wp(20),
-    height: wp(20),
+    width: wp(26),
+    height: wp(24),
     tintColor: colors._6A6A6A,
-  },
-  likedIcon: {
-    tintColor: '#FF4458',
   },
   actionText: {
     ...commonFontStyle(500, 15, colors._6A6A6A),

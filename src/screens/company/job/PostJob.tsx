@@ -463,7 +463,6 @@ const PostJob = () => {
   };
 
   const handleCreateJob = async () => {
-    // Validate required fields - check if job_sector exists and has a valid value
     if (!job_sector || !job_sector.value || (typeof job_sector.value === 'string' && job_sector.value.trim() === '')) {
       errorToast(t('Please select a job department'));
       return;

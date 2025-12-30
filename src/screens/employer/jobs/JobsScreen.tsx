@@ -68,7 +68,6 @@ const JobsScreen = () => {
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
-  console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
 

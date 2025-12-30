@@ -27,6 +27,7 @@ export const IMAGES = {
   dummy_cover: require('./image/dummy_cover.png'),
   dummy_image: require('./image/photo.png'),
   delete: require('./image/delete.png'),
+  chat2: require('./image/chat2.png'),
   ring: require('./image/ring.png'),
 
   logog: require('./image/logog.png'),

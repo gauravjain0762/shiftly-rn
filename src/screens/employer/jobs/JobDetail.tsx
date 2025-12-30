@@ -50,12 +50,13 @@ const JobDetail = () => {
   const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
   const [modal, setModal] = useState(false);
-  const { params } = useRoute<RouteProp<any, any>>();
+  const { params } = useRoute<RouteProp<any, any>>() as any;
   const data = params || params?.item;
   const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
     data?.item?._id || data?.jobId,
   );
   const curr_jobdetails = jobDetail?.data?.job;
+  console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
   const { userInfo } = useSelector((state: RootState) => state.auth);

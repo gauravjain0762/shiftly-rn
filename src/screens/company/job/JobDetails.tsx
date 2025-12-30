@@ -67,10 +67,6 @@ const CoJobDetails = () => {
   const jobDetail = data?.data;
   console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail);
 
-  // Capitalize first letter of posted time
-  const postedTime = getPostedTime(jobDetail?.createdAt);
-  const capitalizedPostedTime = postedTime ? postedTime.charAt(0).toUpperCase() + postedTime.slice(1) : '';
-
   useFocusEffect(
     useCallback(() => {
       refetch();

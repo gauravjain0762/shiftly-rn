@@ -1,15 +1,16 @@
-import React, {FC, useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity, View, Text} from 'react-native';
+import React, { FC, useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import CustomDatePicker from '../common/CustomDatePicker';
-import {IMAGES} from '../../assets/Images';
-import {EducationItem} from '../../features/employeeSlice';
+import { IMAGES } from '../../assets/Images';
+import { EducationItem } from '../../features/employeeSlice';
 import CustomInput from '../common/CustomInput';
 import CountryPicker from 'react-native-country-picker-modal';
 import BaseText from '../common/BaseText';
-import {colors} from '../../theme/colors';
+import { colors } from '../../theme/colors';
 import Tooltip from '../common/Tooltip';
+import CustomDropdown from '../common/CustomDropdown';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -20,9 +21,13 @@ type Props = {
   educationList: EducationItem[];
   educationData?: EducationItem[];
 };
+
 export const isEmptyEducation = (edu: EducationItem) => {
+  // Check if degree is empty or just "Other" without actual text
+  const isDegreeEmpty = !edu.degree || edu.degree === 'Other';
+
   return (
-    !edu.degree ||
+    isDegreeEmpty ||
     !edu.university ||
     !edu.startDate_month ||
     !edu.startDate_year ||
@@ -32,42 +37,109 @@ export const isEmptyEducation = (edu: EducationItem) => {
     !edu.province
   );
 };
+const degreeOptions = [
+  { label: 'High School', value: 'High School' },
+  { label: 'Diploma', value: 'Diploma' },
+  { label: 'Vocational Training', value: 'Vocational Training' },
+  { label: 'Associate Degree', value: 'Associate Degree' },
+  { label: 'Bachelor\'s Degree', value: 'Bachelor\'s Degree' },
+  { label: 'Master\'s Degree', value: 'Master\'s Degree' },
+  { label: 'Doctorate (PhD)', value: 'Doctorate (PhD)' },
+  { label: 'Professional Degree', value: 'Professional Degree' },
+  { label: 'Certificate', value: 'Certificate' },
+  { label: 'Other', value: 'Other' },
+];
 
 const EducationList: FC<Props> = ({
   educationListEdit,
   setEducationListEdit,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [showOtherDegreeInput, setShowOtherDegreeInput] = useState<boolean>(false);
+  const [otherDegreeText, setOtherDegreeText] = useState<string>('');
+
+  // Check if "Other" is selected and set the state
+  React.useEffect(() => {
+    const isOther = educationListEdit?.degree === 'Other' ||
+      (educationListEdit?.degree &&
+        !degreeOptions.some(opt => opt.value === educationListEdit.degree));
+
+    setShowOtherDegreeInput(isOther);
+
+    if (isOther && educationListEdit?.degree !== 'Other') {
+      setOtherDegreeText(educationListEdit?.degree);
+    }
+  }, [educationListEdit?.degree]);
 
   return (
     <View style={styles.wrapper}>
-      <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+      <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
         <Text style={styles.fieldLabel}>Degree</Text>
         <Tooltip
           message="We use your education info to better match you with employers who value specific qualifications."
           position="bottom"
           containerStyle={styles.tooltipIcon}
-          tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+          tooltipBoxStyle={{
+            left: wp(-29),
+            top: hp(28),
+            width: wp(280),
+            maxWidth: wp(280),
+            zIndex: 1000
+          }}
         />
       </View>
-      <CustomInput
-        placeholder="Enter Degree"
-        value={educationListEdit?.degree}
-        onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, degree: text})
-        }
-        label=""
-        inputStyle={{color: colors._050505}}
+
+      <CustomDropdown
+        data={degreeOptions}
+        placeholder="Select Degree"
+        value={showOtherDegreeInput ? 'Other' : educationListEdit?.degree}
+        container={{}}
+        onChange={(selectedItem: { label: string; value: string }) => {
+          if (selectedItem?.value === 'Other') {
+            setShowOtherDegreeInput(true);
+            setEducationListEdit({
+              ...educationListEdit,
+              degree: 'Other',
+            });
+          } else {
+            setShowOtherDegreeInput(false);
+            setOtherDegreeText('');
+            setEducationListEdit({
+              ...educationListEdit,
+              degree: selectedItem?.value,
+            });
+          }
+        }}
       />
+
+      {showOtherDegreeInput && (
+        <CustomInput
+          placeholder="Enter your degree"
+          value={otherDegreeText}
+          onChange={(text: string) => {
+            setOtherDegreeText(text);
+            setEducationListEdit({
+              ...educationListEdit,
+              degree: text,
+            });
+          }}
+          label=""
+          inputStyle={{ color: colors._050505, marginTop: 10 }}
+          containerStyle={{ marginTop: hp(-10), marginBottom: hp(15) }}
+        />
+      )}
+
       <CustomInput
         label="University"
         placeholder="Enter University"
         value={educationListEdit?.university}
         onChange={(text: any) =>
-          setEducationListEdit({...educationListEdit, university: text})
+          setEducationListEdit({ ...educationListEdit, university: text })
         }
-        inputStyle={{color: colors._050505}}
+        inputStyle={{ color: colors._050505 }}
       />
+
+      {/* Rest of the component stays the same */}
       <View style={styles.dateContainer}>
         <CustomDatePicker
           type="Education"
@@ -126,7 +198,7 @@ const EducationList: FC<Props> = ({
               });
             }}
             containerStyle={styles.flex1}
-            inputStyle={{color: colors._050505}}
+            inputStyle={{ color: colors._050505 }}
           />
         </View>
       </View>
@@ -145,7 +217,7 @@ const EducationList: FC<Props> = ({
               typeof item?.name === 'string'
                 ? item.name
                 : item?.name?.common || '';
-            setEducationListEdit({...educationListEdit, country: countryName});
+            setEducationListEdit({ ...educationListEdit, country: countryName });
             setIsVisible(false);
           }}
           onClose={() => {
