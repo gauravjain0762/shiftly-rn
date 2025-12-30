@@ -428,6 +428,8 @@ const EmpLocation = () => {
         }, 200);
     };
 
+    const { bottom } = useSafeAreaInsets();
+
     return (
         <>
             <StatusBar
@@ -435,7 +437,7 @@ const EmpLocation = () => {
                 barStyle="dark-content"
                 backgroundColor="transparent"
             />
-            <SafeAreaView style={AppStyles.mainWhiteContainer} edges={[]}>
+            <SafeAreaView style={[AppStyles.mainWhiteContainer]} edges={['bottom']} >
                 <View
                     style={[
                         styles.searchContainer,

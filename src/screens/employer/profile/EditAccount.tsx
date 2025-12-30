@@ -8,7 +8,7 @@ import {
   View,
   TextInput,
 } from 'react-native';
-import { CustomTextInput, LinearContainer } from '../../../component';
+import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
@@ -31,7 +31,7 @@ export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
     ?.toString()
     ?.replace('+', '') as keyof typeof callingCodeToCountryCode;
-  return callingCodeToCountryCode[cleanCode] || '';
+  return callingCodeToCountryCode[cleanCode] || 'AE';
 };
 
 const EditAccountScreen = () => {
@@ -56,14 +56,14 @@ const EditAccountScreen = () => {
   useEffect(() => {
     if (userInfo) {
       setFormData({
-        picture: userInfo.picture || '',
-        name: userInfo.name || '',
-        location: userInfo.location || '',
-        nationality: userInfo.nationality || '',
-        about: userInfo.about || '',
-        phone: userInfo.phone || '',
-        phone_code: userInfo.phone_code || '',
-        email: userInfo.email || '',
+        picture: userInfo?.picture || '',
+        name: userInfo?.name || '',
+        location: userInfo?.location || '',
+        nationality: userInfo?.nationality || '',
+        about: userInfo?.about || '',
+        phone: userInfo?.phone || '',
+        phone_code: userInfo?.phone_code || '',
+        email: userInfo?.email || '',
       });
     }
   }, [userInfo]);
@@ -136,20 +136,21 @@ const EditAccountScreen = () => {
               <TouchableOpacity
                 onPress={() => setIsImagePickerVisible(true)}
                 style={styles.avatarContainer}>
-                <CustomImage
-                  resizeMode="cover"
-                  containerStyle={styles.avatar}
-                  uri={picture?.path || formData?.picture}
-                  imageStyle={{
-                    height: '100%',
-                    width: '100%',
-                  }}
-                />
+                <View style={styles.avatar}>
+                  <Image
+                    source={
+                      picture?.path || formData?.picture
+                        ? { uri: picture?.path || formData?.picture }
+                        : IMAGES.logoText
+                    }
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                  />
+                </View>
                 <View style={styles.editIconContainer}>
                   <Image source={IMAGES.edit_icon} style={styles.editIcon} />
                 </View>
               </TouchableOpacity>
-              {/* <Text style={styles.avatarLabel}>Change Photo</Text> */}
             </View>
 
             <CustomInput
@@ -193,7 +194,6 @@ const EditAccountScreen = () => {
 
           {/* Details Section */}
           <View style={styles.detailsContainer}>
-            {/* Nationality */}
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Nationality</Text>
               <TouchableOpacity
@@ -337,7 +337,6 @@ const styles = StyleSheet.create({
 
   avatarWrapper: {
     alignItems: 'center',
-    marginTop: hp(20),
   },
   avatarContainer: {
     position: 'relative',
@@ -347,13 +346,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-    borderRadius: 100,
+    borderRadius: wp(60),
   },
   avatar: {
     width: wp(120),
     height: wp(120),
-    borderRadius: 100,
+    borderRadius: wp(60),
     overflow: 'hidden',
+    backgroundColor: '#E0E0E0', // Fallback background color
+  },
+  avatarImage: {
+    width: wp(120),
+    height: wp(120),
   },
   editIconContainer: {
     position: 'absolute',

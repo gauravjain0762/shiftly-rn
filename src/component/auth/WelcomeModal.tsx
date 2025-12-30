@@ -39,7 +39,7 @@ const WelcomeModal = ({
         />
 
         <Text style={styles.welcomeText}>
-          {t('Welcome')}, {name}
+          {t('Welcome')}, {name} 👋
         </Text>
 
         <Text style={styles.messageText}>

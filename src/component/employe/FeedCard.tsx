@@ -21,7 +21,6 @@ const FeedCard: FC<card> = ({
   isLiked = false,
   item
 }) => {
-  console.log("🔥 ~ FeedCard ~ item:", item)
   const hasImage = item?.images?.length > 0;
   const [imageLoading, setImageLoading] = useState(hasImage);
   const [localLiked, setLocalLiked] = useState(isLiked);
@@ -68,7 +67,6 @@ const FeedCard: FC<card> = ({
 
       <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
 
-      {/* Banner */}
       {hasImage && (
         <View style={styles.banner}>
           <View style={styles.post}>
@@ -94,21 +92,6 @@ const FeedCard: FC<card> = ({
         description={item?.description || 'N/A'}
       />
 
-      {/* Action Buttons Row */}
-      {/* <View style={styles.actionRow}>
-        
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={onPressShare}
-          activeOpacity={0.7}>
-          <Image
-            source={IMAGES.share}
-            style={styles.actionIcon}
-          />
-          <Text style={styles.actionText}>Share</Text>
-        </TouchableOpacity>
-      </View> */}
     </TouchableOpacity>
   );
 };

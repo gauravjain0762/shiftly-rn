@@ -1,8 +1,10 @@
 import Toast from 'react-native-toast-message';
 import { navigationRef } from '../navigation/RootContainer';
-import { CommonActions } from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
 import moment from 'moment';
+import { Platform } from 'react-native';
+
+export const isAndroid = Platform.OS === 'android' ? true : false;
 
 export const successToast = (message: string) => {
   Toast.show({ type: 'success', text1: message });

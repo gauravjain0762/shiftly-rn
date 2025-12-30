@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
   Platform,
@@ -13,34 +13,34 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
   errorToast,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {useAppDispatch} from '../../../redux/hooks';
-import {RootState} from '../../../store';
-import {useSelector} from 'react-redux';
+import { useAppDispatch } from '../../../redux/hooks';
+import { RootState } from '../../../store';
+import { useSelector } from 'react-redux';
 import {
   useEmployeeForgotPasswordMutation,
   useEmployeeOTPVerifyMutation,
   useEmployeeResendOTPMutation,
   useEmployeeResetPasswordMutation,
 } from '../../../api/authApi';
-import {setForgotPasswordSteps, setUserInfo} from '../../../features/authSlice';
-import {SCREENS} from '../../../navigation/screenNames';
-import {passwordStyles} from './EmpChangePassword';
+import { setForgotPasswordSteps, setUserInfo } from '../../../features/authSlice';
+import { SCREENS } from '../../../navigation/screenNames';
+import { passwordStyles } from './EmpChangePassword';
 
 const EmpForgotPassword = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const {fcmToken, userInfo, forgotPasswordSteps} = useSelector(
+  const { fcmToken, userInfo, forgotPasswordSteps } = useSelector(
     (state: RootState) => state.auth,
   );
   console.log('🔥🔥🔥 ~ EmpForgotPassword ~ userInfo:', userInfo);
@@ -98,7 +98,7 @@ const EmpForgotPassword = () => {
       return;
     }
     try {
-      const res = await employeeForgotPassword({email}).unwrap();
+      const res = await employeeForgotPassword({ email }).unwrap();
       // console.log("🔥 ~ handleSendOtpwithEmail ~ res:", res)
       if (res?.status) {
         successToast(res?.message);
@@ -177,7 +177,7 @@ const EmpForgotPassword = () => {
 
   const handleResendOTP = async () => {
     try {
-      const res = await employeeResendOTP({user_id: userInfo?._id}).unwrap();
+      const res = await employeeResendOTP({ user_id: userInfo?._id }).unwrap();
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         setTimer(30);
@@ -194,7 +194,7 @@ const EmpForgotPassword = () => {
       case 1:
         return (
           <>
-            <Text style={passwordStyles.description}>
+            <Text style={[passwordStyles.description, { marginTop: hp(40) }]}>
               {t(
                 'Enter the email associated with your account and we’ll send an email instructions to forgot your password.',
               )}
@@ -224,7 +224,7 @@ const EmpForgotPassword = () => {
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
               {timer !== 0 && (
-                <View style={[styles.info_row, {marginTop: hp(19)}]}>
+                <View style={[styles.info_row, { marginTop: hp(19) }]}>
                   <Text style={styles.infotext}>
                     {t('You will receive OTP by email')}
                   </Text>
@@ -255,10 +255,9 @@ const EmpForgotPassword = () => {
                     {t('Resend')}
                   </Text>
                 ) : (
-                  <View style={[{marginTop: hp(31), alignItems: 'center'}]}>
-                    <Text style={styles.secText}>{`00:${
-                      timer < 10 ? `0${timer}` : timer
-                    }`}</Text>
+                  <View style={[{ marginTop: hp(31), alignItems: 'center' }]}>
+                    <Text style={styles.secText}>{`00:${timer < 10 ? `0${timer}` : timer
+                      }`}</Text>
                     <Text style={styles.secText1}>
                       {t("Didn't receive the code? Resend in")} {timer}
                       {'s'}
@@ -315,29 +314,31 @@ const EmpForgotPassword = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top', 'bottom']}}
+      SafeAreaProps={{ edges: ['top', 'bottom'] }}
       colors={[colors._F7F7F7, colors.white]}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
-        // scrollEnabled={false}
         automaticallyAdjustContentInsets
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={passwordStyles.scrollcontainer}
+        contentContainerStyle={[passwordStyles.scrollcontainer, { paddingBottom: hp(20), paddingTop: hp(20) }]}
         style={passwordStyles.container}>
-        <TouchableOpacity
-          hitSlop={8}
-          onPress={() => prevStep(forgotPasswordSteps)}
-          style={[passwordStyles.backBtn]}>
-          <Image
-            resizeMode="contain"
-            source={IMAGES.leftSide}
-            style={passwordStyles.back}
-          />
-        </TouchableOpacity>
-        {forgotPasswordSteps !== 2 && (
-          <Text style={passwordStyles.title}>{t('Forgot Password')}</Text>
-        )}
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
+          <TouchableOpacity
+            hitSlop={8}
+            onPress={() => prevStep(forgotPasswordSteps)}
+            style={[passwordStyles.backBtn]}>
+            <Image
+              resizeMode="contain"
+              source={IMAGES.leftSide}
+              style={passwordStyles.back}
+            />
+          </TouchableOpacity>
+          {forgotPasswordSteps !== 2 && (
+            <Text style={passwordStyles.title}>{t('Forgot Password')}</Text>
+          )}
+        </View>
         {renderStepUI()}
       </KeyboardAwareScrollView>
     </LinearContainer>

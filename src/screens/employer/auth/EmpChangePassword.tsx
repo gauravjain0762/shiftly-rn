@@ -1,60 +1,37 @@
-import React, {useState} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import {
+  BackHeader,
   CustomTextInput,
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {useTranslation} from 'react-i18next';
+import { colors } from '../../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useTranslation } from 'react-i18next';
 import {
   useEmployeeChangePasswordMutation,
-  useEmployeeForgotPasswordMutation,
 } from '../../../api/authApi';
-import {RootState} from '../../../store';
-import {useSelector} from 'react-redux';
+import { RootState } from '../../../store';
+import { useSelector } from 'react-redux';
 import {
   errorToast,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {setChangePasswordSteps, setUserInfo} from '../../../features/authSlice';
-import {useAppDispatch} from '../../../redux/hooks';
-import {SCREENS} from '../../../navigation/screenNames';
+import { setChangePasswordSteps, setUserInfo } from '../../../features/authSlice';
+import { useAppDispatch } from '../../../redux/hooks';
+import { SCREENS } from '../../../navigation/screenNames';
 
 const ChangePassword = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [email, setEmail] = useState(__DEV__ ? 'bilal@devicebee.com' : '');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const {changePasswordSteps} = useSelector((state: RootState) => state.auth);
-  const [employeeForgotPassword] = useEmployeeForgotPasswordMutation({});
+  const { changePasswordSteps } = useSelector((state: RootState) => state.auth);
   const [employeeChangedPassword] = useEmployeeChangePasswordMutation({});
-
-  const handleVerifyEmail = async () => {
-    if (!email.trim()) {
-      errorToast('Please enter a valid email');
-      return;
-    }
-    try {
-      const res = await employeeForgotPassword({email}).unwrap();
-      if (res?.status) {
-        successToast('Email verified successfully');
-        dispatch(setUserInfo(res.data?.user));
-        nextStep();
-      } else {
-        errorToast(res?.message || 'Something went wrong');
-      }
-    } catch (error: any) {
-      errorToast(error?.data?.message || 'Failed to send OTP');
-    }
-  };
 
   const handleChangePassword = async () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
@@ -67,7 +44,7 @@ const ChangePassword = () => {
         old_password: oldPassword,
         new_password: newPassword,
         confirm_password: confirmPassword,
-      }).unwrap();
+      }).unwrap() as any;
       if (res?.status) {
         successToast(res?.message);
         dispatch(setUserInfo(res.data?.user));
@@ -80,58 +57,9 @@ const ChangePassword = () => {
     }
   };
 
-  const nextStep = () =>
-    dispatch(setChangePasswordSteps(changePasswordSteps + 1));
-
-  const prevStep = (num?: any) => {
-    if (num == 1) {
-      navigationRef.goBack();
-    } else {
-      dispatch(setChangePasswordSteps(changePasswordSteps - 1));
-    }
-  };
-
-  // const renderStepUI = () => {
-  //   switch (changePasswordSteps) {
-  //     case 1:
-  //       return (
-  //         <>
-  //           <Text style={passwordStyles.description}>
-  //             {t(
-  //               'Enter the email associated with your account and we’ll send an email instructions to reset your password.',
-  //             )}
-  //           </Text>
-  //           <View style={passwordStyles.inputView}>
-  //             <Text style={passwordStyles.label}>{t('Your Email')}</Text>
-  //             <CustomTextInput
-  //               value={email}
-  //               style={passwordStyles.emailText}
-  //               placeholder="Enter your email"
-  //               placeholderTextColor={colors._7B7878}
-  //               containerStyle={passwordStyles.inputcontainer}
-  //               onChangeText={setEmail}
-  //             />
-  //           </View>
-  //           <GradientButton
-  //             type="Employee"
-  //             title="Submit"
-  //             onPress={handleVerifyEmail}
-  //             style={passwordStyles.button}
-  //           />
-  //         </>
-  //       );
-  //     case 2:
-  //       return (
-
-  //       );
-  //     default:
-  //       return null;
-  //   }
-  // };
-
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top', 'bottom']}}
+      SafeAreaProps={{ edges: ['bottom'] }}
       colors={[colors._F7F7F7, colors.white]}>
       <KeyboardAwareScrollView
         enableAutomaticScroll
@@ -141,19 +69,12 @@ const ChangePassword = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={passwordStyles.scrollcontainer}
         style={passwordStyles.container}>
-        <TouchableOpacity
-          onPress={() => {
-            prevStep(changePasswordSteps);
-          }}
-          hitSlop={8}
-          style={[passwordStyles.backBtn]}>
-          <Image
-            resizeMode="contain"
-            source={IMAGES.leftSide}
-            style={passwordStyles.back}
-          />
-        </TouchableOpacity>
-        <Text style={passwordStyles.title}>{t('Change Password')}</Text>
+        <BackHeader
+          isRight={false}
+          title="Change Password"
+          titleStyle={{ flex: 1 }}
+          containerStyle={{ gap: wp(20), paddingTop: hp(20) }}
+        />
 
         {/* {renderStepUI()} */}
         <View style={passwordStyles.inputView}>
@@ -207,8 +128,7 @@ export default ChangePassword;
 export const passwordStyles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: hp(35),
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(25),
   },
   scrollcontainer: {
     flexGrow: 1,
@@ -226,8 +146,8 @@ export const passwordStyles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   title: {
-    marginTop: hp(20),
-    paddingTop: hp(10),
+    flex: 3,
+    textAlign: 'center',
     ...commonFontStyle(500, 25, colors._2F2F2F),
   },
   description: {
@@ -258,7 +178,7 @@ export const passwordStyles = StyleSheet.create({
     margin: 0,
   },
   button: {
-    marginTop: hp(50),
+    marginTop: hp(40),
     // backgroundColor: colors._F7F7F7
   },
 });

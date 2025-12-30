@@ -3,9 +3,7 @@ import {
   StyleSheet,
   Text,
   ViewStyle,
-  TouchableOpacity,
   View,
-  Platform,
   Keyboard,
 } from 'react-native';
 import React, {useState} from 'react';
@@ -39,6 +37,7 @@ type Props = {
   dropIcon?: string;
   dateMode?: string;
   placeholderStyle?: any;
+  dropdownPosition?: 'top' | 'bottom' | "auto";
 };
 
 const CustomDropdownMulti = ({
@@ -65,11 +64,11 @@ const CustomDropdownMulti = ({
   minimumDate,
   dropIcon,
   dateMode,
-  renderEmptyComponent,
   flatListProps,
   required,
   selectedStyle,
-  placeholderStyle
+  placeholderStyle,
+  dropdownPosition
 }: Props) => {
   return (
     <>
@@ -89,7 +88,7 @@ const CustomDropdownMulti = ({
           // onChange={item => onChange(item)}
           onChange={items => onChange?.(items)}
           disable={disable}
-          dropdownPosition={'bottom'}
+          dropdownPosition={dropdownPosition ||'bottom'}
           style={[styles.dropdownStyle, dropdownStyle]}
           flatListProps={flatListProps}
           labelField={labelField === undefined ? 'label' : labelField}

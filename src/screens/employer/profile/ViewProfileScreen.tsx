@@ -31,7 +31,6 @@ export const callingCodeToCountry = (callingCode: any) => {
 const ViewProfileScreen = () => {
   const {data: getProfile} = useGetEmployeeProfileQuery({});
   const userInfo = getProfile?.data?.user;
-  console.log("🔥🔥🔥 ~ ViewProfileScreen ~ userInfo:", userInfo)
 
   const countryCode = userInfo?.phone_code || 'AE';
 
@@ -93,7 +92,7 @@ const ViewProfileScreen = () => {
                 {label: 'Email', value: userInfo?.email},
                 {
                   label: 'Phone',
-                  value: `+${userInfo?.phone_code} ${userInfo?.phone}`,
+                  value: `+${userInfo?.phone_code || "N/A"} ${userInfo?.phone || "N/A"}`,
                   showFlag: true,
                 },
               ]}
@@ -108,8 +107,8 @@ const ViewProfileScreen = () => {
                     {item?.showFlag && (
                       <Flag
                         withEmoji
-                        flagSize={wp(30)}
                         withFlagButton
+                        flagSize={wp(30)}
                         countryCode={callingCodeToCountry(countryCode) as any}
                       />
                     )}

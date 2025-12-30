@@ -297,6 +297,7 @@ const JobsScreen = () => {
             tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
           />
         </View>
+
         {isLoading ? (
           <MyJobsSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
         ) : (

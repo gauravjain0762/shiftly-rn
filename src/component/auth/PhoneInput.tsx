@@ -80,6 +80,7 @@ const PhoneInput: FC<picker> = ({
           </Text>
           <Image
             source={IMAGES.ic_down1}
+            tintColor={colors._0B3970}
             style={[{width: 12, height: 12, resizeMode: 'contain'}, downIcon]}
           />
         </TouchableOpacity>

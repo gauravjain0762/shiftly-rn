@@ -180,7 +180,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
             label: skill?.title,
             value: skill?._id,
           }))}
-          placeholder={'Select language you speak'}
+          placeholder={'Add your skills'}
           value={aboutEdit?.selectedSkills}
           selectedStyle={styles.selectedStyle}
           container={styles.multiDropdownContainer}
@@ -210,22 +210,23 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
         </View>
       )}
 
-      <View style={{ marginTop: hp(0), overflow: 'visible' }}>
+      <View style={{ marginTop: hp(0), overflow: 'visible', zIndex: 1 }}>
         <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
           <Text style={styles.fieldLabel}>Select your language</Text>
           <Tooltip
             message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
             position="bottom"
             containerStyle={styles.tooltipIcon}
-            tooltipBoxStyle={{ left: wp(-65), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+            tooltipBoxStyle={{ left: wp(-70), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
           />
         </View>
         <CustomDropdownMulti
           disable={false}
+          dropdownPosition="auto"
           data={languages.map(lang => ({ label: lang, value: lang }))}
-          placeholder={'Select language you speak'}
+          placeholder={'Add your languages'}
           value={aboutEdit?.selectedLanguages.map((l: any) => l.name)}
-          container={styles.multiDropdownContainer}
+          container={[styles.multiDropdownContainer, { overflow: 'visible' }]}
           selectedStyle={styles.selectedStyle}
           onChange={(selectedItems: string[]) => {
             const updatedLanguages = selectedItems.map(name => {

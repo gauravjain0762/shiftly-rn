@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ImageBackground } from 'react-native';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
@@ -27,37 +27,41 @@ const JobCard: FC<props> = ({
   isShowFavIcon = true,
 }) => {
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
+  const coverImageUri = item?.company_id?.cover_images?.[0];
+  const logoUri = item?.company_id?.logo;
 
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
-      <CustomImage
-        tintColor={item?.company_id?.cover_images?.[0] ? '' : ''}
-        uri={item?.company_id?.cover_images?.[0] || ''}
-        imageStyle={{
-          opacity: 1,
-          width: '100%',
-          height: '100%',
-        }}
-        resizeMode={isCoverImage ? "cover" : "contain"}
-        containerStyle={{
-          height: hp(140),
-          overflow: 'hidden',
-          alignSelf: 'center',
-          justifyContent: 'flex-end',
-          width: isCoverImage ? '100%' : '100%',
-        }}>
-        <View style={styles.logo}>
-          <CustomImage
-            resizeMode="stretch"
-            source={IMAGES.logoText}
-            uri={item?.company_id?.logo}
-            containerStyle={styles.companyLogo}
-            imageStyle={{
-              width: '100%',
-              height: '100%',
-            }}
+      {/* Cover Image Section */}
+      <View style={styles.coverImageContainer}>
+        {isCoverImage && coverImageUri ? (
+          <FastImage
+            source={{ uri: coverImageUri }}
+            style={styles.coverImage}
+            resizeMode="cover"
           />
+        ) : (
+          <View style={styles.placeholderCover} />
+        )}
+
+        {/* Company Logo - Overlapping */}
+        <View style={styles.logo}>
+          {logoUri ? (
+            <FastImage
+              source={{ uri: logoUri }}
+              style={styles.companyLogoImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <FastImage
+              source={IMAGES.logoText}
+              style={styles.companyLogoImage}
+              resizeMode="contain"
+            />
+          )}
         </View>
+
+        {/* Action Buttons */}
         <View
           style={[
             styles.actions,
@@ -82,8 +86,9 @@ const JobCard: FC<props> = ({
             </TouchableOpacity>
           )}
         </View>
-      </CustomImage>
+      </View>
 
+      {/* Card Content */}
       <View style={styles.cardContent}>
         <View style={styles.companyInfo}>
           <Text style={[styles.companyName, {}]} numberOfLines={1}>
@@ -95,11 +100,12 @@ const JobCard: FC<props> = ({
         </View>
         <View style={styles.titleRow}>
           <Text style={styles.jobTitle}>{item?.title}</Text>
-          {item?.job_type && <View style={styles.badge}>
-            <Text style={styles.badgeText}>{item?.job_type}</Text>
-          </View>}
+          {item?.job_type && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{item?.job_type}</Text>
+            </View>
+          )}
         </View>
-
 
         <ExpandableText
           maxLines={2}
@@ -107,6 +113,7 @@ const JobCard: FC<props> = ({
           descriptionStyle={styles.jobDescription}
           showStyle={{ paddingHorizontal: 0, fontSize: 15 }}
         />
+        
         {(item?.monthly_salary_from || item?.monthly_salary_to) && (
           <View style={styles.salaryContainer}>
             <Text style={styles.salaryLabel}>Salary range: </Text>
@@ -128,35 +135,33 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: colors._EFEFEF,
   },
-  jobImage: {
-
+  coverImageContainer: {
+    height: hp(140),
+    width: '100%',
+    position: 'relative',
+    backgroundColor: colors._EFEFEF,
+  },
+  coverImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderCover: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: colors._EFEFEF,
   },
   cardContent: {
     gap: hp(2),
     padding: hp(12),
     backgroundColor: colors.white,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
   companyInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  companyLogo: {
-    width: wp(50),
-    height: wp(50),
-    borderRadius: hp(80),
-    overflow: 'hidden',
-  },
   companyName: {
     ...commonFontStyle(400, 13, colors.black),
-  },
-  postedText: {
-    ...commonFontStyle(400, 11, colors.black),
   },
   jobTitle: {
     ...commonFontStyle(600, 18, colors.black),
@@ -177,11 +182,6 @@ const styles = StyleSheet.create({
     lineHeight: hp(18),
     paddingHorizontal: 0,
   },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   badge: {
     backgroundColor: colors.empPrimary,
     paddingVertical: hp(6),
@@ -193,11 +193,11 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: hp(7),
-    alignSelf: 'flex-end',
-    paddingRight: wp(10),
+    position: 'absolute',
+    right: wp(10),
+    top: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: hp(50),
   },
   iconButton: {
     backgroundColor: colors.white,
@@ -221,10 +221,11 @@ const styles = StyleSheet.create({
     bottom: hp(10),
     borderRadius: 100,
     position: 'absolute',
+    left: wp(20),
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: wp(20),
     backgroundColor: colors.white,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -232,6 +233,11 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 4,
+  },
+  companyLogoImage: {
+    width: '100%',
+    height: '100%',
   },
   titleRow: {
     marginTop: hp(4),
@@ -242,9 +248,5 @@ const styles = StyleSheet.create({
   icon: {
     width: wp(22),
     height: wp(22),
-  },
-  iconFilled: {
-    width: wp(28),
-    height: wp(28),
   },
 });

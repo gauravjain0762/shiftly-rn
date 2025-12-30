@@ -3,6 +3,7 @@ import {View, TextInput, StyleSheet, Image, ViewStyle} from 'react-native';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
+import { isAndroid } from '../../utils/commonFunction';
 
 type SearchBarProps = {
   value: string;
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 30,
     paddingHorizontal: wp(24),
-    paddingVertical: hp(14),
+    paddingVertical: isAndroid ? hp(7) : hp(14),
     gap: wp(12),
   },
   companyContainer: {
