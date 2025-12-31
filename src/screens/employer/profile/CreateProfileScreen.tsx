@@ -68,6 +68,8 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
+  console.log(">>>>>>> ~ CreateProfileScreen ~ educationList length: >>>>>>>>>>", educationList?.length)
+
   const { data: getEducation, refetch: refetchEducation } = useGetEducationsQuery(
     {},
     {
@@ -745,6 +747,7 @@ const CreateProfileScreen = () => {
             onPress={() => {
               dispatch(setActiveStep(2));
             }}
+            // disabled={educationList?.length === 0}
           />
         </View>
       )}
@@ -784,6 +787,7 @@ const CreateProfileScreen = () => {
             onPress={() => {
               dispatch(setActiveStep(3));
             }}
+            // disabled={experienceList?.length === 0}
           />
         </View>
       )}
@@ -821,6 +825,7 @@ const CreateProfileScreen = () => {
               handleUpdateProfile();
             }
           }}
+          disabled={resumes?.length === 0}
         />
       )}
       {(isLoadingEducation || isLoadingAboutme) && <Loader />}

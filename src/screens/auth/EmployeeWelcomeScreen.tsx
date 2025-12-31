@@ -43,7 +43,7 @@ const EmployeeOnboardingData = [
     id: '1',
     image: IMAGES.illustration5,
     title: 'Get hired for who you are.',
-    description: `Get hired based on who you are and how you work, not just what’s on your resume.`,
+    description: `Get hired based on who you are and how you work, not just what's on your resume.`,
   },
   {
     id: '2',
@@ -57,14 +57,14 @@ const EmployeeOnboardingData = [
     image: IMAGES.illustration7,
     title: 'Advanced assessment technology',
     description:
-      'evaluates skills,behavior & cultural fit helping teams hire for long-term success.',
+      'evaluates skills,behavior & cultural fit helping teams hire for long-term success.',
   },
   {
     id: '4',
     image: IMAGES.illustration8,
     title: 'Your first job starts here.',
     description:
-      'Whether you’re a student, intern, or recent graduate, get hired based on your po',
+      `Whether you're a student, intern, or recent graduate, get hired based on your potential.`,
   },
 ];
 
@@ -106,6 +106,14 @@ const EmployeeWelcomeScreen = () => {
   };
 
   useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '469951772536-djodilivnia3lg1v4pbovo4fdktna76c.apps.googleusercontent.com',
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((user: any) => {
       if (user) {
         resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
@@ -122,9 +130,13 @@ const EmployeeWelcomeScreen = () => {
   const handleGoogleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      
+      await GoogleSignin.signOut();
+      
       const userInfo = await GoogleSignin.signIn();
       const { data }: any = userInfo;
       const { idToken } = data;
+      
       if (idToken) {
         let socialObj: any = {
           name: data.user.name,
@@ -157,7 +169,7 @@ const EmployeeWelcomeScreen = () => {
       } else if (error.code === statusCodes.IN_PROGRESS) {
         console.log('Sign-in is already in progress');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log('Play services not available');
+        errorToast('Google Play services not available');
       } else {
         errorToast('Google Sign-In failed. Please try again.');
       }
@@ -362,4 +374,3 @@ const styles = StyleSheet.create({
 });
 
 export default EmployeeWelcomeScreen;
-

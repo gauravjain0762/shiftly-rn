@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   FlatList,
   Image,
@@ -9,17 +9,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {LinearContainer} from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
-import {goBack, navigateTo} from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useGetEmployeeProfileQuery} from '../../../api/dashboardApi';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {Flag} from 'react-native-country-picker-modal';
-import {callingCodeToCountryCode} from '../../../utils/countryFlags';
+import { LinearContainer } from '../../../component';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { goBack, navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useGetEmployeeProfileQuery } from '../../../api/dashboardApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Flag } from 'react-native-country-picker-modal';
+import { callingCodeToCountryCode } from '../../../utils/countryFlags';
 import CustomImage from '../../../component/common/CustomImage';
+import { useFocusEffect } from '@react-navigation/native';
 
 export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
@@ -29,29 +30,38 @@ export const callingCodeToCountry = (callingCode: any) => {
 };
 
 const ViewProfileScreen = () => {
-  const {data: getProfile} = useGetEmployeeProfileQuery({});
+  const {
+    data: getProfile,
+    refetch,
+  } = useGetEmployeeProfileQuery({});
   const userInfo = getProfile?.data?.user;
 
   const countryCode = userInfo?.phone_code || 'AE';
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top']}}
+      SafeAreaProps={{ edges: ['top'] }}
       colors={[colors._F7F7F7, colors._F7F7F7]}>
-      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Pressable
             onPress={() => goBack()}
-            style={{padding: wp(23), paddingBottom: 0}}>
+            style={{ padding: wp(23), paddingBottom: 0 }}>
             <Image
               source={IMAGES.backArrow}
-              style={{height: hp(20), width: wp(24), tintColor: colors._0B3970}}
+              style={{ height: hp(20), width: wp(24), tintColor: colors._0B3970 }}
             />
           </Pressable>
           <View style={styles.container}>
             <CustomImage
               uri={userInfo?.picture}
-              imageStyle={{height: '100%', width: '100%'}}
+              imageStyle={{ height: '100%', width: '100%' }}
               containerStyle={styles.avatar}
               resizeMode="cover"
             />
@@ -59,12 +69,12 @@ const ViewProfileScreen = () => {
             <View style={styles.locationRow}>
               <Image
                 source={IMAGES.marker}
-                style={[styles.locationicon, {tintColor: colors._0B3970}]}
+                style={[styles.locationicon, { tintColor: colors._0B3970 }]}
               />
               <Text style={styles.location}>{userInfo?.location || 'N/A'}</Text>
             </View>
 
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
               <TouchableOpacity style={styles.editButton}>
                 <Text style={styles.editButtonText}>Open to Work</Text>
               </TouchableOpacity>
@@ -84,12 +94,12 @@ const ViewProfileScreen = () => {
           <View style={styles.detailsContainer}>
             <FlatList
               data={[
-                {label: 'About me', value: userInfo?.about},
+                { label: 'About me', value: userInfo?.about },
                 {
                   label: 'Nationality',
                   value: userInfo?.nationality,
                 },
-                {label: 'Email', value: userInfo?.email},
+                { label: 'Email', value: userInfo?.email },
                 {
                   label: 'Phone',
                   value: `+${userInfo?.phone_code || "N/A"} ${userInfo?.phone || "N/A"}`,
@@ -97,13 +107,13 @@ const ViewProfileScreen = () => {
                 },
               ]}
               keyExtractor={(_, index) => index.toString()}
-              contentContainerStyle={{gap: hp(23)}}
-              renderItem={({item}) => (
-                <View style={{gap: hp(2)}}>
-                  <Text style={{...commonFontStyle(600, 20, colors._0B3970)}}>
+              contentContainerStyle={{ gap: hp(23) }}
+              renderItem={({ item }) => (
+                <View style={{ gap: hp(2) }}>
+                  <Text style={{ ...commonFontStyle(600, 20, colors._0B3970) }}>
                     {item.label}
                   </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     {item?.showFlag && (
                       <Flag
                         withEmoji
@@ -112,7 +122,7 @@ const ViewProfileScreen = () => {
                         countryCode={callingCodeToCountry(countryCode) as any}
                       />
                     )}
-                    <Text style={{...commonFontStyle(400, 18, colors._4A4A4A)}}>
+                    <Text style={{ ...commonFontStyle(400, 18, colors._4A4A4A) }}>
                       {item.value || '-'}
                     </Text>
                   </View>

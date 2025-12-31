@@ -14,21 +14,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CustomTextInput,
   GradientButton,
   LinearContainer,
 } from '../../../component';
 import * as Progress from 'react-native-progress';
-import {SCREEN_WIDTH, commonFontStyle, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {hp} from '../../../theme/fonts';
-import CustomBtn from '../../../component/common/CustomBtn';
-import {useTranslation} from 'react-i18next';
-import {navigationRef} from '../../../navigation/RootContainer';
+import { SCREEN_WIDTH, commonFontStyle, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { hp } from '../../../theme/fonts';
+import { useTranslation } from 'react-i18next';
+import { navigationRef } from '../../../navigation/RootContainer';
 import PhoneInput from '../../../component/auth/PhoneInput';
 import WelcomeModal from '../../../component/auth/WelcomeModal';
 import moment from 'moment';
@@ -40,10 +39,10 @@ import {
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
+import { SCREENS } from '../../../navigation/screenNames';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   setCreateEmployeeAccount,
   setUserInfo,
@@ -54,28 +53,30 @@ import {
   useEmployeeSendOTPMutation,
   useEmployeeSignUpMutation,
 } from '../../../api/authApi';
-import {RootState} from '../../../store';
+import { RootState } from '../../../store';
 import CustomImage from '../../../component/common/CustomImage';
-import CountryPicker, {Country, Flag} from 'react-native-country-picker-modal';
+import CountryPicker, { Country, Flag } from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
-import {useEmpUpdateProfileMutation} from '../../../api/dashboardApi';
-import {useRoute} from '@react-navigation/native';
+import { useEmpUpdateProfileMutation, useLazyGetEmployeeProfileQuery } from '../../../api/dashboardApi';
+import { useRoute } from '@react-navigation/native';
 import Tooltip from '../../../component/common/Tooltip';
+import { setProfileCompletion } from '../../../features/employeeSlice';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const SignUp = () => {
   const dispatch = useDispatch<any>();
-  const {t} = useTranslation<any>();
-  const {params} = useRoute();
-  const {isGoogleAuth, isAppleAuth} =
-    (params as {isGoogleAuth: boolean; isAppleAuth: boolean}) ?? {};
-  const {fcmToken, userInfo} = useSelector((state: RootState) => state.auth);
-  console.log('🔥🔥🔥 ~ SignUp ~ userInfo:', userInfo);
+  const { t } = useTranslation<any>();
+  const { params } = useRoute();
+  const { isGoogleAuth, isAppleAuth } =
+    (params as { isGoogleAuth: boolean; isAppleAuth: boolean }) ?? {};
+  const { fcmToken, userInfo } = useSelector((state: RootState) => state.auth);
   const signupData = useSelector(
     (state: any) => state.auth.createEmployeeAccount,
   );
   const [empSendOTP] = useEmployeeSendOTPMutation({});
+  const [getProfile] = useLazyGetEmployeeProfileQuery();
+  const profile_completion = useSelector((state: RootState) => state.employee.profile_completion);
 
   const {
     step,
@@ -98,13 +99,9 @@ const SignUp = () => {
     describe,
     picture,
     countryCode,
-    googleId,
-    appleId,
   } = signupData;
 
   const [password, setPassword] = useState('');
-  // const [otp, setOtp] = useState(new Array(4).fill(''));
-  // const inputRefs = useRef<any>([]);
   const inputRefsOtp = useRef<any>([]);
   const [empSignUp] = useEmployeeSignUpMutation({});
   const [empOTPVerify] = useEmployeeOTPVerifyMutation({});
@@ -194,9 +191,9 @@ const SignUp = () => {
       };
 
       if (isGoogleAuth || isAppleAuth) {
-        response = await empSendOTP(socialObj).unwrap();
+        response = await empSendOTP(socialObj).unwrap() as any;
       } else {
-        response = await empSignUp(obj).unwrap();
+        response = await empSignUp(obj).unwrap() as any;
       }
 
       if (response?.status) {
@@ -228,14 +225,13 @@ const SignUp = () => {
     };
     console.log(' ~ handleOTPVerify ~ verifyData:', verifyData);
     try {
-      const response = await empOTPVerify(verifyData).unwrap();
-      console.log('🔥 ~ handleOTPVerify ~ response?.data:', response?.data);
+      const response = await empOTPVerify(verifyData).unwrap() as any;
       if (response?.status) {
         successToast(response?.message);
         dispatch(setUserInfo(response?.data?.user));
         // dispatch(clearEmployeeAccount());
         setTimeout(() => {
-          updateSignupData({showModal: true, timer: 0});
+          updateSignupData({ showModal: true, timer: 0 });
         }, 200);
       } else {
         errorToast(response?.message);
@@ -250,12 +246,12 @@ const SignUp = () => {
     try {
       const response = await employeeResendOTP({
         user_id: userInfo?._id,
-      }).unwrap();
+      }).unwrap() as any;
 
       if (response?.status) {
         successToast(response?.message);
         dispatch(setUserInfo(response?.data));
-        updateSignupData({timer: 30});
+        updateSignupData({ timer: 30 });
         // dispatch(clearEmployeeAccount());
       } else {
         errorToast(response?.message || 'Something went wrong');
@@ -285,11 +281,20 @@ const SignUp = () => {
     let res;
     try {
       res = await empUpdateProfile(form).unwrap();
-      console.log('🔥🔥 ~ handleFinishSetup ~ res:', res?.data);
 
       if (res?.status) {
         successToast(res?.message);
         dispatch(setUserInfo(res?.data?.user));
+
+        try {
+          const profileResponse = await getProfile({}).unwrap();
+          if (profileResponse?.status && profileResponse?.data?.user?.profile_completion) {
+            console.log("🔥 ~ handleFinishSetup ~ profileResponse.data.user.profile_completion:", profileResponse.data.user.profile_completion)
+            dispatch(setProfileCompletion(profileResponse.data.user.profile_completion));
+          }
+        } catch (profileError) {
+        }
+
         nextStep();
       } else {
         errorToast(res?.message);
@@ -351,7 +356,7 @@ const SignUp = () => {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        updateSignupData({step: step - 1});
+        updateSignupData({ step: step - 1 });
         // Reset and fade in from left
         slideAnim.setValue(-50);
         Animated.parallel([
@@ -370,46 +375,16 @@ const SignUp = () => {
     }
   };
 
-  // const handleChange = (text: string, index: number) => {
-  //   const newPass = [...password];
-  //   newPass[index] = text;
-  //   setPassword(newPass);
-
-  //   if (newPass.every(val => val !== '')) {
-  //     dispatch(
-  //       setCreateEmployeeAccount({
-  //         full_password: newPass.join(''),
-  //       }),
-  //     );
-  //   }
-
-  //   if (text && index < 7) {
-  //     inputRefs.current[index + 1]?.focus();
-  //   }
-  // };
-
-  // const handleKeyPress = (
-  //   e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-  //   index: number,
-  // ) => {
-  //   if (
-  //     e.nativeEvent.key === 'Backspace' &&
-  //     password[index] === '' &&
-  //     index > 0
-  //   ) {
-  //     const newPass = [...password];
-  //     newPass[index - 1] = '';
-  //     setPassword(newPass);
-
-  //     dispatch(
-  //       setCreateEmployeeAccount({
-  //         full_password: newPass.join(''),
-  //       }),
-  //     );
-
-  //     inputRefs.current[index - 1]?.focus();
-  //   }
-  // };
+  const handleSkip = async () => {
+    try {
+      const profileResponse = await getProfile({}).unwrap();
+      if (profileResponse?.status && profileResponse?.data?.user?.profile_completion) {
+        dispatch(setProfileCompletion(profileResponse.data.user.profile_completion));
+      }
+    } catch (error) {
+    }
+    nextStep();
+  };
 
   const handleChangeOtp = (text: string, index: number) => {
     const newOtp = [...otp];
@@ -417,7 +392,7 @@ const SignUp = () => {
     // setOtp(newOtp);
     console.log('🔥 ~ handleChangeOtp ~ newOtp:', newOtp);
 
-    updateSignupData({otp: newOtp});
+    updateSignupData({ otp: newOtp });
 
     if (text && index < 7) {
       inputRefsOtp.current[index + 1]?.focus();
@@ -432,7 +407,7 @@ const SignUp = () => {
       const newOtp = [...otp];
       newOtp[index - 1] = '';
       // setOtp(newOtp);
-      updateSignupData({otp: newOtp});
+      updateSignupData({ otp: newOtp });
       inputRefsOtp.current[index - 1]?.focus();
     }
   };
@@ -452,10 +427,10 @@ const SignUp = () => {
               <CustomTextInput
                 placeholder={t('ex. John smith')}
                 placeholderTextColor={colors._7B7878}
-                onChangeText={text => updateSignupData({name: text})}
+                onChangeText={text => updateSignupData({ name: text })}
                 value={name}
                 inputStyle={styles.input}
-                containerStyle={{marginBottom: 0}}
+                containerStyle={{ marginBottom: 0 }}
                 maxLength={20}
               />
               <CharLength chars={20} value={name} type={'employee'} />
@@ -485,9 +460,9 @@ const SignUp = () => {
               <CustomTextInput
                 placeholder={t('Type your email here')}
                 placeholderTextColor={colors._7B7878}
-                onChangeText={text => updateSignupData({email: text})}
+                onChangeText={text => updateSignupData({ email: text })}
                 value={email}
-                inputStyle={{...styles.input, textTransform: 'lowercase'}}
+                inputStyle={{ ...styles.input, textTransform: 'lowercase' }}
                 keyboardType="email-address"
               />
             </View>
@@ -611,7 +586,7 @@ const SignUp = () => {
                 callingCode={phone_code}
                 countryCode={countryCode}
                 placeholderTextColor={colors._7B7878}
-                onPhoneChange={(e: any) => updateSignupData({phone: e})}
+                onPhoneChange={(e: any) => updateSignupData({ phone: e })}
                 onCallingCodeChange={(e: any) =>
                   updateSignupData({
                     phone_code: e.callingCode[0],
@@ -619,8 +594,7 @@ const SignUp = () => {
                   })
                 }
                 category="Employee"
-                maxLength={10}
-                // placeholder='Enter your phone number'
+              // placeholder='Enter your phone number'
               />
             </View>
             <GradientButton
@@ -648,9 +622,9 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
               {timer !== 0 && (
-                <View style={[styles.info_row, {marginTop: hp(19)}]}>
+                <View style={[styles.info_row, { marginTop: hp(19) }]}>
                   <Text style={styles.infotext}>
-                    {t('You will receive OTP by email')}
+                    {t(`You will receive an OTP via email at ${email}`)}
                   </Text>
                 </View>
               )}
@@ -681,7 +655,7 @@ const SignUp = () => {
                     {t('Resend')}
                   </Text>
                 ) : (
-                  <View style={[{marginTop: hp(40), alignItems: 'center'}]}>
+                  <View style={[{ marginTop: hp(40), alignItems: 'center' }]}>
                     <Text style={styles.secText}>
                       {timer} {t('Sec')}
                     </Text>
@@ -712,7 +686,7 @@ const SignUp = () => {
               <CustomTextInput
                 placeholder={t(`Select which describe you`)}
                 placeholderTextColor={colors._7B7878}
-                onChangeText={text => updateSignupData({describe: text})}
+                onChangeText={text => updateSignupData({ describe: text })}
                 value={describe}
                 inputStyle={styles.input1}
                 multiline
@@ -725,8 +699,8 @@ const SignUp = () => {
                     key={index}
                     style={[styles.optionContainer]}
                     onPress={() => {
-                      updateSignupData({describe: option});
-                      updateSignupData({selected: option});
+                      updateSignupData({ describe: option });
+                      updateSignupData({ selected: option });
                     }}>
                     <Text
                       style={[
@@ -738,7 +712,7 @@ const SignUp = () => {
                     {isSelected && (
                       <Image
                         source={IMAGES.mark}
-                        style={{width: 25, height: 22, resizeMode: 'contain', tintColor: colors._0B3970}}
+                        style={{ width: 25, height: 22, resizeMode: 'contain', tintColor: colors._0B3970 }}
                       />
                     )}
                   </TouchableOpacity>
@@ -763,10 +737,10 @@ const SignUp = () => {
               </Text>
               <Pressable
                 style={styles.dateRow}
-                onPress={() => updateSignupData({open: true})}>
+                onPress={() => updateSignupData({ open: true })}>
                 <Image
                   source={IMAGES.cake}
-                  style={{width: 24, height: 24, resizeMode: 'contain', tintColor: colors._0B3970}}
+                  style={{ width: 24, height: 24, resizeMode: 'contain', tintColor: colors._0B3970 }}
                 />
                 <Text style={styles.dateText}>
                   {dob
@@ -794,13 +768,13 @@ const SignUp = () => {
                     dob: moment(dates).format('YYYY-MM-DD'),
                   });
                 }}
-                onCancel={() => updateSignupData({open: false})}
+                onCancel={() => updateSignupData({ open: false })}
               />
               <View style={styles.underline} />
-              <Text style={[styles.title, {marginTop: 40}]}>
+              <Text style={[styles.title, { marginTop: 40 }]}>
                 {t('What is your gender?')}
               </Text>
-              <Pressable style={styles.dateRow} onPress={() => {}}>
+              <Pressable style={styles.dateRow} onPress={() => { }}>
                 <Text
                   style={[
                     styles.dateText,
@@ -818,7 +792,7 @@ const SignUp = () => {
                   <TouchableOpacity
                     key={index}
                     style={[styles.optionContainer]}
-                    onPress={() => updateSignupData({selected1: option})}>
+                    onPress={() => updateSignupData({ selected1: option })}>
                     <Text
                       style={[
                         styles.optionText,
@@ -829,7 +803,7 @@ const SignUp = () => {
                     {isSelected && (
                       <Image
                         source={IMAGES.mark}
-                        style={{width: 25, height: 22, resizeMode: 'contain', tintColor: colors._0B3970}}
+                        style={{ width: 25, height: 22, resizeMode: 'contain', tintColor: colors._0B3970 }}
                       />
                     )}
                   </TouchableOpacity>
@@ -860,14 +834,14 @@ const SignUp = () => {
               <View style={styles.fieldHeader}>
                 <Text style={styles.fieldHeaderText}>{t('Select your nationality ')}</Text>
                 <Tooltip
-                  message={t('This helps hotels understand your background and visa options.')}
                   position="bottom"
                   containerStyle={styles.tooltipIcon}
-                  tooltipBoxStyle={{right: wp(-10), top: hp(30), width: wp(280), maxWidth: wp(280)}}
+                  message={t('This helps hotels understand your background and visa options.')}
+                  tooltipBoxStyle={{ right: wp(5), top: hp(30), width: wp(280), maxWidth: wp(280) }}
                 />
               </View>
               <TouchableOpacity
-                style={[styles.dateRow, {alignItems: 'center'}]}
+                style={[styles.dateRow, { alignItems: 'center' }]}
                 onPress={() => {
                   setIsVisible('1');
                 }}>
@@ -894,17 +868,17 @@ const SignUp = () => {
 
               <View style={styles.underline} />
 
-              <View style={[styles.fieldHeader, {marginTop: hp(27)}]}>
+              <View style={[styles.fieldHeader, { marginTop: hp(27) }]}>
                 <Text style={styles.fieldHeaderText}>{t('Where are you currently residing?')}</Text>
                 <Tooltip
                   message={t('Used to match you with jobs near you or offering relocation support.')}
                   position="bottom"
                   containerStyle={styles.tooltipIcon}
-                  tooltipBoxStyle={{right: wp(-10), top: hp(30), width: wp(280), maxWidth: wp(280)}}
+                  tooltipBoxStyle={{ right: wp(5), top: hp(30), width: wp(280), maxWidth: wp(280) }}
                 />
               </View>
               <TouchableOpacity
-                style={[styles.dateRow, {alignItems: 'center', marginTop: 27}]}
+                style={[styles.dateRow, { alignItems: 'center', marginTop: 27 }]}
                 onPress={() => {
                   setIsVisible('2');
                 }}>
@@ -968,11 +942,11 @@ const SignUp = () => {
                   onClose={() => {
                     setIsVisible(null);
                   }}
-                  // placeholder=""
+                // placeholder=""
                 />
               )}
             </ScrollView>
-            <View style={{marginBottom: 30}} />
+            <View style={{ marginBottom: 30 }} />
             <GradientButton
               type="Company"
               style={styles.btn}
@@ -1002,18 +976,18 @@ const SignUp = () => {
               </Text>
 
               <TouchableOpacity
-                onPress={() => updateSignupData({imageModal: true})}
+                onPress={() => updateSignupData({ imageModal: true })}
                 style={styles.uploadBox}>
                 <View style={styles.imagePlaceholder}>
                   <Image
-                    source={picture?.path ? {uri: picture?.path} : IMAGES.user}
+                    source={picture?.path ? { uri: picture?.path } : IMAGES.user}
                     style={styles.profileImage}
                     resizeMode="cover"
                   />
                 </View>
                 {picture?.path && (
                   <Pressable
-                    onPress={() => updateSignupData({picture: ''})}
+                    onPress={() => updateSignupData({ picture: '' })}
                     style={styles.removeButton}>
                     <CustomImage
                       size={hp(12)}
@@ -1043,11 +1017,11 @@ const SignUp = () => {
               <Text style={styles.title}>{t('Completion Acknowledgment')}</Text>
               <Text style={styles.infotext1}>
                 {t(
-                  "You're almost there! Your profile is 70% complete. Add your experience & skills to start applying for the best opportunities.",
+                  `You're almost there! Your profile is ${profile_completion}% complete. Add your experience & skills to start applying for the best opportunities.`,
                 )}
               </Text>
             </View>
-            <View style={{gap: hp(20)}}>
+            <View style={{ gap: hp(20) }}>
               <GradientButton
                 type="Company"
                 title={t('Complete My Profile')}
@@ -1110,7 +1084,7 @@ const SignUp = () => {
               }
             }}
             hitSlop={8}
-            style={[styles.backBtn, {flex: 1}]}>
+            style={[styles.backBtn, { flex: 1 }]}>
             <Image
               resizeMode="contain"
               source={IMAGES.leftSide}
@@ -1118,7 +1092,7 @@ const SignUp = () => {
             />
           </TouchableOpacity>
           {step == 9 && (
-            <TouchableOpacity onPress={nextStep} style={styles.skipBtn}>
+            <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
               <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
           )}
@@ -1130,13 +1104,13 @@ const SignUp = () => {
         name={name}
         onClose={() => {
           nextStep();
-          updateSignupData({showModal: false});
+          updateSignupData({ showModal: false });
         }}
       />
       <ImagePickerModal
         actionSheet={imageModal}
-        setActionSheet={() => updateSignupData({imageModal: false})}
-        onUpdate={(image: any) => updateSignupData({picture: image})}
+        setActionSheet={() => updateSignupData({ imageModal: false })}
+        onUpdate={(image: any) => updateSignupData({ picture: image })}
       />
     </LinearContainer>
   );
@@ -1201,7 +1175,7 @@ const styles = StyleSheet.create({
     paddingTop: hp(30),
   },
   tooltipIcon: {
-    marginTop: hp(6),
+    marginTop: hp(30),
   },
   backBtn: {
     alignSelf: 'flex-start',

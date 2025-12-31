@@ -15,6 +15,7 @@ export interface EducationItem {
   isEditing?: boolean;
   isLocal?: boolean;
   _id?: string;
+  profile_completion?: number;
 }
 
 export interface ExperienceItem {
@@ -69,6 +70,7 @@ export interface EmployeeState {
   isBannerLoaded: boolean;
   isSuccessModalVisible: boolean;
   auth: AuthState;
+  profile_completion: number;
 }
 
 const initialState: EmployeeState = {
@@ -138,6 +140,7 @@ const initialState: EmployeeState = {
     email: __DEV__ ? 'emplyoee1@gmail.com' : '',
     password: __DEV__ ? '12345678' : '',
   },
+  profile_completion: 0,
 };
 
 const employeeSlice = createSlice({
@@ -160,6 +163,9 @@ const employeeSlice = createSlice({
       state.educationList = state.educationList.filter(
         (_, i) => i !== action.payload,
       );
+    },
+    setProfileCompletion: (state, action: PayloadAction<number>) => {
+      state.profile_completion = action.payload;
     },
     setExperienceList: (state, action: PayloadAction<ExperienceItem[]>) => {
       state.experienceList = action.payload;
@@ -217,6 +223,7 @@ export const {
   setIsBannerLoaded,
   setIsSuccessModalVisible,
   setAuthData,
+  setProfileCompletion,
 } = employeeSlice.actions;
 
 export const selectEmployeeState = (state: RootState): EmployeeState =>

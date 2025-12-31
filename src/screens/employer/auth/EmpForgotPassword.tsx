@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
+  Keyboard,
   Platform,
   StyleSheet,
   Text,
@@ -94,13 +95,14 @@ const EmpForgotPassword = () => {
 
   const handleSendOtpwithEmail = async () => {
     if (!email.trim()) {
+      Keyboard.dismiss();
       errorToast('Please enter a valid email');
       return;
     }
     try {
-      const res = await employeeForgotPassword({ email }).unwrap();
-      // console.log("🔥 ~ handleSendOtpwithEmail ~ res:", res)
+      const res = await employeeForgotPassword({ email }).unwrap() as any;
       if (res?.status) {
+        Keyboard.dismiss();
         successToast(res?.message);
         dispatch(setUserInfo(res.data?.user));
         setTimer(30);
@@ -108,13 +110,16 @@ const EmpForgotPassword = () => {
           nextStep();
         }
       } else {
+        Keyboard.dismiss();
         errorToast(res?.message || 'Something went wrong');
       }
     } catch (error: any) {
+      Keyboard.dismiss();
       errorToast(error?.data?.message || 'Failed to send OTP');
     }
   };
 
+  // Update the verifyOTP function:
   const verifyOTP = async () => {
     let data = {
       otp: otp.join(''),
@@ -124,19 +129,28 @@ const EmpForgotPassword = () => {
     };
     console.log(data, 'verifyOTP data');
 
-    const response = await OtpVerify(data).unwrap();
-    console.log(response, 'response----');
-    if (response?.status) {
-      dispatch(setUserInfo(response.data?.user));
-      successToast(response?.message);
-      nextStep();
-    } else {
-      errorToast(response?.message);
+    try {
+      const response = await OtpVerify(data).unwrap() as any;
+      console.log(response, 'response----');
+      if (response?.status) {
+        Keyboard.dismiss();
+        dispatch(setUserInfo(response.data?.user));
+        successToast(response?.message);
+        nextStep();
+      } else {
+        Keyboard.dismiss();
+        errorToast(response?.message);
+      }
+    } catch (error: any) {
+      Keyboard.dismiss();
+      errorToast(error?.data?.message || 'OTP verification failed');
     }
   };
 
+  // Update the handleChangePassword function:
   const handleChangePassword = async () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
+      Keyboard.dismiss();
       errorToast('Please enter new password and confirm password');
       return;
     }
@@ -149,15 +163,41 @@ const EmpForgotPassword = () => {
     };
     console.log(data, 'handle ResetPassword data');
 
-    const response = await employeeResetPassword(data).unwrap();
-    console.log(response, 'companyChangePassword response----');
-    if (response?.status) {
-      successToast(response?.message);
-      dispatch(setUserInfo(response.data?.user));
-      resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
-      dispatch(setForgotPasswordSteps(1));
-    } else {
-      errorToast("New password and confirm password doesn't match");
+    try {
+      const response = await employeeResetPassword(data).unwrap() as any;
+      console.log(response, 'companyChangePassword response----');
+      if (response?.status) {
+        Keyboard.dismiss();
+        successToast(response?.message);
+        dispatch(setUserInfo(response.data?.user));
+        resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
+        dispatch(setForgotPasswordSteps(1));
+      } else {
+        Keyboard.dismiss();
+        errorToast("New password and confirm password doesn't match");
+      }
+    } catch (error: any) {
+      Keyboard.dismiss();
+      errorToast(error?.data?.message || 'Failed to reset password');
+    }
+  };
+
+  // Update the handleResendOTP function:
+  const handleResendOTP = async () => {
+    try {
+      const res = await employeeResendOTP({ user_id: userInfo?._id }).unwrap() as any;
+      if (res?.status) {
+        Keyboard.dismiss();
+        successToast(res?.message || 'OTP sent successfully');
+        setTimer(30);
+        setStart(true);
+      } else {
+        Keyboard.dismiss();
+        errorToast(res?.message || 'Something went wrong');
+      }
+    } catch (error: any) {
+      Keyboard.dismiss();
+      errorToast(error?.data?.message || 'Failed to send OTP');
     }
   };
 
@@ -175,20 +215,6 @@ const EmpForgotPassword = () => {
     }
   };
 
-  const handleResendOTP = async () => {
-    try {
-      const res = await employeeResendOTP({ user_id: userInfo?._id }).unwrap();
-      if (res?.status) {
-        successToast(res?.message || 'OTP sent successfully');
-        setTimer(30);
-      } else {
-        errorToast(res?.message || 'Something went wrong');
-      }
-    } catch (error: any) {
-      errorToast(error?.data?.message || 'Failed to send OTP');
-    }
-  };
-
   const renderStepUI = () => {
     switch (forgotPasswordSteps) {
       case 1:
@@ -196,7 +222,7 @@ const EmpForgotPassword = () => {
           <>
             <Text style={[passwordStyles.description, { marginTop: hp(40) }]}>
               {t(
-                'Enter the email associated with your account and we’ll send an email instructions to forgot your password.',
+                `Enter the email associated with your account and we'll send an email instructions to forgot your password.`,
               )}
             </Text>
             <View style={passwordStyles.inputView}>
@@ -222,7 +248,7 @@ const EmpForgotPassword = () => {
         return (
           <View style={styles.innerConrainer}>
             <View>
-              <Text style={styles.title}>{t('Verify OTP Code')}</Text>
+              {/* Removed duplicate title - it's now in the header */}
               {timer !== 0 && (
                 <View style={[styles.info_row, { marginTop: hp(19) }]}>
                   <Text style={styles.infotext}>
@@ -324,21 +350,28 @@ const EmpForgotPassword = () => {
         contentContainerStyle={[passwordStyles.scrollcontainer, { paddingBottom: hp(20), paddingTop: hp(20) }]}
         style={passwordStyles.container}>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
+        {/* Header with centered title */}
+        <View style={styles.headerContainer}>
           <TouchableOpacity
             hitSlop={8}
             onPress={() => prevStep(forgotPasswordSteps)}
-            style={[passwordStyles.backBtn]}>
+            style={styles.backButton}>
             <Image
               resizeMode="contain"
               source={IMAGES.leftSide}
               style={passwordStyles.back}
             />
           </TouchableOpacity>
-          {forgotPasswordSteps !== 2 && (
-            <Text style={passwordStyles.title}>{t('Forgot Password')}</Text>
-          )}
+
+          <Text style={styles.headerTitle}>
+            {forgotPasswordSteps === 1 && t('Forgot Password')}
+            {forgotPasswordSteps === 2 && t('Verify OTP Code')}
+            {forgotPasswordSteps === 3 && t('Reset Password')}
+          </Text>
+
+          <View style={styles.placeholder} />
         </View>
+
         {renderStepUI()}
       </KeyboardAwareScrollView>
     </LinearContainer>
@@ -348,10 +381,28 @@ const EmpForgotPassword = () => {
 export default EmpForgotPassword;
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: hp(20),
+  },
+  backButton: {
+    width: wp(40),
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    ...commonFontStyle(600, 22, colors._0B3970),
+  },
+  placeholder: {
+    width: wp(40),
+  },
+  // ... rest of existing styles
   innerConrainer: {
     flex: 1,
     marginTop: hp(16),
-    // justifyContent: 'space-between',
   },
   title: {
     paddingTop: hp(10),

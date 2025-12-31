@@ -5,8 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
-  PermissionsAndroid,
-  Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import ImageCropPicker from 'react-native-image-crop-picker';
@@ -45,8 +43,6 @@ const ImagePickerModal = ({
         let temp = { ...image, name: 'image_' + new Date().getTime() + '.png' };
         closeActionSheet();
         onUpdate(temp);
-
-        closeActionSheet();
       });
     } catch (err) {
       console.log('Camera cancelled or error', err);
@@ -75,43 +71,62 @@ const ImagePickerModal = ({
   };
 
   const openDocument = async () => {
-    console.log('opening document >>>>>>');
     try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert('Permission Denied', 'Storage permission is required');
-          return;
-        }
-      }
+      console.log('📄 Opening document picker...');
 
-      const file = await pick({
+      const result = await pick({
         type: [types.pdf, types.doc, types.docx],
+        allowMultiSelection: false,
+        copyTo: 'cachesDirectory',
       });
 
-      if (!file?.uri) {
-        console.log('❌ No file selected');
+      console.log('📄 Document picker result:', result);
+
+      if (!result || result.length === 0) {
+        console.log('❌ No document selected');
         return;
       }
 
+      const file = result[0];
+      console.log('📄 Selected file:', file);
+
+      if (!file?.uri) {
+        console.log('❌ No URI in selected file');
+        return;
+      }
+
+      // Handle different URI formats
+      let fileUri = file.uri;
+
+      // For Android, sometimes we need to use the fileCopyUri
+      if (Platform.OS === 'android' && file.fileCopyUri) {
+        fileUri = file.fileCopyUri;
+      }
+
       const temp = {
-        uri: file.uri,
-        name: file.name ?? 'document',
-        type: file.type ?? 'application/octet-stream',
-        size: file.size ?? 0,
+        uri: fileUri,
+        path: fileUri,
+        name: file.name || 'document.pdf',
+        type: file.type || 'application/pdf',
+        size: file.size || 0,
+        filename: file.name || 'document.pdf',
+        file_name: file.name || 'document.pdf',
       };
 
-      console.log('🔥 ~ openDocument ~ file:', temp);
+      console.log('✅ Formatted document data:', temp);
 
-      closeActionSheet?.();
-      onUpdate?.(temp);
-    } catch (err) {
+      closeActionSheet();
+      onUpdate(temp);
+    } catch (err: any) {
       if (isErrorWithCode(err) && err.code === 'DOCUMENTS_PICKER_CANCELED') {
-        console.log('📄 Document picker cancelled');
+        console.log('User canceled document picker');
       } else {
-        console.log('❌ Document picker error:', err);
+        console.error('❌ Document picker error:', err);
+        console.error('Error details:', {
+          message: err.message,
+          code: err.code,
+          stack: err.stack,
+        });
       }
     }
   };
@@ -128,11 +143,13 @@ const ImagePickerModal = ({
               <Text style={styles.text}>Select From Gallery</Text>
             </TouchableOpacity>
           )}
-          <View style={styles.separator} />
           {isGalleryEnable && (
-            <TouchableOpacity style={styles.optionButton} onPress={openCamera}>
-              <Text style={styles.text}>Take a Photo</Text>
-            </TouchableOpacity>
+            <>
+              <View style={styles.separator} />
+              <TouchableOpacity style={styles.optionButton} onPress={openCamera}>
+                <Text style={styles.text}>Take a Photo</Text>
+              </TouchableOpacity>
+            </>
           )}
           {allowDocument && (
             <>
@@ -140,7 +157,7 @@ const ImagePickerModal = ({
               <TouchableOpacity
                 style={styles.optionButton}
                 onPress={openDocument}>
-                <Text style={styles.text}>Select Document</Text>
+                <Text style={styles.text}>Select Document (PDF/Word)</Text>
               </TouchableOpacity>
             </>
           )}

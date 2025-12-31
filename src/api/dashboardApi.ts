@@ -792,4 +792,5 @@ export const {
   useGetActivitiesQuery,
   useUnshortlistEmployeeMutation,
   useSendInterviewInvitesMutation,
+  useLazyGetEmployeeProfileQuery
 } = dashboardApi;

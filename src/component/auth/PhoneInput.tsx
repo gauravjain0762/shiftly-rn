@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, { FC, useState } from 'react';
 import {
   View,
   TextInput,
@@ -12,10 +12,10 @@ import {
   TextInputProps,
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
-import {commonFontStyle} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
-import {useTranslation} from 'react-i18next';
+import { commonFontStyle } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
+import { useTranslation } from 'react-i18next';
 
 type picker = {
   callingCodeStyle?: TextStyle;
@@ -46,11 +46,30 @@ const PhoneInput: FC<picker> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [valid, setValid] = useState(true);
-  const {t, i18n} = useTranslation();
+  const { t } = useTranslation();
+
   const handlePhoneChange = (text: string) => {
-    onPhoneChange?.(text);
-    setValid(/^[2-9]\d{6,9}$/.test(text.replace(/\s/g, '')));
+    const formatted = formatPhoneNumber(text);
+
+    onPhoneChange?.(formatted);
+
+    setValid(/^[2-9]\d\s\d{3}\s\d{5}$/.test(formatted));
   };
+
+  const formatPhoneNumber = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 10);
+
+    if (digits.length <= 2) {
+      return digits;
+    }
+
+    if (digits.length <= 5) {
+      return `${digits.slice(0, 2)} ${digits.slice(2)}`;
+    }
+
+    return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+  };
+
 
   return (
     <View style={styles.container}>
@@ -74,43 +93,45 @@ const PhoneInput: FC<picker> = ({
           onPress={() => {
             setShowModal(true);
           }}
-          style={{flexDirection: 'row', alignItems: 'center', top: 2}}>
+          style={{ flexDirection: 'row', alignItems: 'center', top: 2 }}>
           <Text style={[styles.callingCode, callingCodeStyle]}>
             +{callingCode}
           </Text>
           <Image
             source={IMAGES.ic_down1}
             tintColor={colors._0B3970}
-            style={[{width: 12, height: 12, resizeMode: 'contain'}, downIcon]}
+            style={[{ width: 12, height: 12, resizeMode: 'contain' }, downIcon]}
           />
         </TouchableOpacity>
         <TextInput
           style={[styles.input, phoneStyle]}
           value={phone}
           onChangeText={handlePhoneChange}
-          placeholder={placeholder || '28 364 12'}
+          placeholder="52 519 53665"
           keyboardType="phone-pad"
+          maxLength={12}
           {...TextInputProps}
         />
-        {valid && phone?.length > 8 && (
+        {valid && phone?.length === 12 && (
           <Image
             source={IMAGES.right}
             tintColor={colors.green}
-            style={{width: 22, height: 22, resizeMode: 'contain'}}
+            style={{ width: 22, height: 22, resizeMode: 'contain' }}
           />
         )}
+
       </View>
       <View style={styles.underline} />
       {!valid && (
         <View style={styles.errorRow}>
           <Image
             source={IMAGES.error_icon}
-            style={{width: 31, height: 28, resizeMode: 'contain'}}
+            style={{ width: 31, height: 28, resizeMode: 'contain' }}
           />
           <Text
             style={[
               styles.errorText,
-              {color: category === 'Employee' ? colors._3D3D3D : colors._3D3D3D},
+              { color: category === 'Employee' ? colors._3D3D3D : colors._3D3D3D },
             ]}>
             {t('Please enter a valid phone number')}
           </Text>

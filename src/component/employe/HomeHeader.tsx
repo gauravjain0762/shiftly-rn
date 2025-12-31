@@ -1,10 +1,10 @@
-import React, {FC} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { FC } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
 import CustomImage from '../common/CustomImage';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
 
 type props = {
   onPressNotifi?: () => void;
@@ -13,47 +13,70 @@ type props = {
   companyProfile?: any;
 };
 
+const getInitials = (name?: string) => {
+  if (!name) return '?';
+
+  const words = name.trim().split(' ').filter(Boolean);
+
+  if (words.length === 1) {
+    return words[0][0].toUpperCase();
+  }
+
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
 const HomeHeader: FC<props> = ({
-  onPressNotifi = () => {},
+  onPressNotifi = () => { },
   type = 'employe',
   onPressAvatar,
   companyProfile,
 }) => {
-  console.log("🔥 ~ HomeHeader ~ companyProfile:", companyProfile)
+  const imageUri =
+    type === 'company'
+      ? companyProfile?.logo
+      : companyProfile?.picture;
+
+  const hasValidImage =
+    typeof imageUri === 'string' && imageUri.trim().length > 0;
+
   return (
     <View style={styles.header}>
       <View style={styles.row}>
-        {companyProfile?.logo ? (
-          <CustomImage
-            uri={
-              type === 'company' ? companyProfile.logo : companyProfile?.picture
-            }
-            imageStyle={{height: '100%', width: '100%'}}
-            containerStyle={styles.avatar}
-            resizeMode="stretch"
-            onPress={onPressAvatar}
-          />
-        ) : companyProfile?.picture ? (
-          <CustomImage
-            uri={companyProfile?.picture}
-            imageStyle={{height: '100%', width: '100%'}}
-            containerStyle={styles.avatar}
-            resizeMode="stretch"
-            onPress={onPressAvatar}
-          />
-        ) : null}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={onPressAvatar}
+          style={styles.avatar}>
+
+          {hasValidImage ? (
+            <Image
+              source={{ uri: imageUri }}
+              style={StyleSheet.absoluteFillObject}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {getInitials(
+                  type === 'company'
+                    ? companyProfile?.company_name
+                    : companyProfile?.name
+                )}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
         <View style={styles.info}>
           <Text
             style={[
               styles.name,
-              {color: type == 'company' ? colors._0B3970 : colors._0B3970},
+              { color: type == 'company' ? colors._0B3970 : colors._0B3970 },
             ]}>
             {companyProfile?.company_name || companyProfile?.name || 'N/A'}
           </Text>
 
           <View
-            style={{flexDirection: 'row', alignItems: 'center', gap: wp(6)}}>
+            style={{ flexDirection: 'row', alignItems: 'center', gap: wp(6) }}>
             <CustomImage
               size={wp(18)}
               source={IMAGES.marker}
@@ -62,7 +85,7 @@ const HomeHeader: FC<props> = ({
             <Text
               style={[
                 styles.location,
-                {color: type == 'company' ? colors._0B3970 : colors._0B3970},
+                { color: type == 'company' ? colors._0B3970 : colors._0B3970 },
               ]}>
               {companyProfile?.location || 'N/A'}
             </Text>
@@ -76,7 +99,7 @@ const HomeHeader: FC<props> = ({
           source={IMAGES.notification}
           style={[
             styles.bell,
-            {tintColor: type == 'company' ? colors._0B3970 : colors._0B3970},
+            { tintColor: type == 'company' ? colors._0B3970 : colors._0B3970 },
           ]}
         />
       </TouchableOpacity>
@@ -122,11 +145,15 @@ const styles = StyleSheet.create({
     width: '70%',
   },
   avatarPlaceholder: {
-    width: wp(60),
-    height: wp(60),
+    ...StyleSheet.absoluteFillObject,
     borderRadius: 100,
+    backgroundColor: colors._0B3970,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: wp(22),
+    fontWeight: '700',
   },
 });

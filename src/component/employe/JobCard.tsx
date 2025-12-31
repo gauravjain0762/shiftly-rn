@@ -1,21 +1,32 @@
 import React, { FC } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ImageBackground } from 'react-native';
+import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
-import CustomImage from '../common/CustomImage';
 import FastImage from 'react-native-fast-image';
 import { getTimeAgo } from '../../utils/commonFunction';
+import RNFS from 'react-native-fs';
 
 type props = {
   item?: any;
   heartImage?: any;
   onPress?: () => void;
-  onPressShare?: () => void;
+  // onPressShare?: () => void;
   onPressFavorite?: () => void;
   isShowFavIcon?: boolean;
+};
+
+const downloadImage = async (url: string) => {
+  const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
+
+  await RNFS.downloadFile({
+    fromUrl: url,
+    toFile: filePath,
+  }).promise;
+
+  return `file://${filePath}`;
 };
 
 const JobCard: FC<props> = ({
@@ -23,12 +34,50 @@ const JobCard: FC<props> = ({
   onPress = () => { },
   onPressFavorite,
   heartImage,
-  onPressShare = () => { },
+  // onPressShare = () => { },
   isShowFavIcon = true,
 }) => {
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
   const coverImageUri = item?.company_id?.cover_images?.[0];
   const logoUri = item?.company_id?.logo;
+
+  const handleShare = async () => {
+    try {
+      const title = item?.title || 'Job Opportunity';
+      const area = item?.area || '';
+      const description = item?.description || '';
+      const salary =
+        item?.monthly_salary_from || item?.monthly_salary_to
+          ? `Salary: AED ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+          : '';
+
+      const message = `${title}
+  ${area}
+  
+  ${description}
+  
+  ${salary}`;
+
+      let imagePath;
+
+      if (coverImageUri) {
+        imagePath = await downloadImage(coverImageUri);
+      }
+
+      await Share.open({
+        title: title,
+        message: `${title}
+      ${area}
+      
+      ${description}
+      
+      ${salary}`,
+      });
+      
+    } catch (err) {
+      console.log('❌ Share error:', err);
+    }
+  };
 
   return (
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
@@ -67,7 +116,7 @@ const JobCard: FC<props> = ({
             styles.actions,
             { marginTop: !isShowFavIcon ? hp(80) : hp(50) },
           ]}>
-          <TouchableOpacity onPress={onPressShare} style={styles.iconButton}>
+          <TouchableOpacity onPress={handleShare} style={styles.iconButton}>
             <FastImage
               source={IMAGES.share}
               resizeMode="contain"
@@ -113,7 +162,7 @@ const JobCard: FC<props> = ({
           descriptionStyle={styles.jobDescription}
           showStyle={{ paddingHorizontal: 0, fontSize: 15 }}
         />
-        
+
         {(item?.monthly_salary_from || item?.monthly_salary_to) && (
           <View style={styles.salaryContainer}>
             <Text style={styles.salaryLabel}>Salary range: </Text>

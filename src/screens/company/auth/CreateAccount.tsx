@@ -989,7 +989,7 @@ const CreateAccount = () => {
                   <Text style={styles.infotext}>
                     We’ve sent a 4-digit code to your email{' '}
                     <Text style={{ fontWeight: 'bold', color: '_0B3970' }}>
-                      {companyRegisterData?.email || 'your email'}
+                      {companyRegisterData?.email || 'N/A'}
                     </Text>
                     . Please enter it below.
                   </Text>
@@ -1006,7 +1006,7 @@ const CreateAccount = () => {
                     maxLength={1}
                     style={styles.otpBox1}
                     keyboardType="decimal-pad"
-                  // autoFocus={idx === 0 && otp.every(v => v === '')}
+                    // autoFocus={idx === 0 && otp.every(v => v === '')}
                   />
                 ))}
               </View>
