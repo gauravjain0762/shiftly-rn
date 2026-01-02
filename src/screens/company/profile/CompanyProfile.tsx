@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
+  GradientButton,
   LinearContainer,
   ParallaxContainer,
   ShareModal,
@@ -33,10 +34,11 @@ import {
   useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from '../../../component/common/CustomImage';
 import ExpandableText from '../../../component/common/ExpandableText';
+import { resetNavigation } from '../../../utils/commonFunction';
 
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
@@ -55,6 +57,8 @@ const CompanyProfile = () => {
   const { data } = useGetProfileQuery();
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
+  const { params } = useRoute<any>();
+  const fromOnboarding = params?.fromOnboarding || false;
 
   useEffect(() => {
     if (data?.status && data.data?.company) {
@@ -66,7 +70,7 @@ const CompanyProfile = () => {
   // Memoize cover images to prevent recreation on tab changes
   const coverImages = useMemo(() => {
     const images = companyProfileData?.cover_images || userInfo?.cover_images;
-    
+
     if (!images || !Array.isArray(images) || images.length === 0) {
       return [IMAGES.newlogo];
     }
@@ -74,17 +78,17 @@ const CompanyProfile = () => {
     // Helper function to validate and clean URLs
     const isValidImageUrl = (url: string): boolean => {
       if (!url || typeof url !== 'string') return false;
-      
+
       const trimmed = url.trim();
       if (trimmed === '') return false;
-      
+
       // Check if URL has the base URL repeated (malformed)
       const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
       const repeatedPattern = baseUrl + baseUrl;
       if (trimmed.includes(repeatedPattern)) {
         return false;
       }
-      
+
       // Check if it's a valid URL format
       try {
         new URL(trimmed);
@@ -319,10 +323,24 @@ const CompanyProfile = () => {
 
             {renderJobs}
 
+            {fromOnboarding && (
+              <View style={styles.ctaContainer}>
+                <GradientButton
+                  type="Company"
+                  title="Get Started"
+                  onPress={() => {
+                    resetNavigation(SCREENS.CoTabNavigator);
+                  }}
+                  style={styles.ctaButton}
+                />
+              </View>
+            )}
+
             <ShareModal
               visible={isShareModalVisible}
               onClose={() => setIsShareModalVisible(false)}
             />
+
           </LinearContainer>
         </ParallaxContainer>
       </ScrollView>
@@ -429,10 +447,19 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: hp(26),
+    marginTop: hp(40)
   },
   emptyContainer: {
     flex: 1,
     backgroundColor: colors.coPrimary,
     paddingVertical: hp(20),
+  },
+  ctaContainer: {
+    marginTop: hp(40),
+    marginBottom: hp(20),
+    paddingHorizontal: wp(13),
+  },
+  ctaButton: {
+    marginHorizontal: 0,
   },
 });

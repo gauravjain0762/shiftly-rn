@@ -126,6 +126,7 @@ export const IMAGES = {
   illustration6: require('./image/illustration6.png'),
   illustration7: require('./image/illustration7.png'),
   illustration8: require('./image/illustration8.png'),
+  work: require('./image/work.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

@@ -11,22 +11,31 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import {commonFontStyle, hp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {Defs, RadialGradient, Rect, Stop, Svg} from 'react-native-svg';
+import { commonFontStyle, hp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { Defs, RadialGradient, Rect, Stop, Svg } from 'react-native-svg';
 
 interface DiamondGradientButtonProps extends TouchableOpacityProps {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
   style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
-  stopColor?: string;
+
+  radialStops?: {
+    offset: string;
+    color: string;
+    opacity?: number;
+  }[];
+
   cx?: string;
   cy?: string;
   rx?: string;
   ry?: string;
   fx?: string;
   fy?: string;
+
+  gradientColors?: string[];
+
   type?: 'Company' | 'Employee';
   textContainerStyle?: ViewStyle;
 }
@@ -36,13 +45,14 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
   onPress,
   style,
   textStyle,
-  stopColor = '',
-  cx = '',
-  cy = '',
-  fx = '',
-  fy = '',
-  rx = '',
-  ry = '',
+  radialStops,
+  gradientColors = [colors.white, colors._F7F7F7],
+  cx = '50%',
+  cy = '50%',
+  fx = '50%',
+  fy = '50%',
+  rx = '50%',
+  ry = '50%',
   type = 'Employee',
   textContainerStyle,
   ...rest
@@ -62,51 +72,46 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
             borderWidth: 1.5,
             borderColor: colors._0B3970,
             shadowColor: 'transparent',
-            shadowOffset: {width: 0, height: 0},
+            shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 0,
             shadowRadius: 0,
             elevation: 0,
           }),
         },
       ]}>
-      {type == 'Employee' ? (
+      {type === 'Employee' ? (
         <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
           <Defs>
             <RadialGradient
               id="diamond"
-              cx={cx || '50%'}
-              cy={cy || '50%'}
-              rx={rx || '50%'}
-              ry={ry || '50%'}
-              fx={fx || '50%'}
-              fy={fy || '50%'}>
-              <Stop
-                offset="0%"
-                stopColor={stopColor || colors.white}
-                stopOpacity="1"
-              />
-              <Stop
-                offset="100%"
-                stopColor={stopColor || colors.white}
-                stopOpacity="1"
-              />
+              cx={cx}
+              cy={cy}
+              rx={rx}
+              ry={ry}
+              fx={fx}
+              fy={fy}
+            >
+              {(radialStops ?? [
+                { offset: '0%', color: colors.white, opacity: 1 },
+                { offset: '100%', color: colors.white, opacity: 1 },
+              ]).map((stop, index) => (
+                <Stop
+                  key={index}
+                  offset={stop.offset}
+                  stopColor={stop.color}
+                  stopOpacity={stop.opacity ?? 1}
+                />
+              ))}
             </RadialGradient>
           </Defs>
-          <Rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            rx="0"
-            ry="0"
-            fill="url(#diamond)"
-          />
+
+          <Rect width="100%" height="100%" fill="url(#diamond)" />
         </Svg>
-      ) : type == 'Company' ? (
+      ) : type === 'Company' ? (
         <LinearGradient
-          colors={[colors.white, colors._F7F7F7]}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
       ) : (
@@ -135,7 +140,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     overflow: 'hidden',
     shadowColor: '#FFFFFF',
-    shadowOffset: {width: 0, height: 8},
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
     shadowRadius: 10,
     elevation: 8,

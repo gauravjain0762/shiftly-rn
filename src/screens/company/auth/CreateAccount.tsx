@@ -67,6 +67,7 @@ import CharLength from '../../../component/common/CharLength';
 import CustomCheckBox from '../../../component/common/CustomCheckBox';
 import { debounce } from 'lodash';
 import BaseText from '../../../component/common/BaseText';
+import Tooltip from '../../../component/common/Tooltip';
 
 export const companySize = [
   { label: '0 - 50', value: '0 - 50' },
@@ -105,6 +106,7 @@ const CreateAccount = () => {
     registerSuccessModal,
     companyProfileData,
   } = useSelector((state: RootState) => state.auth);
+  console.log(">>>>>>>>> ~ CreateAccount ~ companyRegisterData:", companyRegisterData)
   const {
     services = [],
     logo,
@@ -415,17 +417,17 @@ const CreateAccount = () => {
       successToast(response?.message);
       setStart((prev: boolean) => !prev);
       nextStep();
-      dispatch(
-        setCompanyRegisterData({
-          business_type_id: '',
-          company_name: '',
-          name: '',
-          email: '',
-          password: '',
-          phone_code: '971',
-          phone: '',
-        }),
-      );
+      // dispatch(
+      //   setCompanyRegisterData({
+      //     business_type_id: '',
+      //     company_name: '',
+      //     name: '',
+      //     email: '',
+      //     password: '',
+      //     phone_code: '971',
+      //     phone: '',
+      //   }),
+      // );
     } else {
       errorToast(response?.message);
     }
@@ -548,7 +550,7 @@ const CreateAccount = () => {
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
       if (type === 'complete') {
-        resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile);
+        resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile, { fromOnboarding: true });
       } else {
         resetNavigation(SCREENS.CoTabNavigator);
       }
@@ -865,7 +867,7 @@ const CreateAccount = () => {
                     resizeMode="contain"
                     style={styles.shield}
                   />
-                  <Text style={styles.passRule}>{t('Password Rule')}</Text>
+                  <Text style={styles.passRule}>{t('Password Rules')}</Text>
                 </View>
                 {rules?.map((item: any, index: number) => {
                   const passed = item?.test(companyRegisterData?.password);
@@ -958,7 +960,7 @@ const CreateAccount = () => {
                     }),
                   )
                 }
-                maxLength={10}
+                maxLength={12}
               />
             </View>
             <GradientButton
@@ -1006,7 +1008,7 @@ const CreateAccount = () => {
                     maxLength={1}
                     style={styles.otpBox1}
                     keyboardType="decimal-pad"
-                    // autoFocus={idx === 0 && otp.every(v => v === '')}
+                  // autoFocus={idx === 0 && otp.every(v => v === '')}
                   />
                 ))}
               </View>
@@ -1059,9 +1061,17 @@ const CreateAccount = () => {
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
-              <Text style={styles.title}>
-                {t('What is your company website?')}
-              </Text>
+              <View style={styles.fieldHeader}>
+                <Text style={[styles.title, { flex: 1 }]}>
+                  {t('What is your company website?')}
+                </Text>
+                <Tooltip
+                  position="bottom"
+                  containerStyle={styles.tooltipIcon}
+                  message={t('We use this to verify your company and increase candidate trust.')}
+                  tooltipBoxStyle={{ right: wp(5), top: hp(30), width: wp(280), maxWidth: wp(280) }}
+                />
+              </View>
               <CustomTextInput
                 placeholder={t('Enter website')}
                 placeholderTextColor={colors._7B7878}
@@ -1267,10 +1277,7 @@ const CreateAccount = () => {
             <View style={AppStyles.flex}>
               <View style={styles.titleRow}>
                 <Text style={styles.title}>
-                  {t('Describe in few lines about you business e.g.')}
-                  <Text style={{ ...commonFontStyle(500, 20, colors._0B3970) }}>
-                    {t('Description')}
-                  </Text>
+                  {t('Tell job seekers who you are and what you do.')}
                 </Text>
               </View>
               <View style={{ position: 'relative' }}>
@@ -1301,7 +1308,7 @@ const CreateAccount = () => {
                 {showTooltip && (
                   <View style={styles.tooltipCase10}>
                     <Text style={styles.txtColor}>
-                      {'Describe your business to help job seekers understand what you do.'}
+                      {'This description appears on your public company profile. A clear introduction helps talents understand your brand and attract the right candidates.'}
                     </Text>
                   </View>
                 )}
@@ -1891,6 +1898,19 @@ const styles = StyleSheet.create({
     // borderRadius: 15,
     // overflow: 'hidden',
   },
+  fieldHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    columnGap: wp(8),
+  },
+  tooltipIcon: {
+    marginTop: hp(30),
+    paddingHorizontal: wp(5),
+    minWidth: wp(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   diffButton: {
     borderRadius: 100,
     borderWidth: 1,
@@ -2105,7 +2125,7 @@ const styles = StyleSheet.create({
     padding: wp(10),
     borderWidth: hp(1),
     borderColor: colors._D9D9D9,
-    maxWidth: wp(200),
+    maxWidth: wp(300),
     zIndex: 1000,
     shadowColor: '#000',
     shadowOffset: {

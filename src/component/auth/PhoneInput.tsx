@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -16,6 +16,15 @@ import { commonFontStyle } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { useTranslation } from 'react-i18next';
+import { callingCodeToCountryCode } from '../../utils/countryFlags';
+
+// Reverse mapping: countryCode to callingCode
+const countryCodeToCallingCode: { [key: string]: string } = Object.entries(
+  callingCodeToCountryCode
+).reduce((acc, [code, country]) => {
+  acc[country] = code;
+  return acc;
+}, {} as { [key: string]: string });
 
 type picker = {
   callingCodeStyle?: TextStyle;
@@ -46,7 +55,14 @@ const PhoneInput: FC<picker> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [valid, setValid] = useState(true);
+  const [detectedCountry, setDetectedCountry] = useState<string>('AE');
+  const [detectedCallingCode, setDetectedCallingCode] = useState<string>('971');
   const { t } = useTranslation();
+
+  // Auto-detect country on component mount
+  useEffect(() => {
+    detectUserCountry();
+  }, []);
 
   const handlePhoneChange = (text: string) => {
     const formatted = formatPhoneNumber(text);
@@ -70,18 +86,102 @@ const PhoneInput: FC<picker> = ({
     return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
   };
 
+  const detectUserCountry = async () => {
+    try {
+      const ipResult = await detectCountryByIP();
+      
+      if (ipResult) {
+        console.log('✅ IP detection successful:', ipResult);
+        setDetectedCountry(ipResult.countryCode);
+        setDetectedCallingCode(ipResult.callingCode);
+
+        onCallingCodeChange?.({
+          cca2: ipResult.countryCode,
+          callingCode: [ipResult.callingCode],
+        });
+
+        return;
+      }
+
+      // Fallback to UAE
+      console.log('⚠️ Falling back to UAE default');
+      setDetectedCountry('AE');
+      setDetectedCallingCode('971');
+      
+      onCallingCodeChange?.({
+        cca2: 'AE',
+        callingCode: ['971'],
+      });
+
+    } catch (error) {
+      console.error('❌ Error detecting country:', error);
+      
+      // Fallback to UAE
+      setDetectedCountry('AE');
+      setDetectedCallingCode('971');
+      
+      onCallingCodeChange?.({
+        cca2: 'AE',
+        callingCode: ['971'],
+      });
+    }
+  };
+
+  const detectCountryByIP = async (): Promise<{
+    countryCode: string;
+    callingCode: string;
+  } | null> => {
+    try {
+      const response = await fetch('https://ipapi.co/json/', {
+        timeout: 5000,
+      } as any);
+      
+      if (!response.ok) {
+        console.log('⚠️ IP API response not OK:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('🌐 IP API data:', data);
+
+      const countryCode = data.country_code?.toUpperCase();
+      
+      if (countryCode && countryCodeToCallingCode[countryCode]) {
+        const callingCode = countryCodeToCallingCode[countryCode];
+        
+        return {
+          countryCode,
+          callingCode,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('❌ Error detecting country by IP:', error);
+      return null;
+    }
+  };
+
+  // Use detected country or provided countryCode
+  const currentCountryCode = countryCode || detectedCountry;
+  const currentCallingCode = callingCode || detectedCallingCode;
 
   return (
     <View style={styles.container}>
       <View style={styles.phoneRow}>
         <CountryPicker
           visible={showModal}
-          countryCode={countryCode}
+          countryCode={currentCountryCode}
           withFilter
           withFlag
           withCallingCode
           flagSize={50}
           onSelect={country => {
+            const selectedCallingCode = country.callingCode?.[0] || '971';
+            
+            setDetectedCountry(country.cca2);
+            setDetectedCallingCode(selectedCallingCode);
+            
             onCallingCodeChange?.(country);
           }}
           onClose={() => {
@@ -95,7 +195,7 @@ const PhoneInput: FC<picker> = ({
           }}
           style={{ flexDirection: 'row', alignItems: 'center', top: 2 }}>
           <Text style={[styles.callingCode, callingCodeStyle]}>
-            +{callingCode}
+            +{currentCallingCode}
           </Text>
           <Image
             source={IMAGES.ic_down1}
@@ -119,7 +219,6 @@ const PhoneInput: FC<picker> = ({
             style={{ width: 22, height: 22, resizeMode: 'contain' }}
           />
         )}
-
       </View>
       <View style={styles.underline} />
       {!valid && (
@@ -143,8 +242,6 @@ const PhoneInput: FC<picker> = ({
 
 const styles = StyleSheet.create({
   container: {
-    // padding: 16,
-    // backgroundColor: '#03386E',
     marginTop: 55,
   },
   phoneRow: {

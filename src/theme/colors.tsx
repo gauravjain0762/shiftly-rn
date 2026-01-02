@@ -9,6 +9,7 @@ export const colors = {
   _F7F7F7: '#F7F7F7',
   _FBFBFB: '#FBFBFB',
   _FEFEFE: "#FEFEFE",
+  _E0C688: '#E0C688',
 
   _0B3970: '#0B3970',
   _104686: '#104686',

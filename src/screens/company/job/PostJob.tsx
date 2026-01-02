@@ -1438,6 +1438,7 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={position?.value}
+                  dropdownPosition='top'
                   onChange={(e: any) => {
                     updateJobForm({ position: { label: e.label, value: e.value } });
                   }}

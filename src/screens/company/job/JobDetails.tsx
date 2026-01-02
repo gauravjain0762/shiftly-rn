@@ -383,7 +383,6 @@ const CoJobDetails = () => {
                 )}
 
                 {selectedMetricIndex === 3 && (
-                  // Total Shortlisted - Show shortlisted employees
                   jobDetail?.shortlisted?.length > 0 ? (
                     jobDetail.shortlisted.map((item: any, index: number) => {
                       if (item === null) return null;
@@ -410,7 +409,6 @@ const CoJobDetails = () => {
                           <TouchableOpacity
                             style={styles.inviteButton}
                             onPress={() => {
-                              // TODO: Handle invite action
                               console.log('Invite pressed for:', item?.user_id?.name);
                             }}>
                             <Text style={styles.inviteButtonText}>Invite</Text>
