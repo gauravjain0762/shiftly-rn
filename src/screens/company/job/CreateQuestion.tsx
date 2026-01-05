@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,10 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {Plus} from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { Plus } from 'lucide-react-native';
 import {
   goBack,
   errorToast,
@@ -23,12 +23,12 @@ import {
   navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
-import {useRoute} from '@react-navigation/native';
-import {useSendInterviewInvitesMutation} from '../../../api/dashboardApi';
+import { useRoute } from '@react-navigation/native';
+import { useSendInterviewInvitesMutation } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useAppSelector} from '../../../redux/hooks';
-import {selectJobForm} from '../../../features/companySlice';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useAppSelector } from '../../../redux/hooks';
+import { selectJobForm } from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import CreateQuestionSkeleton from '../../../component/skeletons/CreateQuestionSkeleton';
 
@@ -40,16 +40,16 @@ const QUESTION_PRESETS = [
 ];
 
 const CreateQuestion = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const route = useRoute<any>();
-  const {jobId, invitePayload} = route.params || {};
+  const { jobId, invitePayload } = route.params || {};
   const [questionText, setQuestionText] = useState('');
   const [addedQuestions, setAddedQuestions] = useState<string[]>([]);
   const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([]);
   const [areQuestionsLoading, setAreQuestionsLoading] = useState(true);
-  const [sendInvites, {isLoading}] = useSendInterviewInvitesMutation();
-  const {updateJobForm} = useJobFormUpdater();
-  const {isSuccessModalVisible} = useAppSelector((state: any) =>
+  const [sendInvites, { isLoading }] = useSendInterviewInvitesMutation();
+  const { updateJobForm } = useJobFormUpdater();
+  const { isSuccessModalVisible } = useAppSelector((state: any) =>
     selectJobForm(state),
   );
 
@@ -88,36 +88,38 @@ const CreateQuestion = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('job_id', jobId);
-    formData.append('invite_to', invitePayload.invite_to || 'specific');
+    console.log("🔥 ~ handleSubmit ~ jobId:", jobId);
 
-    if (
-      invitePayload.invite_to === 'specific' &&
-      Array.isArray(invitePayload.user_ids)
-    ) {
-      const filteredIds = invitePayload.user_ids.filter(
-        (id: string | null) => !!id,
-      );
+    // Create params object matching the cURL structure
+    const params = {
+      job_id: jobId,
+      invite_to: invitePayload.invite_to || 'specific',
+      questions: addedQuestions,
+    } as any;
+
+    // Add user_ids based on invite_to type
+    if (invitePayload.invite_to === 'specific' && Array.isArray(invitePayload.user_ids)) {
+      const filteredIds = invitePayload.user_ids.filter((id: string | null) => !!id);
       if (!filteredIds.length) {
         errorToast(t('Please select at least one employee'));
         return;
       }
-      formData.append('user_ids', filteredIds.join(','));
+      params.user_ids = filteredIds.join(',');
+    } else if (invitePayload.user_ids) {
+      params.user_ids = Array.isArray(invitePayload.user_ids)
+        ? invitePayload.user_ids.join(',')
+        : invitePayload.user_ids;
     }
 
-    addedQuestions.forEach((question, index) => {
-      formData.append(`questions[${index}]`, question);
-    });
+    console.log("🔥 ~ handleSubmit ~ params:", params);
 
-    console.log('Added questions count:', addedQuestions.length);
-    console.log('Questions:', addedQuestions);
     try {
-      const response = await sendInvites(formData).unwrap();
-      console.log("🔥 ~ handleSubmit ~ response:", response)
+      const response = await sendInvites(params).unwrap();
+      console.log("🔥 ~ handleSubmit ~ response:", response);
+
       if (response?.status) {
         successToast(response?.message || t('Invites sent successfully'));
-        updateJobForm({isSuccessModalVisible: true});
+        updateJobForm({ isSuccessModalVisible: true });
         setQuestionText('');
         setAddedQuestions([]);
       } else {
@@ -219,7 +221,7 @@ const CreateQuestion = () => {
 
       {isLoading && (
         <View style={styles.loadingOverlay}>
-          <View pointerEvents="none" style={{flex: 1}}>
+          <View pointerEvents="none" style={{ flex: 1 }}>
             <CreateQuestionSkeleton />
           </View>
         </View>
@@ -228,7 +230,7 @@ const CreateQuestion = () => {
       <BottomModal
         visible={isSuccessModalVisible}
         backgroundColor={colors.white}
-        onClose={() => updateJobForm({isSuccessModalVisible: false})}>
+        onClose={() => { }}>
         <View style={styles.modalIconWrapper}>
           <View style={styles.modalIconCircle}>
             <Text style={styles.modalIconCheck}>✓</Text>
@@ -245,8 +247,8 @@ const CreateQuestion = () => {
           type="Company"
           title={t('View pending interviews')}
           onPress={() => {
-            updateJobForm({isSuccessModalVisible: false});
-            navigateTo(SCREENS.CoJob);
+            updateJobForm({ isSuccessModalVisible: false });
+            resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
           }}
         />
         <GradientButton
@@ -254,7 +256,7 @@ const CreateQuestion = () => {
           type="Company"
           title={t('Back to dashboard')}
           onPress={() => {
-            updateJobForm({isSuccessModalVisible: false});
+            updateJobForm({ isSuccessModalVisible: false });
             resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
           }}
         />

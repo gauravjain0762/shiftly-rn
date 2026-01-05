@@ -64,7 +64,7 @@ const CoNotification = () => {
         <View style={{flex: 1, gap: hp(5)}}>
           <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
           <BaseText style={styles.time}>{item?.message}</BaseText>
-          <BaseText style={styles.time}>{formatted(item?.created_at)}</BaseText>
+          <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
         </View>
       </View>
     </View>

@@ -28,6 +28,7 @@ export const SCREENS = {
   EditAccount: 'EditAccount',
   SearchJob: 'SearchJob',
   FavoriteJobList: 'FavoriteJobList',
+  JobInvitationScreen: 'JobInvitationScreen',
 
   //company
   CoLogin: 'CoLogin',

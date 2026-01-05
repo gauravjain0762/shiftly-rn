@@ -54,6 +54,7 @@ import SearchJob from '../screens/employer/jobs/SearchJob';
 import FavoriteJobList from '../screens/employer/jobs/FavoriteJobList';
 import CreateQuestion from '../screens/company/job/CreateQuestion';
 import EmpLocation from '../component/employe/EmpLocation';
+import JobInvitationScreen from '../screens/employer/jobs/JobInvitationScreen';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -290,6 +291,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.EmpLocation}
           component={EmpLocation}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.JobInvitationScreen}
+          component={JobInvitationScreen}
         />
       </Stack.Navigator>
     );

@@ -14,7 +14,6 @@ type JobCardProps = {
 
 const MyJobCard = (props: JobCardProps) => {
   const { onPressShare, onPressCard, item } = props;
-  console.log("🔥 ~ MyJobCard ~ item:", item)
 
   return (
     <>

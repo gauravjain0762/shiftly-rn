@@ -1,8 +1,8 @@
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import WebView from 'react-native-webview';
 
-const WebViewRender = ({url, onLoadEnd}: {url?: string; onLoadEnd?: any}) => {
+const WebViewRender = ({ url, onLoadEnd }: { url?: string; onLoadEnd?: any }) => {
   const injectedJavaScript = `
     (function() {
       const style = document.createElement('style');
@@ -25,11 +25,14 @@ const WebViewRender = ({url, onLoadEnd}: {url?: string; onLoadEnd?: any}) => {
   return (
     <View style={styles.container}>
       <WebView
-        source={{uri: url ? url : 'https://www.google.com/'}}
-        style={{flex: 1}}
+        source={{ uri: url ? url : 'https://www.google.com/' }}
+        style={{ flex: 1 }}
         onLoadEnd={onLoadEnd}
-        injectedJavaScript={injectedJavaScript}
         javaScriptEnabled={true}
+        originWhitelist={['*']}
+        injectedJavaScript={injectedJavaScript}
+        onError={(e) => console.log('WebView error:', e.nativeEvent)}
+        onHttpError={(e) => console.log('HTTP error:', e.nativeEvent)}
       />
     </View>
   );

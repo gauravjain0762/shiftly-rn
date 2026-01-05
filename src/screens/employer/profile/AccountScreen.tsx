@@ -163,7 +163,8 @@ const AccountScreen = () => {
   ];
 
   const handleLogout = async () => {
-    const res = await empLogout({}).unwrap();
+    const res = await empLogout({}).unwrap() as any;
+    console.log("🔥 ~ handleLogout ~ res:", res)
     if (res.status) {
       successToast(res.message);
       dispatch(setAuthToken(''));
@@ -176,7 +177,7 @@ const AccountScreen = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const res = await employeeDeleteAccount({}).unwrap();
+      const res = await employeeDeleteAccount({}).unwrap() as any;
       if (res?.status) {
         successToast(res?.message);
         resetNavigation(SCREEN_NAMES.SelectRollScreen);

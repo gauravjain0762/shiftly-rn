@@ -1,9 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
-import { StyleSheet, View, StatusBar } from 'react-native';
 import React from 'react';
+import { StyleSheet, View, StatusBar } from 'react-native';
+
 import { useRoute } from '@react-navigation/native';
 import WebViewRender from '../../component/common/WebViewRender';
-import { BackHeader, LinearContainer, Loader } from '../../component';
+import { LinearContainer, Loader } from '../../component';
 import { useTranslation } from 'react-i18next';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
@@ -23,7 +24,7 @@ const WebViewScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor={colors._F7F7F7} />
       <LinearContainer
         colors={[colors._F7F7F7, colors.white]}>
-        <View style={styles.headerContainer}>
+        {type !== 'interview' && <View style={styles.headerContainer}>
           <CustomImage
             size={wp(20)}
             onPress={goBack}
@@ -37,7 +38,7 @@ const WebViewScreen = () => {
             ]}>
             {t(params?.title)}
           </BaseText>
-        </View>
+        </View>}
 
         <View style={{ flex: 1 }}>
           <WebViewRender

@@ -38,7 +38,7 @@ const CoProfile = () => {
   const dispatch = useAppDispatch();
   const [popupVisible, setPopupVisible] = useState(false);
   const [deletepopupVisible, setdeletePopupVisible] = useState(false);
-  const [companyLogout] = useCompanyLogoutMutation();
+  const [companyLogout] = useCompanyLogoutMutation({});
   const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
   const [isLanguageModalVisible, setLanguageModalVisible] =
     useState<boolean>(false);
@@ -156,7 +156,8 @@ const CoProfile = () => {
   };
   const onLogout = async () => {
     let response = null;
-    response = await companyLogout({}).unwrap();
+    response = await companyLogout({}).unwrap() as any;
+    console.log("🔥 ~ onLogout ~ response:", response)
     if (response?.status) {
       clearAsync();
       resetNavigation(SCREEN_NAMES.SelectRollScreen);
@@ -170,7 +171,7 @@ const CoProfile = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const res = await companyDeleteAccount({}).unwrap();
+      const res = await companyDeleteAccount({}).unwrap() as any;
       if (res?.status) {
         successToast(res?.message);
         clearAsync();

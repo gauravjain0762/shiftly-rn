@@ -265,7 +265,7 @@ export default CoJob;
 const styles = StyleSheet.create({
   header: {
     paddingTop: hp(26),
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(25),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

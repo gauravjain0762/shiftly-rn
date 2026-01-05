@@ -1,7 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import {setFcmToken} from '../features/authSlice';
-import {PermissionsAndroid, Platform} from 'react-native';
+import {PermissionsAndroid, Platform, Linking} from 'react-native';
 import {errorToast} from '../utils/commonFunction';
 
 //
@@ -34,7 +34,7 @@ async function onDisplayNotification(message: any) {
     },
     ios: {
       sound: 'default',
-      badgeCount: await notifee.getBadgeCount(), // keep it in sync
+      badgeCount: await notifee.getBadgeCount(),
     },
   });
 }
@@ -87,9 +87,7 @@ const getFirebaseToken = async (dispatch: any) => {
   }
 };
 
-//
 // 📩 Foreground Messages
-//
 export const onMessage = () =>
   messaging().onMessage(async (remoteMessage: any) => {
     console.log('FCM foreground message:', remoteMessage);
@@ -173,9 +171,39 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
 //
 // 🔗 Navigate on Notification Press
 //
-export const navigateToOrderDetails = (remoteMessage: any) => {
-  if (remoteMessage?.data) {
-    // Add your navigation logic here
+export const navigateToOrderDetails = async (remoteMessage: any) => {
+  try {
+    const data = remoteMessage?.data;
+    
+    if (!data) {
+      console.log('No data in notification');
+      return;
+    }
+
+    console.log('Notification data:', data);
+
+    // Check if notification type is "interview"
+    if (data.type === 'interview' && data.interview_link) {
+      console.log('Opening interview link:', data.interview_link);
+      
+      // Check if the URL can be opened
+      const supported = await Linking.canOpenURL(data.interview_link);
+      
+      if (supported) {
+        await Linking.openURL(data.interview_link);
+      } else {
+        console.error('Cannot open URL:', data.interview_link);
+        errorToast('Unable to open interview link');
+      }
+    } else {
+      // Handle other notification types here
+      console.log('Other notification type:', data.type);
+      // Add your navigation logic for other types
+      // Example: navigateTo(SCREENS.SomeScreen, { id: data.id });
+    }
+  } catch (error) {
+    console.error('Error navigating from notification:', error);
+    errorToast('Failed to open notification');
   }
 };
 

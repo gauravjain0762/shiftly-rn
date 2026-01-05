@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,44 +8,46 @@ import {
   FlatList,
   Pressable,
 } from 'react-native';
-import {useRoute} from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import {
   BackHeader,
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {colors} from '../../../theme/colors';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {useTranslation} from 'react-i18next';
+import { colors } from '../../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { useTranslation } from 'react-i18next';
 import CustomImage from '../../../component/common/CustomImage';
 import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
-import {navigateTo, errorToast} from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
+import { navigateTo, errorToast } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
 
 const SuggestedEmployeeScreen = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const route = useRoute<any>();
-  const {jobId, jobData} = route.params || {};
+  const { jobId, jobData } = route.params || {};
 
   const {
     data: suggestedResponse,
     isLoading,
     isFetching,
-  } = useGetSuggestedEmployeesQuery(jobId, {skip: !jobId});
+  } = useGetSuggestedEmployeesQuery(jobId, { skip: !jobId });
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ suggestedResponse:", suggestedResponse)
 
   const {
     data: jobDetailsResponse,
     isLoading: isJobLoading,
-  } = useGetCompanyJobDetailsQuery(jobId, {skip: !jobId});
+  } = useGetCompanyJobDetailsQuery(jobId, { skip: !jobId });
 
   const jobInfo = jobData || jobDetailsResponse?.data || {};
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobInfo:", jobInfo)
   const employees = suggestedResponse?.data?.users || [];
+  const ai_data = suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
   const isScreenLoading = isJobLoading || isLoading || isFetching;
 
@@ -108,7 +110,7 @@ const SuggestedEmployeeScreen = () => {
 
   const handleBulkInvite = () => {
     if (inviteAllSelected) {
-      handleNavigateToQuestions({invite_to: 'all', user_ids: []});
+      handleNavigateToQuestions({ invite_to: 'all', user_ids: [] });
       return;
     }
     if (!selectedUserIds.length) {
@@ -165,7 +167,7 @@ const SuggestedEmployeeScreen = () => {
 
   const jobTypeLabel = jobInfo?.contract_type;
 
-  const renderEmployee = ({item}: {item: any}) => {
+  const renderEmployee = ({ item }: { item: any }) => {
     const experience =
       item?.experience ||
       item?.years_of_experience ||
@@ -262,7 +264,7 @@ const SuggestedEmployeeScreen = () => {
                 </View>
                 <View style={styles.analyticsTextWrapper}>
                   <Text style={styles.analyticsPrimary}>
-                    {'142 ' + t('Candidates Analyzed by AI')}
+                    {`${ai_data?.ai_candidates || 0} ${t('Candidates Analyzed by AI')}`}
                   </Text>
                   <Text style={styles.analyticsSecondary}>
                     {t('Covers all received profiles')}
@@ -275,7 +277,7 @@ const SuggestedEmployeeScreen = () => {
                 </View>
                 <View style={styles.analyticsTextWrapper}>
                   <Text style={styles.analyticsPrimary}>
-                    {'6 ' + t('Highly Matched Profiles')}
+                    {`${ai_data?.matched_candidates || 0} ${'Highly Matched Profiles'}`}
                   </Text>
                   <Text style={styles.analyticsSecondary}>
                     {t('For profiles above 75% match score')}
@@ -320,7 +322,7 @@ const SuggestedEmployeeScreen = () => {
               keyExtractor={(item, index) => item?._id || index.toString()}
               scrollEnabled={false}
               renderItem={renderEmployee}
-              extraData={{selectedUserIds, inviteAllSelected}}
+              extraData={{ selectedUserIds, inviteAllSelected }}
               ListEmptyComponent={
                 <View style={styles.emptyState}>
                   <Text style={styles.emptyTitle}>

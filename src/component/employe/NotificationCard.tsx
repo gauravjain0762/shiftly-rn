@@ -1,11 +1,13 @@
-import React, {FC} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
+import React, { FC } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import BaseText from '../common/BaseText';
-import {formatted} from '../../utils/commonFunction';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
+import { SCREENS } from '../../navigation/screenNames';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { formatted, navigateTo } from '../../utils/commonFunction';
+import { useGetEmployeeJobDetailsQuery } from '../../api/dashboardApi';
 
 type props = {
   onPress: () => void;
@@ -15,19 +17,40 @@ type props = {
 const NotificationCard: FC<props> = ({
   item,
 }: any) => {
+  const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
+    item?.data?.id,
+  );
+  console.log(">>>>>>>>>> ~ NotificationCard ~ jobDetail:", jobDetail)
+
   return (
     <View style={styles.card}>
       <View style={[styles.iconWrapper, styles.starIcon]}>
         <Image
           source={IMAGES.bell}
-          style={{width: wp(16), height: hp(16), resizeMode: 'contain', tintColor: colors._0B3970}}
+          style={{ width: wp(16), height: hp(16), resizeMode: 'contain', tintColor: colors._0B3970 }}
         />
       </View>
-      <View style={{flex: 1, gap: hp(5)}}>
+      <View style={{ flex: 1, gap: hp(5) }}>
         {/* <BaseText style={styles.notificationTitle}>{index + 1}</BaseText> */}
         <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
         <BaseText style={styles.message}>{item?.message}</BaseText>
-        <BaseText style={styles.time}>{formatted(item?.created_at)}</BaseText>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
+          <Pressable
+            onPress={() => {
+              navigateTo(SCREENS.JobInvitationScreen, {
+                link: item?.data?.interview_link,
+                jobDetail: jobDetail?.data,
+              });
+            }}
+            style={{
+              backgroundColor: colors._0B3970, paddingHorizontal: wp(10), paddingVertical: hp(8),
+              borderRadius: hp(20)
+            }}>
+            <BaseText style={{ ...commonFontStyle(500, 13, colors.white) }}>{'View Invitation'}</BaseText>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
