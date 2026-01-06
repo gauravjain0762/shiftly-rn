@@ -44,7 +44,6 @@ const EmpForgotPassword = () => {
   const { fcmToken, userInfo, forgotPasswordSteps } = useSelector(
     (state: RootState) => state.auth,
   );
-  console.log('🔥🔥🔥 ~ EmpForgotPassword ~ userInfo:', userInfo);
   const [email, setEmail] = useState(__DEV__ ? 'bilal@devicebee.com' : '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -147,7 +146,6 @@ const EmpForgotPassword = () => {
     }
   };
 
-  // Update the handleChangePassword function:
   const handleChangePassword = async () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
       Keyboard.dismiss();
@@ -174,7 +172,6 @@ const EmpForgotPassword = () => {
         dispatch(setForgotPasswordSteps(1));
       } else {
         Keyboard.dismiss();
-        errorToast("New password and confirm password doesn't match");
       }
     } catch (error: any) {
       Keyboard.dismiss();
@@ -234,6 +231,7 @@ const EmpForgotPassword = () => {
                 placeholderTextColor={colors._7B7878}
                 containerStyle={passwordStyles.inputcontainer}
                 onChangeText={setEmail}
+                keyboardType="email-address"
               />
             </View>
             <GradientButton

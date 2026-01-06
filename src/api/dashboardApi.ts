@@ -743,6 +743,15 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    getDashboard: builder.query<any, any>({
+      query: () => {
+        return {
+          url: API.getDashboard,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+    }),
   }),
 });
 
@@ -792,5 +801,6 @@ export const {
   useGetActivitiesQuery,
   useUnshortlistEmployeeMutation,
   useSendInterviewInvitesMutation,
-  useLazyGetEmployeeProfileQuery
+  useLazyGetEmployeeProfileQuery,
+  useGetDashboardQuery,
 } = dashboardApi;

@@ -6,6 +6,7 @@ import { navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import {
   useGetCompanyPostsQuery,
+  useGetDashboardQuery,
   useGetProfileQuery,
 } from '../../../api/dashboardApi';
 import { colors } from '../../../theme/colors';
@@ -24,6 +25,10 @@ const CoHome = () => {
   const dispatch = useAppDispatch();
   const { data: profileData } = useGetProfileQuery();
   const userdata = profileData?.data?.comnpany;
+
+  const { data: dashboardData } = useGetDashboardQuery({});
+  const job_stats = dashboardData?.data?.stats;
+
   const { userInfo }: any = useSelector((state: RootState) => state.auth);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,7 +59,6 @@ const CoHome = () => {
 
   const {
     data: getPost,
-    isLoading,
     isFetching,
   } = useGetCompanyPostsQuery({ page: currentPage });
 
@@ -84,7 +88,11 @@ const CoHome = () => {
     setAllPosts([]);
   };
 
-  const job_summary = [{ id: "1", title: "Active Jobs", value: 12, color: "#F3F3F3" }, { id: "2", title: "Pending Jobs", value: 15, color: "#E5F7FF" }, { id: "3", title: "Expired Jobs", value: 10, color: "#FFEFF0" }];
+  const job_summary = [
+    { id: "1", title: "Active Jobs", value: job_stats?.active_jobs, color: "#F3F3F3" },
+    { id: "2", title: "Pending Jobs", value: job_stats?.pending_jobs, color: "#E5F7FF" },
+    { id: "3", title: "Expired Jobs", value: job_stats?.expired_jobs, color: "#FFEFF0" },
+  ];
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']} containerStyle={{ paddingHorizontal: wp(25) }}>
@@ -162,7 +170,7 @@ const CoHome = () => {
           <Image source={IMAGES.check} style={{ width: wp(20), height: hp(20) }} />
         </View>
         <Text style={{ ...commonFontStyle(500, 15, colors.white), textAlign: 'center' }}>
-          {"12 new candidates matched by"}{" "}
+          {`${job_stats?.ai_matched_candidates} new candidates matched by`}{" "}
           <Text style={{ ...commonFontStyle(700, 17, colors._F3E1B7) }}>{"AI"}</Text>
         </Text>
       </View>

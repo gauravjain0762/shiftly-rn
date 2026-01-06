@@ -35,6 +35,7 @@ const ViewProfileScreen = () => {
     refetch,
   } = useGetEmployeeProfileQuery({});
   const userInfo = getProfile?.data?.user;
+  console.log("🔥 ~ ViewProfileScreen ~ userInfo:", userInfo)
 
   const countryCode = userInfo?.phone_code || 'AE';
 

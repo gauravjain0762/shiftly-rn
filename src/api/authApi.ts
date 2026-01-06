@@ -455,7 +455,7 @@ export const authApi = createApi({
           url: API.employeeOTPVerify,
           method: HTTP_METHOD.POST,
           data: credentials,
-          skipLoader: false,
+          skipLoader: true,
         };
       },
       invalidatesTags: ['Auth'],
@@ -546,7 +546,7 @@ export const authApi = createApi({
         url: API.employeeForgotPassword,
         method: HTTP_METHOD.POST,
         data: credentials,
-        skipLoader: false,
+        skipLoader: true,
       }),
       invalidatesTags: ['Auth'],
       async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
@@ -567,7 +567,7 @@ export const authApi = createApi({
         url: API.employeeResendOTP,
         method: HTTP_METHOD.POST,
         data: credentials,
-        skipLoader: false,
+        skipLoader: true,
       }),
       invalidatesTags: ['Auth'],
       async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {

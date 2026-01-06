@@ -22,6 +22,7 @@ import BaseText from '../../../component/common/BaseText';
 
 const ProfileScreen = () => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  console.log("🔥 ~ ProfileScreen ~ userInfo:", userInfo)
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen);
@@ -72,7 +73,7 @@ const ProfileScreen = () => {
           />
           <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
           <View style={styles.locationRow}>
-            <Image source={IMAGES.marker} style={styles.locationicon} />
+            <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
             <BaseText style={styles.location}>
               {userInfo?.location || 'N/A'}
             </BaseText>

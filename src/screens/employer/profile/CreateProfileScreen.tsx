@@ -747,7 +747,7 @@ const CreateProfileScreen = () => {
             onPress={() => {
               dispatch(setActiveStep(2));
             }}
-            // disabled={educationList?.length === 0}
+            disabled={educationList?.length === 0}
           />
         </View>
       )}
@@ -787,7 +787,7 @@ const CreateProfileScreen = () => {
             onPress={() => {
               dispatch(setActiveStep(3));
             }}
-            // disabled={experienceList?.length === 0}
+            disabled={experienceList?.length === 0}
           />
         </View>
       )}
@@ -825,7 +825,7 @@ const CreateProfileScreen = () => {
               handleUpdateProfile();
             }
           }}
-          disabled={resumes?.length === 0}
+          // disabled={resumes?.length === 0}
         />
       )}
       {(isLoadingEducation || isLoadingAboutme) && <Loader />}

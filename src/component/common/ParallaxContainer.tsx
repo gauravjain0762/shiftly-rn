@@ -92,14 +92,14 @@ const SimpleImage: FC<{
     (typeof source === 'object' && source.uri)
   );
 
-  const finalSource = !hasValidSource || hasError ? IMAGES.newlogo : source;
+  const finalSource = !hasValidSource || hasError ? IMAGES.logoText : source;
 
   return (
     <CustomImage
       source={finalSource}
       imageStyle={style}
       containerStyle={styles.imageContainer}
-      resizeMode="contain"
+      resizeMode={hasValidSource ? 'cover' : 'contain'}
       props={{
         onError: () => {
           setHasError(true);

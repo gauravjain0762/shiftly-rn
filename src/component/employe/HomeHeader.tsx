@@ -87,7 +87,7 @@ const HomeHeader: FC<props> = ({
                 styles.location,
                 { color: type == 'company' ? colors._0B3970 : colors._0B3970 },
               ]}>
-              {companyProfile?.location || 'N/A'}
+              {companyProfile?.location || companyProfile?.address || 'N/A'}
             </Text>
           </View>
         </View>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   info: {
     gap: hp(6),
-    width: '70%',
+    width: '67%',
   },
   avatarPlaceholder: {
     ...StyleSheet.absoluteFillObject,

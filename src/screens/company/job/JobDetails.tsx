@@ -175,20 +175,18 @@ const CoJobDetails = () => {
                 <View style={styles.jobPostHeader}>
                   <View style={styles.companyLogoContainer}>
                     <CustomImage
+                      resizeMode="contain"
+                      source={IMAGES.logoText}
                       uri={jobDetail?.company_id?.logo}
-                      source={IMAGES.dummy_cover}
                       containerStyle={styles.companyLogo}
                       imageStyle={{ width: '100%', height: '100%' }}
-                      resizeMode="cover"
                     />
                   </View>
                   <View style={styles.jobPostHeaderRight}>
-                    <Text style={styles.companyName}>
-                      {jobDetail?.company_id?.company_name || 'N/A'}
-                    </Text>
                     <Text style={styles.companyLocation}>
                       {jobDetail?.address || 'N/A'}
                     </Text>
+                    <Text style={styles.jobTitle}>{jobDetail?.title || 'N/A'}</Text>
                   </View>
                   <View style={styles.jobPostActions}>
                     <TouchableOpacity
@@ -212,7 +210,6 @@ const CoJobDetails = () => {
                   </View>
                 </View>
 
-                <Text style={styles.jobTitle}>{jobDetail?.title || 'N/A'}</Text>
 
                 <Text numberOfLines={3} style={styles.jobDescriptionSnippet}>
                   {jobDetail?.description || 'N/A'}
@@ -223,11 +220,11 @@ const CoJobDetails = () => {
                     {jobDetail?.applicants?.slice(0, 3).map((item: any, index: number) => (
                       <View key={index} style={[styles.applicantAvatar, { marginLeft: index > 0 ? wp(-8) : 0 }]}>
                         <CustomImage
-                          uri={item?.user_id?.picture}
+                          resizeMode="cover"
                           source={IMAGES.avatar}
+                          uri={item?.user_id?.picture}
                           containerStyle={styles.applicantAvatarImage}
                           imageStyle={{ width: '100%', height: '100%' }}
-                          resizeMode="cover"
                         />
                       </View>
                     ))}
@@ -292,7 +289,7 @@ const CoJobDetails = () => {
                 {selectedMetricIndex === 0 && (
                   // Total Job View - Show empty or placeholder
                   <View style={styles.emptyState}>
-                    <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No job viewers</BaseText>
+                    <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No job viewers</BaseText>
                   </View>
                 )}
 
@@ -334,7 +331,7 @@ const CoJobDetails = () => {
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No applicants</BaseText>
+                      <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No applicants</BaseText>
                     </View>
                   )
                 )}
@@ -377,7 +374,7 @@ const CoJobDetails = () => {
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No suggested candidates</BaseText>
+                      <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No suggested candidates</BaseText>
                     </View>
                   )
                 )}
@@ -418,7 +415,7 @@ const CoJobDetails = () => {
                     })
                   ) : (
                     <View style={styles.emptyState}>
-                      <BaseText style={{...commonFontStyle(500, 16, colors._2F2F2F)}}>No shortlisted applicants</BaseText>
+                      <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No shortlisted applicants</BaseText>
                     </View>
                   )
                 )}
@@ -708,6 +705,7 @@ const styles = StyleSheet.create({
   },
   jobPostHeaderRight: {
     flex: 1,
+    gap: hp(7),
     marginLeft: wp(12),
   },
   companyName: {
@@ -718,14 +716,13 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 14, colors._4A4A4A),
   },
   jobPostActions: {
-    flexDirection: 'row',
     gap: wp(8),
   },
   actionIconButton: {
     width: wp(32),
     height: hp(32),
     borderRadius: hp(16),
-    backgroundColor: colors._F4E2B8,
+    backgroundColor: colors._FDF4DF,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -735,8 +732,8 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   jobTitle: {
-    ...commonFontStyle(700, 20, colors._0B3970),
     marginBottom: hp(8),
+    ...commonFontStyle(600, 18, colors.black),
   },
   jobDescriptionSnippet: {
     ...commonFontStyle(400, 14, colors._4A4A4A),

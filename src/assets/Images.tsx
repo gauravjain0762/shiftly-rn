@@ -29,6 +29,7 @@ export const IMAGES = {
   delete: require('./image/delete.png'),
   chat2: require('./image/chat2.png'),
   ring: require('./image/ring.png'),
+  posts: require('./image/posts.png'),
 
   logog: require('./image/logog.png'),
   logo1: require('./image/logo.png'),

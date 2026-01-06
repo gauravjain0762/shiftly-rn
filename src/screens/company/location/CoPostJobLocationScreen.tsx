@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {useTranslation} from 'react-i18next';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {AppStyles} from '../../../theme/appStyles';
@@ -663,9 +663,9 @@ const CoPostJobLocationScreen = () => {
             <View style={styles.container}>
               <MapView
                 ref={mapRef}
-                provider="google"
                 region={position}
                 onPress={handleMapPress}
+                provider={'google'}
                 onPoiClick={handlePoiClick}
                 onRegionChange={handleRegionChange}
                 onRegionChangeComplete={handleRegionChangeComplete}

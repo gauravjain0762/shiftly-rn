@@ -200,7 +200,7 @@ const JobDetail = () => {
         onBackPress={handleGoBack}
         containerStyle={styles.headerContainer}
         RightIcon={
-          <TouchableOpacity onPress={handle} style={styles.right}>
+          <TouchableOpacity onPress={handleShare} style={styles.right}>
             <Image
               source={IMAGES.share}
               resizeMode="contain"

@@ -432,6 +432,14 @@ const SignUp = () => {
                 inputStyle={styles.input}
                 containerStyle={{ marginBottom: 0 }}
                 maxLength={20}
+                returnKeyType='next'
+                onSubmitEditing={() => {
+                  if (!name?.trim()) {
+                    errorToast(t('Name is required'));
+                    return;
+                  }
+                  nextStep();
+                }}
               />
               <CharLength chars={20} value={name} type={'employee'} />
             </View>
@@ -464,6 +472,18 @@ const SignUp = () => {
                 value={email}
                 inputStyle={{ ...styles.input, textTransform: 'lowercase' }}
                 keyboardType="email-address"
+                returnKeyType='next'
+                onSubmitEditing={() => {
+                  if (!email?.trim()) {
+                    errorToast(t('Email is required'));
+                    return;
+                  }
+                  if (!emailRegex.test(email)) {
+                    errorToast('Please enter a valid email address');
+                    return;
+                  }
+                  handleRegister(true);
+                }}
               />
             </View>
             <GradientButton
@@ -513,6 +533,7 @@ const SignUp = () => {
                   placeholderTextColor={colors._DADADA}
                   isPassword
                   value={password}
+                  returnKeyType='next'
                   onChangeText={(text: any) => {
                     setPassword(text);
 
@@ -521,6 +542,20 @@ const SignUp = () => {
                         full_password: text,
                       }),
                     );
+                  }}
+                  onSubmitEditing={() => {
+                    const enteredPassword = password;
+
+                    if (!enteredPassword) {
+                      errorToast(t('Password is required'));
+                      return;
+                    }
+                    if (!passwordRules.every(rule => rule.test(enteredPassword))) {
+                      errorToast('Password does not meet all the requirements');
+                      return;
+                    }
+
+                    nextStep();
                   }}
                 />
               </View>
@@ -594,6 +629,18 @@ const SignUp = () => {
                   })
                 }
                 category="Employee"
+                returnKeyType='next'
+                onSubmitEditing={() => {
+                  if (!phone?.trim()) {
+                    errorToast(t('Phone number is required'));
+                    return;
+                  }
+                  if (phone?.length < 9) {
+                    errorToast('Please enter a valid phone number');
+                    return;
+                  }
+                  handleRegister();
+                }}
               // placeholder='Enter your phone number'
               />
             </View>
@@ -643,6 +690,12 @@ const SignUp = () => {
                         keyboardType="decimal-pad"
                         // autoFocus={idx === 0}
                         placeholderTextColor={colors._D5D5D5}
+                        returnKeyType={idx === otp.length - 1 ? 'done' : 'next'}
+                        onSubmitEditing={() => {
+                          if (idx === otp.length - 1) {
+                            handleOTPVerify();
+                          }
+                        }}
                       />
                     ),
                   )}
@@ -691,6 +744,8 @@ const SignUp = () => {
                 inputStyle={styles.input1}
                 multiline
                 numberOfLines={3}
+                returnKeyType='next'
+                onSubmitEditing={nextStep}
               />
               {options.map((option, index) => {
                 const isSelected = option === selected;

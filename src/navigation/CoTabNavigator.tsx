@@ -1,13 +1,13 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {IMAGES} from '../assets/Images';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { IMAGES } from '../assets/Images';
 import FastImage from 'react-native-fast-image';
-import {colors} from '../theme/colors';
-import {commonFontStyle, hp, wp} from '../theme/fonts';
-import {SCREENS} from './screenNames';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { colors } from '../theme/colors';
+import { commonFontStyle, hp, wp } from '../theme/fonts';
+import { SCREENS } from './screenNames';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CoHome from '../screens/company/home/CoHome';
 import CoJob from '../screens/company/job/CoJob';
 import CoPost from '../screens/company/post/CoPost';
@@ -18,14 +18,14 @@ import CoMessage from '../screens/company/chat/CoMessage';
 const Tab = createBottomTabNavigator();
 
 // Custom Tab Bar Component
-const CustomTabBar = ({state, navigation}: any) => {
+const CustomTabBar = ({ state, navigation }: any) => {
   const insets = useSafeAreaInsets();
 
   return (
     <View
       style={[
         styles.tabBarContainer,
-        {paddingBottom: insets.bottom || hp(10)},
+        { paddingBottom: insets.bottom || hp(10) },
       ]}>
       {state.routes.map((route: any, index: any) => {
         const isFocused = state.index === index;
@@ -39,7 +39,7 @@ const CustomTabBar = ({state, navigation}: any) => {
             iconName = isFocused ? IMAGES.Jobs_on : IMAGES.Jobs_off;
             break;
           case SCREENS.CoPost:
-            iconName = isFocused ? IMAGES.postFill : IMAGES.postFill;
+            iconName = isFocused ? IMAGES.posts : IMAGES.posts;
             break;
 
           case SCREENS.CoActivity:
@@ -78,26 +78,17 @@ const CustomTabBar = ({state, navigation}: any) => {
             key={route.name}
             onPress={() => navigation.navigate(route.name)}
             style={[styles.tabButton]}>
-            {route.name == SCREENS.CoPost ? (
-              <FastImage
-                source={iconName}
-                defaultSource={iconName}
-                style={styles.carImage}
-                resizeMode="contain"
-              />
-            ) : (
-              <FastImage
-                source={iconName}
-                defaultSource={iconName}
-                style={styles.image}
-                resizeMode="contain"
-                tintColor={isFocused ? colors._0B3970 : '#4A4A4AA8'}
-              />
-            )}
+            <FastImage
+              source={iconName}
+              defaultSource={iconName}
+              style={styles.image}
+              resizeMode="contain"
+              tintColor={isFocused ? colors._0B3970 : '#4A4A4AA8'}
+            />
             <Text
               style={[
                 styles.labelText,
-                {color: isFocused ? colors._0B3970 : '#4A4A4AA8'},
+                { color: isFocused ? colors._0B3970 : '#4A4A4AA8' },
               ]}>
               {labelName}
             </Text>
@@ -112,7 +103,7 @@ const CustomTabBar = ({state, navigation}: any) => {
 export default function CoTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={{headerShown: false, tabBarHideOnKeyboard: true}}
+      screenOptions={{ headerShown: false, tabBarHideOnKeyboard: true }}
       initialRouteName={SCREENS.CoHome}
       tabBar={(props: any) => <CustomTabBar {...props} />}>
       <Tab.Screen name={SCREENS.CoHome} component={CoHome} />

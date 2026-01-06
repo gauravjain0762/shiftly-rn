@@ -17,6 +17,7 @@ export const API = {
   companyAppleSignIn: '/company/appleSignin',
 
   // Dashboard
+  getDashboard: 'company/getDashboard',
   getBusinessTypes: '/company/getBusinessTypes',
   getServices: '/company/getServices',
   getCompanyPosts: '/company/getPosts',

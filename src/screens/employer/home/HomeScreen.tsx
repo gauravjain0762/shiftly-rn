@@ -73,6 +73,7 @@ const HomeScreen = () => {
       <View style={styles.header}>
         <HomeHeader
           companyProfile={userInfo}
+          onPressAvatar={() => navigateTo(SCREENS.ProfileScreen)}
           onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
         />
       </View>

@@ -6696,7 +6696,7 @@ react-native-linear-gradient@^2.8.3:
 
 react-native-maps@1.24.3:
   version "1.24.3"
-  resolved "https://registry.npmjs.org/react-native-maps/-/react-native-maps-1.24.3.tgz"
+  resolved "https://registry.npmjs.org/react-native-maps/-/react-native-maps-1.24.3.tgz#05ab0ddedd03c8f63dd52141fe7f0583b1a5cb2e"
   integrity sha512-cF5oTA8z24QqGIRFfDcsXLEs/gCd0RhaJ9KPv/2HiogKD5gpjh1naimZUJQ6IsEcUngSSk8iov6p2jd7dB+/bQ==
   dependencies:
     "@types/geojson" "^7946.0.13"

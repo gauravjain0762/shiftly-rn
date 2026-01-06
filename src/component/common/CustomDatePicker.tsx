@@ -28,7 +28,13 @@ const months = [
   'December',
 ];
 
-const years = Array.from({length: 2050 - 1975 + 1}, (_, i) => 1975 + i);
+// Generate years from 1975 to current year (no future years)
+const getYears = () => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({length: currentYear - 1975 + 1}, (_, i) => 1975 + i);
+};
+
+const years = getYears();
 
 type DateProps = {
   type: 'Education' | 'Experience';
@@ -84,6 +90,7 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
   const handleSelect = (item: string | number) => {
     let newMonth = selectedMonth;
     let newYear = selectedYear;
+    const currentYear = new Date().getFullYear();
 
     if (openPicker === 'Month') {
       newMonth = item as string;
@@ -91,6 +98,12 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
     } else if (openPicker === 'Year') {
       newYear = item.toString();
       setSelectedYear(newYear);
+
+      // ✅ Validation: Prevent selecting future years
+      if (Number(newYear) > currentYear) {
+        errorToast('Cannot select future years');
+        return;
+      }
     }
 
     // ✅ Validation for End Date
@@ -120,6 +133,12 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
             return;
           }
         }
+      } else if (label === 'Start Date') {
+        // ✅ Validation: Prevent selecting future years for Start Date
+        if (newYear && Number(newYear) > currentYear) {
+          errorToast('Cannot select future years');
+          return;
+        }
       }
     }
 
@@ -127,8 +146,11 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
     onChange?.({month: newMonth, year: newYear});
   };
 
-  // ✅ Filter years for End Date to prevent selecting years less than start year
+  // ✅ Filter years to prevent selecting future years and ensure End Date >= Start Date
   const getFilteredYears = () => {
+    const currentYear = new Date().getFullYear();
+    let filteredYears = years.filter(year => year <= currentYear);
+
     if (
       label === 'End Date' &&
       (type === 'Education' || type === 'Experience')
@@ -139,10 +161,20 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
           : dateValue?.startDate_year;
 
       if (startYear) {
-        return years.filter(year => year >= Number(startYear));
+        // End date must be >= start year and <= current year
+        filteredYears = filteredYears.filter(
+          year => year >= Number(startYear) && year <= currentYear
+        );
       }
+    } else if (
+      label === 'Start Date' &&
+      (type === 'Education' || type === 'Experience')
+    ) {
+      // Start date must be <= current year (no future years)
+      filteredYears = filteredYears.filter(year => year <= currentYear);
     }
-    return years;
+
+    return filteredYears;
   };
 
   // ✅ Filter months for End Date in the same year as start date
