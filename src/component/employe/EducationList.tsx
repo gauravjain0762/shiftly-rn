@@ -60,8 +60,9 @@ const EducationList: FC<Props> = ({
 
   // Check if "Other" is selected and set the state
   React.useEffect(() => {
-    const isOther = educationListEdit?.degree === 'Other' ||
-      (educationListEdit?.degree &&
+    const isOther =
+      educationListEdit?.degree === 'Other' ||
+      (!!educationListEdit?.degree &&
         !degreeOptions.some(opt => opt.value === educationListEdit.degree));
 
     setShowOtherDegreeInput(isOther);
@@ -188,7 +189,8 @@ const EducationList: FC<Props> = ({
         <View style={styles.halfWidth}>
           <CustomInput
             label="City/Region"
-            placeholder="Enter City/Region"
+            placeholder={'Enter City/\nRegion'}
+            placeholderTextColor={'#969595'}
             value={educationListEdit?.province}
             onChange={(text: string) => {
               const onlyLetters = text.replace(/[^A-Za-z ]/g, '');
@@ -198,7 +200,7 @@ const EducationList: FC<Props> = ({
               });
             }}
             containerStyle={styles.flex1}
-            inputStyle={{ color: colors._050505 }}
+            inputStyle={{ ...commonFontStyle(400, 16, colors._050505) }}
           />
         </View>
       </View>
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   dateContainer: {
-    marginBottom: 20,
+    marginBottom: hp(12),
     gap: 10,
   },
   row: {
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
   },
   countryPlaceholder: {
     flex: 1,
-    ...commonFontStyle(400, 18, '#969595'),
+    ...commonFontStyle(400, 17, '#969595'),
   },
   dropdownIcon: {
     width: 12,

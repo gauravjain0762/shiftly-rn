@@ -2,13 +2,13 @@ import {
   NavigationContainer,
   createNavigationContainerRef,
 } from '@react-navigation/native';
-import React, {FC, useEffect} from 'react';
-import {useAppDispatch} from '../redux/hooks';
+import React, { FC, useEffect } from 'react';
+import { useAppDispatch } from '../redux/hooks';
 import StackNavigator from './StackNavigator';
-import {Loader} from '../component';
-import {colors} from '../theme/colors';
-import {useSelector} from 'react-redux';
-import {selectIsLoading} from '../features/loaderSlice';
+import { Loader } from '../component';
+import { colors } from '../theme/colors';
+import { useSelector } from 'react-redux';
+import { selectIsLoading } from '../features/loaderSlice';
 import {
   onBackgroundNotificationPress,
   onMessage,
@@ -16,8 +16,9 @@ import {
   openAppNotificationEvent,
   requestNotificationUserPermission,
 } from '../hooks/notificationHandler';
-import {Linking} from 'react-native';
+import { Linking } from 'react-native';
 import Splash from "react-native-splash-screen";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -65,15 +66,17 @@ const RootContainer: FC = () => {
   };
 
   return (
-    <NavigationContainer
-      onReady={() => Splash.hide()}
-      linking={linking}
-      theme={DefaultThemeColor as any}
-      ref={navigationRef}>
-      {/* <StatusBar barStyle={'dark-content'} backgroundColor={colors.white} /> */}
-      <StackNavigator />
-      {isLoading && <Loader />}
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer
+        onReady={() => Splash.hide()}
+        linking={linking}
+        theme={DefaultThemeColor as any}
+        ref={navigationRef}>
+        {/* <StatusBar barStyle={'dark-content'} backgroundColor={colors.white} /> */}
+        <StackNavigator />
+        {isLoading && <Loader />}
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 };
 export default RootContainer;

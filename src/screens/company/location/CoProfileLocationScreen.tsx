@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
   btn: {
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: hp(40),
     position: 'absolute',
     marginVertical: hp(20),
     marginHorizontal: wp(20),
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
     width: wp(20),
     height: wp(20),
     borderRadius: wp(10),
-    backgroundColor: colors.primary || '#007AFF',
+    backgroundColor: colors.coPrimary || '#007AFF',
     borderWidth: 3,
     borderColor: 'white',
     shadowColor: '#000',
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
   currentLocationButton: {
     position: 'absolute',
     right: wp(16),
-    bottom: hp(100),
+    bottom: hp(150),
     backgroundColor: 'white',
     borderRadius: wp(25),
     padding: wp(12),

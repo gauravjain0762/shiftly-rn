@@ -311,7 +311,6 @@ const JobsScreen = () => {
                 <JobCard
                   key={index}
                   item={item}
-                  onPressShare={() => setModal(true)}
                   heartImage={isFavorite}
                   onPressFavorite={() => handleToggleFavorite(item)}
                   onPress={() =>

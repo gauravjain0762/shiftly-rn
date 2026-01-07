@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
-import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Share from 'react-native-share';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
@@ -13,7 +14,6 @@ type props = {
   item?: any;
   heartImage?: any;
   onPress?: () => void;
-  // onPressShare?: () => void;
   onPressFavorite?: () => void;
   isShowFavIcon?: boolean;
 };
@@ -34,7 +34,6 @@ const JobCard: FC<props> = ({
   onPress = () => { },
   onPressFavorite,
   heartImage,
-  // onPressShare = () => { },
   isShowFavIcon = true,
 }) => {
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
@@ -52,30 +51,33 @@ const JobCard: FC<props> = ({
           : '';
 
       const message = `${title}
-  ${area}
-  
-  ${description}
-  
-  ${salary}`;
+${area}
 
-      let imagePath;
+${description}
+
+${salary}`;
+
+      const shareOptions: any = {
+        title: title,
+        message: message,
+      };
 
       if (coverImageUri) {
-        imagePath = await downloadImage(coverImageUri);
+        try {
+          const imagePath = await downloadImage(coverImageUri);
+          shareOptions.url = imagePath;
+          shareOptions.type = 'image/jpeg';
+        } catch (imageError) {
+          console.log('❌ Image download error:', imageError);
+        }
       }
 
-      await Share.open({
-        title: title,
-        message: `${title}
-      ${area}
-      
-      ${description}
-      
-      ${salary}`,
-      });
-      
-    } catch (err) {
-      console.log('❌ Share error:', err);
+      await Share.open(shareOptions);
+
+    } catch (err: any) {
+      if (err?.message !== 'User did not share') {
+        console.log('❌ Share error:', err);
+      }
     }
   };
 

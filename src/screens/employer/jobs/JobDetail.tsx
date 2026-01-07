@@ -67,7 +67,7 @@ const JobDetail = () => {
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
 
   const JobDetailsArr = {
-    'Job Type': curr_jobdetails?.job_type,
+    'Job Type': curr_jobdetails?.contract_type,
     Department: curr_jobdetails?.job_sector,
     'Start Date': curr_jobdetails?.start_date,
     Duration: curr_jobdetails?.duration,

@@ -6,7 +6,7 @@ import {
   View,
   Keyboard,
 } from 'react-native';
-import React, {useState} from 'react';
+import React from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {MultiSelect} from 'react-native-element-dropdown';
@@ -23,7 +23,7 @@ type Props = {
   data?: any;
   label?: any;
   value?: any;
-  onChange?: (text: string) => void;
+  onChange?: (value: any) => void;
   isSearch?: any;
   inputContainer?: any;
   container?: any;
@@ -37,7 +37,11 @@ type Props = {
   dropIcon?: string;
   dateMode?: string;
   placeholderStyle?: any;
-  dropdownPosition?: 'top' | 'bottom' | "auto";
+  flatListProps?: any;
+  required?: boolean;
+  selectedStyle?: any;
+  dropdownPosition?: 'top' | 'bottom' | 'auto';
+  hideSelectedItems?: boolean;
 };
 
 const CustomDropdownMulti = ({
@@ -68,7 +72,8 @@ const CustomDropdownMulti = ({
   required,
   selectedStyle,
   placeholderStyle,
-  dropdownPosition
+  dropdownPosition,
+  hideSelectedItems = false,
 }: Props) => {
   return (
     <>
@@ -104,6 +109,11 @@ const CustomDropdownMulti = ({
           minHeight={30}
           keyboardAvoiding={true}
           activeColor={'transparent'}
+          renderSelectedItem={
+            hideSelectedItems
+              ? () => <View style={styles.hiddenSelectedItem} />
+              : undefined
+          }
           renderRightIcon={() => {
             return (
               <Image
@@ -248,5 +258,10 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     resizeMode: 'contain',
+  },
+  hiddenSelectedItem: {
+    width: 0,
+    height: 0,
+    opacity: 0,
   },
 });

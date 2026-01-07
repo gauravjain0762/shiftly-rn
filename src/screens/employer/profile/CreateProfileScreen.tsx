@@ -498,6 +498,7 @@ const CreateProfileScreen = () => {
       edges={['bottom']}
       style={{ flex: 1, backgroundColor: colors._F7F7F7 }}>
       <LinearContainer
+        containerStyle={{ flex: 1 }}
         colors={[colors._F7F7F7, colors._F7F7F7]}>
         {/* Fixed Header */}
         <View style={styles.topConrainer}>
@@ -825,7 +826,7 @@ const CreateProfileScreen = () => {
               handleUpdateProfile();
             }
           }}
-          // disabled={resumes?.length === 0}
+        // disabled={resumes?.length === 0}
         />
       )}
       {(isLoadingEducation || isLoadingAboutme) && <Loader />}

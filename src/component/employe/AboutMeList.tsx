@@ -183,7 +183,11 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
           placeholder={'Add your skills'}
           value={aboutEdit?.selectedSkills}
           selectedStyle={styles.selectedStyle}
+          dropdownStyle={{
+            marginBottom: hp(6),
+          }}
           container={styles.multiDropdownContainer}
+          hideSelectedItems
           onChange={(selectedItems: any) => {
             setAboutEdit({
               ...aboutEdit,
@@ -191,24 +195,23 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
             });
           }}
         />
+        {aboutEdit?.selectedSkills?.length > 0 && (
+          <View style={[styles.languageListContainer, styles.skillsListContainer]}>
+            {aboutEdit?.selectedSkills?.map((id: any) => {
+              const skill = skillsList?.find(
+                (s: any) => s._id === id || s._id === id?._id,
+              );
+              return (
+                <View key={id} style={styles.languageChip}>
+                  <Text style={styles.languageChipText}>
+                    {skill?.title || id}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        )}
       </View>
-
-      {aboutEdit?.selectedSkills?.length > 0 && (
-        <View style={styles.languageListContainer}>
-          {aboutEdit?.selectedSkills?.map((id: any) => {
-            const skill = skillsList.find(
-              (s: any) => s._id === id || s._id === id?._id,
-            );
-            return (
-              <View key={id} style={styles.languageChip}>
-                <Text style={styles.languageChipText}>
-                  {skill?.title || id}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      )}
 
       <View style={{ marginTop: hp(0), overflow: 'visible', zIndex: 1 }}>
         <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
@@ -217,7 +220,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
             message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
             position="bottom"
             containerStyle={styles.tooltipIcon}
-            tooltipBoxStyle={{ left: wp(-70), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+            tooltipBoxStyle={{ left: '-250%', top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
           />
         </View>
         <CustomDropdownMulti
@@ -226,8 +229,9 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
           data={languages.map(lang => ({ label: lang, value: lang }))}
           placeholder={'Add your languages'}
           value={aboutEdit?.selectedLanguages.map((l: any) => l.name)}
-          container={[styles.multiDropdownContainer, { overflow: 'visible' }]}
+          container={[styles.multiDropdownContainer, { overflow: 'visible', marginBottom: hp(15) }]}
           selectedStyle={styles.selectedStyle}
+          hideSelectedItems
           onChange={(selectedItems: string[]) => {
             const updatedLanguages = selectedItems.map(name => {
               const existing = (aboutEdit?.selectedLanguages || []).find(
@@ -261,7 +265,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
                       ]}
                       onPress={() => {
                         const updatedLanguages = aboutEdit.selectedLanguages.map(
-                          l => (l.name === lang.name ? { ...l, level } : l),
+                          (l: any) => (l.name === lang.name ? { ...l, level } : l),
                         );
 
                         setAboutEdit({
@@ -350,8 +354,8 @@ const styles = StyleSheet.create({
     // marginBottom: 20,
   },
   multiDropdownContainer: {
-    // marginBottom: 15,
-    marginTop: 0,
+    marginTop: hp(5),
+    marginBottom: 0,
   },
   headerText: {
     marginBottom: 8,
@@ -374,8 +378,11 @@ const styles = StyleSheet.create({
     gap: wp(4),
     flexWrap: 'wrap',
     flexDirection: 'row',
-    marginBottom: hp(5),
-    marginTop: hp(10),
+    marginTop: hp(0),
+    marginBottom: 0,
+  },
+  skillsListContainer: {
+    marginTop: hp(8),
   },
   languageChip: {
     borderWidth: 1,

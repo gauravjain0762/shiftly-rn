@@ -1,20 +1,19 @@
 import {
   Platform,
+  StatusBar,
   StyleSheet,
-  Text,
   View,
   ViewStyle,
-  ImageBackground,
 } from 'react-native';
-import React, {memo} from 'react';
+import React, { memo } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   SafeAreaView,
   SafeAreaViewProps,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import {AppStyles} from '../../theme/appStyles';
-import {colors} from '../../theme/colors';
+import { AppStyles } from '../../theme/appStyles';
+import { useIsFocused } from '@react-navigation/native';
 
 type Props = {
   children: any;
@@ -28,22 +27,58 @@ const LinearContainer = ({
   children,
   containerStyle = [],
   colors = '',
-  SafeAreaProps = {edges: ['top']},
+  SafeAreaProps = { edges: ['top'] },
   ...props
 }: Props) => {
+
+  const insets = useSafeAreaInsets();
+  const isAndroid15Plus = Platform.OS === 'android' && Platform.Version >= 35;
+  const backgroundColor = "#fff";
+
+  const getPaddingTop = () => {
+    if (isAndroid15Plus) {
+      return insets.top;
+    }
+    return insets.top;
+  };
+
+
+  const FocusAwareStatusBar = ({ barStyle, backgroundColor }) => {
+
+    const isFocused = useIsFocused();
+    return isFocused ? (
+      <StatusBar
+        barStyle={barStyle}
+        backgroundColor="transparent"
+        animated
+        showHideTransition="fade"
+        translucent={Platform.OS === 'android'}
+      />
+    ) : null;
+  };
+
   return (
     <View style={[styles.mainContainer]}>
       <LinearGradient
         style={styles.linearView}
         colors={colors || ['#043379', '#041F50']}>
-        <SafeAreaView
-          {...SafeAreaProps}
-          style={[AppStyles.flex]}
-          edges={['top']}>
+        <View
+          style={[
+            styles.containerStyle,
+            {
+              backgroundColor: backgroundColor,
+              paddingTop: getPaddingTop(),
+              // paddingBottom: insets.bottom,
+              paddingLeft: insets.left,
+              paddingRight: insets.right,
+            },
+          ]}
+        >
+          <FocusAwareStatusBar barStyle={'dark-content'} backgroundColor={backgroundColor} />
           <View style={[styles.containerStyle, containerStyle]} {...props}>
             {children}
           </View>
-        </SafeAreaView>
+        </View>
       </LinearGradient>
     </View>
   );
@@ -54,7 +89,7 @@ export default memo(LinearContainer);
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: 'white',
   },
   linearView: {
     flex: 1,

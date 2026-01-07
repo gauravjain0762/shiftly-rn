@@ -38,7 +38,7 @@ const ApplyJob = () => {
   const data = params?.data as any;
   console.log("🔥 ~ ApplyJob ~ data:", data)
   const [imageModal, setImageModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<any>([]);
+  const [selectedDoc, setSelectedDoc] = useState<any>(null);
   const resumeList = params?.resumeList as any;
   const { bottom } = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
@@ -48,8 +48,8 @@ const ApplyJob = () => {
   );
 
   const handleApplyJob = async () => {
-    if (!selectedDoc) {
-      errorToast('Please select or upload a resume');
+    if (!selectedDoc || (!selectedDoc?._id && !selectedDoc?.file)) {
+      errorToast(t('Please select or upload a resume'));
       return;
     }
 
@@ -112,7 +112,7 @@ const ApplyJob = () => {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
-              <Text style={{...commonFontStyle(400, 15, colors._050505)}}>{data?.job_sector || "N/A"}</Text>
+              <Text style={{...commonFontStyle(400, 15, colors._050505)}}>{data?.company_id?.company_name || "N/A"}</Text>
               <Text style={styles.location}>{data?.address}</Text>
               <Text style={[styles.meta, { flex: 0 }]}>{data?.area}</Text>
               <View

@@ -28,7 +28,7 @@ interface Props extends DropdownProps<any> {
   data?: any;
   label?: any;
   value?: any;
-  onChange?: (text: string) => void;
+  onChange?: (item: any) => void;
   isSearch?: any;
   inputContainer?: any;
   container?: ViewStyle;
