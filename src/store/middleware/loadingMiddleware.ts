@@ -10,7 +10,7 @@ export const loadingMiddleware: Middleware = api => next => action => {
   const {type, meta} = action as any;
   const isRtkQuery =
     apiReducerPaths.some(path => type.startsWith(`${path}/`)) &&
-    // skipLoader support: if the original arg had skipLoader=true, don’t count
+    // skipLoader support: check both meta.arg.skipLoader and the query result
     !(meta as any)?.arg?.skipLoader;
 
   if (isRtkQuery) {

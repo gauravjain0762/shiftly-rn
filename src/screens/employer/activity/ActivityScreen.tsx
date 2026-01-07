@@ -44,7 +44,7 @@ const ActivityScreen = () => {
           ListEmptyComponent={() => {
             return (
               <NoDataText
-                text="You don’t have any activity yet. Once you post jobs or content, updates will appear here."
+                text="You don’t have any activity yet."
                 textStyle={{ color: colors._0B3970 }}
               />
             );

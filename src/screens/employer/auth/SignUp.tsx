@@ -107,7 +107,7 @@ const SignUp = () => {
   const [empOTPVerify] = useEmployeeOTPVerifyMutation({});
   const [employeeResendOTP] = useEmployeeResendOTPMutation({});
   const [empUpdateProfile] = useEmpUpdateProfileMutation({});
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(signupData?.timer ?? 30);
 
   const [isVisible, setIsVisible] = useState<null | string>(null);
 
@@ -152,6 +152,18 @@ const SignUp = () => {
     dispatch(setCreateEmployeeAccount(updates));
   };
 
+  // Sync local timer with Redux timer only when explicitly set (like on Resend or OTP verified)
+  useEffect(() => {
+    // Only sync when Redux timer is explicitly set to 30 (Resend clicked) or 0 (OTP verified)
+    // This prevents timer from resetting when Next is clicked without OTP
+    if (signupData?.timer !== undefined) {
+      // Only update if Redux timer is 30 (resend) or 0 (verified), or if local timer is not initialized
+      if (signupData.timer === 30 || signupData.timer === 0 || (timer === 30 && signupData.timer !== 30)) {
+        setTimer(signupData.timer);
+      }
+    }
+  }, [signupData?.timer]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
@@ -191,9 +203,9 @@ const SignUp = () => {
       };
 
       if (isGoogleAuth || isAppleAuth) {
-        response = await empSendOTP(socialObj).unwrap() as any;
+        response = await empSendOTP({ ...socialObj, skipLoader: true }).unwrap() as any;
       } else {
-        response = await empSignUp(obj).unwrap() as any;
+        response = await empSignUp({ ...obj, skipLoader: true }).unwrap() as any;
       }
 
       if (response?.status) {
@@ -232,12 +244,15 @@ const SignUp = () => {
         // dispatch(clearEmployeeAccount());
         setTimeout(() => {
           updateSignupData({ showModal: true, timer: 0 });
+          setTimer(0);
         }, 200);
       } else {
         errorToast(response?.message);
+        // Don't reset timer on error - keep the current timer running
       }
     } catch (error) {
       console.error('Error registering user:', error);
+      // Don't reset timer on error - keep the current timer running
     }
   };
 

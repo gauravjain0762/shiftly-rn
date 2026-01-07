@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     alignItems: 'center',
     justifyContent: 'center',
-    width: wp(90),
+    width: wp(100),
     marginLeft: wp(-33),
   },
   dotLabel: {

@@ -377,12 +377,15 @@ export const authApi = createApi({
       },
     }),
     employeeSendOTP: builder.mutation<any, any>({
-      query: (credentials: any) => ({
-        url: API.employeeSendOTP,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-      }),
+      query: (credentials: any) => {
+        const {skipLoader, ...data} = credentials;
+        return {
+          url: API.employeeSendOTP,
+          method: HTTP_METHOD.POST,
+          data,
+          skipLoader: skipLoader ?? true,
+        };
+      },
       invalidatesTags: ['Auth'],
       async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
@@ -425,12 +428,15 @@ export const authApi = createApi({
       },
     }),
     employeeSignUp: builder.mutation<any, any>({
-      query: (credentials: any) => ({
-        url: API.employeeSignup,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-      }),
+      query: (credentials: any) => {
+        const {skipLoader, ...data} = credentials;
+        return {
+          url: API.employeeSignup,
+          method: HTTP_METHOD.POST,
+          data,
+          skipLoader: skipLoader ?? true,
+        };
+      },
       invalidatesTags: ['Auth'],
       async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
         try {
