@@ -364,10 +364,10 @@ const JobsScreen = () => {
           <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
             <Image style={styles.headerIcons} source={IMAGES.filter} />
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => navigateTo(SCREENS.NotificationScreen)}>
             <Image style={styles.headerIcons} source={IMAGES.notification} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
 
@@ -680,7 +680,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: wp(25),
     paddingVertical: hp(24),
   },
   headerTitle: {

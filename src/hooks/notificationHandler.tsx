@@ -2,7 +2,8 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import {setFcmToken} from '../features/authSlice';
 import {PermissionsAndroid, Platform, Linking} from 'react-native';
-import {errorToast} from '../utils/commonFunction';
+import {errorToast, navigateTo} from '../utils/commonFunction';
+import { SCREENS } from '../navigation/screenNames';
 
 //
 // 🔔 Display Notification + Badge Update
@@ -180,7 +181,7 @@ export const navigateToOrderDetails = async (remoteMessage: any) => {
       return;
     }
 
-    console.log('Notification data:', data);
+    console.log('Notification data:>>>>>>>', data);
 
     // Check if notification type is "interview"
     if (data.type === 'interview' && data.interview_link) {
@@ -190,7 +191,11 @@ export const navigateToOrderDetails = async (remoteMessage: any) => {
       const supported = await Linking.canOpenURL(data.interview_link);
       
       if (supported) {
-        await Linking.openURL(data.interview_link);
+        // await Linking.openURL(data.interview_link);
+        navigateTo(SCREENS.JobInvitationScreen, {
+          link: data.interview_link,
+          jobDetail: data.job_detail,
+        });
       } else {
         console.error('Cannot open URL:', data.interview_link);
         errorToast('Unable to open interview link');
