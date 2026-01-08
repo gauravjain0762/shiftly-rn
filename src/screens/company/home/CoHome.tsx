@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GradientButton, HomeHeader, LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { navigateTo } from '../../../utils/commonFunction';
@@ -145,94 +145,96 @@ const CoHome = () => {
         />
       )} */}
 
-      <View style={{ borderRadius: hp(15), borderColor: colors._E0C688, borderWidth: 1, paddingHorizontal: wp(16), paddingVertical: hp(20) }}>
-        <Text style={{ ...commonFontStyle(600, 16, colors.black) }}>{"Job Status Summary"}</Text>
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+        <View style={{ borderRadius: hp(15), borderColor: colors._E0C688, borderWidth: 1, paddingHorizontal: wp(16), paddingVertical: hp(20) }}>
+          <Text style={{ ...commonFontStyle(600, 16, colors.black) }}>{"Job Status Summary"}</Text>
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: wp(10) }}>
-          {
-            job_summary?.map((item, index) => {
-              return (
-                <View key={index} style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: hp(10), backgroundColor: item?.color, paddingVertical: hp(10), marginTop: hp(18) }}>
-                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: wp(10) }}>
-                    <Image source={IMAGES.work} style={{ width: wp(20), height: hp(20) }} />
-                    <Text style={{ ...commonFontStyle(500, 14, colors.black) }}>{item.title}</Text>
-                    <Text style={{ ...commonFontStyle(500, 20, colors.black) }}>{item.value}</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: wp(10) }}>
+            {
+              job_summary?.map((item, index) => {
+                return (
+                  <View key={index} style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: hp(10), backgroundColor: item?.color, paddingVertical: hp(10), marginTop: hp(18) }}>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: wp(10) }}>
+                      <Image source={IMAGES.work} style={{ width: wp(20), height: hp(20) }} />
+                      <Text style={{ ...commonFontStyle(500, 14, colors.black) }}>{item.title}</Text>
+                      <Text style={{ ...commonFontStyle(500, 20, colors.black) }}>{item.value}</Text>
+                    </View>
                   </View>
-                </View>
-              )
-            })}
+                )
+              })}
+          </View>
+
         </View>
 
-      </View>
-
-      <View style={{ backgroundColor: colors._0B3970, width: '100%', height: hp(60), marginVertical: hp(18), borderRadius: hp(10), justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: wp(16), }}>
-        <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: colors._F3E1B7, width: wp(30), height: wp(30), borderRadius: wp(30) }}>
-          <Image source={IMAGES.check} style={{ width: wp(20), height: hp(20) }} />
+        <View style={{ backgroundColor: colors._0B3970, width: '100%', height: hp(60), marginVertical: hp(18), borderRadius: hp(10), justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: wp(16), }}>
+          <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: colors._F3E1B7, width: wp(30), height: wp(30), borderRadius: wp(30) }}>
+            <Image source={IMAGES.check} style={{ width: wp(20), height: hp(20) }} />
+          </View>
+          <Text style={{ ...commonFontStyle(500, 15, colors.white), textAlign: 'center' }}>
+            {`${job_stats?.ai_matched_candidates} new candidates matched by`}{" "}
+            <Text style={{ ...commonFontStyle(700, 17, colors._F3E1B7) }}>{"AI"}</Text>
+          </Text>
         </View>
-        <Text style={{ ...commonFontStyle(500, 15, colors.white), textAlign: 'center' }}>
-          {`${job_stats?.ai_matched_candidates} new candidates matched by`}{" "}
-          <Text style={{ ...commonFontStyle(700, 17, colors._F3E1B7) }}>{"AI"}</Text>
-        </Text>
-      </View>
 
-      <View style={styles.metricCardsContainer}>
-        {metricOptions.map((option, index) => {
-          const isSelected = selectedMetricIndex === index;
-          return (
-            <TouchableOpacity
-              key={index}
-              activeOpacity={0.7}
-              onPress={() => setSelectedMetricIndex(index)}
-              style={[
-                styles.metricCard,
-                isSelected && styles.metricCardHighlighted,
-              ]}>
-              <Image
-                source={option.icon}
-                resizeMode="contain"
+        <View style={styles.metricCardsContainer}>
+          {metricOptions.map((option, index) => {
+            const isSelected = selectedMetricIndex === index;
+            return (
+              <TouchableOpacity
+                key={index}
+                activeOpacity={0.7}
+                onPress={() => setSelectedMetricIndex(index)}
                 style={[
-                  styles.metricIcon,
-                  { tintColor: isSelected ? colors.white : '#CDA953' }
-                ]}
-              />
-              <View style={styles.metricTextContainer}>
-                <Text
-                  style={
-                    isSelected
-                      ? styles.metricLabelBoldWhite
-                      : styles.metricLabelBold
-                  }>
-                  {option.label}
-                </Text>
-                <Text
-                  style={
-                    isSelected
-                      ? styles.metricLabelBoldWhite
-                      : styles.metricLabelBold
-                  }>
-                  {option.subLabel}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+                  styles.metricCard,
+                  isSelected && styles.metricCardHighlighted,
+                ]}>
+                <Image
+                  source={option.icon}
+                  resizeMode="contain"
+                  style={[
+                    styles.metricIcon,
+                    { tintColor: isSelected ? colors.white : '#CDA953' }
+                  ]}
+                />
+                <View style={styles.metricTextContainer}>
+                  <Text
+                    style={
+                      isSelected
+                        ? styles.metricLabelBoldWhite
+                        : styles.metricLabelBold
+                    }>
+                    {option.label}
+                  </Text>
+                  <Text
+                    style={
+                      isSelected
+                        ? styles.metricLabelBoldWhite
+                        : styles.metricLabelBold
+                    }>
+                    {option.subLabel}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
-      <View style={{ gap: hp(25), marginVertical: hp(30) }}>
-        <GradientButton
-          type="Company"
-          title="Create a Job"
-          onPress={() => navigateTo(SCREENS.CoJob)}
-          textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
-          gradientColors={[colors._2D5486, colors._0B3970, colors._051C38]}
-        />
-        <GradientButton
-          type="Company"
-          title="Manage Job"
-          onPress={() => navigateTo(SCREENS.CoJob)}
-        />
-      </View>
+        <View style={{ gap: hp(25), marginVertical: hp(30) }}>
+          <GradientButton
+            type="Company"
+            title="Create a Job"
+            onPress={() => navigateTo(SCREENS.CoJob)}
+            textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
+            gradientColors={[colors._2D5486, colors._0B3970, colors._051C38]}
+          />
+          <GradientButton
+            type="Company"
+            title="Manage Job"
+            onPress={() => navigateTo(SCREENS.CoJob)}
+          />
+        </View>
 
+      </ScrollView>
     </LinearContainer >
   );
 };

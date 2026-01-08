@@ -438,8 +438,10 @@ const SignUp = () => {
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
-              <Text style={styles.title}>{t(`Hi! Let’s start with your full name 🙂 Please enter your first and last name`)}</Text>
+              <Text style={styles.title}>{t(`Hi! Let's start with your full name 🙂 Please enter your first and last name`)}</Text>
               <CustomTextInput
+                label={t('Full Name')}
+                required
                 placeholder={t('ex. John smith')}
                 placeholderTextColor={colors._7B7878}
                 onChangeText={text => updateSignupData({ name: text })}
@@ -481,6 +483,8 @@ const SignUp = () => {
                 {t('Great! Can you share your email so we can create your account?')}
               </Text>
               <CustomTextInput
+                label={t('Email')}
+                required
                 placeholder={t('Type your email here')}
                 placeholderTextColor={colors._7B7878}
                 onChangeText={text => updateSignupData({ email: text })}
@@ -540,6 +544,8 @@ const SignUp = () => {
               </View> */}
               <View style={styles.otpContainer}>
                 <CustomTextInput
+                  label={t('Password')}
+                  required
                   showRightIcon
                   inputStyle={styles.passinput}
                   containerStyle={styles.inputcontainer}
@@ -630,6 +636,9 @@ const SignUp = () => {
             <View>
               <Text style={styles.title}>
                 {t('What is your phone number?')}
+              </Text>
+              <Text style={styles.fieldLabel}>
+                {t('Phone Number')}<Text style={styles.required}>*</Text>
               </Text>
               <PhoneInput
                 phone={phone}
@@ -805,6 +814,9 @@ const SignUp = () => {
               <Text style={styles.title}>
                 {t('What is your date of birth?')}
               </Text>
+              <Text style={styles.fieldLabel}>
+                {t('Date of Birth')}<Text style={styles.required}>*</Text>
+              </Text>
               <Pressable
                 style={styles.dateRow}
                 onPress={() => updateSignupData({ open: true })}>
@@ -843,6 +855,9 @@ const SignUp = () => {
               <View style={styles.underline} />
               <Text style={[styles.title, { marginTop: 40 }]}>
                 {t('What is your gender?')}
+              </Text>
+              <Text style={styles.fieldLabel}>
+                {t('Gender')}<Text style={styles.required}>*</Text>
               </Text>
               <Pressable style={styles.dateRow} onPress={() => { }}>
                 <Text
@@ -902,7 +917,9 @@ const SignUp = () => {
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}>
               <View style={styles.fieldHeader}>
-                <Text style={styles.fieldHeaderText}>{t('Select your nationality ')}</Text>
+                <Text style={styles.fieldHeaderText}>
+                  {t('Select your nationality ')}<Text style={styles.required}>*</Text>
+                </Text>
                 <Tooltip
                   position="bottom"
                   containerStyle={styles.tooltipIcon}
@@ -939,7 +956,9 @@ const SignUp = () => {
               <View style={styles.underline} />
 
               <View style={[styles.fieldHeader, { marginTop: hp(27) }]}>
-                <Text style={styles.fieldHeaderText}>{t('Where are you currently residing?')}</Text>
+                <Text style={styles.fieldHeaderText}>
+                  {t('Where are you currently residing?')}<Text style={styles.required}>*</Text>
+                </Text>
                 <Tooltip
                   message={t('Used to match you with jobs near you or offering relocation support.')}
                   position="bottom"
@@ -1243,6 +1262,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     ...commonFontStyle(500, 25, colors._0B3970),
     paddingTop: hp(30),
+  },
+  fieldLabel: {
+    marginTop: hp(30),
+    marginBottom: hp(12),
+    ...commonFontStyle(500, 18, colors._0B3970),
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
   tooltipIcon: {
     marginTop: hp(30),

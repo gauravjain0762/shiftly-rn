@@ -41,9 +41,10 @@ type DateProps = {
   label: string;
   dateValue: any;
   onChange: (date: any) => void;
+  required?: boolean;
 };
 
-const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
+const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProps) => {
   const [openPicker, setOpenPicker] = useState<'Month' | 'Year' | null>(null);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
@@ -236,7 +237,10 @@ const CustomDatePicker = ({label, onChange, dateValue, type}: DateProps) => {
 
   return (
     <View style={{flex: 1}}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.label}>
+        {label}
+        {required && <Text style={styles.required}>*</Text>}
+      </Text>
 
       <View style={{flexDirection: 'row', alignItems: 'center', gap: wp(16)}}>
         <Dropdown
@@ -313,6 +317,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 12,
     ...commonFontStyle(600, 18, colors._050505),
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
   inputStyle: {
     ...commonFontStyle(400, 18, colors._050505),

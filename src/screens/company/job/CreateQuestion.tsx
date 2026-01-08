@@ -20,7 +20,6 @@ import {
   goBack,
   errorToast,
   successToast,
-  navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
 import { useRoute } from '@react-navigation/native';
@@ -31,6 +30,7 @@ import { useAppSelector } from '../../../redux/hooks';
 import { selectJobForm } from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import CreateQuestionSkeleton from '../../../component/skeletons/CreateQuestionSkeleton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const QUESTION_PRESETS = [
   'Describe your previous job experience relevant to this role?',
@@ -47,7 +47,7 @@ const CreateQuestion = () => {
   const [addedQuestions, setAddedQuestions] = useState<string[]>([]);
   const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([]);
   const [areQuestionsLoading, setAreQuestionsLoading] = useState(true);
-  const [sendInvites, { isLoading }] = useSendInterviewInvitesMutation();
+  const [sendInvites, { isLoading }] = useSendInterviewInvitesMutation({});
   const { updateJobForm } = useJobFormUpdater();
   const { isSuccessModalVisible } = useAppSelector((state: any) =>
     selectJobForm(state),
@@ -136,132 +136,134 @@ const CreateQuestion = () => {
   };
 
   return (
-    <LinearContainer colors={[colors.coPrimary, colors.white]}>
-      <View style={styles.header}>
-        <BackHeader
-          type="company"
-          onBackPress={() => goBack()}
-          title={t('Create Question')}
-          isRight={false}
-        />
-      </View>
+    <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+      <LinearContainer colors={[colors.coPrimary, colors.white]}>
+        <View style={styles.header}>
+          <BackHeader
+            type="company"
+            onBackPress={() => goBack()}
+            title={t('Create Question')}
+            isRight={false}
+          />
+        </View>
 
-      {areQuestionsLoading ? (
-        <CreateQuestionSkeleton />
-      ) : (
-        <>
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}>
-            <View style={styles.container}>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder={t('Write your question here...')}
-                  placeholderTextColor={colors.greyOpacity}
-                  value={questionText}
-                  onChangeText={setQuestionText}
-                  multiline
-                  textAlignVertical="top"
-                />
-              </View>
-
-              <TouchableOpacity
-                style={styles.addQuestionButton}
-                onPress={handleAddQuestion}
-                activeOpacity={0.7}>
-                <View style={styles.addButtonIcon}>
-                  <Plus size={20} color={colors.black} />
+        {areQuestionsLoading ? (
+          <CreateQuestionSkeleton />
+        ) : (
+          <>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}>
+              <View style={styles.container}>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder={t('Write your question here...')}
+                    placeholderTextColor={colors.greyOpacity}
+                    value={questionText}
+                    onChangeText={setQuestionText}
+                    multiline
+                    textAlignVertical="top"
+                  />
                 </View>
-                <Text style={styles.addButtonText}>{t('Add New Question')}</Text>
-              </TouchableOpacity>
 
-              <View style={styles.predefinedSection}>
-                {predefinedQuestions.map((question, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.questionCard}
-                    onPress={() => handleSelectPredefinedQuestion(question)}
-                    activeOpacity={0.7}>
-                    <Text style={styles.questionCardText}>{question}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                <TouchableOpacity
+                  style={styles.addQuestionButton}
+                  onPress={handleAddQuestion}
+                  activeOpacity={0.7}>
+                  <View style={styles.addButtonIcon}>
+                    <Plus size={20} color={colors.black} />
+                  </View>
+                  <Text style={styles.addButtonText}>{t('Add New Question')}</Text>
+                </TouchableOpacity>
 
-              {addedQuestions.length > 0 && (
-                <View style={styles.addedSection}>
-                  <Text style={styles.sectionTitle}>{t('Added Questions')}</Text>
-                  {addedQuestions.map((question, index) => (
-                    <View key={index} style={styles.addedQuestionCard}>
-                      <Text style={styles.addedQuestionText}>{question}</Text>
-                      <TouchableOpacity
-                        onPress={() => handleRemoveQuestion(index)}
-                        style={styles.removeButton}>
-                        <Text style={styles.removeButtonText}>×</Text>
-                      </TouchableOpacity>
-                    </View>
+                <View style={styles.predefinedSection}>
+                  {predefinedQuestions.map((question, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.questionCard}
+                      onPress={() => handleSelectPredefinedQuestion(question)}
+                      activeOpacity={0.7}>
+                      <Text style={styles.questionCardText}>{question}</Text>
+                    </TouchableOpacity>
                   ))}
                 </View>
-              )}
+
+                {addedQuestions.length > 0 && (
+                  <View style={styles.addedSection}>
+                    <Text style={styles.sectionTitle}>{t('Added Questions')}</Text>
+                    {addedQuestions.map((question, index) => (
+                      <View key={index} style={styles.addedQuestionCard}>
+                        <Text style={styles.addedQuestionText}>{question}</Text>
+                        <TouchableOpacity
+                          onPress={() => handleRemoveQuestion(index)}
+                          style={styles.removeButton}>
+                          <Text style={styles.removeButtonText}>×</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonContainer}>
+              <GradientButton
+                style={styles.submitButton}
+                type="Company"
+                title={t('Proceed to AI Interview')}
+                onPress={handleSubmit}
+                disabled={isLoading}
+              />
             </View>
-          </ScrollView>
+          </>
+        )}
 
-          <View style={styles.buttonContainer}>
-            <GradientButton
-              style={styles.submitButton}
-              type="Company"
-              title={t('Proceed to AI Interview')}
-              onPress={handleSubmit}
-              disabled={isLoading}
-            />
-          </View>
-        </>
-      )}
-
-      {isLoading && (
+        {/* {isLoading && (
         <View style={styles.loadingOverlay}>
           <View pointerEvents="none" style={{ flex: 1 }}>
             <CreateQuestionSkeleton />
           </View>
         </View>
-      )}
+      )} */}
 
-      <BottomModal
-        visible={isSuccessModalVisible}
-        backgroundColor={colors.white}
-        onClose={() => { }}>
-        <View style={styles.modalIconWrapper}>
-          <View style={styles.modalIconCircle}>
-            <Text style={styles.modalIconCheck}>✓</Text>
+        <BottomModal
+          visible={isSuccessModalVisible}
+          backgroundColor={colors.white}
+          onClose={() => { }}>
+          <View style={styles.modalIconWrapper}>
+            <View style={styles.modalIconCircle}>
+              <Text style={styles.modalIconCheck}>✓</Text>
+            </View>
           </View>
-        </View>
-        <Text style={styles.modalTitle}>
-          {t('AI interviews successfully sent')}
-        </Text>
-        <Text style={styles.modalSubtitle}>
-          {t('Candidates will be automatically analyzed and scored')}
-        </Text>
-        <GradientButton
-          style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
-          type="Company"
-          title={t('View pending interviews')}
-          onPress={() => {
-            updateJobForm({ isSuccessModalVisible: false });
-            resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
-          }}
-        />
-        <GradientButton
-          style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
-          type="Company"
-          title={t('Back to dashboard')}
-          onPress={() => {
-            updateJobForm({ isSuccessModalVisible: false });
-            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
-          }}
-        />
-      </BottomModal>
-    </LinearContainer>
+          <Text style={styles.modalTitle}>
+            {t('AI interviews successfully sent')}
+          </Text>
+          <Text style={styles.modalSubtitle}>
+            {t('Candidates will be automatically analyzed and scored')}
+          </Text>
+          <GradientButton
+            style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
+            type="Company"
+            title={t('View pending interviews')}
+            onPress={() => {
+              updateJobForm({ isSuccessModalVisible: false });
+              resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
+            }}
+          />
+          <GradientButton
+            style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
+            type="Company"
+            title={t('Back to dashboard')}
+            onPress={() => {
+              updateJobForm({ isSuccessModalVisible: false });
+              resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
+            }}
+          />
+        </BottomModal>
+      </LinearContainer>
+    </SafeAreaView>
   );
 };
 

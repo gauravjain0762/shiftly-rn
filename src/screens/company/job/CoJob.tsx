@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CustomTextInput,
   GradientButton,
@@ -48,6 +49,7 @@ const CoJob = () => {
   const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
+  const insets = useSafeAreaInsets();
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
@@ -163,42 +165,40 @@ const CoJob = () => {
         </View>
       </View>
 
-      {isLoading ? (
-        <MyJobsSkeleton backgroundColor={colors.coPrimary} />
-      ) : (
-        <View style={styles.outerContainer}>
-          <FlatList
-            data={latestJobList}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.contentContainer}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item, index }) => (
-              <View key={index} style={{ marginBottom: hp(10) }}>
-                <MyJobCard
-                  item={item}
-                  onPressShare={() => setIsShareModalVisible(true)}
-                  onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
-                />
-              </View>
-            )}
-            onRefresh={refetch}
-            refreshing={isLoading}
-            ListEmptyComponent={() => (
-              <View style={styles.emptyContainer}>
-                {renderPostJobButton()}
-                <Text style={styles.emptyText}>
-                  {filters?.location ||
-                    filters?.job_types ||
-                    filters?.salary_from !== 1000 ||
-                    filters?.salary_to !== 50000
-                    ? 'No filtered jobs found'
-                    : 'Create your first job to start hiring talent.'}
-                </Text>
-              </View>
-            )}
-          />
-        </View>
-      )}
+      {isLoading && <MyJobsSkeleton backgroundColor={colors.coPrimary} />}
+
+      <View style={styles.outerContainer}>
+        <FlatList
+          data={latestJobList}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainer}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <View key={index} style={{ marginBottom: hp(10) }}>
+              <MyJobCard
+                item={item}
+                onPressShare={() => setIsShareModalVisible(true)}
+                onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+              />
+            </View>
+          )}
+          onRefresh={refetch}
+          refreshing={isLoading}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              {renderPostJobButton()}
+              <Text style={styles.emptyText}>
+                {filters?.location ||
+                  filters?.job_types ||
+                  filters?.salary_from !== 1000 ||
+                  filters?.salary_to !== 50000
+                  ? 'No filtered jobs found'
+                  : 'Create your first job to start hiring talent.'}
+              </Text>
+            </View>
+          )}
+        />
+      </View>
 
       {isFilterModalVisible && (
         <BottomModal
@@ -289,9 +289,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: wp(18),
+    zIndex: 1,
   },
   gradient: {
     borderRadius: hp(100),
+    overflow: 'hidden',
   },
   postJobButton: {
     gap: wp(10),

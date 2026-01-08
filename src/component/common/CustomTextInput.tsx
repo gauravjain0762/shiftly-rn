@@ -41,6 +41,12 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
+      {label && (
+        <Text style={styles.label}>
+          {label}
+          {required && <Text style={styles.required}>*</Text>}
+        </Text>
+      )}
       <TextInput
         style={[styles.input, inputStyle]}
         secureTextEntry={isPassword && !showPassword}
@@ -83,6 +89,7 @@ const getGlobalStyles = (props: any) => {
     },
     required: {
       color: 'red',
+      marginLeft: 2,
     },
     input: {
       flex: 1,

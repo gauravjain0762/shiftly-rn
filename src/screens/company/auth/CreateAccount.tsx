@@ -604,6 +604,8 @@ const CreateAccount = () => {
                       value: item._id,
                     })) || []
                   }
+                  label={t('Business Type')}
+                  required
                   labelField="label"
                   valueField="value"
                   placeholder={'Please select a business type'}
@@ -651,6 +653,8 @@ const CreateAccount = () => {
               <Text style={styles.title}>{t('Business Name')}</Text>
               <View style={styles.row}>
                 <CustomTextInput
+                  label={t('Business Name')}
+                  required
                   placeholder={t('Ex: Atlantis The Palm, Dubai')}
                   placeholderTextColor={colors._7B7878}
                   onChangeText={(companyName: string) => {
@@ -711,7 +715,7 @@ const CreateAccount = () => {
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
-              <Text style={styles.title}>{t('Account Manager’s Name')}</Text>
+              <Text style={styles.title}>{t("Account Manager's Name")}</Text>
               <View style={styles.row}>
                 {/* <Image
                   source={IMAGES.badge}
@@ -719,6 +723,8 @@ const CreateAccount = () => {
                   style={styles.badge}
                 /> */}
                 <CustomTextInput
+                  label={t('Account Manager Name')}
+                  required
                   placeholder={t('Ex: John Smith')}
                   placeholderTextColor={colors._7B7878}
                   onChangeText={(name: string) =>
@@ -782,6 +788,8 @@ const CreateAccount = () => {
                   style={styles.mail}
                 />
                 <CustomTextInput
+                  label={t('Email')}
+                  required
                   placeholder={t('Enter your email')}
                   placeholderTextColor={colors._7B7878}
                   onChangeText={handleEmailChange}
@@ -842,6 +850,8 @@ const CreateAccount = () => {
             <View>
               <Text style={styles.title}>{t('Set a secure password')}</Text>
               <CustomTextInput
+                label={t('Password')}
+                required
                 placeholder={t('Enter Password')}
                 placeholderTextColor={colors._7B7878}
                 onChangeText={(e: any) =>
@@ -937,6 +947,9 @@ const CreateAccount = () => {
             <View>
               <Text style={styles.title}>
                 {t('What is your phone number?')}
+              </Text>
+              <Text style={styles.fieldLabel}>
+                {t('Phone Number')}<Text style={styles.required}>*</Text>
               </Text>
               <PhoneInput
                 countryCode={companyRegisterData?.countryCode}
@@ -1711,6 +1724,15 @@ const styles = StyleSheet.create({
   title: {
     ...commonFontStyle(500, 25, colors._0B3970),
     paddingTop: hp(10),
+  },
+  fieldLabel: {
+    marginTop: hp(30),
+    marginBottom: hp(12),
+    ...commonFontStyle(500, 18, colors._0B3970),
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
   dateRow: {
     flexDirection: 'row',

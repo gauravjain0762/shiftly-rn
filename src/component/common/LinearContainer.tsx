@@ -8,11 +8,9 @@ import {
 import React, { memo } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
-  SafeAreaView,
   SafeAreaViewProps,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { AppStyles } from '../../theme/appStyles';
 import { useIsFocused } from '@react-navigation/native';
 
 type Props = {

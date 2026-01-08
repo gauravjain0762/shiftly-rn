@@ -247,13 +247,14 @@ const EmpForgotPassword = () => {
           <View style={styles.innerConrainer}>
             <View>
               {/* Removed duplicate title - it's now in the header */}
-              {timer !== 0 && (
-                <View style={[styles.info_row, { marginTop: hp(19) }]}>
-                  <Text style={styles.infotext}>
-                    {t('You will receive OTP by email')}
+              <View style={[styles.info_row, { marginTop: hp(19) }]}>
+                <Text style={styles.infotext}>
+                  {t('You will receive an OTP via email at')}{' '}
+                  <Text style={{ fontWeight: '600', color: colors._0B3970 }}>
+                    {email || userInfo?.email || ''}
                   </Text>
-                </View>
-              )}
+                </Text>
+              </View>
               <View style={styles.otpContainer}>
                 {otp?.map((val, idx) => (
                   <TextInput

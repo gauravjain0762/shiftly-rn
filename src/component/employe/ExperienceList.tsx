@@ -68,7 +68,9 @@ const ExperienceList: FC<any> = ({
   return (
     <View style={styles.wrapper}>
       <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
-        <Text style={styles.fieldLabel}>Desired Job Title</Text>
+        <Text style={styles.fieldLabel}>
+          Desired Job Title<Text style={styles.required}>*</Text>
+        </Text>
         <Tooltip
           message="Select the job title you are looking for (e.g., Receptionist, Waiter, Housekeeping Attendant). This helps us match you with the right employers."
           position="bottom"
@@ -90,7 +92,9 @@ const ExperienceList: FC<any> = ({
 
       <BaseText style={styles.headerText}>Past Job Experience</BaseText>
       <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
-        <Text style={styles.fieldLabel}>Job Title</Text>
+        <Text style={styles.fieldLabel}>
+          Job Title<Text style={styles.required}>*</Text>
+        </Text>
         <Tooltip
           message="Enter the position you held (e.g., Waiter, Receptionist). This helps us match your skills and salary expectations."
           position="bottom"
@@ -108,6 +112,7 @@ const ExperienceList: FC<any> = ({
       />
       <CustomInput
         label="Company Name"
+        required
         placeholder={'Enter Company Name'}
         value={experienceListEdit.company}
         onChange={(text: any) =>
@@ -118,6 +123,7 @@ const ExperienceList: FC<any> = ({
       <CustomDropdown
         data={departmentOptions}
         label="Department"
+        required
         placeholder={'Select Department'}
         value={experienceListEdit?.department}
         container={{marginBottom: 15}}
@@ -130,7 +136,9 @@ const ExperienceList: FC<any> = ({
       />
 
       <View style={styles.countryWrapper}>
-        <BaseText style={styles.label}>{'Country'}</BaseText>
+        <BaseText style={styles.label}>
+          {'Country'}<Text style={styles.required}>*</Text>
+        </BaseText>
         <TouchableOpacity
           onPress={() => setIsVisible(true)}
           style={styles.country}>
@@ -169,6 +177,7 @@ const ExperienceList: FC<any> = ({
       <CustomDatePicker
         type={'Experience'}
         label={'Start Date'}
+        required
         dateValue={experienceListEdit}
         onChange={(date: any) =>
           setExperienceListEdit({
@@ -186,6 +195,7 @@ const ExperienceList: FC<any> = ({
         <CustomDatePicker
           type={'Experience'}
           label={'End Date'}
+          required={!experienceListEdit?.still_working}
           dateValue={experienceListEdit}
           disabled={experienceListEdit?.still_working}
           onChange={(date: any) => {
@@ -242,6 +252,7 @@ const ExperienceList: FC<any> = ({
         data={experienceOptions}
         dropdownPosition="top"
         label="What type of experience"
+        required
         placeholder={'What type of experience'}
         value={experienceListEdit?.experience_type}
         container={{marginBottom: 15}}
@@ -271,6 +282,10 @@ const styles = StyleSheet.create({
     marginTop: hp(20),
     marginBottom: hp(12),
     ...commonFontStyle(400, wp(18), colors._050505),
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
   countryWrapper: {
     flex: 1,

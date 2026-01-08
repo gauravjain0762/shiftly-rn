@@ -61,6 +61,11 @@ export const dashboardApi = createApi({
         url: API.sendInterviewInvites,
         method: HTTP_METHOD.POST,
         data: credentials,
+        skipLoader: false,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
       }),
     }),
     getSuggestedEmployees: builder.query<any, any>({
@@ -399,6 +404,7 @@ export const dashboardApi = createApi({
         location,
         job_sectors,
         search,
+        page,
       }) => {
         const params = new URLSearchParams();
 
@@ -408,6 +414,7 @@ export const dashboardApi = createApi({
         if (location) params.append('location', location);
         if (job_sectors) params.append('job_sectors', job_sectors);
         if (search) params.append('search', search);
+        if (page) params.append('page', page.toString());
 
         return {
           url: `${API.getEmployeeJobs}?${params.toString()}`,

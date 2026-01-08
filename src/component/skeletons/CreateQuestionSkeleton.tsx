@@ -2,7 +2,6 @@ import React from 'react';
 import {ScrollView, View} from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
 
 const CreateQuestionSkeleton = () => {
   const questionPlaceholders = [1, 2, 3, 4];

@@ -3,13 +3,12 @@ import {
   FlatList,
   Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -70,6 +69,7 @@ const JobsScreen = () => {
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
+  const pagination = data?.data?.pagination;
 
   const [filters, setFilters] = useState<{
     job_sectors: string[];
@@ -93,10 +93,15 @@ const JobsScreen = () => {
     'newest' | 'salary_high_low' | 'salary_low_high' | null
   >(null);
   const [sortedJobList, setSortedJobList] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allJobs, setAllJobs] = useState<any[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const lastLoadedPageRef = useRef(0);
 
   useEffect(() => {
-    trigger({});
-  }, [trigger]);
+    trigger({ page: 1 });
+  }, []);
 
   useEffect(() => {
     if (favJobList) {
@@ -104,30 +109,71 @@ const JobsScreen = () => {
     }
   }, [favJobList]);
 
+  // Update allJobs when new data arrives based on pagination
   useEffect(() => {
     if (!jobList) {
+      return;
+    }
+
+    // Wait for pagination data before processing
+    if (!pagination) {
+      return;
+    }
+
+    const responsePage = pagination.current_page;
+    
+    // Only update if this is a new page we haven't loaded yet
+    if (responsePage > lastLoadedPageRef.current) {
+      if (responsePage === 1) {
+        // First page - replace all jobs
+        setAllJobs(jobList);
+        lastLoadedPageRef.current = 1;
+        setCurrentPage(1);
+      } else {
+        // Subsequent pages - append to existing jobs
+        setAllJobs(prev => {
+          // Prevent duplicates by checking job IDs
+          const existingIds = new Set(prev.map((job: any) => job._id));
+          const newJobs = jobList.filter((job: any) => job._id && !existingIds.has(job._id));
+          if (newJobs.length > 0) {
+            lastLoadedPageRef.current = responsePage;
+            setCurrentPage(responsePage);
+            return [...prev, ...newJobs];
+          }
+          return prev;
+        });
+      }
+      setIsLoadingMore(false);
+    }
+  }, [jobList, pagination]);
+
+  // Update pagination info
+  useEffect(() => {
+    if (pagination) {
+      setHasMorePages(pagination.current_page < pagination.total_pages);
+    }
+  }, [pagination]);
+
+  useEffect(() => {
+    if (allJobs.length === 0) {
       setSortedJobList([]);
       return;
     }
 
-    let sorted = [...jobList];
+    let sorted = [...allJobs];
 
     if (sortBy === 'newest') {
       sorted.sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime(),
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
       );
-    }
-
-    if (sortBy === 'salary_high_low') {
+    } else if (sortBy === 'salary_high_low') {
       sorted.sort(
         (a, b) =>
           (b.monthly_salary_to || 0) - (a.monthly_salary_to || 0),
       );
-    }
-
-    if (sortBy === 'salary_low_high') {
+    } else if (sortBy === 'salary_low_high') {
       sorted.sort(
         (a, b) =>
           (a.monthly_salary_from || 0) - (b.monthly_salary_from || 0),
@@ -135,7 +181,7 @@ const JobsScreen = () => {
     }
 
     setSortedJobList(sorted);
-  }, [jobList, sortBy]);
+  }, [allJobs, sortBy]);
 
   const handleApplyFilter = () => {
     const newFilters = {
@@ -145,6 +191,13 @@ const JobsScreen = () => {
     };
     setFilters(newFilters);
     setIsFilterModalVisible(false);
+
+    // Reset pagination when filters change
+    setCurrentPage(1);
+    setAllJobs([]);
+    setHasMorePages(true);
+    setIsLoadingMore(false);
+    lastLoadedPageRef.current = 0;
 
     const newQueryParams = {
       salary_from: newFilters.salary_from || undefined,
@@ -156,6 +209,7 @@ const JobsScreen = () => {
       job_sectors: newFilters.job_sectors.length
         ? newFilters.job_sectors.join(',')
         : undefined,
+      page: 1,
     };
 
     trigger(newQueryParams);
@@ -171,7 +225,68 @@ const JobsScreen = () => {
       // employer_type: '',
     });
     setRange([0, 100000]);
-    trigger({});
+    // Reset pagination when clearing filters
+    setCurrentPage(1);
+    setAllJobs([]);
+    setHasMorePages(true);
+    setIsLoadingMore(false);
+    lastLoadedPageRef.current = 0;
+    trigger({ page: 1 });
+  };
+
+  const loadMoreJobs = () => {
+    // Prevent multiple simultaneous loads
+    if (isLoadingMore || isLoading) {
+      return;
+    }
+
+    // Check if we have more pages
+    if (!hasMorePages) {
+      return;
+    }
+
+    // Need pagination info to determine next page
+    if (!pagination) {
+      return;
+    }
+
+    const nextPage = currentPage + 1;
+    
+    // Check if we've reached the last page
+    if (nextPage > pagination.total_pages) {
+      setHasMorePages(false);
+      return;
+    }
+
+    // Don't load if we've already loaded this page
+    if (nextPage <= lastLoadedPageRef.current) {
+      return;
+    }
+
+    console.log('Loading page:', nextPage);
+    setIsLoadingMore(true);
+
+    const queryParams = {
+      salary_from: filters.salary_from || undefined,
+      salary_to: filters.salary_to || undefined,
+      location: filters.location || undefined,
+      job_types: filters.job_types.length
+        ? filters.job_types.join(',')
+        : undefined,
+      job_sectors: filters.job_sectors.length
+        ? filters.job_sectors.join(',')
+        : undefined,
+      page: nextPage,
+    };
+
+    trigger(queryParams)
+      .then(() => {
+        // Loading state will be cleared in useEffect when data arrives
+      })
+      .catch((error) => {
+        console.error('Error loading more jobs:', error);
+        setIsLoadingMore(false);
+      });
   };
 
   const handleToggleFavorite = async (job: any) => {
@@ -221,119 +336,137 @@ const JobsScreen = () => {
     />
   );
 
+  const renderHeader = () => (
+    <>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
+        <View style={styles.headerImgBar}>
+          <TouchableOpacity
+            onPress={() => {
+              navigateTo(SCREENS.SearchJob, {
+                data: sortedJobList.length > 0 ? sortedJobList : allJobs,
+              });
+            }}>
+            <Image style={styles.headerIcons} source={IMAGES.search} />
+          </TouchableOpacity>
+
+          {/* Custom Sort Icon */}
+          <TouchableOpacity
+            onPress={() => setIsSortModalVisible(true)}
+            style={styles.sortButtonContainer}>
+            <View style={styles.sortIconWrapper}>
+              <View style={[styles.sortLine, styles.sortLineTop, sortBy && { backgroundColor: colors.empPrimary }]} />
+              <View style={[styles.sortLine, styles.sortLineMiddle, sortBy && { backgroundColor: colors.empPrimary }]} />
+              <View style={[styles.sortLine, styles.sortLineBottom, sortBy && { backgroundColor: colors.empPrimary }]} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
+            <Image style={styles.headerIcons} source={IMAGES.filter} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigateTo(SCREENS.NotificationScreen)}>
+            <Image style={styles.headerIcons} source={IMAGES.notification} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.carouselWrapper}>
+        {isLoading && currentPage === 1 ? (
+          <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
+        ) : (
+          <>
+            <Carousel
+              loop
+              autoPlay
+              height={180}
+              data={carouselImages}
+              renderItem={BannerItem}
+              width={SCREEN_WIDTH - 32}
+              scrollAnimationDuration={2500}
+              onSnapToItem={index => setActiveIndex(index)}
+            />
+            {carouselImages && carouselImages.length > 1 && (
+              <View style={styles.paginationContainer}>
+                {carouselImages?.map((_: any, index: number) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.carouselDot,
+                      index === activeIndex && styles.carouselDotActive,
+                    ]}
+                  />
+                ))}
+              </View>
+            )}
+          </>
+        )}
+      </View>
+      <View style={styles.sectionTitleContainer}>
+        <Text style={styles.sectionTitle}>{t('Recommended for You')}</Text>
+        <Tooltip
+          position="bottom"
+          containerStyle={styles.tooltipIcon}
+          message="Recommended for you, based on your profile and AI matching."
+          tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+        />
+      </View>
+    </>
+  );
+
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
-      <ScrollView style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
-          <View style={styles.headerImgBar}>
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo(SCREENS.SearchJob, {
-                  data: sortedJobList.length > 0 ? sortedJobList : jobList,
-                });
-              }}>
-              <Image style={styles.headerIcons} source={IMAGES.search} />
-            </TouchableOpacity>
-
-            {/* Custom Sort Icon */}
-            <TouchableOpacity
-              onPress={() => setIsSortModalVisible(true)}
-              style={styles.sortButtonContainer}>
-              <View style={styles.sortIconWrapper}>
-                <View style={[styles.sortLine, styles.sortLineTop, sortBy && { backgroundColor: colors.empPrimary }]} />
-                <View style={[styles.sortLine, styles.sortLineMiddle, sortBy && { backgroundColor: colors.empPrimary }]} />
-                <View style={[styles.sortLine, styles.sortLineBottom, sortBy && { backgroundColor: colors.empPrimary }]} />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
-              <Image style={styles.headerIcons} source={IMAGES.filter} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigateTo(SCREENS.NotificationScreen)}>
-              <Image style={styles.headerIcons} source={IMAGES.notification} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.carouselWrapper}>
-          {isLoading ? (
-            <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
-          ) : (
-            <>
-              <Carousel
-                loop
-                autoPlay
-                height={180}
-                data={carouselImages}
-                renderItem={BannerItem}
-                width={SCREEN_WIDTH - 32}
-                scrollAnimationDuration={2500}
-                onSnapToItem={index => setActiveIndex(index)}
-              />
-              {carouselImages && carouselImages.length > 1 && (
-                <View style={styles.paginationContainer}>
-                  {carouselImages?.map((_: any, index: number) => (
-                    <View
-                      key={index}
-                      style={[
-                        styles.carouselDot,
-                        index === activeIndex && styles.carouselDotActive,
-                      ]}
-                    />
-                  ))}
-                </View>
-              )}
-            </>
-          )}
-        </View>
-        <View style={styles.sectionTitleContainer}>
-          <Text style={styles.sectionTitle}>{t('Recommended for You')}</Text>
-          <Tooltip
-            position="bottom"
-            containerStyle={styles.tooltipIcon}
-            message="Recommended for you, based on your profile and AI matching."
-            tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
-          />
-        </View>
-
-        {isLoading ? (
+      {isLoading && currentPage === 1 ? (
+        <>
+          {renderHeader()}
           <MyJobsSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
-        ) : (
-          <FlatList
-            data={sortedJobList.length > 0 ? sortedJobList : jobList}
-            style={AppStyles.flex}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item, index }: any) => {
-              const isFavorite = localFavorites.includes(item?._id);
-              return (
-                <JobCard
-                  key={index}
-                  item={item}
-                  heartImage={isFavorite}
-                  onPressFavorite={() => handleToggleFavorite(item)}
-                  onPress={() =>
-                    navigateTo(SCREEN_NAMES.JobDetail, {
-                      item: item,
-                      resumeList: resumeList,
-                    })
-                  }
-                />
-              );
-            }}
-            keyExtractor={(_, index) => index.toString()}
-            ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
-            contentContainerStyle={styles.scrollContainer}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <BaseText style={styles.emptyText}>
-                  We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
+        </>
+      ) : (
+        <FlatList
+          data={sortedJobList.length > 0 ? sortedJobList : allJobs}
+          style={AppStyles.flex}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item, index }: any) => {
+            const isFavorite = localFavorites.includes(item?._id);
+            return (
+              <JobCard
+                key={index}
+                item={item}
+                heartImage={isFavorite}
+                onPressFavorite={() => handleToggleFavorite(item)}
+                onPress={() =>
+                  navigateTo(SCREENS.JobDetail, {
+                    item: item,
+                    resumeList: resumeList,
+                  })
+                }
+              />
+            );
+          }}
+          keyExtractor={(item, index) => item?._id || index.toString()}
+          ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
+          contentContainerStyle={styles.scrollContainer}
+          ListHeaderComponent={renderHeader}
+          onEndReached={loadMoreJobs}
+          onEndReachedThreshold={0.3}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <BaseText style={styles.emptyText}>
+                We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
+              </BaseText>
+            </View>
+          }
+          ListFooterComponent={
+            isLoadingMore ? (
+              <View style={styles.loadingMoreContainer}>
+                <BaseText style={styles.loadingMoreText}>
+                  Loading more jobs...
                 </BaseText>
               </View>
-            }
-          />
-        )}
+            ) : null
+          }
+        />
+      )}
 
         <BottomModal
           visible={isFilterModalVisible}
@@ -533,7 +666,6 @@ const JobsScreen = () => {
         </BottomModal>
 
         <ShareModal visible={modal} onClose={() => setModal(!modal)} />
-      </ScrollView>
     </LinearContainer>
   );
 };
@@ -583,8 +715,7 @@ const styles = StyleSheet.create({
     marginTop: hp(0),
   },
   scrollContainer: {
-    flexGrow: 1,
-    paddingBottom: '5%',
+    paddingBottom: hp(30),
     paddingHorizontal: wp(25),
   },
   carouselWrapper: {
@@ -837,5 +968,12 @@ const styles = StyleSheet.create({
   sortLineBottom: {
     width: wp(12),
     alignSelf: 'flex-start',
+  },
+  loadingMoreContainer: {
+    paddingVertical: hp(20),
+    alignItems: 'center',
+  },
+  loadingMoreText: {
+    ...commonFontStyle(400, 14, colors._7B7878),
   },
 });

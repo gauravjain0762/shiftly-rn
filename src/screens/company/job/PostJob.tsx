@@ -827,7 +827,7 @@ const PostJob = () => {
 
                 <ScrollView style={styles.skillsScrollView}>
                   <View style={styles.skillsWrapper}>
-                    {skills.map((item, index) => {
+                    {skills?.map((item, index) => {
                       return (
                         <Pressable
                           key={index}
@@ -1341,7 +1341,9 @@ const PostJob = () => {
                 ref={jobDepartmentFieldRef} 
                 style={styles.field}
                 collapsable={false}>
-                <Text style={styles.label}>{t('Job Department')}</Text>
+                <Text style={styles.label}>
+                  {t('Job Department')}<Text style={styles.required}>*</Text>
+                </Text>
                 <CustomDropdown
                   data={dropdownBusinessTypesOptions}
                   labelField="label"
@@ -1569,6 +1571,10 @@ const styles = StyleSheet.create({
   },
   label: {
     ...commonFontStyle(400, 18, colors._0B3970),
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
   input: {
     flex: 1,

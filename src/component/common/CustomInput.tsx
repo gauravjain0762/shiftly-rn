@@ -15,11 +15,17 @@ const CustomInput = ({
   onPress,
   placeholder,
   inputStyle,
+  required,
   ...props
 }: any) => {
   return (
     <View style={{ flex: 1 }}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text style={styles.label}>
+          {label}
+          {required && <Text style={styles.required}>*</Text>}
+        </Text>
+      ) : null}
       <TextInput
         onPress={onPress}
         placeholder={placeholder}
@@ -62,6 +68,7 @@ const styles = StyleSheet.create({
   },
   required: {
     color: 'red',
+    marginLeft: 2,
   },
   labelTextStyle: {
     ...commonFontStyle(600, 25, colors.black),

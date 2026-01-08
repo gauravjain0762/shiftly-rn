@@ -75,7 +75,9 @@ const EducationList: FC<Props> = ({
   return (
     <View style={styles.wrapper}>
       <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
-        <Text style={styles.fieldLabel}>Degree</Text>
+        <Text style={styles.fieldLabel}>
+          Degree<Text style={styles.required}>*</Text>
+        </Text>
         <Tooltip
           message="We use your education info to better match you with employers who value specific qualifications."
           position="bottom"
@@ -132,6 +134,7 @@ const EducationList: FC<Props> = ({
 
       <CustomInput
         label="University"
+        required
         placeholder="Enter University"
         value={educationListEdit?.university}
         onChange={(text: any) =>
@@ -145,6 +148,7 @@ const EducationList: FC<Props> = ({
         <CustomDatePicker
           type="Education"
           label="Start Date"
+          required
           dateValue={educationListEdit}
           onChange={(date: any) => {
             setEducationListEdit({
@@ -157,6 +161,7 @@ const EducationList: FC<Props> = ({
         <CustomDatePicker
           type="Education"
           label="End Date"
+          required
           dateValue={educationListEdit}
           onChange={(date: any) => {
             setEducationListEdit({
@@ -170,7 +175,9 @@ const EducationList: FC<Props> = ({
 
       <View style={styles.row}>
         <View style={styles.halfWidth}>
-          <BaseText style={styles.label}>{'Country'}</BaseText>
+          <BaseText style={styles.label}>
+            {'Country'}<Text style={styles.required}>*</Text>
+          </BaseText>
           <TouchableOpacity
             onPress={() => setIsVisible(true)}
             style={styles.country}>
@@ -189,6 +196,7 @@ const EducationList: FC<Props> = ({
         <View style={styles.halfWidth}>
           <CustomInput
             label="City/Region"
+            required
             placeholder={'Enter City/\nRegion'}
             placeholderTextColor={'#969595'}
             value={educationListEdit?.province}
@@ -284,6 +292,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 12,
     ...commonFontStyle(500, 18, colors._050505),
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
   fieldHeader: {
     flexDirection: 'row',

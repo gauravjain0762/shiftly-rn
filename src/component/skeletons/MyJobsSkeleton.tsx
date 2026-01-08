@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
+import { hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 type Props = {
@@ -16,10 +16,11 @@ const MyJobsSkeleton = (props: Props) => {
     <SkeletonPlaceholder
       backgroundColor={background}
       highlightColor={highlight}
-      borderRadius={4}>
+      borderRadius={4}
+    >
       {[1, 2, 3, 4].map((_, idx) => (
         <SkeletonPlaceholder.Item
-          key={idx}
+          key={`skeleton-${idx}`}
           flexDirection="column"
           alignItems="flex-start"
           marginBottom={hp(10)}
