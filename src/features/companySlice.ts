@@ -73,7 +73,7 @@ const initialState: CompanyState = {
     salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},
     currency: {label: 'AED', value: 'AED'},
     position: {label: '1', value: '1'},
-    describe: '',
+    describe: __DEV__ ? 'Testing Testing' : '',
     selected: [],
     jobSkills: [],
     skillId: [],

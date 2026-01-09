@@ -32,7 +32,7 @@ import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import CreateQuestionSkeleton from '../../../component/skeletons/CreateQuestionSkeleton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const QUESTION_PRESETS = [
+const QUESTION_PRESETS: string[] = [
   'Describe your previous job experience relevant to this role?',
   'Can you share an example of a project you successfully completed?',
   'Describe a challenge you faced at work and how you solved it.',
@@ -55,8 +55,15 @@ const CreateQuestion = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setPredefinedQuestions(QUESTION_PRESETS);
-      setAreQuestionsLoading(false);
+      try {
+        const questions = [...QUESTION_PRESETS];
+        setPredefinedQuestions(questions);
+        setAreQuestionsLoading(false);
+      } catch (error) {
+        console.error('Error loading predefined questions:', error);
+        setPredefinedQuestions([]);
+        setAreQuestionsLoading(false);
+      }
     }, 500);
     return () => clearTimeout(timer);
   }, []);
@@ -90,7 +97,6 @@ const CreateQuestion = () => {
 
     console.log("🔥 ~ handleSubmit ~ jobId:", jobId);
 
-    // Create params object matching the cURL structure
     const params = {
       job_id: jobId,
       invite_to: invitePayload.invite_to || 'specific',
@@ -110,7 +116,6 @@ const CreateQuestion = () => {
         ? invitePayload.user_ids.join(',')
         : invitePayload.user_ids;
     }
-
     console.log("🔥 ~ handleSubmit ~ params:", params);
 
     try {
@@ -147,9 +152,9 @@ const CreateQuestion = () => {
           />
         </View>
 
-        {areQuestionsLoading ? (
+        {/* {areQuestionsLoading ? (
           <CreateQuestionSkeleton />
-        ) : (
+        ) : ( */}
           <>
             <ScrollView
               style={styles.scrollView}
@@ -179,15 +184,22 @@ const CreateQuestion = () => {
                 </TouchableOpacity>
 
                 <View style={styles.predefinedSection}>
-                  {predefinedQuestions.map((question, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.questionCard}
-                      onPress={() => handleSelectPredefinedQuestion(question)}
-                      activeOpacity={0.7}>
-                      <Text style={styles.questionCardText}>{question}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  {predefinedQuestions && Array.isArray(predefinedQuestions) && predefinedQuestions.length > 0 ? (
+                    predefinedQuestions.map((question, index) => {
+                      if (!question || typeof question !== 'string') {
+                        return null;
+                      }
+                      return (
+                        <TouchableOpacity
+                          key={`question-${index}`}
+                          style={styles.questionCard}
+                          onPress={() => handleSelectPredefinedQuestion(question)}
+                          activeOpacity={0.7}>
+                          <Text style={styles.questionCardText}>{question}</Text>
+                        </TouchableOpacity>
+                      );
+                    })
+                  ) : null}
                 </View>
 
                 {addedQuestions.length > 0 && (
@@ -218,15 +230,7 @@ const CreateQuestion = () => {
               />
             </View>
           </>
-        )}
-
-        {/* {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <View pointerEvents="none" style={{ flex: 1 }}>
-            <CreateQuestionSkeleton />
-          </View>
-        </View>
-      )} */}
+        {/* // )} */}
 
         <BottomModal
           visible={isSuccessModalVisible}

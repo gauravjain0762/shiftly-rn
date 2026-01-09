@@ -27,7 +27,7 @@ interface ToastProps {
 const ToastComponent: React.FC<ToastProps> = ({type, text1, lineAnim}) => {
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}}>
       <View style={styles.toastStyle}>
         {type === 'success' && (
           <View style={{}}>
@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH - 50,
     borderRadius: 10,
     overflow: 'hidden',
+    bottom: hp(14)
   },
   row: {
     flexDirection:"row",

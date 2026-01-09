@@ -1500,28 +1500,44 @@ const PostJob = () => {
           type="Company"
           title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
           onPress={() => {
-            updateJobForm({ isSuccessModalVisible: false });
-            if (editMode) {
-              setCreatedJobId('');
-              setCreatedJobData(null);
+            try {
+              // Close modal first
+              updateJobForm({ isSuccessModalVisible: false });
+              
+              if (editMode) {
+                setCreatedJobId('');
+                setCreatedJobData(null);
+                dispatch(resetJobFormState());
+                dispatch(setCoPostJobSteps(0));
+                navigationRef?.current?.goBack();
+                return;
+              }
+              
+              const jobIdToUse = createdJobId || job_id;
+              const jobDataToUse = createdJobData;
+              
+              // Reset state
               dispatch(resetJobFormState());
               dispatch(setCoPostJobSteps(0));
-              navigationRef?.current?.goBack();
-              return;
-            }
-            const jobIdToUse = createdJobId || job_id;
-            const jobDataToUse = createdJobData;
-            dispatch(resetJobFormState());
-            dispatch(setCoPostJobSteps(0));
-            setCreatedJobId('');
-            setCreatedJobData(null);
-            if (jobIdToUse) {
-              navigateTo(SCREENS.SuggestedEmployee, {
-                jobId: jobIdToUse,
-                jobData: jobDataToUse,
-              });
-            } else {
-              navigationRef?.current?.goBack();
+              
+              // Clear local state
+              setCreatedJobId('');
+              setCreatedJobData(null);
+              
+              // Navigate with a small delay to ensure modal closes
+              setTimeout(() => {
+                if (jobIdToUse) {
+                  navigateTo(SCREENS.SuggestedEmployee, {
+                    jobId: jobIdToUse,
+                    jobData: jobDataToUse,
+                  });
+                } else {
+                  navigationRef?.current?.goBack();
+                }
+              }, 100);
+            } catch (error) {
+              console.error('Navigation error:', error);
+              updateJobForm({ isSuccessModalVisible: false });
             }
           }}
         />
