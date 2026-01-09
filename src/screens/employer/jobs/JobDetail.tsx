@@ -8,9 +8,10 @@ import {
   View,
   Dimensions,
   FlatList,
-  Share,
   ActivityIndicator,
 } from 'react-native';
+import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
 
 import {
   BackHeader,
@@ -56,9 +57,9 @@ const JobDetail = () => {
     data?.item?._id || data?.jobId,
   );
   const curr_jobdetails = jobDetail?.data?.job;
-  console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
+  const shareUrl = jobDetail?.data?.share_url;
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
@@ -135,34 +136,61 @@ const JobDetail = () => {
     );
   };
 
+  const downloadImage = async (url: string) => {
+    const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
+
+    await RNFS.downloadFile({
+      fromUrl: url,
+      toFile: filePath,
+    }).promise;
+
+    return `file://${filePath}`;
+  };
+
   const handleShare = async () => {
     try {
-      const jobId = data?._id || curr_jobdetails?._id;
+      const title = curr_jobdetails?.title || 'Job Opportunity';
+      const area = curr_jobdetails?.address || curr_jobdetails?.area || '';
+      const description = curr_jobdetails?.description || '';
+      const salary =
+        curr_jobdetails?.monthly_salary_from || curr_jobdetails?.monthly_salary_to
+          ? `Salary: AED ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
+          : '';
 
-      if (!jobId) {
-        errorToast('Job ID not found');
-        return;
-      }
+      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
+      
+      const message = `${title}
+${area}
 
-      const shareUrl = `https://sky.devicebee.com/Shiftly/share-job/${jobId}`;
+${description}
 
-      const result = await Share.share({
-        message: `Check out this job on Shiftly: ${curr_jobdetails?.title}`,
+${salary}${shareUrlText}`;
+
+      const shareOptions: any = {
+        title: title,
+        message: message,
         url: shareUrl,
-        title: 'Shiftly Job',
-      });
+      };
 
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          console.log('Shared with activity type:', result.activityType);
-        } else {
-          console.log('Shared successfully');
+      // Use cover image if available, otherwise use company logo
+      const coverImageUri = coverImages && coverImages.length > 0 ? coverImages[0] : curr_jobdetails?.company_id?.logo;
+      
+      if (coverImageUri) {
+        try {
+          const imagePath = await downloadImage(coverImageUri);
+          shareOptions.url = imagePath;
+          shareOptions.type = 'image/jpeg';
+        } catch (imageError) {
+          console.log('❌ Image download error:', imageError);
         }
-      } else if (result.action === Share.dismissedAction) {
-        console.log('Share dismissed');
       }
-    } catch (error: any) {
-      console.error('Error sharing:', error.message);
+
+      await Share.open(shareOptions);
+
+    } catch (err: any) {
+      if (err?.message !== 'User did not share') {
+        console.log('❌ Share error:', err);
+      }
     }
   };
 

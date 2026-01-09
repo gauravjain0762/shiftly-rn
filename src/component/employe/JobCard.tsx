@@ -50,16 +50,21 @@ const JobCard: FC<props> = ({
           ? `Salary: AED ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
           : '';
 
+      const shareUrl = item?.share_url || '';
+
+      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
+
       const message = `${title}
 ${area}
 
 ${description}
 
-${salary}`;
+${salary}${shareUrlText}`;
 
       const shareOptions: any = {
         title: title,
         message: message,
+        url: shareUrl,
       };
 
       if (coverImageUri) {

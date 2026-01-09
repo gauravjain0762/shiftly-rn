@@ -64,6 +64,7 @@ const JobsScreen = () => {
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
   const { data: getDepartmentData } = useGetFilterDataQuery({});
   const departments = getDepartmentData?.data?.job_sectors;
+  console.log("🔥 ~ JobsScreen ~ departments:", departments)
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
@@ -121,7 +122,7 @@ const JobsScreen = () => {
     }
 
     const responsePage = pagination.current_page;
-    
+
     // Only update if this is a new page we haven't loaded yet
     if (responsePage > lastLoadedPageRef.current) {
       if (responsePage === 1) {
@@ -251,7 +252,7 @@ const JobsScreen = () => {
     }
 
     const nextPage = currentPage + 1;
-    
+
     // Check if we've reached the last page
     if (nextPage > pagination.total_pages) {
       setHasMorePages(false);
@@ -408,7 +409,7 @@ const JobsScreen = () => {
           position="bottom"
           containerStyle={styles.tooltipIcon}
           message="Recommended for you, based on your profile and AI matching."
-          tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute' , overflow: 'visible'}}
+          tooltipBoxStyle={{ left: wp(-100), top: '-200%', width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute', overflow: 'visible' }}
         />
       </View>
     </>
@@ -467,204 +468,204 @@ const JobsScreen = () => {
         />
       )}
 
-        <BottomModal
-          visible={isFilterModalVisible}
-          backgroundColor={colors._F7F7F7}
-          onClose={() => setIsFilterModalVisible(false)}>
-          <View style={styles.modalContent}>
-            <View style={styles.filterContainer}>
-              <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
+      <BottomModal
+        visible={isFilterModalVisible}
+        backgroundColor={colors._F7F7F7}
+        onClose={() => setIsFilterModalVisible(false)}>
+        <View style={styles.modalContent}>
+          <View style={styles.filterContainer}>
+            <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
 
-              <CustomImage
-                onPress={() => {
-                  setIsFilterModalVisible(false);
-                }}
-                source={IMAGES.close}
-                size={wp(18)}
-              />
-            </View>
-
-            <Text style={styles.sectionLabel}>{t('Department')}</Text>
-            <View style={styles.pillRow}>
-              {departments?.map((dept: any) => {
-                const isSelected = filters.job_sectors.includes(dept);
-                return (
-                  <Pressable
-                    key={dept}
-                    style={[styles.pill, isSelected && styles.pillSelected]}
-                    onPress={() => {
-                      setFilters(prev => ({
-                        ...prev,
-                        job_sectors: isSelected
-                          ? prev.job_sectors.filter(d => d !== dept)
-                          : [...prev.job_sectors, dept],
-                      }));
-                    }}>
-                    <Text
-                      style={[
-                        styles.pillText,
-                        isSelected && styles.pillTextSelected,
-                      ]}>
-                      {dept}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <View style={styles.inputWrapper}>
-              <CustomTextInput
-                value={filters.location}
-                onChangeText={txt =>
-                  setFilters(prev => ({ ...prev, location: txt }))
-                }
-                placeholder={t('Location')}
-                placeholderTextColor={colors.black}
-                inputStyle={styles.locationInput}
-              />
-              <View style={styles.underline} />
-            </View>
-
-            <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
-            <View style={styles.pillRow}>
-              {jobTypes.map((job: any) => {
-                const isSelected = filters.job_types.includes(job.type);
-                return (
-                  <Pressable
-                    key={job.type}
-                    style={[styles.pill, isSelected && styles.pillSelected]}
-                    onPress={() => {
-                      setFilters(prev => ({
-                        ...prev,
-                        job_types: isSelected
-                          ? prev.job_types.filter(j => j !== job.type)
-                          : [...prev.job_types, job.type],
-                      }));
-                    }}>
-                    <Text
-                      style={[
-                        styles.pillText,
-                        isSelected && styles.pillTextSelected,
-                      ]}>
-                      {job.value}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <View style={styles.salarySection}>
-              <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
-              <RangeSlider range={range} setRange={setRange} />
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <Pressable onPress={clearFilters} style={styles.clearContainer}>
-                <Text>{'Clear'}</Text>
-              </Pressable>
-              <GradientButton
-                type="Employee"
-                style={styles.btn}
-                title={t('Apply Filter')}
-                onPress={handleApplyFilter}
-              />
-            </View>
+            <CustomImage
+              onPress={() => {
+                setIsFilterModalVisible(false);
+              }}
+              source={IMAGES.close}
+              size={wp(18)}
+            />
           </View>
-        </BottomModal>
 
-        <BottomModal
-          visible={isSortModalVisible}
-          backgroundColor={colors._F7F7F7}
-          onClose={() => setIsSortModalVisible(false)}
-        >
-          <View style={styles.modalContent}>
-            <Text style={styles.filterTitle}>Sort By</Text>
-
-            <View style={styles.sortOptions}>
-              {/* Newest */}
-              <Pressable
-                style={[
-                  styles.sortOption,
-                  sortBy === 'newest' && styles.sortOptionSelected,
-                ]}
-                onPress={() => {
-                  setSortBy('newest');
-                  setIsSortModalVisible(false);
-                }}
-              >
-                <View style={styles.sortOptionContent}>
-                  <Text
-                    style={[
-                      styles.sortOptionText,
-                      sortBy === 'newest' && styles.sortOptionTextSelected,
-                    ]}
-                  >
-                    Newest Jobs
-                  </Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.sortOption,
-                  sortBy === 'salary_high_low' && styles.sortOptionSelected,
-                ]}
-                onPress={() => {
-                  setSortBy('salary_high_low');
-                  setIsSortModalVisible(false);
-                }}
-              >
-                <View style={styles.sortOptionContent}>
-                  <Text
-                    style={[
-                      styles.sortOptionText,
-                      sortBy === 'salary_high_low' && styles.sortOptionTextSelected,
-                    ]}
-                  >
-                    Salary: High to Low
-                  </Text>
-                </View>
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.sortOption,
-                  sortBy === 'salary_low_high' && styles.sortOptionSelected,
-                ]}
-                onPress={() => {
-                  setSortBy('salary_low_high');
-                  setIsSortModalVisible(false);
-                }}
-              >
-                <View style={styles.sortOptionContent}>
-                  <Text
-                    style={[
-                      styles.sortOptionText,
-                      sortBy === 'salary_low_high' &&
-                      styles.sortOptionTextSelected,
-                    ]}
-                  >
-                    Salary: Low to High
-                  </Text>
-                </View>
-              </Pressable>
-
-              {sortBy && (
+          <Text style={styles.sectionLabel}>{t('Department')}</Text>
+          <View style={styles.pillRow}>
+            {departments?.map((dept: any) => {
+              const isSelected = filters.job_sectors.includes(dept);
+              return (
                 <Pressable
-                  style={styles.clearSortButton}
+                  key={dept}
+                  style={[styles.pill, isSelected && styles.pillSelected]}
                   onPress={() => {
-                    setSortBy(null);
-                    setIsSortModalVisible(false);
-                  }}
-                >
-                  <Text style={styles.clearSortText}>Clear Sort</Text>
+                    setFilters(prev => ({
+                      ...prev,
+                      job_sectors: isSelected
+                        ? prev.job_sectors.filter(d => d !== dept)
+                        : [...prev.job_sectors, dept],
+                    }));
+                  }}>
+                  <Text
+                    style={[
+                      styles.pillText,
+                      isSelected && styles.pillTextSelected,
+                    ]}>
+                    {dept}
+                  </Text>
                 </Pressable>
-              )}
-            </View>
+              );
+            })}
           </View>
-        </BottomModal>
 
-        <ShareModal visible={modal} onClose={() => setModal(!modal)} />
+          <View style={styles.inputWrapper}>
+            <CustomTextInput
+              value={filters.location}
+              onChangeText={txt =>
+                setFilters(prev => ({ ...prev, location: txt }))
+              }
+              placeholder={t('Location')}
+              placeholderTextColor={colors.black}
+              inputStyle={styles.locationInput}
+            />
+            <View style={styles.underline} />
+          </View>
+
+          <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
+          <View style={styles.pillRow}>
+            {jobTypes.map((job: any) => {
+              const isSelected = filters.job_types.includes(job.type);
+              return (
+                <Pressable
+                  key={job.type}
+                  style={[styles.pill, isSelected && styles.pillSelected]}
+                  onPress={() => {
+                    setFilters(prev => ({
+                      ...prev,
+                      job_types: isSelected
+                        ? prev.job_types.filter(j => j !== job.type)
+                        : [...prev.job_types, job.type],
+                    }));
+                  }}>
+                  <Text
+                    style={[
+                      styles.pillText,
+                      isSelected && styles.pillTextSelected,
+                    ]}>
+                    {job.value}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={styles.salarySection}>
+            <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
+            <RangeSlider range={range} setRange={setRange} />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Pressable onPress={clearFilters} style={styles.clearContainer}>
+              <Text>{'Clear'}</Text>
+            </Pressable>
+            <GradientButton
+              type="Employee"
+              style={styles.btn}
+              title={t('Apply Filter')}
+              onPress={handleApplyFilter}
+            />
+          </View>
+        </View>
+      </BottomModal>
+
+      <BottomModal
+        visible={isSortModalVisible}
+        backgroundColor={colors._F7F7F7}
+        onClose={() => setIsSortModalVisible(false)}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.filterTitle}>Sort By</Text>
+
+          <View style={styles.sortOptions}>
+            {/* Newest */}
+            <Pressable
+              style={[
+                styles.sortOption,
+                sortBy === 'newest' && styles.sortOptionSelected,
+              ]}
+              onPress={() => {
+                setSortBy('newest');
+                setIsSortModalVisible(false);
+              }}
+            >
+              <View style={styles.sortOptionContent}>
+                <Text
+                  style={[
+                    styles.sortOptionText,
+                    sortBy === 'newest' && styles.sortOptionTextSelected,
+                  ]}
+                >
+                  Newest Jobs
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.sortOption,
+                sortBy === 'salary_high_low' && styles.sortOptionSelected,
+              ]}
+              onPress={() => {
+                setSortBy('salary_high_low');
+                setIsSortModalVisible(false);
+              }}
+            >
+              <View style={styles.sortOptionContent}>
+                <Text
+                  style={[
+                    styles.sortOptionText,
+                    sortBy === 'salary_high_low' && styles.sortOptionTextSelected,
+                  ]}
+                >
+                  Salary: High to Low
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.sortOption,
+                sortBy === 'salary_low_high' && styles.sortOptionSelected,
+              ]}
+              onPress={() => {
+                setSortBy('salary_low_high');
+                setIsSortModalVisible(false);
+              }}
+            >
+              <View style={styles.sortOptionContent}>
+                <Text
+                  style={[
+                    styles.sortOptionText,
+                    sortBy === 'salary_low_high' &&
+                    styles.sortOptionTextSelected,
+                  ]}
+                >
+                  Salary: Low to High
+                </Text>
+              </View>
+            </Pressable>
+
+            {sortBy && (
+              <Pressable
+                style={styles.clearSortButton}
+                onPress={() => {
+                  setSortBy(null);
+                  setIsSortModalVisible(false);
+                }}
+              >
+                <Text style={styles.clearSortText}>Clear Sort</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </BottomModal>
+
+      <ShareModal visible={modal} onClose={() => setModal(!modal)} />
     </LinearContainer>
   );
 };

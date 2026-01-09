@@ -35,9 +35,10 @@ const HomeHeader: FC<props> = ({
     type === 'company'
       ? companyProfile?.logo
       : companyProfile?.picture;
+  console.log("🔥 ~ HomeHeader ~ imageUri:", imageUri)
 
   const hasValidImage =
-    typeof imageUri === 'string' && imageUri.trim().length > 0;
+    typeof imageUri === 'string' && imageUri.trim().length > 0 && !imageUri.includes('blank');
 
   return (
     <View style={styles.header}>
