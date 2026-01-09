@@ -12,7 +12,7 @@ import {
   TextInputProps,
 } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
-import { commonFontStyle } from '../../theme/fonts';
+import { commonFontStyle, hp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { useTranslation } from 'react-i18next';
@@ -242,7 +242,7 @@ const PhoneInput: FC<picker> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 55,
+    marginTop: hp(0),
   },
   phoneRow: {
     flexDirection: 'row',

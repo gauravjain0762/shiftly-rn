@@ -169,7 +169,7 @@ const SignUp = () => {
 
     if (timer > 0) {
       interval = setInterval(() => {
-        setTimer(prev => prev - 1);
+        setTimer((prev: number) => prev - 1);
       }, 1000);
     }
 
@@ -529,23 +529,14 @@ const SignUp = () => {
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
-              <Text style={styles.title}>{t('Set a secure password')}</Text>
-              {/* <View style={styles.info_row}>
-                <CustomImage
-                  source={IMAGES.info}
-                  size={hp(22)}
-                  imageStyle={{marginTop: hp(2)}}
-                />
-                <Text style={styles.infotext}>
-                  {
-                    'Password must include at least 8 characters, one uppercase letter, one number, and one symbol.'
-                  }
-                </Text>
-              </View> */}
+
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.title}>{t('Set a secure password')}</Text>
+                <Text style={{ ...commonFontStyle(400, 18, colors.red) }}>{t('*')}</Text>
+              </View>
+
               <View style={styles.otpContainer}>
                 <CustomTextInput
-                  label={t('Password')}
-                  required
                   showRightIcon
                   inputStyle={styles.passinput}
                   containerStyle={styles.inputcontainer}
@@ -918,7 +909,7 @@ const SignUp = () => {
               showsVerticalScrollIndicator={false}>
               <View style={styles.fieldHeader}>
                 <Text style={styles.fieldHeaderText}>
-                  {t('Select your nationality ')}<Text style={styles.required}>*</Text>
+                  {t('Select your nationality')}<Text style={styles.required}>*</Text>
                 </Text>
                 <Tooltip
                   position="bottom"
@@ -1260,8 +1251,8 @@ const styles = StyleSheet.create({
   fieldHeaderText: {
     flex: 1,
     flexWrap: 'wrap',
-    ...commonFontStyle(500, 25, colors._0B3970),
     paddingTop: hp(30),
+    ...commonFontStyle(500, 25, colors._0B3970),
   },
   fieldLabel: {
     marginTop: hp(30),
@@ -1419,7 +1410,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     // alignItems: 'center',
     marginBottom: 10,
-    marginTop: 67,
+    marginTop: hp(20),
   },
   dateText: {
     ...commonFontStyle(400, 20, colors._0B3970),
@@ -1503,14 +1494,13 @@ const styles = StyleSheet.create({
     borderColor: colors._234F86,
     borderRadius: 10,
     paddingHorizontal: wp(23),
-    paddingVertical: hp(16),
+    paddingVertical: hp(12),
     justifyContent: 'space-between',
     alignItems: 'center',
     flex: 1,
   },
   passinput: {
     ...commonFontStyle(700, 24, colors._0B3970),
-    paddingTop: 8,
   },
   eye: {
     tintColor: colors._0B3970,

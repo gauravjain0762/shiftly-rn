@@ -408,7 +408,7 @@ const JobsScreen = () => {
           position="bottom"
           containerStyle={styles.tooltipIcon}
           message="Recommended for you, based on your profile and AI matching."
-          tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+          tooltipBoxStyle={{ left: wp(-100), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute' , overflow: 'visible'}}
         />
       </View>
     </>
@@ -703,7 +703,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: hp(12),
-    paddingHorizontal: wp(25),
     gap: wp(8),
     overflow: 'visible',
   },

@@ -10,7 +10,7 @@ import {
   ViewStyle,
   ImageStyle,
 } from 'react-native';
-import {commonFontStyle} from '../../theme/fonts';
+import {commonFontStyle, hp} from '../../theme/fonts';
 import {IMAGES} from '../../assets/Images';
 import {colors} from '../../theme/colors';
 
@@ -47,31 +47,37 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
           {required && <Text style={styles.required}>*</Text>}
         </Text>
       )}
-      <TextInput
-        style={[styles.input, inputStyle]}
-        secureTextEntry={isPassword && !showPassword}
-        includeFontPadding={false}
-        textAlignVertical="center"
-        {...rest}
-      />
-      {showRightIcon && (
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => (
-            setShowPassword(!showPassword), onShow(!showPassword)
-          )}>
-          <Image
-            source={!showPassword ? IMAGES.eye : IMAGES.eye_on}
-            style={{
-              width: 24,
-              height: 24,
-              resizeMode: 'contain',
-              tintColor: colors._0B3970,
-              ...imgStyle,
-            }}
-          />
-        </TouchableOpacity>
-      )}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[
+            styles.input,
+            label && styles.inputWithLabel,
+            inputStyle,
+            label && { marginTop: 20 },
+          ]}
+          secureTextEntry={isPassword && !showPassword}
+          textAlignVertical="center"
+          {...rest}
+        />
+        {showRightIcon && (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => (
+              setShowPassword(!showPassword), onShow(!showPassword)
+            )}>
+            <Image
+              source={!showPassword ? IMAGES.eye : IMAGES.eye_on}
+              style={{
+                width: 24,
+                height: 24,
+                resizeMode: 'contain',
+                tintColor: colors._0B3970,
+                ...imgStyle,
+              }}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
@@ -80,20 +86,25 @@ const getGlobalStyles = (props: any) => {
   return StyleSheet.create({
     container: {
       marginBottom: 15,
-      flexDirection: 'row',
-      alignItems: 'center',
     },
     label: {
-      marginBottom: 5,
+      marginTop: hp(40),
       ...commonFontStyle(500, 16, colors.black),
     },
     required: {
       color: 'red',
       marginLeft: 2,
     },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
     input: {
       flex: 1,
       ...commonFontStyle(500, 22, colors._1F1F1F),
+    },
+    inputWithLabel: {
+      marginTop: 0,
     },
   });
 };
