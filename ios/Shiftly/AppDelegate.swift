@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     FirebaseApp.configure()
     
     // Configure Google Maps
-    GMSServices.provideAPIKey("AIzaSyDRZwUC3zt1mzDVr7zSuxnjKC6l0q7Ec0E")
+    GMSServices.provideAPIKey("AIzaSyC0YuOdzYKbtMXSUqnL2P6SBRC9RE_gZO4")
 
     // React Native setup
     let delegate = ReactNativeDelegate()

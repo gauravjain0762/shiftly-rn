@@ -1,7 +1,6 @@
 import React from 'react';
 import {hp, wp} from '../../theme/fonts';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import {colors} from '../../theme/colors';
 
 type Props = {
   backgroundColor?: string;
@@ -22,6 +21,7 @@ const PostSkeleton = (props: Props) => {
           key={idx}
           flexDirection="column"
           marginBottom={hp(20)}
+          marginTop={hp(50)}
           padding={hp(16)}>
           <SkeletonPlaceholder.Item
             flexDirection="row"

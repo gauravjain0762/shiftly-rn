@@ -60,9 +60,11 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     justifyContent: 'center',
+    zIndex: 9999,
   },
   iconContainer: {
     padding: wp(5),
+    zIndex: 9999,
   },
   icon: {
     width: wp(18),
@@ -76,7 +78,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(10),
     borderRadius: 8,
     width: wp(250),
-    zIndex: 10,
+    zIndex: 99999, // Much higher zIndex
     borderWidth: hp(1),
     borderColor: colors._D9D9D9,
     shadowColor: '#000',

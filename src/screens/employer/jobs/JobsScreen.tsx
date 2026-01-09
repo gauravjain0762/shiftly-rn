@@ -418,8 +418,7 @@ const JobsScreen = () => {
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       {isLoading && currentPage === 1 ? (
         <>
-          {renderHeader()}
-          <MyJobsSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
+          <MyJobsSkeleton />
         </>
       ) : (
         <FlatList
