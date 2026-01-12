@@ -68,6 +68,7 @@ const JobDetail = () => {
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [activeIndex, setActiveIndex] = useState(0);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
+  const is_applied = params?.is_applied;
 
   const JobDetailsArr = {
     'Job Type': curr_jobdetails?.contract_type,
@@ -426,9 +427,9 @@ ${salary}${shareUrlText}`;
             <View style={{ height: hp(40) }} />
             <GradientButton
               type="Company"
-              disabled={curr_jobdetails?.is_applied}
+              disabled={is_applied}
               onPress={() => {
-                if (curr_jobdetails?.is_applied) {
+                if (is_applied) {
                   errorToast('You already applied for this job.');
                   return;
                 }
@@ -437,7 +438,7 @@ ${salary}${shareUrlText}`;
                   resumeList: resumeList,
                 });
               }}
-              title={curr_jobdetails?.is_applied ? 'Applied' : 'Apply Now'}
+              title={is_applied ? 'Applied' : 'Apply Now'}
             />
           </ScrollView>
         </>

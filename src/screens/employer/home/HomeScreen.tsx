@@ -34,9 +34,9 @@ const HomeScreen = () => {
     isFetching,
     isLoading,
     refetch,
-  } = useGetEmployeePostsQuery({});
+  } = useGetEmployeePostsQuery({page: currentPage});
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
-  const posts = getPost?.data?.posts;
+  const posts = getPost?.data?.posts || [];
 
   useEffect(() => {
     if (userInfo?._id) {
@@ -51,12 +51,12 @@ const HomeScreen = () => {
   }, [profileData]);
 
   useEffect(() => {
-    if (!getPost) return;
+    if (!getPost || !posts) return;
 
     if (currentPage === 1) {
       setAllPosts(posts);
     } else {
-      setAllPosts(prev => [...prev, ...posts]);
+      setAllPosts(prev => [...prev, ...(posts || [])]);
     }
     setIsLoadingMore(false);
   }, [getPost, posts, currentPage]);
@@ -66,6 +66,12 @@ const HomeScreen = () => {
       setIsLoadingMore(true);
       setCurrentPage(prev => prev + 1);
     }
+  };
+
+  const handleRefresh = () => {
+    setCurrentPage(1);
+    setAllPosts([]);
+    refetch();
   };
 
   const renderheader = () => {
@@ -88,14 +94,14 @@ const HomeScreen = () => {
         <FlatList
           data={allPosts}
           style={AppStyles.flex}
-          refreshing={isLoading}
-          onRefresh={refetch}
+          refreshing={isLoading && currentPage === 1}
+          onRefresh={handleRefresh}
           onEndReachedThreshold={0.5}
           onEndReached={handleLoadMore}
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={(item, index) => item?._id || index.toString()}
           showsVerticalScrollIndicator={false}
           renderItem={({item, index}: {item: any; index: number}) => (
-            <FeedCard item={item} key={index} />
+            <FeedCard item={item} key={item?._id || index} />
           )}
           contentContainerStyle={styles.scrollcontainer}
           ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
@@ -104,7 +110,7 @@ const HomeScreen = () => {
             isLoadingMore ? (
               <ActivityIndicator
                 size="large"
-                color={colors._D5D5D5}
+                color={colors._0B3970}
                 style={{marginVertical: hp(10)}}
               />
             ) : null

@@ -437,6 +437,7 @@ const JobsScreen = () => {
                   navigateTo(SCREENS.JobDetail, {
                     item: item,
                     resumeList: resumeList,
+                    is_applied: item?.is_applied,
                   })
                 }
               />

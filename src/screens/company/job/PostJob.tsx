@@ -157,6 +157,7 @@ const PostJob = () => {
     job_id,
     expiry_date,
   } = useAppSelector((state: any) => selectJobForm(state));
+
   const { updateJobForm } = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
@@ -181,7 +182,7 @@ const PostJob = () => {
   // Animation values
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
-  
+
   // Refs for scroll control
   const scrollViewRef = useRef<any>(null);
   const jobDepartmentFieldRef = useRef<View>(null);
@@ -269,7 +270,7 @@ const PostJob = () => {
           (data: any) => {
             const address = data?.results?.[0]?.formatted_address;
             const components = data?.results?.[0]?.address_components || [];
-            
+
             const stateObj = components.find((c: any) =>
               c.types.includes('administrative_area_level_1'),
             );
@@ -420,14 +421,14 @@ const PostJob = () => {
     if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
       return;
     }
-    
+
     if (location && !userAddress?.address) {
       getAddress(
         location,
         (data: any) => {
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
-          
+
           const stateObj = components.find((c: any) =>
             c.types.includes('administrative_area_level_1'),
           );
@@ -534,10 +535,10 @@ const PostJob = () => {
     } catch (err: any) {
       console.error('Failed to submit job:', err);
       // Extract error message from response
-      const errorMessage = 
-        err?.data?.message || 
-        err?.data?.error || 
-        err?.message || 
+      const errorMessage =
+        err?.data?.message ||
+        err?.data?.error ||
+        err?.message ||
         'Something went wrong!';
       errorToast(errorMessage);
     } finally {
@@ -880,10 +881,10 @@ const PostJob = () => {
               <View />
             </View>
             <View style={styles.requirementsContainer}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={styles.inputLabelLarge}>{t('Job Requirements')}</Text>
                 <Tooltip
-                  tooltipBoxStyle={{right: '-100%'}}
+                  tooltipBoxStyle={{ right: '-100%' }}
                   message={"Choose from our predefined list of requirements to ensure accurate candidate matching."}
                 />
               </View>
@@ -899,7 +900,7 @@ const PostJob = () => {
                 {(() => {
                   // Filter out empty/blank requirements
                   const validRequirements = requirements?.filter((req: string) => req && req.trim().length > 0) || [];
-                  
+
                   return validRequirements.length > 0 ? (
                     <FlatList
                       data={validRequirements}
@@ -1338,8 +1339,8 @@ const PostJob = () => {
                   onCancel={() => updateJobForm({ isModalVisible: false })}
                 />
               </View>
-              <View 
-                ref={jobDepartmentFieldRef} 
+              <View
+                ref={jobDepartmentFieldRef}
                 style={styles.field}
                 collapsable={false}>
                 <Text style={styles.label}>
@@ -1504,7 +1505,7 @@ const PostJob = () => {
             try {
               // Close modal first
               updateJobForm({ isSuccessModalVisible: false });
-              
+
               if (editMode) {
                 setCreatedJobId('');
                 setCreatedJobData(null);
@@ -1513,18 +1514,18 @@ const PostJob = () => {
                 navigationRef?.current?.goBack();
                 return;
               }
-              
+
               const jobIdToUse = createdJobId || job_id;
               const jobDataToUse = createdJobData;
-              
+
               // Reset state
               dispatch(resetJobFormState());
               dispatch(setCoPostJobSteps(0));
-              
+
               // Clear local state
               setCreatedJobId('');
               setCreatedJobData(null);
-              
+
               // Navigate with a small delay to ensure modal closes
               setTimeout(() => {
                 if (jobIdToUse) {

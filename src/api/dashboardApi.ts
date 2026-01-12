@@ -487,9 +487,10 @@ export const dashboardApi = createApi({
       },
     }),
     getEmployeePosts: builder.query<any, any>({
-      query: () => ({
+      query: params => ({
         url: API.getEmployeePosts,
         method: HTTP_METHOD.GET,
+        params: params,
         skipLoader: true,
       }),
       providesTags: ['GetEmployeePost'],
