@@ -254,9 +254,7 @@ const ApplyJob = () => {
           if (fileSize > MAX_FILE_SIZE) {
             const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
             errorToast(
-              t('File size is {{size}}MB. Maximum allowed size is 5MB', {
-                size: fileSizeMB,
-              }) || `File size is ${fileSizeMB}MB. Maximum allowed size is 5MB`
+              `File size is ${fileSizeMB}MB. Maximum allowed size is 5MB`
             );
             return;
           }

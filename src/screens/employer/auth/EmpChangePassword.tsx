@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import {
   BackHeader,
   CustomTextInput,
@@ -17,9 +17,11 @@ import { RootState } from '../../../store';
 import { useSelector } from 'react-redux';
 import {
   errorToast,
+  passwordRules,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
+import { IMAGES } from '../../../assets/Images';
 import { setChangePasswordSteps, setUserInfo } from '../../../features/authSlice';
 import { useAppDispatch } from '../../../redux/hooks';
 import { SCREENS } from '../../../navigation/screenNames';
@@ -34,8 +36,23 @@ const ChangePassword = () => {
   const [employeeChangedPassword] = useEmployeeChangePasswordMutation({});
 
   const handleChangePassword = async () => {
+    if (!oldPassword.trim()) {
+      errorToast('Please enter your old password');
+      return;
+    }
+
     if (!newPassword.trim() || !confirmPassword.trim()) {
       errorToast('Please enter new password and confirm password');
+      return;
+    }
+
+    if (!passwordRules.every(rule => rule.test(newPassword))) {
+      errorToast('Password does not meet all the requirements');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      errorToast('New password and confirm password do not match');
       return;
     }
 
@@ -111,6 +128,33 @@ const ChangePassword = () => {
             onChangeText={setConfirmPassword}
             isPassword
           />
+          <View style={passwordStyles.passwordRulesContainer}>
+            <View style={passwordStyles.passlableCon}>
+              <Image
+                source={IMAGES.shield}
+                resizeMode="contain"
+                style={passwordStyles.shield}
+              />
+              <Text style={passwordStyles.passRule}>{t('Password Rule')}</Text>
+            </View>
+            {passwordRules?.map((item: any, index: number) => {
+              const passed = item?.test(newPassword);
+              return (
+                <View key={index} style={passwordStyles.rules}>
+                  {passed ? (
+                    <Image
+                      source={IMAGES.check}
+                      style={passwordStyles.check}
+                      tintColor={colors._0B3970}
+                    />
+                  ) : (
+                    <View style={passwordStyles.point} />
+                  )}
+                  <Text style={passwordStyles.ruleTitle}>{item?.label}</Text>
+                </View>
+              );
+            })}
+          </View>
           <GradientButton
             type="Employee"
             title="Submit"
@@ -180,5 +224,45 @@ export const passwordStyles = StyleSheet.create({
   button: {
     marginTop: hp(40),
     // backgroundColor: colors._F7F7F7
+  },
+  passwordRulesContainer: {
+    marginTop: hp(28),
+  },
+  passlableCon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(9),
+    marginBottom: hp(10),
+  },
+  shield: {
+    width: wp(27),
+    height: wp(27),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
+  },
+  passRule: {
+    ...commonFontStyle(500, 25, colors._0B3970),
+  },
+  point: {
+    width: wp(9),
+    height: wp(9),
+    backgroundColor: colors._0B3970,
+    borderRadius: 100,
+  },
+  rules: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: wp(20),
+    paddingLeft: wp(10),
+    paddingBottom: hp(2),
+  },
+  ruleTitle: {
+    ...commonFontStyle(400, 15, colors._0B3970),
+  },
+  check: {
+    width: wp(12),
+    height: wp(12),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
 });

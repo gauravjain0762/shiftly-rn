@@ -197,7 +197,7 @@ const EducationList: FC<Props> = ({
           <CustomInput
             label="City/Region"
             required
-            placeholder={'Enter City/\nRegion'}
+            placeholder={'City/Region'}
             placeholderTextColor={'#969595'}
             value={educationListEdit?.province}
             onChange={(text: string) => {

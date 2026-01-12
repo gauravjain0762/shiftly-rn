@@ -301,7 +301,7 @@ const CreateAccount = () => {
     newPass[index] = text;
     dispatch(setCompanyProfileData({ otp: newPass }));
 
-    if (text && index < 7) {
+    if (text && index < 3) {
       inputRefsOtp.current[index + 1]?.focus();
     }
   };

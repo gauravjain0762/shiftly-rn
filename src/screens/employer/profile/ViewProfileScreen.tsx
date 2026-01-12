@@ -21,6 +21,7 @@ import { Flag } from 'react-native-country-picker-modal';
 import { callingCodeToCountryCode } from '../../../utils/countryFlags';
 import CustomImage from '../../../component/common/CustomImage';
 import { useFocusEffect } from '@react-navigation/native';
+import { getInitials, hasValidImage } from '../../../utils/commonFunction';
 
 export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
@@ -60,12 +61,20 @@ const ViewProfileScreen = () => {
             />
           </Pressable>
           <View style={styles.container}>
-            <CustomImage
-              uri={userInfo?.picture}
-              imageStyle={{ height: '100%', width: '100%' }}
-              containerStyle={styles.avatar}
-              resizeMode="cover"
-            />
+            {hasValidImage(userInfo?.picture) ? (
+              <CustomImage
+                uri={userInfo?.picture}
+                imageStyle={{ height: '100%', width: '100%' }}
+                containerStyle={styles.avatar}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>
+                  {getInitials(userInfo?.name)}
+                </Text>
+              </View>
+            )}
             <Text style={styles.name}>{userInfo?.name}</Text>
             <View style={styles.locationRow}>
               <Image
@@ -230,5 +239,15 @@ const styles = StyleSheet.create({
   },
   editAccountBtnText: {
     ...commonFontStyle(500, 16, '#0A376D'),
+  },
+  avatarPlaceholder: {
+    backgroundColor: colors._0B3970,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: wp(22),
+    fontWeight: '700',
   },
 });

@@ -149,7 +149,7 @@ const initialState: AppState = {
     phone: '',
     phone_code: '971',
     describe: "I'm a job seeker",
-    picture: 'https://sky.devicebee.com/Shiftly/public/uploads//blank.png',
+    picture: '',
     countryCode: 'AE',
     googleId: '',
     appleId: ''

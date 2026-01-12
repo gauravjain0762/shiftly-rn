@@ -69,7 +69,9 @@ const PhoneInput: FC<picker> = ({
 
     onPhoneChange?.(formatted);
 
-    setValid(/^[2-9]\d\s\d{3}\s\d{5}$/.test(formatted));
+    // Check if we have exactly 10 digits (allowing 0 as first digit)
+    const digits = formatted.replace(/\D/g, '');
+    setValid(digits.length === 10 && /^\d{10}$/.test(digits));
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -212,7 +214,7 @@ const PhoneInput: FC<picker> = ({
           maxLength={12}
           {...TextInputProps}
         />
-        {valid && phone?.length === 12 && (
+        {valid && phone && phone.replace(/\D/g, '').length === 10 && (
           <Image
             source={IMAGES.right}
             tintColor={colors.green}

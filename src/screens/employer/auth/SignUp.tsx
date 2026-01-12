@@ -230,7 +230,7 @@ const SignUp = () => {
 
   const handleOTPVerify = async () => {
     const verifyData = {
-      otp: otp.join('') || '123456',
+      otp: otp.join('') || '1234',
       user_id: userInfo?._id,
       device_token: fcmToken ?? 'ddd',
       device_type: Platform.OS,
@@ -409,7 +409,7 @@ const SignUp = () => {
 
     updateSignupData({ otp: newOtp });
 
-    if (text && index < 7) {
+    if (text && index < 3) {
       inputRefsOtp.current[index + 1]?.focus();
     }
   };
@@ -622,6 +622,10 @@ const SignUp = () => {
         );
 
       case 4:
+        // Get digits only from phone number (remove spaces and non-digits)
+        const phoneDigits = phone?.replace(/\D/g, '') || '';
+        const isValidPhone = phoneDigits.length === 10;
+        
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
@@ -650,8 +654,8 @@ const SignUp = () => {
                     errorToast(t('Phone number is required'));
                     return;
                   }
-                  if (phone?.length < 9) {
-                    errorToast('Please enter a valid phone number');
+                  if (!isValidPhone) {
+                    errorToast('Please enter a valid 10-digit phone number');
                     return;
                   }
                   handleRegister();
@@ -663,13 +667,14 @@ const SignUp = () => {
               type="Company"
               style={styles.btn}
               title={'Next'}
+              disabled={!isValidPhone}
               onPress={() => {
                 if (!phone?.trim()) {
                   errorToast(t('Phone number is required'));
                   return;
                 }
-                if (phone?.length < 9) {
-                  errorToast('Please enter a valid phone number');
+                if (!isValidPhone) {
+                  errorToast('Please enter a valid 10-digit phone number');
                   return;
                 }
                 handleRegister();

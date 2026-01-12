@@ -803,7 +803,12 @@ const CreateProfileScreen = () => {
             },
           ]}
           title={'Next'}
+          disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
           onPress={() => {
+            if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
+              errorToast('Please select at least one skill');
+              return;
+            }
             dispatch(setActiveStep(4));
           }}
         />

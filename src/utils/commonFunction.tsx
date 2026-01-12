@@ -191,6 +191,26 @@ export const getTimeAgo = (createdAt: string): string => {
   return `${diffSeconds}s`;
 };
 
+export const getInitials = (name?: string) => {
+  if (!name) return '?';
+
+  const words = name.trim().split(' ').filter(Boolean);
+
+  if (words.length === 1) {
+    return words[0][0].toUpperCase();
+  }
+
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
+export const hasValidImage = (imageUri?: string | null) => {
+  return (
+    typeof imageUri === 'string' &&
+    imageUri.trim().length > 0 &&
+    !imageUri.toLowerCase().includes('blank')
+  );
+};
+
 export const passwordRules = [
   { label: 'Minimum 8 characters', test: (pw: string | any[]) => pw.length >= 8 },
   {

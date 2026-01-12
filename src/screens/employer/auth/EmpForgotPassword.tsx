@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
   errorToast,
+  passwordRules,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
@@ -48,7 +49,7 @@ const EmpForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
-  const [otp, setOtp] = useState(new Array(6).fill(''));
+  const [otp, setOtp] = useState(new Array(4).fill(''));
   const [timer, setTimer] = useState(__DEV__ ? 30 : 30);
   const [start, setStart] = useState(false);
   const [OtpVerify] = useEmployeeOTPVerifyMutation();
@@ -78,7 +79,7 @@ const EmpForgotPassword = () => {
     newPass[index] = text;
     setOtp(newPass);
 
-    if (text && index < 7) {
+    if (text && index < 3) {
       inputRefsOtp.current[index + 1]?.focus();
     }
   };
@@ -150,6 +151,18 @@ const EmpForgotPassword = () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
       Keyboard.dismiss();
       errorToast('Please enter new password and confirm password');
+      return;
+    }
+
+    if (!passwordRules.every(rule => rule.test(newPassword))) {
+      Keyboard.dismiss();
+      errorToast('Password does not meet all the requirements');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Keyboard.dismiss();
+      errorToast('New password and confirm password do not match');
       return;
     }
 
@@ -324,6 +337,33 @@ const EmpForgotPassword = () => {
               isPassword
               onChangeText={setConfirmPassword}
             />
+            <View style={passwordStyles.passwordRulesContainer}>
+              <View style={passwordStyles.passlableCon}>
+                <Image
+                  source={IMAGES.shield}
+                  resizeMode="contain"
+                  style={passwordStyles.shield}
+                />
+                <Text style={passwordStyles.passRule}>{t('Password Rule')}</Text>
+              </View>
+              {passwordRules?.map((item: any, index: number) => {
+                const passed = item?.test(newPassword);
+                return (
+                  <View key={index} style={passwordStyles.rules}>
+                    {passed ? (
+                      <Image
+                        source={IMAGES.check}
+                        style={passwordStyles.check}
+                        tintColor={colors._0B3970}
+                      />
+                    ) : (
+                      <View style={passwordStyles.point} />
+                    )}
+                    <Text style={passwordStyles.ruleTitle}>{item?.label}</Text>
+                  </View>
+                );
+              })}
+            </View>
             <GradientButton
               type="Employee"
               title="Submit"

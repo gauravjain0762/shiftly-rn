@@ -6,15 +6,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {BackHeader, LinearContainer} from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
-import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
+import React, { useState } from 'react';
+import { BackHeader, LinearContainer } from '../../../component';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
 import CustomPopup from '../../../component/common/CustomPopup';
 import {
   errorToast,
+  getInitials,
+  hasValidImage,
   navigateTo,
   resetNavigation,
   successToast,
@@ -25,20 +27,21 @@ import {
   setAuthToken,
   setCompanyRegisterData,
 } from '../../../features/authSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {clearAsync} from '../../../utils/asyncStorage';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearAsync } from '../../../utils/asyncStorage';
 import {
   useEmployeeDeleteAccountMutation,
   useEmployeeLogoutMutation,
 } from '../../../api/authApi';
-import {AppDispatch, RootState} from '../../../store';
+import { AppDispatch, RootState } from '../../../store';
 import LanguageModal from '../../../component/common/LanguageModel';
 import CustomImage from '../../../component/common/CustomImage';
 
 const AccountScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [empLogout] = useEmployeeLogoutMutation({});
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  console.log("🔥 ~ AccountScreen ~ userInfo:", userInfo)
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [employeeDeleteAccount] = useEmployeeDeleteAccountMutation({});
   const [deletepopupVisible, setdeletePopupVisible] = useState<boolean>(false);
@@ -202,16 +205,20 @@ const AccountScreen = () => {
           title={'Account'}
           titleStyle={styles.headerTitle}
           RightIcon={
-            <CustomImage
-              source={
-                userInfo?.picture
-                  ? {uri: userInfo?.picture}
-                  : {uri: 'https://randomuser.me/api/portraits/women/44.jpg'}
-              }
-              imageStyle={{height: '100%', width: '100%'}}
-              containerStyle={styles.avatar}
-              resizeMode="cover"
-            />
+            hasValidImage(userInfo?.picture) ? (
+              <CustomImage
+                source={{ uri: userInfo?.picture }}
+                imageStyle={{ height: '100%', width: '100%' }}
+                containerStyle={styles.avatar}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>
+                  {getInitials(userInfo?.name)}
+                </Text>
+              </View>
+            )
           }
         />
       </View>
@@ -255,7 +262,7 @@ const AccountScreen = () => {
                 <Text
                   style={[
                     styles.label,
-                    item.label == 'Logout' ? {color: 'red'} : {},
+                    item.label == 'Logout' ? { color: 'red' } : {},
                   ]}>
                   {item.label}
                 </Text>
@@ -372,5 +379,15 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...commonFontStyle(600, 22, colors._0B3970),
+  },
+  avatarPlaceholder: {
+    backgroundColor: colors._0B3970,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: wp(22),
+    fontWeight: '700',
   },
 });

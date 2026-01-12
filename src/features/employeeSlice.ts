@@ -137,8 +137,8 @@ const initialState: EmployeeState = {
   isBannerLoaded: false,
   isSuccessModalVisible: false,
   auth: {
-    email: __DEV__ ? 'emplyoee1@gmail.com' : '',
-    password: __DEV__ ? '12345678' : '',
+    email: __DEV__ ? 'test111@yopmail.com' : '',
+    password: __DEV__ ? 'Test@123' : '',
   },
   profile_completion: 0,
 };
