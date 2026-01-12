@@ -30,6 +30,7 @@ import { RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsSuccessModalVisible } from '../../../features/employeeSlice';
 import Tooltip from '../../../component/common/Tooltip';
+import RNFS from 'react-native-fs';
 
 const ApplyJob = () => {
   const { t } = useTranslation();
@@ -46,6 +47,18 @@ const ApplyJob = () => {
   const { isSuccessModalVisible } = useSelector(
     (state: RootState) => state.employee,
   );
+
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
+  const checkFileSize = async (filePath: string): Promise<number> => {
+    try {
+      const fileInfo = await RNFS.stat(filePath);
+      return fileInfo.size;
+    } catch (error) {
+      console.error('Error getting file size:', error);
+      return 0;
+    }
+  };
 
   const handleApplyJob = async () => {
     if (!selectedDoc || (!selectedDoc?._id && !selectedDoc?.file)) {
@@ -126,7 +139,7 @@ const ApplyJob = () => {
                 <Text
                   style={
                     styles.salary
-                  }>{`AED ${data?.monthly_salary_from} - ${data?.monthly_salary_to}`}</Text>
+                  }>{`${data?.currency} ${data?.monthly_salary_from} - ${data?.monthly_salary_to}`}</Text>
               </View>
             </View>
           </View>
@@ -220,12 +233,37 @@ const ApplyJob = () => {
       <ImagePickerModal
         actionSheet={imageModal}
         setActionSheet={setImageModal}
-        onUpdate={(image: any) => {
+        onUpdate={async (image: any) => {
           setImageModal(false);
+
+          const filePath = image?.path || image?.uri;
+          if (!filePath) {
+            errorToast(t('Unable to get file information'));
+            return;
+          }
+
+          // Check file size
+          let fileSize = image?.size || 0;
+          
+          // If size is not provided, get it from file system
+          if (!fileSize || fileSize === 0) {
+            fileSize = await checkFileSize(filePath);
+          }
+
+          // Validate file size (5MB limit)
+          if (fileSize > MAX_FILE_SIZE) {
+            const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+            errorToast(
+              t('File size is {{size}}MB. Maximum allowed size is 5MB', {
+                size: fileSizeMB,
+              }) || `File size is ${fileSizeMB}MB. Maximum allowed size is 5MB`
+            );
+            return;
+          }
 
           const newResume = {
             file_name: image?.name || image?.filename || 'Uploaded CV',
-            file: image?.path || image?.uri,
+            file: filePath,
             type: image?.type,
           };
 

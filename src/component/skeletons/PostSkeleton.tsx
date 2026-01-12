@@ -20,8 +20,8 @@ const PostSkeleton = (props: Props) => {
         <SkeletonPlaceholder.Item
           key={idx}
           flexDirection="column"
-          marginBottom={hp(20)}
-          marginTop={hp(50)}
+          // marginBottom={hp(20)}
+          // marginTop={hp(30)}
           padding={hp(16)}>
           <SkeletonPlaceholder.Item
             flexDirection="row"

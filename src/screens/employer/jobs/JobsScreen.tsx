@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +15,6 @@ import {
   GradientButton,
   JobCard,
   LinearContainer,
-  ShareModal,
 } from '../../../component';
 import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
@@ -25,7 +25,7 @@ import {
   errorToast,
   navigateTo,
 } from '../../../utils/commonFunction';
-import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
+import { SCREENS } from '../../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
 import {
   useAddRemoveFavouriteMutation,
@@ -57,15 +57,15 @@ const jobTypes: object[] = [
 const JobsScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
-  const [modal, setModal] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const { userInfo } = useSelector((state: RootState) => state.auth);
+
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
   const { data: getDepartmentData } = useGetFilterDataQuery({});
   const departments = getDepartmentData?.data?.job_sectors;
-  console.log("🔥 ~ JobsScreen ~ departments:", departments)
   const favJobList = getFavoriteJobs?.data?.jobs;
+
   const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
@@ -99,6 +99,7 @@ const JobsScreen = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMorePages, setHasMorePages] = useState(true);
   const lastLoadedPageRef = useRef(0);
+  const [showAllDepartments, setShowAllDepartments] = useState(false);
 
   useEffect(() => {
     trigger({ page: 1 });
@@ -148,7 +149,6 @@ const JobsScreen = () => {
     }
   }, [jobList, pagination]);
 
-  // Update pagination info
   useEffect(() => {
     if (pagination) {
       setHasMorePages(pagination.current_page < pagination.total_pages);
@@ -193,7 +193,6 @@ const JobsScreen = () => {
     setFilters(newFilters);
     setIsFilterModalVisible(false);
 
-    // Reset pagination when filters change
     setCurrentPage(1);
     setAllJobs([]);
     setHasMorePages(true);
@@ -471,14 +470,21 @@ const JobsScreen = () => {
       <BottomModal
         visible={isFilterModalVisible}
         backgroundColor={colors._F7F7F7}
-        onClose={() => setIsFilterModalVisible(false)}>
-        <View style={styles.modalContent}>
+        onClose={() => {
+          setIsFilterModalVisible(false);
+          setShowAllDepartments(false);
+        }}>
+        <ScrollView
+          style={styles.modalScrollView}
+          contentContainerStyle={styles.modalContent}
+          showsVerticalScrollIndicator={false}>
           <View style={styles.filterContainer}>
             <Text style={styles.filterTitle}>{t('Search Filter')}</Text>
 
             <CustomImage
               onPress={() => {
                 setIsFilterModalVisible(false);
+                setShowAllDepartments(false);
               }}
               source={IMAGES.close}
               size={wp(18)}
@@ -487,11 +493,11 @@ const JobsScreen = () => {
 
           <Text style={styles.sectionLabel}>{t('Department')}</Text>
           <View style={styles.pillRow}>
-            {departments?.map((dept: any) => {
+            {(showAllDepartments ? departments : departments?.slice(0, 6))?.map((dept: any, index: number) => {
               const isSelected = filters.job_sectors.includes(dept);
               return (
                 <Pressable
-                  key={dept}
+                  key={dept?._id || dept?.title || dept || index}
                   style={[styles.pill, isSelected && styles.pillSelected]}
                   onPress={() => {
                     setFilters(prev => ({
@@ -506,12 +512,19 @@ const JobsScreen = () => {
                       styles.pillText,
                       isSelected && styles.pillTextSelected,
                     ]}>
-                    {dept}
+                    {dept?.title}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
+          {departments && departments.length > 6 && !showAllDepartments && (
+            <TouchableOpacity
+              onPress={() => setShowAllDepartments(true)}
+              style={styles.showMoreContainer}>
+              <Text style={styles.showMoreText}>{t('Show more')}</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.inputWrapper}>
             <CustomTextInput
@@ -570,7 +583,7 @@ const JobsScreen = () => {
               onPress={handleApplyFilter}
             />
           </View>
-        </View>
+        </ScrollView>
       </BottomModal>
 
       <BottomModal
@@ -665,7 +678,6 @@ const JobsScreen = () => {
         </View>
       </BottomModal>
 
-      <ShareModal visible={modal} onClose={() => setModal(!modal)} />
     </LinearContainer>
   );
 };
@@ -750,6 +762,9 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     marginTop: hp(30),
+  },
+  modalScrollView: {
+    flexGrow: 1,
   },
   modalContent: {
     paddingHorizontal: wp(15),
@@ -973,5 +988,14 @@ const styles = StyleSheet.create({
   },
   loadingMoreText: {
     ...commonFontStyle(400, 14, colors._7B7878),
+  },
+  showMoreContainer: {
+    marginTop: hp(8),
+    marginBottom: hp(10),
+    alignItems: 'center',
+  },
+  showMoreText: {
+    ...commonFontStyle(500, 16, colors._0B3970),
+    textDecorationLine: 'underline',
   },
 });

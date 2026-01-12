@@ -160,13 +160,13 @@ const SuggestedEmployeeScreen = () => {
     const from = jobInfo?.monthly_salary_from;
     const to = jobInfo?.monthly_salary_to;
     if (from && to) {
-      return `AED ${formatCurrency(from)} - ${formatCurrency(to)}`;
+      return `${jobInfo?.currency} ${formatCurrency(from)} - ${formatCurrency(to)}`;
     }
     if (from) {
-      return `AED ${formatCurrency(from)}`;
+      return `${jobInfo?.currency} ${formatCurrency(from)}`;
     }
     if (to) {
-      return `AED ${formatCurrency(to)}`;
+      return `${jobInfo?.currency} ${formatCurrency(to)}`;
     }
     return '';
   }, [jobInfo]);

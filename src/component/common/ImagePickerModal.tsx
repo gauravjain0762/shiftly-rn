@@ -32,6 +32,16 @@ const ImagePickerModal = ({
       ImageCropPicker.openCamera({
         mediaType: 'photo',
         cropping: true,
+        cropperToolbarTitle: 'Edit Photo',
+        cropperStatusBarColor: '#000000',
+        cropperToolbarColor: '#000000',
+        cropperActiveWidgetColor: '#0B3970',
+        cropperToolbarWidgetColor: '#FFFFFF',
+        cropperCancelText: 'Cancel',
+        cropperChooseText: 'Done',
+        ...(Platform.OS === 'ios' && {
+          cropperStatusBarTranslucent: false,
+        }),
       }).then(image => {
         if (Platform.OS === 'android') {
           image.sourceURL = image.path;
@@ -55,6 +65,16 @@ const ImagePickerModal = ({
         mediaType: 'photo',
         cropping: true,
         compressImageQuality: 0.5,
+        cropperToolbarTitle: 'Edit Photo',
+        cropperStatusBarColor: '#000000',
+        cropperToolbarColor: '#000000',
+        cropperActiveWidgetColor: '#0B3970',
+        cropperToolbarWidgetColor: '#FFFFFF',
+        cropperCancelText: 'Cancel',
+        cropperChooseText: 'Done',
+        ...(Platform.OS === 'ios' && {
+          cropperStatusBarTranslucent: false,
+        }),
       });
 
       const temp = {

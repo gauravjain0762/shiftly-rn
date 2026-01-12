@@ -56,7 +56,9 @@ const JobDetail = () => {
   const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
     data?.item?._id || data?.jobId,
   );
+  console.log("🔥 ~ JobDetail ~ jobDetail:", jobDetail)
   const curr_jobdetails = jobDetail?.data?.job;
+  console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
   const shareUrl = jobDetail?.data?.share_url;
@@ -154,7 +156,7 @@ const JobDetail = () => {
       const description = curr_jobdetails?.description || '';
       const salary =
         curr_jobdetails?.monthly_salary_from || curr_jobdetails?.monthly_salary_to
-          ? `Salary: AED ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${curr_jobdetails?.currency} ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
@@ -334,7 +336,7 @@ ${salary}${shareUrlText}`;
                 <View style={styles.snapshotItem}>
                   <Text style={styles.snapshotLabel}>Salary</Text>
                   <Text style={styles.snapshotValue}>
-                    AED {curr_jobdetails?.monthly_salary_from} - {curr_jobdetails?.monthly_salary_to}
+                    {curr_jobdetails?.currency} {curr_jobdetails?.monthly_salary_from} - {curr_jobdetails?.monthly_salary_to}
                   </Text>
                 </View>
               )}
@@ -422,30 +424,21 @@ ${salary}${shareUrlText}`;
             </View>
 
             <View style={{ height: hp(40) }} />
-            {curr_jobdetails?.is_applied ? (
-              <BaseText
-                style={{
-                  textAlign: 'center',
-                  ...commonFontStyle(500, 18, colors._0B3970),
-                }}>{`Applied on ${formatDate(
-                  curr_jobdetails?.createdAt,
-                )}`}</BaseText>
-            ) : (
-              <GradientButton
-                type="Company"
-                onPress={() => {
-                  if (curr_jobdetails?.is_applied) {
-                    errorToast('You already applied for this job.');
-                    return;
-                  }
-                  navigateTo(SCREEN_NAMES.ApplyJob, {
-                    data: curr_jobdetails,
-                    resumeList: resumeList,
-                  });
-                }}
-                title={curr_jobdetails?.is_applied ? 'Applied' : 'Apply Now'}
-              />
-            )}
+            <GradientButton
+              type="Company"
+              disabled={curr_jobdetails?.is_applied}
+              onPress={() => {
+                if (curr_jobdetails?.is_applied) {
+                  errorToast('You already applied for this job.');
+                  return;
+                }
+                navigateTo(SCREEN_NAMES.ApplyJob, {
+                  data: curr_jobdetails,
+                  resumeList: resumeList,
+                });
+              }}
+              title={curr_jobdetails?.is_applied ? 'Applied' : 'Apply Now'}
+            />
           </ScrollView>
         </>
       )}

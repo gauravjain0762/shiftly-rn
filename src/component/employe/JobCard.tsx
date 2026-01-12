@@ -36,6 +36,7 @@ const JobCard: FC<props> = ({
   heartImage,
   isShowFavIcon = true,
 }) => {
+  console.log("🔥 ~ JobCard ~ item:", item)
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
   const coverImageUri = item?.company_id?.cover_images?.[0];
   const logoUri = item?.company_id?.logo;
@@ -47,10 +48,11 @@ const JobCard: FC<props> = ({
       const description = item?.description || '';
       const salary =
         item?.monthly_salary_from || item?.monthly_salary_to
-          ? `Salary: AED ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${item?.currency} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrl = item?.share_url || '';
+      console.log("🔥 ~ handleShare ~ shareUrl:", shareUrl)
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
@@ -174,7 +176,7 @@ ${salary}${shareUrlText}`;
           <View style={styles.salaryContainer}>
             <Text style={styles.salaryLabel}>Salary range: </Text>
             <Text style={styles.salaryAmount}>
-              AED {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()}
+              {item?.currency} {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()}
             </Text>
           </View>
         )}

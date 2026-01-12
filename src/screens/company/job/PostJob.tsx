@@ -493,6 +493,7 @@ const PostJob = () => {
       skills: skillId?.join(','),
       facilities: selected?.map((item: any) => item._id).join(','),
       requirements: requirements?.join(','),
+      currency: currency?.value,
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);

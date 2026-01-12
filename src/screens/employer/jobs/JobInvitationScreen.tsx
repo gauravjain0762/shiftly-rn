@@ -55,7 +55,7 @@ const JobInvitationScreen = () => {
                             {job?.contract_type}
                         </BaseText>
                         <BaseText style={styles.salary}>
-                            {`${job?.monthly_salary_from} - ${job?.monthly_salary_to} AED`}
+                            {`${job?.currency} ${job?.monthly_salary_from} - ${job?.monthly_salary_to}`}
                         </BaseText>
                     </View>
                 </View>
