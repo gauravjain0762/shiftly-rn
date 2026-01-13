@@ -281,7 +281,9 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
                     {/* Show label when this dot is pressed */}
                     {pressedDot?.langName === lang.name && pressedDot?.level === level && (
                       <View style={styles.dotLabelContainer}>
-                        <Text style={styles.dotLabel}>{proficiencyLabels[level]}</Text>
+                        <Text style={styles.dotLabel} numberOfLines={1} ellipsizeMode="tail">
+                          {proficiencyLabels[level]}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -455,12 +457,15 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     alignItems: 'center',
     justifyContent: 'center',
-    width: wp(100),
+    minWidth: wp(100),
+    maxWidth: wp(150),
     marginLeft: wp(-33),
+    flexShrink: 0,
   },
   dotLabel: {
     ...commonFontStyle(500, 12, colors.white),
     textAlign: 'center',
+    flexShrink: 0,
   },
   btn: {
     marginHorizontal: wp(4),

@@ -1003,6 +1003,11 @@ const SignUp = () => {
                   withCallingCode={false}
                   withFlag
                   withEmoji={false}
+                  modalProps={{
+                    animationType: 'slide',
+                    transparent: true,
+                    presentationStyle: 'overFullScreen',
+                  }}
                   onSelect={(item: Country) => {
                     const countryName =
                       typeof item?.name === 'string'

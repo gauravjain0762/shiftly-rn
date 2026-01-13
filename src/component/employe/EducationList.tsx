@@ -222,6 +222,11 @@ const EducationList: FC<Props> = ({
           withCallingCode={false}
           withFlag
           withEmoji={false}
+          modalProps={{
+            animationType: 'slide',
+            transparent: true,
+            presentationStyle: 'overFullScreen',
+          }}
           onSelect={(item: any) => {
             const countryName =
               typeof item?.name === 'string'

@@ -51,6 +51,8 @@ const EditAccountScreen = () => {
   const [picture, setPicture] = useState<any>(null);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [showNationalityPicker, setShowNationalityPicker] = useState(false);
+  const [countryPickerReady, setCountryPickerReady] = useState(false);
+  const [nationalityPickerReady, setNationalityPickerReady] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [updateProfile] = useEmpUpdateProfileMutation();
@@ -208,7 +210,12 @@ const EditAccountScreen = () => {
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Nationality</Text>
               <TouchableOpacity
-                onPress={() => setShowNationalityPicker(true)}
+                onPress={() => {
+                  setNationalityPickerReady(true);
+                  setTimeout(() => {
+                    setShowNationalityPicker(true);
+                  }, 100);
+                }}
                 style={styles.countrySelector}>
                 <Text
                   style={
@@ -234,7 +241,12 @@ const EditAccountScreen = () => {
               <Text style={styles.fieldLabel}>Phone</Text>
               <View style={styles.phoneContainer}>
                 <TouchableOpacity
-                  onPress={() => setShowCountryPicker(true)}
+                  onPress={() => {
+                    setCountryPickerReady(true);
+                    setTimeout(() => {
+                      setShowCountryPicker(true);
+                    }, 100);
+                  }}
                   style={styles.countryCodeSelector}>
                   <Flag
                     withFlagButton
@@ -277,13 +289,18 @@ const EditAccountScreen = () => {
           />
         </KeyboardAwareScrollView>
 
-        {showCountryPicker && (
+        {countryPickerReady && (
           <CountryPicker
             visible={showCountryPicker}
             withFilter
             withFlag
             withEmoji={true}
             withCallingCode={true}
+            modalProps={{
+              animationType: 'slide',
+              transparent: true,
+              presentationStyle: 'overFullScreen',
+            }}
             onSelect={country => {
               setFormData(prev => ({
                 ...prev,
@@ -291,16 +308,24 @@ const EditAccountScreen = () => {
               }));
               setShowCountryPicker(false);
             }}
-            onClose={() => setShowCountryPicker(false)}
+            onClose={() => {
+              setShowCountryPicker(false);
+              setTimeout(() => setCountryPickerReady(false), 300);
+            }}
           />
         )}
 
-        {showNationalityPicker && (
+        {nationalityPickerReady && (
           <CountryPicker
             withFlag
             withFilter
             withEmoji={false}
             visible={showNationalityPicker}
+            modalProps={{
+              animationType: 'slide',
+              transparent: true,
+              presentationStyle: 'overFullScreen',
+            }}
             onSelect={country => {
               const countryName =
                 typeof country?.name === 'string'
@@ -309,7 +334,10 @@ const EditAccountScreen = () => {
               setFormData(prev => ({ ...prev, nationality: countryName }));
               setShowNationalityPicker(false);
             }}
-            onClose={() => setShowNationalityPicker(false)}
+            onClose={() => {
+              setShowNationalityPicker(false);
+              setTimeout(() => setNationalityPickerReady(false), 300);
+            }}
           />
         )}
 

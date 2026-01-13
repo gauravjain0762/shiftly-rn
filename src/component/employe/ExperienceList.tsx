@@ -163,6 +163,11 @@ const ExperienceList: FC<any> = ({
           withCallingCode={false}
           withFlag
           withEmoji={false}
+          modalProps={{
+            animationType: 'slide',
+            transparent: true,
+            presentationStyle: 'overFullScreen',
+          }}
           onSelect={(item: any) => {
             setExperienceListEdit({...experienceListEdit, country: item?.name});
             setIsVisible(false);

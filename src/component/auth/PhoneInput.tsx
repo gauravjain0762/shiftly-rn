@@ -164,7 +164,6 @@ const PhoneInput: FC<picker> = ({
     }
   };
 
-  // Use detected country or provided countryCode
   const currentCountryCode = countryCode || detectedCountry;
   const currentCallingCode = callingCode || detectedCallingCode;
 
@@ -178,6 +177,11 @@ const PhoneInput: FC<picker> = ({
           withFlag
           withCallingCode
           flagSize={50}
+          modalProps={{
+            animationType: 'slide',
+            transparent: true,
+            presentationStyle: 'overFullScreen',
+          }}
           onSelect={country => {
             const selectedCallingCode = country.callingCode?.[0] || '971';
             

@@ -119,7 +119,7 @@ const ProfileScreen = () => {
           {userInfo?.profile_completion && (
             <View style={[styles.completionCard]}>
               <BaseText style={styles.completionTitle}>
-                Profile completion
+                Profile Completion
               </BaseText>
               <View style={styles.row}>
                 <View style={styles.progressBarBg}>
@@ -145,7 +145,7 @@ const ProfileScreen = () => {
           )}
 
           {/* Section: About Me */}
-          <Section title="About me" content={userInfo?.about || 'N/A'} />
+          <Section title="About Me" content={userInfo?.about || 'N/A'} />
 
           {/* Section: Professional Experience */}
           {userInfo?.experience && (
@@ -374,6 +374,7 @@ const styles = StyleSheet.create({
   completionCard: {
     backgroundColor: colors.white,
     borderRadius: 12,
+    width: '90%',
     padding: 14,
     marginTop: 16,
     margin: wp(20),
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 15, colors._4A4A4A),
   },
   percentage: {
-    ...commonFontStyle(500, 25, colors._0B3970),
+    ...commonFontStyle(500, 22, colors._0B3970),
   },
   ctaCard: {
     marginTop: 16,
