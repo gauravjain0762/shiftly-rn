@@ -39,6 +39,7 @@ const JobCard: FC<props> = ({
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
   const coverImageUri = item?.company_id?.cover_images?.[0];
   const logoUri = item?.company_id?.logo;
+  console.log("🔥 ~ JobCard ~ logoUri:", logoUri)
 
   const handleShare = async () => {
     try {
@@ -91,31 +92,19 @@ ${salary}${shareUrlText}`;
     <TouchableOpacity onPress={() => onPress()} style={styles.jobCard}>
       {/* Cover Image Section */}
       <View style={styles.coverImageContainer}>
-        {isCoverImage && coverImageUri ? (
-          <FastImage
-            source={{ uri: coverImageUri }}
-            style={styles.coverImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.placeholderCover} />
-        )}
+        <FastImage
+          source={isCoverImage && coverImageUri ? { uri: coverImageUri } : IMAGES.logoText}
+          style={styles.coverImage}
+          resizeMode={isCoverImage && coverImageUri ? "cover" : "contain"}
+        />
 
         {/* Company Logo - Overlapping */}
         <View style={styles.logo}>
-          {logoUri ? (
-            <FastImage
-              source={{ uri: logoUri }}
-              style={styles.companyLogoImage}
-              resizeMode="cover"
-            />
-          ) : (
-            <FastImage
-              source={IMAGES.logoText}
-              style={styles.companyLogoImage}
-              resizeMode="contain"
-            />
-          )}
+          <FastImage
+            style={styles.companyLogoImage}
+            resizeMode={logoUri ? "cover" : "contain"}
+            source={logoUri ? { uri: logoUri } : IMAGES.logoText}
+          />
         </View>
 
         {/* Action Buttons */}

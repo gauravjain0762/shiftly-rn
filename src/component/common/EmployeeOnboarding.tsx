@@ -92,7 +92,7 @@ const EmployeeOnboarding: React.FC<EmployeeOnboardingProps> = ({ data }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: hp(24),
+    marginTop: hp(20),
   },
   flatList: {
     flexGrow: 0,

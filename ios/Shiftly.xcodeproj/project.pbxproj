@@ -335,7 +335,7 @@
 				CODE_SIGN_ENTITLEMENTS = Shiftly/Shiftly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = DGB65FCA99;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Shiftly/Info.plist;
@@ -370,7 +370,7 @@
 				CODE_SIGN_ENTITLEMENTS = Shiftly/Shiftly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = DGB65FCA99;
 				INFOPLIST_FILE = Shiftly/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;

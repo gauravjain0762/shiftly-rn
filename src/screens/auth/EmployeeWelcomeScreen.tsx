@@ -29,7 +29,6 @@ import {
   useEmployeeAppleSignInMutation,
   useEmployeeGoogleSignInMutation,
 } from '../../api/authApi';
-import { useGetAppDataQuery } from '../../api/dashboardApi';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { jwtDecode } from 'jwt-decode';
 import auth from '@react-native-firebase/auth';
@@ -75,7 +74,6 @@ const EmployeeWelcomeScreen = () => {
   const { fcmToken } = useSelector((state: RootState) => state.auth);
   const [employeeGoogleSignIn] = useEmployeeGoogleSignInMutation({});
   const [employeeAppleSignIn] = useEmployeeAppleSignInMutation({});
-  useGetAppDataQuery({});
 
   const updateSignupData = (
     updates: Partial<{
@@ -246,7 +244,7 @@ const EmployeeWelcomeScreen = () => {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}>
             <CustomImage
-              size={100}
+              size={95}
               source={IMAGES.newlogo1}
             />
             <EmployeeOnboarding data={EmployeeOnboardingData} />
