@@ -48,7 +48,7 @@ import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 import { getAddress } from '../../../utils/locationHandler';
 import {
   useEditCompanyJobMutation,
-  useGetBusinessTypesQuery,
+  useGetDepartmentsQuery,
   useGetFacilitiesQuery,
   useGetSkillsQuery,
   useGetSuggestedEmployeesQuery,
@@ -165,8 +165,8 @@ const PostJob = () => {
   const facilities = facilitiesData?.data?.facilities;
   const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
-  const { data: businessTypesData } = useGetBusinessTypesQuery({});
-  const businessTypes = businessTypesData?.data?.types as any[];
+  const { data: departmentsData } = useGetDepartmentsQuery({});
+  const departments = departmentsData?.data?.departments as any[];
   const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
   const shouldSkip = !(steps === 5 && !!job_id);
   const { data: suggestedData } = useGetSuggestedEmployeesQuery(job_id, {
@@ -202,7 +202,7 @@ const PostJob = () => {
     }
   };
 
-  const dropdownBusinessTypesOptions = businessTypes?.map(item => ({
+  const dropdownDepartmentsOptions = departments?.map(item => ({
     label: item.title,
     value: item._id, // Use _id for department_id
     title: item.title, // Keep title for display
@@ -370,13 +370,13 @@ const PostJob = () => {
   useEffect(() => {
     if (
       !hasInitializedJobSectorRef.current &&
-      dropdownBusinessTypesOptions?.length > 0 &&
+      dropdownDepartmentsOptions?.length > 0 &&
       !job_sector
     ) {
-      updateJobForm({ job_sector: dropdownBusinessTypesOptions[0] });
+      updateJobForm({ job_sector: dropdownDepartmentsOptions[0] });
       hasInitializedJobSectorRef.current = true;
     }
-  }, [dropdownBusinessTypesOptions, job_sector, updateJobForm]);
+  }, [dropdownDepartmentsOptions, job_sector, updateJobForm]);
 
   // Initialize job_type if not set (only for new jobs, not edit mode)
   useEffect(() => {
@@ -1347,7 +1347,7 @@ const PostJob = () => {
                   {t('Job Department')}<Text style={styles.required}>*</Text>
                 </Text>
                 <CustomDropdown
-                  data={dropdownBusinessTypesOptions}
+                  data={dropdownDepartmentsOptions}
                   labelField="label"
                   valueField="value"
                   value={job_sector?.value}

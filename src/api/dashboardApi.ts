@@ -112,6 +112,13 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getDepartments: builder.query<any, any>({
+      query: () => ({
+        url: API.getDepartments,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+    }),
     getFacilities: builder.query<any, any>({
       query: () => ({
         url: API.getFacilities,
@@ -790,6 +797,7 @@ export const {
   useCreateCompanyProfileMutation,
   useGetSkillsQuery,
   useGetBusinessTypesQuery,
+  useGetDepartmentsQuery,
   useGetSuggestedEmployeesQuery,
   useGetFacilitiesQuery,
   useLazyGetEmployeeJobsQuery,

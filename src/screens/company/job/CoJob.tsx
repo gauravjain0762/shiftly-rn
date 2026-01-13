@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -63,27 +64,68 @@ const CoJob = () => {
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
 
+  const [page, setPage] = useState<number>(1);
+  const [allJobs, setAllJobs] = useState<any[]>([]);
+  const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
+
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
     setValue(filters.job_types || null);
     setLocation(filters.location || '');
+    // Reset pagination when filters change
+    setPage(1);
+    setAllJobs([]);
+    setOnEndReachedCalled(false);
   }, [filters]);
 
-  const { data, isLoading, refetch } = useGetCompanyJobsQuery(filters);
-  const [jobs, setJobs] = useState<any[]>([]);
+  const queryParams = {
+    ...filters,
+    page: page,
+  };
+
+  const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(queryParams);
+  const jobList = data?.data?.jobs || [];
+  const pagination = data?.data?.pagination;
 
   useFocusEffect(
     useCallback(() => {
-      refetch();
-    }, [filters]),
+      if (page === 1 && !isLoading) {
+        refetch();
+      }
+    }, [filters, page]),
   );
 
   useEffect(() => {
-    const jobData = data?.data?.jobs;
-    setJobs(jobData ?? []);
+    if (data) {
+      const newData = jobList;
+      setAllJobs(prev =>
+        pagination?.current_page === 1 ? newData : [...prev, ...newData],
+      );
+      setOnEndReachedCalled(false);
+    }
   }, [data]);
 
-  const latestJobList = jobs;
+  const handleLoadMore = () => {
+    if (
+      pagination?.current_page < pagination?.total_pages &&
+      !onEndReachedCalled &&
+      !isFetching &&
+      !isLoading
+    ) {
+      const nextPage = page + 1;
+      setOnEndReachedCalled(true);
+      setPage(nextPage);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (page !== 1) {
+      setPage(1);
+    }
+    setAllJobs([]);
+    setOnEndReachedCalled(false);
+    refetch();
+  };
 
   const handleApplyFilter = async () => {
     try {
@@ -165,15 +207,15 @@ const CoJob = () => {
         </View>
       </View>
 
-      {isLoading && !data && <MyJobsSkeleton backgroundColor={colors.coPrimary} />}
+      {isLoading && !data && <MyJobsSkeleton />}
 
       {(!isLoading || data) && (
         <View style={styles.outerContainer}>
           <FlatList
-            data={latestJobList}
+            data={allJobs}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(item, index) => item?._id || item?.id || index.toString()}
             renderItem={({ item, index }) => (
               <View key={index} style={{ marginBottom: hp(10) }}>
                 <MyJobCard
@@ -183,8 +225,10 @@ const CoJob = () => {
                 />
               </View>
             )}
-            onRefresh={refetch}
-            refreshing={isLoading && !!data}
+            onRefresh={handleRefresh}
+            refreshing={isFetching && page === 1}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
             ListEmptyComponent={() => {
               if (isLoading && !data) {
                 return null; // Don't show empty state during initial load
@@ -203,6 +247,15 @@ const CoJob = () => {
                 </View>
               );
             }}
+            ListFooterComponent={
+              isFetching &&
+              pagination?.current_page < pagination?.total_pages ? (
+                <ActivityIndicator
+                  color={colors._0B3970}
+                  style={{ marginVertical: hp(16) }}
+                />
+              ) : null
+            }
           />
         </View>
       )}

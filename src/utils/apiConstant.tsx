@@ -34,6 +34,8 @@ export const API = {
   getCompanyProfile: '/company/getProfile',
   updateCompanyProfile: '/company/updateProfile',
 
+  getDepartments: '/company/getDepartments',
+
   // create
   createCompanyPost: '/company/createPost',
   createCompanyJob: '/company/createJob',

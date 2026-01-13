@@ -598,5 +598,6 @@ const styles = StyleSheet.create({
   },
   ctaButton: {
     borderRadius: wp(22),
+    marginBottom: hp(30)
   },
 });

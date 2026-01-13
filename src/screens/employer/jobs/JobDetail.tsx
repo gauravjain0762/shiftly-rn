@@ -70,7 +70,7 @@ const JobDetail = () => {
 
   const JobDetailsArr = {
     'Job Type': curr_jobdetails?.contract_type,
-    Department: curr_jobdetails?.job_sector,
+    Department: curr_jobdetails?.department_id?.title,
     'Start Date': curr_jobdetails?.start_date,
     Duration: curr_jobdetails?.duration,
     Vacancy: curr_jobdetails?.no_positions,
@@ -324,12 +324,12 @@ ${salary}${shareUrlText}`;
                 </View>
               )}
 
-              {/* {curr_jobdetails?.department_id && (
+              {curr_jobdetails?.department_id?.title && (
                 <View style={styles.snapshotItem}>
                   <Text style={styles.snapshotLabel}>Department</Text>
-                  <Text style={styles.snapshotValue}>{curr_jobdetails?.department_id}</Text>
+                  <Text style={styles.snapshotValue}>{curr_jobdetails?.department_id?.title}</Text>
                 </View>
-              )} */}
+              )}
 
               {curr_jobdetails?.monthly_salary_from && curr_jobdetails?.monthly_salary_to && (
                 <View style={styles.snapshotItem}>
