@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -51,6 +52,7 @@ const EditAccountScreen = () => {
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [showNationalityPicker, setShowNationalityPicker] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [updateProfile] = useEmpUpdateProfileMutation();
 
   useEffect(() => {
@@ -61,7 +63,7 @@ const EditAccountScreen = () => {
         location: userInfo?.location || '',
         nationality: userInfo?.nationality || '',
         about: userInfo?.about || '',
-        phone: userInfo?.phone || '',
+        phone: (userInfo?.phone || '').replace(/\s/g, ''),
         phone_code: userInfo?.phone_code || '',
         email: userInfo?.email || '',
       });
@@ -80,6 +82,12 @@ const EditAccountScreen = () => {
     }
 
     console.log('🔥 ~ handleSave ~ formData:', formData);
+    
+    // Set loading state if image is being uploaded
+    if (picture?.path) {
+      setIsUploadingImage(true);
+    }
+    
     try {
       const updateData = new FormData();
       updateData.append('name', formData.name);
@@ -103,10 +111,14 @@ const EditAccountScreen = () => {
       const response = await updateProfile(updateData).unwrap();
       console.log('🔥 ~ handleSave ~ response?.data:', response?.data);
       if (response?.status) {
+        setIsUploadingImage(false);
         successToast('Profile updated successfully');
         goBack();
+      } else {
+        setIsUploadingImage(false);
       }
     } catch (error) {
+      setIsUploadingImage(false);
       errorToast('Failed to update profile');
       console.log('Update error:', error);
     }
@@ -135,21 +147,30 @@ const EditAccountScreen = () => {
             <View style={styles.avatarWrapper}>
               <TouchableOpacity
                 onPress={() => setIsImagePickerVisible(true)}
-                style={styles.avatarContainer}>
+                style={styles.avatarContainer}
+                disabled={isUploadingImage}>
                 <View style={styles.avatar}>
-                  <Image
-                    source={
-                      picture?.path || formData?.picture
-                        ? { uri: picture?.path || formData?.picture }
-                        : IMAGES.logoText
-                    }
-                    style={styles.avatarImage}
-                    resizeMode="cover"
-                  />
+                  {isUploadingImage ? (
+                    <View style={styles.loaderContainer}>
+                      <ActivityIndicator size="large" color={colors._0B3970} />
+                    </View>
+                  ) : (
+                    <Image
+                      source={
+                        picture?.path || formData?.picture
+                          ? { uri: picture?.path || formData?.picture }
+                          : null
+                      }
+                      style={styles.avatarImage}
+                      resizeMode="cover"
+                    />
+                  )}
                 </View>
-                <View style={styles.editIconContainer}>
-                  <Image source={IMAGES.edit_icon} style={styles.editIcon} />
-                </View>
+                {!isUploadingImage && (
+                  <View style={styles.editIconContainer}>
+                    <Image source={IMAGES.edit_icon} style={styles.editIcon} />
+                  </View>
+                )}
               </TouchableOpacity>
             </View>
 
@@ -159,16 +180,6 @@ const EditAccountScreen = () => {
               value={formData?.name}
               onChange={(text: any) =>
                 setFormData(prev => ({ ...prev, name: text }))
-              }
-              containerStyle={styles.inputContainer}
-            />
-
-            <CustomInput
-              label="Location"
-              placeholder="Enter your location"
-              value={formData?.location}
-              onChange={(text: any) =>
-                setFormData(prev => ({ ...prev, location: text }))
               }
               containerStyle={styles.inputContainer}
             />
@@ -247,9 +258,11 @@ const EditAccountScreen = () => {
                   placeholder="Enter phone number"
                   placeholderTextColor="#969595"
                   value={formData?.phone}
-                  onChangeText={text =>
-                    setFormData(prev => ({ ...prev, phone: text }))
-                  }
+                  onChangeText={text => {
+                    // Remove all spaces from the phone number
+                    const phoneWithoutSpaces = text.replace(/\s/g, '');
+                    setFormData(prev => ({ ...prev, phone: phoneWithoutSpaces }));
+                  }}
                   keyboardType="phone-pad"
                   maxLength={10}
                 />
@@ -358,6 +371,13 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: wp(120),
     height: wp(120),
+  },
+  loaderContainer: {
+    width: wp(120),
+    height: wp(120),
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E0E0E0',
   },
   editIconContainer: {
     position: 'absolute',
@@ -477,7 +497,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
   },
   countryCodeText: {
-    ...commonFontStyle(400, 14, colors._050505),
+    ...commonFontStyle(400, 16, colors._050505),
     minWidth: wp(35),
   },
 

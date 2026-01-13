@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {LinearContainer} from '../../../component';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {colors} from '../../../theme/colors';
@@ -19,14 +19,22 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
+import { navigationRef } from '../../../navigation/RootContainer';
 
 const ProfileScreen = () => {
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  const [showAllSkills, setShowAllSkills] = useState(false);
   console.log("🔥 ~ ProfileScreen ~ userInfo:", userInfo)
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen);
   };
+
+  const skills = userInfo?.skills || [];
+  const hasMoreThan8Skills = skills.length > 8;
+  const displayedSkills = hasMoreThan8Skills && !showAllSkills 
+    ? skills.slice(0, 8) 
+    : skills;
 
   const HeaderWithAdd = useCallback(
     ({title}: any) => (
@@ -53,7 +61,7 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.scrollContiner}
         showsVerticalScrollIndicator={false}>
         <Pressable
-          onPress={() => goBack()}
+          onPress={() => navigationRef.goBack()}
           style={{padding: wp(23), paddingBottom: 0}}>
           <Image
             source={IMAGES.backArrow}
@@ -118,7 +126,9 @@ const ProfileScreen = () => {
                   <View
                     style={[
                       styles.progressBarFill,
-                      {width: userInfo?.profile_completion * 2.75 || 0},
+                      {
+                        width: `${userInfo?.profile_completion || 0}%`,
+                      },
                     ]}
                   />
                 </View>
@@ -138,10 +148,84 @@ const ProfileScreen = () => {
           <Section title="About me" content={userInfo?.about || 'N/A'} />
 
           {/* Section: Professional Experience */}
-          <Section
-            title="Professional Experience"
-            content={userInfo?.experience?.title || 'N/A'}
-          />
+          {userInfo?.experience && (
+            <View style={styles.card}>
+              <HeaderWithAdd title="Professional Experience" />
+              <View style={styles.experienceContainer}>
+                {userInfo.experience.title && (
+                  <BaseText style={styles.experienceTitle}>
+                    {userInfo.experience.title}
+                  </BaseText>
+                )}
+                {userInfo.experience.company && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Company:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.company}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.department && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Department:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.department}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.preferred_position && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Position:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.preferred_position}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.country && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Location:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.country}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.job_start && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Start Date:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.job_start.month} {userInfo.experience.job_start.year}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.job_end && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>End Date:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.job_end.month} {userInfo.experience.job_end.year}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.still_working && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Status:</BaseText>
+                    <BaseText style={[styles.infoValue, styles.currentStatus]}>
+                      Currently Working
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.experience.experience_type && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Type:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.experience.experience_type
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </BaseText>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
 
           {/* Section: My Languages */}
           <View style={[styles.card, {width: '90%'}]}>
@@ -160,28 +244,70 @@ const ProfileScreen = () => {
           </View>
 
           {/* Section: Education */}
-          <Section
-            title="Education"
-            onPress={() => {
-              navigateTo(SCREENS.CreateProfileScreen);
-            }}
-            content={userInfo?.education?.degree || 'N/A'}
-          />
+          {userInfo?.education && (
+            <View style={styles.card}>
+              <HeaderWithAdd title="Education" />
+              <View style={styles.educationContainer}>
+                {userInfo.education.degree && (
+                  <BaseText style={styles.educationDegree}>
+                    {userInfo.education.degree}
+                  </BaseText>
+                )}
+                {userInfo.education.university && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>University:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.education.university}
+                    </BaseText>
+                  </View>
+                )}
+                {(userInfo.education.country || userInfo.education.province) && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Location:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {[userInfo.education.province, userInfo.education.country]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </BaseText>
+                  </View>
+                )}
+                {userInfo.education.start_date && userInfo.education.end_date && (
+                  <View style={styles.infoRow}>
+                    <BaseText style={styles.infoLabel}>Duration:</BaseText>
+                    <BaseText style={styles.infoValue}>
+                      {userInfo.education.start_date.month} {userInfo.education.start_date.year} - {userInfo.education.end_date.month} {userInfo.education.end_date.year}
+                    </BaseText>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
 
           {/* Section: Skills */}
           <View style={styles.card}>
             <HeaderWithAdd title="Skills" />
             <View style={styles.skillContainer}>
-              {userInfo?.skills?.length ? (
-                userInfo?.skills?.map((skill: any) => (
-                  <View key={skill} style={styles.skillBadge}>
-                    <BaseText style={styles.skillText}>{skill?.title}</BaseText>
-                  </View>
-                ))
+              {skills.length ? (
+                <>
+                  {displayedSkills.map((skill: any, index: number) => (
+                    <View key={skill?._id || skill?.title || index} style={styles.skillBadge}>
+                      <BaseText style={styles.skillText}>{skill?.title}</BaseText>
+                    </View>
+                  ))}
+                </>
               ) : (
                 <BaseText style={styles.skillText}>{'N/A'}</BaseText>
               )}
             </View>
+            {hasMoreThan8Skills && (
+              <TouchableOpacity
+                onPress={() => setShowAllSkills(!showAllSkills)}
+                style={styles.showMoreButton}>
+                <BaseText style={styles.showMoreText}>
+                  {showAllSkills ? 'Show less' : 'Show more'}
+                </BaseText>
+              </TouchableOpacity>
+            )}
           </View>
         </SafeAreaView>
       </ScrollView>
@@ -305,11 +431,6 @@ const styles = StyleSheet.create({
   ctaArrow: {
     ...commonFontStyle(700, 16, '#fff'),
   },
-  locationicon: {
-    width: wp(24),
-    height: wp(24),
-    resizeMode: 'contain',
-  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -332,15 +453,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1.2,
     borderColor: '#E0D7C8',
-    paddingBottom: hp(26),
+    paddingBottom: hp(16),
     marginHorizontal: wp(21),
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: hp(11),
-    marginBottom: hp(16),
+    paddingTop: hp(14),
+    marginBottom: hp(10),
   },
   title: {
     ...commonFontStyle(700, 22, colors._0B3970),
@@ -400,6 +521,14 @@ const styles = StyleSheet.create({
   skillText: {
     ...commonFontStyle(400, 16, colors._0B3970),
   },
+  showMoreButton: {
+    marginTop: hp(12),
+    alignSelf: 'flex-start',
+  },
+  showMoreText: {
+    ...commonFontStyle(500, 16, colors._0B3970),
+    textDecorationLine: 'underline',
+  },
   certRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -420,5 +549,37 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: wp(22),
     fontWeight: '700',
+  },
+  experienceContainer: {
+    marginTop: hp(2),
+  },
+  experienceTitle: {
+    ...commonFontStyle(600, 18, colors._0B3970),
+    marginBottom: hp(10),
+  },
+  educationContainer: {
+    marginTop: hp(2),
+  },
+  educationDegree: {
+    ...commonFontStyle(600, 18, colors._0B3970),
+    marginBottom: hp(10),
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: hp(6),
+    flexWrap: 'wrap',
+  },
+  infoLabel: {
+    ...commonFontStyle(500, 15, colors._4A4A4A),
+    minWidth: wp(90),
+    marginRight: wp(8),
+  },
+  infoValue: {
+    ...commonFontStyle(400, 15, colors._0B3970),
+    flex: 1,
+  },
+  currentStatus: {
+    color: colors.empPrimary || '#4CAF50',
+    fontWeight: '600',
   },
 });

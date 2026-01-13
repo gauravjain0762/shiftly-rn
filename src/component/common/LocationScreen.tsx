@@ -36,7 +36,8 @@ const LocationScreen = () => {
   const {t} = useTranslation();
   const mapRef = useRef<any | null>(null);
 
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
+  const mapKey = getAppData?.map_key;
   const [search, setSearch] = useState(userInfo?.address || '');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
@@ -87,33 +88,38 @@ const LocationScreen = () => {
           longitude: currentLocation.longitude,
         });
 
-        getAddress(currentLocation, (data: any) => {
-          console.log('getAddress 1 is called -  >>>>>>>');
-          const address = data?.results?.[0]?.formatted_address;
-          const components = data?.results?.[0]?.address_components || [];
+        getAddress(
+          currentLocation,
+          (data: any) => {
+            console.log('getAddress 1 is called -  >>>>>>>');
+            const address = data?.results?.[0]?.formatted_address;
+            const components = data?.results?.[0]?.address_components || [];
 
-          const stateObj = components.find((c: any) =>
-            c.types.includes('administrative_area_level_1'),
-          );
-          const countryObj = components.find((c: any) =>
-            c.types.includes('country'),
-          );
+            const stateObj = components.find((c: any) =>
+              c.types.includes('administrative_area_level_1'),
+            );
+            const countryObj = components.find((c: any) =>
+              c.types.includes('country'),
+            );
 
-          const state = stateObj?.long_name || '';
-          const country = countryObj?.long_name || '';
+            const state = stateObj?.long_name || '';
+            const country = countryObj?.long_name || '';
 
-          if (address) {
-            setSearch(address);
-            ref.current?.setAddressText(address);
-            setSelectedAddress({
-              address,
-              lat: currentLocation.latitude,
-              lng: currentLocation.longitude,
-              state,
-              country,
-            });
-          }
-        });
+            if (address) {
+              setSearch(address);
+              ref.current?.setAddressText(address);
+              setSelectedAddress({
+                address,
+                lat: currentLocation.latitude,
+                lng: currentLocation.longitude,
+                state,
+                country,
+              });
+            }
+          },
+          undefined,
+          mapKey,
+        );
 
         setTimeout(() => {
           mapRef.current?.animateToRegion(newPosition, 1000);
@@ -280,6 +286,8 @@ const LocationScreen = () => {
           });
         }
       },
+      undefined,
+      mapKey,
     );
   };
 
@@ -295,34 +303,39 @@ const LocationScreen = () => {
     setMarkerPosition(coords);
     mapRef.current?.animateToRegion(region, 500);
 
-    getAddress(coords, (data: any) => {
-      console.log('getAddress 3 is called -  >>>>>>>');
+    getAddress(
+      coords,
+      (data: any) => {
+        console.log('getAddress 3 is called -  >>>>>>>');
 
-      const address = data?.results?.[0]?.formatted_address;
-      const components = data?.results?.[0]?.address_components || [];
+        const address = data?.results?.[0]?.formatted_address;
+        const components = data?.results?.[0]?.address_components || [];
 
-      const stateObj = components.find((c: any) =>
-        c.types.includes('administrative_area_level_1'),
-      );
-      const countryObj = components.find((c: any) =>
-        c.types.includes('country'),
-      );
+        const stateObj = components.find((c: any) =>
+          c.types.includes('administrative_area_level_1'),
+        );
+        const countryObj = components.find((c: any) =>
+          c.types.includes('country'),
+        );
 
-      const state = stateObj?.long_name || '';
-      const country = countryObj?.long_name || '';
+        const state = stateObj?.long_name || '';
+        const country = countryObj?.long_name || '';
 
-      if (address) {
-        setSearch(address);
-        ref.current?.setAddressText(address);
-        setSelectedAddress({
-          address,
-          lat: coords.latitude,
-          lng: coords.longitude,
-          state,
-          country,
-        });
-      }
-    });
+        if (address) {
+          setSearch(address);
+          ref.current?.setAddressText(address);
+          setSelectedAddress({
+            address,
+            lat: coords.latitude,
+            lng: coords.longitude,
+            state,
+            country,
+          });
+        }
+      },
+      undefined,
+      mapKey,
+    );
   };
 
   const handleGetCurrentLocation = async () => {
@@ -345,34 +358,39 @@ const LocationScreen = () => {
       });
       mapRef.current?.animateToRegion(region, 500);
 
-      getAddress(location, (data: any) => {
-        console.log('getAddress 4 is called -  >>>>>>>');
+      getAddress(
+        location,
+        (data: any) => {
+          console.log('getAddress 4 is called -  >>>>>>>');
 
-        const address = data?.results?.[0]?.formatted_address;
-        const components = data?.results?.[0]?.address_components || [];
+          const address = data?.results?.[0]?.formatted_address;
+          const components = data?.results?.[0]?.address_components || [];
 
-        const stateObj = components.find((c: any) =>
-          c.types.includes('administrative_area_level_1'),
-        );
-        const countryObj = components.find((c: any) =>
-          c.types.includes('country'),
-        );
+          const stateObj = components.find((c: any) =>
+            c.types.includes('administrative_area_level_1'),
+          );
+          const countryObj = components.find((c: any) =>
+            c.types.includes('country'),
+          );
 
-        const state = stateObj?.long_name || '';
-        const country = countryObj?.long_name || '';
+          const state = stateObj?.long_name || '';
+          const country = countryObj?.long_name || '';
 
-        if (address) {
-          setSearch(address);
-          ref.current?.setAddressText(address);
-          setSelectedAddress({
-            address,
-            lat: location.latitude,
-            lng: location.longitude,
-            state,
-            country,
-          });
-        }
-      });
+          if (address) {
+            setSearch(address);
+            ref.current?.setAddressText(address);
+            setSelectedAddress({
+              address,
+              lat: location.latitude,
+              lng: location.longitude,
+              state,
+              country,
+            });
+          }
+        },
+        undefined,
+        mapKey,
+      );
     } else {
       Alert.alert(
         'Location Error',
@@ -468,7 +486,7 @@ const LocationScreen = () => {
               minLength={2}
               fetchDetails={true}
               query={{
-                key: API?.GOOGLE_MAP_API_KEY,
+                key: mapKey || API?.GOOGLE_MAP_API_KEY,
                 language: 'en',
               }}
               autoFillOnNotFound={false}

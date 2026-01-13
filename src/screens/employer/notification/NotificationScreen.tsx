@@ -20,6 +20,7 @@ const NotificationScreen = () => {
     isLoading,
     isFetching,
     data: notificationsData,
+    refetch,
   } = useGetEmployeeNotificationsQuery(
     {page},
     {refetchOnMountOrArgChange: true},
@@ -51,6 +52,14 @@ const NotificationScreen = () => {
     }
   };
 
+  const handleRefresh = () => {
+    if (page !== 1) {
+      setPage(1);
+    }
+    setOnEndReachedCalled(false);
+    refetch();
+  };
+
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
@@ -76,6 +85,8 @@ const NotificationScreen = () => {
             renderItem={(item: any) => <NotificationCard {...item} />}
             ItemSeparatorComponent={() => <View style={{height: hp(22)}} />}
             showsVerticalScrollIndicator={false}
+            refreshing={isFetching && page === 1}
+            onRefresh={handleRefresh}
             onEndReached={onReached}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => {

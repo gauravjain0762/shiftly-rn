@@ -12,7 +12,8 @@ import {IMAGES} from '../../assets/Images';
 import {getAsyncUserLocation} from '../../utils/asyncStorage';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
-import Config from 'react-native-config';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../store';
 
 type map = {
   containerStyle?: ViewStyle;
@@ -31,6 +32,9 @@ const LocationContainer: FC<map> = ({
   address,
   showAddressCard = true,
 }) => {
+  const {getAppData} = useSelector((state: RootState) => state.auth);
+  const mapKey = getAppData?.map_key;
+  
   useEffect(() => {
     getLocation();
   }, []);
@@ -76,7 +80,7 @@ const LocationContainer: FC<map> = ({
           zoomEnabled={true}
           scrollEnabled={false}
           provider="google"
-          key={Config?.MAP_KEY}
+          key={mapKey}
           style={styles.mapImage}>
           <Marker
             coordinate={{

@@ -165,40 +165,47 @@ const CoJob = () => {
         </View>
       </View>
 
-      {isLoading && <MyJobsSkeleton backgroundColor={colors.coPrimary} />}
+      {isLoading && !data && <MyJobsSkeleton backgroundColor={colors.coPrimary} />}
 
-      <View style={styles.outerContainer}>
-        <FlatList
-          data={latestJobList}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.contentContainer}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <View key={index} style={{ marginBottom: hp(10) }}>
-              <MyJobCard
-                item={item}
-                onPressShare={() => setIsShareModalVisible(true)}
-                onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
-              />
-            </View>
-          )}
-          onRefresh={refetch}
-          refreshing={isLoading}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              {renderPostJobButton()}
-              <Text style={styles.emptyText}>
-                {filters?.location ||
-                  filters?.job_types ||
-                  filters?.salary_from !== 1000 ||
-                  filters?.salary_to !== 50000
-                  ? 'No filtered jobs found'
-                  : 'Create your first job to start hiring talent.'}
-              </Text>
-            </View>
-          )}
-        />
-      </View>
+      {(!isLoading || data) && (
+        <View style={styles.outerContainer}>
+          <FlatList
+            data={latestJobList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.contentContainer}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <View key={index} style={{ marginBottom: hp(10) }}>
+                <MyJobCard
+                  item={item}
+                  onPressShare={() => setIsShareModalVisible(true)}
+                  onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+                />
+              </View>
+            )}
+            onRefresh={refetch}
+            refreshing={isLoading && !!data}
+            ListEmptyComponent={() => {
+              if (isLoading && !data) {
+                return null; // Don't show empty state during initial load
+              }
+              return (
+                <View style={styles.emptyContainer}>
+                  {renderPostJobButton()}
+                  <Text style={styles.emptyText}>
+                    {filters?.location ||
+                      filters?.job_types ||
+                      filters?.salary_from !== 1000 ||
+                      filters?.salary_to !== 50000
+                      ? 'No filtered jobs found'
+                      : 'Create your first job to start hiring talent.'}
+                  </Text>
+                </View>
+              );
+            }}
+          />
+        </View>
+      )}
 
       {isFilterModalVisible && (
         <BottomModal

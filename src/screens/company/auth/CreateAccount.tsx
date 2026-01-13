@@ -572,12 +572,15 @@ const CreateAccount = () => {
     }
   };
 
+  const {getAppData} = useSelector((state: RootState) => state.auth);
+  const mapKey = getAppData?.map_key;
+
   const debouncedGetAddressList = useCallback(
     debounce(async (text: string) => {
-      const result = await getAddressList(text);
+      const result = await getAddressList(text, mapKey);
       setSuggestions(result?.slice(0, 5) || []);
     }, 500),
-    [],
+    [mapKey],
   );
 
   const renderStep = () => {
@@ -1194,7 +1197,7 @@ const CreateAccount = () => {
                         key={index}
                         onPress={async () => {
                           try {
-                            const location = await getPlaceDetails(item.place_id);
+                            const location = await getPlaceDetails(item.place_id, mapKey);
                             console.log("🔥 ~ location:", location)
 
                             if (location) {

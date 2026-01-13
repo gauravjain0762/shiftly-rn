@@ -98,7 +98,10 @@ export const API = {
   //Notifications
   getEmployeeNotifications: '/getNotifications',
 
-  // google Map API
+  // App Data
+  getAppData: '/getAppData',
+
+  // google Map API (deprecated - use map_key from getAppData)
   GOOGLE_MAP_API_KEY: 'AIzaSyC0YuOdzYKbtMXSUqnL2P6SBRC9RE_gZO4',
 };
 

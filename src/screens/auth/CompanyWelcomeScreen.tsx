@@ -21,6 +21,7 @@ import CompanyOnboarding from '../../component/common/CompanyOnboarding';
 import { BackHeader, LinearContainer } from '../../component';
 import auth from '@react-native-firebase/auth';
 import CustomImage from '../../component/common/CustomImage';
+import { useGetAppDataQuery } from '../../api/dashboardApi';
 
 const CompanyOnboardingData = [
   {
@@ -54,6 +55,7 @@ const CompanyOnboardingData = [
 
 const CompanyWelcomeScreen = () => {
   const { t } = useTranslation();
+  useGetAppDataQuery({});
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((user: any) => {

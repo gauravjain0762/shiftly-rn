@@ -36,7 +36,6 @@ const JobCard: FC<props> = ({
   heartImage,
   isShowFavIcon = true,
 }) => {
-  console.log("🔥 ~ JobCard ~ item:", item)
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
   const coverImageUri = item?.company_id?.cover_images?.[0];
   const logoUri = item?.company_id?.logo;

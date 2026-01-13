@@ -7,6 +7,7 @@ import {
   setBusinessType,
   setCompanyProfileAllData,
   setCompanyServices,
+  setGetAppData,
   setSkills,
   setUserInfo,
 } from '../features/authSlice';
@@ -760,6 +761,23 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    getAppData: builder.query<any, void>({
+      query: () => ({
+        url: API.getAppData,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (data?.status && data?.data) {
+            dispatch(setGetAppData(data.data));
+          }
+        } catch (error) {
+          console.log('Get App Data Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -811,4 +829,5 @@ export const {
   useSendInterviewInvitesMutation,
   useLazyGetEmployeeProfileQuery,
   useGetDashboardQuery,
+  useGetAppDataQuery,
 } = dashboardApi;

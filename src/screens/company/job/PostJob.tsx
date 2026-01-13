@@ -483,8 +483,8 @@ const PostJob = () => {
       lng: location?.longitude,
       people_anywhere: canApply,
       duration: duration?.value,
-      department_id: job_sector?.value, // Backend expects department_id
-      job_sector: job_sector?.value, // Backend also expects job_sector (for validation)
+      department_id: job_sector?.value,
+      job_sector: job_sector?.value,
       expiry_date: expiry_date,
       start_date: startDate?.value,
       contract_type: contract?.value,

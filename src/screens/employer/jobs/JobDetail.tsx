@@ -26,7 +26,6 @@ import { colors } from '../../../theme/colors';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   errorToast,
-  formatDate,
   goBack,
   navigateTo,
   resetNavigation,
@@ -56,7 +55,6 @@ const JobDetail = () => {
   const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
     data?.item?._id || data?.jobId,
   );
-  console.log("🔥 ~ JobDetail ~ jobDetail:", jobDetail)
   const curr_jobdetails = jobDetail?.data?.job;
   console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;

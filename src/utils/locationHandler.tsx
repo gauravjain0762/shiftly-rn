@@ -278,9 +278,11 @@ export const getAddress = async (
   region: any,
   onSucess?: any,
   onFailure?: any,
+  mapKey?: string,
 ) => {
   const headersList = {};
-  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${region?.latitude},${region?.longitude}&key=${API?.GOOGLE_MAP_API_KEY}`;
+  const apiKey = mapKey || API?.GOOGLE_MAP_API_KEY;
+  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${region?.latitude},${region?.longitude}&key=${apiKey}`;
   fetch(url, {
     method: 'GET',
     headers: headersList,
@@ -295,21 +297,22 @@ export const getAddress = async (
       }
     })
     .then(async data => {
-      onSucess(data);
+      if (onSucess) onSucess(data);
     })
     .catch(error => {
       console.log('error------', error);
-      onFailure(error);
+      if (onFailure) onFailure(error);
     });
 };
 
-export const getAddressList = async (query: string) => {
+export const getAddressList = async (query: string, mapKey?: string) => {
   if (!query || query.length < 3) return;
 
   try {
+    const apiKey = mapKey || API?.GOOGLE_MAP_API_KEY;
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
       query
-    )}&key=${API?.GOOGLE_MAP_API_KEY}`;
+    )}&key=${apiKey}`;
 
     const response = await fetch(url);
     const result = await response.json();
@@ -323,11 +326,12 @@ export const getAddressList = async (query: string) => {
   }
 };
 
-export const getPlaceDetails = async (placeId) => {
+export const getPlaceDetails = async (placeId: string, mapKey?: string) => {
   if (!placeId) return;
 
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${API?.GOOGLE_MAP_API_KEY}`;
+    const apiKey = mapKey || API?.GOOGLE_MAP_API_KEY;
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}`;
 
     const response = await fetch(url);
     const result = await response.json();

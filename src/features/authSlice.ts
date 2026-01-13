@@ -257,7 +257,7 @@ const authPersistConfig = {
   key: 'auth',
   storage: AsyncStorage,
   // Only persist these fields
-  whitelist: ['language', 'authToken', 'fcmToken', 'userInfo', 'guestLogin'],
+  whitelist: ['language', 'authToken', 'fcmToken', 'userInfo', 'guestLogin', 'getAppData'],
 };
 
 export const persistedAuthReducer = persistReducer(

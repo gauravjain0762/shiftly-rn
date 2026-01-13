@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -8,20 +8,23 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
-import { goBack, navigateTo } from '../../../utils/commonFunction';
+import { goBack, navigateTo, successToast, errorToast } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
-import { useGetEmployeeProfileQuery } from '../../../api/dashboardApi';
+import { useGetEmployeeProfileQuery, useUpdateAboutMeMutation } from '../../../api/dashboardApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Flag } from 'react-native-country-picker-modal';
 import { callingCodeToCountryCode } from '../../../utils/countryFlags';
 import CustomImage from '../../../component/common/CustomImage';
 import { useFocusEffect } from '@react-navigation/native';
 import { getInitials, hasValidImage } from '../../../utils/commonFunction';
+import { useAppDispatch } from '../../../redux/hooks';
+import { setUserInfo } from '../../../features/authSlice';
 
 export const callingCodeToCountry = (callingCode: any) => {
   const cleanCode = callingCode
@@ -31,11 +34,15 @@ export const callingCodeToCountry = (callingCode: any) => {
 };
 
 const ViewProfileScreen = () => {
+  const dispatch = useAppDispatch();
   const {
     data: getProfile,
     refetch,
   } = useGetEmployeeProfileQuery({});
   const userInfo = getProfile?.data?.user;
+  const [updateAboutMe, { isLoading: isUpdating }] = useUpdateAboutMeMutation();
+  const [isOpenForWork, setIsOpenForWork] = useState(userInfo?.open_for_job || false);
+
   console.log("🔥 ~ ViewProfileScreen ~ userInfo:", userInfo)
 
   const countryCode = userInfo?.phone_code || 'AE';
@@ -45,6 +52,39 @@ const ViewProfileScreen = () => {
       refetch();
     }, [refetch])
   );
+
+  // Update local state when userInfo changes
+  React.useEffect(() => {
+    if (userInfo?.open_for_job !== undefined) {
+      setIsOpenForWork(userInfo?.open_for_job);
+    }
+  }, [userInfo?.open_for_job]);
+
+  const handleToggleOpenForWork = async () => {
+    try {
+      const newValue = !isOpenForWork;
+      const formData = new FormData();
+      formData.append('open_for_job', newValue);
+
+      const response = await updateAboutMe(formData).unwrap();
+      
+      if (response?.status) {
+        setIsOpenForWork(newValue);
+        // Update userInfo in Redux if response contains updated user data
+        if (response?.data?.user) {
+          dispatch(setUserInfo(response.data.user));
+        }
+        successToast(response?.message || 'Status updated successfully');
+        // Refetch to get latest data
+        refetch();
+      } else {
+        errorToast(response?.message || 'Failed to update status');
+      }
+    } catch (error: any) {
+      console.error('Error updating open for work status:', error);
+      errorToast(error?.data?.message || 'Failed to update status');
+    }
+  };
 
   return (
     <LinearContainer
@@ -85,8 +125,23 @@ const ViewProfileScreen = () => {
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>Open to Work</Text>
+              <TouchableOpacity 
+                onPress={handleToggleOpenForWork}
+                disabled={isUpdating}
+                style={[
+                  styles.editButton,
+                  isOpenForWork && styles.editButtonActive
+                ]}>
+                {isUpdating ? (
+                  <ActivityIndicator size="small" color={isOpenForWork ? colors.white : colors._0B3970} />
+                ) : (
+                  <Text style={[
+                    styles.editButtonText,
+                    isOpenForWork && styles.editButtonTextActive
+                  ]}>
+                    Open to Work
+                  </Text>
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
@@ -203,8 +258,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#E6E6E6',
   },
+  editButtonActive: {
+    backgroundColor: colors._0B3970,
+  },
   editButtonText: {
     ...commonFontStyle(400, 17, colors._0B3970),
+  },
+  editButtonTextActive: {
+    ...commonFontStyle(400, 17, colors.white),
   },
   decText: {
     ...commonFontStyle(400, 17, '#E7E7E7'),

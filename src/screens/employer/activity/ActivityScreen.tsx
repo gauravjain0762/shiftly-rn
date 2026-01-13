@@ -28,29 +28,26 @@ const ActivityScreen = () => {
           titleStyle={styles.headerTitle}
         />
       </View>
-      {isLoading ? (
-        <ActivityIndicator size={'large'} color={colors._D5D5D5} />
-      ) : (
-        <FlatList
-          data={activities}
-          style={AppStyles.flex}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={(item: any) => <ActivitiesCard {...item} />}
-          contentContainerStyle={styles.scrollContainer}
-          ItemSeparatorComponent={() => <View style={{ height: hp(22) }} />}
-          showsVerticalScrollIndicator={false}
-          refreshing={isLoading}
-          onRefresh={refetch}
-          ListEmptyComponent={() => {
-            return (
-              <NoDataText
-                text="You don’t have any activity yet."
-                textStyle={{ color: colors._0B3970 }}
-              />
-            );
-          }}
-        />
-      )}
+
+      <FlatList
+        data={activities}
+        style={AppStyles.flex}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={(item: any) => <ActivitiesCard {...item} />}
+        contentContainerStyle={styles.scrollContainer}
+        ItemSeparatorComponent={() => <View style={{ height: hp(22) }} />}
+        showsVerticalScrollIndicator={false}
+        refreshing={isLoading}
+        onRefresh={refetch}
+        ListEmptyComponent={() => {
+          return (
+            <NoDataText
+              text="You don’t have any activity yet."
+              textStyle={{ color: colors._0B3970 }}
+            />
+          );
+        }}
+      />
     </LinearContainer>
   );
 };

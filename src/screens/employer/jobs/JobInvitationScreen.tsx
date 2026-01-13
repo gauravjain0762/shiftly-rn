@@ -18,8 +18,8 @@ const JobInvitationScreen = () => {
         jobDetail: any;
         link: string;
     };
+    console.log("🔥 ~ JobInvitationScreen ~ link:", link)
     const job = jobDetail?.job;
-    console.log("🔥 ~ JobInvitationScreen ~ job:", job.contract_type)
     const company = job?.company_id;
 
     return (

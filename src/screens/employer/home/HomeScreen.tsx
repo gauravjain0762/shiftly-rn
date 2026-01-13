@@ -69,8 +69,10 @@ const HomeScreen = () => {
   };
 
   const handleRefresh = () => {
-    setCurrentPage(1);
-    setAllPosts([]);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+    setIsLoadingMore(false);
     refetch();
   };
 
@@ -94,7 +96,7 @@ const HomeScreen = () => {
         <FlatList
           data={allPosts}
           style={AppStyles.flex}
-          refreshing={isLoading && currentPage === 1}
+          refreshing={isFetching && currentPage === 1}
           onRefresh={handleRefresh}
           onEndReachedThreshold={0.5}
           onEndReached={handleLoadMore}
