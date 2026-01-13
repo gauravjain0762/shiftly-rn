@@ -411,6 +411,7 @@ export const dashboardApi = createApi({
         salary_to,
         location,
         job_sectors,
+        departments,
         search,
         page,
       }) => {
@@ -421,6 +422,7 @@ export const dashboardApi = createApi({
         if (salary_to) params.append('salary_to', salary_to.toString());
         if (location) params.append('location', location);
         if (job_sectors) params.append('job_sectors', job_sectors);
+        if (departments) params.append('departments', departments);
         if (search) params.append('search', search);
         if (page) params.append('page', page.toString());
 

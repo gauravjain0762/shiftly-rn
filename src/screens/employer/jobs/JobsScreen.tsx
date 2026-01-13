@@ -100,9 +100,22 @@ const JobsScreen = () => {
   const [hasMorePages, setHasMorePages] = useState(true);
   const lastLoadedPageRef = useRef(0);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
+  const isFilterAppliedRef = useRef(false);
 
   useEffect(() => {
-    trigger({ page: 1 });
+    trigger({ page: 1 })
+      .then((response: any) => {
+        console.log('🔥 ~ Initial Load ~ getJobs API Response:', {
+          status: response?.data?.status,
+          message: response?.data?.message,
+          jobs: response?.data?.data?.jobs,
+          jobsCount: response?.data?.data?.jobs?.length,
+          pagination: response?.data?.data?.pagination,
+        });
+      })
+      .catch((error: any) => {
+        console.log('🔥 ~ Initial Load ~ API Error:', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -122,6 +135,18 @@ const JobsScreen = () => {
       return;
     }
 
+    // Log API response on every filter/data update
+    console.log('🔥 ~ getJobs API Response:', {
+      status: data?.status,
+      message: data?.message,
+      jobs: jobList,
+      jobsCount: jobList?.length,
+      pagination: pagination,
+      totalRecords: pagination?.total_records,
+      currentPage: pagination?.current_page,
+      totalPages: pagination?.total_pages,
+    });
+
     const responsePage = pagination.current_page;
 
     // Only update if this is a new page we haven't loaded yet
@@ -131,6 +156,12 @@ const JobsScreen = () => {
         setAllJobs(jobList);
         lastLoadedPageRef.current = 1;
         setCurrentPage(1);
+        // Update hasMorePages based on pagination
+        if (pagination.total_pages <= 1) {
+          setHasMorePages(false);
+        }
+        // Reset filter applied flag after processing first page
+        isFilterAppliedRef.current = false;
       } else {
         // Subsequent pages - append to existing jobs
         setAllJobs(prev => {
@@ -151,7 +182,16 @@ const JobsScreen = () => {
 
   useEffect(() => {
     if (pagination) {
-      setHasMorePages(pagination.current_page < pagination.total_pages);
+      const hasMore = pagination.current_page < pagination.total_pages;
+      setHasMorePages(hasMore);
+      // If we're on the last page or no more pages, ensure loadMore won't trigger
+      if (!hasMore) {
+        setIsLoadingMore(false);
+        // Also reset filter applied flag when we know there are no more pages
+        if (pagination.current_page === 1 && pagination.total_pages === 1) {
+          isFilterAppliedRef.current = false;
+        }
+      }
     }
   }, [pagination]);
 
@@ -198,21 +238,62 @@ const JobsScreen = () => {
     setHasMorePages(true);
     setIsLoadingMore(false);
     lastLoadedPageRef.current = 0;
+    isFilterAppliedRef.current = true; // Mark that filter was just applied
+    
+    // Reset pagination state to prevent immediate loadMoreJobs call
+    // This ensures we wait for the new API response before allowing pagination
 
-    const newQueryParams = {
-      salary_from: newFilters.salary_from || undefined,
-      salary_to: newFilters.salary_to || undefined,
-      location: newFilters.location || undefined,
-      job_types: newFilters.job_types.length
-        ? newFilters.job_types.join(',')
-        : undefined,
-      job_sectors: newFilters.job_sectors.length
-        ? newFilters.job_sectors.join(',')
-        : undefined,
+    const newQueryParams: any = {
       page: 1,
     };
 
-    trigger(newQueryParams);
+    // Only add location if it's provided and not empty
+    if (newFilters.location && newFilters.location.trim() !== '') {
+      newQueryParams.location = newFilters.location;
+    }
+
+    // Only add job_types if any are selected
+    if (newFilters.job_types && newFilters.job_types.length > 0) {
+      newQueryParams.job_types = newFilters.job_types.join(',');
+    }
+
+    // Only pass salary parameters if they differ from default range [0, 50000]
+    // Don't pass if user hasn't explicitly changed the salary range
+    const defaultSalaryFrom = 0;
+    const defaultSalaryTo = 50000;
+    
+    if (newFilters.salary_from && newFilters.salary_from !== defaultSalaryFrom) {
+      newQueryParams.salary_from = newFilters.salary_from;
+    }
+    if (newFilters.salary_to && newFilters.salary_to !== defaultSalaryTo) {
+      newQueryParams.salary_to = newFilters.salary_to;
+    }
+
+    // Add departments parameter only if any department is selected
+    // Filter to ensure only string IDs are included
+    const departmentIds = newFilters.job_sectors
+      .filter((id: any) => typeof id === 'string' && id.trim() !== '')
+      .join(',');
+    
+    if (departmentIds) {
+      newQueryParams.departments = departmentIds;
+      console.log('🔥 ~ handleApplyFilter ~ departments:', newQueryParams.departments);
+    }
+
+    console.log('🔥 ~ handleApplyFilter ~ newQueryParams:', newQueryParams);
+    trigger(newQueryParams)
+      .then((response: any) => {
+        console.log('🔥 ~ handleApplyFilter ~ API Response:', {
+          status: response?.data?.status,
+          message: response?.data?.message,
+          jobs: response?.data?.data?.jobs,
+          jobsCount: response?.data?.data?.jobs?.length,
+          pagination: response?.data?.data?.pagination,
+        });
+      })
+      .catch((error: any) => {
+        console.log('🔥 ~ handleApplyFilter ~ API Error:', error);
+      });
   };
 
   const clearFilters = () => {
@@ -231,12 +312,19 @@ const JobsScreen = () => {
     setHasMorePages(true);
     setIsLoadingMore(false);
     lastLoadedPageRef.current = 0;
+    isFilterAppliedRef.current = true; // Mark that filter was just applied
     trigger({ page: 1 });
   };
 
   const loadMoreJobs = () => {
     // Prevent multiple simultaneous loads
     if (isLoadingMore || isLoading) {
+      return;
+    }
+
+    // Don't load more if filter was just applied - wait for first page to be processed
+    if (isFilterAppliedRef.current) {
+      console.log('🔥 ~ loadMoreJobs ~ Filter just applied, skipping loadMore');
       return;
     }
 
@@ -255,6 +343,7 @@ const JobsScreen = () => {
     // Check if we've reached the last page
     if (nextPage > pagination.total_pages) {
       setHasMorePages(false);
+      setIsLoadingMore(false);
       return;
     }
 
@@ -263,28 +352,64 @@ const JobsScreen = () => {
       return;
     }
 
+    // Additional safety check: if current page is 1 and we only have 1 page, don't load more
+    if (currentPage === 1 && pagination.total_pages === 1) {
+      setHasMorePages(false);
+      return;
+    }
+
     console.log('Loading page:', nextPage);
     setIsLoadingMore(true);
 
-    const queryParams = {
-      salary_from: filters.salary_from || undefined,
-      salary_to: filters.salary_to || undefined,
-      location: filters.location || undefined,
-      job_types: filters.job_types.length
-        ? filters.job_types.join(',')
-        : undefined,
-      job_sectors: filters.job_sectors.length
-        ? filters.job_sectors.join(',')
-        : undefined,
+    const queryParams: any = {
       page: nextPage,
     };
 
+    // Only add location if it's provided and not empty
+    if (filters.location && filters.location.trim() !== '') {
+      queryParams.location = filters.location;
+    }
+
+    // Only add job_types if any are selected
+    if (filters.job_types && filters.job_types.length > 0) {
+      queryParams.job_types = filters.job_types.join(',');
+    }
+
+    // Only pass salary parameters if they differ from default range [0, 50000]
+    // Don't pass if user hasn't explicitly changed the salary range
+    const defaultSalaryFrom = 0;
+    const defaultSalaryTo = 50000;
+    
+    if (filters.salary_from && filters.salary_from !== defaultSalaryFrom) {
+      queryParams.salary_from = filters.salary_from;
+    }
+    if (filters.salary_to && filters.salary_to !== defaultSalaryTo) {
+      queryParams.salary_to = filters.salary_to;
+    }
+
+    // Add departments parameter only if any department is selected
+    // Filter to ensure only string IDs are included
+    const departmentIds = filters.job_sectors
+      .filter((id: any) => typeof id === 'string' && id.trim() !== '')
+      .join(',');
+    
+    if (departmentIds) {
+      queryParams.departments = departmentIds;
+    }
+
     trigger(queryParams)
-      .then(() => {
+      .then((response: any) => {
+        console.log('🔥 ~ loadMoreJobs ~ API Response:', {
+          status: response?.data?.status,
+          message: response?.data?.message,
+          jobs: response?.data?.data?.jobs,
+          jobsCount: response?.data?.data?.jobs?.length,
+          pagination: response?.data?.data?.pagination,
+        });
         // Loading state will be cleared in useEffect when data arrives
       })
       .catch((error) => {
-        console.error('Error loading more jobs:', error);
+        console.error('🔥 ~ loadMoreJobs ~ API Error:', error);
         setIsLoadingMore(false);
       });
   };
@@ -447,8 +572,8 @@ const JobsScreen = () => {
           ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
           contentContainerStyle={styles.scrollContainer}
           ListHeaderComponent={renderHeader}
-          onEndReached={loadMoreJobs}
-          onEndReachedThreshold={0.3}
+          onEndReached={hasMorePages ? loadMoreJobs : undefined}
+          onEndReachedThreshold={0.5}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <BaseText style={styles.emptyText}>
@@ -495,18 +620,29 @@ const JobsScreen = () => {
           <Text style={styles.sectionLabel}>{t('Department')}</Text>
           <View style={styles.pillRow}>
             {(showAllDepartments ? departments : departments?.slice(0, 6))?.map((dept: any, index: number) => {
-              const isSelected = filters.job_sectors.includes(dept);
+              const deptId = dept?._id;
+              // Check if selected - handle both string IDs and objects
+              const isSelected = filters.job_sectors.some(
+                (d: any) => (typeof d === 'string' ? d : d?._id) === deptId
+              );
               return (
                 <Pressable
-                  key={dept?._id || dept?.title || dept || index}
+                  key={deptId || dept?.title || dept || index}
                   style={[styles.pill, isSelected && styles.pillSelected]}
                   onPress={() => {
-                    setFilters(prev => ({
-                      ...prev,
-                      job_sectors: isSelected
-                        ? prev.job_sectors.filter(d => d !== dept)
-                        : [...prev.job_sectors, dept],
-                    }));
+                    setFilters(prev => {
+                      // Clean up any existing non-string values and ensure only IDs are stored
+                      const cleanSectors = prev.job_sectors.filter(
+                        (d: any) => typeof d === 'string' && d.trim() !== ''
+                      );
+                      
+                      return {
+                        ...prev,
+                        job_sectors: isSelected
+                          ? cleanSectors.filter((d: string) => d !== deptId)
+                          : [...cleanSectors, deptId],
+                      };
+                    });
                   }}>
                   <Text
                     style={[
