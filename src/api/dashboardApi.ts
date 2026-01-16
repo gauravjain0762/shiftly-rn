@@ -418,7 +418,8 @@ export const dashboardApi = createApi({
         const params = new URLSearchParams();
 
         if (job_types) params.append('job_types', job_types);
-        if (salary_from) params.append('salary_from', salary_from.toString());
+        // Always pass salary_from, defaulting to 0 if not provided
+        params.append('salary_from', (salary_from ?? 0).toString());
         if (salary_to) params.append('salary_to', salary_to.toString());
         if (location) params.append('location', location);
         if (job_sectors) params.append('job_sectors', job_sectors);

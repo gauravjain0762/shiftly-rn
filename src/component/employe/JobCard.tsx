@@ -39,7 +39,6 @@ const JobCard: FC<props> = ({
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
   const coverImageUri = item?.company_id?.cover_images?.[0];
   const logoUri = item?.company_id?.logo;
-  console.log("🔥 ~ JobCard ~ logoUri:", logoUri)
 
   const handleShare = async () => {
     try {

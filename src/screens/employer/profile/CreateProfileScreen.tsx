@@ -381,7 +381,7 @@ const CreateProfileScreen = () => {
 
     formData.append('open_for_job', aboutEdit?.open_for_jobs ? true : false);
     formData.append('location', aboutEdit?.location || '');
-    formData.append('responsibility', aboutEdit?.responsibilities || '');
+    // formData.append('responsibility', aboutEdit?.responsibilities || '');
 
     formData.append('skills', aboutEdit?.selectedSkills?.join(',') || '');
 
@@ -863,6 +863,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginHorizontal: wp(4),
+    marginBottom: hp(10)
   },
   addEduText: {
     ...commonFontStyle(500, 20, colors._0B3970),
@@ -875,5 +876,6 @@ const styles = StyleSheet.create({
   },
   buttonStyle: {
     paddingHorizontal: wp(25),
+    paddingBottom: hp(10),
   },
 });

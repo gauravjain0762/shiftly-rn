@@ -54,8 +54,11 @@ const EducationCard = ({item, onRemove, onEdit, type}: Props) => {
       </View>
 
       <View style={styles.rowSpaceBetween}>
-        <View>
-          <BaseText style={styles.university}>
+        <View style={{ width: '70%' }}>
+          <BaseText 
+            style={styles.university}
+            numberOfLines={3}
+            ellipsizeMode="tail">
             {isEducation ? item?.university : item?.company}
           </BaseText>
           <BaseText style={styles.location}>

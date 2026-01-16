@@ -54,7 +54,7 @@ const ApplicationSuccessModal: FC<modal> = ({
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        {/* <TouchableOpacity 
           style={styles.button} 
           onPress={onViewApps}
           activeOpacity={0.8}>
@@ -67,7 +67,7 @@ const ApplicationSuccessModal: FC<modal> = ({
           <View style={styles.buttonGradient}>
             <Text style={styles.buttonText}>View my applications</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity 
           style={styles.button} 

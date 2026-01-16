@@ -118,20 +118,43 @@ const JobDetail = () => {
 
   const isFavorite = localFavorites.includes(curr_jobdetails?._id);
 
-  const coverImages =
-    curr_jobdetails?.company_id?.cover_images?.length > 0
-      ? curr_jobdetails?.company_id?.cover_images
-      : [curr_jobdetails?.company_id?.logo];
+  // Ensure coverImages always has valid image sources, fallback to logoText if not found
+  const coverImages = (() => {
+    const coverImgs = curr_jobdetails?.company_id?.cover_images;
+    const logo = curr_jobdetails?.company_id?.logo;
+    
+    // Check if cover_images exists and has valid entries
+    if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
+      // Filter out null/undefined/empty values
+      const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
+      if (validCoverImages.length > 0) {
+        return validCoverImages;
+      }
+    }
+    
+    // Fallback to logo if available
+    if (logo && typeof logo === 'string' && logo.trim() !== '') {
+      return [logo];
+    }
+    
+    // Final fallback to logoText
+    return [IMAGES.logoText];
+  })();
 
   const renderCarouselItem = ({ item, index }: any) => {
+    // Handle both URI strings and require resources (numbers)
+    const isCoverImage = typeof item === 'string';
+    const imageSource = isCoverImage
+      ? { uri: item } 
+      : (typeof item === 'number' ? item : IMAGES.logoText);
 
     return (
       <View key={index} style={styles.carouselItemContainer}>
         <CustomImage
-          resizeMode="cover"
+          resizeMode={isCoverImage ? "cover" : "contain"}
           imageStyle={styles.imageStyle}
           containerStyle={styles.carouselImage}
-          source={item ? { uri: item } : IMAGES.newlogo}
+          source={imageSource}
         />
       </View>
     );
@@ -174,9 +197,14 @@ ${salary}${shareUrlText}`;
       };
 
       // Use cover image if available, otherwise use company logo
-      const coverImageUri = coverImages && coverImages.length > 0 ? coverImages[0] : curr_jobdetails?.company_id?.logo;
+      // Only use string URLs for sharing (not require resources)
+      const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
+        ? coverImages[0] 
+        : (curr_jobdetails?.company_id?.logo && typeof curr_jobdetails.company_id.logo === 'string'
+          ? curr_jobdetails.company_id.logo 
+          : null);
       
-      if (coverImageUri) {
+      if (coverImageUri && typeof coverImageUri === 'string') {
         try {
           const imagePath = await downloadImage(coverImageUri);
           shareOptions.url = imagePath;
@@ -248,18 +276,20 @@ ${salary}${shareUrlText}`;
           <View style={styles.bannerWrapper}>
             {coverImages && coverImages?.length > 0 && (
               <>
-                <Carousel
-                  loop={coverImages?.length > 1}
-                  width={screenWidth}
-                  height={hp(230)}
-                  autoPlay={coverImages?.length > 1}
-                  autoPlayInterval={4000}
-                  data={coverImages}
-                  scrollAnimationDuration={500}
-                  onSnapToItem={index => setActiveIndex(index)}
-                  renderItem={renderCarouselItem}
-                  style={styles.carousel}
-                />
+                <View style={styles.carouselShadowContainer}>
+                  <Carousel
+                    loop={coverImages?.length > 1}
+                    width={screenWidth}
+                    height={hp(230)}
+                    autoPlay={coverImages?.length > 1}
+                    autoPlayInterval={4000}
+                    data={coverImages}
+                    scrollAnimationDuration={500}
+                    onSnapToItem={index => setActiveIndex(index)}
+                    renderItem={renderCarouselItem}
+                    style={styles.carousel}
+                  />
+                </View>
                 {/* Pagination Dots - Only show if more than 1 image */}
                 {coverImages?.length > 1 && (
                   <View style={styles.pagination}>
@@ -278,25 +308,18 @@ ${salary}${shareUrlText}`;
                 )}
               </>
             )}
-            {/* <View style={styles.alertContainer}>
-              <View style={styles.rowContainer}>
-                <CustomImage source={IMAGES.ring} size={hp(20)} />
-                <BaseText style={styles.addJobText}>{'Add this to J'}</BaseText>
-                <Pressable style={styles.alertButton}>
-                  <BaseText style={styles.alertText}>{'Job Alert'}</BaseText>
-                </Pressable>
-              </View>
-            </View> */}
           </View>
 
           <ScrollView
             style={styles.container}
+            contentContainerStyle={{ paddingBottom: hp(20) }}
             showsVerticalScrollIndicator={false}>
             {/* Header Section */}
             <View style={styles.header}>
               <CustomImage
-                resizeMode="cover"
-                uri={curr_jobdetails?.company_id?.logo}
+                resizeMode={curr_jobdetails?.company_id?.logo ? "cover" : "contain"}
+                uri={curr_jobdetails?.company_id?.logo || undefined}
+                source={!curr_jobdetails?.company_id?.logo ? IMAGES.logoText : undefined}
                 containerStyle={styles.logoBg}
                 imageStyle={{ width: '100%', height: '100%' }}
               />
@@ -468,7 +491,18 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(230),
     marginTop: hp(10),
+    marginBottom: hp(8),
     position: 'relative',
+  },
+  carouselShadowContainer: {
+    width: '100%',
+    height: hp(230),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    overflow: 'visible',
   },
   carousel: {
     width: '100%',
@@ -612,6 +646,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
   },
   like: {
     backgroundColor: colors.white,

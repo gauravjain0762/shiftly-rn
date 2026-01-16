@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground} from 'react-native';
-import {commonFontStyle, wp} from '../../theme/fonts';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {IMAGES} from '../../assets/Images';
 import moment from 'moment';
@@ -29,8 +29,13 @@ const ExperienceCard = ({item, onRemove, onEdit}: Props) => {
       </View>
 
       <View style={styles.rowSpaceBetween}>
-        <View>
-          <Text style={styles.university}>{item?.company}</Text>
+        <View style={{ width: '70%' }}>
+          <Text 
+            style={styles.university}
+            numberOfLines={3}
+            ellipsizeMode="tail">
+            {item?.company}
+          </Text>
           <Text style={styles.location}>
             {item?.department}{item?.country ? ` • ${item?.country}` : ''}
           </Text>

@@ -1,9 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
-import CustomInput from '../common/CustomInput';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
 import Tooltip from '../common/Tooltip';
@@ -161,14 +160,14 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
         </TouchableOpacity>
       </View>
 
-      <CustomInput
+      {/* <CustomInput
         label="Key Responsibilities"
         placeholder={'Enter Key Responsibilities'}
         value={aboutEdit.responsibilities}
         onChange={(text: any) =>
           setAboutEdit({ ...aboutEdit, responsibilities: text })
         }
-      />
+      /> */}
 
       <View>
         <Text style={[styles.headerText, { marginTop: hp(20) }]}>
@@ -281,7 +280,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
                     {/* Show label when this dot is pressed */}
                     {pressedDot?.langName === lang.name && pressedDot?.level === level && (
                       <View style={styles.dotLabelContainer}>
-                        <Text style={styles.dotLabel} numberOfLines={1} ellipsizeMode="tail">
+                        <Text style={styles.dotLabel} numberOfLines={1}>
                           {proficiencyLabels[level]}
                         </Text>
                       </View>
@@ -451,7 +450,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: hp(32),
     backgroundColor: colors._0B3970,
-    paddingHorizontal: wp(10),
     paddingVertical: hp(4),
     borderRadius: hp(6),
     zIndex: 1000,
@@ -460,7 +458,7 @@ const styles = StyleSheet.create({
     minWidth: wp(100),
     maxWidth: wp(150),
     marginLeft: wp(-33),
-    flexShrink: 0,
+    width: '100%'
   },
   dotLabel: {
     ...commonFontStyle(500, 12, colors.white),

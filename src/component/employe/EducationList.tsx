@@ -195,16 +195,18 @@ const EducationList: FC<Props> = ({
         </View>
         <View style={styles.halfWidth}>
           <CustomInput
-            label="City/Region"
             required
+            label="City/Region"
             placeholder={'City/Region'}
             placeholderTextColor={'#969595'}
             value={educationListEdit?.province}
             onChange={(text: string) => {
-              const onlyLetters = text.replace(/[^A-Za-z ]/g, '');
+              // Allow letters and spaces only - preserve all spaces between words
+              const cleanedText = text.replace(/[^A-Za-z ]/g, '');
+              
               setEducationListEdit({
                 ...educationListEdit,
-                province: onlyLetters.trim(),
+                province: cleanedText,
               });
             }}
             containerStyle={styles.flex1}

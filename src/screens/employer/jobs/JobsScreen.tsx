@@ -20,7 +20,7 @@ import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
 import { AppStyles } from '../../../theme/appStyles';
-import Carousel from 'react-native-reanimated-carousel';
+import Carousel, { Pagination } from 'react-native-snap-carousel';
 import {
   errorToast,
   navigateTo,
@@ -59,6 +59,7 @@ const JobsScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [activeIndex, setActiveIndex] = useState(0);
+  const carouselRef = useRef<any>(null);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
@@ -72,6 +73,7 @@ const JobsScreen = () => {
   console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
+  // console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages)
   const pagination = data?.data?.pagination;
 
   const [filters, setFilters] = useState<{
@@ -138,7 +140,7 @@ const JobsScreen = () => {
   }, [userInfo]);
 
   useEffect(() => {
-    trigger({ page: 1 })
+    trigger({ page: 1, salary_from: filters.salary_from ?? 0 })
       .then((response: any) => {
         console.log('🔥 ~ Initial Load ~ getJobs API Response:', {
           status: response?.data?.status,
@@ -343,14 +345,11 @@ const JobsScreen = () => {
       newQueryParams.job_types = newFilters.job_types.join(',');
     }
 
-    // Only pass salary parameters if they differ from default range [0, 50000]
-    // Don't pass if user hasn't explicitly changed the salary range
+    // Always pass salary_from, defaulting to 0 if not selected
     const defaultSalaryFrom = 0;
     const defaultSalaryTo = 50000;
     
-    if (newFilters.salary_from && newFilters.salary_from !== defaultSalaryFrom) {
-      newQueryParams.salary_from = newFilters.salary_from;
-    }
+    newQueryParams.salary_from = newFilters.salary_from ?? defaultSalaryFrom;
     if (newFilters.salary_to && newFilters.salary_to !== defaultSalaryTo) {
       newQueryParams.salary_to = newFilters.salary_to;
     }
@@ -399,7 +398,7 @@ const JobsScreen = () => {
     setIsLoadingMore(false);
     lastLoadedPageRef.current = 0;
     isFilterAppliedRef.current = true; // Mark that filter was just applied
-    trigger({ page: 1 });
+    trigger({ page: 1, salary_from: 0 });
   };
 
   const loadMoreJobs = () => {
@@ -461,14 +460,11 @@ const JobsScreen = () => {
       queryParams.job_types = filters.job_types.join(',');
     }
 
-    // Only pass salary parameters if they differ from default range [0, 50000]
-    // Don't pass if user hasn't explicitly changed the salary range
+    // Always pass salary_from, defaulting to 0 if not selected
     const defaultSalaryFrom = 0;
     const defaultSalaryTo = 50000;
     
-    if (filters.salary_from && filters.salary_from !== defaultSalaryFrom) {
-      queryParams.salary_from = filters.salary_from;
-    }
+    queryParams.salary_from = filters.salary_from ?? defaultSalaryFrom;
     if (filters.salary_to && filters.salary_to !== defaultSalaryTo) {
       queryParams.salary_to = filters.salary_to;
     }
@@ -534,17 +530,13 @@ const JobsScreen = () => {
   };
 
   const BannerItem = ({ item, index }: any) => (
-    <FastImage
-      key={index}
-      resizeMode="cover"
-      source={{ uri: item?.image }}
-      style={styles.carouselImage}
-      onLoadEnd={() => {
-        console.log('Banner Loaded >>>>>>>>.');
-        dispatch(setIsBannerLoaded(true));
-      }}
-      onError={() => dispatch(setIsBannerLoaded(false))}
-    />
+    <View style={styles.carouselItemContainer}>
+      <Image
+        resizeMode="cover"
+        style={styles.carouselImage}
+        source={{ uri: item?.image }}
+      />
+    </View>
   );
 
   const renderHeader = () => (
@@ -582,35 +574,60 @@ const JobsScreen = () => {
         </View>
       </View>
 
-      <View style={styles.carouselWrapper}>
-        {isLoading && currentPage === 1 ? (
-          <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
-        ) : (
-          <>
+      <View>
+        <View style={styles.carouselWrapper}>
+          {isLoading && currentPage === 1 ? (
+            <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
+          ) : (
             <Carousel
-              loop
-              autoPlay
-              height={180}
+              ref={carouselRef}
               data={carouselImages}
               renderItem={BannerItem}
-              width={SCREEN_WIDTH - 32}
-              scrollAnimationDuration={2500}
-              onSnapToItem={index => setActiveIndex(index)}
+              sliderWidth={SCREEN_WIDTH - 32}
+              itemWidth={SCREEN_WIDTH - 32}
+              loop={carouselImages && carouselImages.length > 1}
+              autoplay={carouselImages && carouselImages.length > 1}
+              autoplayInterval={3000}
+              onSnapToItem={index => {
+                if (carouselImages && carouselImages.length > 0) {
+                  // In loop mode, react-native-snap-carousel uses cloned items
+                  // The index can be negative or beyond array length, so we normalize it
+                  let actualIndex = index;
+                  if (index < 0) {
+                    actualIndex = ((index % carouselImages.length) + carouselImages.length) % carouselImages.length;
+                  } else {
+                    actualIndex = index % carouselImages.length;
+                  }
+                  setActiveIndex(actualIndex);
+                }
+              }}
+              enableMomentum={false}
+              lockScrollWhileSnapping={true}
+              inactiveSlideScale={1}
+              inactiveSlideOpacity={1}
+              enableSnap={true}
+              loopClonesPerSide={carouselImages && carouselImages.length > 1 ? Math.max(carouselImages.length, 5) : 0}
+              removeClippedSubviews={false}
+              firstItem={0}
+              shouldOptimizeUpdates={false}
+              autoplayDelay={500}
+              swipeThreshold={50}
+              decelerationRate="fast"
             />
-            {carouselImages && carouselImages.length > 1 && (
-              <View style={styles.paginationContainer}>
-                {carouselImages?.map((_: any, index: number) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.carouselDot,
-                      index === activeIndex && styles.carouselDotActive,
-                    ]}
-                  />
-                ))}
-              </View>
-            )}
-          </>
+          )}
+        </View>
+        {carouselImages && carouselImages.length > 1 && (
+          <View style={styles.paginationWrapper}>
+            <Pagination
+              dotsLength={carouselImages.length}
+              activeDotIndex={activeIndex}
+              containerStyle={styles.paginationContainer}
+              dotStyle={styles.carouselDotActive}
+              inactiveDotStyle={styles.carouselDot}
+              inactiveDotOpacity={1}
+              inactiveDotScale={1}
+            />
+          </View>
         )}
       </View>
       <View style={styles.sectionTitleContainer}>
@@ -979,21 +996,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(25),
   },
   carouselWrapper: {
-    marginTop: 16,
+    marginTop: hp(16),
+    borderRadius: 12,
+    overflow: 'hidden',
+    height: hp(180),
+    width: SCREEN_WIDTH - 32,
+    alignSelf: 'center',
+  },
+  carouselItemContainer: {
+    width: SCREEN_WIDTH - 32,
+    height: hp(180),
     borderRadius: 12,
     overflow: 'hidden',
     justifyContent: 'center',
-    alignSelf: 'center',
-    position: 'relative',
+    alignItems: 'center',
+  },
+  paginationWrapper: {
+    marginTop: hp(16),
+    marginBottom: hp(8),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: hp(12),
-    width: '100%',
-    gap: wp(6),
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
   // carouselImage: {
   //   width: '100%',
@@ -1001,8 +1027,11 @@ const styles = StyleSheet.create({
   // },
   carouselImage: {
     height: hp(180),
-    borderRadius: 12,
     width: SCREEN_WIDTH - wp(32),
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   skeletonBox: {
     height: 180,
@@ -1133,14 +1162,18 @@ const styles = StyleSheet.create({
     marginVertical: hp(40),
   },
   carouselDot: {
-    height: hp(6),
-    width: wp(6),
-    borderRadius: hp(3),
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    height: hp(8),
+    width: wp(8),
+    borderRadius: hp(4),
+    backgroundColor: colors._7B7878,
+    marginHorizontal: wp(3),
   },
   carouselDotActive: {
     width: wp(17),
-    backgroundColor: colors.white,
+    height: hp(8),
+    borderRadius: hp(4),
+    backgroundColor: colors._0B3970,
+    marginHorizontal: wp(3),
   },
   filterContainer: {
     flexDirection: 'row',
