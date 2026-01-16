@@ -45,6 +45,7 @@ import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
 import FastImage from 'react-native-fast-image';
 import CustomImage from '../../../component/common/CustomImage';
 import Tooltip from '../../../component/common/Tooltip';
+import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 
 const jobTypes: object[] = [
   { type: 'Full Time', value: 'Full Time' },
@@ -68,6 +69,7 @@ const JobsScreen = () => {
 
   const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
+  console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
   const pagination = data?.data?.pagination;
@@ -91,8 +93,12 @@ const JobsScreen = () => {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
   const [sortBy, setSortBy] = useState<
-    'newest' | 'salary_high_low' | 'salary_low_high' | null
+    'newest' | 'salary_high_low' | 'salary_low_high' | 'closest_location' | null
   >(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [sortedJobList, setSortedJobList] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
@@ -101,6 +107,35 @@ const JobsScreen = () => {
   const lastLoadedPageRef = useRef(0);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const isFilterAppliedRef = useRef(false);
+
+  // Get user location for closest location sorting
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      try {
+        // Priority 1: Check userInfo from Redux
+        if (userInfo?.lat && userInfo?.lng) {
+          setUserLocation({
+            lat: userInfo.lat,
+            lng: userInfo.lng,
+          });
+          return;
+        }
+
+        // Priority 2: Check AsyncStorage
+        const location = await getAsyncUserLocation();
+        if (location?.lat && location?.lng) {
+          setUserLocation({
+            lat: location.lat,
+            lng: location.lng,
+          });
+        }
+      } catch (error) {
+        console.log('Error fetching user location:', error);
+      }
+    };
+
+    fetchUserLocation();
+  }, [userInfo]);
 
   useEffect(() => {
     trigger({ page: 1 })
@@ -195,6 +230,26 @@ const JobsScreen = () => {
     }
   }, [pagination]);
 
+  // Calculate distance between two coordinates using Haversine formula
+  const calculateDistance = (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+  ): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in kilometers
+  };
+
   useEffect(() => {
     if (allJobs.length === 0) {
       setSortedJobList([]);
@@ -219,10 +274,41 @@ const JobsScreen = () => {
         (a, b) =>
           (a.monthly_salary_from || 0) - (b.monthly_salary_from || 0),
       );
+    } else if (sortBy === 'closest_location') {
+      if (userLocation) {
+        sorted.sort((a, b) => {
+          const aLat = a?.lat || a?.location?.lat;
+          const aLng = a?.lng || a?.location?.lng;
+          const bLat = b?.lat || b?.location?.lat;
+          const bLng = b?.lng || b?.location?.lng;
+
+          // If job doesn't have coordinates, put it at the end
+          if (!aLat || !aLng) return 1;
+          if (!bLat || !bLng) return -1;
+
+          const distanceA = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            aLat,
+            aLng,
+          );
+          const distanceB = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            bLat,
+            bLng,
+          );
+
+          return distanceA - distanceB;
+        });
+      } else {
+        // If no user location, don't sort by distance
+        console.log('User location not available for closest location sorting');
+      }
     }
 
     setSortedJobList(sorted);
-  }, [allJobs, sortBy]);
+  }, [allJobs, sortBy, userLocation]);
 
   const handleApplyFilter = () => {
     const newFilters = {
@@ -796,6 +882,33 @@ const JobsScreen = () => {
                   ]}
                 >
                   Salary: Low to High
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.sortOption,
+                sortBy === 'closest_location' && styles.sortOptionSelected,
+              ]}
+              onPress={() => {
+                if (userLocation) {
+                  setSortBy('closest_location');
+                  setIsSortModalVisible(false);
+                } else {
+                  errorToast('Location not available. Please enable location services.');
+                }
+              }}
+            >
+              <View style={styles.sortOptionContent}>
+                <Text
+                  style={[
+                    styles.sortOptionText,
+                    sortBy === 'closest_location' &&
+                    styles.sortOptionTextSelected,
+                  ]}
+                >
+                  Closest Location
                 </Text>
               </View>
             </Pressable>

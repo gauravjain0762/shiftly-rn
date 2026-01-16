@@ -230,7 +230,7 @@ const SignUp = () => {
 
   const handleOTPVerify = async () => {
     const verifyData = {
-      otp: otp.join('') || '1234',
+      otp: otp.join(''),
       user_id: userInfo?._id,
       device_token: fcmToken ?? 'ddd',
       device_type: Platform.OS,

@@ -80,7 +80,10 @@ const ActivitiesCard: FC<props> = ({ item }) => {
 
           <Pressable
             onPress={() => {
-              navigateTo(SCREENS.JobDetail, { jobId: item?.job_id, is_applied: item?.status === "Applied" ? "Applied" : null });
+              navigateTo(SCREENS.JobDetail, { 
+                jobId: item?.job_id, 
+                is_applied: item?.status === "Applied" ? true : false 
+              });
             }}
             style={styles.button}>
             <Image
