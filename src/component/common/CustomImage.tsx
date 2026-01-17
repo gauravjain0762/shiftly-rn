@@ -40,6 +40,12 @@ const CustomImage = ({
   children,
   ...props
 }: Props) => {
+  // Ensure we always have a valid source for FastImage
+  // If both uri and source are null/undefined, use logoText as fallback
+  const imageSource = uri 
+    ? {uri: uri} 
+    : (source || IMAGES.logoText);
+
   return (
     <TouchableOpacity
       activeOpacity={onPress ? 0.5 : 1}
@@ -55,9 +61,9 @@ const CustomImage = ({
       }}>
       <FastImage
         resizeMode={resizeMode}
-        source={uri ? {uri: uri} : source}
+        source={imageSource}
         tintColor={tintColor}
-        defaultSource={source ? source : IMAGES.logoText}
+        defaultSource={IMAGES.logoText}
         style={[{width: size, height: size}, imageStyle]}
         {...props}>
         {children}

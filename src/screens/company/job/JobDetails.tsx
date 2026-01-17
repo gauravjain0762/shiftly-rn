@@ -158,8 +158,8 @@ const CoJobDetails = () => {
       ) : (
         <>
           <ScrollView
-            showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: hp(120) }}>
             <BackHeader
               type="company"
@@ -234,7 +234,7 @@ const CoJobDetails = () => {
                   </View>
                   <View style={styles.jobTypeTag}>
                     <Text style={styles.jobTypeText}>
-                      {jobDetail?.job_type || 'Full Time'}
+                      {jobDetail?.job_type || 'N/A'}
                     </Text>
                   </View>
                 </View>
@@ -669,6 +669,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     marginVertical: hp(45),
     marginHorizontal: wp(22),
+    marginBottom: hp(60),
   },
   emptyState: {
     alignItems: 'center',

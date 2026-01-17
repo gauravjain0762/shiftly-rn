@@ -22,6 +22,7 @@ import {passwordStyles} from './ChangePassword';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {
   errorToast,
+  passwordRules,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
@@ -99,7 +100,7 @@ const ForgotPassword = () => {
       return;
     }
     try {
-      const res = await companyForgotPassword({email: auth?.email}).unwrap();
+      const res = await companyForgotPassword({email: auth?.email?.toLocaleLowerCase()}).unwrap();
       console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ res:', res);
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
@@ -143,7 +144,7 @@ const ForgotPassword = () => {
 
     let data = {
       company_id: userInfo?._id,
-      otp: otp.join('') || '1234',
+      otp: otp.join(''),
       password: newPassword,
       confirm_password: confirmPassword,
     };
@@ -209,6 +210,8 @@ const ForgotPassword = () => {
                 containerStyle={passwordStyles.inputcontainer}
                 onChangeText={e => dispatch(setAuthData({email: e}))}
                 secureTextEntry={false}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
             </View>
             <GradientButton
@@ -224,13 +227,11 @@ const ForgotPassword = () => {
           <View style={styles.innerConrainer}>
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
-              {timer !== 0 && (
-                <View style={[styles.info_row, {marginTop: hp(19)}]}>
-                  <Text style={styles.infotext}>
-                    {t('You will receive OTP by email')}
-                  </Text>
-                </View>
-              )}
+              <View style={[styles.info_row, {marginTop: hp(19)}]}>
+                <Text style={styles.infotext}>
+                  {t('You will receive OTP by email')} {auth?.email || userInfo?.email || ''}
+                </Text>
+              </View>
               <View style={styles.otpContainer}>
                 {otp?.map((val, idx) => (
                   <TextInput
@@ -303,6 +304,33 @@ const ForgotPassword = () => {
               showRightIcon
               imgStyle={passwordStyles.eye}
             />
+            <View style={passwordStyles.passwordRulesContainer}>
+              <View style={passwordStyles.passlableCon}>
+                <Image
+                  source={IMAGES.shield}
+                  resizeMode="contain"
+                  style={passwordStyles.shield}
+                />
+                <Text style={passwordStyles.passRule}>{t('Password Rule')}</Text>
+              </View>
+              {passwordRules?.map((item: any, index: number) => {
+                const passed = item?.test(newPassword);
+                return (
+                  <View key={index} style={passwordStyles.rules}>
+                    {passed ? (
+                      <Image
+                        source={IMAGES.check}
+                        style={passwordStyles.check}
+                        tintColor={colors._0B3970}
+                      />
+                    ) : (
+                      <View style={passwordStyles.point} />
+                    )}
+                    <Text style={passwordStyles.ruleTitle}>{item?.label}</Text>
+                  </View>
+                );
+              })}
+            </View>
             <GradientButton
               type="Company"
               onPress={handleChangePassword}

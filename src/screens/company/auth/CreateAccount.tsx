@@ -790,31 +790,36 @@ const CreateAccount = () => {
                   resizeMode="contain"
                   style={styles.mail}
                 />
-                <CustomTextInput
-                  label={t('Email')}
-                  required
-                  placeholder={t('Enter your email')}
-                  placeholderTextColor={colors._7B7878}
-                  onChangeText={handleEmailChange}
-                  value={companyRegisterData?.email}
-                  inputStyle={[styles.input1, { textTransform: 'lowercase' }]}
-                  containerStyle={[styles.Inputcontainer, { flex: 1 }]}
-                />
-
-                <TouchableOpacity
-                  onPress={() => setShowTooltip(!showTooltip)}
-                  style={{ marginLeft: wp(8) }}>
-                  <Image source={IMAGES.info} style={styles.iBtn} />
-                </TouchableOpacity>
-                {showTooltip && (
-                  <View style={styles.iBtnTxt}>
-                    <Text style={styles.txtColor}>
-                      {
-                        'Please use your official company email.\nPersonal emails (e.g., Gmail, Yahoo) are not accepted.'
-                      }
+                <View style={{ flex: 1 }}>
+                  <View style={styles.labelRow}>
+                    <Text style={styles.emailLabel}>
+                      {t('Email')}
+                      <Text style={styles.required}>*</Text>
                     </Text>
+                    <TouchableOpacity
+                      onPress={() => setShowTooltip(!showTooltip)}
+                      style={{ marginLeft: wp(8) }}>
+                      <Image source={IMAGES.info} style={styles.iBtn} />
+                    </TouchableOpacity>
                   </View>
-                )}
+                  {showTooltip && (
+                    <View style={styles.iBtnTxt}>
+                      <Text style={styles.txtColor}>
+                        {
+                          'Please use your official company email.\nPersonal emails (e.g., Gmail, Yahoo) are not accepted.'
+                        }
+                      </Text>
+                    </View>
+                  )}
+                  <CustomTextInput
+                    placeholder={t('Enter your email')}
+                    placeholderTextColor={colors._7B7878}
+                    onChangeText={handleEmailChange}
+                    value={companyRegisterData?.email}
+                    inputStyle={[styles.input1, { textTransform: 'lowercase', marginTop: 20, paddingLeft: 0, marginLeft: 0 }]}
+                    containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0 }]}
+                  />
+                </View>
               </View>
 
               {validationMsg.length > 0 && (
@@ -1780,13 +1785,13 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginTop: hp(65),
     borderBottomWidth: 2,
     borderColor: colors._F4E2B8,
     justifyContent: 'center',
     alignSelf: 'flex-start',
-    paddingBottom: hp(16),
+    paddingBottom: hp(8),
   },
   badge: {
     width: wp(28),
@@ -1803,6 +1808,15 @@ const styles = StyleSheet.create({
     height: wp(20),
     resizeMode: 'contain',
     marginRight: wp(12),
+    marginTop: hp(40),
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(40),
+  },
+  emailLabel: {
+    ...commonFontStyle(500, 16, colors.black),
   },
   passwordContiner: {
     justifyContent: 'space-between',

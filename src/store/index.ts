@@ -94,8 +94,8 @@ setupListeners(store.dispatch);
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-export const resetStore = () => {
-  persistor.purge();
+export const resetStore = async () => {
+  await persistor.purge();
   store.dispatch({type: 'RESET_STORE'});
-  persistor.persist();
+  await persistor.persist();
 };

@@ -99,13 +99,6 @@ const startDateData = [
   { label: 'Next Month', value: 'Next Month' },
 ];
 
-const contractTypeData = [
-  { label: 'Full-time experience', value: 'Full-time experience' },
-  { label: 'Part-time experience', value: 'Part-time experience' },
-  { label: 'Contractual', value: 'Contractual' },
-  { label: 'Probation Period', value: 'Probation Period' },
-];
-
 const numberOfPositionsData = [
   { label: '1', value: '1' },
   { label: '2', value: '2' },
@@ -498,8 +491,6 @@ const PostJob = () => {
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);
-    console.log('~ >>>> handleCreateJob ~ job_sector:', job_sector);
-    console.log('~ >>>> handleCreateJob ~ department_id:', job_sector?.value);
 
     try {
       let response;

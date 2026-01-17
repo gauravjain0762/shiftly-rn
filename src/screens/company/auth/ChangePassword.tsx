@@ -203,6 +203,46 @@ export const passwordStyles = StyleSheet.create({
     marginTop: hp(50),
   },
   eye: {
-    tintColor: '#CDB682',
+    tintColor: colors._0B3970,
+  },
+  passwordRulesContainer: {
+    marginTop: hp(28),
+  },
+  passlableCon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(9),
+    marginBottom: hp(10),
+  },
+  shield: {
+    width: wp(27),
+    height: wp(27),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
+  },
+  passRule: {
+    ...commonFontStyle(500, 25, colors._0B3970),
+  },
+  point: {
+    width: wp(9),
+    height: wp(9),
+    backgroundColor: colors._0B3970,
+    borderRadius: 100,
+  },
+  rules: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: wp(20),
+    paddingLeft: wp(10),
+    paddingBottom: hp(2),
+  },
+  ruleTitle: {
+    ...commonFontStyle(400, 15, colors._0B3970),
+  },
+  check: {
+    width: wp(12),
+    height: wp(12),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
 });

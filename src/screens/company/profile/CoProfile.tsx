@@ -7,34 +7,34 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {BackHeader, LinearContainer} from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import React, { useState } from 'react';
+import { BackHeader, LinearContainer } from '../../../component';
+import { IMAGES } from '../../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import CustomPopup from '../../../component/common/CustomPopup';
-import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
+import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
 import {
   useCompanyDeleteAccountMutation,
   useCompanyLogoutMutation,
 } from '../../../api/authApi';
-import {clearAsync} from '../../../utils/asyncStorage';
+import { clearAsync } from '../../../utils/asyncStorage';
 import {
   errorToast,
   navigateTo,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {logouts} from '../../../features/authSlice';
-import {persistor, resetStore, RootState} from '../../../store';
-import {useAppDispatch} from '../../../redux/hooks';
-import {colors} from '../../../theme/colors';
-import {useTranslation} from 'react-i18next';
+import { logouts } from '../../../features/authSlice';
+import { persistor, resetStore, RootState } from '../../../store';
+import { useAppDispatch } from '../../../redux/hooks';
+import { colors } from '../../../theme/colors';
+import { useTranslation } from 'react-i18next';
 import LanguageModal from '../../../component/common/LanguageModel';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import CustomImage from '../../../component/common/CustomImage';
 
 const CoProfile = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [popupVisible, setPopupVisible] = useState(false);
   const [deletepopupVisible, setdeletePopupVisible] = useState(false);
@@ -42,7 +42,7 @@ const CoProfile = () => {
   const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
   const [isLanguageModalVisible, setLanguageModalVisible] =
     useState<boolean>(false);
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
 
   const settingsData = [
     {
@@ -154,18 +154,47 @@ const CoProfile = () => {
     //     console.error('Error signing out: ', error);
     //   }
   };
+
   const onLogout = async () => {
-    let response = null;
-    response = await companyLogout({}).unwrap() as any;
-    console.log("🔥 ~ onLogout ~ response:", response)
-    if (response?.status) {
-      clearAsync();
-      resetNavigation(SCREEN_NAMES.SelectRollScreen);
-      dispatch(logouts());
-      resetStore();
-      signOutIfLoggedIn();
-    } else {
-      errorToast(response?.message);
+    try {
+      const response = await companyLogout({}).unwrap() as any;
+      console.log("🔥 ~ onLogout ~ response:", response);
+      
+      if (response?.status) {
+        // Clear async storage first
+        await clearAsync();
+        
+        // Dispatch logout action to clear Redux state
+        dispatch(logouts());
+        
+        // Reset store and purge persistor (async)
+        await resetStore();
+        
+        // Sign out from Firebase/Google if logged in (async but no need to await)
+        signOutIfLoggedIn().catch(err => {
+          console.log('Error signing out from Firebase:', err);
+        });
+        
+        // Navigate after all cleanup is complete
+        resetNavigation(SCREEN_NAMES.SelectRollScreen);
+      } else {
+        errorToast(response?.message || 'Logout failed');
+      }
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      // Even if API call fails, still perform logout locally
+      try {
+        await clearAsync();
+        dispatch(logouts());
+        await resetStore();
+        signOutIfLoggedIn().catch(err => {
+          console.log('Error signing out from Firebase:', err);
+        });
+        resetNavigation(SCREEN_NAMES.SelectRollScreen);
+      } catch (localError) {
+        console.error('Error during local logout:', localError);
+        errorToast('An error occurred during logout');
+      }
     }
   };
 
@@ -174,10 +203,10 @@ const CoProfile = () => {
       const res = await companyDeleteAccount({}).unwrap() as any;
       if (res?.status) {
         successToast(res?.message);
-        clearAsync();
-        resetNavigation(SCREEN_NAMES.SelectRollScreen);
+        await clearAsync();
         dispatch(logouts());
-        resetStore();
+        await resetStore();
+        resetNavigation(SCREEN_NAMES.SelectRollScreen);
       }
     } catch (error) {
       console.error('Error deleting account: ', error);
@@ -187,7 +216,7 @@ const CoProfile = () => {
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
-      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <BackHeader
           type="company"
           isRight={false}
@@ -197,8 +226,9 @@ const CoProfile = () => {
           RightIcon={
             <View>
               <CustomImage
-                uri={userInfo?.logo}
-                imageStyle={{height: '100%', width: '100%'}}
+                uri={userInfo?.logo || undefined}
+                source={!userInfo?.logo ? IMAGES.logoText : undefined}
+                imageStyle={{ height: '100%', width: '100%' }}
                 containerStyle={{
                   height: hp(51),
                   width: wp(51),
@@ -233,7 +263,7 @@ const CoProfile = () => {
                 <Text
                   style={[
                     styles.label,
-                    item.label == 'Logout' ? {color: 'red'} : {},
+                    item.label == 'Logout' ? { color: 'red' } : {},
                   ]}>
                   {item.label}
                 </Text>
