@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import React, { useState } from 'react';
-import { BackHeader, LinearContainer } from '../../../component';
+import { LinearContainer } from '../../../component';
 import { IMAGES } from '../../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import CustomPopup from '../../../component/common/CustomPopup';
@@ -217,29 +217,24 @@ const CoProfile = () => {
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <BackHeader
-          type="company"
-          isRight={false}
-          title={t('Account')}
-          titleStyle={styles.title}
-          containerStyle={styles.header}
-          RightIcon={
-            <View>
-              <CustomImage
-                uri={userInfo?.logo || undefined}
-                source={!userInfo?.logo ? IMAGES.logoText : undefined}
-                imageStyle={{ height: '100%', width: '100%' }}
-                containerStyle={{
-                  height: hp(51),
-                  width: wp(51),
-                  borderRadius: hp(51),
-                  overflow: 'hidden',
-                }}
-                resizeMode="cover"
-              />
-            </View>
-          }
-        />
+        <View style={styles.header}>
+          <View style={styles.sideWrapper} />
+          <Text style={styles.headerTitle}>{t('Account')}</Text>
+          <View style={styles.rightWrapper}>
+            <CustomImage
+              uri={userInfo?.logo || undefined}
+              source={!userInfo?.logo ? IMAGES.logoText : undefined}
+              imageStyle={{ height: '100%', width: '100%' }}
+              containerStyle={{
+                height: hp(51),
+                width: wp(51),
+                borderRadius: hp(51),
+                overflow: 'hidden',
+              }}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
 
         {settingsData.map((section, index) => (
           <View key={index} style={styles.section}>
@@ -317,12 +312,24 @@ export default CoProfile;
 
 const styles = StyleSheet.create({
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingTop: hp(24),
     marginBottom: hp(28),
     paddingHorizontal: wp(23),
   },
-  title: {
-    right: '22%',
+  sideWrapper: {
+    width: wp(44),
+  },
+  headerTitle: {
+    flex: 1,
+    ...commonFontStyle(600, 22, colors._0B3970),
+    textAlign: 'center',
+  },
+  rightWrapper: {
+    width: wp(44),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   section: {
     marginBottom: hp(24),

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
 
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
@@ -12,8 +14,95 @@ type JobCardProps = {
   onPressShare?: () => void;
 };
 
+const downloadImage = async (url: string) => {
+  const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
+
+  await RNFS.downloadFile({
+    fromUrl: url,
+    toFile: filePath,
+  }).promise;
+
+  return `file://${filePath}`;
+};
+
 const MyJobCard = (props: JobCardProps) => {
-  const { onPressShare, onPressCard, item } = props;
+  const { onPressCard, item } = props;
+
+  // Ensure coverImages always has valid image sources, fallback to logoText if not found
+  const coverImages = (() => {
+    const coverImgs = item?.company_id?.cover_images;
+    const logo = item?.company_id?.logo;
+    
+    // Check if cover_images exists and has valid entries
+    if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
+      // Filter out null/undefined/empty values
+      const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
+      if (validCoverImages.length > 0) {
+        return validCoverImages;
+      }
+    }
+    
+    // Fallback to logo if available
+    if (logo && typeof logo === 'string' && logo.trim() !== '') {
+      return [logo];
+    }
+    
+    // Final fallback to logoText
+    return [IMAGES.logoText];
+  })();
+
+  const handleShare = async () => {
+    try {
+      const title = item?.title || 'Job Opportunity';
+      const area = item?.address || item?.area || '';
+      const description = item?.description || '';
+      const salary =
+        item?.monthly_salary_from || item?.monthly_salary_to
+          ? `Salary: ${item?.currency} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+          : '';
+
+      const shareUrl = item?.share_url || '';
+      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
+      
+      const message = `${title}
+${area}
+
+${description}
+
+${salary}${shareUrlText}`;
+
+      const shareOptions: any = {
+        title: title,
+        message: message,
+        url: shareUrl,
+      };
+
+      // Use cover image if available, otherwise use company logo
+      // Only use string URLs for sharing (not require resources)
+      const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
+        ? coverImages[0] 
+        : (item?.company_id?.logo && typeof item.company_id.logo === 'string'
+          ? item.company_id.logo 
+          : null);
+      
+      if (coverImageUri && typeof coverImageUri === 'string') {
+        try {
+          const imagePath = await downloadImage(coverImageUri);
+          shareOptions.url = imagePath;
+          shareOptions.type = 'image/jpeg';
+        } catch (imageError) {
+          console.log('❌ Image download error:', imageError);
+        }
+      }
+
+      await Share.open(shareOptions);
+
+    } catch (err: any) {
+      if (err?.message !== 'User did not share') {
+        console.log('❌ Share error:', err);
+      }
+    }
+  };
 
   return (
     <>
@@ -24,7 +113,7 @@ const MyJobCard = (props: JobCardProps) => {
             <Text style={styles.titleText}>{`${item?.title}`}</Text>
           </View>
 
-          <Pressable onPress={onPressShare} style={styles.shareButton}>
+          <Pressable onPress={handleShare} style={styles.shareButton}>
             <Image source={IMAGES.share} style={styles.shareIcon} />
           </Pressable>
         </View>

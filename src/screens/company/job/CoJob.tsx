@@ -14,7 +14,6 @@ import {
   CustomTextInput,
   GradientButton,
   LinearContainer,
-  ShareModal,
 } from '../../../component';
 import { useTranslation } from 'react-i18next';
 import { commonFontStyle, hp, SCREEN_WIDTH, wp } from '../../../theme/fonts';
@@ -61,8 +60,6 @@ const CoJob = () => {
   ]);
   const [value, setValue] = useState<any>(filters.contract_types || null);
   const [location, setLocation] = useState<string>(filters.location || '');
-  const [isShareModalVisible, setIsShareModalVisible] =
-    useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
@@ -220,7 +217,6 @@ const CoJob = () => {
               <View key={index} style={{ marginBottom: hp(10) }}>
                 <MyJobCard
                   item={item}
-                  onPressShare={() => setIsShareModalVisible(true)}
                   onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
                 />
               </View>
@@ -312,10 +308,6 @@ const CoJob = () => {
           </View>
         </BottomModal>
       )}
-      <ShareModal
-        visible={isShareModalVisible}
-        onClose={() => setIsShareModalVisible(false)}
-      />
     </LinearContainer>
   );
 };

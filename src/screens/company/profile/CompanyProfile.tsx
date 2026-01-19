@@ -121,7 +121,7 @@ const CompanyProfile = () => {
 
     // If no valid images after filtering, return dummy image
     if (filteredImages.length === 0) {
-      return [IMAGES.dummy_cover];
+      return [IMAGES.logoText];
     }
 
     return filteredImages;
@@ -213,7 +213,7 @@ const CompanyProfile = () => {
         <Image source={IMAGES.backArrow} style={styles.backArrow} />
       </TouchableOpacity>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: hp(40) }}
+        contentContainerStyle={{ paddingBottom: hp(40), backgroundColor: colors.coPrimary }}
         showsVerticalScrollIndicator={false}>
         <ParallaxContainer
           imagePath={coverImages}
@@ -222,18 +222,18 @@ const CompanyProfile = () => {
           loaderColor={colors._0B3970}>
           <LinearContainer
             SafeAreaProps={{ edges: ['bottom'] }}
-            containerStyle={styles.linearContainer}
-            colors={['#F7F7F7', '#FFFFFF']}>
+            containerStyle={[styles.linearContainer, { flex: 1, padding: 0, backgroundColor: colors.coPrimary }]}
+            colors={[colors.coPrimary, colors.coPrimary]}>
             <View style={styles.profileHeader}>
               <CustomImage
                 uri={
                   hasValidLogo
                     ? companyProfileData?.logo
-                    : 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png'
+                    : null
                 }
                 imageStyle={{ height: '100%', width: '100%' }}
                 containerStyle={styles.logoContainer}
-                resizeMode="cover"
+                resizeMode={hasValidLogo ? "cover" : "contain"}
               />
 
               <View style={styles.titleTextContainer}>
@@ -255,26 +255,25 @@ const CompanyProfile = () => {
                     {companyProfileData?.mission || 'N/A'}
                   </Text>
                 )}
-                {/* <Text style={styles.industry}>
-                  {companyProfileData?.address || 'N/A'}
-                </Text> */}
               </View>
             </View>
 
-            {companyProfileData?.about && (
-              <ExpandableText
-                maxLines={3}
-                showStyle={{ paddingHorizontal: 0 }}
-                descriptionStyle={styles.description}
-                description={companyProfileData?.about || 'N/A'}
-              />
-            )}
+            <View style={{ backgroundColor: colors.coPrimary }}>
+              {companyProfileData?.about && (
+                <ExpandableText
+                  maxLines={3}
+                  showStyle={{ paddingHorizontal: 0 }}
+                  descriptionStyle={styles.description}
+                  description={companyProfileData?.about || 'N/A'}
+                />
+              )}
 
-            {companyProfileData?.values && (
-              <Text style={styles.description}>
-                {companyProfileData?.values || 'N/A'}
-              </Text>
-            )}
+              {companyProfileData?.values && (
+                <Text style={styles.description}>
+                  {companyProfileData?.values || 'N/A'}
+                </Text>
+              )}
+            </View>
 
             <View style={styles.tabRow}>
               {ProfileTabs?.map((item, index) => (
@@ -303,7 +302,8 @@ const CompanyProfile = () => {
               <FlatList
                 numColumns={2}
                 data={allPosts}
-                style={{ marginTop: hp(10) }}
+                style={{ marginTop: hp(10), backgroundColor: colors.coPrimary }}
+                contentContainerStyle={{ backgroundColor: colors.coPrimary }}
                 renderItem={renderPostItem}
                 keyExtractor={item => `post-${item.id}`}
                 columnWrapperStyle={{ justifyContent: 'space-between' }}
@@ -357,7 +357,9 @@ const styles = StyleSheet.create({
   },
   linearContainer: {
     paddingHorizontal: wp(21),
-    backgroundColor: colors.coPrimary
+    backgroundColor: colors.coPrimary,
+    paddingTop: 0,
+    marginTop: 0,
   },
   backButton: {
     position: 'absolute',
@@ -373,7 +375,7 @@ const styles = StyleSheet.create({
   profileHeader: {
     flexDirection: 'row',
     gap: 12,
-    // paddingVertical: hp(20),
+    marginTop: hp(-30),
     alignItems: 'center',
   },
   logoContainer: {
@@ -381,6 +383,14 @@ const styles = StyleSheet.create({
     height: wp(90),
     borderRadius: 100,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 1,
   },
   logo: {
     width: wp(82),

@@ -32,7 +32,7 @@ const CoAboutTab = ({ companyProfileData }: Props) => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.infoRow}>
         <View style={[AppStyles.flex]}>
           <Text style={styles.infoTitle}>{'Website'}</Text>
@@ -97,6 +97,9 @@ const CoAboutTab = ({ companyProfileData }: Props) => {
 export default CoAboutTab;
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.coPrimary,
+  },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

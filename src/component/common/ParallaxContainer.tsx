@@ -1,10 +1,8 @@
 import {
   Dimensions,
-  ImageBackground,
   StyleSheet,
   View,
   ViewStyle,
-  ActivityIndicator,
 } from 'react-native';
 import React, { FC, ReactNode, useState, useCallback } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
@@ -12,7 +10,6 @@ import { colors } from '../../theme/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from './CustomImage';
 import { IMAGES } from '../../assets/Images';
-import { hp, wp } from '../../theme/fonts';
 
 type SimpleCarouselProps = {
   imagePath?: string | { uri: string } | (string | { uri: string })[];
@@ -77,7 +74,8 @@ const SimpleImage: FC<{
   children: ReactNode;
   showLoader: boolean;
   loaderColor: string;
-}> = ({ source, style, children, showLoader, loaderColor }) => {
+  isFallback?: boolean;
+}> = ({ source, style, children, showLoader, loaderColor, isFallback = false }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -93,13 +91,16 @@ const SimpleImage: FC<{
   );
 
   const finalSource = !hasValidSource || hasError ? IMAGES.logoText : source;
+  // Check if logoText is being used (either as fallback or explicitly passed)
+  const isLogoText = source === IMAGES.logoText || finalSource === IMAGES.logoText || isFallback;
+  const resizeMode = !isLogoText ? 'contain' : 'cover';
 
   return (
     <CustomImage
       source={finalSource}
       imageStyle={style}
       containerStyle={styles.imageContainer}
-      resizeMode={hasValidSource ? 'cover' : 'contain'}
+      resizeMode={resizeMode}
       props={{
         onError: () => {
           setHasError(true);
@@ -165,18 +166,19 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
         typeof item === 'number' ||
         (typeof item === 'object' && item.uri)
       );
+      // Use logoText as fallback instead of blank.png to ensure contain mode
       const source = hasValidSource
         ? item
-        : {
-          uri: 'https://sky.devicebee.com/Shiftly/public/uploads/blank.png',
-        };
+        : IMAGES.logoText;
+      const isFallback = !hasValidSource;
 
       return (
         <SimpleImage
           source={source}
           style={{ width: imageWidth, height: IMG_HEIGHT }}
           showLoader={showLoader && hasValidSource}
-          loaderColor={loaderColor}>
+          loaderColor={loaderColor}
+          isFallback={isFallback}>
           {ImageChildren}
         </SimpleImage>
       );
@@ -212,8 +214,8 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({
         ) : (
           <CustomImage
             size={150}
-            source={IMAGES.newlogo}
-            imageStyle={{ width: 150, height: 150 }}
+            source={IMAGES.logoText}
+            imageStyle={{ width: imageWidth, height: IMG_HEIGHT }}
             resizeMode="contain">
             {ImageChildren}
           </CustomImage>

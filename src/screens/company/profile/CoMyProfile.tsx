@@ -41,7 +41,10 @@ const CoMyProfile = () => {
           titleStyle={styles.title}
           containerStyle={styles.header}
         />
-        <ScrollView scrollEnabled showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          scrollEnabled 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}>
           {/* Profile Header */}
           <View style={styles.profileRow}>
             <CustomImage
@@ -195,6 +198,9 @@ const styles = StyleSheet.create({
   },
   space: {
     gap: hp(6),
+  },
+  scrollContent: {
+    paddingBottom: hp(100),
   },
   btn: {
     marginTop: hp(40),

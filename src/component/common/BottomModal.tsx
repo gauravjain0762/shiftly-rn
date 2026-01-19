@@ -33,7 +33,15 @@ const BottomModal = ({
       style={styles.modal}
       onBackdropPress={onClose}
       avoidKeyboard
-      isVisible={visible}>
+      isVisible={visible}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={300}
+      animationOutTiming={300}
+      backdropTransitionInTiming={300}
+      backdropTransitionOutTiming={300}
+      useNativeDriverForBackdrop={true}
+      hideModalContentWhileAnimating={true}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoiding}>

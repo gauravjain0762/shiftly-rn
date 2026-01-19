@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
 import {
   BackHeader,
   GradientButton,
@@ -52,7 +54,7 @@ const CoJobDetails = () => {
   const job_id = params?._id as any;
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
-  const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(3);
+  const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const metricOptions = [
@@ -65,7 +67,95 @@ const CoJobDetails = () => {
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const jobDetail = data?.data;
+  const shareUrl = data?.data?.share_url;
   console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail);
+  console.log("🔥 ~ CoJobDetails ~ invited_users:", jobDetail?.invited_users);
+
+  // Ensure coverImages always has valid image sources, fallback to logoText if not found
+  const coverImages = (() => {
+    const coverImgs = jobDetail?.company_id?.cover_images;
+    const logo = jobDetail?.company_id?.logo;
+    
+    // Check if cover_images exists and has valid entries
+    if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
+      // Filter out null/undefined/empty values
+      const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
+      if (validCoverImages.length > 0) {
+        return validCoverImages;
+      }
+    }
+    
+    // Fallback to logo if available
+    if (logo && typeof logo === 'string' && logo.trim() !== '') {
+      return [logo];
+    }
+    
+    // Final fallback to logoText
+    return [IMAGES.logoText];
+  })();
+
+  const downloadImage = async (url: string) => {
+    const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
+
+    await RNFS.downloadFile({
+      fromUrl: url,
+      toFile: filePath,
+    }).promise;
+
+    return `file://${filePath}`;
+  };
+
+  const handleShare = async () => {
+    try {
+      const title = jobDetail?.title || 'Job Opportunity';
+      const area = jobDetail?.address || jobDetail?.area || '';
+      const description = jobDetail?.description || '';
+      const salary =
+        jobDetail?.monthly_salary_from || jobDetail?.monthly_salary_to
+          ? `Salary: ${jobDetail?.currency} ${jobDetail?.monthly_salary_from?.toLocaleString()} - ${jobDetail?.monthly_salary_to?.toLocaleString()}`
+          : '';
+
+      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
+      
+      const message = `${title}
+${area}
+
+${description}
+
+${salary}${shareUrlText}`;
+
+      const shareOptions: any = {
+        title: title,
+        message: message,
+        url: shareUrl,
+      };
+
+      // Use cover image if available, otherwise use company logo
+      // Only use string URLs for sharing (not require resources)
+      const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
+        ? coverImages[0] 
+        : (jobDetail?.company_id?.logo && typeof jobDetail.company_id.logo === 'string'
+          ? jobDetail.company_id.logo 
+          : null);
+      
+      if (coverImageUri && typeof coverImageUri === 'string') {
+        try {
+          const imagePath = await downloadImage(coverImageUri);
+          shareOptions.url = imagePath;
+          shareOptions.type = 'image/jpeg';
+        } catch (imageError) {
+          console.log('❌ Image download error:', imageError);
+        }
+      }
+
+      await Share.open(shareOptions);
+
+    } catch (err: any) {
+      if (err?.message !== 'User did not share') {
+        console.log('❌ Share error:', err);
+      }
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -190,7 +280,7 @@ const CoJobDetails = () => {
                   </View>
                   <View style={styles.jobPostActions}>
                     <TouchableOpacity
-                      onPress={() => setIsShareModalVisible(true)}
+                      onPress={handleShare}
                       style={styles.actionIconButton}>
                       <Image
                         source={IMAGES.share}
@@ -337,46 +427,100 @@ const CoJobDetails = () => {
                 )}
 
                 {selectedMetricIndex === 2 && (
-                  // Suggested Candidate - Show suggested matches (from lines 381-382 area)
-                  jobDetail?.suggested_matches?.length > 0 ? (
-                    jobDetail.suggested_matches.map((item: any, index: number) => {
-                      if (item === null) return null;
-                      return (
-                        <View key={index} style={styles.candidateCard}>
-                          <CustomImage
-                            resizeMode="cover"
-                            source={IMAGES.avatar}
-                            containerStyle={styles.candidateAvatar}
-                            uri={item?.user_id?.picture || item?.picture}
-                            imageStyle={{ width: '100%', height: '100%' }}
-                          />
-                          <View style={styles.candidateInfo}>
-                            <Text style={styles.candidateName}>
-                              {item?.user_id?.name || item?.name || 'N/A'}
-                            </Text>
-                            <Text style={styles.candidateRole}>
-                              {item?.user_id?.responsibility || item?.responsibility || 'N/A'}
-                            </Text>
-                            <Text style={styles.candidateExperience}>
-                              {item?.user_id?.years_of_experience || item?.years_of_experience || item?.experience || '0'}y Experience
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            style={styles.inviteButton}
-                            onPress={() => {
-                              // TODO: Handle invite action
-                              console.log('Invite pressed for:', item?.user_id?.name || item?.name);
-                            }}>
-                            <Text style={styles.inviteButtonText}>Invite</Text>
-                          </TouchableOpacity>
+                  <>
+                    {/* Invited Users Section */}
+                    {jobDetail?.invited_users && Array.isArray(jobDetail.invited_users) && jobDetail.invited_users.length > 0 && (
+                      <>
+                        <View style={styles.sectionHeader}>
+                          <Text style={styles.sectionTitle}>Invited Candidates</Text>
                         </View>
-                      );
-                    })
-                  ) : (
-                    <View style={styles.emptyState}>
-                      <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No suggested candidates</BaseText>
-                    </View>
-                  )
+                        {jobDetail.invited_users.map((item: any, index: number) => {
+                          if (!item || item === null) return null;
+                          // Handle both structures: item.user_id or direct user object
+                          const user = item?.user_id || item;
+                          if (!user || !user._id) return null;
+                          
+                          return (
+                            <View key={`invited-${item._id || index}`} style={[styles.candidateCard, styles.invitedCard]}>
+                              <CustomImage
+                                resizeMode="cover"
+                                source={IMAGES.avatar}
+                                containerStyle={styles.candidateAvatar}
+                                uri={user?.picture}
+                                imageStyle={{ width: '100%', height: '100%' }}
+                              />
+                              <View style={styles.candidateInfo}>
+                                <Text style={styles.candidateName}>
+                                  {user?.name || 'N/A'}
+                                </Text>
+                                <Text style={styles.candidateRole}>
+                                  {user?.responsibility || user?.job_title || 'N/A'}
+                                </Text>
+                                <Text style={styles.candidateExperience}>
+                                  {user?.years_of_experience || user?.experience || '0'}y Experience
+                                </Text>
+                              </View>
+                              <View style={styles.invitedBadge}>
+                                <Text style={styles.invitedBadgeText}>Invited</Text>
+                              </View>
+                            </View>
+                          );
+                        })}
+                      </>
+                    )}
+
+                    {/* Suggested Matches Section */}
+                    {jobDetail?.suggested_matches && jobDetail.suggested_matches.length > 0 && (
+                      <>
+                        {jobDetail?.invited_users && jobDetail.invited_users.length > 0 && (
+                          <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Suggested Candidates</Text>
+                          </View>
+                        )}
+                        {jobDetail.suggested_matches.map((item: any, index: number) => {
+                          if (item === null) return null;
+                          return (
+                            <View key={`suggested-${index}`} style={styles.candidateCard}>
+                              <CustomImage
+                                resizeMode="cover"
+                                source={IMAGES.avatar}
+                                containerStyle={styles.candidateAvatar}
+                                uri={item?.user_id?.picture || item?.picture}
+                                imageStyle={{ width: '100%', height: '100%' }}
+                              />
+                              <View style={styles.candidateInfo}>
+                                <Text style={styles.candidateName}>
+                                  {item?.user_id?.name || item?.name || 'N/A'}
+                                </Text>
+                                <Text style={styles.candidateRole}>
+                                  {item?.user_id?.responsibility || item?.responsibility || 'N/A'}
+                                </Text>
+                                <Text style={styles.candidateExperience}>
+                                  {item?.user_id?.years_of_experience || item?.years_of_experience || item?.experience || '0'}y Experience
+                                </Text>
+                              </View>
+                              <TouchableOpacity
+                                style={styles.inviteButton}
+                                onPress={() => {
+                                  // TODO: Handle invite action
+                                  console.log('Invite pressed for:', item?.user_id?.name || item?.name);
+                                }}>
+                                <Text style={styles.inviteButtonText}>Invite</Text>
+                              </TouchableOpacity>
+                            </View>
+                          );
+                        })}
+                      </>
+                    )}
+
+                    {/* Empty State */}
+                    {(!jobDetail?.invited_users || !Array.isArray(jobDetail.invited_users) || jobDetail.invited_users.length === 0) &&
+                      (!jobDetail?.suggested_matches || !Array.isArray(jobDetail.suggested_matches) || jobDetail.suggested_matches.length === 0) && (
+                        <View style={styles.emptyState}>
+                          <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No suggested candidates</BaseText>
+                        </View>
+                      )}
+                  </>
                 )}
 
                 {selectedMetricIndex === 3 && (
@@ -862,6 +1006,22 @@ const styles = StyleSheet.create({
     borderRadius: hp(50),
   },
   inviteButtonText: {
+    ...commonFontStyle(500, 12, colors.white),
+  },
+  sectionHeader: {
+    marginBottom: hp(12),
+  },
+  invitedCard: {
+    backgroundColor: '#EEF4FF',
+    borderColor: colors._0B3970,
+  },
+  invitedBadge: {
+    backgroundColor: colors._0B3970,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(20),
+    borderRadius: hp(50),
+  },
+  invitedBadgeText: {
     ...commonFontStyle(500, 12, colors.white),
   },
 });

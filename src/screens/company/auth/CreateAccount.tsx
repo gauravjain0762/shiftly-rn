@@ -744,7 +744,7 @@ const CreateAccount = () => {
                 />
                 <TouchableOpacity
                   onPress={() => setShowTooltip(!showTooltip)}
-                  style={{ marginLeft: wp(8) }}>
+                  style={{ marginLeft: wp(28), position: 'absolute', top: '32%' }}>
                   <Image source={IMAGES.info} style={styles.iBtn} />
                 </TouchableOpacity>
                 {showTooltip && (
@@ -788,10 +788,10 @@ const CreateAccount = () => {
                 <Image
                   source={IMAGES.mail}
                   resizeMode="contain"
-                  style={styles.mail}
+                  style={[styles.mail, {marginTop: hp(40)}]}
                 />
                 <View style={{ flex: 1 }}>
-                  <View style={styles.labelRow}>
+                  <View style={[styles.labelRow, {marginTop: hp(40)}]}>
                     <Text style={styles.emailLabel}>
                       {t('Email')}
                       <Text style={styles.required}>*</Text>
@@ -803,7 +803,7 @@ const CreateAccount = () => {
                     </TouchableOpacity>
                   </View>
                   {showTooltip && (
-                    <View style={styles.iBtnTxt}>
+                    <View style={[styles.iBtnTxt, {bottom: hp(85), overflow: 'visible'}]}>
                       <Text style={styles.txtColor}>
                         {
                           'Please use your official company email.\nPersonal emails (e.g., Gmail, Yahoo) are not accepted.'
@@ -816,8 +816,8 @@ const CreateAccount = () => {
                     placeholderTextColor={colors._7B7878}
                     onChangeText={handleEmailChange}
                     value={companyRegisterData?.email}
-                    inputStyle={[styles.input1, { textTransform: 'lowercase', marginTop: 20, paddingLeft: 0, marginLeft: 0 }]}
-                    containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0 }]}
+                    inputStyle={[styles.input1, { textTransform: 'lowercase', marginTop: 20, paddingLeft: 0, marginLeft: 0, overflow: 'hidden' }]}
+                    containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0, }]}
                   />
                 </View>
               </View>
@@ -1786,7 +1786,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginTop: hp(65),
+    // marginTop: hp(65),
     borderBottomWidth: 2,
     borderColor: colors._F4E2B8,
     justifyContent: 'center',
@@ -1808,12 +1808,11 @@ const styles = StyleSheet.create({
     height: wp(20),
     resizeMode: 'contain',
     marginRight: wp(12),
-    marginTop: hp(40),
   },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: hp(40),
+    // marginTop: hp(40),
   },
   emailLabel: {
     ...commonFontStyle(500, 16, colors.black),
@@ -1823,7 +1822,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors._7B7878,
     borderBottomWidth: 1,
     paddingBottom: hp(14),
-    marginTop: hp(65),
+    // marginTop: hp(5),
     flex: 1,
     marginBottom: 0,
   },
