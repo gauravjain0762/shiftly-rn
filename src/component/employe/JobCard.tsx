@@ -145,9 +145,9 @@ ${salary}${shareUrlText}`;
         </View>
         <View style={styles.titleRow}>
           <Text style={styles.jobTitle}>{item?.title}</Text>
-          {item?.job_type && (
+          {item?.contract_type && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{item?.job_type}</Text>
+              <Text style={styles.badgeText}>{item?.contract_type}</Text>
             </View>
           )}
         </View>

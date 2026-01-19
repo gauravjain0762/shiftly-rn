@@ -328,8 +328,8 @@ const CoChat = () => {
                     jobdetail_chatData?.job_id?.title ||
                     'N/A'
                   } - ${
-                    mainjob_data?.job_type ||
-                    jobdetail_chatData?.job_id?.job_type ||
+                    mainjob_data?.contract_type ||
+                    jobdetail_chatData?.job_id?.contract_type ||
                     'N/A'
                   }`}
                 </Text>

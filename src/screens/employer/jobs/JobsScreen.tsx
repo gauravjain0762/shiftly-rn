@@ -47,7 +47,7 @@ import CustomImage from '../../../component/common/CustomImage';
 import Tooltip from '../../../component/common/Tooltip';
 import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 
-const jobTypes: object[] = [
+const contractTypes: object[] = [
   { type: 'Full Time', value: 'Full Time' },
   { type: 'Part Time', value: 'Part Time' },
   { type: 'Temporary', value: 'Temporary' },
@@ -78,13 +78,13 @@ const JobsScreen = () => {
 
   const [filters, setFilters] = useState<{
     job_sectors: string[];
-    job_types: string[];
+    contract_types: string[];
     salary_from: number;
     salary_to: number;
     location: string;
   }>({
     job_sectors: [],
-    job_types: [],
+    contract_types: [],
     salary_from: 0,
     salary_to: 0,
     location: '',
@@ -340,9 +340,9 @@ const JobsScreen = () => {
       newQueryParams.location = newFilters.location;
     }
 
-    // Only add job_types if any are selected
-    if (newFilters.job_types && newFilters.job_types.length > 0) {
-      newQueryParams.job_types = newFilters.job_types.join(',');
+    // Only add contract_types if any are selected
+    if (newFilters.contract_types && newFilters.contract_types.length > 0) {
+      newQueryParams.contract_types = newFilters.contract_types.join(',');
     }
 
     // Always pass salary_from, defaulting to 0 if not selected
@@ -384,7 +384,7 @@ const JobsScreen = () => {
   const clearFilters = () => {
     setFilters({
       job_sectors: [],
-      job_types: [],
+      contract_types: [],
       salary_from: 0,
       salary_to: 0,
       location: '',
@@ -455,9 +455,9 @@ const JobsScreen = () => {
       queryParams.location = filters.location;
     }
 
-    // Only add job_types if any are selected
-    if (filters.job_types && filters.job_types.length > 0) {
-      queryParams.job_types = filters.job_types.join(',');
+    // Only add contract_types if any are selected
+    if (filters.contract_types && filters.contract_types.length > 0) {
+      queryParams.contract_types = filters.contract_types.join(',');
     }
 
     // Always pass salary_from, defaulting to 0 if not selected
@@ -781,8 +781,8 @@ const JobsScreen = () => {
 
           <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
           <View style={styles.pillRow}>
-            {jobTypes.map((job: any) => {
-              const isSelected = filters.job_types.includes(job.type);
+            {contractTypes.map((job: any) => {
+              const isSelected = filters.contract_types.includes(job.type);
               return (
                 <Pressable
                   key={job.type}
@@ -790,9 +790,9 @@ const JobsScreen = () => {
                   onPress={() => {
                     setFilters(prev => ({
                       ...prev,
-                      job_types: isSelected
-                        ? prev.job_types.filter(j => j !== job.type)
-                        : [...prev.job_types, job.type],
+                      contract_types: isSelected
+                        ? prev.contract_types.filter(j => j !== job.type)
+                        : [...prev.contract_types, job.type],
                     }));
                   }}>
                   <Text

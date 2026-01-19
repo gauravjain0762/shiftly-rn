@@ -182,7 +182,7 @@ const SuggestedEmployeeScreen = () => {
     return '';
   }, [jobInfo]);
 
-  const jobTypeLabel = jobInfo?.contract_type || '';
+  const contractTypeLabel = jobInfo?.contract_type || '';
 
   const renderEmployee = (item: any) => {
     if (!item || !item._id) {
@@ -268,10 +268,10 @@ const SuggestedEmployeeScreen = () => {
                 </View>
                 <View style={styles.jobCardInfo}>
                   <Text style={styles.jobTitle}>{jobInfo?.title || ''}</Text>
-                  {(jobLocation || jobTypeLabel) && (
+                  {(jobLocation || contractTypeLabel) && (
                     <Text style={styles.jobLocation}>
                       {jobLocation}
-                      {jobTypeLabel ? ` - ${jobTypeLabel}` : ''}
+                      {contractTypeLabel ? ` - ${contractTypeLabel}` : ''}
                     </Text>
                   )}
                   {!!salaryRange && (

@@ -406,7 +406,7 @@ export const dashboardApi = createApi({
     }),
     getEmployeeJobs: builder.query<any, any>({
       query: ({
-        job_types,
+        contract_types,
         salary_from,
         salary_to,
         location,
@@ -417,7 +417,7 @@ export const dashboardApi = createApi({
       }) => {
         const params = new URLSearchParams();
 
-        if (job_types) params.append('job_types', job_types);
+        if (contract_types) params.append('contract_types', contract_types);
         // Always pass salary_from, defaulting to 0 if not provided
         params.append('salary_from', (salary_from ?? 0).toString());
         if (salary_to) params.append('salary_to', salary_to.toString());

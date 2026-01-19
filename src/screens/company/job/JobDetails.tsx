@@ -234,7 +234,7 @@ const CoJobDetails = () => {
                   </View>
                   <View style={styles.jobTypeTag}>
                     <Text style={styles.jobTypeText}>
-                      {jobDetail?.job_type || 'N/A'}
+                      {jobDetail?.contract_type || 'N/A'}
                     </Text>
                   </View>
                 </View>
@@ -428,18 +428,18 @@ const CoJobDetails = () => {
             style={styles.button}
             title={t('Edit Job')}
             onPress={() => {
-              console.log('job_type>>>>>.', jobDetail?.job_type);
+              console.log('contract_type>>>>>.', jobDetail?.contract_type);
               dispatch(
                 setJobFormState({
                   job_id: job_id,
                   title: jobDetail?.title,
-                  job_type:
-                    typeof jobDetail?.job_type === 'string'
+                  contract_type:
+                    typeof jobDetail?.contract_type === 'string'
                       ? {
-                        label: jobDetail?.job_type,
-                        value: jobDetail?.job_type,
+                        label: jobDetail?.contract_type,
+                        value: jobDetail?.contract_type,
                       }
-                      : jobDetail?.job_type || {
+                      : jobDetail?.contract_type || {
                         label: 'Full Time',
                         value: 'Full Time',
                       },

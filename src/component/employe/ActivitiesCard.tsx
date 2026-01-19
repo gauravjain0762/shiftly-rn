@@ -46,7 +46,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
 
         <View style={{ gap: hp(15) }}>
           <Text style={styles.jobTitle} numberOfLines={1}>
-            {item?.job_title} - {item?.job_type || "N/A"}
+            {item?.job_title} - {item?.contract_type || "N/A"}
           </Text>
           <View
             style={[

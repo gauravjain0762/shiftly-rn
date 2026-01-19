@@ -185,7 +185,7 @@ const Chat = () => {
               <Text style={styles.jobTitle}>
                 {' '}
                 {`${jobdetail_chatData?.job_title || 'N/A'} - ${
-                  jobdetail_chatData?.job_type || 'N/A'
+                  jobdetail_chatData?.contract_type || 'N/A'
                 }`}
               </Text>
               <TouchableOpacity

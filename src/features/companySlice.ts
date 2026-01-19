@@ -4,7 +4,7 @@ import {RootState} from '../store';
 
 interface JobFormState {
   title: string;
-  job_type: {label: string; value: string};
+  contract_type: {label: string; value: string};
   area: {label: string; value: string};
   duration: {label: string; value: string};
   job_sector: {label: string; value: string} | null;
@@ -53,7 +53,7 @@ interface CompanyState {
 }
 
 interface FiltersState {
-  job_types: string | null;
+  contract_types: string | null;
   salary_from: number;
   salary_to: number;
   location: string;
@@ -64,12 +64,11 @@ const initialState: CompanyState = {
   coPostSteps: 1,
   jobForm: {
     title: '',
-    job_type: {label: 'Full Time', value: 'Full Time'},
+    contract_type: {label: 'Full Time', value: 'Full Time'},
     area: {label: 'Dubai Marina', value: 'Dubai Marina'},
     duration: {label: '1 Month', value: '1 Month'},
     job_sector: {label: 'Hotel/Resort', value: 'Hotel/Resort'},
     startDate: {label: 'Immediately', value: 'Immediately'},
-    contract: {label: 'Full-time experience', value: 'Full-time experience'},
     salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},
     currency: {label: 'AED', value: 'AED'},
     position: {label: '1', value: '1'},
@@ -97,7 +96,7 @@ const initialState: CompanyState = {
     isPostUploading: false,
   },
   filters: {
-    job_types: null,
+    contract_types: null,
     salary_from: 1000,
     salary_to: 50000,
     location: '',

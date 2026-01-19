@@ -41,7 +41,7 @@ const MyJobCard = (props: JobCardProps) => {
               }>{`${item?.applicants?.length}  Applicants`}</Text>
           )}
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{`${item?.job_type || 'N/A'
+            <Text style={styles.badgeText}>{`${item?.contract_type || 'N/A'
               }`}</Text>
           </View>
 

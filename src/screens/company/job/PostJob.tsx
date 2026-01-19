@@ -68,7 +68,7 @@ import CharLength from '../../../component/common/CharLength';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Tooltip from '../../../component/common/Tooltip';
 
-const jobTypeData = [
+const contractTypeData = [
   { label: 'Full Time', value: 'Full Time' },
   { label: 'Part Time', value: 'Part Time' },
   { label: 'Freelance', value: 'Freelance' },
@@ -128,7 +128,7 @@ const PostJob = () => {
   const dispatch = useDispatch<any>();
   const {
     title,
-    job_type,
+    contract_type,
     area,
     duration,
     job_sector,
@@ -357,7 +357,7 @@ const PostJob = () => {
   }, [isDropdownOpen]);
 
   const hasInitializedJobSectorRef = useRef<boolean>(false);
-  const hasInitializedJobTypeRef = useRef<boolean>(false);
+  const hasInitializedContractTypeRef = useRef<boolean>(false);
   const hasCleanedRequirementsRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -371,18 +371,18 @@ const PostJob = () => {
     }
   }, [dropdownDepartmentsOptions, job_sector, updateJobForm]);
 
-  // Initialize job_type if not set (only for new jobs, not edit mode)
+  // Initialize contract_type if not set (only for new jobs, not edit mode)
   useEffect(() => {
     if (
-      !hasInitializedJobTypeRef.current &&
+      !hasInitializedContractTypeRef.current &&
       !editMode &&
-      jobTypeData?.length > 0 &&
-      !job_type
+      contractTypeData?.length > 0 &&
+      (!contract_type || !contract_type?.label || !contract_type?.value)
     ) {
-      updateJobForm({ job_type: jobTypeData[0] }); // Default to "Full Time"
-      hasInitializedJobTypeRef.current = true;
+      updateJobForm({ contract_type: contractTypeData[0] }); // Default to "Full Time"
+      hasInitializedContractTypeRef.current = true;
     }
-  }, [editMode, job_type, updateJobForm]);
+  }, [editMode, contract_type, updateJobForm]);
 
   // Clean up empty/blank requirements when creating a new job (only on mount)
   useEffect(() => {
@@ -468,7 +468,7 @@ const PostJob = () => {
     // Build params with latest values
     const params = {
       title: title,
-      job_type: job_type?.label,
+      contract_type: contract_type?.label || contract_type?.value || 'Full Time',
       area: area?.value,
       description: describe,
       address: userAddress?.address || 'UAE, Dubai',
@@ -480,7 +480,6 @@ const PostJob = () => {
       job_sector: job_sector?.value,
       expiry_date: expiry_date,
       start_date: startDate?.value,
-      contract_type: contract?.value,
       monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
       monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
       no_positions: position?.value,
@@ -1084,7 +1083,7 @@ const PostJob = () => {
                         {`${userAddress?.state || 'N/A'}, ${userAddress?.country || 'N/A'}`}
                       </Text>
                     </View>
-                    <Text style={styles.location}>{job_type?.label}</Text>
+                    <Text style={styles.location}>{contract_type?.label}</Text>
                     <Text
                       style={
                         styles.salary
@@ -1204,12 +1203,12 @@ const PostJob = () => {
               <View style={styles.field}>
                 <Text style={styles.label}>{t('Type of contract')}</Text>
                 <CustomDropdown
-                  data={jobTypeData}
+                  data={contractTypeData}
                   labelField="label"
                   valueField="value"
-                  value={job_type?.value}
+                  value={contract_type?.value}
                   onChange={(e: any) => {
-                    updateJobForm({ job_type: { label: e.label, value: e.value } });
+                    updateJobForm({ contract_type: { label: e.label, value: e.value } });
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}

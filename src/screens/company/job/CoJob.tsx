@@ -37,7 +37,7 @@ import {
 } from '../../../features/companySlice';
 import { useFocusEffect } from '@react-navigation/native';
 
-const jobTypes = [
+const contractTypes = [
   { label: 'Full Time', value: 'Full Time' },
   { label: 'Part Time', value: 'Part Time' },
   { label: 'Freelance', value: 'Freelance' },
@@ -59,7 +59,7 @@ const CoJob = () => {
     filters.salary_from,
     filters.salary_to,
   ]);
-  const [value, setValue] = useState<any>(filters.job_types || null);
+  const [value, setValue] = useState<any>(filters.contract_types || null);
   const [location, setLocation] = useState<string>(filters.location || '');
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
@@ -70,7 +70,7 @@ const CoJob = () => {
 
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
-    setValue(filters.job_types || null);
+    setValue(filters.contract_types || null);
     setLocation(filters.location || '');
     // Reset pagination when filters change
     setPage(1);
@@ -132,7 +132,7 @@ const CoJob = () => {
       dispatch(
         setFilters({
           location: location,
-          job_types: value,
+          contract_types: value,
           salary_from: range[0],
           salary_to: range[1],
         }),
@@ -193,7 +193,7 @@ const CoJob = () => {
           {data && (
             <Pressable
               onPress={() => {
-                setValue(filters.job_types || null);
+                setValue(filters.contract_types || null);
                 setLocation(filters.location || '');
                 setRange([
                   filters.salary_from || 1000,
@@ -238,7 +238,7 @@ const CoJob = () => {
                   {renderPostJobButton()}
                   <Text style={styles.emptyText}>
                     {filters?.location ||
-                      filters?.job_types ||
+                      filters?.contract_types ||
                       filters?.salary_from !== 1000 ||
                       filters?.salary_to !== 50000
                       ? 'No filtered jobs found'
@@ -285,7 +285,7 @@ const CoJob = () => {
               <RangeSlider range={range} setRange={setRange} />
             </View>
             <Dropdown
-              data={jobTypes}
+              data={contractTypes}
               labelField="label"
               valueField="value"
               placeholder="Job Type"
