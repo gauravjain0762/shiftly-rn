@@ -205,3 +205,11 @@ export const callingCodeToCountryCode = {
   '996': 'KG', // Kyrgyzstan
   '998': 'UZ', // Uzbekistan
 };
+
+// Reverse mapping: countryCode to callingCode
+export const countryCodeToCallingCode: { [key: string]: string } = Object.entries(
+  callingCodeToCountryCode
+).reduce((acc, [code, country]) => {
+  acc[country] = code;
+  return acc;
+}, {} as { [key: string]: string });

@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     width: '90%',
     alignItems: 'center',
-    bottom: '15%',
+    bottom: '5%',
   },
   title: {
     marginTop: 20,

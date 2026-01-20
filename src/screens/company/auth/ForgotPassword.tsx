@@ -47,7 +47,6 @@ const ForgotPassword = () => {
   );
   const [OtpVerify] = useCompanyOTPVerifyMutation();
   const [companyChangePassword] = useCompanyChangePasswordMutation();
-  const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
@@ -100,7 +99,7 @@ const ForgotPassword = () => {
       return;
     }
     try {
-      const res = await companyForgotPassword({email: auth?.email?.toLocaleLowerCase()}).unwrap();
+      const res = await companyForgotPassword({email: auth?.email?.toLocaleLowerCase()}).unwrap() as any;
       console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ res:', res);
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
@@ -126,7 +125,7 @@ const ForgotPassword = () => {
     };
     console.log(data, 'verifyOTP data');
 
-    const response = await OtpVerify(data).unwrap();
+    const response = await OtpVerify(data).unwrap() as any;
     console.log(response, 'response----');
     if (response?.status) {
       successToast(response?.message);
@@ -148,9 +147,9 @@ const ForgotPassword = () => {
       password: newPassword,
       confirm_password: confirmPassword,
     };
-    console.log(data, 'handleChangePassword data');
+    console.log(data, 'handleChangePassword data >>>>>>>>>>>>>');
 
-    const response = await companyChangePassword(data).unwrap();
+    const response = await companyChangePassword(data).unwrap() as any;
     console.log(response, 'companyChangePassword response----');
     if (response?.status) {
       successToast(response?.message);
@@ -158,7 +157,7 @@ const ForgotPassword = () => {
       resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
       dispatch(setForgotPasswordSteps(1));
     } else {
-      errorToast("New password and confirm password doesn't match");
+      errorToast(response?.message || "Something went wrong");
     }
   };
 
@@ -178,7 +177,7 @@ const ForgotPassword = () => {
 
   const handleResendOTP = async () => {
     try {
-      const res = await companyResendOTP({company_id: userInfo?._id}).unwrap();
+      const res = await companyResendOTP({company_id: userInfo?._id}).unwrap() as any;
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         setTimer(30);

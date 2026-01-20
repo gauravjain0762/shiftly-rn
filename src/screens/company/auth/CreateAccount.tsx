@@ -316,29 +316,72 @@ const CreateAccount = () => {
   };
 
   const UploadPhoto = (e: any) => {
-    if (type === 'cover') {
-      const newImage = {
-        name: e?.filename || e?.name || 'cover.jpg',
-        uri: e?.sourceURL || e?.uri || e?.path,
-        type: e?.mime || 'image/jpeg',
-      };
-      dispatch(
-        setCompanyProfileData({
-          cover_images: [...(cover_images || []), newImage],
-        }),
-      );
-    } else {
-      const newLogo = {
-        name: e?.filename ?? e?.name,
-        uri: e?.sourceURL,
-        type: e?.mime,
-      };
+    try {
+      // Validate that we have image data
+      if (!e) {
+        console.error('UploadPhoto: No image data provided');
+        errorToast('Failed to load image. Please try again.');
+        return;
+      }
 
-      dispatch(
-        setCompanyProfileData({
-          logo: newLogo,
-        }),
-      );
+      if (type === 'cover') {
+        // Handle cover image upload
+        const imageUri = e?.sourceURL || e?.uri || e?.path;
+        
+        if (!imageUri) {
+          console.error('Cover image upload failed: No URI found', e);
+          errorToast('Failed to load image. Please try again.');
+          return;
+        }
+
+        // Ensure URI is properly formatted for Android
+        const finalUri = Platform.OS === 'android' && !imageUri.startsWith('file://') && !imageUri.startsWith('content://')
+          ? `file://${imageUri}`
+          : imageUri;
+
+        const newImage = {
+          name: e?.filename || e?.name || `cover_${new Date().getTime()}.jpg`,
+          uri: finalUri,
+          type: e?.mime || e?.type || 'image/jpeg',
+        };
+
+        dispatch(
+          setCompanyProfileData({
+            cover_images: [...(cover_images || []), newImage],
+          }),
+        );
+      } else {
+        // Handle logo upload with proper fallbacks for all image picker response formats
+        const logoUri = e?.sourceURL || e?.uri || e?.path;
+        const logoName = e?.filename || e?.name || `logo_${new Date().getTime()}.jpg`;
+        const logoType = e?.mime || e?.type || 'image/jpeg';
+
+        if (!logoUri) {
+          console.error('Logo upload failed: No URI found in image picker response', e);
+          errorToast('Failed to load image. Please try again.');
+          return;
+        }
+
+        // Ensure URI is properly formatted for Android
+        const finalLogoUri = Platform.OS === 'android' && !logoUri.startsWith('file://') && !logoUri.startsWith('content://')
+          ? `file://${logoUri}`
+          : logoUri;
+
+        const newLogo = {
+          name: logoName,
+          uri: finalLogoUri,
+          type: logoType,
+        };
+
+        dispatch(
+          setCompanyProfileData({
+            logo: newLogo,
+          }),
+        );
+      }
+    } catch (error: any) {
+      console.error('UploadPhoto error:', error);
+      errorToast('Failed to process image. Please try again.');
     }
   };
 
@@ -549,6 +592,19 @@ const CreateAccount = () => {
     // console.log(response, response?.status, 'response----handleCreateProfile');
     dispatch(setCompanyProfileAllData(response?.data?.company));
     if (response?.status) {
+      // Preserve logo from local state if API response doesn't have it yet, or use API response logo
+      const logoFromResponse = response?.data?.company?.logo;
+      const logoFromLocal = companyProfileData?.logo;
+      
+      // Update companyProfileData with API response, but preserve logo if local exists and API doesn't
+      dispatch(setCompanyProfileData({
+        ...response?.data?.company,
+        // Keep local logo URI if API response doesn't have logo yet, otherwise use API logo
+        logo: logoFromResponse || logoFromLocal,
+        // Also preserve cover_images from local if API doesn't have them yet
+        cover_images: response?.data?.company?.cover_images || companyProfileData?.cover_images,
+      }));
+      
       if (type === 'complete') {
         resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile, { fromOnboarding: true });
       } else {
@@ -725,35 +781,41 @@ const CreateAccount = () => {
                   resizeMode="contain"
                   style={styles.badge}
                 /> */}
-                <CustomTextInput
-                  label={t('Account Manager Name')}
-                  required
-                  placeholder={t('Ex: John Smith')}
-                  placeholderTextColor={colors._7B7878}
-                  onChangeText={(name: string) =>
-                    dispatch(
-                      setCompanyRegisterData({
-                        name,
-                      }),
-                    )
-                  }
-                  inputStyle={styles.input1}
-                  value={companyRegisterData?.name}
-                  containerStyle={styles.Inputcontainer}
-                  maxLength={50}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowTooltip(!showTooltip)}
-                  style={{ marginLeft: wp(28), position: 'absolute', top: '32%' }}>
-                  <Image source={IMAGES.info} style={styles.iBtn} />
-                </TouchableOpacity>
-                {showTooltip && (
-                  <View style={styles.iBtnTxt}>
-                    <Text style={styles.txtColor}>
-                      {'Your name is not displayed on published job posts.'}
+                <View style={{ flex: 1 }}>
+                  <View style={[styles.labelRow, {marginTop: hp(40)}]}>
+                    <Text style={styles.emailLabel}>
+                      {t('Account Manager Name')}
+                      <Text style={styles.required}>*</Text>
                     </Text>
+                    <TouchableOpacity
+                      onPress={() => setShowTooltip(!showTooltip)}
+                      style={{ marginLeft: wp(8) }}>
+                      <Image source={IMAGES.info} style={styles.iBtn} />
+                    </TouchableOpacity>
                   </View>
-                )}
+                  {showTooltip && (
+                    <View style={[styles.iBtnTxt, {bottom: hp(85), overflow: 'visible'}]}>
+                      <Text style={styles.txtColor}>
+                        {'Your name is not displayed on published job posts.'}
+                      </Text>
+                    </View>
+                  )}
+                  <CustomTextInput
+                    placeholder={t('Ex: John Smith')}
+                    placeholderTextColor={colors._7B7878}
+                    onChangeText={(name: string) =>
+                      dispatch(
+                        setCompanyRegisterData({
+                          name,
+                        }),
+                      )
+                    }
+                    inputStyle={[styles.input1, { textTransform: 'none', marginTop: 20, paddingLeft: 0, marginLeft: 0, overflow: 'hidden' }]}
+                    containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0, }]}
+                    value={companyRegisterData?.name}
+                    maxLength={50}
+                  />
+                </View>
               </View>
               <CharLength chars={50} value={companyRegisterData?.name} />
             </View>
@@ -817,7 +879,9 @@ const CreateAccount = () => {
                     onChangeText={handleEmailChange}
                     value={companyRegisterData?.email}
                     inputStyle={[styles.input1, { textTransform: 'lowercase', marginTop: 20, paddingLeft: 0, marginLeft: 0, overflow: 'hidden' }]}
-                    containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0, }]}
+                    containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0 }]}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
                   />
                 </View>
               </View>
@@ -989,11 +1053,15 @@ const CreateAccount = () => {
               type="Company"
               title={t('Next')}
               onPress={() => {
-                if (!companyRegisterData?.phone?.trim()) {
+                const rawPhone = companyRegisterData?.phone || '';
+                const numericPhone = rawPhone.replace(/\D/g, ''); // keep only digits
+
+                if (!numericPhone.trim()) {
                   errorToast('Please enter your phone number');
                   return;
                 }
-                if (companyRegisterData?.phone.length < 9) {
+                // Require at least 10 digits before proceeding
+                if (numericPhone.length < 10) {
                   errorToast('Please enter a valid phone number');
                   return;
                 }
@@ -1563,18 +1631,20 @@ const CreateAccount = () => {
                   </View>
                 )}
 
-                <TouchableOpacity
-                  onPress={() => (setType('logo'), setImageModal(!imageModal))}
-                  style={styles.logoConatiner}>
-                  <Image
-                    source={
-                      Object.keys(logo)?.length
-                        ? { uri: logo?.uri }
-                        : IMAGES.logoImg
-                    }
-                    style={styles.logoImg}
-                  />
-                </TouchableOpacity>
+                <View style={styles.logoShadowContainer}>
+                  <TouchableOpacity
+                    onPress={() => (setType('logo'), setImageModal(!imageModal))}
+                    style={styles.logoConatiner}>
+                    <Image
+                      source={
+                        Object.keys(logo)?.length && logo?.uri
+                          ? { uri: logo?.uri }
+                          : IMAGES.logoImg
+                      }
+                      style={styles.logoImg}
+                    />
+                  </TouchableOpacity>
+                </View>
 
                 {Object.keys(logo)?.length && (
                   <Pressable
@@ -1596,7 +1666,7 @@ const CreateAccount = () => {
               </View>
             </View>
 
-            <View>
+            <View style={styles.buttonContainer}>
               <GradientButton
                 style={styles.btn}
                 type="Company"
@@ -1625,7 +1695,10 @@ const CreateAccount = () => {
           automaticallyAdjustContentInsets
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollcontainer}
+          contentContainerStyle={[
+            styles.scrollcontainer,
+            companyRegistrationStep === 11 && { paddingBottom: hp(30) }
+          ]}
           style={styles.container}>
           <View style={styles.rowView}>
             <TouchableOpacity
@@ -1980,12 +2053,22 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     paddingVertical: hp(15),
   },
+  logoShadowContainer: {
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   logoConatiner: {
     width: hp(150),
     height: hp(150),
     overflow: 'hidden',
     borderWidth: hp(1),
-    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: hp(150 / 2),
@@ -2026,6 +2109,10 @@ const styles = StyleSheet.create({
   skipBtn: {
     alignSelf: 'center',
     marginTop: hp(22),
+    marginBottom: hp(20),
+  },
+  buttonContainer: {
+    paddingBottom: hp(20),
   },
   marker: {
     width: wp(37),

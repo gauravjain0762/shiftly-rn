@@ -93,7 +93,7 @@ const SimpleImage: FC<{
   const finalSource = !hasValidSource || hasError ? IMAGES.logoText : source;
   // Check if logoText is being used (either as fallback or explicitly passed)
   const isLogoText = source === IMAGES.logoText || finalSource === IMAGES.logoText || isFallback;
-  const resizeMode = !isLogoText ? 'contain' : 'cover';
+  const resizeMode = isLogoText ? 'contain' : 'cover';
 
   return (
     <CustomImage

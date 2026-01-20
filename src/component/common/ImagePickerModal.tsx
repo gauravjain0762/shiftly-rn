@@ -29,9 +29,12 @@ const ImagePickerModal = ({
 
   const openCamera = async () => {
     try {
-      ImageCropPicker.openCamera({
+      closeActionSheet(); // Close modal first to prevent UI issues
+      
+      const image = await ImageCropPicker.openCamera({
         mediaType: 'photo',
         cropping: true,
+        compressImageQuality: 0.7, // Compress camera images to prevent memory issues
         cropperToolbarTitle: 'Edit Photo',
         cropperStatusBarColor: '#000000',
         cropperToolbarColor: '#000000',
@@ -39,23 +42,71 @@ const ImagePickerModal = ({
         cropperToolbarWidgetColor: '#FFFFFF',
         cropperCancelText: 'Cancel',
         cropperChooseText: 'Done',
+        ...(Platform.OS === 'android' && {
+          // Android-specific options
+          includeBase64: false,
+          freeStyleCropEnabled: false,
+        }),
         ...(Platform.OS === 'ios' && {
           cropperStatusBarTranslucent: false,
         }),
-      }).then(image => {
-        if (Platform.OS === 'android') {
-          image.sourceURL = image.path;
-        } else {
-          if (image.sourceURL == null) {
-            image.sourceURL = image.path;
-          }
-        }
-        let temp = { ...image, name: 'image_' + new Date().getTime() + '.png' };
-        closeActionSheet();
-        onUpdate(temp);
       });
-    } catch (err) {
-      console.log('Camera cancelled or error', err);
+
+      // Validate image object
+      if (!image || (!image.path && !image.sourceURL)) {
+        console.error('Invalid image object from camera:', image);
+        return;
+      }
+
+      // Handle Android path/URI issues
+      let imageUri = image.path;
+      if (Platform.OS === 'android') {
+        // For Android, ensure we have a valid URI
+        if (image.path) {
+          // Ensure path starts with file:// if it doesn't already
+          imageUri = image.path.startsWith('file://') ? image.path : `file://${image.path}`;
+          image.sourceURL = imageUri;
+        } else if (image.sourceURL) {
+          imageUri = image.sourceURL;
+        } else {
+          console.error('No valid path or sourceURL found for Android image');
+          return;
+        }
+      } else {
+        // iOS handling
+        if (image.sourceURL == null && image.path) {
+          image.sourceURL = image.path;
+          imageUri = image.path;
+        } else if (image.sourceURL) {
+          imageUri = image.sourceURL;
+        }
+      }
+
+      // Create image object with all required properties
+      const temp = {
+        ...image,
+        uri: imageUri,
+        path: imageUri,
+        sourceURL: imageUri,
+        name: image.filename || `image_${new Date().getTime()}.${image.mime?.split('/')[1] || 'jpg'}`,
+        filename: image.filename || `image_${new Date().getTime()}.${image.mime?.split('/')[1] || 'jpg'}`,
+        type: image.mime || 'image/jpeg',
+        mime: image.mime || 'image/jpeg',
+      };
+
+      onUpdate(temp);
+    } catch (err: any) {
+      // Handle different error types
+      if (err?.code === 'E_PICKER_CANCELLED' || err?.message?.includes('cancel')) {
+        console.log('Camera cancelled by user');
+        // Don't show error for user cancellation
+      } else {
+        console.error('Camera error:', err);
+        // You might want to show an error toast here
+        // errorToast('Failed to capture image. Please try again.');
+      }
+      // Ensure modal is closed even on error
+      closeActionSheet();
     }
   };
 
