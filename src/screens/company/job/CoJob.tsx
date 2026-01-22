@@ -82,6 +82,7 @@ const CoJob = () => {
 
   const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(queryParams);
   const jobList = data?.data?.jobs || [];
+  console.log("🔥 ~ CoJob ~ jobList:", jobList)
   const pagination = data?.data?.pagination;
 
   useFocusEffect(
@@ -290,6 +291,7 @@ const CoJob = () => {
               style={styles.dropdown}
               placeholderStyle={styles.placeholderStyle}
               selectedTextStyle={styles.selectedTextStyle}
+              dropdownPosition="top"
               renderRightIcon={() => (
                 <Image source={IMAGES.dropdown} style={styles.dropdownIcon} />
               )}

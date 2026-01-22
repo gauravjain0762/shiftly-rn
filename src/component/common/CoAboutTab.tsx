@@ -98,7 +98,7 @@ export default CoAboutTab;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.coPrimary,
+    backgroundColor: colors.white,
   },
   infoRow: {
     flexDirection: 'row',

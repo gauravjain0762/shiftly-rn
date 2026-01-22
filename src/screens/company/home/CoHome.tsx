@@ -198,6 +198,8 @@ const CoHome = () => {
                 />
                 <View style={styles.metricTextContainer}>
                   <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                     style={
                       isSelected
                         ? styles.metricLabelBoldWhite
@@ -206,6 +208,8 @@ const CoHome = () => {
                     {option.label}
                   </Text>
                   <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                     style={
                       isSelected
                         ? styles.metricLabelBoldWhite
@@ -275,6 +279,7 @@ const styles = StyleSheet.create({
     borderColor: '#CDA953',
     justifyContent: 'flex-start',
     gap: wp(12),
+    minHeight: hp(80),
   },
   metricCardHighlighted: {
     backgroundColor: colors._0B3970,
@@ -288,6 +293,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     justifyContent: 'center',
+    flexShrink: 1,
   },
   metricLabelBold: {
     ...commonFontStyle(700, 14, colors.black),
@@ -297,7 +303,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 16, colors.black),
   },
   metricLabelBoldWhite: {
-    ...commonFontStyle(500, 16, colors.white),
+    ...commonFontStyle(700, 14, colors.white),
     marginBottom: hp(2),
   },
   metricLabelWhite: {

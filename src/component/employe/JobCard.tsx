@@ -209,6 +209,8 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 13, colors.black),
   },
   jobTitle: {
+    width: '60%',
+    flexShrink: 1,
     ...commonFontStyle(600, 18, colors.black),
   },
   salaryContainer: {

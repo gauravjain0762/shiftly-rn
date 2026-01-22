@@ -7,6 +7,7 @@ import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { SCREENS } from '../../navigation/screenNames';
 import { IMAGES } from '../../assets/Images';
+import { useGetEmployeeJobDetailsQuery } from '../../api/dashboardApi';
 
 type props = {
   item?: any;
@@ -14,11 +15,51 @@ type props = {
 
 const ActivitiesCard: FC<props> = ({ item }) => {
   console.log(">>>>>>>>>>>>>>... ~ ActivitiesCard ~ item:", item)
+  const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
+    item?.job_id,
+    {
+      skip: !item?.job_id, // Skip query if job_id is not available
+    }
+  );
+  
   const getStatusText = () => {
     if (item?.type) {
       return item.type.charAt(0).toUpperCase() + item.type.slice(1);
     }
     return '';
+  };
+
+  const handleViewPress = () => {
+    // Check if interview_link is available in item or jobDetail
+    const interviewLink = item?.interview_link || jobDetail?.data?.interview_link;
+    
+    if (jobDetail?.data) {
+      navigateTo(SCREENS.JobInvitationScreen, {
+        link: interviewLink || '',
+        jobDetail: jobDetail.data,
+      });
+    } else if (item?.job_id) {
+      // If job details are still loading, wait a bit or navigate with available data
+      // For now, navigate to interview screen - it will handle missing data
+      navigateTo(SCREENS.JobInvitationScreen, {
+        link: interviewLink || '',
+        jobDetail: {
+          job: {
+            title: item?.job_title,
+            contract_type: item?.contract_type,
+            area: item?.area,
+            country: item?.country,
+            monthly_salary_from: item?.monthly_salary_from,
+            monthly_salary_to: item?.monthly_salary_to,
+            currency: item?.currency,
+          },
+          company_id: {
+            company_name: item?.company_name,
+            logo: item?.company_logo,
+          },
+        },
+      });
+    }
   };
 
   return (
@@ -79,12 +120,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
           )}
 
           <Pressable
-            onPress={() => {
-              navigateTo(SCREENS.JobDetail, { 
-                jobId: item?.job_id, 
-                is_applied: item?.status === "Applied" ? true : false 
-              });
-            }}
+            onPress={handleViewPress}
             style={styles.button}>
             <Image
               source={IMAGES.eye_on}

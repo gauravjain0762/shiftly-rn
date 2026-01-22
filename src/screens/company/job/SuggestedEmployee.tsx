@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: wp(25),
-    paddingBottom: hp(120),
+    paddingBottom: '40%',
     gap: hp(20),
   },
   jobCard: {
@@ -527,7 +527,6 @@ const styles = StyleSheet.create({
     borderColor: '#E0D7C8',
     borderRadius: wp(18),
     padding: wp(12),
-    marginTop: hp(15),
     backgroundColor: colors.white,
     shadowColor: '#000',
     shadowOpacity: 0.04,

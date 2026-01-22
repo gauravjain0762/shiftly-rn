@@ -361,13 +361,16 @@ const PostJob = () => {
   const hasCleanedRequirementsRef = useRef<boolean>(false);
 
   useEffect(() => {
+    // Set first department as default when departments are loaded and no job_sector is selected
     if (
-      !hasInitializedJobSectorRef.current &&
       dropdownDepartmentsOptions?.length > 0 &&
-      !job_sector
+      (!job_sector || !job_sector?.value)
     ) {
+      // Always set default when departments are available and job_sector is not set
       updateJobForm({ job_sector: dropdownDepartmentsOptions[0] });
-      hasInitializedJobSectorRef.current = true;
+      if (!hasInitializedJobSectorRef.current) {
+        hasInitializedJobSectorRef.current = true;
+      }
     }
   }, [dropdownDepartmentsOptions, job_sector, updateJobForm]);
 
@@ -1190,7 +1193,9 @@ const PostJob = () => {
             ]}>
             <View>
               <View style={styles.field}>
-                <Text style={styles.label}>{t('Job Title')}</Text>
+                <Text style={styles.label}>
+                  {t('Job Title')}<Text style={styles.required}>*</Text>
+                </Text>
                 <CustomTextInput
                   value={title}
                   onChangeText={e => updateJobForm({ title: e })}

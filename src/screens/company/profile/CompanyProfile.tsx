@@ -222,7 +222,7 @@ const CompanyProfile = () => {
     // Check multiple sources for logo
     const logoFromProfileData = companyProfileData?.logo;
     const logoFromAllData = companyProfileAllData?.logo;
-    
+
     // Handle both string (URL) and object (local URI) formats
     if (logoFromProfileData) {
       if (typeof logoFromProfileData === 'string' && logoFromProfileData.trim() !== '') {
@@ -232,7 +232,7 @@ const CompanyProfile = () => {
         return true;
       }
     }
-    
+
     if (logoFromAllData) {
       if (typeof logoFromAllData === 'string' && logoFromAllData.trim() !== '') {
         return true;
@@ -241,15 +241,15 @@ const CompanyProfile = () => {
         return true;
       }
     }
-    
+
     return false;
   }, [companyProfileData?.logo, companyProfileAllData?.logo]);
-  
+
   // Get logo URI from multiple sources, prioritizing local URI over server URL
   const logoUri = useMemo(() => {
     const logoFromProfileData = companyProfileData?.logo;
     const logoFromAllData = companyProfileAllData?.logo;
-    
+
     // Prioritize local URI (object format) over server URL (string format)
     if (logoFromProfileData) {
       if (typeof logoFromProfileData === 'object' && logoFromProfileData?.uri) {
@@ -259,7 +259,7 @@ const CompanyProfile = () => {
         return logoFromProfileData;
       }
     }
-    
+
     if (logoFromAllData) {
       if (typeof logoFromAllData === 'object' && logoFromAllData?.uri) {
         return logoFromAllData.uri;
@@ -268,7 +268,7 @@ const CompanyProfile = () => {
         return logoFromAllData;
       }
     }
-    
+
     return null;
   }, [companyProfileData?.logo, companyProfileAllData?.logo]);
 
@@ -285,7 +285,7 @@ const CompanyProfile = () => {
       // FastImage loads very fast from cache, so we use a very short timeout
       setIsLogoLoading(true);
       setLogoLoadError(false);
-      
+
       logoLoadTimeoutRef.current = setTimeout(() => {
         setIsLogoLoading(prev => {
           // Only update if still loading to avoid race conditions
@@ -318,7 +318,7 @@ const CompanyProfile = () => {
         <Image source={IMAGES.backArrow} style={styles.backArrow} />
       </TouchableOpacity>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: hp(40), backgroundColor: colors.coPrimary }}
+        contentContainerStyle={{ paddingBottom: hp(40), backgroundColor: colors.white }}
         showsVerticalScrollIndicator={false}>
         <ParallaxContainer
           imagePath={coverImages}
@@ -327,8 +327,8 @@ const CompanyProfile = () => {
           loaderColor={colors._0B3970}>
           <LinearContainer
             SafeAreaProps={{ edges: ['bottom'] }}
-            containerStyle={[styles.linearContainer, { flex: 1, padding: 0, backgroundColor: colors.coPrimary, marginTop: hp(10) }]}
-            colors={[colors.coPrimary, colors.coPrimary]}>
+            containerStyle={[styles.linearContainer, { flex: 1, padding: 0, backgroundColor: colors.white, marginTop: hp(10) }]}
+            colors={[colors.white, colors.white]}>
             <View style={styles.profileHeader}>
               <View style={styles.logoContainer}>
                 {hasValidLogo && logoUri && !logoLoadError ? (
@@ -399,7 +399,7 @@ const CompanyProfile = () => {
               </View>
             </View>
 
-            <View style={{ backgroundColor: colors.coPrimary }}>
+            <View style={{}}>
               {companyProfileData?.about && (
                 <ExpandableText
                   maxLines={3}
@@ -432,37 +432,37 @@ const CompanyProfile = () => {
 
             <View style={styles.divider} />
 
-            {selectedTanIndex === 0 && (
-              <CoAboutTab
-                companyProfileData={companyProfileData}
-                companyProfileAllData={companyProfileAllData}
-              />
-            )}
+              {selectedTanIndex === 0 && (
+                <CoAboutTab
+                  companyProfileData={companyProfileData}
+                  companyProfileAllData={companyProfileAllData}
+                />
+              )}
 
-            {selectedTanIndex === 1 && (
-              <FlatList
-                numColumns={2}
-                data={allPosts}
-                style={{ marginTop: hp(10), backgroundColor: colors.coPrimary }}
-                contentContainerStyle={{ backgroundColor: colors.coPrimary }}
-                renderItem={renderPostItem}
-                keyExtractor={item => `post-${item.id}`}
-                columnWrapperStyle={{ justifyContent: 'space-between' }}
-                ListEmptyComponent={() => (
-                  <View style={styles.emptyContainer}>
-                    <Text
-                      style={[
-                        commonFontStyle(500, 16, colors._0B3970),
-                        { textAlign: 'center', marginTop: hp(20) },
-                      ]}>
-                      No Posts Found
-                    </Text>
-                  </View>
-                )}
-              />
-            )}
+              {selectedTanIndex === 1 && (
+                <FlatList
+                  numColumns={2}
+                  data={allPosts}
+                  style={{ marginTop: hp(10), backgroundColor: colors.coPrimary }}
+                  contentContainerStyle={{ backgroundColor: colors.coPrimary }}
+                  renderItem={renderPostItem}
+                  keyExtractor={item => `post-${item.id}`}
+                  columnWrapperStyle={{ justifyContent: 'space-between' }}
+                  ListEmptyComponent={() => (
+                    <View style={styles.emptyContainer}>
+                      <Text
+                        style={[
+                          commonFontStyle(500, 16, colors._0B3970),
+                          { textAlign: 'center', marginTop: hp(20) },
+                        ]}>
+                        No Posts Found
+                      </Text>
+                    </View>
+                  )}
+                />
+              )}
 
-            {renderJobs}
+              {renderJobs}
 
             {fromOnboarding && (
               <View style={styles.ctaContainer}>
@@ -476,11 +476,6 @@ const CompanyProfile = () => {
                 />
               </View>
             )}
-
-            <ShareModal
-              visible={isShareModalVisible}
-              onClose={() => setIsShareModalVisible(false)}
-            />
 
           </LinearContainer>
         </ParallaxContainer>
@@ -498,7 +493,7 @@ const styles = StyleSheet.create({
   },
   linearContainer: {
     paddingHorizontal: wp(21),
-    backgroundColor: colors.coPrimary,
+    backgroundColor: colors.white,
     paddingTop: 0,
     marginTop: 0,
   },
@@ -514,11 +509,14 @@ const styles = StyleSheet.create({
     tintColor: colors.empPrimary,
   },
   profileHeader: {
-    flexDirection: 'row',
     gap: 12,
     marginTop: hp(-30),
+    flexDirection: 'row',
     alignItems: 'center',
-  },
+    backgroundColor: colors.white,
+    width: '100%',
+    alignSelf: 'center',
+  },  
   logoContainer: {
     width: wp(90),
     height: wp(90),
@@ -621,7 +619,7 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: colors.coPrimary,
+    backgroundColor: colors.white,
     paddingVertical: hp(20),
   },
   ctaContainer: {

@@ -1,10 +1,9 @@
+import React from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   View,
 } from 'react-native';
-import React from 'react';
 import { ActivitiesCard, BackHeader, LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';

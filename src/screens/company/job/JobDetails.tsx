@@ -75,7 +75,7 @@ const CoJobDetails = () => {
   const coverImages = (() => {
     const coverImgs = jobDetail?.company_id?.cover_images;
     const logo = jobDetail?.company_id?.logo;
-    
+
     // Check if cover_images exists and has valid entries
     if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
       // Filter out null/undefined/empty values
@@ -84,12 +84,12 @@ const CoJobDetails = () => {
         return validCoverImages;
       }
     }
-    
+
     // Fallback to logo if available
     if (logo && typeof logo === 'string' && logo.trim() !== '') {
       return [logo];
     }
-    
+
     // Final fallback to logoText
     return [IMAGES.logoText];
   })();
@@ -116,7 +116,7 @@ const CoJobDetails = () => {
           : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-      
+
       const message = `${title}
 ${area}
 
@@ -133,11 +133,11 @@ ${salary}${shareUrlText}`;
       // Use cover image if available, otherwise use company logo
       // Only use string URLs for sharing (not require resources)
       const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
-        ? coverImages[0] 
+        ? coverImages[0]
         : (jobDetail?.company_id?.logo && typeof jobDetail.company_id.logo === 'string'
-          ? jobDetail.company_id.logo 
+          ? jobDetail.company_id.logo
           : null);
-      
+
       if (coverImageUri && typeof coverImageUri === 'string') {
         try {
           const imagePath = await downloadImage(coverImageUri);
@@ -247,17 +247,17 @@ ${salary}${shareUrlText}`;
         </View>
       ) : (
         <>
+          <BackHeader
+            type="company"
+            isRight={false}
+            title="Jobs Detail"
+            titleStyle={styles.title}
+            containerStyle={styles.header}
+          />
           <ScrollView
             style={{ flex: 1 }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: hp(120) }}>
-            <BackHeader
-              type="company"
-              isRight={false}
-              title="Jobs Detail"
-              titleStyle={styles.title}
-              containerStyle={styles.header}
-            />
 
             <View style={styles.bodyContainer}>
               {/* Job Posting Card */}
@@ -439,7 +439,7 @@ ${salary}${shareUrlText}`;
                           // Handle both structures: item.user_id or direct user object
                           const user = item?.user_id || item;
                           if (!user || !user._id) return null;
-                          
+
                           return (
                             <View key={`invited-${item._id || index}`} style={[styles.candidateCard, styles.invitedCard]}>
                               <CustomImage
@@ -828,7 +828,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: wp(20),
     padding: hp(15),
-    marginTop: hp(15),
     marginBottom: hp(20),
   },
   jobPostHeader: {
