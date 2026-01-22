@@ -410,6 +410,11 @@ const StackNavigator: FC = () => {
       <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />
       <Stack.Screen name={SCREENS.CoChat} component={CoChat} />
       <Stack.Screen
+        options={({navigation}) => ({headerShown: false})}
+        name={SCREENS.CreateQuestion}
+        component={CreateQuestion}
+      />
+      <Stack.Screen
         name={SCREENS.SelectRollScreen}
         component={SelectRollScreen}
       />

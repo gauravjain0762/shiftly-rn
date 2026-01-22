@@ -97,11 +97,10 @@ const CreateQuestion = () => {
 
     console.log("🔥 ~ handleSubmit ~ jobId:", jobId);
 
-    const params = {
-      job_id: jobId,
-      invite_to: invitePayload.invite_to || 'specific',
-      questions: addedQuestions,
-    } as any;
+    // Format as FormData to match API requirements
+    const formData = new FormData();
+    formData.append('job_id', jobId);
+    formData.append('invite_to', invitePayload.invite_to || 'specific');
 
     // Add user_ids based on invite_to type
     if (invitePayload.invite_to === 'specific' && Array.isArray(invitePayload.user_ids)) {
@@ -110,16 +109,23 @@ const CreateQuestion = () => {
         errorToast(t('Please select at least one employee'));
         return;
       }
-      params.user_ids = filteredIds.join(',');
+      formData.append('user_ids', filteredIds.join(','));
     } else if (invitePayload.user_ids) {
-      params.user_ids = Array.isArray(invitePayload.user_ids)
+      const userIds = Array.isArray(invitePayload.user_ids)
         ? invitePayload.user_ids.join(',')
         : invitePayload.user_ids;
+      formData.append('user_ids', userIds);
     }
-    console.log("🔥 ~ handleSubmit ~ params:", params);
+
+    // Add questions as indexed array items (questions[0], questions[1], etc.)
+    addedQuestions.forEach((question, index) => {
+      formData.append(`questions[${index}]`, question);
+    });
+
+    console.log("🔥 ~ handleSubmit ~ formData:", formData);
 
     try {
-      const response = await sendInvites(params).unwrap();
+      const response = await sendInvites(formData).unwrap();
       console.log("🔥 ~ handleSubmit ~ response:", response);
 
       if (response?.status) {

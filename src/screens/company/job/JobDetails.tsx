@@ -28,7 +28,6 @@ import {
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import {
   errorToast,
-  getPostedTime,
   navigateTo,
   successToast,
 } from '../../../utils/commonFunction';
@@ -239,6 +238,26 @@ ${salary}${shareUrlText}`;
     }
   };
 
+  const handleInviteCandidate = (user: any) => {
+    const userId = user?.user_id?._id || user?._id;
+    if (!userId) {
+      errorToast('User ID not found');
+      return;
+    }
+    if (!job_id) {
+      errorToast('Job ID not found');
+      return;
+    }
+    
+    navigateTo(SCREENS.CreateQuestion, {
+      jobId: job_id,
+      invitePayload: {
+        invite_to: 'specific',
+        user_ids: [userId],
+      },
+    });
+  };
+
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       {isLoading ? (
@@ -388,6 +407,14 @@ ${salary}${shareUrlText}`;
                   jobDetail?.applicants?.length > 0 ? (
                     jobDetail.applicants.map((item: any, index: number) => {
                       if (item === null) return null;
+                      
+                      // Check if this applicant is also in invited_users
+                      const isInvited = jobDetail?.invited_users?.some(
+                        (invited: any) => 
+                          invited?.user_id?._id === item?.user_id?._id ||
+                          invited?.user_id === item?.user_id?._id
+                      );
+                      
                       return (
                         <View key={index} style={styles.candidateCard}>
                           <CustomImage
@@ -408,14 +435,17 @@ ${salary}${shareUrlText}`;
                               {item?.user_id?.years_of_experience || item?.user_id?.experience || '0'}y Experience
                             </Text>
                           </View>
-                          <TouchableOpacity
-                            style={styles.inviteButton}
-                            onPress={() => {
-                              // TODO: Handle invite action
-                              console.log('Invite pressed for:', item?.user_id?.name);
-                            }}>
-                            <Text style={styles.inviteButtonText}>Invite</Text>
-                          </TouchableOpacity>
+                          {isInvited ? (
+                            <View style={styles.invitedBadge}>
+                              <Text style={styles.invitedBadgeText}>Invited</Text>
+                            </View>
+                          ) : (
+                            <TouchableOpacity
+                              style={styles.inviteButton}
+                              onPress={() => handleInviteCandidate(item)}>
+                              <Text style={styles.inviteButtonText}>Invite</Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
                       );
                     })
@@ -501,10 +531,7 @@ ${salary}${shareUrlText}`;
                               </View>
                               <TouchableOpacity
                                 style={styles.inviteButton}
-                                onPress={() => {
-                                  // TODO: Handle invite action
-                                  console.log('Invite pressed for:', item?.user_id?.name || item?.name);
-                                }}>
+                                onPress={() => handleInviteCandidate(item)}>
                                 <Text style={styles.inviteButtonText}>Invite</Text>
                               </TouchableOpacity>
                             </View>
@@ -549,9 +576,7 @@ ${salary}${shareUrlText}`;
                           </View>
                           <TouchableOpacity
                             style={styles.inviteButton}
-                            onPress={() => {
-                              console.log('Invite pressed for:', item?.user_id?.name);
-                            }}>
+                            onPress={() => handleInviteCandidate(item)}>
                             <Text style={styles.inviteButtonText}>Invite</Text>
                           </TouchableOpacity>
                         </View>
@@ -976,6 +1001,16 @@ const styles = StyleSheet.create({
     marginBottom: hp(10),
     borderWidth: 1,
     borderColor: colors._C9B68B,
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    // Shadow for Android
+    elevation: 3,
   },
   candidateAvatar: {
     width: wp(60),

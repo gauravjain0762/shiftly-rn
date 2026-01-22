@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -68,11 +68,22 @@ const JobsScreen = () => {
 
   const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
-  console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
+  // console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
-  // console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages)
+  console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages);
+  console.log("🔥 ~ JobsScreen ~ carouselImages length:", carouselImages?.length);
   const pagination = data?.data?.pagination;
+
+  // Log carousel setup when data changes
+  useEffect(() => {
+    if (carouselImages && carouselImages.length > 0) {
+      console.log('🔥 Carousel Setup - Total banners:', carouselImages.length);
+      console.log('🔥 Carousel Setup - Banner titles:', carouselImages.map((b: any) => b?.title || b?._id));
+      console.log('🔥 Carousel Setup - Loop enabled:', carouselImages.length > 1);
+      console.log('🔥 Carousel Setup - loopClonesPerSide:', carouselImages.length > 1 ? Math.max(carouselImages.length, 10) : 0);
+    }
+  }, [carouselImages]);
 
   const [filters, setFilters] = useState<{
     job_sectors: string[];
@@ -527,15 +538,24 @@ const JobsScreen = () => {
     }
   };
 
-  const BannerItem = ({ item, index }: any) => (
-    <View style={styles.carouselItemContainer}>
-      <Image
-        resizeMode="cover"
-        style={styles.carouselImage}
-        source={{ uri: item?.image }}
-      />
-    </View>
-  );
+  const BannerItem = ({ item, index }: any) => {
+    // In loop mode, react-native-snap-carousel passes the correct item
+    // but the index can be the raw index including clones
+    // We trust the item prop which is already correctly mapped by the library
+    if (!item) {
+      return null;
+    }
+    
+    return (
+      <View style={styles.carouselItemContainer}>
+        <Image
+          resizeMode="cover"
+          style={styles.carouselImage}
+          source={{ uri: item?.image }}
+        />
+      </View>
+    );
+  };
 
   const renderHeader = () => (
     <>
@@ -579,32 +599,38 @@ const JobsScreen = () => {
           ) : (
             <Carousel
               ref={carouselRef}
-              data={carouselImages}
+              data={carouselImages || []}
               renderItem={BannerItem}
               sliderWidth={SCREEN_WIDTH - 32}
               itemWidth={SCREEN_WIDTH - 32}
               loop={carouselImages && carouselImages.length > 1}
               autoplay={carouselImages && carouselImages.length > 1}
               autoplayInterval={3000}
-              onSnapToItem={index => {
+              onSnapToItem={useCallback((index: number) => {
                 if (carouselImages && carouselImages.length > 0) {
                   // In loop mode, react-native-snap-carousel uses cloned items
                   // The index can be negative or beyond array length, so we normalize it
                   let actualIndex = index;
+                  
+                  // Normalize index to be within valid range [0, carouselImages.length - 1]
                   if (index < 0) {
                     actualIndex = ((index % carouselImages.length) + carouselImages.length) % carouselImages.length;
-                  } else {
+                  } else if (index >= carouselImages.length) {
                     actualIndex = index % carouselImages.length;
+                  } else {
+                    actualIndex = index;
                   }
+                  
+                  console.log('🔥 Carousel onSnapToItem - Raw index:', index, 'Normalized index:', actualIndex, 'Total items:', carouselImages.length);
                   setActiveIndex(actualIndex);
                 }
-              }}
+              }, [carouselImages])}
               enableMomentum={false}
               lockScrollWhileSnapping={true}
               inactiveSlideScale={1}
               inactiveSlideOpacity={1}
               enableSnap={true}
-              loopClonesPerSide={carouselImages && carouselImages.length > 1 ? Math.max(carouselImages.length, 5) : 0}
+              loopClonesPerSide={carouselImages && carouselImages.length > 1 ? carouselImages.length : 0}
               removeClippedSubviews={false}
               firstItem={0}
               shouldOptimizeUpdates={false}
