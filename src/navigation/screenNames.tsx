@@ -59,6 +59,7 @@ export const SCREENS = {
   EmpProfile: 'EmpProfile',
   EmpForgotPassword: 'EmpForgotPassword',
   EmpLocation: 'EmpLocation',
+  EmployeeProfile: 'EmployeeProfile',
 };
 
 export interface ScreenNames {
@@ -113,6 +114,7 @@ export interface ScreenNames {
   CoProfileLocationScreen: string;
   CoEditMyProfile: string;
   CreateQuestion: string;
+  EmployeeProfile: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

@@ -32,6 +32,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
   const handleViewPress = () => {
     // Check if interview_link is available in item or jobDetail
     const interviewLink = item?.interview_link || jobDetail?.data?.interview_link;
+    console.log("🔥 ~ handleViewPress ~ interviewLink:", interviewLink)
     
     if (jobDetail?.data) {
       navigateTo(SCREENS.JobInvitationScreen, {

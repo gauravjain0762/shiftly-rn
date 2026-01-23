@@ -17,7 +17,7 @@ const MyJobsSkeleton = () => {
           justifyContent="space-between"
           alignItems="center"
           paddingVertical={hp(24)}
-          marginTop={hp(50)}
+          marginTop={hp(15)}
           paddingHorizontal={wp(25)}
         >
           <SkeletonPlaceholder.Item

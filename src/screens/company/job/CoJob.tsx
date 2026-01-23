@@ -228,7 +228,7 @@ const CoJob = () => {
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => {
               if (isLoading && !data) {
-                return null; // Don't show empty state during initial load
+                return null;
               }
               return (
                 <View style={styles.emptyContainer}>

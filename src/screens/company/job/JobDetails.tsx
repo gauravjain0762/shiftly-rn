@@ -416,7 +416,10 @@ ${salary}${shareUrlText}`;
                       );
                       
                       return (
-                        <View key={index} style={styles.candidateCard}>
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.candidateCard}
+                          onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: item?.user_id || item })}>
                           <CustomImage
                             uri={item?.user_id?.picture}
                             source={IMAGES.avatar}
@@ -442,11 +445,14 @@ ${salary}${shareUrlText}`;
                           ) : (
                             <TouchableOpacity
                               style={styles.inviteButton}
-                              onPress={() => handleInviteCandidate(item)}>
+                              onPress={(e) => {
+                                e.stopPropagation();
+                                handleInviteCandidate(item);
+                              }}>
                               <Text style={styles.inviteButtonText}>Invite</Text>
                             </TouchableOpacity>
                           )}
-                        </View>
+                        </TouchableOpacity>
                       );
                     })
                   ) : (
@@ -471,7 +477,10 @@ ${salary}${shareUrlText}`;
                           if (!user || !user._id) return null;
 
                           return (
-                            <View key={`invited-${item._id || index}`} style={[styles.candidateCard, styles.invitedCard]}>
+                            <TouchableOpacity
+                              key={`invited-${item._id || index}`}
+                              style={[styles.candidateCard, styles.invitedCard]}
+                              onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: user })}>
                               <CustomImage
                                 resizeMode="cover"
                                 source={IMAGES.avatar}
@@ -493,7 +502,7 @@ ${salary}${shareUrlText}`;
                               <View style={styles.invitedBadge}>
                                 <Text style={styles.invitedBadgeText}>Invited</Text>
                               </View>
-                            </View>
+                            </TouchableOpacity>
                           );
                         })}
                       </>
@@ -509,32 +518,39 @@ ${salary}${shareUrlText}`;
                         )}
                         {jobDetail.suggested_matches.map((item: any, index: number) => {
                           if (item === null) return null;
+                          const user = item?.user_id || item;
                           return (
-                            <View key={`suggested-${index}`} style={styles.candidateCard}>
+                            <TouchableOpacity
+                              key={`suggested-${index}`}
+                              style={styles.candidateCard}
+                              onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: user })}>
                               <CustomImage
                                 resizeMode="cover"
                                 source={IMAGES.avatar}
                                 containerStyle={styles.candidateAvatar}
-                                uri={item?.user_id?.picture || item?.picture}
+                                uri={user?.picture || item?.picture}
                                 imageStyle={{ width: '100%', height: '100%' }}
                               />
                               <View style={styles.candidateInfo}>
                                 <Text style={styles.candidateName}>
-                                  {item?.user_id?.name || item?.name || 'N/A'}
+                                  {user?.name || item?.name || 'N/A'}
                                 </Text>
                                 <Text style={styles.candidateRole}>
-                                  {item?.user_id?.responsibility || item?.responsibility || 'N/A'}
+                                  {user?.responsibility || item?.responsibility || 'N/A'}
                                 </Text>
                                 <Text style={styles.candidateExperience}>
-                                  {item?.user_id?.years_of_experience || item?.years_of_experience || item?.experience || '0'}y Experience
+                                  {user?.years_of_experience || item?.years_of_experience || item?.experience || '0'}y Experience
                                 </Text>
                               </View>
                               <TouchableOpacity
                                 style={styles.inviteButton}
-                                onPress={() => handleInviteCandidate(item)}>
+                                onPress={(e) => {
+                                  e.stopPropagation();
+                                  handleInviteCandidate(item);
+                                }}>
                                 <Text style={styles.inviteButtonText}>Invite</Text>
                               </TouchableOpacity>
-                            </View>
+                            </TouchableOpacity>
                           );
                         })}
                       </>
@@ -551,11 +567,14 @@ ${salary}${shareUrlText}`;
                 )}
 
                 {selectedMetricIndex === 3 && (
-                  jobDetail?.shortlisted?.length > 0 ? (
+                    jobDetail?.shortlisted?.length > 0 ? (
                     jobDetail.shortlisted.map((item: any, index: number) => {
                       if (item === null) return null;
                       return (
-                        <View key={index} style={styles.candidateCard}>
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.candidateCard}
+                          onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: item?.user_id || item })}>
                           <CustomImage
                             uri={item?.user_id?.picture}
                             source={IMAGES.avatar}
@@ -576,10 +595,13 @@ ${salary}${shareUrlText}`;
                           </View>
                           <TouchableOpacity
                             style={styles.inviteButton}
-                            onPress={() => handleInviteCandidate(item)}>
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              handleInviteCandidate(item);
+                            }}>
                             <Text style={styles.inviteButtonText}>Invite</Text>
                           </TouchableOpacity>
-                        </View>
+                        </TouchableOpacity>
                       );
                     })
                   ) : (

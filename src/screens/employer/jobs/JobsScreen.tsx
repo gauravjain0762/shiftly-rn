@@ -71,19 +71,8 @@ const JobsScreen = () => {
   // console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
-  console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages);
-  console.log("🔥 ~ JobsScreen ~ carouselImages length:", carouselImages?.length);
   const pagination = data?.data?.pagination;
 
-  // Log carousel setup when data changes
-  useEffect(() => {
-    if (carouselImages && carouselImages.length > 0) {
-      console.log('🔥 Carousel Setup - Total banners:', carouselImages.length);
-      console.log('🔥 Carousel Setup - Banner titles:', carouselImages.map((b: any) => b?.title || b?._id));
-      console.log('🔥 Carousel Setup - Loop enabled:', carouselImages.length > 1);
-      console.log('🔥 Carousel Setup - loopClonesPerSide:', carouselImages.length > 1 ? Math.max(carouselImages.length, 10) : 0);
-    }
-  }, [carouselImages]);
 
   const [filters, setFilters] = useState<{
     job_sectors: string[];
@@ -254,9 +243,9 @@ const JobsScreen = () => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in kilometers
   };
@@ -336,7 +325,7 @@ const JobsScreen = () => {
     setIsLoadingMore(false);
     lastLoadedPageRef.current = 0;
     isFilterAppliedRef.current = true; // Mark that filter was just applied
-    
+
     // Reset pagination state to prevent immediate loadMoreJobs call
     // This ensures we wait for the new API response before allowing pagination
 
@@ -357,7 +346,7 @@ const JobsScreen = () => {
     // Always pass salary_from, defaulting to 0 if not selected
     const defaultSalaryFrom = 0;
     const defaultSalaryTo = 50000;
-    
+
     newQueryParams.salary_from = newFilters.salary_from ?? defaultSalaryFrom;
     if (newFilters.salary_to && newFilters.salary_to !== defaultSalaryTo) {
       newQueryParams.salary_to = newFilters.salary_to;
@@ -368,7 +357,7 @@ const JobsScreen = () => {
     const departmentIds = newFilters.job_sectors
       .filter((id: any) => typeof id === 'string' && id.trim() !== '')
       .join(',');
-    
+
     if (departmentIds) {
       newQueryParams.departments = departmentIds;
       console.log('🔥 ~ handleApplyFilter ~ departments:', newQueryParams.departments);
@@ -472,7 +461,7 @@ const JobsScreen = () => {
     // Always pass salary_from, defaulting to 0 if not selected
     const defaultSalaryFrom = 0;
     const defaultSalaryTo = 50000;
-    
+
     queryParams.salary_from = filters.salary_from ?? defaultSalaryFrom;
     if (filters.salary_to && filters.salary_to !== defaultSalaryTo) {
       queryParams.salary_to = filters.salary_to;
@@ -483,7 +472,7 @@ const JobsScreen = () => {
     const departmentIds = filters.job_sectors
       .filter((id: any) => typeof id === 'string' && id.trim() !== '')
       .join(',');
-    
+
     if (departmentIds) {
       queryParams.departments = departmentIds;
     }
@@ -538,14 +527,8 @@ const JobsScreen = () => {
     }
   };
 
-  const BannerItem = ({ item, index }: any) => {
-    // In loop mode, react-native-snap-carousel passes the correct item
-    // but the index can be the raw index including clones
-    // We trust the item prop which is already correctly mapped by the library
-    if (!item) {
-      return null;
-    }
-    
+  const renderBannerItem = useCallback(({ item }: any) => {
+    if (!item) return null;
     return (
       <View style={styles.carouselItemContainer}>
         <Image
@@ -555,114 +538,34 @@ const JobsScreen = () => {
         />
       </View>
     );
-  };
+  }, []);
+
+  const handleSnapToItem = useCallback(
+    (index: number) => {
+      if (!carouselImages?.length) return;
+      let actualIndex = index;
+      if (index < 0) {
+        actualIndex = ((index % carouselImages.length) + carouselImages.length) % carouselImages.length;
+      } else if (index >= carouselImages.length) {
+        actualIndex = index % carouselImages.length;
+      }
+      setActiveIndex(actualIndex);
+    },
+    [carouselImages],
+  );
+
+  // Explicitly start autoplay when banners are ready (library can miss mount-time start)
+  useEffect(() => {
+    if (!carouselImages?.length || carouselImages.length < 2) return;
+    const t = setTimeout(() => {
+      carouselRef.current?.startAutoplay?.();
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [carouselImages]);
 
   const renderHeader = () => (
     <>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
-        <View style={styles.headerImgBar}>
-          <TouchableOpacity
-            onPress={() => {
-              navigateTo(SCREENS.SearchJob, {
-                data: sortedJobList.length > 0 ? sortedJobList : allJobs,
-              });
-            }}>
-            <Image style={styles.headerIcons} source={IMAGES.search} />
-          </TouchableOpacity>
 
-          {/* Custom Sort Icon */}
-          <TouchableOpacity
-            onPress={() => setIsSortModalVisible(true)}
-            style={styles.sortButtonContainer}>
-            <View style={styles.sortIconWrapper}>
-              <View style={[styles.sortLine, styles.sortLineTop, sortBy && { backgroundColor: colors.empPrimary }]} />
-              <View style={[styles.sortLine, styles.sortLineMiddle, sortBy && { backgroundColor: colors.empPrimary }]} />
-              <View style={[styles.sortLine, styles.sortLineBottom, sortBy && { backgroundColor: colors.empPrimary }]} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
-            <Image style={styles.headerIcons} source={IMAGES.filter} />
-          </TouchableOpacity>
-          {/* <TouchableOpacity
-            onPress={() => navigateTo(SCREENS.NotificationScreen)}>
-            <Image style={styles.headerIcons} source={IMAGES.notification} />
-          </TouchableOpacity> */}
-        </View>
-      </View>
-
-      <View>
-        <View style={styles.carouselWrapper}>
-          {isLoading && currentPage === 1 ? (
-            <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
-          ) : (
-            <Carousel
-              ref={carouselRef}
-              data={carouselImages || []}
-              renderItem={BannerItem}
-              sliderWidth={SCREEN_WIDTH - 32}
-              itemWidth={SCREEN_WIDTH - 32}
-              loop={carouselImages && carouselImages.length > 1}
-              autoplay={carouselImages && carouselImages.length > 1}
-              autoplayInterval={3000}
-              onSnapToItem={useCallback((index: number) => {
-                if (carouselImages && carouselImages.length > 0) {
-                  // In loop mode, react-native-snap-carousel uses cloned items
-                  // The index can be negative or beyond array length, so we normalize it
-                  let actualIndex = index;
-                  
-                  // Normalize index to be within valid range [0, carouselImages.length - 1]
-                  if (index < 0) {
-                    actualIndex = ((index % carouselImages.length) + carouselImages.length) % carouselImages.length;
-                  } else if (index >= carouselImages.length) {
-                    actualIndex = index % carouselImages.length;
-                  } else {
-                    actualIndex = index;
-                  }
-                  
-                  console.log('🔥 Carousel onSnapToItem - Raw index:', index, 'Normalized index:', actualIndex, 'Total items:', carouselImages.length);
-                  setActiveIndex(actualIndex);
-                }
-              }, [carouselImages])}
-              enableMomentum={false}
-              lockScrollWhileSnapping={true}
-              inactiveSlideScale={1}
-              inactiveSlideOpacity={1}
-              enableSnap={true}
-              loopClonesPerSide={carouselImages && carouselImages.length > 1 ? carouselImages.length : 0}
-              removeClippedSubviews={false}
-              firstItem={0}
-              shouldOptimizeUpdates={false}
-              autoplayDelay={500}
-              swipeThreshold={50}
-              decelerationRate="fast"
-            />
-          )}
-        </View>
-        {carouselImages && carouselImages.length > 1 && (
-          <View style={styles.paginationWrapper}>
-            <Pagination
-              dotsLength={carouselImages.length}
-              activeDotIndex={activeIndex}
-              containerStyle={styles.paginationContainer}
-              dotStyle={styles.carouselDotActive}
-              inactiveDotStyle={styles.carouselDot}
-              inactiveDotOpacity={1}
-              inactiveDotScale={1}
-            />
-          </View>
-        )}
-      </View>
-      <View style={styles.sectionTitleContainer}>
-        <Text style={styles.sectionTitle}>{t('Recommended for You')}</Text>
-        <Tooltip
-          position="bottom"
-          containerStyle={styles.tooltipIcon}
-          message="Recommended for you, based on your profile and AI matching."
-          tooltipBoxStyle={{ left: wp(-100), top: '-200%', width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute', overflow: 'visible' }}
-        />
-      </View>
     </>
   );
 
@@ -673,51 +576,135 @@ const JobsScreen = () => {
           <MyJobsSkeleton />
         </>
       ) : (
-        <FlatList
-          data={sortedJobList.length > 0 ? sortedJobList : allJobs}
-          style={AppStyles.flex}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item, index }: any) => {
-            const isFavorite = localFavorites.includes(item?._id);
-            return (
-              <JobCard
-                key={index}
-                item={item}
-                heartImage={isFavorite}
-                onPressFavorite={() => handleToggleFavorite(item)}
-                onPress={() =>
-                  navigateTo(SCREENS.JobDetail, {
-                    item: item,
-                    resumeList: resumeList,
-                    is_applied: item?.is_applied,
-                  })
-                }
-              />
-            );
-          }}
-          keyExtractor={(item, index) => item?._id || index.toString()}
-          ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
-          contentContainerStyle={styles.scrollContainer}
-          ListHeaderComponent={renderHeader}
-          onEndReached={hasMorePages ? loadMoreJobs : undefined}
-          onEndReachedThreshold={0.5}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <BaseText style={styles.emptyText}>
-                We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
-              </BaseText>
+        <>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
+            <View style={styles.headerImgBar}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigateTo(SCREENS.SearchJob, {
+                    data: sortedJobList.length > 0 ? sortedJobList : allJobs,
+                  });
+                }}>
+                <Image style={styles.headerIcons} source={IMAGES.search} />
+              </TouchableOpacity>
+
+              {/* Custom Sort Icon */}
+              <TouchableOpacity
+                onPress={() => setIsSortModalVisible(true)}
+                style={styles.sortButtonContainer}>
+                <View style={styles.sortIconWrapper}>
+                  <View style={[styles.sortLine, styles.sortLineTop, sortBy && { backgroundColor: colors.empPrimary }]} />
+                  <View style={[styles.sortLine, styles.sortLineMiddle, sortBy && { backgroundColor: colors.empPrimary }]} />
+                  <View style={[styles.sortLine, styles.sortLineBottom, sortBy && { backgroundColor: colors.empPrimary }]} />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
+                <Image style={styles.headerIcons} source={IMAGES.filter} />
+              </TouchableOpacity>
             </View>
-          }
-          ListFooterComponent={
-            isLoadingMore ? (
-              <View style={styles.loadingMoreContainer}>
-                <BaseText style={styles.loadingMoreText}>
-                  Loading more jobs...
+          </View>
+
+          <View>
+            <View style={styles.carouselWrapper}>
+              {isLoading && currentPage === 1 ? (
+                <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
+              ) : (
+                <Carousel
+                  ref={carouselRef}
+                  data={carouselImages || []}
+                  renderItem={renderBannerItem}
+                  sliderWidth={SCREEN_WIDTH - 32}
+                  itemWidth={SCREEN_WIDTH - 32}
+                  loop={carouselImages && carouselImages.length > 1}
+                  autoplay={carouselImages && carouselImages.length > 1}
+                  autoplayInterval={3000}
+                  autoplayDelay={1000}
+                  onSnapToItem={handleSnapToItem}
+                  enableMomentum={false}
+                  lockScrollWhileSnapping={false}
+                  inactiveSlideScale={1}
+                  inactiveSlideOpacity={1}
+                  enableSnap={true}
+                  loopClonesPerSide={carouselImages && carouselImages.length > 1 ? carouselImages.length : 0}
+                  removeClippedSubviews={false}
+                  firstItem={0}
+                  shouldOptimizeUpdates={false}
+                  swipeThreshold={50}
+                  decelerationRate="fast"
+                />
+              )}
+            </View>
+            {carouselImages && carouselImages.length > 1 && (
+              <View style={styles.paginationWrapper}>
+                <Pagination
+                  dotsLength={carouselImages.length}
+                  activeDotIndex={activeIndex}
+                  containerStyle={styles.paginationContainer}
+                  dotStyle={styles.carouselDotActive}
+                  inactiveDotStyle={styles.carouselDot}
+                  inactiveDotOpacity={1}
+                  inactiveDotScale={1}
+                />
+              </View>
+            )}
+          </View>
+          <View style={styles.sectionTitleContainer}>
+            <Text style={styles.sectionTitle}>{t('Recommended for You')}</Text>
+            <Tooltip
+              position="bottom"
+              containerStyle={styles.tooltipIcon}
+              message="Recommended for you, based on your profile and AI matching."
+              tooltipBoxStyle={{ left: wp(-100), top: '-200%', width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute', overflow: 'visible' }}
+            />
+          </View>
+          <FlatList
+            data={sortedJobList.length > 0 ? sortedJobList : allJobs}
+            style={AppStyles.flex}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item, index }: any) => {
+              const isFavorite = localFavorites.includes(item?._id);
+              return (
+                <JobCard
+                  key={index}
+                  item={item}
+                  heartImage={isFavorite}
+                  onPressFavorite={() => handleToggleFavorite(item)}
+                  onPress={() =>
+                    navigateTo(SCREENS.JobDetail, {
+                      item: item,
+                      resumeList: resumeList,
+                      is_applied: item?.is_applied,
+                    })
+                  }
+                />
+              );
+            }}
+            keyExtractor={(item, index) => item?._id || index.toString()}
+            ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
+            contentContainerStyle={styles.scrollContainer}
+            ListHeaderComponent={renderHeader}
+            onEndReached={hasMorePages ? loadMoreJobs : undefined}
+            onEndReachedThreshold={0.5}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <BaseText style={styles.emptyText}>
+                  We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
                 </BaseText>
               </View>
-            ) : null
-          }
-        />
+            }
+            ListFooterComponent={
+              isLoadingMore ? (
+                <View style={styles.loadingMoreContainer}>
+                  <BaseText style={styles.loadingMoreText}>
+                    Loading more jobs...
+                  </BaseText>
+                </View>
+              ) : null
+            }
+          />
+        </>
       )}
 
       <BottomModal
@@ -762,7 +749,7 @@ const JobsScreen = () => {
                       const cleanSectors = prev.job_sectors.filter(
                         (d: any) => typeof d === 'string' && d.trim() !== ''
                       );
-                      
+
                       return {
                         ...prev,
                         job_sectors: isSelected
@@ -981,9 +968,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: hp(24),
+    paddingHorizontal: wp(25),
+    justifyContent: 'space-between',
   },
   headerTitle: {
     ...commonFontStyle(600, 22, colors._0B3970),
@@ -1008,6 +996,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(12),
     gap: wp(8),
     overflow: 'visible',
+    paddingHorizontal: wp(25),
   },
   sectionTitle: {
     ...commonFontStyle(500, 20, colors._0B3970),
