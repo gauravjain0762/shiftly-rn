@@ -11,7 +11,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CoHome from '../screens/company/home/CoHome';
 import CoJob from '../screens/company/job/CoJob';
 import CoPost from '../screens/company/post/CoPost';
-import CoActivity from '../screens/company/activity/CoActivity';
 import CoProfile from '../screens/company/profile/CoProfile';
 import CoMessage from '../screens/company/chat/CoMessage';
 

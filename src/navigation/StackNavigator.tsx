@@ -38,6 +38,7 @@ import ForgotPassword from '../screens/company/auth/ForgotPassword';
 import CoMyProfile from '../screens/company/profile/CoMyProfile';
 import ChangePassword from '../screens/company/auth/ChangePassword';
 import CoPost from '../screens/company/post/CoPost';
+import CreatePost from '../screens/company/post/CreatePost';
 import CoHome from '../screens/company/home/CoHome';
 import CoJobDetails from '../screens/company/job/JobDetails';
 import LocationScreen from '../component/common/LocationScreen';
@@ -374,6 +375,11 @@ const StackNavigator: FC = () => {
           options={({navigation}) => ({headerShown: false})}
           name={SCREENS.CoPost}
           component={CoPost}
+        />
+        <Stack.Screen
+          options={({navigation}) => ({headerShown: false})}
+          name={SCREENS.CreatePost}
+          component={CreatePost}
         />
         <Stack.Screen
           options={({navigation}) => ({headerShown: false})}

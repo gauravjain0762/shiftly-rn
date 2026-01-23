@@ -38,6 +38,7 @@ export const SCREENS = {
   CoActivity: 'CoActivity',
   CoJob: 'CoJob',
   CoPost: 'CoPost',
+  CreatePost: 'CreatePost',
   CoChat: 'CoChat',
   CoTabNavigator: 'CoTabNavigator',
   CoHome: 'CoHome',
@@ -99,6 +100,7 @@ export interface ScreenNames {
   CoActivity: string;
   CoJob: string;
   CoPost: string;
+  CreatePost: string;
   CoChat: string;
   CoTabNavigator: string;
   CoHome: string;

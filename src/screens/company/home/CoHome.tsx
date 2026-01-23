@@ -16,6 +16,7 @@ import {
   setCompanyProfileData,
   setUserInfo,
 } from '../../../features/authSlice';
+import { setCoPostSteps } from '../../../features/companySlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { connectSocket } from '../../../hooks/socketManager';
@@ -94,6 +95,11 @@ const CoHome = () => {
     { id: "3", title: "Expired Jobs", value: job_stats?.expired_jobs, color: "#FFEFF0" },
   ];
 
+  const handleCreatePost = () => {
+    dispatch(setCoPostSteps(1));
+    navigateTo(SCREENS.CreatePost);
+  };
+
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']} containerStyle={{ paddingHorizontal: wp(25) }}>
       <View style={styles.header}>
@@ -102,7 +108,18 @@ const CoHome = () => {
           companyProfile={userInfo}
           onPressAvatar={() => navigateTo(SCREENS.CoMyProfile)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
+          
         />
+        {/* <TouchableOpacity
+          style={styles.plusButton}
+          onPress={handleCreatePost}
+          activeOpacity={0.7}>
+          <Image
+            source={IMAGES.pluse}
+            style={styles.plusIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity> */}
       </View>
       {/* {isLoading && currentPage === 1 ? (
         <PostSkeleton backgroundColor={colors._DADADA} />
@@ -249,7 +266,22 @@ const styles = StyleSheet.create({
   header: {
     marginTop: hp(20),
     paddingBottom: hp(21),
-
+    position: 'relative',
+  },
+  plusButton: {
+    position: 'absolute',
+    top: 0,
+    right: wp(25),
+    zIndex: 10,
+    width: wp(40),
+    height: wp(40),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  plusIcon: {
+    width: wp(30),
+    height: wp(30),
+    tintColor: colors._0B3970,
   },
   scrollcontainer: {
     flexGrow: 1,

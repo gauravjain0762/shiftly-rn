@@ -58,7 +58,7 @@ const CoJob = () => {
     filters.salary_from,
     filters.salary_to,
   ]);
-  const [value, setValue] = useState<any>(filters.contract_types || null);
+  const [value, setValue] = useState<any>(filters.job_types || null);
   const [location, setLocation] = useState<string>(filters.location || '');
 
   const [page, setPage] = useState<number>(1);
@@ -67,7 +67,7 @@ const CoJob = () => {
 
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
-    setValue(filters.contract_types || null);
+    setValue(filters.job_types || null);
     setLocation(filters.location || '');
     // Reset pagination when filters change
     setPage(1);
@@ -130,7 +130,7 @@ const CoJob = () => {
       dispatch(
         setFilters({
           location: location,
-          contract_types: value,
+          job_types: value,
           salary_from: range[0],
           salary_to: range[1],
         }),
@@ -191,7 +191,7 @@ const CoJob = () => {
           {data && (
             <Pressable
               onPress={() => {
-                setValue(filters.contract_types || null);
+                setValue(filters.job_types || null);
                 setLocation(filters.location || '');
                 setRange([
                   filters.salary_from || 1000,
@@ -235,7 +235,7 @@ const CoJob = () => {
                   {renderPostJobButton()}
                   <Text style={styles.emptyText}>
                     {filters?.location ||
-                      filters?.contract_types ||
+                      filters?.job_types ||
                       filters?.salary_from !== 1000 ||
                       filters?.salary_to !== 50000
                       ? 'No filtered jobs found'
