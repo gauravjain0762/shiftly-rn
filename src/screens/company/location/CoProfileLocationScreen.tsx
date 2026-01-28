@@ -34,6 +34,7 @@ import CustomImage from '../../../component/common/CustomImage';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setUserInfo, setCompanyProfileData} from '../../../features/authSlice';
+import { isAndroid } from '../../../utils/commonFunction';
 
 const CoProfileLocationScreen = () => {
   const {t} = useTranslation();
@@ -48,8 +49,8 @@ const CoProfileLocationScreen = () => {
     latitude: number;
     longitude: number;
   } | null>({
-    latitude: userInfo?.lat,
-    longitude: userInfo?.lng,
+    latitude: userInfo?.lat || 25.2048,
+    longitude: userInfo?.lng || 55.2708,
   });
   const [position, setPosition] = useState({
     latitude: userInfo?.lat || 25.2048,
@@ -57,16 +58,22 @@ const CoProfileLocationScreen = () => {
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [selectedAddress, setSelectedAddress] = useState<any>(
+    userInfo?.address ? {
+      address: userInfo.address,
+      lat: userInfo.lat,
+      lng: userInfo.lng,
+      state: userInfo.state,
+      country: userInfo.country,
+    } : null
+  );
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const ref = useRef<any | null>(null);
 
-  // Refs for debouncing and tracking
+  // Refs for debouncing
   const addressFetchTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isUserInteracting = useRef(false);
-  const lastRegion = useRef(position);
 
   useEffect(() => {
     if (userInfo?.address) {
@@ -100,7 +107,6 @@ const CoProfileLocationScreen = () => {
           latitude: currentLocation.latitude,
           longitude: currentLocation.longitude,
         });
-        lastRegion.current = newPosition;
 
         getAddress(
           currentLocation,
@@ -196,7 +202,6 @@ const CoProfileLocationScreen = () => {
     Keyboard.dismiss();
     setIsSearchExpanded(false);
     setIsSearchFocused(false);
-    isUserInteracting.current = false;
 
     const {lat, lng} = details.geometry.location;
     const region = {
@@ -220,7 +225,6 @@ const CoProfileLocationScreen = () => {
     setSearch(address);
     setPosition(region);
     setMarkerPosition({latitude: lat, longitude: lng});
-    lastRegion.current = region;
     setSelectedAddress({
       address,
       lat,
@@ -249,95 +253,71 @@ const CoProfileLocationScreen = () => {
     moveMarkerToCoords(coords);
   };
 
-  // Optimized region change - only update marker position during drag
-  const handleRegionChange = useCallback(
-    (region: any) => {
-      if (isSearchFocused || isSearchExpanded) {
-        return;
-      }
-
-      // Mark that user is interacting
-      isUserInteracting.current = true;
-
-      // Update marker position immediately for smooth dragging
+  // Only update marker position during drag
+  const handleRegionChange = (region: any) => {
+    // Don't update marker if user is searching
+    if (!isSearchFocused && !isSearchExpanded) {
       setMarkerPosition({
         latitude: region.latitude,
         longitude: region.longitude,
       });
-    },
-    [isSearchFocused, isSearchExpanded],
-  );
+    }
+  };
 
   // Fetch address only when drag is complete
-  const handleRegionChangeComplete = useCallback(
-    (region: any) => {
-      if (isSearchFocused || isSearchExpanded) {
-        return;
-      }
+  const handleRegionChangeComplete = (region: any) => {
+    if (isSearchFocused || isSearchExpanded) {
+      return;
+    }
 
-      // Check if region actually changed significantly
-      const hasChanged =
-        Math.abs(region.latitude - lastRegion.current.latitude) > 0.0001 ||
-        Math.abs(region.longitude - lastRegion.current.longitude) > 0.0001;
+    // Update position state after drag completes
+    setPosition({
+      latitude: region.latitude,
+      longitude: region.longitude,
+      latitudeDelta: region.latitudeDelta,
+      longitudeDelta: region.longitudeDelta,
+    });
 
-      if (!hasChanged) {
-        isUserInteracting.current = false;
-        return;
-      }
+    // Clear any pending address fetch
+    if (addressFetchTimeout.current) {
+      clearTimeout(addressFetchTimeout.current);
+    }
 
-      // Update position state
-      setPosition(region);
-      lastRegion.current = region;
+    // Debounce address lookup
+    addressFetchTimeout.current = setTimeout(() => {
+      getAddress(
+        {latitude: region.latitude, longitude: region.longitude},
+        (data: any) => {
+          const address = data?.results?.[0]?.formatted_address;
+          const components = data?.results?.[0]?.address_components || [];
 
-      // Sync marker position one final time
-      setMarkerPosition({
-        latitude: region.latitude,
-        longitude: region.longitude,
-      });
+          const stateObj = components.find((c: any) =>
+            c.types.includes('administrative_area_level_1'),
+          );
+          const countryObj = components.find((c: any) =>
+            c.types.includes('country'),
+          );
 
-      // Clear any pending address fetch
-      if (addressFetchTimeout.current) {
-        clearTimeout(addressFetchTimeout.current);
-      }
+          const state = stateObj?.long_name || '';
+          const country = countryObj?.long_name || '';
 
-      // Debounce address lookup with longer delay for smoother UX
-      addressFetchTimeout.current = setTimeout(() => {
-        getAddress(
-          {latitude: region.latitude, longitude: region.longitude},
-          (data: any) => {
-            const address = data?.results?.[0]?.formatted_address;
-            const components = data?.results?.[0]?.address_components || [];
-
-            const stateObj = components.find((c: any) =>
-              c.types.includes('administrative_area_level_1'),
-            );
-            const countryObj = components.find((c: any) =>
-              c.types.includes('country'),
-            );
-
-            const state = stateObj?.long_name || '';
-            const country = countryObj?.long_name || '';
-
-            if (address) {
-              setSearch(address);
-              ref.current?.setAddressText(address);
-              setSelectedAddress({
-                address,
-                lat: region.latitude,
-                lng: region.longitude,
-                state,
-                country,
-              });
-            }
-          },
-          undefined,
-          mapKey,
-        );
-        isUserInteracting.current = false;
-      }, 500); // Increased debounce time
-    },
-    [isSearchFocused, isSearchExpanded, mapKey],
-  );
+          if (address) {
+            setSearch(address);
+            ref.current?.setAddressText(address);
+            setSelectedAddress({
+              address,
+              lat: region.latitude,
+              lng: region.longitude,
+              state,
+              country,
+            });
+          }
+        },
+        undefined,
+        mapKey,
+      );
+    }, 500);
+  };
 
   const moveMarkerToCoords = (coords: any) => {
     const region = {
@@ -349,7 +329,6 @@ const CoProfileLocationScreen = () => {
 
     setPosition(region);
     setMarkerPosition(coords);
-    lastRegion.current = region;
     mapRef.current?.animateToRegion(region, 500);
 
     // Clear pending timeout
@@ -409,7 +388,6 @@ const CoProfileLocationScreen = () => {
         latitude: location.latitude,
         longitude: location.longitude,
       });
-      lastRegion.current = region;
       mapRef.current?.animateToRegion(region, 500);
 
       getAddress(
@@ -569,9 +547,8 @@ const CoProfileLocationScreen = () => {
             <View style={styles.container}>
               <MapView
                 ref={mapRef}
-                key={API?.GOOGLE_MAP_API_KEY}
                 provider="google"
-                region={position}
+                initialRegion={position}
                 onPress={handleMapPress}
                 onPoiClick={handlePoiClick}
                 onRegionChange={handleRegionChange}
@@ -599,18 +576,12 @@ const CoProfileLocationScreen = () => {
                 pitchEnabled={false}
                 rotateEnabled={false}
                 scrollEnabled={!isSearchFocused}
-                zoomEnabled={!isSearchFocused}
-                zoomControlEnabled={false}
-                loadingEnabled={true}
-                cacheEnabled={true}
-                mapPadding={{top: 0, right: 0, bottom: 0, left: 0}}>
+                zoomEnabled={!isSearchFocused}>
                 {markerPosition && (
                   <Marker
                     coordinate={markerPosition}
                     draggable={false}
-                    tracksViewChanges={false}
-                    anchor={{x: 0.5, y: 1}}
-                    flat={true}>
+                    anchor={{x: 0.5, y: 1}}>
                     <Image
                       resizeMode="contain"
                       source={IMAGES.location_marker}
@@ -750,8 +721,8 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   customMarkerImage: {
-    width: wp(40),
-    height: hp(40),
+    width: isAndroid ? wp(36) : wp(46),
+    height: isAndroid ? hp(36) : hp(46),
   },
   customMarker: {
     width: wp(20),

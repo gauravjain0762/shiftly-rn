@@ -33,6 +33,7 @@ import {RootState} from '../../store';
 import CustomImage from '../common/CustomImage';
 import GradientButton from '../common/GradientButton';
 import {SCREENS} from '../../navigation/screenNames';
+import { isAndroid } from '../../utils/commonFunction';
 
 const EmpLocation = () => {
   const {t} = useTranslation();
@@ -40,39 +41,57 @@ const EmpLocation = () => {
 
   const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
-  
+
   const [search, setSearch] = useState(userInfo?.address || '');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
     latitude: number;
     longitude: number;
-  } | null>({
-    latitude: userInfo?.lat,
-    longitude: userInfo?.lng,
-  });
+  } | null>(
+    userInfo?.lat && userInfo?.lng
+      ? {
+          latitude: userInfo.lat,
+          longitude: userInfo.lng,
+        }
+      : null,
+  );
   const [position, setPosition] = useState({
-    latitude: userInfo?.lat,
-    longitude: userInfo?.lng,
+    latitude: userInfo?.lat || 25.2048,
+    longitude: userInfo?.lng || 55.2708,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [selectedAddress, setSelectedAddress] = useState<any>(
+    userInfo?.address
+      ? {
+          address: userInfo.address,
+          lat: userInfo.lat,
+          lng: userInfo.lng,
+          state: userInfo.state,
+          country: userInfo.country,
+        }
+      : null,
+  );
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const ref = useRef<any | null>(null);
   const dispatch = useDispatch();
 
-  // Refs for debouncing and tracking
+  // Ref for debouncing
   const addressFetchTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isUserInteracting = useRef(false);
-  const lastRegion = useRef(position);
 
   useEffect(() => {
     if (userInfo?.address) {
-      setSearch(userInfo?.address);
-      ref.current?.setAddressText(userInfo?.address);
-      setSelectedAddress(userInfo?.address);
+      setSearch(userInfo.address);
+      ref.current?.setAddressText(userInfo.address);
+      setSelectedAddress({
+        address: userInfo.address,
+        lat: userInfo.lat,
+        lng: userInfo.lng,
+        state: userInfo.state,
+        country: userInfo.country,
+      });
     }
   }, [userInfo?.address]);
 
@@ -94,7 +113,6 @@ const EmpLocation = () => {
           latitude: currentLocation.latitude,
           longitude: currentLocation.longitude,
         });
-        lastRegion.current = newPosition;
 
         getAddress(
           currentLocation,
@@ -130,7 +148,7 @@ const EmpLocation = () => {
 
         setTimeout(() => {
           mapRef.current?.animateToRegion(newPosition, 1000);
-        }, 100);
+        }, 500);
       } else {
         return new Promise(resolve => {
           requestLocationPermission(
@@ -190,7 +208,6 @@ const EmpLocation = () => {
     Keyboard.dismiss();
     setIsSearchExpanded(false);
     setIsSearchFocused(false);
-    isUserInteracting.current = false;
 
     const {lat, lng} = details.geometry.location;
     const region = {
@@ -214,7 +231,6 @@ const EmpLocation = () => {
     setSearch(address);
     setPosition(region);
     setMarkerPosition({latitude: lat, longitude: lng});
-    lastRegion.current = region;
     setSelectedAddress({
       address,
       lat,
@@ -243,46 +259,29 @@ const EmpLocation = () => {
     moveMarkerToCoords(coords);
   };
 
-  // Optimized region change - only update marker position during drag
-  const handleRegionChange = useCallback((region: any) => {
-    if (isSearchFocused || isSearchExpanded) {
-      return;
+  // Only update marker position during drag
+  const handleRegionChange = (region: any) => {
+    // Don't update marker if user is searching
+    if (!isSearchFocused && !isSearchExpanded) {
+      setMarkerPosition({
+        latitude: region.latitude,
+        longitude: region.longitude,
+      });
     }
-
-    // Mark that user is interacting
-    isUserInteracting.current = true;
-
-    // Update marker position immediately for smooth dragging
-    setMarkerPosition({
-      latitude: region.latitude,
-      longitude: region.longitude,
-    });
-  }, [isSearchFocused, isSearchExpanded]);
+  };
 
   // Fetch address only when drag is complete
-  const handleRegionChangeComplete = useCallback((region: any) => {
+  const handleRegionChangeComplete = (region: any) => {
     if (isSearchFocused || isSearchExpanded) {
       return;
     }
 
-    // Check if region actually changed significantly
-    const hasChanged = 
-      Math.abs(region.latitude - lastRegion.current.latitude) > 0.0001 ||
-      Math.abs(region.longitude - lastRegion.current.longitude) > 0.0001;
-
-    if (!hasChanged) {
-      isUserInteracting.current = false;
-      return;
-    }
-
-    // Update position state
-    setPosition(region);
-    lastRegion.current = region;
-    
-    // Sync marker position one final time
-    setMarkerPosition({
+    // Update position state after drag completes
+    setPosition({
       latitude: region.latitude,
       longitude: region.longitude,
+      latitudeDelta: region.latitudeDelta,
+      longitudeDelta: region.longitudeDelta,
     });
 
     // Clear any pending address fetch
@@ -290,7 +289,7 @@ const EmpLocation = () => {
       clearTimeout(addressFetchTimeout.current);
     }
 
-    // Debounce address lookup with longer delay for smoother UX
+    // Debounce address lookup
     addressFetchTimeout.current = setTimeout(() => {
       getAddress(
         {latitude: region.latitude, longitude: region.longitude},
@@ -323,9 +322,8 @@ const EmpLocation = () => {
         undefined,
         mapKey,
       );
-      isUserInteracting.current = false;
-    }, 500); // Increased debounce time
-  }, [isSearchFocused, isSearchExpanded, mapKey]);
+    }, 500);
+  };
 
   const moveMarkerToCoords = (coords: any) => {
     const region = {
@@ -337,7 +335,6 @@ const EmpLocation = () => {
 
     setPosition(region);
     setMarkerPosition(coords);
-    lastRegion.current = region;
     mapRef.current?.animateToRegion(region, 500);
 
     // Clear pending timeout
@@ -397,7 +394,6 @@ const EmpLocation = () => {
         latitude: location.latitude,
         longitude: location.longitude,
       });
-      lastRegion.current = region;
       mapRef.current?.animateToRegion(region, 500);
 
       getAddress(
@@ -442,19 +438,18 @@ const EmpLocation = () => {
   };
 
   const handleSaveLocation = async () => {
-    const data = {
-      address: selectedAddress?.address,
-      lat: selectedAddress?.lat,
-      lng: selectedAddress?.lng,
-      state: selectedAddress?.state,
-      country: selectedAddress?.country,
-    };
-
     if (selectedAddress) {
       try {
+        const data = {
+          address: selectedAddress.address,
+          lat: selectedAddress.lat,
+          lng: selectedAddress.lng,
+          state: selectedAddress.state,
+          country: selectedAddress.country,
+        };
         dispatch(setUserInfo({...userInfo, ...data}));
         navigateTo(SCREENS.CreateProfileScreen, {
-          selectedLocation: selectedAddress?.address,
+          selectedLocation: selectedAddress.address,
         });
       } catch (error) {
         console.error('Failed to save location:', error);
@@ -507,7 +502,6 @@ const EmpLocation = () => {
           <View style={styles.googleAutoCompleteWrapper}>
             <GooglePlacesAutocomplete
               ref={ref}
-              key={API?.GOOGLE_MAP_API_KEY}
               placeholder="Search Location"
               keyboardShouldPersistTaps="handled"
               onPress={handlePlaceSelect}
@@ -552,7 +546,6 @@ const EmpLocation = () => {
             <View style={styles.container}>
               <MapView
                 ref={mapRef}
-                key={API?.GOOGLE_MAP_API_KEY}
                 provider="google"
                 initialRegion={position}
                 onPress={handleMapPress}
@@ -570,7 +563,7 @@ const EmpLocation = () => {
                         },
                         1000,
                       );
-                    }, 100);
+                    }, 500);
                   }
                 }}
                 style={styles.mapStyle}
@@ -582,29 +575,17 @@ const EmpLocation = () => {
                 pitchEnabled={false}
                 rotateEnabled={false}
                 scrollEnabled={!isSearchFocused}
-                zoomEnabled={!isSearchFocused}
-                zoomControlEnabled={false}
-                loadingEnabled={true}
-                cacheEnabled={true}
-                mapPadding={{top: 0, right: 0, bottom: 0, left: 0}}>
+                zoomEnabled={!isSearchFocused}>
                 {markerPosition && (
                   <Marker
                     coordinate={markerPosition}
                     draggable={false}
-                    tracksViewChanges={false}
-                    anchor={{x: 0.5, y: 1}}
-                    flat={true}>
-                    {Platform.OS === 'ios' ? (
-                      <Image
-                        resizeMode="contain"
-                        source={IMAGES.location_marker}
-                        style={styles.customMarkerImage}
-                      />
-                    ) : (
-                      <View style={styles.customMarker}>
-                        <View style={styles.markerDot} />
-                      </View>
-                    )}
+                    anchor={{x: 0.5, y: 1}}>
+                    <Image
+                      resizeMode="contain"
+                      source={IMAGES.location_marker}
+                      style={styles.customMarkerImage}
+                    />
                   </Marker>
                 )}
               </MapView>
@@ -739,8 +720,8 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   customMarkerImage: {
-    width: wp(40),
-    height: hp(40),
+    width: isAndroid ? wp(36) : wp(46),
+    height: isAndroid ? hp(36) : hp(46),
   },
   customMarker: {
     width: wp(20),

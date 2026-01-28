@@ -15,6 +15,7 @@ import {colors} from '../../theme/colors';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../store';
 import {API} from '../../utils/apiConstant';
+import { isAndroid } from '../../utils/commonFunction';
 
 type map = {
   containerStyle?: ViewStyle;
@@ -104,8 +105,8 @@ export default LocationContainer;
 
 const styles = StyleSheet.create({
   location_marker: {
-    width: wp(37),
-    height: hp(56),
+    width: isAndroid ? wp(36) : wp(46),
+    height: isAndroid ? hp(36) : hp(46),
     resizeMode: 'contain',
   },
   map: {

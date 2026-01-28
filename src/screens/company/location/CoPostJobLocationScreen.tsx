@@ -417,45 +417,58 @@ const CoPostJobLocationScreen = () => {
   };
 
   const handleRegionChange = (region: any) => {
+    // Don't interfere during search
     if (isSearchFocused || isSearchExpanded) {
       return;
     }
-
+  
+    // Mark that map is being moved by user (but don't set state repeatedly)
     if (!isMapMoving) {
       setIsMapMoving(true);
     }
-
+  
+    // DON'T update position state during drag - this causes flickering
+    // Only update marker position
     setMarkerPosition({
       latitude: region.latitude,
       longitude: region.longitude,
     });
-
-    setPosition(region);
   };
-
+  
   const handleRegionChangeComplete = (region: any) => {
-    if (isSearchFocused || isSearchExpanded || !isMapMoving) {
+    // Don't fetch address if user is searching
+    if (isSearchFocused || isSearchExpanded) {
+      setIsMapMoving(false);
       return;
     }
-
+  
+    // Now update position state after dragging is complete
+    setPosition({
+      latitude: region.latitude,
+      longitude: region.longitude,
+      latitudeDelta: region.latitudeDelta,
+      longitudeDelta: region.longitudeDelta,
+    });
+  
     setIsMapMoving(false);
-
+  
+    // Fetch address for the new location
     getAddress(
       {latitude: region.latitude, longitude: region.longitude},
       (data: any) => {
         const address = data?.results?.[0]?.formatted_address;
         const components = data?.results?.[0]?.address_components || [];
-
+  
         const stateObj = components.find((c: any) =>
           c.types.includes('administrative_area_level_1'),
         );
         const countryObj = components.find((c: any) =>
           c.types.includes('country'),
         );
-
+  
         const state = stateObj?.long_name || '';
         const country = countryObj?.long_name || '';
-
+  
         if (address) {
           setSearch(address);
           ref.current?.setAddressText(address);
@@ -615,6 +628,8 @@ const CoPostJobLocationScreen = () => {
     }, 200);
   };
 
+  const {bottom} = useSafeAreaInsets()
+
   return (
     <>
       <StatusBar
@@ -684,6 +699,7 @@ const CoPostJobLocationScreen = () => {
               <MapView
                 ref={mapRef}
                 region={position}
+                initialRegion={position}
                 onPress={handleMapPress}
                 provider={'google'}
                 onPoiClick={handlePoiClick}
@@ -710,17 +726,11 @@ const CoPostJobLocationScreen = () => {
                 toolbarEnabled={false}>
                 {markerPosition && (
                   <Marker coordinate={markerPosition} draggable={false}>
-                    {Platform.OS === 'ios' ? (
                       <Image
                         resizeMode="contain"
                         source={IMAGES.location_marker}
                         style={styles.customMarkerImage}
                       />
-                    ) : (
-                      <View style={styles.customMarker}>
-                        <View style={styles.markerDot} />
-                      </View>
-                    )}
                   </Marker>
                 )}
               </MapView>
@@ -731,6 +741,7 @@ const CoPostJobLocationScreen = () => {
               title={t('Save Location')}
               style={[
                 styles.btn,
+                {bottom: bottom},
                 (!selectedAddress || isKeyboardVisible) && styles.btnDisabled,
               ]}
               onPress={handleSaveLocation}
@@ -853,14 +864,14 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   customMarkerImage: {
-    width: wp(40),
-    height: hp(40),
+    width: wp(36),
+    height: hp(36),
   },
   customMarker: {
     width: wp(20),
     height: wp(20),
     borderRadius: wp(10),
-    backgroundColor: colors.primary || '#007AFF',
+    backgroundColor: colors.coPrimary || '#007AFF',
     borderWidth: 3,
     borderColor: 'white',
     shadowColor: '#000',
@@ -883,7 +894,7 @@ const styles = StyleSheet.create({
   currentLocationButton: {
     position: 'absolute',
     right: wp(16),
-    bottom: hp(100),
+    bottom: hp(150),
     backgroundColor: 'white',
     borderRadius: wp(25),
     padding: wp(12),
