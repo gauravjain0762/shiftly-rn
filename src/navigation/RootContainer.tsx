@@ -19,6 +19,7 @@ import {
 import { Linking } from 'react-native';
 import Splash from "react-native-splash-screen";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useGetAppDataQuery } from '../api/dashboardApi';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -32,6 +33,9 @@ let DefaultThemeColor = {
 const RootContainer: FC = () => {
   const isLoading = useSelector(selectIsLoading);
   const dispatch = useAppDispatch();
+
+  // Fetch app data on app initialization - available in all screens and flows
+  useGetAppDataQuery();
 
   useEffect(() => {
     requestNotificationUserPermission(dispatch);

@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useRoute} from '@react-navigation/native';
@@ -52,7 +53,7 @@ type LogoFile = {
 } | null;
 
 const Chat = () => {
-  const {params} = useRoute<any>();
+  const {params} = useRoute<any>() ?? {};
   const jobdetail_chatData = params?.data ?? {};
   const chatId = params?.data?.chat_id;
   const flatListRef = useRef<FlatList>(null);
@@ -68,6 +69,8 @@ const Chat = () => {
   const [chatList, setChatList] = useState<Message[]>([]);
   const [showDownIcon, setShowDownIcon] = useState(false);
   const [showJobCard, setShowJobCard] = useState<boolean>(true);
+
+  const quickReplies = ['Confirm Interview', 'Send Resume', 'Reschedule'];
 
   const handleChatScrollDown = () => {
     flatListRef.current?.scrollToOffset({offset: 0, animated: true});
@@ -145,6 +148,11 @@ const Chat = () => {
       type: img?.type || img?.mime || 'image/jpeg',
     });
   }, []);
+
+  // ----- Quick reply handler -----
+  const handleQuickReply = (reply: string) => {
+    setMessage(reply);
+  };
 
   return (
     <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
@@ -228,8 +236,23 @@ const Chat = () => {
             </Pressable>
           )}
 
-          {/* Input */}
+          {/* Quick Replies */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickRepliesContainer}
+            style={styles.quickRepliesScrollView}>
+            {quickReplies.map((reply, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.quickReplyButton}
+                onPress={() => handleQuickReply(reply)}>
+                <Text style={styles.quickReplyText}>{reply}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
+          {/* Input */}
           <ChatInput
             image={logo}
             setImage={setLogo}
@@ -316,5 +339,23 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
+  },
+  quickRepliesScrollView: {
+    maxHeight: hp(50),
+    marginBottom: hp(8),
+  },
+  quickRepliesContainer: {
+    paddingHorizontal: wp(22),
+    gap: wp(10),
+  },
+  quickReplyButton: {
+    backgroundColor: colors._0B3970,
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(10),
+    borderRadius: 20,
+    marginRight: wp(10),
+  },
+  quickReplyText: {
+    ...commonFontStyle(600, 14, colors.white),
   },
 });

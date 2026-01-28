@@ -42,6 +42,7 @@ import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { getAddressList, getPlaceDetails, requestLocationPermission } from '../../../utils/locationHandler';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
+import { API } from '../../../utils/apiConstant';
 import {
   useCompanyOTPVerifyMutation,
   useCompanySignUpMutation,
@@ -629,7 +630,7 @@ const CreateAccount = () => {
   };
 
   const {getAppData} = useSelector((state: RootState) => state.auth);
-  const mapKey = getAppData?.map_key;
+  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
   const debouncedGetAddressList = useCallback(
     debounce(async (text: string) => {

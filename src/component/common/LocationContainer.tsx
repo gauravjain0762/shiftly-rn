@@ -14,6 +14,7 @@ import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {colors} from '../../theme/colors';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../store';
+import {API} from '../../utils/apiConstant';
 
 type map = {
   containerStyle?: ViewStyle;
@@ -33,7 +34,7 @@ const LocationContainer: FC<map> = ({
   showAddressCard = true,
 }) => {
   const {getAppData} = useSelector((state: RootState) => state.auth);
-  const mapKey = getAppData?.map_key;
+  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
   
   useEffect(() => {
     getLocation();

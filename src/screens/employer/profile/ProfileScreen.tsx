@@ -333,9 +333,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   locationRow: {
-    flexDirection: 'row',
     gap: wp(6),
+    width: "75%",
     marginTop: hp(8),
+    alignSelf: 'center',
+    flexDirection: 'row',
   },
   location: {
     ...commonFontStyle(400, 20, colors._0B3970),

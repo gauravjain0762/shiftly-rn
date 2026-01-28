@@ -33,6 +33,7 @@ export const API = {
   // UserDetails
   getCompanyProfile: '/company/getProfile',
   updateCompanyProfile: '/company/updateProfile',
+  getCompanyProfileById: '/getCompanyProfile',
 
   getDepartments: '/company/getDepartments',
 
@@ -104,7 +105,7 @@ export const API = {
   getAppData: '/getAppData',
 
   // google Map API (deprecated - use map_key from getAppData)
-  GOOGLE_MAP_API_KEY: 'AIzaSyC0YuOdzYKbtMXSUqnL2P6SBRC9RE_gZO4',
+  GOOGLE_MAP_API_KEY: 'AIzaSyD_m-MjRQqW5h1k8GIaIg8meHEXASMytAA',
 };
 
 export const API_ERROR_CODE = {

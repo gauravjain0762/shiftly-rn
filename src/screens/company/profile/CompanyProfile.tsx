@@ -33,6 +33,7 @@ import {
   useGetCompanyJobsQuery,
   useGetCompanyPostsQuery,
   useGetProfileQuery,
+  useLazyGetCompanyProfileByIdQuery,
 } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -44,35 +45,78 @@ import { resetNavigation } from '../../../utils/commonFunction';
 const ProfileTabs = ['About', 'Post', 'Jobs'];
 
 const CompanyProfile = () => {
-  const { data: JobData } = useGetCompanyJobsQuery({});
+  const { params } = useRoute<any>();
+  const fromOnboarding = params?.fromOnboarding || false;
+  const companyId = params?.companyId;
+
+  const { data: JobData } = useGetCompanyJobsQuery({}, {skip: !!companyId});
   const jobsList = JobData?.data?.jobs;
 
   const { companyProfileData, companyProfileAllData, userInfo } = useSelector(
     (state: RootState) => state.auth,
   );
 
-  const { data: getPost } = useGetCompanyPostsQuery({});
+  const { data: getPost } = useGetCompanyPostsQuery({}, {skip: !!companyId});
   const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
-  const { data, isLoading, isFetching, isSuccess } = useGetProfileQuery();
+  const { data, isLoading, isFetching, isSuccess } = useGetProfileQuery(undefined, {skip: !!companyId});
+  
+  // Fetch company profile by ID when viewing another company
+  const [getCompanyProfileById, {data: companyData, isLoading: isCompanyLoading}] = 
+    useLazyGetCompanyProfileByIdQuery();
+  
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
   const [isLogoLoading, setIsLogoLoading] = useState(false);
   const [logoLoadError, setLogoLoadError] = useState(false);
   const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { params } = useRoute<any>();
-  const fromOnboarding = params?.fromOnboarding || false;
+  const [viewedCompanyPosts, setViewedCompanyPosts] = useState<any[]>([]);
+  const [viewedCompanyJobs, setViewedCompanyJobs] = useState<any[]>([]);
+
+  // Fetch company profile by ID if viewing another company
+  useEffect(() => {
+    if (companyId) {
+      getCompanyProfileById({company_id: companyId, tab: 'posts', page: 1});
+    }
+  }, [companyId]);
 
   useEffect(() => {
-    if (data?.status && data.data?.company) {
+    if (data?.status && data.data?.company && !companyId) {
       dispatch(setCompanyProfileAllData(data.data.company));
       dispatch(setCompanyProfileData(data.data.company));
     }
-  }, [data]);
+  }, [data, companyId]);
 
-  // Memoize cover images to prevent recreation on tab changes
+  useEffect(() => {
+    if (companyData?.status && companyId) {
+      setViewedCompanyPosts(companyData?.data?.posts || []);
+      setViewedCompanyJobs(companyData?.data?.jobs || []);
+    }
+  }, [companyData, companyId]);
+
   const coverImages = useMemo(() => {
+    // If viewing another company, use their data
+    if (companyId && companyData?.data?.company?.cover_images) {
+      const images = companyData.data.company.cover_images;
+      
+      if (images && Array.isArray(images) && images.length > 0) {
+        const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
+        const repeatedPattern = baseUrl + baseUrl;
+        
+        const validImages = images.filter((url: string) => {
+          if (!url || typeof url !== 'string') return false;
+          const trimmed = url.trim();
+          if (trimmed === '' || trimmed.includes(repeatedPattern)) return false;
+          return true;
+        });
+        
+        return validImages.length > 0 ? validImages : [IMAGES.banner];
+      }
+      return [IMAGES.banner];
+    }
+    
+    // Otherwise, use own profile data
     // Prioritize userInfo cover_images (set during account creation) to prevent logo flash
     // Then check companyProfileData, then API response
     const imagesFromUserInfo = userInfo?.cover_images;
@@ -146,14 +190,32 @@ const CompanyProfile = () => {
       // Query has completed (or userInfo was available), show fallback
       return [IMAGES.logoText];
     }
-  }, [companyProfileData?.cover_images, userInfo?.cover_images, isLoading, isFetching, isSuccess, data]);
+  }, [companyProfileData?.cover_images, userInfo?.cover_images, isLoading, isFetching, isSuccess, data, companyId, companyData]);
 
   const shouldShowCoverLoader = useMemo(() => {
     return coverImages.length > 0;
   }, [coverImages]);
 
+  // Determine which profile data to use (own or viewed company)
+  const displayProfile = useMemo(() => {
+    if (companyId && companyData?.data?.company) {
+      return companyData.data.company;
+    }
+    return companyProfileAllData || companyProfileData || data?.data?.company;
+  }, [companyId, companyData, companyProfileAllData, companyProfileData, data]);
+
+  // Determine which posts and jobs to show
+  const displayPosts = companyId ? viewedCompanyPosts : allPosts;
+  const displayJobs = companyId ? viewedCompanyJobs : jobsList;
+
   const navigation = useNavigation();
   const handleBackPress = useCallback(() => {
+    // If viewing another company, just go back
+    if (companyId) {
+      navigation.goBack();
+      return;
+    }
+
     const state = navigation.getState() as any;
 
     if (!state?.routes || state.routes.length < 2) {
@@ -176,7 +238,7 @@ const CompanyProfile = () => {
         routes: [{ name: SCREENS.CoTabNavigator as never }],
       });
     }
-  }, [navigation]);
+  }, [navigation, companyId]);
 
   const handleTabPress = useCallback((index: number) => {
     setSelectedTabIndex(index);
@@ -192,7 +254,7 @@ const CompanyProfile = () => {
   const renderJobs = useMemo(() => {
     if (selectedTanIndex !== 2) return null;
 
-    if (jobsList?.length === 0) {
+    if (displayJobs?.length === 0) {
       return (
         <View style={styles.emptyContainer}>
           <Text
@@ -206,7 +268,7 @@ const CompanyProfile = () => {
       );
     }
 
-    return jobsList?.map((item: any, index: number) => (
+    return displayJobs?.map((item: any, index: number) => (
       <ScrollView
         style={{ marginBottom: hp(15) }}
         key={`job-${item.id || index}`}>
@@ -216,61 +278,41 @@ const CompanyProfile = () => {
         />
       </ScrollView>
     ));
-  }, [selectedTanIndex, jobsList]);
+  }, [selectedTanIndex, displayJobs]);
 
   const hasValidLogo = useMemo(() => {
     // Check multiple sources for logo
-    const logoFromProfileData = companyProfileData?.logo;
-    const logoFromAllData = companyProfileAllData?.logo;
+    const logo = displayProfile?.logo;
 
     // Handle both string (URL) and object (local URI) formats
-    if (logoFromProfileData) {
-      if (typeof logoFromProfileData === 'string' && logoFromProfileData.trim() !== '') {
+    if (logo) {
+      if (typeof logo === 'string' && logo.trim() !== '') {
         return true;
       }
-      if (typeof logoFromProfileData === 'object' && logoFromProfileData?.uri) {
-        return true;
-      }
-    }
-
-    if (logoFromAllData) {
-      if (typeof logoFromAllData === 'string' && logoFromAllData.trim() !== '') {
-        return true;
-      }
-      if (typeof logoFromAllData === 'object' && logoFromAllData?.uri) {
+      if (typeof logo === 'object' && logo?.uri) {
         return true;
       }
     }
 
     return false;
-  }, [companyProfileData?.logo, companyProfileAllData?.logo]);
+  }, [displayProfile?.logo]);
 
   // Get logo URI from multiple sources, prioritizing local URI over server URL
   const logoUri = useMemo(() => {
-    const logoFromProfileData = companyProfileData?.logo;
-    const logoFromAllData = companyProfileAllData?.logo;
+    const logo = displayProfile?.logo;
 
     // Prioritize local URI (object format) over server URL (string format)
-    if (logoFromProfileData) {
-      if (typeof logoFromProfileData === 'object' && logoFromProfileData?.uri) {
-        return logoFromProfileData.uri;
+    if (logo) {
+      if (typeof logo === 'object' && logo?.uri) {
+        return logo.uri;
       }
-      if (typeof logoFromProfileData === 'string' && logoFromProfileData.trim() !== '') {
-        return logoFromProfileData;
-      }
-    }
-
-    if (logoFromAllData) {
-      if (typeof logoFromAllData === 'object' && logoFromAllData?.uri) {
-        return logoFromAllData.uri;
-      }
-      if (typeof logoFromAllData === 'string' && logoFromAllData.trim() !== '') {
-        return logoFromAllData;
+      if (typeof logo === 'string' && logo.trim() !== '') {
+        return logo;
       }
     }
 
     return null;
-  }, [companyProfileData?.logo, companyProfileAllData?.logo]);
+  }, [displayProfile?.logo]);
 
   // Reset loading state when logo changes
   useEffect(() => {
@@ -308,6 +350,18 @@ const CompanyProfile = () => {
       }
     };
   }, [hasValidLogo, logoUri]);
+
+  // Show loading when fetching external company profile
+  if (companyId && isCompanyLoading) {
+    return (
+      <SafeAreaView
+        edges={['bottom']}
+        style={{ flex: 1, backgroundColor: colors.coPrimary, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <ActivityIndicator size="large" color={colors._0B3970} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -379,8 +433,8 @@ const CompanyProfile = () => {
 
               <View style={styles.titleTextContainer}>
                 <Text style={styles.companyName}>
-                  {companyProfileData?.company_name
-                    ? companyProfileData.company_name
+                  {displayProfile?.company_name
+                    ? displayProfile.company_name
                       .split(' ')
                       .map(word =>
                         /[A-Z]/.test(word.slice(1))
@@ -391,9 +445,9 @@ const CompanyProfile = () => {
                     : 'N/A'}
                 </Text>
 
-                {companyProfileData?.mission && (
+                {displayProfile?.mission && (
                   <Text style={styles.tagline}>
-                    {companyProfileData?.mission || 'N/A'}
+                    {displayProfile?.mission || 'N/A'}
                   </Text>
                 )}
               </View>
@@ -434,15 +488,15 @@ const CompanyProfile = () => {
 
               {selectedTanIndex === 0 && (
                 <CoAboutTab
-                  companyProfileData={companyProfileData}
-                  companyProfileAllData={companyProfileAllData}
+                  companyProfileData={displayProfile}
+                  companyProfileAllData={displayProfile}
                 />
               )}
 
               {selectedTanIndex === 1 && (
                 <FlatList
                   numColumns={2}
-                  data={allPosts}
+                  data={displayPosts}
                   style={{ marginTop: hp(10), backgroundColor: colors.coPrimary }}
                   contentContainerStyle={{ backgroundColor: colors.coPrimary }}
                   renderItem={renderPostItem}

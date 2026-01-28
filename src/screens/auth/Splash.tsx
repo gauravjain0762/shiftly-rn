@@ -19,12 +19,16 @@ import {
 } from '../../features/authSlice';
 import {useAppDispatch} from '../../redux/hooks';
 import { colors } from '../../theme/colors';
+import { useGetAppDataQuery } from '../../api/dashboardApi';
 
 type Props = {};
 
 const Splash = (props: Props) => {
   const dispatch = useAppDispatch();
   const {role, setRole, loading} = useRole();
+  
+  // Fetch app data on app initialization
+  useGetAppDataQuery();
 
   useEffect(() => {
     // Wait for role to load before initializing app

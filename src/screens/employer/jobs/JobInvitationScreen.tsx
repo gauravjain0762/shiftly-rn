@@ -18,7 +18,6 @@ const JobInvitationScreen = () => {
         jobDetail: any;
         link: string;
     };
-    console.log("🔥 ~ JobInvitationScreen ~ link:", link)
     const job = jobDetail?.job;
     const company = job?.company_id;
 

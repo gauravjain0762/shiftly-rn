@@ -37,7 +37,7 @@ const LocationScreen = () => {
   const mapRef = useRef<any | null>(null);
 
   const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
-  const mapKey = getAppData?.map_key;
+  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
   const [search, setSearch] = useState(userInfo?.address || '');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     width: wp(20),
     height: wp(20),
     borderRadius: wp(10),
-    backgroundColor: colors.primary || '#007AFF',
+    backgroundColor: colors.empPrimary || '#007AFF',
     borderWidth: 3,
     borderColor: 'white',
     shadowColor: '#000',

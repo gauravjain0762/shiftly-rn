@@ -780,6 +780,7 @@ export const dashboardApi = createApi({
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
+          console.log("🔥 ~ getAppData:", data)
           if (data?.status && data?.data) {
             dispatch(setGetAppData(data.data));
           }
@@ -787,6 +788,15 @@ export const dashboardApi = createApi({
           console.log('Get App Data Error', error);
         }
       },
+    }),
+    // Get company profile by ID (for viewing other companies)
+    getCompanyProfileById: builder.query<any, {company_id: string; tab?: string; page?: number}>({
+      query: params => ({
+        url: API.getCompanyProfileById,
+        method: HTTP_METHOD.GET,
+        params: params,
+        skipLoader: false,
+      }),
     }),
   }),
 });
@@ -841,4 +851,6 @@ export const {
   useLazyGetEmployeeProfileQuery,
   useGetDashboardQuery,
   useGetAppDataQuery,
+  useGetCompanyProfileByIdQuery,
+  useLazyGetCompanyProfileByIdQuery,
 } = dashboardApi;

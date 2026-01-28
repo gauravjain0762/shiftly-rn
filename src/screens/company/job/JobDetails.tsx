@@ -55,6 +55,9 @@ const CoJobDetails = () => {
     useState<boolean>(false);
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  
+  const companyId = jobDetail?.company_id?._id;
+  const companyName = jobDetail?.company_id?.company_name || 'this company';
 
   const metricOptions = [
     { key: 'job_view', label: 'Total', subLabel: 'Job View', icon: IMAGES.jobview },
@@ -279,7 +282,6 @@ ${salary}${shareUrlText}`;
             contentContainerStyle={{ paddingBottom: hp(120) }}>
 
             <View style={styles.bodyContainer}>
-              {/* Job Posting Card */}
               <View style={styles.jobPostCard}>
                 <View style={styles.jobPostHeader}>
                   <View style={styles.companyLogoContainer}>

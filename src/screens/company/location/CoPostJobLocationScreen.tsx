@@ -38,7 +38,7 @@ const CoPostJobLocationScreen = () => {
   const mapRef = useRef<any | null>(null);
   const {userAddress: initialUserAddress} = (route.params as any) || {};
   const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
-  const mapKey = getAppData?.map_key;
+  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
   // Priority: initialUserAddress > userInfo (registered) > default
   const defaultAddress = initialUserAddress || 

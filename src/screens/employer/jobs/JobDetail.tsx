@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   ScrollView,
@@ -19,50 +19,50 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import { useTranslation } from 'react-i18next';
-import { IMAGES } from '../../../assets/Images';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { colors } from '../../../theme/colors';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
+import {IMAGES} from '../../../assets/Images';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {colors} from '../../../theme/colors';
+import {RouteProp, useRoute} from '@react-navigation/native';
 import {
   errorToast,
   goBack,
   navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
-import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   useAddRemoveFavouriteMutation,
   useGetEmployeeJobDetailsQuery,
   useGetFavouritesJobQuery,
 } from '../../../api/dashboardApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 import Carousel from 'react-native-reanimated-carousel';
-import { navigationRef } from '../../../navigation/RootContainer';
+import {navigationRef} from '../../../navigation/RootContainer';
 
-const { width: screenWidth } = Dimensions.get('window');
+const {width: screenWidth} = Dimensions.get('window');
 
 const JobDetail = () => {
-  const { t } = useTranslation();
-  const { bottom } = useSafeAreaInsets();
+  const {t} = useTranslation();
+  const {bottom} = useSafeAreaInsets();
   const [modal, setModal] = useState(false);
-  const { params } = useRoute<RouteProp<any, any>>() as any;
+  const {params} = useRoute<RouteProp<any, any>>() as any;
   const data = params || params?.item;
-  const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
+  const {data: jobDetail, isLoading} = useGetEmployeeJobDetailsQuery(
     data?.item?._id || data?.jobId,
   );
   const curr_jobdetails = jobDetail?.data?.job;
-  console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
+  console.log('🔥 ~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
   const shareUrl = jobDetail?.data?.share_url;
-  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const {userInfo} = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
-  const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
+  const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [activeIndex, setActiveIndex] = useState(0);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
@@ -118,40 +118,43 @@ const JobDetail = () => {
 
   const isFavorite = localFavorites.includes(curr_jobdetails?._id);
 
-  // Ensure coverImages always has valid image sources, fallback to logoText if not found
   const coverImages = (() => {
     const coverImgs = curr_jobdetails?.company_id?.cover_images;
     const logo = curr_jobdetails?.company_id?.logo;
-    
+
     // Check if cover_images exists and has valid entries
     if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
       // Filter out null/undefined/empty values
-      const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
+      const validCoverImages = coverImgs.filter(
+        img => img && typeof img === 'string' && img.trim() !== '',
+      );
       if (validCoverImages.length > 0) {
         return validCoverImages;
       }
     }
-    
+
     // Fallback to logo if available
     if (logo && typeof logo === 'string' && logo.trim() !== '') {
       return [logo];
     }
-    
+
     // Final fallback to logoText
     return [IMAGES.logoText];
   })();
 
-  const renderCarouselItem = ({ item, index }: any) => {
+  const renderCarouselItem = ({item, index}: any) => {
     // Handle both URI strings and require resources (numbers)
     const isCoverImage = typeof item === 'string';
     const imageSource = isCoverImage
-      ? { uri: item } 
-      : (typeof item === 'number' ? item : IMAGES.logoText);
+      ? {uri: item}
+      : typeof item === 'number'
+      ? item
+      : IMAGES.logoText;
 
     return (
-      <View key={index} style={styles.carouselItemContainer}>
+      <View key={index?.toString()} style={styles.carouselItemContainer}>
         <CustomImage
-          resizeMode={isCoverImage ? "cover" : "contain"}
+          resizeMode={isCoverImage ? 'cover' : 'contain'}
           imageStyle={styles.imageStyle}
           containerStyle={styles.carouselImage}
           source={imageSource}
@@ -177,12 +180,15 @@ const JobDetail = () => {
       const area = curr_jobdetails?.address || curr_jobdetails?.area || '';
       const description = curr_jobdetails?.description || '';
       const salary =
-        curr_jobdetails?.monthly_salary_from || curr_jobdetails?.monthly_salary_to
-          ? `Salary: ${curr_jobdetails?.currency} ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
+        curr_jobdetails?.monthly_salary_from ||
+        curr_jobdetails?.monthly_salary_to
+          ? `Salary: ${
+              curr_jobdetails?.currency
+            } ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-      
+
       const message = `${title}
 ${area}
 
@@ -198,12 +204,16 @@ ${salary}${shareUrlText}`;
 
       // Use cover image if available, otherwise use company logo
       // Only use string URLs for sharing (not require resources)
-      const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
-        ? coverImages[0] 
-        : (curr_jobdetails?.company_id?.logo && typeof curr_jobdetails.company_id.logo === 'string'
-          ? curr_jobdetails.company_id.logo 
-          : null);
-      
+      const coverImageUri =
+        coverImages &&
+        coverImages.length > 0 &&
+        typeof coverImages[0] === 'string'
+          ? coverImages[0]
+          : curr_jobdetails?.company_id?.logo &&
+            typeof curr_jobdetails.company_id.logo === 'string'
+          ? curr_jobdetails.company_id.logo
+          : null;
+
       if (coverImageUri && typeof coverImageUri === 'string') {
         try {
           const imagePath = await downloadImage(coverImageUri);
@@ -215,7 +225,6 @@ ${salary}${shareUrlText}`;
       }
 
       await Share.open(shareOptions);
-
     } catch (err: any) {
       if (err?.message !== 'User did not share') {
         console.log('❌ Share error:', err);
@@ -246,10 +255,19 @@ ${salary}${shareUrlText}`;
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
+  const handleLearnMore = () => {
+    if (curr_jobdetails?.company_id?._id) {
+      navigationRef.navigate(SCREENS.CompanyProfile, {
+        companyId: curr_jobdetails?.company_id?._id,
+        fromJobDetail: true,
+      });
+    }
+  };
+
   return (
     <LinearContainer
-      SafeAreaProps={{ edges: ['bottom', 'top'] }}
-      containerStyle={{ paddingBottom: bottom }}
+      SafeAreaProps={{edges: ['bottom', 'top']}}
+      containerStyle={{paddingBottom: bottom}}
       colors={[colors._F7F7F7, colors._F7F7F7]}>
       <BackHeader
         type="employe"
@@ -312,20 +330,28 @@ ${salary}${shareUrlText}`;
 
           <ScrollView
             style={styles.container}
-            contentContainerStyle={{ paddingBottom: hp(20) }}
+            contentContainerStyle={{paddingBottom: hp(20)}}
             showsVerticalScrollIndicator={false}>
             {/* Header Section */}
             <View style={styles.header}>
               <CustomImage
-                resizeMode={curr_jobdetails?.company_id?.logo ? "cover" : "contain"}
+                resizeMode={
+                  curr_jobdetails?.company_id?.logo ? 'cover' : 'contain'
+                }
                 uri={curr_jobdetails?.company_id?.logo || undefined}
-                source={!curr_jobdetails?.company_id?.logo ? IMAGES.logoText : undefined}
+                source={
+                  !curr_jobdetails?.company_id?.logo
+                    ? IMAGES.logoText
+                    : undefined
+                }
                 containerStyle={styles.logoBg}
-                imageStyle={{ width: '100%', height: '100%' }}
+                imageStyle={{width: '100%', height: '100%'}}
               />
               <View style={styles.locationTitle}>
                 <Text style={styles.jobTitle}>{curr_jobdetails?.title}</Text>
-                <Text style={styles.coNameTitle}>{curr_jobdetails?.company_id?.company_name}</Text>
+                <Text style={styles.coNameTitle}>
+                  {curr_jobdetails?.company_id?.company_name}
+                </Text>
               </View>
               <TouchableOpacity
                 onPress={() => handleToggleFavorite(curr_jobdetails)}
@@ -343,30 +369,39 @@ ${salary}${shareUrlText}`;
               {curr_jobdetails?.contract_type && (
                 <View style={styles.snapshotItem}>
                   <Text style={styles.snapshotLabel}>Employment Type</Text>
-                  <Text style={styles.snapshotValue}>{curr_jobdetails?.contract_type}</Text>
+                  <Text style={styles.snapshotValue}>
+                    {curr_jobdetails?.contract_type}
+                  </Text>
                 </View>
               )}
 
               {curr_jobdetails?.department_id?.title && (
                 <View style={styles.snapshotItem}>
                   <Text style={styles.snapshotLabel}>Department</Text>
-                  <Text style={styles.snapshotValue}>{curr_jobdetails?.department_id?.title}</Text>
-                </View>
-              )}
-
-              {curr_jobdetails?.monthly_salary_from && curr_jobdetails?.monthly_salary_to && (
-                <View style={styles.snapshotItem}>
-                  <Text style={styles.snapshotLabel}>Salary</Text>
                   <Text style={styles.snapshotValue}>
-                    {curr_jobdetails?.currency} {curr_jobdetails?.monthly_salary_from} - {curr_jobdetails?.monthly_salary_to}
+                    {curr_jobdetails?.department_id?.title}
                   </Text>
                 </View>
               )}
 
+              {curr_jobdetails?.monthly_salary_from &&
+                curr_jobdetails?.monthly_salary_to && (
+                  <View style={styles.snapshotItem}>
+                    <Text style={styles.snapshotLabel}>Salary</Text>
+                    <Text style={styles.snapshotValue}>
+                      {curr_jobdetails?.currency}{' '}
+                      {curr_jobdetails?.monthly_salary_from} -{' '}
+                      {curr_jobdetails?.monthly_salary_to}
+                    </Text>
+                  </View>
+                )}
+
               {curr_jobdetails?.createdAt && (
                 <View style={styles.snapshotItem}>
                   <Text style={styles.snapshotLabel}>Posted</Text>
-                  <Text style={styles.snapshotValue}>{getDaysAgo(curr_jobdetails?.createdAt)}</Text>
+                  <Text style={styles.snapshotValue}>
+                    {getDaysAgo(curr_jobdetails?.createdAt)}
+                  </Text>
                 </View>
               )}
             </View>
@@ -428,7 +463,7 @@ ${salary}${shareUrlText}`;
                 style={styles.flatlist}
                 keyExtractor={(_, index) => index.toString()}
                 contentContainerStyle={styles.flatListContent}
-                renderItem={({ item, index }) => {
+                renderItem={({item, index}) => {
                   const [key, value] = item;
 
                   return (
@@ -445,7 +480,7 @@ ${salary}${shareUrlText}`;
               />
             </View>
 
-            <View style={{ height: hp(40) }} />
+            <View style={{height: hp(40)}} />
             <GradientButton
               type="Company"
               disabled={is_applied}
@@ -461,6 +496,17 @@ ${salary}${shareUrlText}`;
               }}
               title={is_applied ? 'Applied' : 'Apply Now'}
             />
+
+            <TouchableOpacity
+              style={styles.learnMoreContainer}
+              onPress={handleLearnMore}>
+              <Text style={styles.learnMoreText}>
+                Learn more about{' '}
+                <Text style={styles.companyNameText}>
+                  {curr_jobdetails?.company_id?.company_name}
+                </Text>
+              </Text>
+            </TouchableOpacity>
           </ScrollView>
         </>
       )}
@@ -472,7 +518,7 @@ ${salary}${shareUrlText}`;
 export default JobDetail;
 
 const styles = StyleSheet.create({
-  lefticon: { marginRight: wp(21) },
+  lefticon: {marginRight: wp(21)},
   share: {
     width: wp(17),
     height: wp(17),
@@ -498,7 +544,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(230),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,
@@ -647,7 +693,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 4,
@@ -688,14 +734,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(12),
     justifyContent: 'space-between',
   },
-  addJobText: { ...commonFontStyle(500, 13, colors.black) },
+  addJobText: {...commonFontStyle(500, 13, colors.black)},
   alertButton: {
     borderRadius: hp(20),
     paddingVertical: hp(8),
     paddingHorizontal: wp(10),
     backgroundColor: colors.empPrimary,
   },
-  alertText: { ...commonFontStyle(500, 10, colors.white) },
+  alertText: {...commonFontStyle(500, 10, colors.white)},
   snapshotContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -705,7 +751,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(16),
     gap: hp(12),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
@@ -719,5 +765,18 @@ const styles = StyleSheet.create({
   },
   snapshotValue: {
     ...commonFontStyle(600, 14, colors._0B3970),
+  },
+  learnMoreContainer: {
+    paddingVertical: hp(20),
+    paddingHorizontal: wp(20),
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  learnMoreText: {
+    ...commonFontStyle(400, 14, colors._2F2F2F),
+  },
+  companyNameText: {
+    ...commonFontStyle(600, 14, colors._0B3970),
+    textDecorationLine: 'underline',
   },
 });

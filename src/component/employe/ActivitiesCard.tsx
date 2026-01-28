@@ -30,9 +30,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
   };
 
   const handleViewPress = () => {
-    // Check if interview_link is available in item or jobDetail
     const interviewLink = item?.interview_link || jobDetail?.data?.interview_link;
-    console.log("🔥 ~ handleViewPress ~ interviewLink:", interviewLink)
     
     if (jobDetail?.data) {
       navigateTo(SCREENS.JobInvitationScreen, {
@@ -40,8 +38,6 @@ const ActivitiesCard: FC<props> = ({ item }) => {
         jobDetail: jobDetail.data,
       });
     } else if (item?.job_id) {
-      // If job details are still loading, wait a bit or navigate with available data
-      // For now, navigate to interview screen - it will handle missing data
       navigateTo(SCREENS.JobInvitationScreen, {
         link: interviewLink || '',
         jobDetail: {
@@ -106,7 +102,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
         </View>
 
         <View style={styles.actionButtons}>
-          {item?.chat_status === 'chat' && (
+          {item?.chat_status == 'chat' && (
             <Pressable
               onPress={() => {
                 navigateTo(SCREENS.Chat, { data: item });
