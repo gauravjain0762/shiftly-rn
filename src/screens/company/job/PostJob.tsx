@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   BackHeader,
   CustomDropdown,
@@ -19,7 +19,7 @@ import {
   LinearContainer,
   LocationContainer,
 } from '../../../component';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
@@ -27,11 +27,11 @@ import {
   hp,
   wp,
 } from '../../../theme/fonts';
-import { colors } from '../../../theme/colors';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { IMAGES } from '../../../assets/Images';
-import { AppStyles } from '../../../theme/appStyles';
-import { navigationRef } from '../../../navigation/RootContainer';
+import {colors} from '../../../theme/colors';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {IMAGES} from '../../../assets/Images';
+import {AppStyles} from '../../../theme/appStyles';
+import {navigationRef} from '../../../navigation/RootContainer';
 import {
   errorToast,
   IMAGE_URL,
@@ -39,13 +39,13 @@ import {
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
-import { RFValue } from 'react-native-responsive-fontsize';
+import {SCREENS} from '../../../navigation/screenNames';
+import {RFValue} from 'react-native-responsive-fontsize';
 import BottomModal from '../../../component/common/BottomModal';
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
-import { useCreateJobMutation } from '../../../api/authApi';
-import { getAsyncUserLocation } from '../../../utils/asyncStorage';
-import { getAddress } from '../../../utils/locationHandler';
+import {useCreateJobMutation} from '../../../api/authApi';
+import {getAsyncUserLocation} from '../../../utils/asyncStorage';
+import {getAddress} from '../../../utils/locationHandler';
 import {
   useEditCompanyJobMutation,
   useGetDepartmentsQuery,
@@ -54,9 +54,9 @@ import {
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
-import { useAppSelector } from '../../../redux/hooks';
+import {useFocusEffect} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
+import {useAppSelector} from '../../../redux/hooks';
 import {
   resetJobFormState,
   selectJobForm,
@@ -67,64 +67,66 @@ import BaseText from '../../../component/common/BaseText';
 import CharLength from '../../../component/common/CharLength';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Tooltip from '../../../component/common/Tooltip';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import {API} from '../../../utils/apiConstant';
 
 const contractTypeData = [
-  { label: 'Full Time', value: 'Full Time' },
-  { label: 'Part Time', value: 'Part Time' },
-  { label: 'Freelance', value: 'Freelance' },
-  { label: 'Internship', value: 'Internship' },
-  { label: 'Temporary', value: 'Temporary' },
+  {label: 'Full Time', value: 'Full Time'},
+  {label: 'Part Time', value: 'Part Time'},
+  {label: 'Freelance', value: 'Freelance'},
+  {label: 'Internship', value: 'Internship'},
+  {label: 'Temporary', value: 'Temporary'},
 ];
 
 const jobAreaData = [
-  { label: 'Dubai Marina', value: 'Dubai Marina' },
-  { label: 'Business Bay', value: 'Business Bay' },
-  { label: 'Downtown Dubai', value: 'Downtown Dubai' },
-  { label: 'Jumeirah', value: 'Jumeirah' },
-  { label: 'Al Barsha', value: 'Al Barsha' },
+  {label: 'Dubai Marina', value: 'Dubai Marina'},
+  {label: 'Business Bay', value: 'Business Bay'},
+  {label: 'Downtown Dubai', value: 'Downtown Dubai'},
+  {label: 'Jumeirah', value: 'Jumeirah'},
+  {label: 'Al Barsha', value: 'Al Barsha'},
 ];
 
 const durationData = [
-  { label: '7 Days', value: '7 Days' },
-  { label: '14 Days', value: '14 Days' },
-  { label: '1 Month', value: '1 Month' },
-  { label: '3 Months', value: '3 Months' },
-  { label: 'Until Filled', value: 'Until Filled' },
+  {label: '7 Days', value: '7 Days'},
+  {label: '14 Days', value: '14 Days'},
+  {label: '1 Month', value: '1 Month'},
+  {label: '3 Months', value: '3 Months'},
+  {label: 'Until Filled', value: 'Until Filled'},
 ];
 
 const startDateData = [
-  { label: 'Immediately', value: 'Immediately' },
-  { label: 'Within 3 Days', value: 'Within 3 Days' },
-  { label: 'Within a Week', value: 'Within a Week' },
-  { label: 'Next Month', value: 'Next Month' },
+  {label: 'Immediately', value: 'Immediately'},
+  {label: 'Within 3 Days', value: 'Within 3 Days'},
+  {label: 'Within a Week', value: 'Within a Week'},
+  {label: 'Next Month', value: 'Next Month'},
 ];
 
 const numberOfPositionsData = [
-  { label: '1', value: '1' },
-  { label: '2', value: '2' },
-  { label: '3', value: '3' },
-  { label: '4', value: '4' },
-  { label: '5+', value: '5+' },
+  {label: '1', value: '1'},
+  {label: '2', value: '2'},
+  {label: '3', value: '3'},
+  {label: '4', value: '4'},
+  {label: '5+', value: '5+'},
 ];
 
 const salaryRangeData = [
-  { label: '2,000 - 5,000', value: '2,000 - 5,000' },
-  { label: '5,000 - 10,000', value: '5,000 - 10,000' },
-  { label: '10,000 - 15,000', value: '10,000 - 15,000' },
-  { label: '15,000 - 20,000', value: '15,000 - 20,000' },
-  { label: '20,000+', value: '20,000+' },
+  {label: '2,000 - 5,000', value: '2,000 - 5,000'},
+  {label: '5,000 - 10,000', value: '5,000 - 10,000'},
+  {label: '10,000 - 15,000', value: '10,000 - 15,000'},
+  {label: '15,000 - 20,000', value: '15,000 - 20,000'},
+  {label: '20,000+', value: '20,000+'},
 ];
 
 const currencyData = [
-  { label: 'AED', value: 'AED' },
-  { label: 'USD', value: 'USD' },
-  { label: 'EUR', value: 'EUR' },
-  { label: 'INR', value: 'INR' },
-  { label: 'GBP', value: 'GBP' },
+  {label: 'AED', value: 'AED'},
+  {label: 'USD', value: 'USD'},
+  {label: 'EUR', value: 'EUR'},
+  {label: 'INR', value: 'INR'},
+  {label: 'GBP', value: 'GBP'},
 ];
 
 const PostJob = () => {
-  const { t } = useTranslation<any>();
+  const {t} = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const {
     title,
@@ -151,26 +153,30 @@ const PostJob = () => {
     expiry_date,
   } = useAppSelector((state: any) => selectJobForm(state));
 
-  const { updateJobForm } = useJobFormUpdater();
+  const {updateJobForm} = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
-  const { data: facilitiesData } = useGetFacilitiesQuery({});
+  const {data: facilitiesData} = useGetFacilitiesQuery({});
   const facilities = facilitiesData?.data?.facilities;
-  const { data: skillsData } = useGetSkillsQuery({});
+  const {data: skillsData} = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
-  const { data: departmentsData } = useGetDepartmentsQuery({});
+  const {data: departmentsData} = useGetDepartmentsQuery({});
   const departments = departmentsData?.data?.departments as any[];
   const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
   const shouldSkip = !(steps === 5 && !!job_id);
-  const { data: suggestedData } = useGetSuggestedEmployeesQuery(job_id, {
+  const {data: suggestedData} = useGetSuggestedEmployeesQuery(job_id, {
     skip: shouldSkip || !job_id,
   });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
   const [createdJobId, setCreatedJobId] = useState<string>('');
   const [createdJobData, setCreatedJobData] = useState<any>(null);
-  const { userInfo } = useAppSelector((state: any) => state.auth);
-  const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] = useState(false);
+  const {userInfo, getAppData} = useAppSelector((state: any) => state.auth);
+  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
+  const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] =
+    useState(false);
+  const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -191,7 +197,7 @@ const PostJob = () => {
   const handleJobDepartmentBlur = () => {
     setIsDropdownOpen(false);
     if (scrollViewRef.current?.setNativeProps) {
-      scrollViewRef.current.setNativeProps({ scrollEnabled: true });
+      scrollViewRef.current.setNativeProps({scrollEnabled: true});
     }
   };
 
@@ -202,12 +208,12 @@ const PostJob = () => {
   }));
   const [userAddress, setUserAddress] = useState<
     | {
-      address: string;
-      lat: number;
-      lng: number;
-      state: string;
-      country: string;
-    }
+        address: string;
+        lat: number;
+        lng: number;
+        state: string;
+        country: string;
+      }
     | undefined
   >();
 
@@ -334,12 +340,11 @@ const PostJob = () => {
     slideAnim.setValue(0);
   }, []);
 
-
   // Auto-calculate expiry date on mount if duration is set but expiry_date is not
   useEffect(() => {
     if (duration?.value && !expiry_date) {
       const calculatedExpiryDate = calculateExpiryDate(duration.value);
-      updateJobForm({ expiry_date: calculatedExpiryDate });
+      updateJobForm({expiry_date: calculatedExpiryDate});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -349,9 +354,9 @@ const PostJob = () => {
     if (scrollViewRef.current) {
       // Use setNativeProps to disable scroll when dropdown is open
       if (isDropdownOpen) {
-        scrollViewRef.current.setNativeProps?.({ scrollEnabled: false });
+        scrollViewRef.current.setNativeProps?.({scrollEnabled: false});
       } else {
-        scrollViewRef.current.setNativeProps?.({ scrollEnabled: true });
+        scrollViewRef.current.setNativeProps?.({scrollEnabled: true});
       }
     }
   }, [isDropdownOpen]);
@@ -367,7 +372,7 @@ const PostJob = () => {
       (!job_sector || !job_sector?.value)
     ) {
       // Always set default when departments are available and job_sector is not set
-      updateJobForm({ job_sector: dropdownDepartmentsOptions[0] });
+      updateJobForm({job_sector: dropdownDepartmentsOptions[0]});
       if (!hasInitializedJobSectorRef.current) {
         hasInitializedJobSectorRef.current = true;
       }
@@ -382,18 +387,25 @@ const PostJob = () => {
       contractTypeData?.length > 0 &&
       (!contract_type || !contract_type?.label || !contract_type?.value)
     ) {
-      updateJobForm({ contract_type: contractTypeData[0] }); // Default to "Full Time"
+      updateJobForm({contract_type: contractTypeData[0]}); // Default to "Full Time"
       hasInitializedContractTypeRef.current = true;
     }
   }, [editMode, contract_type, updateJobForm]);
 
   // Clean up empty/blank requirements when creating a new job (only on mount)
   useEffect(() => {
-    if (!editMode && !hasCleanedRequirementsRef.current && requirements && requirements.length > 0) {
-      const validRequirements = requirements.filter((req: string) => req && req.trim().length > 0);
+    if (
+      !editMode &&
+      !hasCleanedRequirementsRef.current &&
+      requirements &&
+      requirements.length > 0
+    ) {
+      const validRequirements = requirements.filter(
+        (req: string) => req && req.trim().length > 0,
+      );
       if (validRequirements.length !== requirements.length) {
         // Only update if there were empty requirements to remove
-        updateJobForm({ requirements: validRequirements });
+        updateJobForm({requirements: validRequirements});
       }
       hasCleanedRequirementsRef.current = true;
     }
@@ -401,9 +413,9 @@ const PostJob = () => {
 
   const [location, setLocation] = useState<
     | {
-      latitude: number;
-      longitude: number;
-    }
+        latitude: number;
+        longitude: number;
+      }
     | undefined
   >(undefined);
 
@@ -460,7 +472,11 @@ const PostJob = () => {
   };
 
   const handleCreateJob = async () => {
-    if (!job_sector || !job_sector.value || (typeof job_sector.value === 'string' && job_sector.value.trim() === '')) {
+    if (
+      !job_sector ||
+      !job_sector.value ||
+      (typeof job_sector.value === 'string' && job_sector.value.trim() === '')
+    ) {
       errorToast(t('Please select a job department'));
       return;
     }
@@ -471,7 +487,8 @@ const PostJob = () => {
     // Build params with latest values
     const params = {
       title: title,
-      contract_type: contract_type?.label || contract_type?.value || 'Full Time',
+      contract_type:
+        contract_type?.label || contract_type?.value || 'Full Time',
       area: area?.value,
       description: describe,
       address: userAddress?.address || 'UAE, Dubai',
@@ -498,10 +515,10 @@ const PostJob = () => {
       let response;
 
       if (editMode) {
-        response = await editJob({ job_id: job_id, ...params }).unwrap();
+        response = await editJob({job_id: job_id, ...params}).unwrap();
         console.log('Job updated: >>>>>>>>', response?.data);
       } else {
-        response = await createJob(params).unwrap() as any;
+        response = (await createJob(params).unwrap()) as any;
         console.log('Job created: >>>>>>>>', response?.data);
       }
 
@@ -513,12 +530,12 @@ const PostJob = () => {
           response?.data;
         if (newJobId) {
           setCreatedJobId(String(newJobId));
-          updateJobForm({ job_id: String(newJobId) });
+          updateJobForm({job_id: String(newJobId)});
         }
         setCreatedJobData(response?.data || null);
         setTimeout(() => {
           if (!isSuccessModalVisible) {
-            updateJobForm({ isSuccessModalVisible: true });
+            updateJobForm({isSuccessModalVisible: true});
           }
         }, 150);
         successToast(response?.message);
@@ -544,7 +561,7 @@ const PostJob = () => {
       ? selected.filter((i: any) => i?._id !== item?._id)
       : [...(selected || []), item];
 
-    updateJobForm({ selected: updatedList });
+    updateJobForm({selected: updatedList});
   };
 
   const nextStep = () => {
@@ -695,31 +712,31 @@ const PostJob = () => {
     }
     const trimmedText = requirementText.trim();
     if (trimmedText) {
-      updateJobForm({ requirements: [...requirements, trimmedText] });
+      updateJobForm({requirements: [...requirements, trimmedText]});
     }
-    updateJobForm({ requirementText: '', isModalVisible: false });
+    updateJobForm({requirementText: '', isModalVisible: false});
   };
 
   const removeSkill = (skill: string) => {
     const updatedSkills = jobSkills.filter(s => s !== skill);
-    updateJobForm({ jobSkills: updatedSkills });
+    updateJobForm({jobSkills: updatedSkills});
   };
 
   const handleSkillSelection = (skill: string) => {
     if (jobSkills.includes(skill)) {
       const filtered = jobSkills.filter(i => i !== skill);
-      updateJobForm({ jobSkills: filtered });
+      updateJobForm({jobSkills: filtered});
     } else {
-      updateJobForm({ jobSkills: [...jobSkills, skill] });
+      updateJobForm({jobSkills: [...jobSkills, skill]});
     }
   };
 
   const toggleSkillId = (id: string) => {
     if (skillId.includes(id)) {
       const updated = skillId.filter((i: string) => i !== id);
-      updateJobForm({ skillId: updated });
+      updateJobForm({skillId: updated});
     } else {
-      updateJobForm({ skillId: [...skillId, id] });
+      updateJobForm({skillId: [...skillId, id]});
     }
   };
 
@@ -732,13 +749,13 @@ const PostJob = () => {
   const render = () => {
     const animatedStyle = {
       opacity: fadeAnim,
-      transform: [{ translateX: slideAnim }],
+      transform: [{translateX: slideAnim}],
     };
 
     switch (steps) {
       case 1:
         return (
-          <Animated.View key="step-1" style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-1" style={[{flex: 1}, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -762,7 +779,7 @@ const PostJob = () => {
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
                   placeholder={t('Enter role description')}
-                  onChangeText={e => updateJobForm({ describe: e })}
+                  onChangeText={e => updateJobForm({describe: e})}
                 />
                 <CharLength value={describe} chars={1000} />
               </View>
@@ -783,7 +800,7 @@ const PostJob = () => {
         );
       case 2:
         return (
-          <Animated.View key="step-2" style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-2" style={[{flex: 1}, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -863,7 +880,7 @@ const PostJob = () => {
         );
       case 3:
         return (
-          <Animated.View key="step-3" style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-3" style={[{flex: 1}, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -874,11 +891,15 @@ const PostJob = () => {
               <View />
             </View>
             <View style={styles.requirementsContainer}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.inputLabelLarge}>{t('Job Requirements')}</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={styles.inputLabelLarge}>
+                  {t('Job Requirements')}
+                </Text>
                 <Tooltip
-                  tooltipBoxStyle={{ right: '-100%' }}
-                  message={"Choose from our predefined list of requirements to ensure accurate candidate matching."}
+                  tooltipBoxStyle={{right: '-100%'}}
+                  message={
+                    'Choose from our predefined list of requirements to ensure accurate candidate matching.'
+                  }
                 />
               </View>
               <View
@@ -892,20 +913,31 @@ const PostJob = () => {
                 }>
                 {(() => {
                   // Filter out empty/blank requirements
-                  const validRequirements = requirements?.filter((req: string) => req && req.trim().length > 0) || [];
+                  const validRequirements =
+                    requirements?.filter(
+                      (req: string) => req && req.trim().length > 0,
+                    ) || [];
 
                   return validRequirements.length > 0 ? (
                     <FlatList
                       data={validRequirements}
-                      contentContainerStyle={{ flexGrow: 1, paddingRight: wp(10) }}
+                      contentContainerStyle={{
+                        flexGrow: 1,
+                        paddingRight: wp(10),
+                      }}
                       keyExtractor={(_, index) => index.toString()}
-                      style={{ flex: 1 }}
-                      renderItem={({ item }) => (
+                      style={{flex: 1}}
+                      renderItem={({item}) => (
                         <View style={styles.boxContainer}>
                           <View style={styles.checkRound}>
-                            <Image source={IMAGES.mark} style={styles.markIcon} />
+                            <Image
+                              source={IMAGES.mark}
+                              style={styles.markIcon}
+                            />
                           </View>
-                          <Text style={styles.requirementText} numberOfLines={2}>
+                          <Text
+                            style={styles.requirementText}
+                            numberOfLines={2}>
                             {item}
                           </Text>
                         </View>
@@ -913,7 +945,9 @@ const PostJob = () => {
                       ListEmptyComponent={() => (
                         <View style={styles.emptyReqContainer}>
                           <BaseText
-                            style={{ ...commonFontStyle(400, 16, colors._2F2F2F) }}>
+                            style={{
+                              ...commonFontStyle(400, 16, colors._2F2F2F),
+                            }}>
                             {'No requirements added yet'}
                           </BaseText>
                         </View>
@@ -923,7 +957,7 @@ const PostJob = () => {
                   ) : (
                     <View style={styles.emptyReqContainer}>
                       <BaseText
-                        style={{ ...commonFontStyle(400, 16, colors.black) }}>
+                        style={{...commonFontStyle(400, 16, colors.black)}}>
                         {'No requirements added yet'}
                       </BaseText>
                     </View>
@@ -940,7 +974,7 @@ const PostJob = () => {
                   }
                 }>
                 <Pressable
-                  onPress={() => updateJobForm({ isModalVisible: true })}
+                  onPress={() => updateJobForm({isModalVisible: true})}
                   style={styles.addRequirementButton}>
                   <View style={styles.checkRound}>
                     <Image
@@ -970,11 +1004,11 @@ const PostJob = () => {
             <BottomModal
               visible={isModalVisible}
               onClose={() => {
-                updateJobForm({ isModalVisible: false });
+                updateJobForm({isModalVisible: false});
               }}>
               <Pressable
                 onPress={() => {
-                  updateJobForm({ requirementText: '', isModalVisible: false });
+                  updateJobForm({requirementText: '', isModalVisible: false});
                 }}>
                 <Image
                   source={IMAGES.close}
@@ -983,7 +1017,7 @@ const PostJob = () => {
                 />
               </Pressable>
               <Text
-                onPress={() => updateJobForm({ isModalVisible: true })}
+                onPress={() => updateJobForm({isModalVisible: true})}
                 style={styles.modalTitleText}>
                 {t('Add New Requirements')}
               </Text>
@@ -991,7 +1025,7 @@ const PostJob = () => {
                 multiline
                 maxLength={400}
                 value={requirementText}
-                onChangeText={text => updateJobForm({ requirementText: text })}
+                onChangeText={text => updateJobForm({requirementText: text})}
                 containerStyle={styles.modalInputContainer}
                 placeholder={t('Write requirements')}
                 inputStyle={styles.modalInputStyle}
@@ -1008,7 +1042,7 @@ const PostJob = () => {
         );
       case 4:
         return (
-          <Animated.View key="step-4" style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-4" style={[{flex: 1}, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -1026,7 +1060,7 @@ const PostJob = () => {
                   data={facilities}
                   keyExtractor={(_, index) => index.toString()}
                   contentContainerStyle={styles.providerContainer}
-                  renderItem={({ item, index }) => {
+                  renderItem={({item, index}) => {
                     const isChecked = selected?.some(
                       (i: any) => i?._id === item?._id,
                     );
@@ -1038,7 +1072,7 @@ const PostJob = () => {
                         <View
                           style={[
                             styles.checkbox,
-                            { borderWidth: isChecked ? 0 : 1 },
+                            {borderWidth: isChecked ? 0 : 1},
                           ]}>
                           {isChecked && (
                             <Image
@@ -1056,7 +1090,7 @@ const PostJob = () => {
               <GradientButton
                 style={styles.btn}
                 type="Company"
-                title={t('Post')}
+                title={t('Review your job resume')}
                 onPress={handleCreateJob}
               />
             </View>
@@ -1064,7 +1098,7 @@ const PostJob = () => {
         );
       case 5:
         return (
-          <Animated.View key="step-5" style={[{ flex: 1 }, animatedStyle]}>
+          <Animated.View key="step-5" style={[{flex: 1}, animatedStyle]}>
             <View style={styles.empContainer}>
               <View style={styles.empHeader}>
                 <BackHeader
@@ -1075,7 +1109,7 @@ const PostJob = () => {
                 />
 
                 <View style={styles.card}>
-                  <Image source={{ uri: IMAGE_URL }} style={styles.avatar} />
+                  <Image source={{uri: IMAGE_URL}} style={styles.avatar} />
                   <View style={styles.textContainer}>
                     <Text style={styles.empTitle}>{title}</Text>
                     <Text style={styles.empSubtitle}>
@@ -1083,7 +1117,9 @@ const PostJob = () => {
                     </Text>
                     <View style={styles.empRow}>
                       <Text style={styles.location}>
-                        {`${userAddress?.state || 'N/A'}, ${userAddress?.country || 'N/A'}`}
+                        {`${userAddress?.state || 'N/A'}, ${
+                          userAddress?.country || 'N/A'
+                        }`}
                       </Text>
                     </View>
                     <Text style={styles.location}>{contract_type?.label}</Text>
@@ -1121,7 +1157,7 @@ const PostJob = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
                 keyExtractor={(_, index) => index.toString()}
-                renderItem={({ item, index }) => {
+                renderItem={({item, index}) => {
                   return (
                     <View>
                       <EmplyoeeCard
@@ -1185,20 +1221,21 @@ const PostJob = () => {
           <Animated.View
             key="step-0"
             style={[
-              { flex: 1 },
+              {flex: 1},
               {
                 opacity: fadeAnim,
-                transform: [{ translateX: slideAnim }],
+                transform: [{translateX: slideAnim}],
               },
             ]}>
             <View>
               <View style={styles.field}>
                 <Text style={styles.label}>
-                  {t('Job Title')}<Text style={styles.required}>*</Text>
+                  {t('Job Title')}
+                  <Text style={styles.required}>*</Text>
                 </Text>
                 <CustomTextInput
                   value={title}
-                  onChangeText={e => updateJobForm({ title: e })}
+                  onChangeText={e => updateJobForm({title: e})}
                   placeholder={'Enter job title'}
                   inputStyle={styles.input}
                   placeholderTextColor={colors._7B7878}
@@ -1213,7 +1250,9 @@ const PostJob = () => {
                   valueField="value"
                   value={contract_type?.value}
                   onChange={(e: any) => {
-                    updateJobForm({ contract_type: { label: e.label, value: e.value } });
+                    updateJobForm({
+                      contract_type: {label: e.label, value: e.value},
+                    });
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -1223,24 +1262,132 @@ const PostJob = () => {
               </View>
               <View style={styles.field}>
                 <Text style={styles.label}>{t('Job Area')}</Text>
-                <CustomDropdown
-                  data={jobAreaData}
-                  labelField="label"
-                  valueField="value"
-                  value={area?.value}
-                  onChange={(e: any) => {
-                    updateJobForm({ area: { label: e.label, value: e.value } });
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
+                <View
+                  style={[
+                    styles.autocompleteWrapper,
+                    isAutocompleteOpen && styles.autocompleteWrapperOpen,
+                  ]}>
+                  <GooglePlacesAutocomplete
+                    placeholder={area?.label || 'Search location'}
+                    onPress={(data, details = null) => {
+                      console.log('Selected:', data.description);
+                      updateJobForm({
+                        area: {
+                          label: data.description,
+                          value: data.description,
+                          place_id: data.place_id,
+                          coordinates: details?.geometry?.location,
+                        },
+                      });
+                      setIsAutocompleteOpen(false);
+                    }}
+                    query={{
+                      key: mapKey,
+                      language: 'en',
+                      components: 'country:ae', // Restrict to UAE
+                    }}
+                    fetchDetails={true}
+                    enablePoweredByContainer={false}
+                    keepResultsAfterBlur={true}
+                    listViewDisplayed={isAutocompleteOpen}
+                    onFocus={() => {
+                      setIsAutocompleteOpen(true);
+                    }}
+                    onBlur={() => {
+                      // Delay closing to allow selection
+                      setTimeout(() => setIsAutocompleteOpen(false), 300);
+                    }}
+                    onFail={error => {
+                      console.error('GooglePlacesAutocomplete error:', error);
+                    }}
+                    suppressDefaultStyles={false}
+                    styles={{
+                      container: {
+                        flex: 0,
+                        zIndex: 1000,
+                      },
+                      textInputContainer: {
+                        backgroundColor: 'transparent',
+                        borderWidth: 0,
+                        zIndex: 1000,
+                      },
+                      textInput: {
+                        height: hp(56),
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        paddingVertical: hp(16),
+                        paddingHorizontal: wp(13),
+                        paddingRight: wp(45),
+                        borderColor: colors._234F86,
+                        ...commonFontStyle(400, 18, colors._181818),
+                        backgroundColor: colors.white,
+                        marginTop: 0,
+                        marginBottom: 0,
+                      },
+                      listView: {
+                        position: 'absolute',
+                        top: hp(60),
+                        left: 0,
+                        right: 0,
+                        backgroundColor: colors.white,
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        borderColor: colors._234F86,
+                        elevation: 10,
+                        shadowColor: '#000',
+                        shadowOffset: {width: 0, height: 4},
+                        shadowOpacity: 0.3,
+                        shadowRadius: 8,
+                        maxHeight: hp(250),
+                        zIndex: 1001,
+                        marginTop: hp(4),
+                      },
+                      row: {
+                        backgroundColor: colors.white,
+                        paddingVertical: hp(14),
+                        paddingHorizontal: wp(13),
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors._D9D9D9,
+                        zIndex: 1001,
+                      },
+                      separator: {
+                        height: 0,
+                      },
+                      description: {
+                        ...commonFontStyle(400, 15, colors._181818),
+                        zIndex: 1001,
+                      },
+                      loader: {
+                        paddingVertical: hp(10),
+                      },
+                      poweredContainer: {
+                        display: 'none',
+                      },
+                    }}
+                    debounce={400}
+                    minLength={2}
+                    nearbyPlacesAPI="GooglePlacesSearch"
+                    textInputProps={{
+                      placeholderTextColor: colors._7B7878,
+                      returnKeyType: 'search',
+                      onFocus: () => {
+                        setIsAutocompleteOpen(true);
+                      },
+                      onChangeText: text => {
+                        // Ensure list is shown when user types
+                        setSearchText(text);
+                        setIsAutocompleteOpen(true);
+                      },
+                      clearButtonMode: 'while-editing',
+                    }}
+                    numberOfLines={1}
+                  />
+                </View>
               </View>
               <LocationContainer
                 address={userAddress?.address}
                 onPressMap={() => {
-                  navigateTo(SCREENS.CoPostJobLocationScreen, { userAddress });
+                  navigateTo(SCREENS.CoPostJobLocationScreen, {userAddress});
                 }}
                 containerStyle={styles.map}
                 lat={userAddress?.lat || location?.latitude}
@@ -1248,7 +1395,7 @@ const PostJob = () => {
               />
               <Pressable
                 onPress={() => {
-                  updateJobForm({ canApply: !canApply });
+                  updateJobForm({canApply: !canApply});
                 }}
                 style={styles.peopleRow}>
                 <Image
@@ -1260,10 +1407,14 @@ const PostJob = () => {
                 </Text>
               </Pressable>
               <View style={styles.fieldWithMargin}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.label}>{t('How long should this job be live?')}</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Text style={styles.label}>
+                    {t('How long should this job be live?')}
+                  </Text>
                   <Tooltip
-                    message={t('Choose how long the job stays active. It will automatically expire after this period.')}
+                    message={t(
+                      'Choose how long the job stays active. It will automatically expire after this period.',
+                    )}
                   />
                 </View>
                 <CustomDropdown
@@ -1272,11 +1423,11 @@ const PostJob = () => {
                   valueField="value"
                   value={duration?.value}
                   onChange={(e: any) => {
-                    updateJobForm({ duration: { label: e.label, value: e.value } });
+                    updateJobForm({duration: {label: e.label, value: e.value}});
                     // Automatically calculate expiry date if not manually changed
                     if (!isExpiryDateManuallyChanged) {
                       const calculatedExpiryDate = calculateExpiryDate(e.value);
-                      updateJobForm({ expiry_date: calculatedExpiryDate });
+                      updateJobForm({expiry_date: calculatedExpiryDate});
                     }
                   }}
                   dropdownStyle={styles.dropdown}
@@ -1288,12 +1439,12 @@ const PostJob = () => {
               <View style={styles.field}>
                 <Text style={styles.label}>{t('Expiry Date')}</Text>
                 <Pressable
-                  style={{ position: 'relative' }}
-                  onPress={() => updateJobForm({ isModalVisible: true })}>
+                  style={{position: 'relative'}}
+                  onPress={() => updateJobForm({isModalVisible: true})}>
                   <CustomDropdown
                     data={
                       expiry_date
-                        ? [{ label: expiry_date, value: expiry_date }]
+                        ? [{label: expiry_date, value: expiry_date}]
                         : []
                     }
                     disable={true}
@@ -1308,7 +1459,7 @@ const PostJob = () => {
                   />
                   <Pressable
                     style={[StyleSheet.absoluteFill, styles.overlayPressable]}
-                    onPress={() => updateJobForm({ isModalVisible: true })}
+                    onPress={() => updateJobForm({isModalVisible: true})}
                   />
                 </Pressable>
 
@@ -1321,7 +1472,7 @@ const PostJob = () => {
                       : new Date()
                   }
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  pickerStyleIOS={{ alignSelf: 'center' }}
+                  pickerStyleIOS={{alignSelf: 'center'}}
                   onConfirm={(date: Date) => {
                     const formattedDate = date.toISOString().split('T')[0];
                     updateJobForm({
@@ -1331,7 +1482,7 @@ const PostJob = () => {
                     // Mark as manually changed so duration changes don't override it
                     setIsExpiryDateManuallyChanged(true);
                   }}
-                  onCancel={() => updateJobForm({ isModalVisible: false })}
+                  onCancel={() => updateJobForm({isModalVisible: false})}
                 />
               </View>
               <View
@@ -1339,7 +1490,8 @@ const PostJob = () => {
                 style={styles.field}
                 collapsable={false}>
                 <Text style={styles.label}>
-                  {t('Job Department')}<Text style={styles.required}>*</Text>
+                  {t('Job Department')}
+                  <Text style={styles.required}>*</Text>
                 </Text>
                 <CustomDropdown
                   data={dropdownDepartmentsOptions}
@@ -1348,7 +1500,7 @@ const PostJob = () => {
                   value={job_sector?.value}
                   onChange={(e: any) => {
                     updateJobForm({
-                      job_sector: { label: e.label, value: e.value },
+                      job_sector: {label: e.label, value: e.value},
                     });
                   }}
                   dropdownStyle={styles.dropdown}
@@ -1368,7 +1520,7 @@ const PostJob = () => {
                   value={startDate?.value}
                   onChange={(e: any) => {
                     updateJobForm({
-                      startDate: { label: e.label, value: e.value },
+                      startDate: {label: e.label, value: e.value},
                     });
                   }}
                   dropdownStyle={styles.dropdown}
@@ -1402,7 +1554,7 @@ const PostJob = () => {
                     valueField="value"
                     value={salary?.value}
                     onChange={(e: any) => {
-                      updateJobForm({ salary: { label: e.label, value: e.value } });
+                      updateJobForm({salary: {label: e.label, value: e.value}});
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
@@ -1417,14 +1569,14 @@ const PostJob = () => {
                     value={currency?.value}
                     onChange={(e: any) => {
                       updateJobForm({
-                        currency: { label: e.label, value: e.value },
+                        currency: {label: e.label, value: e.value},
                       });
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
                     RightIconStyle={styles.rightIcon}
                     selectedTextStyle={styles.selectedTextStyle}
-                    container={{ flex: 0.5 }}
+                    container={{flex: 0.5}}
                   />
                 </View>
               </View>
@@ -1437,9 +1589,9 @@ const PostJob = () => {
                   labelField="label"
                   valueField="value"
                   value={position?.value}
-                  dropdownPosition='top'
+                  dropdownPosition="top"
                   onChange={(e: any) => {
-                    updateJobForm({ position: { label: e.label, value: e.value } });
+                    updateJobForm({position: {label: e.label, value: e.value}});
                   }}
                   dropdownStyle={styles.dropdown}
                   renderRightIcon={IMAGES.ic_down}
@@ -1473,7 +1625,7 @@ const PostJob = () => {
         visible={isSuccessModalVisible}
         backgroundColor={colors._FAEED2}
         onClose={() => {
-          updateJobForm({ isSuccessModalVisible: false });
+          updateJobForm({isSuccessModalVisible: false});
         }}>
         <View style={styles.modalIconWrapper}>
           <Image
@@ -1499,7 +1651,7 @@ const PostJob = () => {
           onPress={() => {
             try {
               // Close modal first
-              updateJobForm({ isSuccessModalVisible: false });
+              updateJobForm({isSuccessModalVisible: false});
 
               if (editMode) {
                 setCreatedJobId('');
@@ -1534,7 +1686,7 @@ const PostJob = () => {
               }, 100);
             } catch (error) {
               console.error('Navigation error:', error);
-              updateJobForm({ isSuccessModalVisible: false });
+              updateJobForm({isSuccessModalVisible: false});
             }
           }}
         />
@@ -1543,7 +1695,7 @@ const PostJob = () => {
           onPress={() => {
             dispatch(resetJobFormState());
             dispatch(setCoPostJobSteps(0));
-            updateJobForm({ isSuccessModalVisible: false });
+            updateJobForm({isSuccessModalVisible: false});
             setCreatedJobId('');
             setCreatedJobData(null);
             resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
@@ -1572,10 +1724,6 @@ const styles = StyleSheet.create({
     marginRight: 0,
     textAlign: 'center',
     alignSelf: 'center',
-  },
-  field: {
-    gap: hp(12),
-    marginBottom: hp(14),
   },
   fieldWithMargin: {
     gap: hp(12),
@@ -1739,7 +1887,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: colors._4A4A4A,
   },
-  requirementWrapper: { position: 'absolute', top: '5%', left: 0, right: 0 },
+  requirementWrapper: {position: 'absolute', top: '5%', left: 0, right: 0},
   boxContainer: {
     marginTop: hp(17),
     flexDirection: 'row',
@@ -1994,5 +2142,41 @@ const styles = StyleSheet.create({
   skillsWrapper: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  autocompleteContainer: {
+    position: 'relative',
+    zIndex: 1,
+    flex: 1,
+  },
+  dropdownIconContainer: {
+    position: 'absolute',
+    right: wp(13),
+    top: '50%',
+    transform: [{translateY: -hp(6.5)}],
+    zIndex: 2,
+    pointerEvents: 'none',
+  },
+  autocompleteWrapper: {
+    position: 'relative',
+    zIndex: 100,
+    elevation: 100,
+    overflow: 'visible',
+  },
+  autocompleteWrapperOpen: {
+    zIndex: 1000,
+    elevation: 1000,
+    overflow: 'visible',
+  },
+  searchIconContainer: {
+    position: 'absolute',
+    right: wp(13),
+    top: hp(18),
+    zIndex: 1002,
+    pointerEvents: 'none',
+  },
+  field: {
+    gap: hp(12),
+    marginBottom: hp(14),
+    zIndex: 1,
   },
 });

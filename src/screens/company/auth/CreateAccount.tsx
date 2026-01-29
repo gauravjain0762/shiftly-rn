@@ -974,11 +974,23 @@ const CreateAccount = () => {
                   label={
                     <Text style={styles.txt}>
                       I agree to the{' '}
-                      <Text style={styles.linkedTxt} onPress={() => { }}>
+                      <Text style={styles.linkedTxt} onPress={() => {
+                        navigateTo(SCREENS.WebviewScreen, {
+                          link: 'https://www.google.com',
+                          title: 'Terms & Conditions',
+                          type: 'company',
+                        })
+                      }}>
                         Terms & Conditions
                       </Text>{' '}
                       and{' '}
-                      <Text style={styles.linkedTxt} onPress={() => { }}>
+                      <Text style={styles.linkedTxt} onPress={() => {
+                        navigateTo(SCREENS.WebviewScreen, {
+                          link: 'https://www.google.com',
+                          title: 'Privacy Policy',
+                          type: 'company',
+                        })
+                      }}>
                         Privacy Policy
                       </Text>
                     </Text>

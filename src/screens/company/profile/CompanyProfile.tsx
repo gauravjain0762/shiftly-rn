@@ -394,7 +394,6 @@ const CompanyProfile = () => {
                       resizeMode="cover"
                       props={{
                         onLoad: () => {
-                          // Clear timeout if image loads before timeout
                           if (logoLoadTimeoutRef.current) {
                             clearTimeout(logoLoadTimeoutRef.current);
                             logoLoadTimeoutRef.current = null;
@@ -403,7 +402,6 @@ const CompanyProfile = () => {
                           setLogoLoadError(false);
                         },
                         onError: (error: any) => {
-                          // Clear timeout on error
                           if (logoLoadTimeoutRef.current) {
                             clearTimeout(logoLoadTimeoutRef.current);
                             logoLoadTimeoutRef.current = null;
@@ -453,7 +451,6 @@ const CompanyProfile = () => {
               </View>
             </View>
 
-            <View style={{}}>
               {companyProfileData?.about && (
                 <ExpandableText
                   maxLines={3}
@@ -468,7 +465,6 @@ const CompanyProfile = () => {
                   {companyProfileData?.values || 'N/A'}
                 </Text>
               )}
-            </View>
 
             <View style={styles.tabRow}>
               {ProfileTabs?.map((item, index) => (
