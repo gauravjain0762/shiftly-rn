@@ -285,33 +285,52 @@ const PostJob = () => {
 
   useFocusEffect(
     useCallback(() => {
-      getUserLocation();
-    }, []),
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      const refreshAddress = async () => {
+      const initLocation = async () => {
         try {
           const locationString = await AsyncStorage.getItem('user_location');
           if (locationString !== null) {
             const location = JSON.parse(locationString);
             if (location.address && location.lat && location.lng) {
-              setUserAddress({
-                address: location.address,
-                lat: location.lat,
-                lng: location.lng,
-                state: location.state || '',
-                country: location.country || '',
-              });
+              setUserAddress(location);
+              return;
+            }
+          }
+
+          if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
+            setUserAddress({
+              address: userInfo.address,
+              lat: userInfo.lat,
+              lng: userInfo.lng,
+              state: userInfo.state || '',
+              country: userInfo.country || '',
+            });
+          } else {
+            const coordinates = await getAsyncUserLocation();
+            if (coordinates) {
+              getAddress(
+                coordinates,
+                (data: any) => {
+                  const address = data?.results?.[0]?.formatted_address;
+                  if (address) {
+                    setUserAddress({
+                      address,
+                      lat: coordinates.latitude,
+                      lng: coordinates.longitude,
+                      state: '',
+                      country: '',
+                    });
+                  }
+                },
+                undefined,
+              );
             }
           }
         } catch (error) {
-          console.error('Failed to refresh address:', error);
+          console.error('Failed to init location:', error);
         }
       };
-      refreshAddress();
-    }, []),
+      initLocation();
+    }, [userInfo]),
   );
 
   useEffect(() => {
@@ -379,9 +398,10 @@ const PostJob = () => {
     | undefined
   >(undefined);
 
-  useEffect(() => {
-    getLocation();
-  }, []);
+  // Removed redundant getLocation call on mount
+  // useEffect(() => {
+  //   getLocation();
+  // }, []);
 
   useEffect(() => {
     if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
@@ -422,14 +442,25 @@ const PostJob = () => {
     }
   }, [location, userInfo?.address]);
 
+  // Unused or redundant logic removed
   const getLocation = async () => {
-    const res = await getAsyncUserLocation();
-    if (res) {
-      setLocation(res);
-    }
+    // const res = await getAsyncUserLocation();
+    // if (res) {
+    //   setLocation(res);
+    // }
   };
 
   const handleCreateJob = async () => {
+    if (!title || title.trim() === '') {
+      errorToast(t('Please enter a job title'));
+      return;
+    }
+
+    if (!describe || describe.trim() === '') {
+      errorToast(t('Please enter a job description'));
+      return;
+    }
+
     if (
       !job_sector ||
       !job_sector.value ||
@@ -439,17 +470,27 @@ const PostJob = () => {
       return;
     }
 
+    const finalLat = userAddress?.lat || location?.latitude || userInfo?.lat;
+    const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
+
+    if (!finalLat || !finalLng) {
+      errorToast(t('Please select a job location on the map'));
+      return;
+    }
+
     const [from, to] = salary?.value?.split('-') || [];
 
     const params = {
       title: title,
       contract_type:
-        contract_type?.label || contract_type?.value || 'Full Time',
+        contract_type?.label || contract_type?.value || '',
       area: area?.value,
       description: describe,
-      address: userAddress?.address || 'UAE, Dubai',
-      lat: location?.latitude,
-      lng: location?.longitude,
+      address: userAddress?.address || userInfo?.address || '',
+      city: userAddress?.state || userInfo?.state || '',
+      country: userAddress?.country || userInfo?.country || '',
+      lat: userAddress?.lat || location?.latitude || userInfo?.lat,
+      lng: userAddress?.lng || location?.longitude || userInfo?.lng,
       people_anywhere: canApply,
       duration: duration?.value,
       department_id: job_sector?.value,
@@ -459,10 +500,15 @@ const PostJob = () => {
       monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
       monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
       no_positions: position?.value,
-      skills: skillId?.join(','),
-      facilities: selected?.map((item: any) => item._id).join(','),
-      requirements: requirements?.join(','),
+      skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
+      facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
       currency: currency?.value,
+      essential_benefits: "697b3675c433816cfd6c6928",
+      educations: "697b3591c433816cfd6c687e",
+      experiences: "697b35b3c433816cfd6c6896",
+      certifications: "697b3621c433816cfd6c68e6",
+      languages: "697b3641c433816cfd6c68fe",
+      job_requirements: "697b3675c433816cfd6c6928",
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);
@@ -1087,9 +1133,9 @@ const PostJob = () => {
                     onPress={() => {
                       if (selectedEmployeeIds?.length) {
                         setSelectedEmployeeIds([]);
-                      } else {
+                      } else if (Array.isArray(suggestedEmployeeList)) {
                         setSelectedEmployeeIds(
-                          suggestedEmployeeList.map((item: any) => item._id),
+                          suggestedEmployeeList.map((item: any) => item?._id).filter(Boolean),
                         );
                       }
                     }}
@@ -1583,6 +1629,7 @@ const PostJob = () => {
             type="Company"
             title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
             onPress={() => {
+              console.log("this function >>>>>>>>>>>>>");
               try {
                 updateJobForm({ isSuccessModalVisible: false });
 
@@ -1590,7 +1637,7 @@ const PostJob = () => {
                   setCreatedJobId('');
                   setCreatedJobData(null);
                   dispatch(resetJobFormState());
-                  dispatch(setCoPostJobSteps(0));
+                  // dispatch(setCoPostJobSteps(0));
                   navigationRef?.current?.goBack();
                   return;
                 }
@@ -1599,7 +1646,7 @@ const PostJob = () => {
                 const jobDataToUse = createdJobData;
 
                 dispatch(resetJobFormState());
-                dispatch(setCoPostJobSteps(0));
+                // dispatch(setCoPostJobSteps(0));
 
                 setCreatedJobId('');
                 setCreatedJobData(null);

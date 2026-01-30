@@ -1,26 +1,27 @@
 import {
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
   ViewStyle,
 } from 'react-native';
-import React, {FC, useEffect, useState} from 'react';
-import MapView, {Marker} from 'react-native-maps';
-import {IMAGES} from '../../assets/Images';
-import {getAsyncUserLocation} from '../../utils/asyncStorage';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../store';
-import {API} from '../../utils/apiConstant';
+import React, { FC, useEffect, useState } from 'react';
+import MapView, { Marker } from 'react-native-maps';
+import { IMAGES } from '../../assets/Images';
+import { getAsyncUserLocation } from '../../utils/asyncStorage';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { API } from '../../utils/apiConstant';
 import { isAndroid } from '../../utils/commonFunction';
 
 type map = {
   containerStyle?: ViewStyle;
-  lat?: number | undefined|any;
-  lng?: number | undefined|any;
+  lat?: number | undefined | any;
+  lng?: number | undefined | any;
   onPressMap?: () => void;
   address?: string | undefined;
   showAddressCard?: boolean;
@@ -34,9 +35,9 @@ const LocationContainer: FC<map> = ({
   address,
   showAddressCard = true,
 }) => {
-  const {getAppData} = useSelector((state: RootState) => state.auth);
+  const { getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
-  
+
   useEffect(() => {
     getLocation();
   }, []);
@@ -72,30 +73,30 @@ const LocationContainer: FC<map> = ({
       )}
       <Pressable onPress={onPressMap}>
         {location?.latitude ? <>
-        <MapView
-          region={{
-            latitude: lat || location?.latitude,
-            longitude: lng || location?.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          }}
-          zoomEnabled={true}
-          scrollEnabled={false}
-          provider="google"
-          key={mapKey}
-          style={styles.mapImage}>
-          <Marker
-            coordinate={{
+          <MapView
+            key={`${lat}_${lng}`}
+            region={{
               latitude: lat || location?.latitude,
               longitude: lng || location?.longitude,
-            }}>
-            <Image
-              source={IMAGES.location_marker}
-              style={styles.location_marker}
-            />
-          </Marker>
-        </MapView>
-        </>: <View />}
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
+            }}
+            zoomEnabled={true}
+            scrollEnabled={false}
+            provider={Platform.OS === 'android' ? 'google' : undefined}
+            style={styles.mapImage}>
+            <Marker
+              coordinate={{
+                latitude: lat || location?.latitude,
+                longitude: lng || location?.longitude,
+              }}>
+              <Image
+                source={IMAGES.location_marker}
+                style={styles.location_marker}
+              />
+            </Marker>
+          </MapView>
+        </> : <View />}
       </Pressable>
     </View>
   );

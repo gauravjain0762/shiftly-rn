@@ -117,7 +117,6 @@ const CreateQuestion = () => {
       formData.append('user_ids', userIds);
     }
 
-    // Add questions as indexed array items (questions[0], questions[1], etc.)
     addedQuestions.forEach((question, index) => {
       formData.append(`questions[${index}]`, question);
     });
@@ -158,9 +157,9 @@ const CreateQuestion = () => {
           />
         </View>
 
-        {/* {areQuestionsLoading ? (
+        {areQuestionsLoading ? (
           <CreateQuestionSkeleton />
-        ) : ( */}
+        ) : (
           <>
             <ScrollView
               style={styles.scrollView}
@@ -236,7 +235,7 @@ const CreateQuestion = () => {
               />
             </View>
           </>
-        {/* // )} */}
+        )} 
 
         <BottomModal
           visible={isSuccessModalVisible}

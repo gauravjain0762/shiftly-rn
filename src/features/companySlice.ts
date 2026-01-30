@@ -67,7 +67,7 @@ const initialState: CompanyState = {
     contract_type: {label: 'Full Time', value: 'Full Time'},
     area: {label: 'Dubai Marina', value: 'Dubai Marina'},
     duration: {label: '1 Month', value: '1 Month'},
-    job_sector: {label: 'Hotel/Resort', value: 'Hotel/Resort'},
+    job_sector: null,
     startDate: {label: 'Immediately', value: 'Immediately'},
     salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},
     currency: {label: 'AED', value: 'AED'},

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
@@ -10,46 +10,46 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {AppStyles} from '../../../theme/appStyles';
-import {colors} from '../../../theme/colors';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { AppStyles } from '../../../theme/appStyles';
+import { colors } from '../../../theme/colors';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   getAddress,
   requestLocationPermission,
 } from '../../../utils/locationHandler';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {API} from '../../../utils/apiConstant';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { API } from '../../../utils/apiConstant';
 import GradientButton from '../../../component/common/GradientButton';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {IMAGES} from '../../../assets/Images';
-import {getAsyncUserLocation, setAsyncLocation} from '../../../utils/asyncStorage';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { IMAGES } from '../../../assets/Images';
+import { getAsyncUserLocation, setAsyncLocation } from '../../../utils/asyncStorage';
 import CustomImage from '../../../component/common/CustomImage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const CoPostJobLocationScreen = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const route = useRoute();
   const mapRef = useRef<any | null>(null);
-  const {userAddress: initialUserAddress} = (route.params as any) || {};
-  const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
+  const { userAddress: initialUserAddress } = (route.params as any) || {};
+  const { userInfo, getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
   // Priority: initialUserAddress > userInfo (registered) > default
-  const defaultAddress = initialUserAddress || 
+  const defaultAddress = initialUserAddress ||
     (userInfo?.address && userInfo?.lat && userInfo?.lng
       ? {
-          address: userInfo.address,
-          lat: userInfo.lat,
-          lng: userInfo.lng,
-          state: userInfo.state || '',
-          country: userInfo.country || '',
-        }
+        address: userInfo.address,
+        lat: userInfo.lat,
+        lng: userInfo.lng,
+        state: userInfo.state || '',
+        country: userInfo.country || '',
+      }
       : null);
 
   const [search, setSearch] = useState(defaultAddress?.address || '');
@@ -60,25 +60,25 @@ const CoPostJobLocationScreen = () => {
   } | null>(
     defaultAddress?.lat && defaultAddress?.lng
       ? {
-          latitude: defaultAddress.lat,
-          longitude: defaultAddress.lng,
-        }
+        latitude: defaultAddress.lat,
+        longitude: defaultAddress.lng,
+      }
       : null,
   );
   const [position, setPosition] = useState(
     defaultAddress?.lat && defaultAddress?.lng
       ? {
-          latitude: defaultAddress.lat,
-          longitude: defaultAddress.lng,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }
+        latitude: defaultAddress.lat,
+        longitude: defaultAddress.lng,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
       : {
-          latitude: 25.2048,
-          longitude: 55.2708,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
+        latitude: 25.2048,
+        longitude: 55.2708,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      },
   );
   const [isMapMoving, setIsMapMoving] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(
@@ -91,15 +91,15 @@ const CoPostJobLocationScreen = () => {
 
   useEffect(() => {
     // Priority: initialUserAddress > userInfo (registered)
-    const addressToUse = initialUserAddress || 
+    const addressToUse = initialUserAddress ||
       (userInfo?.address && userInfo?.lat && userInfo?.lng
         ? {
-            address: userInfo.address,
-            lat: userInfo.lat,
-            lng: userInfo.lng,
-            state: userInfo.state || '',
-            country: userInfo.country || '',
-          }
+          address: userInfo.address,
+          lat: userInfo.lat,
+          lng: userInfo.lng,
+          state: userInfo.state || '',
+          country: userInfo.country || '',
+        }
         : null);
 
     if (addressToUse?.address) {
@@ -113,7 +113,33 @@ const CoPostJobLocationScreen = () => {
     try {
       setIsLoadingLocation(true);
 
-      // Priority 1: Use registered company location from userInfo (from registration)
+      // Priority 1: Check route params (initialUserAddress) - Most specific to the current job
+      if (initialUserAddress?.address && initialUserAddress?.lat && initialUserAddress?.lng) {
+        const newPosition = {
+          latitude: initialUserAddress.lat,
+          longitude: initialUserAddress.lng,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+
+        setPosition(newPosition);
+        setMarkerPosition({
+          latitude: initialUserAddress.lat,
+          longitude: initialUserAddress.lng,
+        });
+
+        setSearch(initialUserAddress.address);
+        ref.current?.setAddressText(initialUserAddress.address);
+        setSelectedAddress(initialUserAddress);
+
+        setTimeout(() => {
+          mapRef.current?.animateToRegion(newPosition, 1000);
+        }, 500);
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      // Priority 2: Use registered company location from userInfo (fallback if no job location set)
       if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
         const newPosition = {
           latitude: userInfo.lat,
@@ -137,32 +163,6 @@ const CoPostJobLocationScreen = () => {
           state: userInfo.state || '',
           country: userInfo.country || '',
         });
-
-        setTimeout(() => {
-          mapRef.current?.animateToRegion(newPosition, 1000);
-        }, 500);
-        setIsLoadingLocation(false);
-        return;
-      }
-
-      // Priority 2: Check route params (initialUserAddress)
-      if (initialUserAddress?.address && initialUserAddress?.lat && initialUserAddress?.lng) {
-        const newPosition = {
-          latitude: initialUserAddress.lat,
-          longitude: initialUserAddress.lng,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        };
-
-        setPosition(newPosition);
-        setMarkerPosition({
-          latitude: initialUserAddress.lat,
-          longitude: initialUserAddress.lng,
-        });
-
-        setSearch(initialUserAddress.address);
-        ref.current?.setAddressText(initialUserAddress.address);
-        setSelectedAddress(initialUserAddress);
 
         setTimeout(() => {
           mapRef.current?.animateToRegion(newPosition, 1000);
@@ -195,7 +195,7 @@ const CoPostJobLocationScreen = () => {
             setSelectedAddress(location);
           } else {
             getAddress(
-              {latitude: location.lat, longitude: location.lng},
+              { latitude: location.lat, longitude: location.lng },
               (data: any) => {
                 const address = data?.results?.[0]?.formatted_address;
                 const components = data?.results?.[0]?.address_components || [];
@@ -306,7 +306,7 @@ const CoPostJobLocationScreen = () => {
       Alert.alert(
         'Location Error',
         'Unable to get your location. Please search for a location or enable location services.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     } finally {
       setIsLoadingLocation(false);
@@ -315,11 +315,24 @@ const CoPostJobLocationScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      // If we have registered location or initial address, don't fetch current location
-      if (!userInfo?.address && !initialUserAddress?.address) {
-        getUserLocation();
+      // If we have an initial address (passed from PostJob), use it first
+      if (initialUserAddress?.address && initialUserAddress?.lat && initialUserAddress?.lng) {
+        const newPosition = {
+          latitude: initialUserAddress.lat,
+          longitude: initialUserAddress.lng,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+        setPosition(newPosition);
+        setMarkerPosition({
+          latitude: initialUserAddress.lat,
+          longitude: initialUserAddress.lng,
+        });
+        setSearch(initialUserAddress.address);
+        ref.current?.setAddressText(initialUserAddress.address);
+        setSelectedAddress(initialUserAddress);
       } else if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
-        // Set registered location if available
+        // Fallback to registered location if available
         const newPosition = {
           latitude: userInfo.lat,
           longitude: userInfo.lng,
@@ -340,6 +353,9 @@ const CoPostJobLocationScreen = () => {
           state: userInfo.state || '',
           country: userInfo.country || '',
         });
+      } else {
+        // Otherwise try to get current location
+        getUserLocation();
       }
     }, [initialUserAddress?.address, userInfo?.address]),
   );
@@ -366,7 +382,7 @@ const CoPostJobLocationScreen = () => {
     setIsSearchExpanded(false);
     setIsSearchFocused(false);
 
-    const {lat, lng} = details.geometry.location;
+    const { lat, lng } = details.geometry.location;
     const region = {
       latitude: lat,
       longitude: lng,
@@ -387,7 +403,7 @@ const CoPostJobLocationScreen = () => {
 
     setSearch(address);
     setPosition(region);
-    setMarkerPosition({latitude: lat, longitude: lng});
+    setMarkerPosition({ latitude: lat, longitude: lng });
     setSelectedAddress({
       address,
       lat,
@@ -421,12 +437,12 @@ const CoPostJobLocationScreen = () => {
     if (isSearchFocused || isSearchExpanded) {
       return;
     }
-  
+
     // Mark that map is being moved by user (but don't set state repeatedly)
     if (!isMapMoving) {
       setIsMapMoving(true);
     }
-  
+
     // DON'T update position state during drag - this causes flickering
     // Only update marker position
     setMarkerPosition({
@@ -434,14 +450,14 @@ const CoPostJobLocationScreen = () => {
       longitude: region.longitude,
     });
   };
-  
+
   const handleRegionChangeComplete = (region: any) => {
     // Don't fetch address if user is searching
     if (isSearchFocused || isSearchExpanded) {
       setIsMapMoving(false);
       return;
     }
-  
+
     // Now update position state after dragging is complete
     setPosition({
       latitude: region.latitude,
@@ -449,26 +465,26 @@ const CoPostJobLocationScreen = () => {
       latitudeDelta: region.latitudeDelta,
       longitudeDelta: region.longitudeDelta,
     });
-  
+
     setIsMapMoving(false);
-  
+
     // Fetch address for the new location
     getAddress(
-      {latitude: region.latitude, longitude: region.longitude},
+      { latitude: region.latitude, longitude: region.longitude },
       (data: any) => {
         const address = data?.results?.[0]?.formatted_address;
         const components = data?.results?.[0]?.address_components || [];
-  
+
         const stateObj = components.find((c: any) =>
           c.types.includes('administrative_area_level_1'),
         );
         const countryObj = components.find((c: any) =>
           c.types.includes('country'),
         );
-  
+
         const state = stateObj?.long_name || '';
         const country = countryObj?.long_name || '';
-  
+
         if (address) {
           setSearch(address);
           ref.current?.setAddressText(address);
@@ -585,7 +601,7 @@ const CoPostJobLocationScreen = () => {
       Alert.alert(
         'Location Error',
         'Unable to get your current location. Please check your location settings.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     }
     setIsLoadingLocation(false);
@@ -628,7 +644,7 @@ const CoPostJobLocationScreen = () => {
     }, 200);
   };
 
-  const {bottom} = useSafeAreaInsets()
+  const { bottom } = useSafeAreaInsets()
 
   return (
     <>
@@ -642,7 +658,7 @@ const CoPostJobLocationScreen = () => {
         <View
           style={[
             styles.searchContainer,
-            {marginTop: useSafeAreaInsets().top},
+            { marginTop: useSafeAreaInsets().top },
           ]}>
           <CustomImage
             source={IMAGES.backArrow}
@@ -701,7 +717,7 @@ const CoPostJobLocationScreen = () => {
                 region={position}
                 initialRegion={position}
                 onPress={handleMapPress}
-                provider={'google'}
+                provider={Platform.OS === 'android' ? 'google' : undefined}
                 onPoiClick={handlePoiClick}
                 onRegionChange={handleRegionChange}
                 onRegionChangeComplete={handleRegionChangeComplete}
@@ -726,11 +742,11 @@ const CoPostJobLocationScreen = () => {
                 toolbarEnabled={false}>
                 {markerPosition && (
                   <Marker coordinate={markerPosition} draggable={false}>
-                      <Image
-                        resizeMode="contain"
-                        source={IMAGES.location_marker}
-                        style={styles.customMarkerImage}
-                      />
+                    <Image
+                      resizeMode="contain"
+                      source={IMAGES.location_marker}
+                      style={styles.customMarkerImage}
+                    />
                   </Marker>
                 )}
               </MapView>
@@ -741,7 +757,7 @@ const CoPostJobLocationScreen = () => {
               title={t('Save Location')}
               style={[
                 styles.btn,
-                {bottom: bottom},
+                { bottom: bottom },
                 (!selectedAddress || isKeyboardVisible) && styles.btnDisabled,
               ]}
               onPress={handleSaveLocation}

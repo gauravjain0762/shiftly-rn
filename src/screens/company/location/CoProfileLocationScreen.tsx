@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
@@ -10,37 +10,37 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {AppStyles} from '../../../theme/appStyles';
-import {colors} from '../../../theme/colors';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import MapView, { Marker } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { AppStyles } from '../../../theme/appStyles';
+import { colors } from '../../../theme/colors';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   getAddress,
   requestLocationPermission,
 } from '../../../utils/locationHandler';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {API} from '../../../utils/apiConstant';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { API } from '../../../utils/apiConstant';
 import GradientButton from '../../../component/common/GradientButton';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {useFocusEffect} from '@react-navigation/native';
-import {IMAGES} from '../../../assets/Images';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { useFocusEffect } from '@react-navigation/native';
+import { IMAGES } from '../../../assets/Images';
 import {
   getAsyncUserLocation,
   setAsyncLocation,
 } from '../../../utils/asyncStorage';
 import CustomImage from '../../../component/common/CustomImage';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../../../store';
-import {setUserInfo, setCompanyProfileData} from '../../../features/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import { setUserInfo, setCompanyProfileData } from '../../../features/authSlice';
 import { isAndroid } from '../../../utils/commonFunction';
 
 const CoProfileLocationScreen = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const mapRef = useRef<any | null>(null);
   const dispatch = useDispatch();
-  const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
+  const { userInfo, getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
   const [search, setSearch] = useState(userInfo?.address || '');
@@ -163,7 +163,7 @@ const CoProfileLocationScreen = () => {
       Alert.alert(
         'Location Error',
         'Unable to get your location. Please search for a location or enable location services.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     } finally {
       setIsLoadingLocation(false);
@@ -203,7 +203,7 @@ const CoProfileLocationScreen = () => {
     setIsSearchExpanded(false);
     setIsSearchFocused(false);
 
-    const {lat, lng} = details.geometry.location;
+    const { lat, lng } = details.geometry.location;
     const region = {
       latitude: lat,
       longitude: lng,
@@ -224,7 +224,7 @@ const CoProfileLocationScreen = () => {
 
     setSearch(address);
     setPosition(region);
-    setMarkerPosition({latitude: lat, longitude: lng});
+    setMarkerPosition({ latitude: lat, longitude: lng });
     setSelectedAddress({
       address,
       lat,
@@ -286,7 +286,7 @@ const CoProfileLocationScreen = () => {
     // Debounce address lookup
     addressFetchTimeout.current = setTimeout(() => {
       getAddress(
-        {latitude: region.latitude, longitude: region.longitude},
+        { latitude: region.latitude, longitude: region.longitude },
         (data: any) => {
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
@@ -425,7 +425,7 @@ const CoProfileLocationScreen = () => {
       Alert.alert(
         'Location Error',
         'Unable to get your current location. Please check your location settings.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     }
     setIsLoadingLocation(false);
@@ -440,7 +440,7 @@ const CoProfileLocationScreen = () => {
           lng: selectedAddress?.lng,
         };
         // Update both userInfo and companyProfileData
-        dispatch(setUserInfo({...userInfo, ...data}));
+        dispatch(setUserInfo({ ...userInfo, ...data }));
         dispatch(
           setCompanyProfileData({
             address: selectedAddress.address,
@@ -490,7 +490,7 @@ const CoProfileLocationScreen = () => {
         <View
           style={[
             styles.searchContainer,
-            {marginTop: useSafeAreaInsets().top},
+            { marginTop: useSafeAreaInsets().top },
           ]}>
           <CustomImage
             source={IMAGES.backArrow}
@@ -547,7 +547,7 @@ const CoProfileLocationScreen = () => {
             <View style={styles.container}>
               <MapView
                 ref={mapRef}
-                provider="google"
+                provider={Platform.OS === 'android' ? 'google' : undefined}
                 initialRegion={position}
                 onPress={handleMapPress}
                 onPoiClick={handlePoiClick}
@@ -581,7 +581,7 @@ const CoProfileLocationScreen = () => {
                   <Marker
                     coordinate={markerPosition}
                     draggable={false}
-                    anchor={{x: 0.5, y: 1}}>
+                    anchor={{ x: 0.5, y: 1 }}>
                     <Image
                       resizeMode="contain"
                       source={IMAGES.location_marker}

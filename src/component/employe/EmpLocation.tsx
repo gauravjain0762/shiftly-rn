@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
@@ -10,36 +10,36 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {AppStyles} from '../../theme/appStyles';
-import {colors} from '../../theme/colors';
-import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import MapView, { Marker } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { AppStyles } from '../../theme/appStyles';
+import { colors } from '../../theme/colors';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   getAddress,
   requestLocationPermission,
 } from '../../utils/locationHandler';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {API} from '../../utils/apiConstant';
-import {navigationRef} from '../../navigation/RootContainer';
-import {navigateTo} from '../../utils/commonFunction';
-import {useFocusEffect} from '@react-navigation/native';
-import {IMAGES} from '../../assets/Images';
-import {getAsyncUserLocation, setAsyncLocation} from '../../utils/asyncStorage';
-import {setUserInfo} from '../../features/authSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../../store';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { API } from '../../utils/apiConstant';
+import { navigationRef } from '../../navigation/RootContainer';
+import { navigateTo } from '../../utils/commonFunction';
+import { useFocusEffect } from '@react-navigation/native';
+import { IMAGES } from '../../assets/Images';
+import { getAsyncUserLocation, setAsyncLocation } from '../../utils/asyncStorage';
+import { setUserInfo } from '../../features/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store';
 import CustomImage from '../common/CustomImage';
 import GradientButton from '../common/GradientButton';
-import {SCREENS} from '../../navigation/screenNames';
+import { SCREENS } from '../../navigation/screenNames';
 import { isAndroid } from '../../utils/commonFunction';
 
 const EmpLocation = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const mapRef = useRef<any | null>(null);
 
-  const {userInfo, getAppData} = useSelector((state: RootState) => state.auth);
+  const { userInfo, getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
   const [search, setSearch] = useState(userInfo?.address || '');
@@ -50,9 +50,9 @@ const EmpLocation = () => {
   } | null>(
     userInfo?.lat && userInfo?.lng
       ? {
-          latitude: userInfo.lat,
-          longitude: userInfo.lng,
-        }
+        latitude: userInfo.lat,
+        longitude: userInfo.lng,
+      }
       : null,
   );
   const [position, setPosition] = useState({
@@ -64,12 +64,12 @@ const EmpLocation = () => {
   const [selectedAddress, setSelectedAddress] = useState<any>(
     userInfo?.address
       ? {
-          address: userInfo.address,
-          lat: userInfo.lat,
-          lng: userInfo.lng,
-          state: userInfo.state,
-          country: userInfo.country,
-        }
+        address: userInfo.address,
+        lat: userInfo.lat,
+        lng: userInfo.lng,
+        state: userInfo.state,
+        country: userInfo.country,
+      }
       : null,
   );
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
@@ -169,7 +169,7 @@ const EmpLocation = () => {
       Alert.alert(
         'Location Error',
         'Unable to get your location. Please search for a location or enable location services.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     } finally {
       setIsLoadingLocation(false);
@@ -209,7 +209,7 @@ const EmpLocation = () => {
     setIsSearchExpanded(false);
     setIsSearchFocused(false);
 
-    const {lat, lng} = details.geometry.location;
+    const { lat, lng } = details.geometry.location;
     const region = {
       latitude: lat,
       longitude: lng,
@@ -230,7 +230,7 @@ const EmpLocation = () => {
 
     setSearch(address);
     setPosition(region);
-    setMarkerPosition({latitude: lat, longitude: lng});
+    setMarkerPosition({ latitude: lat, longitude: lng });
     setSelectedAddress({
       address,
       lat,
@@ -292,7 +292,7 @@ const EmpLocation = () => {
     // Debounce address lookup
     addressFetchTimeout.current = setTimeout(() => {
       getAddress(
-        {latitude: region.latitude, longitude: region.longitude},
+        { latitude: region.latitude, longitude: region.longitude },
         (data: any) => {
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
@@ -431,7 +431,7 @@ const EmpLocation = () => {
       Alert.alert(
         'Location Error',
         'Unable to get your current location. Please check your location settings.',
-        [{text: 'OK'}],
+        [{ text: 'OK' }],
       );
     }
     setIsLoadingLocation(false);
@@ -447,7 +447,7 @@ const EmpLocation = () => {
           state: selectedAddress.state,
           country: selectedAddress.country,
         };
-        dispatch(setUserInfo({...userInfo, ...data}));
+        dispatch(setUserInfo({ ...userInfo, ...data }));
         navigateTo(SCREENS.CreateProfileScreen, {
           selectedLocation: selectedAddress.address,
         });
@@ -489,7 +489,7 @@ const EmpLocation = () => {
         <View
           style={[
             styles.searchContainer,
-            {marginTop: useSafeAreaInsets().top},
+            { marginTop: useSafeAreaInsets().top },
           ]}>
           <CustomImage
             source={IMAGES.backArrow}
@@ -546,7 +546,7 @@ const EmpLocation = () => {
             <View style={styles.container}>
               <MapView
                 ref={mapRef}
-                provider="google"
+                provider={Platform.OS === 'android' ? 'google' : undefined}
                 initialRegion={position}
                 onPress={handleMapPress}
                 onPoiClick={handlePoiClick}
@@ -580,7 +580,7 @@ const EmpLocation = () => {
                   <Marker
                     coordinate={markerPosition}
                     draggable={false}
-                    anchor={{x: 0.5, y: 1}}>
+                    anchor={{ x: 0.5, y: 1 }}>
                     <Image
                       resizeMode="contain"
                       source={IMAGES.location_marker}

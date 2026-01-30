@@ -196,7 +196,10 @@ const showEnableLocationAlert = (onFail: any) => {
       { text: 'cancel', onPress: () => onFail() },
       {
         text: 'Enable',
-        onPress: () => promptForEnableLocationIfNeeded(),
+        onPress: () => RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 1000,
+          fastInterval: 1000,
+        }),
       },
     ],
   );
@@ -224,7 +227,10 @@ export const loactionEnabler = async (
   onFail?: (err: any) => void,
 ) => {
   if (Platform.OS === 'android') {
-    await promptForEnableLocationIfNeeded()
+    await RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+      interval: 1000,
+      fastInterval: 1000,
+    })
       .then((res: any) => {
         if (onSucess) onSucess(true);
         // The user has accepted to enable the location services
@@ -282,7 +288,7 @@ export const getAddress = async (
 ) => {
   const headersList = {};
   const apiKey = mapKey || API?.GOOGLE_MAP_API_KEY;
-  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${region?.latitude},${region?.longitude}&key=${apiKey}`;
+  let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${region?.latitude},${region?.longitude}&key=${apiKey}`;
   fetch(url, {
     method: 'GET',
     headers: headersList,
