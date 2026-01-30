@@ -21,7 +21,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
       skip: !item?.job_id, // Skip query if job_id is not available
     }
   );
-  
+
   const getStatusText = () => {
     if (item?.type) {
       return item.type.charAt(0).toUpperCase() + item.type.slice(1);
@@ -31,7 +31,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
 
   const handleViewPress = () => {
     const interviewLink = item?.interview_link || jobDetail?.data?.interview_link;
-    
+
     if (jobDetail?.data) {
       navigateTo(SCREENS.JobInvitationScreen, {
         link: interviewLink || '',
@@ -81,11 +81,24 @@ const ActivitiesCard: FC<props> = ({ item }) => {
       </View>
 
       <View style={styles.bottomRow}>
-
-        <View style={{ gap: hp(15) }}>
+        <View style={{ flex: 1, gap: hp(6) }}>
           <Text style={styles.jobTitle} numberOfLines={1}>
             {item?.job_title} - {item?.contract_type || "N/A"}
           </Text>
+
+          {(item?.monthly_salary_from || item?.monthly_salary_to || jobDetail?.data?.job?.monthly_salary_from) && (
+            <View style={styles.salaryContainer}>
+              <Image
+                source={IMAGES.currency}
+                style={styles.salaryIcon}
+                tintColor={colors._656464}
+              />
+              <Text style={styles.salaryText}>
+                {`${item?.currency || jobDetail?.data?.job?.currency || 'AED'} ${item?.monthly_salary_from || jobDetail?.data?.job?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to || jobDetail?.data?.job?.monthly_salary_to?.toLocaleString()}`}
+              </Text>
+            </View>
+          )}
+
           <View
             style={[
               styles.statusBadge,
@@ -141,7 +154,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8E8E8',
     padding: wp(16),
-    gap: hp(10),
+    gap: hp(8),
   },
   headerRow: {
     flexDirection: 'row',
@@ -211,5 +224,18 @@ const styles = StyleSheet.create({
     width: wp(14),
     height: wp(14),
     tintColor: colors.white,
+  },
+  salaryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(6),
+  },
+  salaryIcon: {
+    width: wp(14),
+    height: hp(14),
+    resizeMode: 'contain',
+  },
+  salaryText: {
+    ...commonFontStyle(600, 12, colors.black),
   },
 });

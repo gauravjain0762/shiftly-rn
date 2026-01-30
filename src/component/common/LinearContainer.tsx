@@ -14,7 +14,7 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 
 type Props = {
-  children: any;
+  children?: any;
   containerStyle?: ViewStyle | {};
   colors?: string[] | '';
   SafeAreaProps?: SafeAreaViewProps;

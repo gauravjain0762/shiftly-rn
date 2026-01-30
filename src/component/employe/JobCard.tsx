@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Share from 'react-native-share';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
@@ -161,6 +161,11 @@ ${salary}${shareUrlText}`;
 
         {(item?.monthly_salary_from || item?.monthly_salary_to) && (
           <View style={styles.salaryContainer}>
+            <Image
+              source={IMAGES.currency}
+              style={styles.salaryIcon}
+              tintColor={colors._656464}
+            />
             <Text style={styles.salaryLabel}>Salary range: </Text>
             <Text style={styles.salaryAmount}>
               {item?.currency} {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()}
@@ -238,6 +243,12 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 13, colors._656464),
     lineHeight: hp(18),
     paddingHorizontal: 0,
+  },
+  salaryIcon: {
+    width: wp(16),
+    height: hp(16),
+    resizeMode: 'contain',
+    marginRight: wp(5),
   },
   badge: {
     backgroundColor: colors.empPrimary,

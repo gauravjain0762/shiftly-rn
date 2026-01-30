@@ -10,28 +10,28 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BackHeader,
   CustomDropdown,
   CustomTextInput,
   GradientButton,
-  LinearContainer,
   LocationContainer,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
+import LinearContainer from '../../../component/common/LinearContainer';
+import { useTranslation } from 'react-i18next';
 import {
   SCREEN_HEIGHT,
-  SCREEN_WIDTH,
   commonFontStyle,
   hp,
   wp,
 } from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {IMAGES} from '../../../assets/Images';
-import {AppStyles} from '../../../theme/appStyles';
-import {navigationRef} from '../../../navigation/RootContainer';
+import { colors } from '../../../theme/colors';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { IMAGES } from '../../../assets/Images';
+import { AppStyles } from '../../../theme/appStyles';
+import { navigationRef } from '../../../navigation/RootContainer';
 import {
   errorToast,
   IMAGE_URL,
@@ -39,13 +39,13 @@ import {
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {RFValue} from 'react-native-responsive-fontsize';
+import { SCREENS } from '../../../navigation/screenNames';
+import { RFValue } from 'react-native-responsive-fontsize';
 import BottomModal from '../../../component/common/BottomModal';
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
-import {useCreateJobMutation} from '../../../api/authApi';
-import {getAsyncUserLocation} from '../../../utils/asyncStorage';
-import {getAddress} from '../../../utils/locationHandler';
+import { useCreateJobMutation } from '../../../api/authApi';
+import { getAsyncUserLocation } from '../../../utils/asyncStorage';
+import { getAddress } from '../../../utils/locationHandler';
 import {
   useEditCompanyJobMutation,
   useGetDepartmentsQuery,
@@ -54,9 +54,9 @@ import {
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
-import {useAppSelector} from '../../../redux/hooks';
+import { useFocusEffect } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { useAppSelector } from '../../../redux/hooks';
 import {
   resetJobFormState,
   selectJobForm,
@@ -67,66 +67,58 @@ import BaseText from '../../../component/common/BaseText';
 import CharLength from '../../../component/common/CharLength';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Tooltip from '../../../component/common/Tooltip';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {API} from '../../../utils/apiConstant';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { API } from '../../../utils/apiConstant';
 
 const contractTypeData = [
-  {label: 'Full Time', value: 'Full Time'},
-  {label: 'Part Time', value: 'Part Time'},
-  {label: 'Freelance', value: 'Freelance'},
-  {label: 'Internship', value: 'Internship'},
-  {label: 'Temporary', value: 'Temporary'},
-];
-
-const jobAreaData = [
-  {label: 'Dubai Marina', value: 'Dubai Marina'},
-  {label: 'Business Bay', value: 'Business Bay'},
-  {label: 'Downtown Dubai', value: 'Downtown Dubai'},
-  {label: 'Jumeirah', value: 'Jumeirah'},
-  {label: 'Al Barsha', value: 'Al Barsha'},
+  { label: 'Full Time', value: 'Full Time' },
+  { label: 'Part Time', value: 'Part Time' },
+  { label: 'Freelance', value: 'Freelance' },
+  { label: 'Internship', value: 'Internship' },
+  { label: 'Temporary', value: 'Temporary' },
 ];
 
 const durationData = [
-  {label: '7 Days', value: '7 Days'},
-  {label: '14 Days', value: '14 Days'},
-  {label: '1 Month', value: '1 Month'},
-  {label: '3 Months', value: '3 Months'},
-  {label: 'Until Filled', value: 'Until Filled'},
+  { label: '7 Days', value: '7 Days' },
+  { label: '14 Days', value: '14 Days' },
+  { label: '1 Month', value: '1 Month' },
+  { label: '3 Months', value: '3 Months' },
+  { label: 'Until Filled', value: 'Until Filled' },
 ];
 
 const startDateData = [
-  {label: 'Immediately', value: 'Immediately'},
-  {label: 'Within 3 Days', value: 'Within 3 Days'},
-  {label: 'Within a Week', value: 'Within a Week'},
-  {label: 'Next Month', value: 'Next Month'},
+  { label: 'Immediately', value: 'Immediately' },
+  { label: 'Within 3 Days', value: 'Within 3 Days' },
+  { label: 'Within a Week', value: 'Within a Week' },
+  { label: 'Next Month', value: 'Next Month' },
 ];
 
 const numberOfPositionsData = [
-  {label: '1', value: '1'},
-  {label: '2', value: '2'},
-  {label: '3', value: '3'},
-  {label: '4', value: '4'},
-  {label: '5+', value: '5+'},
+  { label: '1', value: '1' },
+  { label: '2', value: '2' },
+  { label: '3', value: '3' },
+  { label: '4', value: '4' },
+  { label: '5+', value: '5+' },
 ];
 
 const salaryRangeData = [
-  {label: '2,000 - 5,000', value: '2,000 - 5,000'},
-  {label: '5,000 - 10,000', value: '5,000 - 10,000'},
-  {label: '10,000 - 15,000', value: '10,000 - 15,000'},
-  {label: '15,000 - 20,000', value: '15,000 - 20,000'},
-  {label: '20,000+', value: '20,000+'},
+  { label: '2,000 - 5,000', value: '2,000 - 5,000' },
+  { label: '5,000 - 10,000', value: '5,000 - 10,000' },
+  { label: '10,000 - 15,000', value: '10,000 - 15,000' },
+  { label: '15,000 - 20,000', value: '15,000 - 20,000' },
+  { label: '20,000+', value: '20,000+' },
 ];
 
 const currencyData = [
-  {label: 'AED', value: 'AED'},
-  {label: 'USD', value: 'USD'},
-  {label: 'EUR', value: 'EUR'},
-  {label: 'INR', value: 'INR'},
-  {label: 'GBP', value: 'GBP'},
+  { label: 'AED', value: 'AED' },
+  { label: 'USD', value: 'USD' },
+  { label: 'EUR', value: 'EUR' },
+  { label: 'INR', value: 'INR' },
+  { label: 'GBP', value: 'GBP' },
 ];
 
 const PostJob = () => {
-  const {t} = useTranslation<any>();
+  const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const {
     title,
@@ -135,7 +127,6 @@ const PostJob = () => {
     duration,
     job_sector,
     startDate,
-    contract,
     salary,
     currency,
     position,
@@ -153,73 +144,66 @@ const PostJob = () => {
     expiry_date,
   } = useAppSelector((state: any) => selectJobForm(state));
 
-  const {updateJobForm} = useJobFormUpdater();
+  const insets = useSafeAreaInsets();
+  const { updateJobForm } = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
-  const {data: facilitiesData} = useGetFacilitiesQuery({});
+  const { data: facilitiesData } = useGetFacilitiesQuery({});
   const facilities = facilitiesData?.data?.facilities;
-  const {data: skillsData} = useGetSkillsQuery({});
+  const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
-  const {data: departmentsData} = useGetDepartmentsQuery({});
+  const { data: departmentsData } = useGetDepartmentsQuery({});
   const departments = departmentsData?.data?.departments as any[];
   const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
   const shouldSkip = !(steps === 5 && !!job_id);
-  const {data: suggestedData} = useGetSuggestedEmployeesQuery(job_id, {
+  const { data: suggestedData } = useGetSuggestedEmployeesQuery(job_id, {
     skip: shouldSkip || !job_id,
   });
   const suggestedEmployeeList = suggestedData?.data?.users;
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
   const [createdJobId, setCreatedJobId] = useState<string>('');
   const [createdJobData, setCreatedJobData] = useState<any>(null);
-  const {userInfo, getAppData} = useAppSelector((state: any) => state.auth);
+  const { userInfo, getAppData } = useAppSelector((state: any) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
   const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] =
     useState(false);
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
 
-  // Animation values
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  // Refs for scroll control
   const scrollViewRef = useRef<any>(null);
   const jobDepartmentFieldRef = useRef<View>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Handle dropdown focus - prevent scroll to keep dropdown positioned correctly
   const handleJobDepartmentFocus = () => {
-    // Disable scroll immediately to prevent any auto-scrolling
     setIsDropdownOpen(true);
   };
 
-  // Re-enable scroll when dropdown closes
   const handleJobDepartmentBlur = () => {
     setIsDropdownOpen(false);
-    if (scrollViewRef.current?.setNativeProps) {
-      scrollViewRef.current.setNativeProps({scrollEnabled: true});
-    }
   };
 
   const dropdownDepartmentsOptions = departments?.map(item => ({
     label: item.title,
-    value: item._id, // Use _id for department_id
-    title: item.title, // Keep title for display
+    value: item._id,
+    title: item.title,
   }));
+
   const [userAddress, setUserAddress] = useState<
     | {
-        address: string;
-        lat: number;
-        lng: number;
-        state: string;
-        country: string;
-      }
+      address: string;
+      lat: number;
+      lng: number;
+      state: string;
+      country: string;
+    }
     | undefined
   >();
 
   const getUserLocation = async () => {
     try {
-      // Priority 1: Check AsyncStorage first (selected address from location screen - has state/country)
       const locationString = await AsyncStorage.getItem('user_location');
       if (locationString !== null) {
         const location = JSON.parse(locationString);
@@ -242,7 +226,6 @@ const PostJob = () => {
         }
       }
 
-      // Priority 2: Use registered company location from userInfo (fallback)
       if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
         setUserAddress({
           address: userInfo.address,
@@ -261,7 +244,6 @@ const PostJob = () => {
         };
       }
 
-      // Priority 3: Only if no registered location, try to get current GPS location
       const coordinates = await getAsyncUserLocation();
       if (coordinates) {
         getAddress(
@@ -307,12 +289,10 @@ const PostJob = () => {
     }, []),
   );
 
-  // Refresh address when screen comes into focus (e.g., returning from location screen)
   useFocusEffect(
     useCallback(() => {
       const refreshAddress = async () => {
         try {
-          // Check AsyncStorage for the latest selected address
           const locationString = await AsyncStorage.getItem('user_location');
           if (locationString !== null) {
             const location = JSON.parse(locationString);
@@ -334,52 +314,34 @@ const PostJob = () => {
     }, []),
   );
 
-  // Reset animation when component mounts
   useEffect(() => {
     fadeAnim.setValue(1);
     slideAnim.setValue(0);
   }, []);
 
-  // Auto-calculate expiry date on mount if duration is set but expiry_date is not
   useEffect(() => {
     if (duration?.value && !expiry_date) {
       const calculatedExpiryDate = calculateExpiryDate(duration.value);
-      updateJobForm({expiry_date: calculatedExpiryDate});
+      updateJobForm({ expiry_date: calculatedExpiryDate });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Disable/enable scroll based on dropdown state
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      // Use setNativeProps to disable scroll when dropdown is open
-      if (isDropdownOpen) {
-        scrollViewRef.current.setNativeProps?.({scrollEnabled: false});
-      } else {
-        scrollViewRef.current.setNativeProps?.({scrollEnabled: true});
-      }
-    }
-  }, [isDropdownOpen]);
 
   const hasInitializedJobSectorRef = useRef<boolean>(false);
   const hasInitializedContractTypeRef = useRef<boolean>(false);
   const hasCleanedRequirementsRef = useRef<boolean>(false);
 
   useEffect(() => {
-    // Set first department as default when departments are loaded and no job_sector is selected
     if (
       dropdownDepartmentsOptions?.length > 0 &&
       (!job_sector || !job_sector?.value)
     ) {
-      // Always set default when departments are available and job_sector is not set
-      updateJobForm({job_sector: dropdownDepartmentsOptions[0]});
+      updateJobForm({ job_sector: dropdownDepartmentsOptions[0] });
       if (!hasInitializedJobSectorRef.current) {
         hasInitializedJobSectorRef.current = true;
       }
     }
   }, [dropdownDepartmentsOptions, job_sector, updateJobForm]);
 
-  // Initialize contract_type if not set (only for new jobs, not edit mode)
   useEffect(() => {
     if (
       !hasInitializedContractTypeRef.current &&
@@ -387,12 +349,11 @@ const PostJob = () => {
       contractTypeData?.length > 0 &&
       (!contract_type || !contract_type?.label || !contract_type?.value)
     ) {
-      updateJobForm({contract_type: contractTypeData[0]}); // Default to "Full Time"
+      updateJobForm({ contract_type: contractTypeData[0] });
       hasInitializedContractTypeRef.current = true;
     }
   }, [editMode, contract_type, updateJobForm]);
 
-  // Clean up empty/blank requirements when creating a new job (only on mount)
   useEffect(() => {
     if (
       !editMode &&
@@ -404,8 +365,7 @@ const PostJob = () => {
         (req: string) => req && req.trim().length > 0,
       );
       if (validRequirements.length !== requirements.length) {
-        // Only update if there were empty requirements to remove
-        updateJobForm({requirements: validRequirements});
+        updateJobForm({ requirements: validRequirements });
       }
       hasCleanedRequirementsRef.current = true;
     }
@@ -413,9 +373,9 @@ const PostJob = () => {
 
   const [location, setLocation] = useState<
     | {
-        latitude: number;
-        longitude: number;
-      }
+      latitude: number;
+      longitude: number;
+    }
     | undefined
   >(undefined);
 
@@ -423,9 +383,7 @@ const PostJob = () => {
     getLocation();
   }, []);
 
-  // Fetch address when location is available but address is not (only if no registered location)
   useEffect(() => {
-    // Don't override if we already have registered company location
     if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
       return;
     }
@@ -481,10 +439,8 @@ const PostJob = () => {
       return;
     }
 
-    // Calculate salary range
     const [from, to] = salary?.value?.split('-') || [];
 
-    // Build params with latest values
     const params = {
       title: title,
       contract_type:
@@ -515,7 +471,7 @@ const PostJob = () => {
       let response;
 
       if (editMode) {
-        response = await editJob({job_id: job_id, ...params}).unwrap();
+        response = await editJob({ job_id: job_id, ...params }).unwrap();
         console.log('Job updated: >>>>>>>>', response?.data);
       } else {
         response = (await createJob(params).unwrap()) as any;
@@ -530,12 +486,12 @@ const PostJob = () => {
           response?.data;
         if (newJobId) {
           setCreatedJobId(String(newJobId));
-          updateJobForm({job_id: String(newJobId)});
+          updateJobForm({ job_id: String(newJobId) });
         }
         setCreatedJobData(response?.data || null);
         setTimeout(() => {
           if (!isSuccessModalVisible) {
-            updateJobForm({isSuccessModalVisible: true});
+            updateJobForm({ isSuccessModalVisible: true });
           }
         }, 150);
         successToast(response?.message);
@@ -544,14 +500,12 @@ const PostJob = () => {
       }
     } catch (err: any) {
       console.error('Failed to submit job:', err);
-      // Extract error message from response
       const errorMessage =
         err?.data?.message ||
         err?.data?.error ||
         err?.message ||
         'Something went wrong!';
       errorToast(errorMessage);
-    } finally {
     }
   };
 
@@ -561,11 +515,10 @@ const PostJob = () => {
       ? selected.filter((i: any) => i?._id !== item?._id)
       : [...(selected || []), item];
 
-    updateJobForm({selected: updatedList});
+    updateJobForm({ selected: updatedList });
   };
 
   const nextStep = () => {
-    // Fade out and slide left
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -580,9 +533,7 @@ const PostJob = () => {
     ]).start(() => {
       const nextStepValue = steps + 1;
       dispatch(setCoPostJobSteps(nextStepValue));
-      // Small delay to ensure state update is processed before starting new animation
       setTimeout(() => {
-        // Reset and fade in from right
         slideAnim.setValue(50);
         fadeAnim.setValue(0);
         Animated.parallel([
@@ -605,7 +556,6 @@ const PostJob = () => {
     if (num == 1) {
       navigationRef.goBack();
     } else {
-      // Fade out and slide right
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -620,9 +570,7 @@ const PostJob = () => {
       ]).start(() => {
         const prevStepValue = steps - 1;
         dispatch(setCoPostJobSteps(prevStepValue));
-        // Small delay to ensure state update is processed before starting new animation
         setTimeout(() => {
-          // Reset and fade in from left
           slideAnim.setValue(-50);
           fadeAnim.setValue(0);
           Animated.parallel([
@@ -643,7 +591,6 @@ const PostJob = () => {
   };
 
   const resetToFirstStep = () => {
-    // Animate out current step
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -657,7 +604,6 @@ const PostJob = () => {
       }),
     ]).start(() => {
       dispatch(setCoPostJobSteps(0));
-      // Reset and fade in step 0
       setTimeout(() => {
         slideAnim.setValue(-50);
         fadeAnim.setValue(0);
@@ -677,7 +623,6 @@ const PostJob = () => {
     });
   };
 
-  // Calculate expiry date based on duration
   const calculateExpiryDate = (durationValue: string): string => {
     const today = new Date();
     const expiryDate = new Date(today);
@@ -706,37 +651,40 @@ const PostJob = () => {
     return expiryDate.toISOString().split('T')[0];
   };
 
+  // FIXED: Simplified and corrected requirement adding logic
   const handleAddRequirements = () => {
-    if (!requirementText.trim()) {
+    const trimmedText = requirementText.trim();
+    if (!trimmedText) {
+      errorToast(t('Please enter a requirement'));
       return;
     }
-    const trimmedText = requirementText.trim();
-    if (trimmedText) {
-      updateJobForm({requirements: [...requirements, trimmedText]});
-    }
-    updateJobForm({requirementText: '', isModalVisible: false});
+    updateJobForm({
+      requirements: [...(requirements || []), trimmedText],
+      requirementText: '',
+      isModalVisible: false
+    });
   };
 
   const removeSkill = (skill: string) => {
-    const updatedSkills = jobSkills.filter(s => s !== skill);
-    updateJobForm({jobSkills: updatedSkills});
+    const updatedSkills = jobSkills.filter((s: string) => s !== skill);
+    updateJobForm({ jobSkills: updatedSkills });
   };
 
   const handleSkillSelection = (skill: string) => {
     if (jobSkills.includes(skill)) {
-      const filtered = jobSkills.filter(i => i !== skill);
-      updateJobForm({jobSkills: filtered});
+      const filtered = jobSkills.filter((i: string) => i !== skill);
+      updateJobForm({ jobSkills: filtered });
     } else {
-      updateJobForm({jobSkills: [...jobSkills, skill]});
+      updateJobForm({ jobSkills: [...jobSkills, skill] });
     }
   };
 
   const toggleSkillId = (id: string) => {
     if (skillId.includes(id)) {
       const updated = skillId.filter((i: string) => i !== id);
-      updateJobForm({skillId: updated});
+      updateJobForm({ skillId: updated });
     } else {
-      updateJobForm({skillId: [...skillId, id]});
+      updateJobForm({ skillId: [...skillId, id] });
     }
   };
 
@@ -749,13 +697,13 @@ const PostJob = () => {
   const render = () => {
     const animatedStyle = {
       opacity: fadeAnim,
-      transform: [{translateX: slideAnim}],
+      transform: [{ translateX: slideAnim }],
     };
 
     switch (steps) {
       case 1:
         return (
-          <Animated.View key="step-1" style={[{flex: 1}, animatedStyle]}>
+          <Animated.View key="step-1" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -765,7 +713,12 @@ const PostJob = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.container}>
-              <View>
+              <KeyboardAwareScrollView
+                style={AppStyles.flex}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.stepScrollContainer}
+                enableOnAndroid={true}>
                 <View style={styles.rowWithInfo}>
                   <Text style={styles.inputLabel}>
                     {t('Describe the role to candidates')}
@@ -779,28 +732,26 @@ const PostJob = () => {
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
                   placeholder={t('Enter role description')}
-                  onChangeText={e => updateJobForm({describe: e})}
+                  onChangeText={e => updateJobForm({ describe: e })}
                 />
                 <CharLength value={describe} chars={1000} />
+              </KeyboardAwareScrollView>
+              <View style={{ paddingHorizontal: wp(30) }}>
+                <GradientButton
+                  type="Company"
+                  style={styles.btn}
+                  title={t('Continue')}
+                  onPress={() => {
+                    nextStep();
+                  }}
+                />
               </View>
-              <GradientButton
-                type="Company"
-                style={styles.btn}
-                title={t('Continue')}
-                onPress={() => {
-                  // if (!describe.trim()) {
-                  //   errorToast('Please enter description');
-                  //   return;
-                  // }
-                  nextStep();
-                }}
-              />
             </View>
           </Animated.View>
         );
       case 2:
         return (
-          <Animated.View key="step-2" style={[{flex: 1}, animatedStyle]}>
+          <Animated.View key="step-2" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -809,20 +760,26 @@ const PostJob = () => {
                 <Image source={IMAGES.close} style={styles.close} />
               </TouchableOpacity>
             </View>
-            <View style={styles.container}>
-              <View>
-                <Text style={styles.inputLabelWithMargin}>
-                  {t('Add Job Skills')}
-                </Text>
 
-                {/* Show selected skills as tags with close */}
+            {/* Fixed container with flex layout */}
+            <View style={styles.skillsStepContainer}>
+              {/* Label */}
+              <Text style={styles.inputLabelWithMargin}>
+                {t('Add Job Skills')}
+              </Text>
+
+              {/* Selected skills - scrollable if needed */}
+              <ScrollView
+                style={styles.selectedSkillsScrollContainer}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={true}>
                 <View style={styles.selectedSkillsContainer}>
                   {jobSkills.length === 0 ? (
                     <Text style={styles.placeholderText}>
                       {t('Select job skills')}
                     </Text>
                   ) : (
-                    jobSkills.map((skill, index) => (
+                    jobSkills.map((skill: string, index: number) => (
                       <View key={index} style={styles.skillTag}>
                         <Text style={styles.skillText}>{skill}</Text>
                         <Pressable
@@ -833,54 +790,60 @@ const PostJob = () => {
                       </View>
                     ))
                   )}
-
-                  <View style={styles.bottomUnderline} />
                 </View>
+                <View style={styles.bottomUnderline} />
+              </ScrollView>
 
-                <ScrollView style={styles.skillsScrollView}>
-                  <View style={styles.skillsWrapper}>
-                    {skills?.map((item, index) => {
-                      return (
-                        <Pressable
-                          key={index}
-                          onPress={() => {
-                            toggleSkillId(item._id);
-                            handleSkillSelection(item.title);
-                          }}
-                          style={[
-                            styles.skillOption,
-                            jobSkills.includes(item.title) && {
-                              backgroundColor: colors._0B3970,
-                            },
-                          ]}>
-                          <Text style={styles.skillOptionText}>
-                            {item.title}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </ScrollView>
+              {/* Scrollable skills list */}
+              <ScrollView
+                style={styles.skillsScrollView}
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}>
+                <View style={styles.skillsWrapper}>
+                  {skills?.map((item, index) => {
+                    return (
+                      <Pressable
+                        key={index}
+                        onPress={() => {
+                          toggleSkillId(item._id);
+                          handleSkillSelection(item.title);
+                        }}
+                        style={[
+                          styles.skillOption,
+                          jobSkills.includes(item.title) && {
+                            backgroundColor: colors._0B3970,
+                          },
+                        ]}>
+                        <Text style={styles.skillOptionText}>
+                          {item.title}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+
+              {/* Fixed Continue button */}
+              <View style={{ paddingHorizontal: wp(30) }}>
+                <GradientButton
+                  style={styles.btn}
+                  type="Company"
+                  title={t('Continue')}
+                  onPress={() => {
+                    if (jobSkills?.length === 0) {
+                      errorToast('Please select at least one skill');
+                      return;
+                    }
+                    nextStep();
+                  }}
+                />
               </View>
-
-              <GradientButton
-                style={styles.btn}
-                type="Company"
-                title={t('Continue')}
-                onPress={() => {
-                  if (jobSkills?.length === 0) {
-                    errorToast('Please select at least one skill');
-                    return;
-                  }
-                  nextStep();
-                }}
-              />
             </View>
           </Animated.View>
         );
       case 3:
         return (
-          <Animated.View key="step-3" style={[{flex: 1}, animatedStyle]}>
+          <Animated.View key="step-3" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -890,29 +853,24 @@ const PostJob = () => {
               </Text>
               <View />
             </View>
+
+            {/* FIXED: Proper flex container with non-scrollable button */}
             <View style={styles.requirementsContainer}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={styles.inputLabelLarge}>
                   {t('Job Requirements')}
                 </Text>
                 <Tooltip
-                  tooltipBoxStyle={{right: '-100%'}}
+                  tooltipBoxStyle={{ right: '-100%' }}
                   message={
                     'Choose from our predefined list of requirements to ensure accurate candidate matching.'
                   }
                 />
               </View>
-              <View
-                style={
-                  {}
-                  // requirements?.length
-                  //   ?
-                  //   styles.requirementWrapper
-                  //   :
-                  //   {flexGrow: 1}
-                }>
+
+              {/* Scrollable requirements list */}
+              <View style={{ flex: 1 }}>
                 {(() => {
-                  // Filter out empty/blank requirements
                   const validRequirements =
                     requirements?.filter(
                       (req: string) => req && req.trim().length > 0,
@@ -926,8 +884,8 @@ const PostJob = () => {
                         paddingRight: wp(10),
                       }}
                       keyExtractor={(_, index) => index.toString()}
-                      style={{flex: 1}}
-                      renderItem={({item}) => (
+                      style={{ flex: 1 }}
+                      renderItem={({ item }) => (
                         <View style={styles.boxContainer}>
                           <View style={styles.checkRound}>
                             <Image
@@ -957,7 +915,7 @@ const PostJob = () => {
                   ) : (
                     <View style={styles.emptyReqContainer}>
                       <BaseText
-                        style={{...commonFontStyle(400, 16, colors.black)}}>
+                        style={{ ...commonFontStyle(400, 16, colors.black) }}>
                         {'No requirements added yet'}
                       </BaseText>
                     </View>
@@ -965,16 +923,10 @@ const PostJob = () => {
                 })()}
               </View>
 
-              <View
-                style={
-                  {
-                    // width: '100%',
-                    // bottom: hp(0),
-                    // position: 'absolute',
-                  }
-                }>
+              {/* Fixed bottom buttons */}
+              <View style={styles.fixedBottomSection}>
                 <Pressable
-                  onPress={() => updateJobForm({isModalVisible: true})}
+                  onPress={() => updateJobForm({ isModalVisible: true })}
                   style={styles.addRequirementButton}>
                   <View style={styles.checkRound}>
                     <Image
@@ -992,23 +944,20 @@ const PostJob = () => {
                   type="Company"
                   title={t('Continue')}
                   onPress={() => {
-                    // if (requirements?.length === 0) {
-                    //   errorToast('Please add at least one requirement');
-                    //   return;
-                    // }
                     nextStep();
                   }}
                 />
               </View>
             </View>
+
             <BottomModal
               visible={isModalVisible}
               onClose={() => {
-                updateJobForm({isModalVisible: false});
+                updateJobForm({ isModalVisible: false });
               }}>
               <Pressable
                 onPress={() => {
-                  updateJobForm({requirementText: '', isModalVisible: false});
+                  updateJobForm({ requirementText: '', isModalVisible: false });
                 }}>
                 <Image
                   source={IMAGES.close}
@@ -1017,7 +966,7 @@ const PostJob = () => {
                 />
               </Pressable>
               <Text
-                onPress={() => updateJobForm({isModalVisible: true})}
+                onPress={() => updateJobForm({ isModalVisible: true })}
                 style={styles.modalTitleText}>
                 {t('Add New Requirements')}
               </Text>
@@ -1025,7 +974,7 @@ const PostJob = () => {
                 multiline
                 maxLength={400}
                 value={requirementText}
-                onChangeText={text => updateJobForm({requirementText: text})}
+                onChangeText={text => updateJobForm({ requirementText: text })}
                 containerStyle={styles.modalInputContainer}
                 placeholder={t('Write requirements')}
                 inputStyle={styles.modalInputStyle}
@@ -1042,7 +991,7 @@ const PostJob = () => {
         );
       case 4:
         return (
-          <Animated.View key="step-4" style={[{flex: 1}, animatedStyle]}>
+          <Animated.View key="step-4" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.Backheader}>
               <TouchableOpacity onPress={() => prevStep()}>
                 <Image source={IMAGES.backArrow} style={styles.back} />
@@ -1051,7 +1000,7 @@ const PostJob = () => {
                 <Image source={IMAGES.close} style={styles.close} />
               </TouchableOpacity>
             </View>
-            <View style={styles.container}>
+            <View style={[styles.container, { paddingHorizontal: wp(30) }]}>
               <View>
                 <Text style={styles.inputLabelWithMargin}>
                   {t('You will Provide')}
@@ -1060,7 +1009,7 @@ const PostJob = () => {
                   data={facilities}
                   keyExtractor={(_, index) => index.toString()}
                   contentContainerStyle={styles.providerContainer}
-                  renderItem={({item, index}) => {
+                  renderItem={({ item, index }) => {
                     const isChecked = selected?.some(
                       (i: any) => i?._id === item?._id,
                     );
@@ -1072,7 +1021,7 @@ const PostJob = () => {
                         <View
                           style={[
                             styles.checkbox,
-                            {borderWidth: isChecked ? 0 : 1},
+                            { borderWidth: isChecked ? 0 : 1 },
                           ]}>
                           {isChecked && (
                             <Image
@@ -1098,7 +1047,7 @@ const PostJob = () => {
         );
       case 5:
         return (
-          <Animated.View key="step-5" style={[{flex: 1}, animatedStyle]}>
+          <Animated.View key="step-5" style={[{ flex: 1 }, animatedStyle]}>
             <View style={styles.empContainer}>
               <View style={styles.empHeader}>
                 <BackHeader
@@ -1109,7 +1058,7 @@ const PostJob = () => {
                 />
 
                 <View style={styles.card}>
-                  <Image source={{uri: IMAGE_URL}} style={styles.avatar} />
+                  <Image source={{ uri: IMAGE_URL }} style={styles.avatar} />
                   <View style={styles.textContainer}>
                     <Text style={styles.empTitle}>{title}</Text>
                     <Text style={styles.empSubtitle}>
@@ -1117,9 +1066,8 @@ const PostJob = () => {
                     </Text>
                     <View style={styles.empRow}>
                       <Text style={styles.location}>
-                        {`${userAddress?.state || 'N/A'}, ${
-                          userAddress?.country || 'N/A'
-                        }`}
+                        {`${userAddress?.state || 'N/A'}, ${userAddress?.country || 'N/A'
+                          }`}
                       </Text>
                     </View>
                     <Text style={styles.location}>{contract_type?.label}</Text>
@@ -1157,11 +1105,10 @@ const PostJob = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
                 keyExtractor={(_, index) => index.toString()}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   return (
                     <View>
                       <EmplyoeeCard
-                        key={index}
                         name={item?.name}
                         selected={selectedEmployeeIds.includes(item._id)}
                         picture={item?.picture}
@@ -1193,517 +1140,501 @@ const PostJob = () => {
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
-      {steps == 0 && (
-        <BackHeader
-          type="company"
-          isRight={false}
-          titleStyle={styles.title}
-          title={t('Post your job')}
-          containerStyle={styles.header}
-          onBackPress={() => {
-            dispatch(resetJobFormState());
-            navigationRef?.goBack();
-          }}
-        />
-      )}
-      <KeyboardAwareScrollView
-        ref={scrollViewRef}
-        style={AppStyles.flex}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
-        enableOnAndroid={true}
-        enableAutomaticScroll={false}
-        scrollEnabled={!isDropdownOpen}
-        nestedScrollEnabled={!isDropdownOpen}>
-        {/* <AnimatedSwitcher index={steps}> */}
+      <View style={{ flex: 1, paddingBottom: insets.bottom }}>
         {steps == 0 && (
+          <BackHeader
+            type="company"
+            isRight={false}
+            titleStyle={styles.title}
+            title={t('Post your job')}
+            containerStyle={styles.header}
+            onBackPress={() => {
+              dispatch(resetJobFormState());
+              navigationRef?.goBack();
+            }}
+          />
+        )}
+
+        {/* Step 0 with KeyboardAwareScrollView */}
+        {steps == 0 ? (
           <Animated.View
             key="step-0"
             style={[
-              {flex: 1},
+              { flex: 1 },
               {
                 opacity: fadeAnim,
-                transform: [{translateX: slideAnim}],
+                transform: [{ translateX: slideAnim }],
               },
             ]}>
-            <View>
-              <View style={styles.field}>
-                <Text style={styles.label}>
-                  {t('Job Title')}
-                  <Text style={styles.required}>*</Text>
-                </Text>
-                <CustomTextInput
-                  value={title}
-                  onChangeText={e => updateJobForm({title: e})}
-                  placeholder={'Enter job title'}
-                  inputStyle={styles.input}
-                  placeholderTextColor={colors._7B7878}
-                  containerStyle={styles.inputContainer}
-                />
-              </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>{t('Type of contract')}</Text>
-                <CustomDropdown
-                  data={contractTypeData}
-                  labelField="label"
-                  valueField="value"
-                  value={contract_type?.value}
-                  onChange={(e: any) => {
-                    updateJobForm({
-                      contract_type: {label: e.label, value: e.value},
-                    });
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
-              </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>{t('Job Area')}</Text>
-                <View
-                  style={[
-                    styles.autocompleteWrapper,
-                    isAutocompleteOpen && styles.autocompleteWrapperOpen,
-                  ]}>
-                  <GooglePlacesAutocomplete
-                    placeholder={area?.label || 'Search location'}
-                    onPress={(data, details = null) => {
-                      console.log('Selected:', data.description);
-                      updateJobForm({
-                        area: {
-                          label: data.description,
-                          value: data.description,
-                          place_id: data.place_id,
-                          coordinates: details?.geometry?.location,
-                        },
-                      });
-                      setIsAutocompleteOpen(false);
-                    }}
-                    query={{
-                      key: mapKey,
-                      language: 'en',
-                      components: 'country:ae', // Restrict to UAE
-                    }}
-                    fetchDetails={true}
-                    enablePoweredByContainer={false}
-                    keepResultsAfterBlur={true}
-                    listViewDisplayed={isAutocompleteOpen}
-                    onFocus={() => {
-                      setIsAutocompleteOpen(true);
-                    }}
-                    onBlur={() => {
-                      // Delay closing to allow selection
-                      setTimeout(() => setIsAutocompleteOpen(false), 300);
-                    }}
-                    onFail={error => {
-                      console.error('GooglePlacesAutocomplete error:', error);
-                    }}
-                    suppressDefaultStyles={false}
-                    styles={{
-                      container: {
-                        flex: 0,
-                        zIndex: 1000,
-                      },
-                      textInputContainer: {
-                        backgroundColor: 'transparent',
-                        borderWidth: 0,
-                        zIndex: 1000,
-                      },
-                      textInput: {
-                        height: hp(56),
-                        borderWidth: 2,
-                        borderRadius: 10,
-                        paddingVertical: hp(16),
-                        paddingHorizontal: wp(13),
-                        paddingRight: wp(45),
-                        borderColor: colors._234F86,
-                        ...commonFontStyle(400, 18, colors._181818),
-                        backgroundColor: colors.white,
-                        marginTop: 0,
-                        marginBottom: 0,
-                      },
-                      listView: {
-                        position: 'absolute',
-                        top: hp(60),
-                        left: 0,
-                        right: 0,
-                        backgroundColor: colors.white,
-                        borderRadius: 10,
-                        borderWidth: 1,
-                        borderColor: colors._234F86,
-                        elevation: 10,
-                        shadowColor: '#000',
-                        shadowOffset: {width: 0, height: 4},
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                        maxHeight: hp(250),
-                        zIndex: 1001,
-                        marginTop: hp(4),
-                      },
-                      row: {
-                        backgroundColor: colors.white,
-                        paddingVertical: hp(14),
-                        paddingHorizontal: wp(13),
-                        borderBottomWidth: 1,
-                        borderBottomColor: colors._D9D9D9,
-                        zIndex: 1001,
-                      },
-                      separator: {
-                        height: 0,
-                      },
-                      description: {
-                        ...commonFontStyle(400, 15, colors._181818),
-                        zIndex: 1001,
-                      },
-                      loader: {
-                        paddingVertical: hp(10),
-                      },
-                      poweredContainer: {
-                        display: 'none',
-                      },
-                    }}
-                    debounce={400}
-                    minLength={2}
-                    nearbyPlacesAPI="GooglePlacesSearch"
-                    textInputProps={{
-                      placeholderTextColor: colors._7B7878,
-                      returnKeyType: 'search',
-                      onFocus: () => {
-                        setIsAutocompleteOpen(true);
-                      },
-                      onChangeText: text => {
-                        // Ensure list is shown when user types
-                        setSearchText(text);
-                        setIsAutocompleteOpen(true);
-                      },
-                      clearButtonMode: 'while-editing',
-                    }}
-                    numberOfLines={1}
-                  />
-                </View>
-              </View>
-              <LocationContainer
-                address={userAddress?.address}
-                onPressMap={() => {
-                  navigateTo(SCREENS.CoPostJobLocationScreen, {userAddress});
-                }}
-                containerStyle={styles.map}
-                lat={userAddress?.lat || location?.latitude}
-                lng={userAddress?.lng || location?.longitude}
-              />
-              <Pressable
-                onPress={() => {
-                  updateJobForm({canApply: !canApply});
-                }}
-                style={styles.peopleRow}>
-                <Image
-                  style={styles.check}
-                  source={canApply ? IMAGES.check_mark : IMAGES.circle}
-                />
-                <Text style={styles.peopleTitle}>
-                  {t('People from anywhere can apply')}
-                </Text>
-              </Pressable>
-              <View style={styles.fieldWithMargin}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <KeyboardAwareScrollView
+              ref={scrollViewRef}
+              style={AppStyles.flex}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContainer}
+              enableOnAndroid={true}
+              enableAutomaticScroll={false}
+              scrollEnabled={!isDropdownOpen}
+              nestedScrollEnabled={!isDropdownOpen}>
+              <View>
+                <View style={styles.field}>
                   <Text style={styles.label}>
-                    {t('How long should this job be live?')}
+                    {t('Job Title')}
+                    <Text style={styles.required}>*</Text>
                   </Text>
-                  <Tooltip
-                    message={t(
-                      'Choose how long the job stays active. It will automatically expire after this period.',
-                    )}
+                  <CustomTextInput
+                    value={title}
+                    onChangeText={e => updateJobForm({ title: e })}
+                    placeholder={'Enter job title'}
+                    inputStyle={styles.input}
+                    placeholderTextColor={colors._7B7878}
+                    containerStyle={styles.inputContainer}
                   />
                 </View>
-                <CustomDropdown
-                  data={durationData}
-                  labelField="label"
-                  valueField="value"
-                  value={duration?.value}
-                  onChange={(e: any) => {
-                    updateJobForm({duration: {label: e.label, value: e.value}});
-                    // Automatically calculate expiry date if not manually changed
-                    if (!isExpiryDateManuallyChanged) {
-                      const calculatedExpiryDate = calculateExpiryDate(e.value);
-                      updateJobForm({expiry_date: calculatedExpiryDate});
-                    }
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
-              </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>{t('Expiry Date')}</Text>
-                <Pressable
-                  style={{position: 'relative'}}
-                  onPress={() => updateJobForm({isModalVisible: true})}>
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Type of contract')}</Text>
                   <CustomDropdown
-                    data={
-                      expiry_date
-                        ? [{label: expiry_date, value: expiry_date}]
-                        : []
-                    }
-                    disable={true}
-                    value={expiry_date}
-                    placeholder="Select Date"
+                    data={contractTypeData}
                     labelField="label"
                     valueField="value"
-                    dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
-                  />
-                  <Pressable
-                    style={[StyleSheet.absoluteFill, styles.overlayPressable]}
-                    onPress={() => updateJobForm({isModalVisible: true})}
-                  />
-                </Pressable>
-
-                <DateTimePicker
-                  mode="date"
-                  isVisible={isModalVisible}
-                  date={
-                    expiry_date && !isNaN(new Date(expiry_date).getTime())
-                      ? new Date(expiry_date)
-                      : new Date()
-                  }
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  pickerStyleIOS={{alignSelf: 'center'}}
-                  onConfirm={(date: Date) => {
-                    const formattedDate = date.toISOString().split('T')[0];
-                    updateJobForm({
-                      expiry_date: formattedDate,
-                      isModalVisible: false,
-                    });
-                    // Mark as manually changed so duration changes don't override it
-                    setIsExpiryDateManuallyChanged(true);
-                  }}
-                  onCancel={() => updateJobForm({isModalVisible: false})}
-                />
-              </View>
-              <View
-                ref={jobDepartmentFieldRef}
-                style={styles.field}
-                collapsable={false}>
-                <Text style={styles.label}>
-                  {t('Job Department')}
-                  <Text style={styles.required}>*</Text>
-                </Text>
-                <CustomDropdown
-                  data={dropdownDepartmentsOptions}
-                  labelField="label"
-                  valueField="value"
-                  value={job_sector?.value}
-                  onChange={(e: any) => {
-                    updateJobForm({
-                      job_sector: {label: e.label, value: e.value},
-                    });
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  onDropdownOpen={handleJobDepartmentFocus}
-                  onDropdownClose={handleJobDepartmentBlur}
-                />
-              </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>{t('Start date?')}</Text>
-                <CustomDropdown
-                  data={startDateData}
-                  labelField="label"
-                  valueField="value"
-                  value={startDate?.value}
-                  onChange={(e: any) => {
-                    updateJobForm({
-                      startDate: {label: e.label, value: e.value},
-                    });
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
-              </View>
-              {/* <View style={styles.field}>
-                <Text style={styles.label}>{t('Type of contract')}</Text>
-                <CustomDropdown
-                  data={contractTypeData}
-                  labelField="label"
-                  valueField="value"
-                  value={contract?.value}
-                  onChange={(e: any) => {
-                    updateJobForm({contract: {label: e.label, value: e.value}});
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
-              </View> */}
-              <View style={styles.field}>
-                <Text style={styles.label}>{t('Monthly Salary Offer')}</Text>
-                <View style={styles.salaryrow}>
-                  <CustomDropdown
-                    data={salaryRangeData}
-                    labelField="label"
-                    valueField="value"
-                    value={salary?.value}
-                    onChange={(e: any) => {
-                      updateJobForm({salary: {label: e.label, value: e.value}});
-                    }}
-                    dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    container={AppStyles.flex}
-                  />
-                  <CustomDropdown
-                    data={currencyData}
-                    labelField="label"
-                    valueField="value"
-                    value={currency?.value}
+                    value={contract_type?.value}
                     onChange={(e: any) => {
                       updateJobForm({
-                        currency: {label: e.label, value: e.value},
+                        contract_type: { label: e.label, value: e.value },
                       });
                     }}
                     dropdownStyle={styles.dropdown}
                     renderRightIcon={IMAGES.ic_down}
                     RightIconStyle={styles.rightIcon}
                     selectedTextStyle={styles.selectedTextStyle}
-                    container={{flex: 0.5}}
+                  />
+                </View>
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Job Area')}</Text>
+                  <View
+                    style={[
+                      styles.autocompleteWrapper,
+                      isAutocompleteOpen && styles.autocompleteWrapperOpen,
+                    ]}>
+                    <GooglePlacesAutocomplete
+                      placeholder={area?.label || 'Search location'}
+                      onPress={(data, details = null) => {
+                        console.log('Selected:', data.description);
+                        updateJobForm({
+                          area: {
+                            label: data.description,
+                            value: data.description,
+                            place_id: data.place_id,
+                            coordinates: details?.geometry?.location,
+                          },
+                        });
+                        setIsAutocompleteOpen(false);
+                      }}
+                      query={{
+                        key: mapKey,
+                        language: 'en',
+                        components: 'country:ae',
+                      }}
+                      fetchDetails={true}
+                      enablePoweredByContainer={false}
+                      keepResultsAfterBlur={true}
+                      listViewDisplayed={isAutocompleteOpen}
+                      onFocus={() => {
+                        setIsAutocompleteOpen(true);
+                      }}
+                      onBlur={() => {
+                        setTimeout(() => setIsAutocompleteOpen(false), 300);
+                      }}
+                      onFail={error => {
+                        console.error('GooglePlacesAutocomplete error:', error);
+                      }}
+                      suppressDefaultStyles={false}
+                      styles={{
+                        container: {
+                          flex: 0,
+                          zIndex: 1000,
+                        },
+                        textInputContainer: {
+                          backgroundColor: 'transparent',
+                          borderWidth: 0,
+                          zIndex: 1000,
+                        },
+                        textInput: {
+                          height: hp(56),
+                          borderWidth: 2,
+                          borderRadius: 10,
+                          paddingVertical: hp(16),
+                          paddingHorizontal: wp(13),
+                          paddingRight: wp(45),
+                          borderColor: colors._234F86,
+                          ...commonFontStyle(400, 18, colors._181818),
+                          backgroundColor: colors.white,
+                          marginTop: 0,
+                          marginBottom: 0,
+                        },
+                        listView: {
+                          position: 'absolute',
+                          top: hp(60),
+                          left: 0,
+                          right: 0,
+                          backgroundColor: colors.white,
+                          borderRadius: 10,
+                          borderWidth: 1,
+                          borderColor: colors._234F86,
+                          elevation: 10,
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.3,
+                          shadowRadius: 8,
+                          maxHeight: hp(250),
+                          zIndex: 1001,
+                          marginTop: hp(4),
+                        },
+                        row: {
+                          backgroundColor: colors.white,
+                          paddingVertical: hp(14),
+                          paddingHorizontal: wp(13),
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors._D9D9D9,
+                          zIndex: 1001,
+                        },
+                        separator: {
+                          height: 0,
+                        },
+                        description: {
+                          ...commonFontStyle(400, 15, colors._181818),
+                          zIndex: 1001,
+                        },
+                        loader: {
+                          paddingVertical: hp(10),
+                        },
+                        poweredContainer: {
+                          display: 'none',
+                        },
+                      }}
+                      debounce={400}
+                      minLength={2}
+                      nearbyPlacesAPI="GooglePlacesSearch"
+                      textInputProps={{
+                        placeholderTextColor: colors._7B7878,
+                        returnKeyType: 'search',
+                        onFocus: () => {
+                          setIsAutocompleteOpen(true);
+                        },
+                        onChangeText: text => {
+                          setSearchText(text);
+                          setIsAutocompleteOpen(true);
+                        },
+                        clearButtonMode: 'while-editing',
+                      }}
+                      numberOfLines={1}
+                    />
+                  </View>
+                </View>
+                <LocationContainer
+                  address={userAddress?.address}
+                  onPressMap={() => {
+                    navigateTo(SCREENS.CoPostJobLocationScreen, { userAddress });
+                  }}
+                  containerStyle={styles.map}
+                  lat={userAddress?.lat || location?.latitude}
+                  lng={userAddress?.lng || location?.longitude}
+                />
+                <Pressable
+                  onPress={() => {
+                    updateJobForm({ canApply: !canApply });
+                  }}
+                  style={styles.peopleRow}>
+                  <Image
+                    style={styles.check}
+                    source={canApply ? IMAGES.check_mark : IMAGES.circle}
+                  />
+                  <Text style={styles.peopleTitle}>
+                    {t('People from anywhere can apply')}
+                  </Text>
+                </Pressable>
+                <View style={styles.fieldWithMargin}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.label}>
+                      {t('How long should this job be live?')}
+                    </Text>
+                    <Tooltip
+                      message={t(
+                        'Choose how long the job stays active. It will automatically expire after this period.',
+                      )}
+                    />
+                  </View>
+                  <CustomDropdown
+                    data={durationData}
+                    labelField="label"
+                    valueField="value"
+                    value={duration?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({ duration: { label: e.label, value: e.value } });
+                      if (!isExpiryDateManuallyChanged) {
+                        const calculatedExpiryDate = calculateExpiryDate(e.value);
+                        updateJobForm({ expiry_date: calculatedExpiryDate });
+                      }
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                  />
+                </View>
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Expiry Date')}</Text>
+                  <Pressable
+                    style={{ position: 'relative' }}
+                    onPress={() => updateJobForm({ isModalVisible: true })}>
+                    <CustomDropdown
+                      data={
+                        expiry_date
+                          ? [{ label: expiry_date, value: expiry_date }]
+                          : []
+                      }
+                      disable={true}
+                      value={expiry_date}
+                      placeholder="Select Date"
+                      labelField="label"
+                      valueField="value"
+                      dropdownStyle={styles.dropdown}
+                      renderRightIcon={IMAGES.ic_down}
+                      RightIconStyle={styles.rightIcon}
+                      selectedTextStyle={styles.selectedTextStyle}
+                    />
+                    <Pressable
+                      style={[StyleSheet.absoluteFill, styles.overlayPressable]}
+                      onPress={() => updateJobForm({ isModalVisible: true })}
+                    />
+                  </Pressable>
+
+                  <DateTimePicker
+                    mode="date"
+                    isVisible={isModalVisible}
+                    date={
+                      expiry_date && !isNaN(new Date(expiry_date).getTime())
+                        ? new Date(expiry_date)
+                        : new Date()
+                    }
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    pickerStyleIOS={{ alignSelf: 'center' }}
+                    onConfirm={(date: Date) => {
+                      const formattedDate = date.toISOString().split('T')[0];
+                      updateJobForm({
+                        expiry_date: formattedDate,
+                        isModalVisible: false,
+                      });
+                      setIsExpiryDateManuallyChanged(true);
+                    }}
+                    onCancel={() => updateJobForm({ isModalVisible: false })}
+                  />
+                </View>
+                <View
+                  ref={jobDepartmentFieldRef}
+                  style={styles.field}
+                  collapsable={false}>
+                  <Text style={styles.label}>
+                    {t('Job Department')}
+                    <Text style={styles.required}>*</Text>
+                  </Text>
+                  <CustomDropdown
+                    data={dropdownDepartmentsOptions}
+                    labelField="label"
+                    valueField="value"
+                    value={job_sector?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({
+                        job_sector: { label: e.label, value: e.value },
+                      });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    onDropdownOpen={handleJobDepartmentFocus}
+                    onDropdownClose={handleJobDepartmentBlur}
+                  />
+                </View>
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Start date?')}</Text>
+                  <CustomDropdown
+                    data={startDateData}
+                    labelField="label"
+                    valueField="value"
+                    value={startDate?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({
+                        startDate: { label: e.label, value: e.value },
+                      });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                  />
+                </View>
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Monthly Salary Offer')}</Text>
+                  <View style={styles.salaryrow}>
+                    <CustomDropdown
+                      data={salaryRangeData}
+                      labelField="label"
+                      valueField="value"
+                      value={salary?.value}
+                      onChange={(e: any) => {
+                        updateJobForm({ salary: { label: e.label, value: e.value } });
+                      }}
+                      dropdownStyle={styles.dropdown}
+                      renderRightIcon={IMAGES.ic_down}
+                      RightIconStyle={styles.rightIcon}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      container={AppStyles.flex}
+                    />
+                    <CustomDropdown
+                      data={currencyData}
+                      labelField="label"
+                      valueField="value"
+                      value={currency?.value}
+                      onChange={(e: any) => {
+                        updateJobForm({
+                          currency: { label: e.label, value: e.value },
+                        });
+                      }}
+                      dropdownStyle={styles.dropdown}
+                      renderRightIcon={IMAGES.ic_down}
+                      RightIconStyle={styles.rightIcon}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      container={{ flex: 0.5 }}
+                    />
+                  </View>
+                </View>
+                <View style={styles.field}>
+                  <Text style={styles.label}>
+                    {t('Number of positions available')}
+                  </Text>
+                  <CustomDropdown
+                    data={numberOfPositionsData}
+                    labelField="label"
+                    valueField="value"
+                    value={position?.value}
+                    dropdownPosition="top"
+                    onChange={(e: any) => {
+                      updateJobForm({ position: { label: e.label, value: e.value } });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
                   />
                 </View>
               </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>
-                  {t('Number of positions available')}
-                </Text>
-                <CustomDropdown
-                  data={numberOfPositionsData}
-                  labelField="label"
-                  valueField="value"
-                  value={position?.value}
-                  dropdownPosition="top"
-                  onChange={(e: any) => {
-                    updateJobForm({position: {label: e.label, value: e.value}});
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
-              </View>
+            </KeyboardAwareScrollView>
+            <View style={{ paddingHorizontal: wp(30) }}>
+              <GradientButton
+                style={styles.btn}
+                type="Company"
+                title={t('Next')}
+                onPress={() => {
+                  if (!title.trim()) {
+                    errorToast(t('Please enter a valid title'));
+                    return;
+                  }
+                  if (!expiry_date.trim()) {
+                    errorToast(t('Please select expiry date'));
+                    return;
+                  }
+                  nextStep();
+                }}
+              />
             </View>
-            <GradientButton
-              style={styles.btn}
-              type="Company"
-              title={t('Next')}
-              onPress={() => {
-                if (!title.trim()) {
-                  errorToast(t('Please enter a valid title'));
-                  return;
-                }
-                if (!expiry_date.trim()) {
-                  errorToast(t('Please select expiry date'));
-                  return;
-                }
-                nextStep();
-              }}
-            />
           </Animated.View>
+        ) : (
+          <View style={AppStyles.flex}>
+            {steps !== 0 && render()}
+          </View>
         )}
-        {steps !== 0 && render()}
-        {/* </AnimatedSwitcher> */}
-      </KeyboardAwareScrollView>
-      <BottomModal
-        visible={isSuccessModalVisible}
-        backgroundColor={colors._FAEED2}
-        onClose={() => {
-          updateJobForm({isSuccessModalVisible: false});
-        }}>
-        <View style={styles.modalIconWrapper}>
-          <Image
-            source={IMAGES.check}
-            tintColor={colors._FAEED2}
-            style={styles.modalCheckIcon}
-          />
-        </View>
 
-        <View>
-          <Text style={styles.modalTitle}>{'Job Posted Successfully'}</Text>
-          <Text style={styles.modalSubtitle}>
-            {
-              "We're excited to post your job. get ready to start receiving profiles."
-            }
-          </Text>
-        </View>
+        <BottomModal
+          visible={isSuccessModalVisible}
+          backgroundColor={colors._FAEED2}
+          onClose={() => {
+            updateJobForm({ isSuccessModalVisible: false });
+          }}>
+          <View style={styles.modalIconWrapper}>
+            <Image
+              source={IMAGES.check}
+              tintColor={colors._FAEED2}
+              style={styles.modalCheckIcon}
+            />
+          </View>
 
-        <GradientButton
-          style={styles.btn}
-          type="Company"
-          title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
-          onPress={() => {
-            try {
-              // Close modal first
-              updateJobForm({isSuccessModalVisible: false});
+          <View>
+            <Text style={styles.modalTitle}>{'Job Posted Successfully'}</Text>
+            <Text style={styles.modalSubtitle}>
+              {
+                "We're excited to post your job. get ready to start receiving profiles."
+              }
+            </Text>
+          </View>
 
-              if (editMode) {
-                setCreatedJobId('');
-                setCreatedJobData(null);
+          <GradientButton
+            style={styles.btn}
+            type="Company"
+            title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
+            onPress={() => {
+              try {
+                updateJobForm({ isSuccessModalVisible: false });
+
+                if (editMode) {
+                  setCreatedJobId('');
+                  setCreatedJobData(null);
+                  dispatch(resetJobFormState());
+                  dispatch(setCoPostJobSteps(0));
+                  navigationRef?.current?.goBack();
+                  return;
+                }
+
+                const jobIdToUse = createdJobId || job_id;
+                const jobDataToUse = createdJobData;
+
                 dispatch(resetJobFormState());
                 dispatch(setCoPostJobSteps(0));
-                navigationRef?.current?.goBack();
-                return;
+
+                setCreatedJobId('');
+                setCreatedJobData(null);
+
+                setTimeout(() => {
+                  if (jobIdToUse) {
+                    navigateTo(SCREENS.SuggestedEmployee, {
+                      jobId: jobIdToUse,
+                      jobData: jobDataToUse,
+                    });
+                  } else {
+                    navigationRef?.current?.goBack();
+                  }
+                }, 100);
+              } catch (error) {
+                console.error('Navigation error:', error);
+                updateJobForm({ isSuccessModalVisible: false });
               }
+            }}
+          />
 
-              const jobIdToUse = createdJobId || job_id;
-              const jobDataToUse = createdJobData;
-
-              // Reset state
+          <Text
+            onPress={() => {
               dispatch(resetJobFormState());
               dispatch(setCoPostJobSteps(0));
-
-              // Clear local state
+              updateJobForm({ isSuccessModalVisible: false });
               setCreatedJobId('');
               setCreatedJobData(null);
-
-              // Navigate with a small delay to ensure modal closes
-              setTimeout(() => {
-                if (jobIdToUse) {
-                  navigateTo(SCREENS.SuggestedEmployee, {
-                    jobId: jobIdToUse,
-                    jobData: jobDataToUse,
-                  });
-                } else {
-                  navigationRef?.current?.goBack();
-                }
-              }, 100);
-            } catch (error) {
-              console.error('Navigation error:', error);
-              updateJobForm({isSuccessModalVisible: false});
-            }
-          }}
-        />
-
-        <Text
-          onPress={() => {
-            dispatch(resetJobFormState());
-            dispatch(setCoPostJobSteps(0));
-            updateJobForm({isSuccessModalVisible: false});
-            setCreatedJobId('');
-            setCreatedJobData(null);
-            resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
-          }}
-          style={styles.modalHomeText}>
-          {'Home'}
-        </Text>
-      </BottomModal>
+              resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
+            }}
+            style={styles.modalHomeText}>
+            {'Home'}
+          </Text>
+        </BottomModal>
+      </View>
     </LinearContainer>
   );
 };
@@ -1712,8 +1643,8 @@ export default PostJob;
 
 const styles = StyleSheet.create({
   overlayPressable: {
-    zIndex: 9999, // make sure it's above the dropdown
-    elevation: 9999, // for Android layering
+    zIndex: 9999,
+    elevation: 9999,
   },
   header: {
     paddingHorizontal: wp(35),
@@ -1751,6 +1682,10 @@ const styles = StyleSheet.create({
     paddingBottom: hp(30),
     paddingHorizontal: wp(30),
     justifyContent: 'space-between',
+  },
+  stepScrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: wp(30),
   },
   dropdown: {
     borderRadius: 10,
@@ -1811,6 +1746,7 @@ const styles = StyleSheet.create({
   },
   Backheader: {
     marginTop: hp(20),
+    paddingHorizontal: wp(30),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1831,7 +1767,7 @@ const styles = StyleSheet.create({
   },
   inputLabelWithMargin: {
     ...commonFontStyle(500, 25, colors._0B3970),
-    marginTop: hp(40),
+    marginTop: hp(20),
   },
   inputLabelLarge: {
     ...commonFontStyle(500, 25, colors._0B3970),
@@ -1849,6 +1785,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
+  },
+  // NEW: Container for step 2 with flex layout
+  skillsStepContainer: {
+    flex: 1,
+    paddingHorizontal: wp(30),
+  },
+  // NEW: Scrollable selected skills container
+  selectedSkillsScrollContainer: {
+    maxHeight: hp(120),
+    marginTop: hp(20),
   },
   checkbox: {
     height: wp(24),
@@ -1887,7 +1833,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: colors._4A4A4A,
   },
-  requirementWrapper: {position: 'absolute', top: '5%', left: 0, right: 0},
+  requirementWrapper: { position: 'absolute', top: '5%', left: 0, right: 0 },
   boxContainer: {
     marginTop: hp(17),
     flexDirection: 'row',
@@ -1918,7 +1864,7 @@ const styles = StyleSheet.create({
     fontSize: RFValue(16, SCREEN_HEIGHT),
   },
   addRequirementButton: {
-    marginTop: hp(40),
+    marginTop: hp(20),
     flexDirection: 'row',
     alignSelf: 'center',
     alignItems: 'center',
@@ -1946,14 +1892,17 @@ const styles = StyleSheet.create({
     color: colors._181818,
     fontSize: RFValue(18, SCREEN_HEIGHT),
   },
+  // FIXED: Updated requirements container layout
   requirementsContainer: {
     flex: 1,
     marginTop: hp(20),
+    paddingHorizontal: wp(30),
   },
-  requirementsList: {
-    // flex: 1,
-    // marginTop: hp(16),
+  // FIXED: New fixed bottom section for buttons
+  fixedBottomSection: {
+    paddingBottom: hp(10),
   },
+  requirementsList: {},
   modalCloseIcon: {
     width: wp(18),
     height: hp(18),
@@ -1981,7 +1930,6 @@ const styles = StyleSheet.create({
   },
   empContainer: {
     flex: 1,
-    // backgroundColor: colors._F4E2B8
   },
   empHeader: {
     marginTop: hp(15),
@@ -2027,7 +1975,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   location: {
-    // width: '70%',
     flex: 1,
     ...commonFontStyle(400, 15, colors._939393),
   },
@@ -2087,9 +2034,8 @@ const styles = StyleSheet.create({
   selectedSkillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: hp(35),
-    marginBottom: hp(5),
     gap: wp(8),
+    paddingBottom: hp(10),
   },
   skillTag: {
     flexDirection: 'row',
@@ -2137,7 +2083,9 @@ const styles = StyleSheet.create({
     marginTop: hp(10),
   },
   skillsScrollView: {
-    marginTop: hp(38),
+    flex: 1,
+    marginTop: hp(25),
+    marginBottom: hp(10),
   },
   skillsWrapper: {
     flexDirection: 'row',
@@ -2152,7 +2100,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: wp(13),
     top: '50%',
-    transform: [{translateY: -hp(6.5)}],
+    transform: [{ translateY: -hp(6.5) }],
     zIndex: 2,
     pointerEvents: 'none',
   },

@@ -277,6 +277,23 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    closeCompanyJob: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.closeCompanyJob,
+        method: HTTP_METHOD.POST,
+        skipLoader: false,
+        data: credentials,
+      }),
+      invalidatesTags: ['GetJobs'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'CloseCompanyJob datadata');
+        } catch (error) {
+          console.log('CloseCompanyJob Error', error);
+        }
+      },
+    }),
     getCompanyChats: builder.query<any, any>({
       query: () => ({
         url: API.getCompanyChats,
@@ -853,4 +870,5 @@ export const {
   useGetAppDataQuery,
   useGetCompanyProfileByIdQuery,
   useLazyGetCompanyProfileByIdQuery,
+  useCloseCompanyJobMutation,
 } = dashboardApi;

@@ -49,23 +49,23 @@ const CompanyProfile = () => {
   const fromOnboarding = params?.fromOnboarding || false;
   const companyId = params?.companyId;
 
-  const { data: JobData } = useGetCompanyJobsQuery({}, {skip: !!companyId});
+  const { data: JobData } = useGetCompanyJobsQuery({}, { skip: !!companyId });
   const jobsList = JobData?.data?.jobs;
 
   const { companyProfileData, companyProfileAllData, userInfo } = useSelector(
     (state: RootState) => state.auth,
   );
 
-  const { data: getPost } = useGetCompanyPostsQuery({}, {skip: !!companyId});
+  const { data: getPost } = useGetCompanyPostsQuery({}, { skip: !!companyId });
   const allPosts = getPost?.data?.posts;
 
   const dispatch = useAppDispatch();
-  const { data, isLoading, isFetching, isSuccess } = useGetProfileQuery(undefined, {skip: !!companyId});
-  
+  const { data, isLoading, isFetching, isSuccess } = useGetProfileQuery(undefined, { skip: !!companyId });
+
   // Fetch company profile by ID when viewing another company
-  const [getCompanyProfileById, {data: companyData, isLoading: isCompanyLoading}] = 
+  const [getCompanyProfileById, { data: companyData, isLoading: isCompanyLoading }] =
     useLazyGetCompanyProfileByIdQuery();
-  
+
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [selectedTanIndex, setSelectedTabIndex] = useState<number>(0);
   const [isLogoLoading, setIsLogoLoading] = useState(false);
@@ -77,7 +77,7 @@ const CompanyProfile = () => {
   // Fetch company profile by ID if viewing another company
   useEffect(() => {
     if (companyId) {
-      getCompanyProfileById({company_id: companyId, tab: 'posts', page: 1});
+      getCompanyProfileById({ company_id: companyId, tab: 'posts', page: 1 });
     }
   }, [companyId]);
 
@@ -96,101 +96,53 @@ const CompanyProfile = () => {
   }, [companyData, companyId]);
 
   const coverImages = useMemo(() => {
-    // If viewing another company, use their data
-    if (companyId && companyData?.data?.company?.cover_images) {
-      const images = companyData.data.company.cover_images;
-      
-      if (images && Array.isArray(images) && images.length > 0) {
-        const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
-        const repeatedPattern = baseUrl + baseUrl;
-        
-        const validImages = images.filter((url: string) => {
-          if (!url || typeof url !== 'string') return false;
-          const trimmed = url.trim();
-          if (trimmed === '' || trimmed.includes(repeatedPattern)) return false;
-          return true;
-        });
-        
-        return validImages.length > 0 ? validImages : [IMAGES.banner];
-      }
-      return [IMAGES.banner];
-    }
-    
-    // Otherwise, use own profile data
-    // Prioritize userInfo cover_images (set during account creation) to prevent logo flash
-    // Then check companyProfileData, then API response
-    const imagesFromUserInfo = userInfo?.cover_images;
-    const imagesFromRedux = companyProfileData?.cover_images;
-    const imagesFromApi = data?.data?.company?.cover_images;
-    const images = imagesFromUserInfo || imagesFromRedux || imagesFromApi;
+    // Determine the source of profile data (own or external company)
+    const profile = companyId ? companyData?.data?.company : (companyProfileData || data?.data?.company || userInfo);
+    const images = profile?.cover_images;
+    const logo = profile?.logo;
 
-    // If we have images available (from any source), proceed with validation
+    // Helper to validate and clean URLs
+    const getCleanUrl = (url: any): string | null => {
+      if (!url) return null;
+      let urlStr = typeof url === 'string' ? url : (typeof url === 'object' && url.uri ? url.uri : null);
+      if (!urlStr || typeof urlStr !== 'string') return null;
+
+      const trimmed = urlStr.trim();
+      if (trimmed === '' || trimmed.toLowerCase().includes('blank')) return null;
+
+      // Fix malformed URLs with repeated base path
+      const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
+      if (trimmed.includes(baseUrl + baseUrl)) {
+        return trimmed.replace(baseUrl + baseUrl, baseUrl);
+      }
+      return trimmed;
+    };
+
+    // 1. Process cover images if available
     if (images && Array.isArray(images) && images.length > 0) {
-      // Helper function to validate and clean URLs
-      const isValidImageUrl = (url: string): boolean => {
-        if (!url || typeof url !== 'string') return false;
+      const validImages = images
+        .map(img => getCleanUrl(img))
+        .filter((url): url is string => !!url);
 
-        const trimmed = url.trim();
-        if (trimmed === '') return false;
-
-        // Check if URL has the base URL repeated (malformed)
-        const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
-        const repeatedPattern = baseUrl + baseUrl;
-        if (trimmed.includes(repeatedPattern)) {
-          return false;
-        }
-
-        // Check if it's a valid URL format
-        try {
-          new URL(trimmed);
-          return true;
-        } catch {
-          return false;
-        }
-      };
-
-      const filteredImages = images
-        .filter((img: any) => {
-          if (!img) return false;
-
-          if (typeof img === 'string') {
-            return isValidImageUrl(img);
-          }
-
-          if (typeof img === 'object' && img.uri) {
-            return isValidImageUrl(img.uri);
-          }
-
-          return false;
-        })
-        .map((img: any) => {
-          if (typeof img === 'string') {
-            return { uri: img };
-          }
-          return img;
-        });
-
-      // If no valid images after filtering, return dummy image
-      if (filteredImages.length === 0) {
-        return [IMAGES.logoText];
+      if (validImages.length > 0) {
+        return validImages.map(url => ({ uri: url }));
       }
+    }
 
-      return filteredImages;
-    } else {
-      // No images found in any source
-      // Only show fallback logo if query has completed (successfully or with error)
-      // This prevents the Shiftly logo from flashing during initial load
-      const isProfileLoading = isLoading || isFetching;
+    // 2. Fallback to logo if cover images are missing
+    const cleanLogo = getCleanUrl(logo);
+    if (cleanLogo) {
+      return [{ uri: cleanLogo }];
+    }
 
-      // If still loading, don't show fallback yet - return empty to wait
-      if (isProfileLoading && !imagesFromUserInfo) {
-        return [];
-      }
-
-      // Query has completed (or userInfo was available), show fallback
+    // 3. Last fallback to generic logo/banner
+    // Only return fallback if loading is finished or we're viewing an external company
+    if (!isLoading && !isFetching) {
       return [IMAGES.logoText];
     }
-  }, [companyProfileData?.cover_images, userInfo?.cover_images, isLoading, isFetching, isSuccess, data, companyId, companyData]);
+
+    return [];
+  }, [companyId, companyData, companyProfileData, userInfo, data, isLoading, isFetching]);
 
   const shouldShowCoverLoader = useMemo(() => {
     return coverImages.length > 0;
@@ -451,20 +403,20 @@ const CompanyProfile = () => {
               </View>
             </View>
 
-              {companyProfileData?.about && (
-                <ExpandableText
-                  maxLines={3}
-                  showStyle={{ paddingHorizontal: 0 }}
-                  descriptionStyle={styles.description}
-                  description={companyProfileData?.about || 'N/A'}
-                />
-              )}
+            {companyProfileData?.about && (
+              <ExpandableText
+                maxLines={3}
+                showStyle={{ paddingHorizontal: 0 }}
+                descriptionStyle={styles.description}
+                description={companyProfileData?.about || 'N/A'}
+              />
+            )}
 
-              {companyProfileData?.values && (
-                <Text style={styles.description}>
-                  {companyProfileData?.values || 'N/A'}
-                </Text>
-              )}
+            {companyProfileData?.values && (
+              <Text style={styles.description}>
+                {companyProfileData?.values || 'N/A'}
+              </Text>
+            )}
 
             <View style={styles.tabRow}>
               {ProfileTabs?.map((item, index) => (
@@ -482,37 +434,37 @@ const CompanyProfile = () => {
 
             <View style={styles.divider} />
 
-              {selectedTanIndex === 0 && (
-                <CoAboutTab
-                  companyProfileData={displayProfile}
-                  companyProfileAllData={displayProfile}
-                />
-              )}
+            {selectedTanIndex === 0 && (
+              <CoAboutTab
+                companyProfileData={displayProfile}
+                companyProfileAllData={displayProfile}
+              />
+            )}
 
-              {selectedTanIndex === 1 && (
-                <FlatList
-                  numColumns={2}
-                  data={displayPosts}
-                  style={{ marginTop: hp(10), backgroundColor: colors.coPrimary }}
-                  contentContainerStyle={{ backgroundColor: colors.coPrimary }}
-                  renderItem={renderPostItem}
-                  keyExtractor={item => `post-${item.id}`}
-                  columnWrapperStyle={{ justifyContent: 'space-between' }}
-                  ListEmptyComponent={() => (
-                    <View style={styles.emptyContainer}>
-                      <Text
-                        style={[
-                          commonFontStyle(500, 16, colors._0B3970),
-                          { textAlign: 'center', marginTop: hp(20) },
-                        ]}>
-                        No Posts Found
-                      </Text>
-                    </View>
-                  )}
-                />
-              )}
+            {selectedTanIndex === 1 && (
+              <FlatList
+                numColumns={2}
+                data={displayPosts}
+                style={{ marginTop: hp(10), backgroundColor: colors.coPrimary }}
+                contentContainerStyle={{ backgroundColor: colors.coPrimary }}
+                renderItem={renderPostItem}
+                keyExtractor={item => `post-${item.id}`}
+                columnWrapperStyle={{ justifyContent: 'space-between' }}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyContainer}>
+                    <Text
+                      style={[
+                        commonFontStyle(500, 16, colors._0B3970),
+                        { textAlign: 'center', marginTop: hp(20) },
+                      ]}>
+                      No Posts Found
+                    </Text>
+                  </View>
+                )}
+              />
+            )}
 
-              {renderJobs}
+            {renderJobs}
 
             {fromOnboarding && (
               <View style={styles.ctaContainer}>
@@ -566,7 +518,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     width: '100%',
     alignSelf: 'center',
-  },  
+  },
   logoContainer: {
     width: wp(90),
     height: wp(90),

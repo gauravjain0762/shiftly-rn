@@ -6,7 +6,7 @@ import RNFS from 'react-native-fs';
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
-import { getPostedTime } from '../../utils/commonFunction';
+import { getPostedTime, getExpiryDays } from '../../utils/commonFunction';
 
 type JobCardProps = {
   item?: any;
@@ -32,7 +32,7 @@ const MyJobCard = (props: JobCardProps) => {
   const coverImages = (() => {
     const coverImgs = item?.company_id?.cover_images;
     const logo = item?.company_id?.logo;
-    
+
     // Check if cover_images exists and has valid entries
     if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
       // Filter out null/undefined/empty values
@@ -41,12 +41,12 @@ const MyJobCard = (props: JobCardProps) => {
         return validCoverImages;
       }
     }
-    
+
     // Fallback to logo if available
     if (logo && typeof logo === 'string' && logo.trim() !== '') {
       return [logo];
     }
-    
+
     // Final fallback to logoText
     return [IMAGES.logoText];
   })();
@@ -63,7 +63,7 @@ const MyJobCard = (props: JobCardProps) => {
 
       const shareUrl = item?.share_url || '';
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-      
+
       const message = `${title}
 ${area}
 
@@ -80,11 +80,11 @@ ${salary}${shareUrlText}`;
       // Use cover image if available, otherwise use company logo
       // Only use string URLs for sharing (not require resources)
       const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
-        ? coverImages[0] 
+        ? coverImages[0]
         : (item?.company_id?.logo && typeof item.company_id.logo === 'string'
-          ? item.company_id.logo 
+          ? item.company_id.logo
           : null);
-      
+
       if (coverImageUri && typeof coverImageUri === 'string') {
         try {
           const imagePath = await downloadImage(coverImageUri);
@@ -122,6 +122,19 @@ ${salary}${shareUrlText}`;
           {`${item?.description} `}
         </Text>
 
+        {(item?.monthly_salary_from || item?.monthly_salary_to) && (
+          <View style={styles.salaryContainer}>
+            <Image
+              source={IMAGES.currency}
+              style={styles.salaryIcon}
+              tintColor={colors._656464}
+            />
+            <Text style={styles.salaryText}>
+              {`${item?.currency} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.footerRow}>
           {item?.applicants?.length && (
             <Text
@@ -134,9 +147,16 @@ ${salary}${shareUrlText}`;
               }`}</Text>
           </View>
 
-          <Text style={{ ...commonFontStyle(400, 14, colors.greyOpacity) }}>
-            {`Posted ${getPostedTime(item?.createdAt)}`}
-          </Text>
+          <View style={{ alignItems: 'flex-end' }}>
+            {item?.expiry_date && (
+              <Text style={styles.expiryText}>
+                {getExpiryDays(item.expiry_date)}
+              </Text>
+            )}
+            <Text style={{ ...commonFontStyle(400, 14, colors.greyOpacity) }}>
+              {`Posted ${getPostedTime(item?.createdAt)}`}
+            </Text>
+          </View>
         </View>
       </Pressable>
     </>
@@ -206,5 +226,23 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     ...commonFontStyle(500, 10, colors.white),
+  },
+  salaryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+    marginTop: hp(12),
+  },
+  salaryIcon: {
+    width: wp(16),
+    height: hp(16),
+    resizeMode: 'contain',
+  },
+  salaryText: {
+    ...commonFontStyle(600, 14, colors.black),
+  },
+  expiryText: {
+    ...commonFontStyle(500, 12, colors._EE4444),
+    marginBottom: hp(2),
   },
 });

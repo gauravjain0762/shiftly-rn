@@ -66,6 +66,7 @@ export const colors = {
   redOpacity: 'rgba(255, 0, 0, 0.2)',
   green: '#22C55E',
   greenOpacity: '#BEB130',
+  _EE4444: '#EE4444',
 };
 
 export const darkThemeColors = {

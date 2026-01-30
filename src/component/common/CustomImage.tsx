@@ -1,9 +1,9 @@
-import {StyleSheet, TouchableOpacity, View, ViewStyle} from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import React from 'react';
-import FastImage, {FastImageProps, ImageStyle} from 'react-native-fast-image';
-import {colors} from '../../theme/colors';
-import {hp, wp} from '../../theme/fonts';
-import {IMAGES} from '../../assets/Images';
+import FastImage, { FastImageProps, ImageStyle } from 'react-native-fast-image';
+import { colors } from '../../theme/colors';
+import { hp, wp } from '../../theme/fonts';
+import { IMAGES } from '../../assets/Images';
 
 interface Props {
   onPress?: () => void;
@@ -42,9 +42,11 @@ const CustomImage = ({
 }: Props) => {
   // Ensure we always have a valid source for FastImage
   // If both uri and source are null/undefined, use logoText as fallback
-  const imageSource = uri 
-    ? {uri: uri} 
-    : (source || IMAGES.logoText);
+  const imageSource = uri
+    ? { uri: uri }
+    : typeof source === 'string'
+      ? { uri: source }
+      : (source || IMAGES.logoText);
 
   return (
     <TouchableOpacity
@@ -57,14 +59,14 @@ const CustomImage = ({
 
         ...(isBackGround ? styles.btnContainer : {}),
 
-        ...(bgColor ? {backgroundColor: bgColor} : {}),
+        ...(bgColor ? { backgroundColor: bgColor } : {}),
       }}>
       <FastImage
         resizeMode={resizeMode}
         source={imageSource}
         tintColor={tintColor}
         defaultSource={IMAGES.logoText}
-        style={[{width: size, height: size}, imageStyle]}
+        style={[{ width: size, height: size }, imageStyle]}
         {...props}>
         {children}
       </FastImage>

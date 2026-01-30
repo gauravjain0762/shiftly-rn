@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -19,40 +19,40 @@ import {
   LinearContainer,
   ShareModal,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {IMAGES} from '../../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { IMAGES } from '../../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   errorToast,
   goBack,
   navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
-import {SCREEN_NAMES, SCREENS} from '../../../navigation/screenNames';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   useAddRemoveFavouriteMutation,
   useGetEmployeeJobDetailsQuery,
   useGetFavouritesJobQuery,
 } from '../../../api/dashboardApi';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 import Carousel from 'react-native-reanimated-carousel';
-import {navigationRef} from '../../../navigation/RootContainer';
+import { navigationRef } from '../../../navigation/RootContainer';
 
-const {width: screenWidth} = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
 
 const JobDetail = () => {
-  const {t} = useTranslation();
-  const {bottom} = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { bottom } = useSafeAreaInsets();
   const [modal, setModal] = useState(false);
-  const {params} = useRoute<RouteProp<any, any>>() as any;
+  const { params } = useRoute<RouteProp<any, any>>() as any;
   const data = params || params?.item;
-  const {data: jobDetail, isLoading} = useGetEmployeeJobDetailsQuery(
+  const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
     data?.item?._id || data?.jobId,
   );
   const curr_jobdetails = jobDetail?.data?.job;
@@ -60,9 +60,9 @@ const JobDetail = () => {
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
   const shareUrl = jobDetail?.data?.share_url;
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
-  const {data: getFavoriteJobs, refetch} = useGetFavouritesJobQuery({});
+  const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
   const [activeIndex, setActiveIndex] = useState(0);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
@@ -142,14 +142,14 @@ const JobDetail = () => {
     return [IMAGES.logoText];
   })();
 
-  const renderCarouselItem = ({item, index}: any) => {
+  const renderCarouselItem = ({ item, index }: any) => {
     // Handle both URI strings and require resources (numbers)
     const isCoverImage = typeof item === 'string';
     const imageSource = isCoverImage
-      ? {uri: item}
+      ? { uri: item }
       : typeof item === 'number'
-      ? item
-      : IMAGES.logoText;
+        ? item
+        : IMAGES.logoText;
 
     return (
       <View key={index?.toString()} style={styles.carouselItemContainer}>
@@ -181,10 +181,9 @@ const JobDetail = () => {
       const description = curr_jobdetails?.description || '';
       const salary =
         curr_jobdetails?.monthly_salary_from ||
-        curr_jobdetails?.monthly_salary_to
-          ? `Salary: ${
-              curr_jobdetails?.currency
-            } ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
+          curr_jobdetails?.monthly_salary_to
+          ? `Salary: ${curr_jobdetails?.currency
+          } ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
@@ -206,13 +205,13 @@ ${salary}${shareUrlText}`;
       // Only use string URLs for sharing (not require resources)
       const coverImageUri =
         coverImages &&
-        coverImages.length > 0 &&
-        typeof coverImages[0] === 'string'
+          coverImages.length > 0 &&
+          typeof coverImages[0] === 'string'
           ? coverImages[0]
           : curr_jobdetails?.company_id?.logo &&
             typeof curr_jobdetails.company_id.logo === 'string'
-          ? curr_jobdetails.company_id.logo
-          : null;
+            ? curr_jobdetails.company_id.logo
+            : null;
 
       if (coverImageUri && typeof coverImageUri === 'string') {
         try {
@@ -266,8 +265,8 @@ ${salary}${shareUrlText}`;
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['bottom', 'top']}}
-      containerStyle={{paddingBottom: bottom}}
+      SafeAreaProps={{ edges: ['bottom', 'top'] }}
+      containerStyle={{ paddingBottom: bottom }}
       colors={[colors._F7F7F7, colors._F7F7F7]}>
       <BackHeader
         type="employe"
@@ -330,7 +329,7 @@ ${salary}${shareUrlText}`;
 
           <ScrollView
             style={styles.container}
-            contentContainerStyle={{paddingBottom: hp(20)}}
+            contentContainerStyle={{ paddingBottom: hp(20) }}
             showsVerticalScrollIndicator={false}>
             {/* Header Section */}
             <View style={styles.header}>
@@ -345,13 +344,28 @@ ${salary}${shareUrlText}`;
                     : undefined
                 }
                 containerStyle={styles.logoBg}
-                imageStyle={{width: '100%', height: '100%'}}
+                imageStyle={{ width: '100%', height: '100%' }}
               />
               <View style={styles.locationTitle}>
                 <Text style={styles.jobTitle}>{curr_jobdetails?.title}</Text>
                 <Text style={styles.coNameTitle}>
                   {curr_jobdetails?.company_id?.company_name}
                 </Text>
+
+                {(curr_jobdetails?.monthly_salary_from ||
+                  curr_jobdetails?.monthly_salary_to) && (
+                    <View style={styles.salaryContainerHeader}>
+                      <Image
+                        source={IMAGES.currency}
+                        style={styles.salaryIconHeader}
+                        tintColor={colors._656464}
+                      />
+                      <Text style={styles.salaryTextHeader}>
+                        {`${curr_jobdetails?.currency
+                          } ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                      </Text>
+                    </View>
+                  )}
               </View>
               <TouchableOpacity
                 onPress={() => handleToggleFavorite(curr_jobdetails)}
@@ -463,7 +477,7 @@ ${salary}${shareUrlText}`;
                 style={styles.flatlist}
                 keyExtractor={(_, index) => index.toString()}
                 contentContainerStyle={styles.flatListContent}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   const [key, value] = item;
 
                   return (
@@ -480,7 +494,7 @@ ${salary}${shareUrlText}`;
               />
             </View>
 
-            <View style={{height: hp(40)}} />
+            <View style={{ height: hp(40) }} />
             <GradientButton
               type="Company"
               disabled={is_applied}
@@ -518,7 +532,7 @@ ${salary}${shareUrlText}`;
 export default JobDetail;
 
 const styles = StyleSheet.create({
-  lefticon: {marginRight: wp(21)},
+  lefticon: { marginRight: wp(21) },
   share: {
     width: wp(17),
     height: wp(17),
@@ -544,7 +558,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(230),
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,
@@ -693,7 +707,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 4,
@@ -734,14 +748,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(12),
     justifyContent: 'space-between',
   },
-  addJobText: {...commonFontStyle(500, 13, colors.black)},
+  addJobText: { ...commonFontStyle(500, 13, colors.black) },
   alertButton: {
     borderRadius: hp(20),
     paddingVertical: hp(8),
     paddingHorizontal: wp(10),
     backgroundColor: colors.empPrimary,
   },
-  alertText: {...commonFontStyle(500, 10, colors.white)},
+  alertText: { ...commonFontStyle(500, 10, colors.white) },
   snapshotContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -751,7 +765,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(16),
     gap: hp(12),
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
@@ -778,5 +792,19 @@ const styles = StyleSheet.create({
   companyNameText: {
     ...commonFontStyle(600, 14, colors._0B3970),
     textDecorationLine: 'underline',
+  },
+  salaryContainerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(5),
+    marginTop: hp(4),
+  },
+  salaryIconHeader: {
+    width: wp(14),
+    height: hp(14),
+    resizeMode: 'contain',
+  },
+  salaryTextHeader: {
+    ...commonFontStyle(600, 13, colors.black),
   },
 });

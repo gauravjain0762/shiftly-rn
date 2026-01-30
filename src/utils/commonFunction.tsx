@@ -191,6 +191,18 @@ export const getTimeAgo = (createdAt: string): string => {
   return `${diffSeconds}s`;
 };
 
+export const getExpiryDays = (expiryDate: string): string | null => {
+  if (!expiryDate) return null;
+  const expiry = moment(expiryDate);
+  const now = moment().startOf('day');
+  const diffDays = expiry.diff(now, 'days');
+
+  if (diffDays < 0) return 'Expired';
+  if (diffDays === 0) return 'Expires today';
+  if (diffDays === 1) return 'Expires in 1 day';
+  return `Expires in ${diffDays} days`;
+};
+
 export const getInitials = (name?: string) => {
   if (!name) return '?';
 

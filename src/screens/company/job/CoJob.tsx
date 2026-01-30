@@ -69,7 +69,6 @@ const CoJob = () => {
     setRange([filters.salary_from, filters.salary_to]);
     setValue(filters.job_types || null);
     setLocation(filters.location || '');
-    // Reset pagination when filters change
     setPage(1);
     setAllJobs([]);
     setOnEndReachedCalled(false);
@@ -120,7 +119,6 @@ const CoJob = () => {
     if (page !== 1) {
       setPage(1);
     }
-    setAllJobs([]);
     setOnEndReachedCalled(false);
     refetch();
   };
@@ -246,7 +244,7 @@ const CoJob = () => {
             }}
             ListFooterComponent={
               isFetching &&
-              pagination?.current_page < pagination?.total_pages ? (
+                pagination?.current_page < pagination?.total_pages ? (
                 <ActivityIndicator
                   color={colors._0B3970}
                   style={{ marginVertical: hp(16) }}

@@ -1,6 +1,10 @@
 import React from 'react';
-import {hp, wp} from '../../theme/fonts';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { hp, wp } from '../../theme/fonts';
+import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
+import LinearGradient from 'react-native-linear-gradient';
+
+const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
 type Props = {
   backgroundColor?: string;
@@ -8,56 +12,77 @@ type Props = {
 };
 
 const PostSkeleton = (props: Props) => {
-  const background = props?.backgroundColor || '#E0E0E0';
-  const highlight = props?.highlightColor || '#F5F5F5';
+  const shimmerColors = ['#E1E9EE', '#F8FAFB', '#E1E9EE'];
 
   return (
-    <SkeletonPlaceholder
-      borderRadius={4}
-      highlightColor={highlight}
-      backgroundColor={background}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {[1, 2, 3, 4].map((_, idx) => (
-        <SkeletonPlaceholder.Item
-          key={idx}
-          flexDirection="column"
-          // marginBottom={hp(20)}
-          // marginTop={hp(30)}
-          padding={hp(16)}>
-          <SkeletonPlaceholder.Item
-            flexDirection="row"
-            alignItems="center"
-            marginBottom={hp(12)}>
-            <SkeletonPlaceholder.Item
-              width={hp(50)}
-              height={hp(50)}
-              borderRadius={hp(25)}
+        <View key={`post-skeleton-${idx}`} style={styles.postCard}>
+          <View style={styles.header}>
+            <ShimmerPlaceholder
+              style={styles.avatar}
+              shimmerColors={shimmerColors}
             />
-
-            <SkeletonPlaceholder.Item marginLeft={hp(12)}>
-              <SkeletonPlaceholder.Item
-                width={wp(40)}
-                height={hp(16)}
-                borderRadius={4}
-                marginBottom={hp(6)}
+            <View style={styles.headerText}>
+              <ShimmerPlaceholder
+                style={styles.name}
+                shimmerColors={shimmerColors}
               />
-              <SkeletonPlaceholder.Item
-                width={wp(60)}
-                height={hp(14)}
-                borderRadius={4}
+              <ShimmerPlaceholder
+                style={styles.time}
+                shimmerColors={shimmerColors}
               />
-            </SkeletonPlaceholder.Item>
-          </SkeletonPlaceholder.Item>
-
-          <SkeletonPlaceholder.Item
-            width={'95%'}
-            height={hp(350)}
-            alignSelf="center"
-            borderRadius={hp(12)}
+            </View>
+          </View>
+          <ShimmerPlaceholder
+            style={styles.contentBody}
+            shimmerColors={shimmerColors}
           />
-        </SkeletonPlaceholder.Item>
+        </View>
       ))}
-    </SkeletonPlaceholder>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  postCard: {
+    padding: hp(16),
+    marginBottom: hp(12),
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp(12),
+  },
+  avatar: {
+    width: hp(50),
+    height: hp(50),
+    borderRadius: hp(25),
+  },
+  headerText: {
+    marginLeft: hp(12),
+    gap: hp(6),
+  },
+  name: {
+    width: wp(100),
+    height: hp(16),
+    borderRadius: 4,
+  },
+  time: {
+    width: wp(150),
+    height: hp(14),
+    borderRadius: 4,
+  },
+  contentBody: {
+    width: '100%',
+    height: hp(350),
+    borderRadius: hp(12),
+    alignSelf: 'center',
+  },
+});
 
 export default PostSkeleton;

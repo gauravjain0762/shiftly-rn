@@ -5,7 +5,6 @@ import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import {
-  useGetCompanyPostsQuery,
   useGetDashboardQuery,
   useGetProfileQuery,
 } from '../../../api/dashboardApi';
@@ -16,7 +15,6 @@ import {
   setCompanyProfileData,
   setUserInfo,
 } from '../../../features/authSlice';
-import { setCoPostSteps } from '../../../features/companySlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { connectSocket } from '../../../hooks/socketManager';
@@ -32,9 +30,6 @@ const CoHome = () => {
 
   const { userInfo }: any = useSelector((state: RootState) => state.auth);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [allPosts, setAllPosts] = useState<any[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(3);
 
   const metricOptions = [
@@ -58,47 +53,11 @@ const CoHome = () => {
     }
   }, [userInfo]);
 
-  const {
-    data: getPost,
-    isFetching,
-  } = useGetCompanyPostsQuery({ page: currentPage });
-
-  const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
-
-  useEffect(() => {
-    if (!getPost) return;
-    const posts = (getPost?.data?.posts as any[]) ?? [];
-
-    if (currentPage === 1) {
-      setAllPosts(posts);
-    } else {
-      setAllPosts(prev => [...prev, ...posts]);
-    }
-    setIsLoadingMore(false);
-  }, [getPost, currentPage]);
-
-  const handleLoadMore = () => {
-    if (!isFetching && !isLoadingMore && currentPage < totalPages) {
-      setIsLoadingMore(true);
-      setCurrentPage(prev => prev + 1);
-    }
-  };
-
-  const handleRefresh = () => {
-    setCurrentPage(1);
-    setAllPosts([]);
-  };
-
   const job_summary = [
     { id: "1", title: "Active Jobs", value: job_stats?.active_jobs, color: "#F3F3F3" },
     { id: "2", title: "Pending Jobs", value: job_stats?.pending_jobs, color: "#E5F7FF" },
     { id: "3", title: "Expired Jobs", value: job_stats?.expired_jobs, color: "#FFEFF0" },
   ];
-
-  const handleCreatePost = () => {
-    dispatch(setCoPostSteps(1));
-    navigateTo(SCREENS.CreatePost);
-  };
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']} containerStyle={{ paddingHorizontal: wp(25) }}>
@@ -108,59 +67,8 @@ const CoHome = () => {
           companyProfile={userInfo}
           onPressAvatar={() => navigateTo(SCREENS.CoMyProfile)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
-          
         />
-        {/* <TouchableOpacity
-          style={styles.plusButton}
-          onPress={handleCreatePost}
-          activeOpacity={0.7}>
-          <Image
-            source={IMAGES.pluse}
-            style={styles.plusIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity> */}
       </View>
-      {/* {isLoading && currentPage === 1 ? (
-        <PostSkeleton backgroundColor={colors._DADADA} />
-      ) : (
-        <FlatList
-          data={allPosts}
-          style={AppStyles.flex}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollcontainer}
-          ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-          renderItem={({ item }) => <FeedCard item={item} isFollow />}
-          onEndReachedThreshold={0.5}
-          onEndReached={handleLoadMore}
-          // refreshing={isLoading && currentPage === 1}
-          // onRefresh={handleRefresh}
-          keyExtractor={(_, index) => index.toString()}
-          // ListHeaderComponent={renderHeader}
-          ListEmptyComponent={() => {
-            return (
-              <View style={styles.emptyContainer}>
-                <BaseText
-                  style={{
-                    textAlign: 'center',
-                    ...commonFontStyle(400, 18, colors._0B3970),
-                  }}>
-                  {t('There is no post available')}
-                </BaseText>
-              </View>
-            );
-          }}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <ActivityIndicator
-                size="large"
-                color={colors._D5D5D5}
-                style={{ marginVertical: hp(10) }}
-              />
-            ) : null
-          }
-        />
-      )} */}
 
       <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
         <View style={{ borderRadius: hp(15), borderColor: colors._E0C688, borderWidth: 1, paddingHorizontal: wp(16), paddingVertical: hp(20) }}>
@@ -184,8 +92,8 @@ const CoHome = () => {
         </View>
 
         <View style={{ backgroundColor: colors._0B3970, width: '100%', height: hp(60), marginVertical: hp(18), borderRadius: hp(10), justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: wp(16), }}>
-          <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: colors._F3E1B7, width: wp(30), height: wp(30), borderRadius: wp(30) }}>
-            <Image source={IMAGES.check} style={{ width: wp(20), height: hp(20) }} />
+          <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: colors._F3E1B7, width: wp(25), height: wp(25), borderRadius: wp(25) }}>
+            <Image source={IMAGES.check} style={{ width: wp(15), height: hp(15) }} />
           </View>
           <Text style={{ ...commonFontStyle(500, 15, colors.white), textAlign: 'center' }}>
             {`${job_stats?.ai_matched_candidates} new candidates matched by`}{" "}

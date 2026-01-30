@@ -29,6 +29,7 @@ export const API = {
   addShortlistEmployee: '/company/shortlistEmployee',
   unshortlistEmployee: '/company/unshortlistEmployee',
   editCompanyJob: '/company/editJob',
+  closeCompanyJob: '/company/closeJob',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',

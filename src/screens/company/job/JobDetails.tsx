@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { colors } from '../../../theme/colors';
 import {
   useAddShortlistEmployeeMutation,
+  useCloseCompanyJobMutation,
   useGetCompanyJobDetailsQuery,
   useUnshortlistEmployeeMutation,
 } from '../../../api/dashboardApi';
@@ -30,6 +31,8 @@ import {
   errorToast,
   navigateTo,
   successToast,
+  getExpiryDays,
+  goBack,
 } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useDispatch } from 'react-redux';
@@ -55,44 +58,37 @@ const CoJobDetails = () => {
     useState<boolean>(false);
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  
-  const companyId = jobDetail?.company_id?._id;
-  const companyName = jobDetail?.company_id?.company_name || 'this company';
 
+  const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
+  const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
+  const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
+  const [closeJob] = useCloseCompanyJobMutation();
+  const jobDetail = data?.data;
+  
   const metricOptions = [
     { key: 'job_view', label: 'Total', subLabel: 'Job View', icon: IMAGES.jobview },
     { key: 'applied', label: 'Total Job', subLabel: 'Applied', icon: IMAGES.appliedjob },
     { key: 'suggested', label: 'Suggested', subLabel: 'Candidate', icon: IMAGES.suggested_candidate },
     { key: 'shortlisted', label: 'Total', subLabel: 'Shortlisted', icon: IMAGES.shortlisted },
   ];
-  const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
-  const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
-  const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
-  const jobDetail = data?.data;
-  const shareUrl = data?.data?.share_url;
-  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail);
-  console.log("🔥 ~ CoJobDetails ~ invited_users:", jobDetail?.invited_users);
 
-  // Ensure coverImages always has valid image sources, fallback to logoText if not found
+  const shareUrl = data?.data?.share_url;
+
   const coverImages = (() => {
     const coverImgs = jobDetail?.company_id?.cover_images;
     const logo = jobDetail?.company_id?.logo;
 
-    // Check if cover_images exists and has valid entries
     if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
-      // Filter out null/undefined/empty values
       const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
       if (validCoverImages.length > 0) {
         return validCoverImages;
       }
     }
 
-    // Fallback to logo if available
     if (logo && typeof logo === 'string' && logo.trim() !== '') {
       return [logo];
     }
 
-    // Final fallback to logoText
     return [IMAGES.logoText];
   })();
 
@@ -251,7 +247,7 @@ ${salary}${shareUrlText}`;
       errorToast('Job ID not found');
       return;
     }
-    
+
     navigateTo(SCREENS.CreateQuestion, {
       jobId: job_id,
       invitePayload: {
@@ -259,6 +255,21 @@ ${salary}${shareUrlText}`;
         user_ids: [userId],
       },
     });
+  };
+
+  const handleCloseJob = async () => {
+    try {
+      const res = await closeJob({ job_id: job_id }).unwrap();
+      if (res?.status) {
+        successToast(res?.message || 'Job closed successfully');
+        goBack();
+      } else {
+        errorToast(res?.message || 'Failed to close job');
+      }
+    } catch (error) {
+      console.error('Error closing job:', error);
+      errorToast('Something went wrong while closing the job');
+    }
   };
 
   return (
@@ -298,6 +309,11 @@ ${salary}${shareUrlText}`;
                       {jobDetail?.address || 'N/A'}
                     </Text>
                     <Text style={styles.jobTitle}>{jobDetail?.title || 'N/A'}</Text>
+                    {jobDetail?.job_code && (
+                      <Text style={styles.jobCode}>
+                        #{jobDetail?.job_code}
+                      </Text>
+                    )}
                   </View>
                   <View style={styles.jobPostActions}>
                     <TouchableOpacity
@@ -325,6 +341,28 @@ ${salary}${shareUrlText}`;
                 <Text numberOfLines={3} style={styles.jobDescriptionSnippet}>
                   {jobDetail?.description || 'N/A'}
                 </Text>
+
+                {(jobDetail?.monthly_salary_from || jobDetail?.monthly_salary_to) && (
+                  <View style={styles.salaryContainerDetails}>
+                    <Image
+                      source={IMAGES.currency}
+                      style={styles.salaryIconDetails}
+                      tintColor={colors._656464}
+                    />
+                    <Text style={styles.salaryTextDetails}>
+                      {`${jobDetail?.currency} ${jobDetail?.monthly_salary_from?.toLocaleString()} - ${jobDetail?.monthly_salary_to?.toLocaleString()}`}
+                    </Text>
+                  </View>
+                )}
+
+                {jobDetail?.expiry_date && (
+                  <View style={styles.expiryContainerDetails}>
+                    <Timer size={wp(18)} color={colors._EE4444} />
+                    <Text style={styles.expiryTextDetails}>
+                      {getExpiryDays(jobDetail.expiry_date)}
+                    </Text>
+                  </View>
+                )}
 
                 <View style={styles.jobPostFooter}>
                   <View style={styles.applicantCountContainer}>
@@ -409,14 +447,14 @@ ${salary}${shareUrlText}`;
                   jobDetail?.applicants?.length > 0 ? (
                     jobDetail.applicants.map((item: any, index: number) => {
                       if (item === null) return null;
-                      
+
                       // Check if this applicant is also in invited_users
                       const isInvited = jobDetail?.invited_users?.some(
-                        (invited: any) => 
+                        (invited: any) =>
                           invited?.user_id?._id === item?.user_id?._id ||
                           invited?.user_id === item?.user_id?._id
                       );
-                      
+
                       return (
                         <TouchableOpacity
                           key={index}
@@ -558,7 +596,6 @@ ${salary}${shareUrlText}`;
                       </>
                     )}
 
-                    {/* Empty State */}
                     {(!jobDetail?.invited_users || !Array.isArray(jobDetail.invited_users) || jobDetail.invited_users.length === 0) &&
                       (!jobDetail?.suggested_matches || !Array.isArray(jobDetail.suggested_matches) || jobDetail.suggested_matches.length === 0) && (
                         <View style={styles.emptyState}>
@@ -569,7 +606,7 @@ ${salary}${shareUrlText}`;
                 )}
 
                 {selectedMetricIndex === 3 && (
-                    jobDetail?.shortlisted?.length > 0 ? (
+                  jobDetail?.shortlisted?.length > 0 ? (
                     jobDetail.shortlisted.map((item: any, index: number) => {
                       if (item === null) return null;
                       return (
@@ -621,7 +658,6 @@ ${salary}${shareUrlText}`;
             style={styles.button}
             title={t('Edit Job')}
             onPress={() => {
-              console.log('contract_type>>>>>.', jobDetail?.contract_type);
               dispatch(
                 setJobFormState({
                   job_id: job_id,
@@ -701,6 +737,12 @@ ${salary}${shareUrlText}`;
               navigateTo(SCREENS.PostJob);
             }}
           />
+
+          <TouchableOpacity
+            style={styles.closeJobButton}
+            onPress={handleCloseJob}>
+            <Text style={styles.closeJobText}>{t('Close Job')}</Text>
+          </TouchableOpacity>
         </>
       )}
 
@@ -856,13 +898,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9D9D9',
   },
   button: {
-    bottom: 0,
+    bottom: '10%',
     left: 0,
     right: 0,
     position: 'absolute',
     marginVertical: hp(45),
     marginHorizontal: wp(22),
-    marginBottom: hp(60),
+    marginBottom: hp(40),
   },
   emptyState: {
     alignItems: 'center',
@@ -925,8 +967,11 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   jobTitle: {
-    marginBottom: hp(8),
     ...commonFontStyle(600, 18, colors.black),
+  },
+  jobCode: {
+    ...commonFontStyle(500, 14, colors._0B3970),
+    marginTop: hp(-4),
   },
   jobDescriptionSnippet: {
     ...commonFontStyle(400, 14, colors._4A4A4A),
@@ -1081,5 +1126,45 @@ const styles = StyleSheet.create({
   },
   invitedBadgeText: {
     ...commonFontStyle(500, 12, colors.white),
+  },
+  salaryContainerDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+    marginBottom: hp(12),
+  },
+  salaryIconDetails: {
+    width: wp(18),
+    height: hp(18),
+    resizeMode: 'contain',
+  },
+  salaryTextDetails: {
+    ...commonFontStyle(600, 15, colors.black),
+  },
+  expiryContainerDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+    marginBottom: hp(12),
+  },
+  expiryTextDetails: {
+    ...commonFontStyle(500, 14, colors._EE4444),
+  },
+  closeJobButton: {
+    left: 0,
+    right: 0,
+    bottom: '7%',
+    height: hp(52),
+    borderWidth: 1.5,
+    position: 'absolute',
+    alignItems: 'center',
+    borderRadius: hp(50),
+    marginHorizontal: wp(22),
+    justifyContent: 'center',
+    borderColor: colors._EE4444,
+    backgroundColor: 'transparent',
+  },
+  closeJobText: {
+    ...commonFontStyle(600, 18, colors._EE4444),
   },
 });
