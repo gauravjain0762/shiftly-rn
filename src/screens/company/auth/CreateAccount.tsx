@@ -107,9 +107,8 @@ const CreateAccount = () => {
     registerSuccessModal,
     companyProfileData,
   } = useSelector((state: RootState) => state.auth);
-  console.log(">>>>>>>>> ~ CreateAccount ~ companyRegisterData:", companyRegisterData)
+  console.log("🔥 ~ CreateAccount ~ companyRegistrationStep:", companyRegistrationStep)
   const {
-    services = [],
     logo,
     cover_images,
     otp,
@@ -145,6 +144,16 @@ const CreateAccount = () => {
   // Animation values
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+
+  // Ref to control business type dropdown
+  const businessTypeDropdownRef = useRef<any>(null);
+
+  // Close dropdown when modal opens or step changes away from step 1
+  useEffect(() => {
+    if (registerSuccessModal || companyRegistrationStep !== 1) {
+      businessTypeDropdownRef.current?.close?.();
+    }
+  }, [registerSuccessModal, companyRegistrationStep]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -328,7 +337,7 @@ const CreateAccount = () => {
       if (type === 'cover') {
         // Handle cover image upload
         const imageUri = e?.sourceURL || e?.uri || e?.path;
-        
+
         if (!imageUri) {
           console.error('Cover image upload failed: No URI found', e);
           errorToast('Failed to load image. Please try again.');
@@ -524,8 +533,10 @@ const CreateAccount = () => {
     const response: any = await OtpVerify(data).unwrap();
     // console.log(response, 'response----');
     if (response?.status) {
+      // First show the modal without changing step
       dispatch(setRegisterSuccessModal(true));
       successToast(response?.message);
+      // Don't call nextStep() here - let the modal handle it
     } else {
       errorToast(response?.message);
     }
@@ -596,7 +607,7 @@ const CreateAccount = () => {
       // Preserve logo from local state if API response doesn't have it yet, or use API response logo
       const logoFromResponse = response?.data?.company?.logo;
       const logoFromLocal = companyProfileData?.logo;
-      
+
       // Update companyProfileData with API response, but preserve logo if local exists and API doesn't
       dispatch(setCompanyProfileData({
         ...response?.data?.company,
@@ -605,7 +616,7 @@ const CreateAccount = () => {
         // Also preserve cover_images from local if API doesn't have them yet
         cover_images: response?.data?.company?.cover_images || companyProfileData?.cover_images,
       }));
-      
+
       if (type === 'complete') {
         resetNavigation(SCREENS.CoStack, SCREENS.CompanyProfile, { fromOnboarding: true });
       } else {
@@ -629,7 +640,7 @@ const CreateAccount = () => {
     }
   };
 
-  const {getAppData} = useSelector((state: RootState) => state.auth);
+  const { getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
   const debouncedGetAddressList = useCallback(
@@ -640,13 +651,45 @@ const CreateAccount = () => {
     [mapKey],
   );
 
+  const renderBusinessTypeDropdown = useCallback(() => {
+    return (
+      <CustomDropdown
+        ref={businessTypeDropdownRef}
+        key={`business-type-${companyRegistrationStep}`}
+        data={
+          (businessTypes as any)?.data?.types?.map((item: any) => ({
+            label: item.title,
+            value: item._id,
+          })) || []
+        }
+        label={t('Business Type')}
+        required
+        labelField="label"
+        valueField="value"
+        placeholder={'Please select a business type'}
+        value={companyRegisterData?.business_type_id}
+        onChange={(e: any) => {
+          dispatch(
+            setCompanyRegisterData({
+              business_type_id: e?.value,
+            }),
+          );
+        }}
+        dropdownStyle={styles.dropdown}
+        renderRightIcon={IMAGES.ic_down}
+        RightIconStyle={styles.rightIcon}
+        selectedTextStyle={styles.selectedTextStyle}
+      />
+    );
+  }, [companyRegistrationStep, businessTypes, companyRegisterData?.business_type_id, t, dispatch]);
+
   const renderStep = () => {
     const animatedStyle = {
       opacity: fadeAnim,
       transform: [{ translateX: slideAnim }],
     };
 
-    switch (companyRegistrationStep || 1) {
+    switch (companyRegistrationStep) {
       case 1:
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
@@ -657,31 +700,7 @@ const CreateAccount = () => {
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 style={{ maxHeight: hp(350), marginTop: hp(15) }}>
-                <CustomDropdown
-                  data={
-                    (businessTypes as any)?.data?.types?.map((item: any) => ({
-                      label: item.title,
-                      value: item._id,
-                    })) || []
-                  }
-                  label={t('Business Type')}
-                  required
-                  labelField="label"
-                  valueField="value"
-                  placeholder={'Please select a business type'}
-                  value={companyRegisterData?.business_type_id}
-                  onChange={(e: any) => {
-                    dispatch(
-                      setCompanyRegisterData({
-                        business_type_id: e?.value,
-                      }),
-                    );
-                  }}
-                  dropdownStyle={styles.dropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.rightIcon}
-                  selectedTextStyle={styles.selectedTextStyle}
-                />
+                {companyRegistrationStep === 1 && !registerSuccessModal && renderBusinessTypeDropdown()}
               </ScrollView>
             </View>
             <GradientButton
@@ -783,7 +802,7 @@ const CreateAccount = () => {
                   style={styles.badge}
                 /> */}
                 <View style={{ flex: 1 }}>
-                  <View style={[styles.labelRow, {marginTop: hp(40)}]}>
+                  <View style={[styles.labelRow, { marginTop: hp(40) }]}>
                     <Text style={styles.emailLabel}>
                       {t('Account Manager Name')}
                       <Text style={styles.required}>*</Text>
@@ -795,7 +814,7 @@ const CreateAccount = () => {
                     </TouchableOpacity>
                   </View>
                   {showTooltip && (
-                    <View style={[styles.iBtnTxt, {bottom: hp(85), overflow: 'visible'}]}>
+                    <View style={[styles.iBtnTxt, { bottom: hp(85), overflow: 'visible' }]}>
                       <Text style={styles.txtColor}>
                         {'Your name is not displayed on published job posts.'}
                       </Text>
@@ -851,10 +870,10 @@ const CreateAccount = () => {
                 <Image
                   source={IMAGES.mail}
                   resizeMode="contain"
-                  style={[styles.mail, {marginTop: hp(40)}]}
+                  style={[styles.mail, { marginTop: hp(40) }]}
                 />
                 <View style={{ flex: 1 }}>
-                  <View style={[styles.labelRow, {marginTop: hp(40)}]}>
+                  <View style={[styles.labelRow, { marginTop: hp(40) }]}>
                     <Text style={styles.emailLabel}>
                       {t('Email')}
                       <Text style={styles.required}>*</Text>
@@ -866,7 +885,7 @@ const CreateAccount = () => {
                     </TouchableOpacity>
                   </View>
                   {showTooltip && (
-                    <View style={[styles.iBtnTxt, {bottom: hp(85), overflow: 'visible'}]}>
+                    <View style={[styles.iBtnTxt, { bottom: hp(85), overflow: 'visible' }]}>
                       <Text style={styles.txtColor}>
                         {
                           'Please use your official company email.\nPersonal emails (e.g., Gmail, Yahoo) are not accepted.'
@@ -1091,7 +1110,7 @@ const CreateAccount = () => {
               {timer !== 0 && (
                 <View style={[styles.info_row, { marginTop: hp(19) }]}>
                   <Text style={styles.infotext}>
-                    We’ve sent a 4-digit code to your email{' '}
+                    We've sent a 4-digit code to your email{' '}
                     <Text style={{ fontWeight: 'bold', color: '_0B3970' }}>
                       {companyRegisterData?.email || 'N/A'}
                     </Text>
@@ -1480,7 +1499,7 @@ const CreateAccount = () => {
       //           {t('Select your industry sectors')}
       //         </Text>
       //         <Text style={[styles.title, { marginVertical: hp(33) }]}>
-      //           {t('Your company’s services.')}
+      //           {t('Your company's services.')}
       //         </Text>
       //         <Pressable
       //           style={[styles.dateRow, { marginTop: hp(10) }]}
@@ -1741,13 +1760,15 @@ const CreateAccount = () => {
         <WelcomeModal
           name={'to Shiftly! 🎉'}
           description={t(
-            'You’re all set. Complete your company profile now to unlock smarter hiring and start connecting with top talent.',
+            `You're all set. Complete your company profile now to unlock smarter hiring and start connecting with top talent.`,
           )}
           visible={registerSuccessModal}
           onClose={() => {
             dispatch(setRegisterSuccessModal(false));
             dispatch(setCompanyProfileData({ otp: new Array(4).fill('') }));
-            nextStep();
+            setTimeout(() => {
+              nextStep();
+            }, 100);
           }}
           ButtonContainer={
             <View>
@@ -1756,13 +1777,17 @@ const CreateAccount = () => {
                 type="Company"
                 title={t('Complete Profile')}
                 onPress={() => {
-                  nextStep();
                   dispatch(setRegisterSuccessModal(false));
+                  dispatch(setCompanyProfileData({ otp: new Array(4).fill('') }));
+                  setTimeout(() => {
+                    nextStep();
+                  }, 100);
                 }}
               />
               <TouchableOpacity
                 onPress={() => {
                   dispatch(setRegisterSuccessModal(false));
+                  dispatch(setCompanyProfileData({ otp: new Array(4).fill('') }));
                   resetNavigation(SCREENS.CoTabNavigator);
                 }}
                 style={styles.skip}>

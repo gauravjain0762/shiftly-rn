@@ -10,12 +10,12 @@ import {
   ImageURISource,
   ImageStyle,
 } from 'react-native';
-import React, {ReactNode, useState} from 'react';
-import {colors} from '../../theme/colors';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {Dropdown as DropdownElement} from 'react-native-element-dropdown';
-import {IMAGES} from '../../assets/Images';
-import {DropdownProps} from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model';
+import React, { ReactNode, useState, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { colors } from '../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { Dropdown as DropdownElement } from 'react-native-element-dropdown';
+import { IMAGES } from '../../assets/Images';
+import { DropdownProps } from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model';
 
 interface Props extends DropdownProps<any> {
   title?: string;
@@ -24,6 +24,7 @@ interface Props extends DropdownProps<any> {
   titleColor?: any;
   type?: 'blue' | 'gray';
   disable?: boolean;
+  disabled?: boolean;
   leftIcon?: any;
   data?: any;
   label?: any;
@@ -46,12 +47,21 @@ interface Props extends DropdownProps<any> {
   onDropdownOpen?: () => void;
   onDropdownClose?: () => void;
   dropdownPosition?: 'top' | 'bottom' | "auto";
+  forceClose?: boolean;
+  required?: boolean;
+  datePicker?: any;
+  icon?: any;
+  renderEmptyComponent?: any;
 }
 
-const CustomDropdown = ({
+export interface CustomDropdownRef {
+  close: () => void;
+}
+
+const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
   data,
   value,
-  onChange = () => {},
+  onChange = () => { },
   label,
   isSearch,
   inputContainer,
@@ -80,14 +90,40 @@ const CustomDropdown = ({
   onDropdownOpen,
   onDropdownClose,
   dropdownPosition,
+  forceClose,
   ...props
-}: Props) => {
+}, ref) => {
+  const dropdownRef = useRef<any>(null);
+  // Use ref to track value without causing rerenders of renderItem
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  useImperativeHandle(ref, () => ({
+    close: () => {
+      dropdownRef.current?.close?.();
+    },
+  }));
+
   const handleChange = (item: any) => {
-    // set?.(item.value);
     onChange(item);
-    // Call onDropdownClose when item is selected (dropdown closes)
     onDropdownClose?.();
   };
+
+  // Memoize renderItem to prevent re-renders from causing dropdown to open
+  const memoizedRenderItem = useCallback((res: any) => {
+    const isSelected = String(res?.value) === String(valueRef.current);
+    return (
+      <View style={styles.rowStyle}>
+        <Text
+          style={[
+            styles.inputStyle,
+            { color: isSelected ? '#C9B68B' : '#DADADA' },
+          ]}>
+          {res?.label}
+        </Text>
+      </View>
+    );
+  }, []);
 
   return (
     <>
@@ -99,6 +135,7 @@ const CustomDropdown = ({
           </Text>
         )}
         <DropdownElement
+          ref={dropdownRef}
           onFocus={() => {
             Keyboard.dismiss();
             onDropdownOpen?.();
@@ -114,7 +151,6 @@ const CustomDropdown = ({
           valueField={valueField === undefined ? 'value' : valueField}
           placeholder={placeholder}
           placeholderStyle={styles.placeholderStyle}
-          // itemContainerStyle={styles.containerStyle}
           containerStyle={styles.containerStyle}
           selectedTextStyle={styles.inputStyle}
           search={isSearch || false}
@@ -138,26 +174,13 @@ const CustomDropdown = ({
               />
             );
           }}
-          renderItem={res => {
-            const isSelected = String(res?.value) === String(value);
-            return (
-              <View style={styles.rowStyle}>
-                <Text
-                  style={[
-                    styles.inputStyle,
-                    {color: isSelected ? '#C9B68B' : '#DADADA'},
-                  ]}>
-                  {res?.label}
-                </Text>
-              </View>
-            );
-          }}
+          renderItem={memoizedRenderItem}
           {...props}
         />
       </View>
     </>
   );
-};
+});
 
 export default CustomDropdown;
 

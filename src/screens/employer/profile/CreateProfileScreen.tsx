@@ -380,8 +380,18 @@ const CreateProfileScreen = () => {
     const formData = new FormData();
 
     formData.append('open_for_job', aboutEdit?.open_for_jobs ? true : false);
-    formData.append('location', aboutEdit?.location || '');
-    // formData.append('responsibility', aboutEdit?.responsibilities || '');
+
+    // Extract city and country from the location string if available
+    // Location format from EmpLocation: "Full Address"
+    // We need to pass it as "city, country" format
+    const locationData = route.params?.locationData;
+    if (locationData?.city && locationData?.country) {
+      formData.append('location', `${locationData.city}, ${locationData.country}`);
+    } else if (aboutEdit?.location) {
+      formData.append('location', aboutEdit?.location || '');
+    } else {
+      formData.append('location', '');
+    }
 
     formData.append('skills', aboutEdit?.selectedSkills?.join(',') || '');
 
@@ -748,7 +758,7 @@ const CreateProfileScreen = () => {
             onPress={() => {
               dispatch(setActiveStep(2));
             }}
-            // disabled={educationList?.length === 0}
+          // disabled={educationList?.length === 0}
           />
         </View>
       )}
@@ -788,7 +798,7 @@ const CreateProfileScreen = () => {
             onPress={() => {
               dispatch(setActiveStep(3));
             }}
-            // disabled={experienceList?.length === 0}
+          // disabled={experienceList?.length === 0}
           />
         </View>
       )}

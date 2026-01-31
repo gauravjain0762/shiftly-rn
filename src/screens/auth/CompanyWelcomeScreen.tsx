@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors._0B3970,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     paddingVertical: hp(16),
     borderRadius: hp(30),
     width: '90%',
@@ -174,6 +174,8 @@ const styles = StyleSheet.create({
   },
   emailText: {
     ...commonFontStyle(400, 18, colors.white),
+    textAlign: 'center',
+    alignSelf: 'center',
   },
   icon: {
     width: wp(24),

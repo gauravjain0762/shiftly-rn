@@ -65,7 +65,7 @@ const initialState: CompanyState = {
   jobForm: {
     title: '',
     contract_type: {label: 'Full Time', value: 'Full Time'},
-    area: {label: 'Dubai Marina', value: 'Dubai Marina'},
+    area: {label: '', value: ''},
     duration: {label: '1 Month', value: '1 Month'},
     job_sector: null,
     startDate: {label: 'Immediately', value: 'Immediately'},

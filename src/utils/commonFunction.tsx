@@ -51,11 +51,29 @@ export const companyEmailCheck = (email: string) => {
     'zoho.com',
     'mail.com',
   ];
+
+  // Invalid domain variations (common typos/incomplete domains)
+  const invalidDomains = [
+    'gmail.co',
+    'yahoo.co',
+    'hotmail.co',
+    'outlook.co',
+    'aol.co',
+    'icloud.co',
+    'protonmail.co',
+    'zoho.co',
+    'mail.co',
+  ];
+
   const domain = lowerEmail.split('@')[1];
 
   if (!domain) return false;
 
+  // Reject free email domains
   if (freeDomains.includes(domain)) return false;
+
+  // Reject invalid domain variations
+  if (invalidDomains.includes(domain)) return false;
 
   return emailRegex.test(lowerEmail);
 };

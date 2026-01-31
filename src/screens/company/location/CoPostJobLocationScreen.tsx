@@ -32,6 +32,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 
+// Helper function to remove plus codes like "673C+M8F - " from addresses
+const stripPlusCode = (address: string): string => {
+  if (!address) return address;
+  // Remove plus codes at the start like "673C+M8F - " or "673C+M8F, "
+  return address.replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,4}\s*[-–,]\s*/i, '').trim();
+};
+
 const CoPostJobLocationScreen = () => {
   const { t } = useTranslation();
   const route = useRoute();
@@ -390,7 +397,8 @@ const CoPostJobLocationScreen = () => {
       longitudeDelta: 0.01,
     };
 
-    const address = details.formatted_address || data.description;
+    const rawAddress = details.formatted_address || data.description;
+    const address = stripPlusCode(rawAddress);
     const components = details.address_components || [];
 
     const stateObj = components.find((c: any) =>
@@ -472,7 +480,8 @@ const CoPostJobLocationScreen = () => {
     getAddress(
       { latitude: region.latitude, longitude: region.longitude },
       (data: any) => {
-        const address = data?.results?.[0]?.formatted_address;
+        const rawAddress = data?.results?.[0]?.formatted_address;
+        const address = stripPlusCode(rawAddress);
         const components = data?.results?.[0]?.address_components || [];
 
         const stateObj = components.find((c: any) =>
@@ -517,7 +526,8 @@ const CoPostJobLocationScreen = () => {
     getAddress(
       coords,
       (data: any) => {
-        const address = data?.results?.[0]?.formatted_address;
+        const rawAddress = data?.results?.[0]?.formatted_address;
+        const address = stripPlusCode(rawAddress);
         const components = data?.results?.[0]?.address_components || [];
 
         const stateObj = components.find((c: any) =>
@@ -569,7 +579,8 @@ const CoPostJobLocationScreen = () => {
       getAddress(
         location,
         (data: any) => {
-          const address = data?.results?.[0]?.formatted_address;
+          const rawAddress = data?.results?.[0]?.formatted_address;
+          const address = stripPlusCode(rawAddress);
           const components = data?.results?.[0]?.address_components || [];
 
           const stateObj = components.find((c: any) =>

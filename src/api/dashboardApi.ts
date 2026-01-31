@@ -36,6 +36,7 @@ export const dashboardApi = createApi({
     'AddUpdateExperience',
     'AddRemoveFavourite',
     'GetFavouriteJob',
+    'GetEssentialBenefits',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -815,6 +816,15 @@ export const dashboardApi = createApi({
         skipLoader: false,
       }),
     }),
+
+    getEssentialBenefits: builder.query<any, void>({
+      query: () => ({
+        url: API.getEssentialBenefits,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['GetEssentialBenefits'],
+    }),
   }),
 });
 
@@ -871,4 +881,5 @@ export const {
   useGetCompanyProfileByIdQuery,
   useLazyGetCompanyProfileByIdQuery,
   useCloseCompanyJobMutation,
+  useGetEssentialBenefitsQuery,
 } = dashboardApi;

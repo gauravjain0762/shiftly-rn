@@ -19,6 +19,8 @@ const JobInvitationScreen = () => {
         link: string;
     };
     const job = jobDetail?.job;
+    console.log("jobDetail >>>>>>>>>>>", jobDetail);
+
     const company = job?.company_id;
 
     return (

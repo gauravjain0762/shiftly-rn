@@ -256,7 +256,7 @@ ${salary}${shareUrlText}`;
 
   const handleLearnMore = () => {
     if (curr_jobdetails?.company_id?._id) {
-      navigationRef.navigate(SCREENS.CompanyProfile, {
+      (navigationRef.navigate as any)(SCREENS.CompanyProfile, {
         companyId: curr_jobdetails?.company_id?._id,
         fromJobDetail: true,
       });
@@ -333,19 +333,21 @@ ${salary}${shareUrlText}`;
             showsVerticalScrollIndicator={false}>
             {/* Header Section */}
             <View style={styles.header}>
-              <CustomImage
-                resizeMode={
-                  curr_jobdetails?.company_id?.logo ? 'cover' : 'contain'
-                }
-                uri={curr_jobdetails?.company_id?.logo || undefined}
-                source={
-                  !curr_jobdetails?.company_id?.logo
-                    ? IMAGES.logoText
-                    : undefined
-                }
-                containerStyle={styles.logoBg}
-                imageStyle={{ width: '100%', height: '100%' }}
-              />
+              <TouchableOpacity onPress={handleLearnMore}>
+                <CustomImage
+                  resizeMode={
+                    curr_jobdetails?.company_id?.logo ? 'cover' : 'contain'
+                  }
+                  uri={curr_jobdetails?.company_id?.logo || undefined}
+                  source={
+                    !curr_jobdetails?.company_id?.logo
+                      ? IMAGES.logoText
+                      : undefined
+                  }
+                  containerStyle={styles.logoBg}
+                  imageStyle={{ width: '100%', height: '100%' }}
+                />
+              </TouchableOpacity>
               <View style={styles.locationTitle}>
                 <Text style={styles.jobTitle}>{curr_jobdetails?.title}</Text>
                 <Text style={styles.coNameTitle}>

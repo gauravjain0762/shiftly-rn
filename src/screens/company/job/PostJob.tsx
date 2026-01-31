@@ -2,6 +2,7 @@ import {
   Animated,
   FlatList,
   Image,
+  InteractionManager,
   Platform,
   Pressable,
   ScrollView,
@@ -10,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BackHeader,
@@ -49,6 +50,7 @@ import { getAddress } from '../../../utils/locationHandler';
 import {
   useEditCompanyJobMutation,
   useGetDepartmentsQuery,
+  useGetEssentialBenefitsQuery,
   useGetFacilitiesQuery,
   useGetSkillsQuery,
   useGetSuggestedEmployeesQuery,
@@ -148,8 +150,9 @@ const PostJob = () => {
   const { updateJobForm } = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
-  const { data: facilitiesData } = useGetFacilitiesQuery({});
-  const facilities = facilitiesData?.data?.facilities;
+  const { data: facilitiesData } = useGetEssentialBenefitsQuery({});
+  const facilities = facilitiesData?.data?.benefits;
+  console.log("🔥 ~ PostJob ~ benefits:", facilities)
   const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
   const { data: departmentsData } = useGetDepartmentsQuery({});
@@ -177,19 +180,23 @@ const PostJob = () => {
   const jobDepartmentFieldRef = useRef<View>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleJobDepartmentFocus = () => {
+  const handleJobDepartmentFocus = useCallback(() => {
     setIsDropdownOpen(true);
-  };
+  }, []);
 
-  const handleJobDepartmentBlur = () => {
+  const handleJobDepartmentBlur = useCallback(() => {
     setIsDropdownOpen(false);
-  };
+  }, []);
 
-  const dropdownDepartmentsOptions = departments?.map(item => ({
-    label: item.title,
-    value: item._id,
-    title: item.title,
-  }));
+  const dropdownDepartmentsOptions = useMemo(
+    () =>
+      departments?.map(item => ({
+        label: item.title,
+        value: item._id,
+        title: item.title,
+      })),
+    [departments],
+  );
 
   const [userAddress, setUserAddress] = useState<
     | {
@@ -285,13 +292,22 @@ const PostJob = () => {
 
   useFocusEffect(
     useCallback(() => {
-      const initLocation = async () => {
+      // Defer heavy operations until after navigation animations complete
+      const task = InteractionManager.runAfterInteractions(async () => {
         try {
           const locationString = await AsyncStorage.getItem('user_location');
           if (locationString !== null) {
             const location = JSON.parse(locationString);
             if (location.address && location.lat && location.lng) {
               setUserAddress(location);
+              // Also update the Job Area field with the saved location
+              updateJobForm({
+                area: {
+                  label: location.address,
+                  value: location.address,
+                  coordinates: { lat: location.lat, lng: location.lng },
+                },
+              });
               return;
             }
           }
@@ -303,6 +319,14 @@ const PostJob = () => {
               lng: userInfo.lng,
               state: userInfo.state || '',
               country: userInfo.country || '',
+            });
+            // Also update the Job Area field with userInfo location
+            updateJobForm({
+              area: {
+                label: userInfo.address,
+                value: userInfo.address,
+                coordinates: { lat: userInfo.lat, lng: userInfo.lng },
+              },
             });
           } else {
             const coordinates = await getAsyncUserLocation();
@@ -319,6 +343,14 @@ const PostJob = () => {
                       state: '',
                       country: '',
                     });
+                    // Also update the Job Area field with fetched address
+                    updateJobForm({
+                      area: {
+                        label: address,
+                        value: address,
+                        coordinates: { lat: coordinates.latitude, lng: coordinates.longitude },
+                      },
+                    });
                   }
                 },
                 undefined,
@@ -328,8 +360,10 @@ const PostJob = () => {
         } catch (error) {
           console.error('Failed to init location:', error);
         }
-      };
-      initLocation();
+      });
+
+      return () => task.cancel();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo]),
   );
 
@@ -843,6 +877,7 @@ const PostJob = () => {
               {/* Scrollable skills list */}
               <ScrollView
                 style={styles.skillsScrollView}
+                contentContainerStyle={{ flexGrow: 0 }}
                 showsVerticalScrollIndicator={true}
                 nestedScrollEnabled={true}>
                 <View style={styles.skillsWrapper}>
@@ -1054,6 +1089,7 @@ const PostJob = () => {
                 <FlatList
                   data={facilities}
                   keyExtractor={(_, index) => index.toString()}
+                  showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({ item, index }) => {
                     const isChecked = selected?.some(
@@ -1082,13 +1118,13 @@ const PostJob = () => {
                   }}
                 />
               </View>
-              <GradientButton
-                style={styles.btn}
-                type="Company"
-                title={t('Review your job resume')}
-                onPress={handleCreateJob}
-              />
             </View>
+            <GradientButton
+              style={[styles.btn, { marginHorizontal: wp(25) }]}
+              type="Company"
+              title={t('Review your job resume')}
+              onPress={handleCreateJob}
+            />
           </Animated.View>
         );
       case 5:
@@ -1263,9 +1299,60 @@ const PostJob = () => {
                       isAutocompleteOpen && styles.autocompleteWrapperOpen,
                     ]}>
                     <GooglePlacesAutocomplete
-                      placeholder={area?.label || 'Search location'}
+                      placeholder={area?.label || 'Search your job area'}
                       onPress={(data, details = null) => {
                         console.log('Selected:', data.description);
+
+                        // Extract address components
+                        const addressComponents = details?.address_components || [];
+
+                        // Find sublocality/neighborhood for more specific location
+                        const sublocalityComponent = addressComponents.find((c: any) =>
+                          c.types.includes('sublocality') || c.types.includes('sublocality_level_1') || c.types.includes('neighborhood')
+                        );
+
+                        // Find route/street name
+                        const routeComponent = addressComponents.find((c: any) =>
+                          c.types.includes('route')
+                        );
+
+                        // Find city
+                        const cityComponent = addressComponents.find((c: any) =>
+                          c.types.includes('locality') || c.types.includes('administrative_area_level_1')
+                        );
+
+                        // Find country
+                        const countryComponent = addressComponents.find((c: any) =>
+                          c.types.includes('country')
+                        );
+
+                        const sublocality = sublocalityComponent?.long_name || '';
+                        const route = routeComponent?.long_name || '';
+                        const city = cityComponent?.long_name || '';
+                        const country = countryComponent?.long_name || '';
+
+                        // Build clean display address without plus codes
+                        // Priority: sublocality/neighborhood, city, country
+                        let displayParts = [];
+                        if (sublocality) displayParts.push(sublocality);
+                        else if (route) displayParts.push(route);
+                        if (city) displayParts.push(city);
+                        if (country) displayParts.push(country);
+
+                        // Remove duplicates (sometimes city and sublocality can be same)
+                        displayParts = displayParts.filter((item, index) => displayParts.indexOf(item) === index);
+
+                        let displayAddress = displayParts.length > 0
+                          ? displayParts.join(' - ')
+                          : data.description;
+
+                        // Remove plus codes like "674C+4GC - " from the address using regex
+                        displayAddress = displayAddress.replace(/^[A-Z0-9]{4}\+[A-Z0-9]{2,4}\s*[-–]\s*/i, '');
+
+                        // Get coordinates from place details
+                        const lat = details?.geometry?.location?.lat;
+                        const lng = details?.geometry?.location?.lng;
+
                         updateJobForm({
                           area: {
                             label: data.description,
@@ -1274,6 +1361,18 @@ const PostJob = () => {
                             coordinates: details?.geometry?.location,
                           },
                         });
+
+                        // Update userAddress with selected place coordinates and clean address
+                        if (lat && lng) {
+                          setUserAddress({
+                            address: displayAddress,
+                            lat: lat,
+                            lng: lng,
+                            state: city,
+                            country: country,
+                          });
+                        }
+
                         setIsAutocompleteOpen(false);
                       }}
                       query={{
@@ -1463,6 +1562,7 @@ const PostJob = () => {
                         ? new Date(expiry_date)
                         : new Date()
                     }
+                    minimumDate={new Date()}
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                     pickerStyleIOS={{ alignSelf: 'center' }}
                     onConfirm={(date: Date) => {
@@ -1625,11 +1725,11 @@ const PostJob = () => {
           </View>
 
           <GradientButton
-            style={styles.btn}
             type="Company"
+            style={styles.btn}
+            textStyle={{ textAlign: 'center', alignSelf: 'center' }}
             title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
             onPress={() => {
-              console.log("this function >>>>>>>>>>>>>");
               try {
                 updateJobForm({ isSuccessModalVisible: false });
 
@@ -1637,7 +1737,7 @@ const PostJob = () => {
                   setCreatedJobId('');
                   setCreatedJobData(null);
                   dispatch(resetJobFormState());
-                  // dispatch(setCoPostJobSteps(0));
+                  dispatch(setCoPostJobSteps(1));
                   navigationRef?.current?.goBack();
                   return;
                 }
@@ -1646,7 +1746,7 @@ const PostJob = () => {
                 const jobDataToUse = createdJobData;
 
                 dispatch(resetJobFormState());
-                // dispatch(setCoPostJobSteps(0));
+                dispatch(setCoPostJobSteps(1));
 
                 setCreatedJobId('');
                 setCreatedJobData(null);
@@ -1671,7 +1771,7 @@ const PostJob = () => {
           <Text
             onPress={() => {
               dispatch(resetJobFormState());
-              dispatch(setCoPostJobSteps(0));
+              dispatch(setCoPostJobSteps(1));
               updateJobForm({ isSuccessModalVisible: false });
               setCreatedJobId('');
               setCreatedJobData(null);
@@ -1840,7 +1940,6 @@ const styles = StyleSheet.create({
   },
   // NEW: Scrollable selected skills container
   selectedSkillsScrollContainer: {
-    maxHeight: hp(120),
     marginTop: hp(20),
   },
   checkbox: {
@@ -1869,7 +1968,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   providerContainer: {
-    paddingTop: hp(30),
+    paddingVertical: hp(30),
   },
   Providerlabel: {
     ...commonFontStyle(400, 22, colors?._7B7878),
@@ -2130,7 +2229,6 @@ const styles = StyleSheet.create({
     marginTop: hp(10),
   },
   skillsScrollView: {
-    flex: 1,
     marginTop: hp(25),
     marginBottom: hp(10),
   },

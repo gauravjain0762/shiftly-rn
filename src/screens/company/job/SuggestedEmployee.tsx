@@ -172,11 +172,9 @@ const SuggestedEmployeeScreen = () => {
   }, [jobInfo]);
 
   const jobLocation = useMemo(() => {
-    if (jobInfo?.area) {
-      return jobInfo.area;
-    }
+    // Show only city and country, not the full address
     if (jobInfo?.city || jobInfo?.country) {
-      return `${jobInfo?.city || ''}${jobInfo?.city && jobInfo?.country ? ', ' : ''
+      return `${jobInfo?.city || ''}${jobInfo?.city && jobInfo?.country ? ' - ' : ''
         }${jobInfo?.country || ''}`;
     }
     return '';
@@ -236,7 +234,7 @@ const SuggestedEmployeeScreen = () => {
               styles.inviteButtonText,
               isSelected && styles.inviteButtonTextSelected,
             ]}>
-            {isSelected ? t('Invited') : t('Invite')}
+            {t('Invite')}
           </Text>
         </Pressable>
       </Pressable>
@@ -336,7 +334,7 @@ const SuggestedEmployeeScreen = () => {
                     styles.inviteAllText,
                     inviteAllSelected && styles.inviteAllTextSelected,
                   ]}>
-                  {inviteAllSelected ? t('Invited') : t('Invite All')}
+                  {t('Invite All')}
                 </Text>
               </TouchableOpacity>
             </View>

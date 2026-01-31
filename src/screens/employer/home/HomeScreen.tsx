@@ -1,40 +1,42 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
-import {HomeHeader, LinearContainer} from '../../../component';
-import {hp, wp} from '../../../theme/fonts';
+import { HomeHeader, LinearContainer } from '../../../component';
+import { hp, wp } from '../../../theme/fonts';
 import FeedCard from '../../../component/employe/FeedCard';
-import {AppStyles} from '../../../theme/appStyles';
-import {navigateTo} from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
+import { AppStyles } from '../../../theme/appStyles';
+import { navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
 import {
   useGetEmployeePostsQuery,
   useGetEmployeeProfileQuery,
 } from '../../../api/dashboardApi';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import {
   setUserInfo,
 } from '../../../features/authSlice';
-import {useAppDispatch} from '../../../redux/hooks';
-import {colors} from '../../../theme/colors';
-import {connectSocket} from '../../../hooks/socketManager';
+import { useAppDispatch } from '../../../redux/hooks';
+import { colors } from '../../../theme/colors';
+import { connectSocket } from '../../../hooks/socketManager';
 
 const HomeScreen = () => {
   const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
+  console.log('allPosts >>>>>>', allPosts);
+
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const {userInfo}: any = useSelector((state: RootState) => state.auth);
-  const {data: profileData} = useGetEmployeeProfileQuery({});
+  const { userInfo }: any = useSelector((state: RootState) => state.auth);
+  const { data: profileData } = useGetEmployeeProfileQuery({});
 
   const {
     data: getPost,
     isFetching,
     isLoading,
     refetch,
-  } = useGetEmployeePostsQuery({page: currentPage});
+  } = useGetEmployeePostsQuery({ page: currentPage });
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
   const posts = getPost?.data?.posts || [];
 
@@ -102,18 +104,27 @@ const HomeScreen = () => {
           onEndReached={handleLoadMore}
           keyExtractor={(item, index) => item?._id || index.toString()}
           showsVerticalScrollIndicator={false}
-          renderItem={({item, index}: {item: any; index: number}) => (
-            <FeedCard item={item} key={item?._id || index} />
+          renderItem={({ item, index }: { item: any; index: number }) => (
+            <FeedCard
+              item={item}
+              key={item?._id || index}
+              onPressLogo={() =>
+                item?.company_id?._id &&
+                navigateTo(SCREENS.CompanyProfile, {
+                  companyId: item?.company_id?._id,
+                })
+              }
+            />
           )}
           contentContainerStyle={styles.scrollcontainer}
-          ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
+          ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
           ListHeaderComponent={renderheader}
           ListFooterComponent={
             isLoadingMore ? (
               <ActivityIndicator
                 size="large"
                 color={colors._0B3970}
-                style={{marginVertical: hp(10)}}
+                style={{ marginVertical: hp(10) }}
               />
             ) : null
           }

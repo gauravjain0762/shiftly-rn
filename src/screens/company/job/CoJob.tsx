@@ -49,7 +49,6 @@ const CoJob = () => {
   const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
-  const insets = useSafeAreaInsets();
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
@@ -184,7 +183,10 @@ const CoJob = () => {
         </View>
 
         <View style={styles.rightSection}>
-          {renderPostJobButton()}
+          {
+            jobList.length > 0 &&
+            renderPostJobButton()
+          }
 
           {data && (
             <Pressable
@@ -269,9 +271,9 @@ const CoJob = () => {
             <View style={styles.inputWrapper}>
               <CustomTextInput
                 value={location}
-                onChangeText={text => setLocation(text)}
                 placeholder={t('Location')}
                 inputStyle={styles.locationInput}
+                onChangeText={text => setLocation(text)}
               />
               <View style={styles.underline} />
             </View>
@@ -349,10 +351,10 @@ const styles = StyleSheet.create({
   },
   postJobButton: {
     gap: wp(10),
-    padding: hp(10),
+    padding: hp(14),
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: wp(12),
+    paddingHorizontal: wp(18),
   },
   plusIconContainer: {
     width: wp(18),

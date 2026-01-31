@@ -20,6 +20,8 @@ const NotificationCard: FC<props> = ({
   const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
     item?.data?.id,
   );
+  console.log("🔥 ~ NotificationCard ~ jobDetail:", jobDetail)
+
   return (
     <View style={styles.card}>
       <View style={[styles.iconWrapper, styles.starIcon]}>

@@ -450,6 +450,10 @@ const EmpLocation = () => {
         dispatch(setUserInfo({ ...userInfo, ...data }));
         navigateTo(SCREENS.CreateProfileScreen, {
           selectedLocation: selectedAddress.address,
+          locationData: {
+            city: selectedAddress.state,
+            country: selectedAddress.country,
+          },
         });
       } catch (error) {
         console.error('Failed to save location:', error);

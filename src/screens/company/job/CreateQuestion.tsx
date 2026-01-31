@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -29,15 +29,7 @@ import { SCREENS } from '../../../navigation/screenNames';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectJobForm } from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
-import CreateQuestionSkeleton from '../../../component/skeletons/CreateQuestionSkeleton';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const QUESTION_PRESETS: string[] = [
-  'Describe your previous job experience relevant to this role?',
-  'Can you share an example of a project you successfully completed?',
-  'Describe a challenge you faced at work and how you solved it.',
-  'What kind of work environment helps you perform your best?',
-];
 
 const CreateQuestion = () => {
   const { t } = useTranslation();
@@ -45,38 +37,17 @@ const CreateQuestion = () => {
   const { jobId, invitePayload } = route.params || {};
   const [questionText, setQuestionText] = useState('');
   const [addedQuestions, setAddedQuestions] = useState<string[]>([]);
-  const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([]);
-  const [areQuestionsLoading, setAreQuestionsLoading] = useState(true);
   const [sendInvites, { isLoading }] = useSendInterviewInvitesMutation({});
   const { updateJobForm } = useJobFormUpdater();
   const { isSuccessModalVisible } = useAppSelector((state: any) =>
     selectJobForm(state),
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const questions = [...QUESTION_PRESETS];
-        setPredefinedQuestions(questions);
-        setAreQuestionsLoading(false);
-      } catch (error) {
-        console.error('Error loading predefined questions:', error);
-        setPredefinedQuestions([]);
-        setAreQuestionsLoading(false);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleAddQuestion = () => {
     if (questionText.trim()) {
       setAddedQuestions([...addedQuestions, questionText.trim()]);
       setQuestionText('');
     }
-  };
-
-  const handleSelectPredefinedQuestion = (question: string) => {
-    setAddedQuestions([...addedQuestions, question]);
   };
 
   const handleRemoveQuestion = (index: number) => {
@@ -157,85 +128,60 @@ const CreateQuestion = () => {
           />
         </View>
 
-        {areQuestionsLoading ? (
-          <CreateQuestionSkeleton />
-        ) : (
-          <>
-            <ScrollView
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}>
-              <View style={styles.container}>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder={t('Write your question here...')}
-                    placeholderTextColor={colors.greyOpacity}
-                    value={questionText}
-                    onChangeText={setQuestionText}
-                    multiline
-                    textAlignVertical="top"
-                  />
-                </View>
-
-                <TouchableOpacity
-                  style={styles.addQuestionButton}
-                  onPress={handleAddQuestion}
-                  activeOpacity={0.7}>
-                  <View style={styles.addButtonIcon}>
-                    <Plus size={20} color={colors.black} />
-                  </View>
-                  <Text style={styles.addButtonText}>{t('Add New Question')}</Text>
-                </TouchableOpacity>
-
-                <View style={styles.predefinedSection}>
-                  {predefinedQuestions && Array.isArray(predefinedQuestions) && predefinedQuestions.length > 0 ? (
-                    predefinedQuestions.map((question, index) => {
-                      if (!question || typeof question !== 'string') {
-                        return null;
-                      }
-                      return (
-                        <TouchableOpacity
-                          key={`question-${index}`}
-                          style={styles.questionCard}
-                          onPress={() => handleSelectPredefinedQuestion(question)}
-                          activeOpacity={0.7}>
-                          <Text style={styles.questionCardText}>{question}</Text>
-                        </TouchableOpacity>
-                      );
-                    })
-                  ) : null}
-                </View>
-
-                {addedQuestions.length > 0 && (
-                  <View style={styles.addedSection}>
-                    <Text style={styles.sectionTitle}>{t('Added Questions')}</Text>
-                    {addedQuestions.map((question, index) => (
-                      <View key={index} style={styles.addedQuestionCard}>
-                        <Text style={styles.addedQuestionText}>{question}</Text>
-                        <TouchableOpacity
-                          onPress={() => handleRemoveQuestion(index)}
-                          style={styles.removeButton}>
-                          <Text style={styles.removeButtonText}>×</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            </ScrollView>
-
-            <View style={styles.buttonContainer}>
-              <GradientButton
-                style={styles.submitButton}
-                type="Company"
-                title={t('Proceed to AI Interview')}
-                onPress={handleSubmit}
-                disabled={isLoading}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInput}
+                placeholder={t('Write your question here...')}
+                placeholderTextColor={colors.greyOpacity}
+                value={questionText}
+                onChangeText={setQuestionText}
+                multiline
+                textAlignVertical="top"
               />
             </View>
-          </>
-        )} 
+
+            <TouchableOpacity
+              style={styles.addQuestionButton}
+              onPress={handleAddQuestion}
+              activeOpacity={0.7}>
+              <View style={styles.addButtonIcon}>
+                <Plus size={20} color={colors.black} />
+              </View>
+              <Text style={styles.addButtonText}>{t('Add New Question')}</Text>
+            </TouchableOpacity>
+
+            {addedQuestions.length > 0 && (
+              <View style={styles.addedSection}>
+                <Text style={styles.sectionTitle}>{t('Added Questions')}</Text>
+                {addedQuestions.map((question, index) => (
+                  <View key={index} style={styles.addedQuestionCard}>
+                    <Text style={styles.addedQuestionText}>{question}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleRemoveQuestion(index)}
+                      style={styles.removeButton}>
+                      <Text style={styles.removeButtonText}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        <View style={styles.buttonContainer}>
+          <GradientButton
+            style={styles.submitButton}
+            type="Company"
+            title={t('Proceed to AI Interview')}
+            onPress={handleSubmit}
+            disabled={isLoading}
+          />
+        </View>
 
         <BottomModal
           visible={isSuccessModalVisible}

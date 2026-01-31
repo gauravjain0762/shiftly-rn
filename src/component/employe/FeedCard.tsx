@@ -11,6 +11,7 @@ import CustomImage from '../common/CustomImage';
 type card = {
   onPressCard?: () => void;
   onPressLike?: () => void;
+  onPressLogo?: () => void;
   isLiked?: boolean;
   item?: any;
 };
@@ -18,6 +19,7 @@ type card = {
 const FeedCard: FC<card> = ({
   onPressCard = () => { },
   onPressLike = () => { },
+  onPressLogo = () => { },
   isLiked = false,
   item
 }) => {
@@ -37,14 +39,18 @@ const FeedCard: FC<card> = ({
       style={styles.card}>
       <View style={styles.cardHeader}>
         <CustomImage
+          onPress={onPressLogo}
           resizeMode="cover"
           source={IMAGES.logoImg}
           uri={item?.company_id?.logo}
           containerStyle={styles.logo}
           imageStyle={{ height: '100%', width: '100%' }}
         />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.hotelName}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={onPressLogo}
+          style={{ flex: 1 }}>
+          <Text numberOfLines={1} style={styles.hotelName}>
             {item?.company_id?.company_name || 'N/A'}
           </Text>
           <Text style={styles.walkIn}>
@@ -52,7 +58,7 @@ const FeedCard: FC<card> = ({
               {getTimeAgo(item?.createdAt)}
             </Text>
           </Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={handleLike}
           style={styles.actionButton}
