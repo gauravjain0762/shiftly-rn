@@ -56,7 +56,7 @@ const CoMessage = () => {
             />
           )}
           ListEmptyComponent={() => {
-            return <NoDataText text="No chats found" />;
+            return <NoDataText text="You don’t have any activity yet. Once you post jobs or content, updates will appear here." />;
           }}
           onRefresh={refetch}
           refreshing={isLoading}

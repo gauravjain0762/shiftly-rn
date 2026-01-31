@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   BackHeader,
   CustomTextInput,
@@ -13,103 +20,53 @@ import { IMAGES } from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { AppStyles } from '../../../theme/appStyles';
-import {
-  errorToast,
-  goBack,
-  navigateTo,
-  resetNavigation,
-  successToast,
-} from '../../../utils/commonFunction';
-import { navigationRef } from '../../../navigation/RootContainer';
+import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
-import { useCreateCompanyPostMutation } from '../../../api/dashboardApi';
-import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
-import {
-  incrementCoPostSteps,
-  resetPostFormState,
-  selectPostForm,
-  setCoPostSteps,
-} from '../../../features/companySlice';
-import BottomModal from '../../../component/common/BottomModal';
+import { useAppSelector } from '../../../redux/hooks';
+import { selectPostForm } from '../../../features/companySlice';
 import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
-import ExpandableText from '../../../component/common/ExpandableText';
 import CharLength from '../../../component/common/CharLength';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
 
 const CreatePost = () => {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
-  const [companyPost] = useCreateCompanyPostMutation();
-  const steps = useAppSelector((state: any) => state.company.coPostSteps);
+  const route = useRoute<any>();
+  const insets = useSafeAreaInsets();
   const [imageModal, setImageModal] = useState(false);
-  const {
-    description,
-    isPostModalVisible,
-    uploadedImages,
-    title,
-    isPostUploading,
-  } = useAppSelector(state => selectPostForm(state as any));
+  const [imageLoading, setImageLoading] = useState(false);
+  const { title, description, uploadedImages, postEditMode, postId } = useAppSelector(state =>
+    selectPostForm(state as any),
+  );
   const { updatePostForm } = usePostFormUpdater();
 
-  const nextStep = () => dispatch(setCoPostSteps(steps + 1));
+  // Handle edit mode from navigation params
+  useEffect(() => {
+    const params = route.params;
+    if (params?.editMode && params?.postData) {
+      const { post_id, title: postTitle, description: postDesc, images } = params.postData;
 
-  const prevStep = () => {
-    if (steps === 1) {
-      goBack();
-    } else {
-      dispatch(setCoPostSteps(steps - 1));
+      // Convert existing image URLs to uploadedImages format
+      const existingImages = images?.length > 0
+        ? [{
+          uri: images[0],
+          type: 'image/jpeg',
+          name: images[0].split('/').pop() || 'image.jpg',
+          isExisting: true
+        }]
+        : [];
+
+      updatePostForm({
+        title: postTitle || '',
+        description: postDesc || '',
+        uploadedImages: existingImages,
+        postEditMode: true,
+        postId: post_id,
+      });
     }
-  };
-
-  const resetUploadImages = () => {
-    updatePostForm({ uploadedImages: [] });
-    dispatch(setCoPostSteps(1));
-  };
-
-  const handleUploadPost = async () => {
-    try {
-      if (title === '') {
-        errorToast(t('Please enter a valid title'));
-      } else if (description === '') {
-        errorToast(t('Please enter description'));
-      } else {
-        let data = {
-          title: title.trim(),
-          description: description.trim(),
-          images: uploadedImages?.map(
-            (item: any) => item?.name || item?.uri?.split('/').pop(),
-          ),
-        };
-        console.log(data, 'handleUploadPost datadatadata >>>>>>>>');
-
-        updatePostForm({ isPostUploading: true });
-
-        const formData = new FormData();
-        formData.append('title', title.trim());
-        formData.append('description', description.trim());
-        formData.append('images', {
-          uri: uploadedImages[0]?.uri,
-          type: uploadedImages[0]?.type || 'image/jpeg',
-          name: uploadedImages[0]?.name,
-        });
-
-        const response = await companyPost(formData).unwrap();
-        console.log(response, 'response----companyPost');
-        if (response?.status) {
-          successToast(response?.message);
-          updatePostForm({ isPostModalVisible: true });
-        }
-      }
-    } catch (e: any) {
-      console.error('handleUploadPost error', e);
-      errorToast(e?.data?.message);
-    } finally {
-      updatePostForm({ isPostUploading: false });
-    }
-  };
+  }, [route.params]);
 
   const addImage = (newImage: any) => {
-    console.log('New image received:', newImage);
-
     const imageObject = {
       uri: newImage?.sourceURL || newImage?.path || newImage?.uri,
       type: newImage?.mime || newImage?.type || 'image/jpeg',
@@ -117,356 +74,151 @@ const CreatePost = () => {
         (newImage?.sourceURL || newImage?.path || newImage?.uri)
           ?.split('/')
           .pop() || `image_${Date.now()}.jpg`,
+      isExisting: false,
     };
 
-    console.log('Formatted image object:', imageObject);
-
-    const updatedImages =
-      uploadedImages.length > 0 ? [imageObject] : [imageObject];
-
-    updatePostForm({ uploadedImages: updatedImages });
+    updatePostForm({ uploadedImages: [imageObject] });
 
     setTimeout(() => {
       setImageModal(false);
     }, 200);
   };
 
-  const postInputContainer = React.useMemo(
-    () => ({
-      marginTop: hp(65),
-      marginHorizontal: wp(35),
-    }),
-    [],
-  );
+  const removeImage = () => {
+    updatePostForm({ uploadedImages: [] });
+  };
 
   const hasValidImage = () => {
     return uploadedImages.length > 0 && uploadedImages[0]?.uri;
   };
 
-  const render = () => {
-    switch (steps || 1) {
-      case 1:
-        return (
-          <View style={{ flex: 1 }}>
-            {uploadedImages?.length < 1 && (
-              <BackHeader
-                onBackPress={goBack}
-                type="company"
-                title=""
-                isRight={false}
-                containerStyle={{ paddingHorizontal: wp(33), marginTop: hp(15) }}
-              />
-            )}
-
-            <View>
-              {uploadedImages?.length < 1 ? (
-                <View style={styles.headercontainer}>
-                  <Text style={styles.createPost}>{t('Create a post')}</Text>
-                </View>
-              ) : (
-                <TouchableOpacity onPress={resetUploadImages}>
-                  <Image
-                    source={IMAGES.close}
-                    style={[styles.close, { marginVertical: hp(30) }]}
-                  />
-                </TouchableOpacity>
-              )}
-              {uploadedImages?.length > 0 ? (
-                <Image
-                  source={{ uri: uploadedImages[0]?.uri }}
-                  style={styles.uploadImg}
-                />
-              ) : (
-                <View style={styles.uploadContainer}>
-                  <Image style={styles.upload} source={IMAGES.uploadImg} />
-                  <Text style={styles.uploadTitle}>{t('Upload Images')}</Text>
-                  <Text style={styles.support}>
-                    {'Supported format jpeg, png'}
-                  </Text>
-                </View>
-              )}
-            </View>
-            {uploadedImages?.length > 0 ? (
-              <>
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log('Retake button pressed');
-                    setImageModal(true);
-                  }}
-                  style={styles.retakeBtn}>
-                  <Text style={styles.retake}>{t('Retake')}</Text>
-                </TouchableOpacity>
-                <GradientButton
-                  style={styles.btn}
-                  type="Company"
-                  title={t('Continue')}
-                  onPress={() => {
-                    console.log('Tap one time >>>>>');
-                    dispatch(incrementCoPostSteps());
-                  }}
-                />
-              </>
-            ) : (
-              <GradientButton
-                style={[styles.btn]}
-                type="Company"
-                title={t('Upload Image')}
-                onPress={() => {
-                  console.log('Upload Image button pressed');
-                  setImageModal(true);
-                }}
-              />
-            )}
-          </View>
-        );
-      case 2:
-        return (
-          <View style={styles.container}>
-            <View>
-              <View style={styles.headercontainer}>
-                <BackHeader
-                  onBackPress={() => prevStep()}
-                  type="company"
-                  title=""
-                  isRight={false}
-                />
-                <Text style={styles.createPost}>
-                  {t('Write your post title')}
-                </Text>
-              </View>
-              <CustomTextInput
-                value={title}
-                maxLength={60}
-                inputStyle={styles.input1}
-                placeholderTextColor={colors._7B7878}
-                placeholder={t('Enter the post title')}
-                onChangeText={(e: any) => updatePostForm({ title: e })}
-                containerStyle={[styles.Inputcontainer, postInputContainer]}
-              />
-              <CharLength
-                chars={60}
-                value={title}
-                style={{ paddingHorizontal: wp(30) }}
-              />
-            </View>
-            <GradientButton
-              style={styles.btn}
-              type="Company"
-              title={t('Continue')}
-              onPress={() => {
-                if (!title.trim()) {
-                  return errorToast(t('Please enter a valid title'));
-                }
-                nextStep();
-              }}
-            />
-          </View>
-        );
-      case 3:
-        return (
-          <View style={styles.container}>
-            <View>
-              <View style={styles.headercontainer}>
-                <BackHeader
-                  onBackPress={() => prevStep()}
-                  type="company"
-                  title=""
-                  RightIcon={
-                    <TouchableOpacity
-                      onPress={() => {
-                        resetUploadImages();
-                        updatePostForm({
-                          title: '',
-                          description: '',
-                        });
-                      }}>
-                      <Image source={IMAGES.close} style={styles.close} />
-                    </TouchableOpacity>
-                  }
-                />
-                <Text style={styles.createPost}>
-                  {t('What do you want to share with job seekers?')}
-                </Text>
-              </View>
-              <CustomTextInput
-                multiline
-                value={description}
-                placeholderTextColor={colors._7B7878}
-                placeholder={t('Enter the description')}
-                onChangeText={(e: any) => updatePostForm({ description: e })}
-                inputStyle={[styles.input1, { maxHeight: hp(180) }]}
-                containerStyle={[
-                  styles.Inputcontainer,
-                  { marginTop: hp(65), marginHorizontal: wp(35) },
-                ]}
-                maxLength={200}
-              />
-              <CharLength
-                chars={200}
-                value={description}
-                style={{ paddingHorizontal: wp(30) }}
-              />
-            </View>
-            <GradientButton
-              style={styles.btn}
-              type="Company"
-              title={t('Continue')}
-              onPress={() => {
-                if (!description.trim()) {
-                  return errorToast(t('Please enter a description'));
-                }
-                nextStep();
-              }}
-            />
-          </View>
-        );
-      case 4:
-        return (
-          <View style={styles.container}>
-            <View>
-              <View style={styles.headercontainer}>
-                <BackHeader
-                  onBackPress={() => prevStep()}
-                  type="company"
-                  title=""
-                  RightIcon={
-                    <TouchableOpacity
-                      onPress={() => {
-                        resetUploadImages();
-                        navigateTo(SCREENS.CoHome);
-                      }}>
-                      <Image
-                        source={IMAGES.close}
-                        style={[styles.close, { marginVertical: hp(20) }]}
-                      />
-                    </TouchableOpacity>
-                  }
-                />
-                <Text style={[styles.post, {
-                  ...commonFontStyle(600, 22, colors._181818),
-                }]}>{title}</Text>
-              </View>
-              {hasValidImage() && (
-                <Image
-                  source={{ uri: uploadedImages[0]?.uri }}
-                  style={[styles.uploadImg, { marginTop: hp(20) }]}
-                />
-              )}
-              <ExpandableText
-                descriptionStyle={[
-                  styles.post,
-                  { marginHorizontal: wp(26), marginTop: hp(20) },
-                ]}
-                description={description}
-                maxLines={5}
-                showStyle={{
-                  paddingVertical: hp(8),
-                  marginHorizontal: wp(26),
-                }}
-              />
-            </View>
-            <GradientButton
-              type="Company"
-              style={styles.btn}
-              disabled={isPostUploading}
-              onPress={handleUploadPost}
-              title={t('Publish Post')}
-            />
-          </View>
-        );
-
-      default:
-        break;
+  const handleReviewPost = () => {
+    if (!title.trim()) {
+      return errorToast(t('Please enter a post title'));
     }
+    if (!description.trim()) {
+      return errorToast(t('Please enter a description'));
+    }
+    if (!hasValidImage()) {
+      return errorToast(t('Please upload an image'));
+    }
+    navigateTo(SCREENS.PreviewPost);
   };
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
+      <View style={styles.headerContainer}>
+        <BackHeader
+          onBackPress={goBack}
+          type="company"
+          title=""
+          isRight={false}
+        />
+        <Text style={styles.screenTitle}>
+          {postEditMode ? t('Edit Post') : t('Create a post')}
+        </Text>
+      </View>
+
       <KeyboardAwareScrollView
         enableAutomaticScroll
         automaticallyAdjustContentInsets
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={AppStyles.flexGrow}
-        style={styles.scrollConatiner}>
-        {render()}
+        contentContainerStyle={styles.scrollContent}
+        style={AppStyles.flex}>
+
+        {/* Image Upload Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>{t('Post Image')}</Text>
+          {hasValidImage() ? (
+            <View style={styles.imagePreviewContainer}>
+              {imageLoading && (
+                <View style={styles.imageLoaderContainer}>
+                  <ActivityIndicator size="large" color={colors._0B3970} />
+                </View>
+              )}
+              <Image
+                source={{ uri: uploadedImages[0]?.uri }}
+                style={styles.uploadedImage}
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
+              />
+              <View style={styles.imageActions}>
+                <TouchableOpacity
+                  style={styles.changeImageBtn}
+                  onPress={() => setImageModal(true)}>
+                  <Text style={styles.changeImageText}>{t('Change')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.removeImageBtn}
+                  onPress={removeImage}>
+                  <Image
+                    source={IMAGES.close}
+                    style={styles.removeIcon}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.uploadPlaceholder}
+              onPress={() => setImageModal(true)}>
+              <Image style={styles.uploadIcon} source={IMAGES.uploadImg} />
+              <Text style={styles.uploadText}>{t('Upload Image')}</Text>
+              <Text style={styles.supportText}>
+                {t('Supported format jpeg, png')}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Title Input */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>{t('Post Title')}</Text>
+          <CustomTextInput
+            value={title}
+            maxLength={60}
+            inputStyle={styles.input}
+            placeholderTextColor={colors._7B7878}
+            placeholder={t('Enter the post title')}
+            onChangeText={(e: any) => updatePostForm({ title: e })}
+            containerStyle={styles.inputContainer}
+          />
+          <CharLength chars={60} value={title} style={styles.charLength} />
+        </View>
+
+        {/* Description Input */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>{t('Description')}</Text>
+          <CustomTextInput
+            multiline
+            maxLength={200}
+            value={description}
+            inputStyle={[styles.input, styles.descriptionInput]}
+            placeholderTextColor={colors._7B7878}
+            placeholder={t('What do you want to share with job seekers?')}
+            onChangeText={(e: any) => updatePostForm({ description: e })}
+            containerStyle={styles.inputContainer}
+          />
+          <CharLength chars={200} value={description} style={styles.charLength} />
+        </View>
       </KeyboardAwareScrollView>
+
+      {/* Review Post Button */}
+      <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
+        <GradientButton
+          style={styles.reviewBtn}
+          type="Company"
+          title={t('Review Post')}
+          onPress={handleReviewPost}
+        />
+      </View>
+
       <ImagePickerModal
         actionSheet={imageModal}
-        setActionSheet={() => {
-          console.log('ImagePickerModal closing');
-          setImageModal(false);
-        }}
-        onUpdate={(e: any) => {
-          console.log('ImagePickerModal onUpdate called with:', e);
-          addImage(e);
-        }}
+        setActionSheet={() => setImageModal(false)}
+        onUpdate={(e: any) => addImage(e)}
       />
-      <BottomModal
-        visible={isPostModalVisible}
-        backgroundColor={colors._FAEED2}
-        onClose={() => { }}>
-        <View style={styles.modalIconWrapper}>
-          <Image
-            source={IMAGES.check}
-            tintColor={colors._FAEED2}
-            style={styles.modalCheckIcon}
-          />
-        </View>
-
-        <View>
-          <Text style={styles.modalTitle}>{'Post Created Successfully'}</Text>
-          <Text style={styles.modalSubtitle}>
-            {
-              'Your post has been published. View it now or return to the home screen.'
-            }
-          </Text>
-        </View>
-
-        <GradientButton
-          style={styles.btn}
-          type="Company"
-          title={t('Home')}
-          onPress={() => {
-            dispatch(setCoPostSteps(0));
-            updatePostForm({
-              isPostModalVisible: false,
-              uploadedImages: [],
-              title: '',
-              description: '',
-            });
-            // Reset navigation to CoPost tab screen
-            if (navigationRef.current?.isReady()) {
-              navigationRef.current.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: SCREENS.CoStack,
-                    state: {
-                      routes: [
-                        {
-                          name: SCREENS.CoTabNavigator,
-                          state: {
-                            routes: [{ name: SCREENS.CoPost }],
-                            index: 0,
-                          },
-                        },
-                      ],
-                      index: 0,
-                    },
-                  },
-                ],
-              });
-            } else {
-              // Fallback: reset to tab navigator and navigate to CoPost
-              resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
-              setTimeout(() => {
-                navigateTo(SCREENS.CoPost);
-              }, 100);
-            }
-          }}
-        />
-      </BottomModal>
     </LinearContainer>
   );
 };
@@ -474,110 +226,126 @@ const CreatePost = () => {
 export default CreatePost;
 
 const styles = StyleSheet.create({
-  headercontainer: {
+  headerContainer: {
+    paddingHorizontal: wp(25),
+    paddingTop: hp(15),
     gap: hp(10),
-    marginTop: hp(15),
-    paddingHorizontal: wp(35),
   },
-  createPost: {
-    ...commonFontStyle(500, 25, colors._0B3970),
+  screenTitle: {
+    ...commonFontStyle(600, 24, colors._0B3970),
   },
-  uploadContainer: {
-    marginTop: hp(16),
-    borderWidth: hp(1),
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: wp(25),
+    paddingBottom: hp(120),
+  },
+  section: {
+    marginTop: hp(24),
+  },
+  sectionLabel: {
+    ...commonFontStyle(500, 16, colors._0B3970),
+    marginBottom: hp(12),
+  },
+  uploadPlaceholder: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
     borderColor: colors._7B7878,
-    justifyContent: 'center',
+    borderRadius: wp(12),
+    paddingVertical: hp(40),
     alignItems: 'center',
-    height: '70%',
-    marginHorizontal: wp(2),
+    justifyContent: 'center',
+    backgroundColor: colors._F7F7F7,
   },
-  upload: {
-    width: wp(70),
-    height: wp(70),
+  uploadIcon: {
+    width: wp(50),
+    height: wp(50),
     resizeMode: 'contain',
-    tintColor: '#234F85',
-  },
-  uploadTitle: {
-    ...commonFontStyle(500, 20, colors._234F86),
-    marginTop: hp(35),
-  },
-  support: {
-    ...commonFontStyle(400, 15, colors.black),
-    marginTop: hp(10),
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  btn: {
-    marginVertical: hp(30),
-    marginHorizontal: wp(42),
-  },
-  close: {
-    width: wp(18),
-    height: wp(18),
-    marginLeft: wp(42),
     tintColor: colors._0B3970,
   },
-  uploadImg: {
-    height: hp(390),
+  uploadText: {
+    ...commonFontStyle(500, 16, colors._0B3970),
+    marginTop: hp(12),
+  },
+  supportText: {
+    ...commonFontStyle(400, 13, colors._7B7878),
+    marginTop: hp(4),
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    borderRadius: wp(12),
+    overflow: 'hidden',
+  },
+  uploadedImage: {
+    width: '100%',
+    height: hp(200),
+    borderRadius: wp(12),
     resizeMode: 'cover',
   },
-  retake: {
-    ...commonFontStyle(500, 20, colors._0B3970),
-    paddingVertical: hp(12),
-  },
-  retakeBtn: {
-    borderRadius: 100,
-    borderColor: colors._0B3970,
-    borderWidth: 1,
+  imageLoaderContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: wp(42),
-    marginTop: '20%',
+    backgroundColor: colors._F7F7F7,
+    zIndex: 1,
   },
-  Inputcontainer: {
-    flex: 1,
-    marginBottom: 0,
-    borderBottomWidth: 2,
+  imageActions: {
+    position: 'absolute',
+    top: hp(10),
+    right: wp(10),
+    flexDirection: 'row',
+    gap: wp(8),
+  },
+  changeImageBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: wp(12),
+    paddingVertical: hp(6),
+    borderRadius: wp(8),
+  },
+  changeImageText: {
+    ...commonFontStyle(500, 13, colors._0B3970),
+  },
+  removeImageBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: wp(6),
+    borderRadius: wp(8),
+  },
+  removeIcon: {
+    width: wp(14),
+    height: wp(14),
+    tintColor: colors._0B3970,
+  },
+  inputContainer: {
+    borderBottomWidth: 1.5,
     borderBottomColor: colors._7B7878,
-    paddingBottom: 4,
+    marginBottom: 0,
+    paddingBottom: hp(8),
   },
-  input1: {
-    ...commonFontStyle(400, 22, colors._1F1F1F),
+  input: {
+    ...commonFontStyle(400, 18, colors._1F1F1F),
+    padding: 0,
   },
-  scrollConatiner: {
-    flex: 1,
+  descriptionInput: {
+    minHeight: hp(80),
+    maxHeight: hp(150),
+    textAlignVertical: 'top',
   },
-  post: {
-    ...commonFontStyle(400, 20, colors._181818),
+  charLength: {
+    marginTop: hp(4),
   },
-  modalIconWrapper: {
-    width: wp(90),
-    height: hp(90),
-    alignSelf: 'center',
-    borderRadius: wp(90),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors._0B3970,
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: wp(25),
+    paddingVertical: hp(20),
+    backgroundColor: colors.white,
   },
-  modalCheckIcon: {
-    width: wp(30),
-    height: hp(30),
-    borderRadius: wp(30),
-  },
-  modalTitle: {
-    textAlign: 'center',
-    marginVertical: hp(16),
-    ...commonFontStyle(600, 25, colors.black),
-  },
-  modalSubtitle: {
-    textAlign: 'center',
-    ...commonFontStyle(400, 18, colors._6B6B6B),
-  },
-  modalHomeText: {
-    marginBottom: hp(20),
-    textAlign: 'center',
-    ...commonFontStyle(400, 19, colors._B4B4B4),
+  reviewBtn: {
+    borderRadius: wp(25),
   },
 });

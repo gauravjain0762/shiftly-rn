@@ -57,6 +57,7 @@ export const SCREENS = {
   CoEditMyProfile: 'CoEditMyProfile',
   CreateQuestion: 'CreateQuestion',
   JobPreview: 'JobPreview',
+  PreviewPost: 'PreviewPost',
   EmpChangePassword: 'EmpChangePassword',
   EmpProfile: 'EmpProfile',
   EmpForgotPassword: 'EmpForgotPassword',

@@ -1,12 +1,14 @@
 import React, { FC, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { colors } from '../../theme/colors';
-import { getTimeAgo } from '../../utils/commonFunction';
+import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import ExpandableText from '../common/ExpandableText';
 import CustomImage from '../common/CustomImage';
+import { SCREENS } from '../../navigation/screenNames';
+import { useTranslation } from 'react-i18next';
 
 type card = {
   onPressCard?: () => void;
@@ -14,6 +16,7 @@ type card = {
   onPressLogo?: () => void;
   isLiked?: boolean;
   item?: any;
+  showMenu?: boolean; // Show three-dot menu for company posts
 };
 
 const FeedCard: FC<card> = ({
@@ -21,15 +24,33 @@ const FeedCard: FC<card> = ({
   onPressLike = () => { },
   onPressLogo = () => { },
   isLiked = false,
-  item
+  item,
+  showMenu = false,
 }) => {
+  const { t } = useTranslation();
   const hasImage = item?.images?.length > 0;
   const [imageLoading, setImageLoading] = useState(hasImage);
   const [localLiked, setLocalLiked] = useState(isLiked);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
   const handleLike = () => {
     setLocalLiked(!localLiked);
     onPressLike();
+  };
+
+  const handleEdit = () => {
+    setMenuVisible(false);
+    // Navigate to CreatePost with post data for editing
+    navigateTo(SCREENS.CreatePost, {
+      editMode: true,
+      postData: {
+        post_id: item?._id,
+        title: item?.title || '',
+        description: item?.description || '',
+        images: item?.images || [],
+      },
+    });
   };
 
   return (
@@ -59,16 +80,36 @@ const FeedCard: FC<card> = ({
             </Text>
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleLike}
-          style={styles.actionButton}
-        >
-          <CustomImage
-            size={wp(26)}
-            resizeMode={!localLiked ? "cover" : "contain"}
-            source={localLiked ? IMAGES.like : IMAGES.hart}
-          />
-        </TouchableOpacity>
+
+        {/* Action buttons container */}
+        <View style={styles.headerActions}>
+          {showMenu && (
+            <TouchableOpacity
+              onLayout={(event) => {
+                event.target.measureInWindow((x: number, y: number, width: number, height: number) => {
+                  setMenuPosition({ x: x - wp(100), y: y + height + hp(5) });
+                });
+              }}
+              onPress={() => setMenuVisible(true)}
+              style={styles.menuButton}>
+              <Image
+                source={IMAGES.dots}
+                style={styles.dotsIcon}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={handleLike}
+            style={styles.actionButton}
+          >
+            <CustomImage
+              size={wp(26)}
+              resizeMode={!localLiked ? "cover" : "contain"}
+              source={localLiked ? IMAGES.like : IMAGES.hart}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
@@ -97,6 +138,30 @@ const FeedCard: FC<card> = ({
         descriptionStyle={styles.description}
         description={item?.description || 'N/A'}
       />
+
+      {/* Dropdown Menu Modal */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setMenuVisible(false)}>
+          <View style={[styles.menuContainer, { top: menuPosition.y, left: menuPosition.x }]}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleEdit}>
+              <Image
+                source={IMAGES.edit_icon}
+                style={styles.menuIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.menuText}>{t('Edit Post')}</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
 
     </TouchableOpacity>
   );
@@ -191,7 +256,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: hp(6),
-    paddingHorizontal: wp(12),
+    paddingHorizontal: wp(8),
   },
   actionIcon: {
     width: wp(26),
@@ -206,5 +271,49 @@ const styles = StyleSheet.create({
   },
   savedText: {
     color: colors._0B3970,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(4),
+  },
+  menuButton: {
+    padding: wp(8),
+  },
+  dotsIcon: {
+    width: wp(20),
+    height: wp(20),
+    tintColor: colors._6A6A6A,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  menuContainer: {
+    position: 'absolute',
+    backgroundColor: colors.white,
+    borderRadius: wp(12),
+    paddingVertical: hp(4),
+    minWidth: wp(150),
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: hp(12),
+    paddingHorizontal: wp(16),
+    gap: wp(10),
+  },
+  menuIcon: {
+    width: wp(18),
+    height: wp(18),
+    tintColor: colors._0B3970,
+  },
+  menuText: {
+    ...commonFontStyle(500, 15, colors._1F1F1F),
   },
 });

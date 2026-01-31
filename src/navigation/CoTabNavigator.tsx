@@ -60,7 +60,7 @@ const CustomTabBar = ({ state, navigation }: any) => {
             labelName = 'Jobs';
             break;
           case SCREENS.CoPost:
-            labelName = 'Post';
+            labelName = 'Posts';
             break;
           case SCREENS.CoActivity:
             labelName = 'Activity';

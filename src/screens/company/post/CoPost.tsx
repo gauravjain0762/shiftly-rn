@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { BackHeader, GradientButton, HomeHeader, LinearContainer } from '../../../component';
+import { GradientButton, LinearContainer } from '../../../component';
 import LinearGradient from 'react-native-linear-gradient';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { useTranslation } from 'react-i18next';
@@ -15,16 +15,11 @@ import { setCoPostSteps } from '../../../features/companySlice';
 import FeedCard from '../../../component/employe/FeedCard';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
 import BaseText from '../../../component/common/BaseText';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
 
 const CoPost = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { userInfo }: any = useSelector((state: RootState) => state.auth);
-  const { data: profileData } = useGetProfileQuery();
 
-  // Posts list state
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   console.log("🔥 ~ CoPost ~ allPosts:", allPosts)
@@ -100,7 +95,7 @@ const CoPost = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollcontainer}
             ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-            renderItem={({ item }) => <FeedCard item={item} />}
+            renderItem={({ item }) => <FeedCard item={item} showMenu={true} />}
             onEndReachedThreshold={0.5}
             onEndReached={handleLoadMore}
             refreshing={isFetching && currentPage === 1}

@@ -162,6 +162,30 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    editCompanyPost: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.editCompanyPost,
+        method: HTTP_METHOD.POST,
+        data: credentials,
+        skipLoader: false,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+      invalidatesTags: ['CreatePost', 'GetPost'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'editCompanyPost response');
+          if (!data?.status) {
+            errorToast(data?.message);
+          }
+        } catch (error) {
+          console.log('Edit Post Error', error);
+        }
+      },
+    }),
     createCompanyProfile: builder.mutation<any, any>({
       query: credentials => ({
         url: API.updateCompanyProfile,
@@ -832,6 +856,7 @@ export const {
   useGetCompanyJobsQuery,
   useGetCompanyPostsQuery,
   useCreateCompanyPostMutation,
+  useEditCompanyPostMutation,
   useGetEmployeeProfileQuery,
   useGetServicesQuery,
   useCreateCompanyProfileMutation,

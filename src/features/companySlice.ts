@@ -36,6 +36,8 @@ interface PostFormState {
   isPostModalVisible: boolean;
   uploadedImages: any[];
   isPostUploading: false;
+  postEditMode: boolean;
+  postId: string;
 }
 
 interface AuthState {
@@ -94,6 +96,8 @@ const initialState: CompanyState = {
     isPostModalVisible: false,
     uploadedImages: [],
     isPostUploading: false,
+    postEditMode: false,
+    postId: '',
   },
   filters: {
     job_types: null,
