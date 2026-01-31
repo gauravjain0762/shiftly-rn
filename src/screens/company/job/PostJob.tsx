@@ -51,7 +51,6 @@ import {
   useEditCompanyJobMutation,
   useGetDepartmentsQuery,
   useGetEssentialBenefitsQuery,
-  useGetFacilitiesQuery,
   useGetSkillsQuery,
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
@@ -209,90 +208,8 @@ const PostJob = () => {
     | undefined
   >();
 
-  const getUserLocation = async () => {
-    try {
-      const locationString = await AsyncStorage.getItem('user_location');
-      if (locationString !== null) {
-        const location = JSON.parse(locationString);
-        if (location.address && location.lat && location.lng) {
-          setUserAddress({
-            address: location.address,
-            lat: location.lat,
-            lng: location.lng,
-            state: location.state || '',
-            country: location.country || '',
-          });
-          console.log('Retrieved location from AsyncStorage:', location);
-          return {
-            address: location.address,
-            lat: location.lat,
-            lng: location.lng,
-            state: location.state || '',
-            country: location.country || '',
-          };
-        }
-      }
-
-      if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
-        setUserAddress({
-          address: userInfo.address,
-          lat: userInfo.lat,
-          lng: userInfo.lng,
-          state: userInfo.state || '',
-          country: userInfo.country || '',
-        });
-        console.log('Using registered company location:', userInfo.address);
-        return {
-          address: userInfo.address,
-          lat: userInfo.lat,
-          lng: userInfo.lng,
-          state: userInfo.state || '',
-          country: userInfo.country || '',
-        };
-      }
-
-      const coordinates = await getAsyncUserLocation();
-      if (coordinates) {
-        getAddress(
-          coordinates,
-          (data: any) => {
-            const address = data?.results?.[0]?.formatted_address;
-            const components = data?.results?.[0]?.address_components || [];
-
-            const stateObj = components.find((c: any) =>
-              c.types.includes('administrative_area_level_1'),
-            );
-            const countryObj = components.find((c: any) =>
-              c.types.includes('country'),
-            );
-
-            const state = stateObj?.long_name || '';
-            const country = countryObj?.long_name || '';
-
-            if (address) {
-              setUserAddress({
-                address,
-                lat: coordinates.latitude,
-                lng: coordinates.longitude,
-                state,
-                country,
-              });
-            }
-          },
-          (error: any) => {
-            console.error('Failed to get address from coordinates:', error);
-          },
-        );
-      }
-    } catch (error) {
-      console.error('Failed to retrieve user location:', error);
-    }
-    return null;
-  };
-
   useFocusEffect(
     useCallback(() => {
-      // Defer heavy operations until after navigation animations complete
       const task = InteractionManager.runAfterInteractions(async () => {
         try {
           const locationString = await AsyncStorage.getItem('user_location');
@@ -300,7 +217,6 @@ const PostJob = () => {
             const location = JSON.parse(locationString);
             if (location.address && location.lat && location.lng) {
               setUserAddress(location);
-              // Also update the Job Area field with the saved location
               updateJobForm({
                 area: {
                   label: location.address,
@@ -320,7 +236,6 @@ const PostJob = () => {
               state: userInfo.state || '',
               country: userInfo.country || '',
             });
-            // Also update the Job Area field with userInfo location
             updateJobForm({
               area: {
                 label: userInfo.address,
@@ -363,7 +278,6 @@ const PostJob = () => {
       });
 
       return () => task.cancel();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo]),
   );
 
@@ -1123,7 +1037,33 @@ const PostJob = () => {
               style={[styles.btn, { marginHorizontal: wp(25) }]}
               type="Company"
               title={t('Review your job resume')}
-              onPress={handleCreateJob}
+              onPress={() => {
+                // Validate required fields before navigating
+                if (!title || title.trim() === '') {
+                  errorToast(t('Please enter a job title'));
+                  return;
+                }
+                if (!describe || describe.trim() === '') {
+                  errorToast(t('Please enter a job description'));
+                  return;
+                }
+                if (!job_sector || !job_sector.value) {
+                  errorToast(t('Please select a job department'));
+                  return;
+                }
+                const finalLat = userAddress?.lat || location?.latitude || userInfo?.lat;
+                const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
+                if (!finalLat || !finalLng) {
+                  errorToast(t('Please select a job location on the map'));
+                  return;
+                }
+                // Navigate to JobPreview with necessary data
+                navigateTo(SCREENS.JobPreview, {
+                  userAddress,
+                  skillId,
+                  location,
+                });
+              }}
             />
           </Animated.View>
         );

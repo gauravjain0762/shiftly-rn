@@ -76,11 +76,11 @@ const CoProfile = () => {
     {
       section: 'General',
       items: [
-        {
-          label: 'Language',
-          icon: IMAGES.Language,
-          onPress: () => setLanguageModalVisible(true),
-        },
+        // {
+        //   label: 'Language',
+        //   icon: IMAGES.Language,
+        //   onPress: () => setLanguageModalVisible(true),
+        // },
         {
           label: 'Notifications',
           icon: IMAGES.Notifications,
@@ -159,22 +159,22 @@ const CoProfile = () => {
     try {
       const response = await companyLogout({}).unwrap() as any;
       console.log("🔥 ~ onLogout ~ response:", response);
-      
+
       if (response?.status) {
         // Clear async storage first
         await clearAsync();
-        
+
         // Dispatch logout action to clear Redux state
         dispatch(logouts());
-        
+
         // Reset store and purge persistor (async)
         await resetStore();
-        
+
         // Sign out from Firebase/Google if logged in (async but no need to await)
         signOutIfLoggedIn().catch(err => {
           console.log('Error signing out from Firebase:', err);
         });
-        
+
         // Navigate after all cleanup is complete
         resetNavigation(SCREEN_NAMES.SelectRollScreen);
       } else {
@@ -297,12 +297,12 @@ const CoProfile = () => {
             setdeletePopupVisible(false);
           }}
         />
-        <LanguageModal
+        {/* <LanguageModal
           type={'Company'}
           visible={isLanguageModalVisible}
           onClose={() => setLanguageModalVisible(false)}
           onLanguageSelect={() => setLanguageModalVisible(false)}
-        />
+        /> */}
       </ScrollView>
     </LinearContainer>
   );

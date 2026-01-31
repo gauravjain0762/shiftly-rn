@@ -56,6 +56,7 @@ export const SCREENS = {
   CoProfileLocationScreen: 'CoProfileLocationScreen',
   CoEditMyProfile: 'CoEditMyProfile',
   CreateQuestion: 'CreateQuestion',
+  JobPreview: 'JobPreview',
   EmpChangePassword: 'EmpChangePassword',
   EmpProfile: 'EmpProfile',
   EmpForgotPassword: 'EmpForgotPassword',

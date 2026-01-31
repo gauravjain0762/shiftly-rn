@@ -52,6 +52,7 @@ import EditAccountScreen from '../screens/employer/profile/EditAccount';
 import SearchJob from '../screens/employer/jobs/SearchJob';
 import FavoriteJobList from '../screens/employer/jobs/FavoriteJobList';
 import CreateQuestion from '../screens/company/job/CreateQuestion';
+import JobPreview from '../screens/company/job/JobPreview';
 import EmpLocation from '../component/employe/EmpLocation';
 import JobInvitationScreen from '../screens/employer/jobs/JobInvitationScreen';
 import EmployeeProfile from '../screens/company/job/EmployeeProfile';
@@ -403,6 +404,11 @@ const StackNavigator: FC = () => {
           options={({ navigation }) => ({ headerShown: false })}
           name={SCREENS.CreateQuestion}
           component={CreateQuestion}
+        />
+        <Stack.Screen
+          options={({ navigation }) => ({ headerShown: false })}
+          name={SCREENS.JobPreview}
+          component={JobPreview}
         />
       </Stack.Navigator>
     );

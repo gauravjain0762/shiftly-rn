@@ -305,12 +305,12 @@ const AccountScreen = () => {
           }}
         />
 
-        <LanguageModal
+        {/* <LanguageModal
           type={'Employee'}
           visible={isLanguageModalVisible}
           onClose={() => setLanguageModalVisible(false)}
           onLanguageSelect={() => setLanguageModalVisible(false)}
-        />
+        /> */}
       </ScrollView>
     </LinearContainer>
   );
