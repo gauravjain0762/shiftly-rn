@@ -1,40 +1,37 @@
-import React, {useState} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   CustomTextInput,
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {useTranslation} from 'react-i18next';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useTranslation } from 'react-i18next';
 import {
-  useCompanyForgotPasswordMutation,
   useCompanyResetPasswordMutation,
 } from '../../../api/authApi';
-import {RootState} from '../../../store';
-import {useSelector} from 'react-redux';
+import { RootState } from '../../../store';
+import { useSelector } from 'react-redux';
 import {
   errorToast,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {setChangePasswordSteps, setUserInfo} from '../../../features/authSlice';
-import {useAppDispatch} from '../../../redux/hooks';
-import {SCREENS} from '../../../navigation/screenNames';
+import { setChangePasswordSteps, } from '../../../features/authSlice';
+import { useAppDispatch } from '../../../redux/hooks';
+import { SCREENS } from '../../../navigation/screenNames';
 
 const ChangePassword = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [email, setEmail] = useState(__DEV__ ? 'db@company.com' : '');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const {changePasswordSteps} = useSelector((state: RootState) => state.auth);
-  const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
+  const { changePasswordSteps } = useSelector((state: RootState) => state.auth);
   const [companyChangedPassword] = useCompanyResetPasswordMutation({});
 
   const handleChangePassword = async () => {
@@ -47,7 +44,7 @@ const ChangePassword = () => {
         old_password: oldPassword,
         new_password: newPassword,
         confirm_password: confirmPassword,
-      }).unwrap();
+      }).unwrap() as any;
       if (res?.status) {
         successToast(res?.message);
         resetNavigation(SCREENS.CoTabNavigator);
@@ -69,7 +66,7 @@ const ChangePassword = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top', 'bottom']}}
+      SafeAreaProps={{ edges: ['top', 'bottom'] }}
       colors={['#F7F7F7', '#FFFFFF']}>
       <KeyboardAwareScrollView
         enableAutomaticScroll

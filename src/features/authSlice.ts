@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {persistReducer} from 'redux-persist';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { persistReducer } from 'redux-persist';
 
 type CompanyRegisterData = {
   business_type_id: string;
@@ -77,6 +77,7 @@ interface AppState {
     googleId?: string;
     appleId?: string
   };
+  hasUnreadNotification?: boolean;
 }
 
 const initialState: AppState = {
@@ -154,6 +155,7 @@ const initialState: AppState = {
     googleId: '',
     appleId: ''
   },
+  hasUnreadNotification: false,
 };
 
 const authSlice = createSlice({
@@ -250,6 +252,9 @@ const authSlice = createSlice({
         step: savedSteps,
       };
     },
+    setHasUnreadNotification: (state, action: PayloadAction<boolean>) => {
+      state.hasUnreadNotification = action.payload;
+    },
   },
 });
 
@@ -257,7 +262,7 @@ const authPersistConfig = {
   key: 'auth',
   storage: AsyncStorage,
   // Only persist these fields
-  whitelist: ['language', 'authToken', 'fcmToken', 'userInfo', 'guestLogin', 'getAppData'],
+  whitelist: ['language', 'authToken', 'fcmToken', 'userInfo', 'guestLogin', 'getAppData', 'hasUnreadNotification'],
 };
 
 export const persistedAuthReducer = persistReducer(
@@ -289,6 +294,7 @@ export const {
   setCreateEmployeeAccount,
   clearEmployeeAccount,
   clearCompanyRegisterData,
+  setHasUnreadNotification,
 } = authSlice.actions;
 
 export default authSlice.reducer;

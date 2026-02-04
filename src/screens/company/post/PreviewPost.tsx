@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
     Image,
     StyleSheet,
     Text,
     View,
     ScrollView,
+    Platform,
+    ActivityIndicator,
 } from 'react-native';
 import {
     BackHeader,
@@ -165,7 +166,6 @@ const PreviewPost = () => {
 
                 {/* Post Preview Card */}
                 <View style={styles.previewCard}>
-                    {/* Image */}
                     {hasValidImage() && (
                         <View style={styles.imageContainer}>
                             {imageLoading && (
@@ -174,7 +174,11 @@ const PreviewPost = () => {
                                 </View>
                             )}
                             <Image
-                                source={{ uri: uploadedImages[0]?.uri }}
+                                source={{
+                                    uri: (Platform.OS === 'ios' && uploadedImages[0]?.uri && !uploadedImages[0]?.uri.startsWith('file://') && !uploadedImages[0]?.uri.startsWith('http') && !uploadedImages[0]?.uri.startsWith('ph://'))
+                                        ? `file://${uploadedImages[0]?.uri}`
+                                        : uploadedImages[0]?.uri
+                                }}
                                 style={styles.postImage}
                                 onLoadStart={() => setImageLoading(true)}
                                 onLoadEnd={() => setImageLoading(false)}
@@ -234,6 +238,7 @@ const PreviewPost = () => {
                     title={t('Home')}
                     onPress={handleGoHome}
                 />
+                <View style={{ paddingBottom: insets.bottom }} />
             </BottomModal>
         </LinearContainer>
     );

@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   BackHeader,
@@ -460,47 +460,77 @@ const CreateProfileScreen = () => {
   };
 
   const handleRemoveEducation = async (item: EducationItem | any) => {
-    try {
-      if (item?._id) {
-        const res = await removeEducation(item._id).unwrap();
-        successToast(res?.message || 'Education removed');
-        refetchEducation();
-        dispatch(
-          setEducationList(educationList.filter(edu => edu._id !== item._id)),
-        );
-      } else {
-        dispatch(
-          setEducationList(
-            educationList.filter(edu => edu.education_id !== item.education_id),
-          ),
-        );
-      }
-    } catch (error) {
-      errorToast('Failed to remove education');
-      console.error(error);
-    }
+    Alert.alert(
+      'Remove Education',
+      'Are you sure you want to remove this',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              if (item?._id) {
+                const res = await removeEducation(item._id).unwrap();
+                successToast(res?.message || 'Education removed');
+                refetchEducation();
+                dispatch(
+                  setEducationList(educationList.filter(edu => edu._id !== item._id)),
+                );
+              } else {
+                dispatch(
+                  setEducationList(
+                    educationList.filter(edu => edu.education_id !== item.education_id),
+                  ),
+                );
+              }
+            } catch (error) {
+              errorToast('Failed to remove education');
+              console.error(error);
+            }
+          },
+        },
+      ],
+    );
   };
 
   const handleRemoveExperience = async (item: ExperienceItem | any) => {
-    try {
-      if (item?._id) {
-        const res = await removeExperience(item._id).unwrap();
-        successToast(res?.message || 'Experience removed');
-        refetchExperience();
-        setExperienceList(experienceList.filter(exp => exp._id !== item._id));
-      } else {
-        dispatch(
-          setExperienceList(
-            experienceList.filter(
-              exp => exp.experience_id !== item.experience_id,
-            ),
-          ),
-        );
-      }
-    } catch (error) {
-      errorToast('Failed to remove experience');
-      console.error(error);
-    }
+    Alert.alert(
+      'Remove Experience',
+      'Are you sure you want to remove this',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              if (item?._id) {
+                const res = await removeExperience(item._id).unwrap();
+                successToast(res?.message || 'Experience removed');
+                refetchExperience();
+                setExperienceList(experienceList.filter(exp => exp._id !== item._id));
+              } else {
+                dispatch(
+                  setExperienceList(
+                    experienceList.filter(
+                      exp => exp.experience_id !== item.experience_id,
+                    ),
+                  ),
+                );
+              }
+            } catch (error) {
+              errorToast('Failed to remove experience');
+              console.error(error);
+            }
+          },
+        },
+      ],
+    );
   };
 
   return (

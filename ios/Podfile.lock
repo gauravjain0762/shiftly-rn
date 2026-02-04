@@ -2087,7 +2087,7 @@ PODS:
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
-  - RNFBApp (23.8.4):
+  - RNFBApp (23.8.6):
     - DoubleConversion
     - Firebase/CoreOnly (= 12.8.0)
     - glog
@@ -2112,7 +2112,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNFBAuth (23.8.4):
+  - RNFBAuth (23.8.6):
     - DoubleConversion
     - Firebase/Auth (= 12.8.0)
     - glog
@@ -2138,7 +2138,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - RNFBApp
     - Yoga
-  - RNFBMessaging (23.8.4):
+  - RNFBMessaging (23.8.6):
     - DoubleConversion
     - Firebase/Messaging (= 12.8.0)
     - FirebaseCoreExtension
@@ -2383,7 +2383,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNShare (12.2.4):
+  - RNShare (12.2.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2407,7 +2407,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (15.15.1):
+  - RNSVG (15.15.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2430,9 +2430,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNSVG/common (= 15.15.1)
+    - RNSVG/common (= 15.15.2)
     - Yoga
-  - RNSVG/common (15.15.1):
+  - RNSVG/common (15.15.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2998,9 +2998,9 @@ SPEC CHECKSUMS:
   RNDateTimePicker: fe93a0dd58fc778fa8c5ce98fbcaf48acbc4cb04
   RNDeviceInfo: 36d7f232bfe7c9b5c494cb7793230424ed32c388
   RNFastImage: 462a183c4b0b6b26fdfd639e1ed6ba37536c3b87
-  RNFBApp: 92708642c95afecbbbd783240fad8624ee8342a0
-  RNFBAuth: bc233a6b6466adf0bcc3151c45ebf313c341be84
-  RNFBMessaging: 45536143eeddf38755153a07712012e9f2270001
+  RNFBApp: a4dd1616cbc80a3c18aa09d5e66217da4f495fe1
+  RNFBAuth: ff56438eaf7c81ea582ad559c4b240376a608240
+  RNFBMessaging: d5cf9f8878c8f88fd234df179e085e27da8ce483
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNGestureHandler: 715fa8a84165228bbf11e5140015a13c56dc6ee4
   RNGoogleSignin: db4aa231a90bdc4cea8b749ec68b168c8f747ec2
@@ -3009,8 +3009,8 @@ SPEC CHECKSUMS:
   RNPermissions: fd7a2c0410230c9b2fe6bd6bdd3de782346425e4
   RNReanimated: 34f5a65606f038eb85448fc4444590ec300407af
   RNScreens: a25b818417609cbd805474dffd2d28b229704cfc
-  RNShare: d6a38e1622fe1988f3133d66179725413d92ab6d
-  RNSVG: 469b02f125c056241514c7b18444074a27396ae4
+  RNShare: 9fd9e02f3b6f58d59c340d366863756339f8cc8b
+  RNSVG: 09cdb3d2c5e58076076fb505d1ceb8a26eb59c12
   RNWorklets: 0725839ad8fe67a05ce4b9f2a7db4f5b95312068
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d

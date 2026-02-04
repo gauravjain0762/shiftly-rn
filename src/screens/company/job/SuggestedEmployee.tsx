@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Pressable,
+  Image,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -17,6 +18,7 @@ import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { useTranslation } from 'react-i18next';
 import CustomImage from '../../../component/common/CustomImage';
+import { IMAGES } from '../../../assets/Images';
 import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
@@ -50,18 +52,14 @@ const SuggestedEmployeeScreen = () => {
   const isScreenLoading = isJobLoading || isLoading || isFetching;
   const hasDataLoaded = useRef(false);
 
-  // Only show skeleton on initial load, not on refetches
   const showSkeleton = useMemo(() => {
-    // If we have data, never show skeleton
     if (hasDataLoaded.current || (employees && employees.length > 0) || (jobInfo && Object.keys(jobInfo).length > 0)) {
       return false;
     }
-    // Show skeleton only on initial load
     return isScreenLoading;
   }, [isScreenLoading, employees, jobInfo]);
 
   useEffect(() => {
-    // Mark that data has been loaded once
     if (!isScreenLoading && (employees?.length > 0 || (jobInfo && Object.keys(jobInfo).length > 0))) {
       hasDataLoaded.current = true;
     }
@@ -191,14 +189,24 @@ const SuggestedEmployeeScreen = () => {
       item?.years_of_experience ||
       item?.total_experience ||
       0;
+
+    // Check if user is already invited
+    const isInvited = jobInfo?.invited_users?.some((invited: any) =>
+      (invited?.user_id?._id === item?._id) ||
+      (invited?.user_id === item?._id) ||
+      (invited === item?._id)
+    );
+
     const isSelected = selectedUserIds.includes(item?._id);
+
     return (
       <Pressable
         key={item._id}
-        onPress={() => toggleUserSelection(item?._id)}
+        onPress={() => !isInvited && toggleUserSelection(item?._id)}
         style={[
           styles.employeeCard,
           isSelected && styles.selectedEmployeeCard,
+          isInvited && styles.invitedCard
         ]}>
         <CustomImage
           uri={
@@ -219,24 +227,31 @@ const SuggestedEmployeeScreen = () => {
             {`${experience || 0}y ${t('Experience')}`}
           </Text>
         </View>
-        <Pressable
-          onPress={event => {
-            event.stopPropagation();
-            setInviteAllSelected(false);
-            toggleUserSelection(item?._id);
-          }}
-          style={[
-            styles.inviteButton,
-            isSelected && styles.inviteButtonSelected,
-          ]}>
-          <Text
+
+        {isInvited || isSelected ? (
+          <View style={styles.invitedIconContainer}>
+            <Image source={IMAGES.checked} style={styles.invitedIcon} />
+          </View>
+        ) : (
+          <Pressable
+            onPress={event => {
+              event.stopPropagation();
+              setInviteAllSelected(false);
+              toggleUserSelection(item?._id);
+            }}
             style={[
-              styles.inviteButtonText,
-              isSelected && styles.inviteButtonTextSelected,
+              styles.inviteButton,
+              isSelected && styles.inviteButtonSelected,
             ]}>
-            {t('Invite')}
-          </Text>
-        </Pressable>
+            <Text
+              style={[
+                styles.inviteButtonText,
+                isSelected && styles.inviteButtonTextSelected,
+              ]}>
+              {t('Invite')}
+            </Text>
+          </Pressable>
+        )}
       </Pressable>
     );
   };
@@ -596,5 +611,18 @@ const styles = StyleSheet.create({
   ctaButton: {
     borderRadius: wp(22),
     marginBottom: hp(30)
+  },
+  invitedIcon: {
+    width: wp(24),
+    height: wp(24),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970, // Or use the original color if check_circle is already colored
+  },
+  invitedIconContainer: {
+    padding: wp(10),
+  },
+  invitedCard: {
+    backgroundColor: '#F9FAFB', // Light gray bg for invited cards
+    borderColor: '#EEE',
   },
 });

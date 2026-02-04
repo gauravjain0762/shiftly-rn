@@ -1209,7 +1209,7 @@ const CreateAccount = () => {
               />
               <View style={{ marginTop: hp(50) }}>
                 <Text style={styles.title}>
-                  {t('Company size')}{' '}
+                  {t('Company size')}{' '}<Text style={styles.required}>*</Text>{' '}
                   <Text style={{ fontSize: 15 }}>{t('(Employees)')}</Text>
                 </Text>
                 {/* <Pressable style={styles.dateRow} onPress={() => {}}>

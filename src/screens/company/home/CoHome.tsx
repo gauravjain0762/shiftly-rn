@@ -152,7 +152,10 @@ const CoHome = () => {
           <GradientButton
             type="Company"
             title="Create a Job"
-            onPress={() => navigateTo(SCREENS.PostJob)}
+            onPress={() => {
+              console.log("Create a Job >>>>>>>>>>>>..");
+              navigateTo(SCREENS.PostJob)
+            }}
             textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
             gradientColors={[colors._2D5486, colors._0B3970, colors._051C38]}
           />

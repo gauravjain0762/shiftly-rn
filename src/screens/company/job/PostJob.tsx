@@ -1720,6 +1720,7 @@ const PostJob = () => {
             style={styles.modalHomeText}>
             {'Home'}
           </Text>
+          <View style={{ paddingBottom: insets.bottom + 10 }} />
         </BottomModal>
       </View>
     </LinearContainer>

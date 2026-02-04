@@ -1,14 +1,16 @@
 import messaging from '@react-native-firebase/messaging';
-import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import {setFcmToken} from '../features/authSlice';
-import {PermissionsAndroid, Platform, Linking} from 'react-native';
-import {errorToast, navigateTo} from '../utils/commonFunction';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import { setFcmToken, setHasUnreadNotification } from '../features/authSlice';
+import { PermissionsAndroid, Platform, Linking } from 'react-native';
+import { errorToast, navigateTo } from '../utils/commonFunction';
 import { SCREENS } from '../navigation/screenNames';
+import { store } from '../store';
 
 //
 // 🔔 Display Notification + Badge Update
 //
 async function onDisplayNotification(message: any) {
+  store.dispatch(setHasUnreadNotification(true)); // Show red dot
   await notifee.requestPermission();
 
   // ✅ update badge BEFORE showing
@@ -31,7 +33,7 @@ async function onDisplayNotification(message: any) {
     android: {
       channelId,
       sound: 'default',
-      pressAction: {id: 'default', launchActivity: 'default'},
+      pressAction: { id: 'default', launchActivity: 'default' },
     },
     ios: {
       sound: 'default',
@@ -128,7 +130,7 @@ export const onNotificationPress = () =>
 // 🟢 Foreground Event Listener (tap, dismiss)
 //
 export const openAppNotificationEvent = () =>
-  notifee.onForegroundEvent(async ({type, detail}) => {
+  notifee.onForegroundEvent(async ({ type, detail }) => {
     switch (type) {
       case EventType.DISMISSED:
         console.log('User dismissed notification', detail.notification);
@@ -150,6 +152,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   let count = await notifee.getBadgeCount();
   count++;
   await notifee.setBadgeCount(count);
+  store.dispatch(setHasUnreadNotification(true)); // Show red dot
 
   // Create Android channel
   const channelId = await notifee.createChannel({
@@ -164,8 +167,8 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   await notifee.displayNotification({
     title: (remoteMessage?.data?.title as string) || 'Notification',
     body: (remoteMessage?.data?.body as string) || '',
-    android: {channelId, sound: 'default'},
-    ios: {sound: 'default', badgeCount: count},
+    android: { channelId, sound: 'default' },
+    ios: { sound: 'default', badgeCount: count },
   });
 });
 
@@ -175,7 +178,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
 export const navigateToOrderDetails = async (remoteMessage: any) => {
   try {
     const data = remoteMessage?.data;
-    
+
     if (!data) {
       console.log('No data in notification');
       return;
@@ -186,10 +189,10 @@ export const navigateToOrderDetails = async (remoteMessage: any) => {
     // Check if notification type is "interview"
     if (data.type === 'interview' && data.interview_link) {
       console.log('Opening interview link:', data.interview_link);
-      
+
       // Check if the URL can be opened
       const supported = await Linking.canOpenURL(data.interview_link);
-      
+
       if (supported) {
         // await Linking.openURL(data.interview_link);
         navigateTo(SCREENS.JobInvitationScreen, {

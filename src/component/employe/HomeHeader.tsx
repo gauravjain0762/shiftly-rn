@@ -25,12 +25,17 @@ const getInitials = (name?: string) => {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };
 
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+
 const HomeHeader: FC<props> = ({
   onPressNotifi = () => { },
   type = 'employe',
   onPressAvatar,
   companyProfile,
 }) => {
+  const { hasUnreadNotification } = useSelector((state: RootState) => state.auth);
+
   const imageUri =
     type === 'company'
       ? companyProfile?.logo
@@ -95,13 +100,16 @@ const HomeHeader: FC<props> = ({
       <TouchableOpacity
         style={styles.bellIcon}
         onPress={() => onPressNotifi && onPressNotifi()}>
-        <Image
-          source={IMAGES.notification}
-          style={[
-            styles.bell,
-            { tintColor: type == 'company' ? colors._0B3970 : colors._0B3970 },
-          ]}
-        />
+        <View>
+          <Image
+            source={IMAGES.notification}
+            style={[
+              styles.bell,
+              { tintColor: type == 'company' ? colors._0B3970 : colors._0B3970 },
+            ]}
+          />
+          {hasUnreadNotification && <View style={styles.redDot} />}
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -134,6 +142,17 @@ const styles = StyleSheet.create({
     width: wp(30),
     height: wp(30),
     resizeMode: 'contain',
+  },
+  redDot: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: wp(10),
+    height: wp(10),
+    borderRadius: wp(5),
+    backgroundColor: 'red',
+    borderWidth: 1,
+    borderColor: 'white',
   },
   row: {
     flexDirection: 'row',

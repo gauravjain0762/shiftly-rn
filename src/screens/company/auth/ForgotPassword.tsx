@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
   Platform,
@@ -13,40 +13,40 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {useTranslation} from 'react-i18next';
-import {passwordStyles} from './ChangePassword';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useTranslation } from 'react-i18next';
+import { passwordStyles } from './ChangePassword';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
   errorToast,
   passwordRules,
   resetNavigation,
   successToast,
 } from '../../../utils/commonFunction';
-import {useAppDispatch} from '../../../redux/hooks';
-import {RootState} from '../../../store';
-import {useSelector} from 'react-redux';
+import { useAppDispatch } from '../../../redux/hooks';
+import { RootState } from '../../../store';
+import { useSelector } from 'react-redux';
 import {
-  useCompanyChangePasswordMutation,
   useCompanyForgotPasswordMutation,
-  useCompanyOTPVerifyMutation,
+  useCompanyResetPasswordMutation,
   useCompanyResendOTPMutation,
 } from '../../../api/authApi';
-import {setForgotPasswordSteps, setUserInfo} from '../../../features/authSlice';
-import {SCREENS} from '../../../navigation/screenNames';
-import {setAuthData} from '../../../features/companySlice';
+import { setForgotPasswordSteps, setUserInfo } from '../../../features/authSlice';
+import { SCREENS } from '../../../navigation/screenNames';
+import { setAuthData } from '../../../features/companySlice';
 
 const ForgotPassword = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const {fcmToken, userInfo, forgotPasswordSteps} = useSelector(
+  const { fcmToken, userInfo, forgotPasswordSteps } = useSelector(
     (state: RootState) => state.auth,
   );
-  const [OtpVerify] = useCompanyOTPVerifyMutation();
-  const [companyChangePassword] = useCompanyChangePasswordMutation();
+  // const [OtpVerify] = useCompanyOTPVerifyMutation();
+  // const [companyChangePassword] = useCompanyChangePasswordMutation();
+  const [companyResetPassword] = useCompanyResetPasswordMutation();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
@@ -55,7 +55,7 @@ const ForgotPassword = () => {
   const [start, setStart] = useState(false);
   const [companyForgotPassword] = useCompanyForgotPasswordMutation({});
   const [companyResendOTP] = useCompanyResendOTPMutation({});
-  const {auth} = useSelector((state: RootState) => state.company);
+  const { auth } = useSelector((state: RootState) => state.company);
 
   useEffect(() => {
     if (timer == 0) return;
@@ -99,8 +99,7 @@ const ForgotPassword = () => {
       return;
     }
     try {
-      const res = await companyForgotPassword({email: auth?.email?.toLocaleLowerCase()}).unwrap() as any;
-      console.log('🔥🔥🔥 ~ handleSendOtpwithEmail ~ res:', res);
+      const res = await companyForgotPassword({ email: auth?.email?.toLocaleLowerCase() }).unwrap() as any;
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         dispatch(setUserInfo(res.data?.user));
@@ -117,21 +116,28 @@ const ForgotPassword = () => {
   };
 
   const verifyOTP = async () => {
+    // For verifying OTP, we call the same resetPassword API but with verify_otp=true
     let data = {
       otp: otp.join(''),
       company_id: userInfo?._id,
-      device_token: fcmToken ?? 'ddd',
-      device_type: Platform.OS,
+      verify_otp: true,
+      // password: '',
+      // confirm_password: '',
     };
     console.log(data, 'verifyOTP data');
 
-    const response = await OtpVerify(data).unwrap() as any;
-    console.log(response, 'response----');
-    if (response?.status) {
-      successToast(response?.message);
-      nextStep();
-    } else {
-      errorToast(response?.message);
+    try {
+      const response = await companyResetPassword(data).unwrap() as any;
+      console.log(response, 'response----');
+      if (response?.status) {
+        successToast(response?.message || 'OTP verified successfully');
+        nextStep();
+      } else {
+        errorToast(response?.message || 'Invalid OTP');
+      }
+    } catch (error: any) {
+      console.error("OTP Verification failed", error);
+      errorToast(error?.data?.message || 'OTP Verification failed');
     }
   };
 
@@ -146,18 +152,24 @@ const ForgotPassword = () => {
       otp: otp.join(''),
       password: newPassword,
       confirm_password: confirmPassword,
+      // verify_otp is not passed here (or passed as false implicitly by omission)
     };
     console.log(data, 'handleChangePassword data >>>>>>>>>>>>>');
 
-    const response = await companyChangePassword(data).unwrap() as any;
-    console.log(response, 'companyChangePassword response----');
-    if (response?.status) {
-      successToast(response?.message);
-      dispatch(setUserInfo(response.data?.user));
-      resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
-      dispatch(setForgotPasswordSteps(1));
-    } else {
-      errorToast(response?.message || "Something went wrong");
+    try {
+      const response = await companyResetPassword(data).unwrap() as any;
+      console.log(response, 'companyChangePassword response----');
+      if (response?.status) {
+        successToast(response?.message);
+        dispatch(setUserInfo(response.data?.user));
+        resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
+        dispatch(setForgotPasswordSteps(1));
+      } else {
+        errorToast(response?.message || "Something went wrong");
+      }
+    } catch (error: any) {
+      console.error("Password reset failed", error);
+      errorToast(error?.data?.message || 'Password reset failed');
     }
   };
 
@@ -177,7 +189,7 @@ const ForgotPassword = () => {
 
   const handleResendOTP = async () => {
     try {
-      const res = await companyResendOTP({company_id: userInfo?._id}).unwrap() as any;
+      const res = await companyResendOTP({ company_id: userInfo?._id }).unwrap() as any;
       if (res?.status) {
         successToast(res?.message || 'OTP sent successfully');
         setTimer(30);
@@ -207,7 +219,7 @@ const ForgotPassword = () => {
                 placeholder="Enter your email"
                 placeholderTextColor={colors._7B7878}
                 containerStyle={passwordStyles.inputcontainer}
-                onChangeText={e => dispatch(setAuthData({email: e}))}
+                onChangeText={e => dispatch(setAuthData({ email: e }))}
                 secureTextEntry={false}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -226,7 +238,7 @@ const ForgotPassword = () => {
           <View style={styles.innerConrainer}>
             <View>
               <Text style={styles.title}>{t('Verify OTP Code')}</Text>
-              <View style={[styles.info_row, {marginTop: hp(19)}]}>
+              <View style={[styles.info_row, { marginTop: hp(19) }]}>
                 <Text style={styles.infotext}>
                   {t('You will receive OTP by email')} {auth?.email || userInfo?.email || ''}
                 </Text>
@@ -256,10 +268,9 @@ const ForgotPassword = () => {
                     {t('Resend')}
                   </Text>
                 ) : (
-                  <View style={[{marginTop: hp(31), alignItems: 'center'}]}>
-                    <Text style={styles.secText}>{`00:${
-                      timer < 10 ? `0${timer}` : timer
-                    }`}</Text>
+                  <View style={[{ marginTop: hp(31), alignItems: 'center' }]}>
+                    <Text style={styles.secText}>{`00:${timer < 10 ? `0${timer}` : timer
+                      }`}</Text>
                     <Text style={styles.secText1}>
                       {t("Didn't receive the code? Resend in")} {timer}
                       {'s'}
@@ -345,7 +356,7 @@ const ForgotPassword = () => {
 
   return (
     <LinearContainer
-      SafeAreaProps={{edges: ['top', 'bottom']}}
+      SafeAreaProps={{ edges: ['top', 'bottom'] }}
       colors={['#F7F7F7', '#FFFFFF']}>
       <KeyboardAwareScrollView
         enableAutomaticScroll

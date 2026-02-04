@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -7,28 +7,34 @@ import {
   View,
 } from 'react-native';
 
-import {BackHeader, LinearContainer} from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
+import { BackHeader, LinearContainer } from '../../../component';
+import { useTranslation } from 'react-i18next';
+import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
-import {useGetCompanyNotificationQuery} from '../../../api/dashboardApi';
-import {formatted} from '../../../utils/commonFunction';
-import {AppStyles} from '../../../theme/appStyles';
+import { useGetCompanyNotificationQuery } from '../../../api/dashboardApi';
+import { formatted } from '../../../utils/commonFunction';
+import { useAppDispatch } from '../../../redux/hooks';
+import { setHasUnreadNotification } from '../../../features/authSlice';
 
 const CoNotification = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
 
   const [page, setPage] = useState<number>(1);
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
 
+  useEffect(() => {
+    dispatch(setHasUnreadNotification(false));
+  }, []);
+
   const {
     data: notificationsData,
     isFetching,
     isLoading,
-  } = useGetCompanyNotificationQuery({page}, {refetchOnMountOrArgChange: true});
+  } = useGetCompanyNotificationQuery({ page }, { refetchOnMountOrArgChange: true });
 
   const notificationList = notificationsData?.data?.notifications || [];
   const pagination = notificationsData?.data?.pagination;
@@ -55,13 +61,13 @@ const CoNotification = () => {
     }
   };
 
-  const renderItem = ({item, index}: any) => (
+  const renderItem = ({ item, index }: any) => (
     <View key={index} style={styles.card}>
       <View style={styles.cardContent}>
         <View style={[styles.iconWrapper]}>
           <Image source={IMAGES.bell} style={styles.bell} />
         </View>
-        <View style={{flex: 1, gap: hp(5)}}>
+        <View style={{ flex: 1, gap: hp(5) }}>
           <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
           <BaseText style={styles.time}>{item?.message}</BaseText>
           <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
@@ -77,7 +83,7 @@ const CoNotification = () => {
         isRight={true}
         title={t('Notifications')}
         containerStyle={styles.header}
-        RightIcon={<View style={{width: 20}} />}
+        RightIcon={<View style={{ width: 20 }} />}
       />
 
       {isLoading ? (
@@ -104,7 +110,7 @@ const CoNotification = () => {
           onEndReachedThreshold={0.2}
           ListFooterComponent={() =>
             isFetching && pagination?.current_page < pagination?.total_pages ? (
-              <ActivityIndicator color={colors._D5D5D5} style={{marginVertical: 10}} />
+              <ActivityIndicator color={colors._D5D5D5} style={{ marginVertical: 10 }} />
             ) : null
           }
         />
