@@ -47,6 +47,24 @@ const SuggestedEmployeeScreen = () => {
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted'>('suggested');
+
+  const invitedEmployees = useMemo(() => {
+    const list = jobInfo?.invited_users || [];
+    if (list.length === 0) {
+      // Sample data for demonstration as per user request
+      return [{
+        _id: 'sample_1',
+        name: 'Fdfdf fdf',
+        responsibility: 'Full Time',
+        picture: null,
+        experience: 5,
+        isSample: true
+      }];
+    }
+    return list;
+  }, [jobInfo]);
+
 
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
   const isScreenLoading = isJobLoading || isLoading || isFetching;
@@ -179,6 +197,108 @@ const SuggestedEmployeeScreen = () => {
   }, [jobInfo]);
 
   const contractTypeLabel = jobInfo?.contract_type || '';
+
+  const renderShortlistedEmployee = (item: any) => {
+    // Handle structure where user details might be nested in user_id
+    const user = item?.user_id || item;
+
+    if (!user || (!user._id && !item.isSample)) return null;
+
+    // For now, assuming invited means "AI Shortlisted" as per user request
+    const experience = user?.experience || user?.years_of_experience || user?.total_experience || 0;
+
+    return (
+      <View key={user._id || 'sample'} style={styles.shortlistedCard}>
+        <View style={styles.shortlistedContent}>
+          <View style={styles.shortlistedLeft}>
+            <View style={styles.shortlistedHeader}>
+              <CustomImage
+                uri={user?.picture || 'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'}
+                containerStyle={styles.shortlistedAvatar}
+                imageStyle={styles.shortlistedAvatar}
+              />
+              <View style={styles.shortlistedInfo}>
+                <Text style={styles.employeeName}>{user?.name || t('Candidate Name')}</Text>
+                <Text style={styles.employeeRole}>{user?.responsibility || user?.job_title || t('Job Role')}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.shortlistedExp}>{`${experience || 0}y ${t('Experience')}`}</Text>
+
+            <View style={styles.shortlistedActions}>
+              <TouchableOpacity style={styles.viewAiButton}>
+                <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.assessmentButton}>
+                <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.timelineContainer}>
+            {/* Step 1: AI Interview - Invited */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineIndicator}>
+                <Image source={IMAGES.checked} style={[styles.timelineIcon, { tintColor: colors._0B3970 }]} />
+                <View style={styles.timelineLine} />
+              </View>
+              <View style={styles.timelineContent}>
+                <View style={styles.timelineRow}>
+                  <Text style={styles.timelineTime}>2:30 PM - 04Jan</Text>
+                </View>
+                <Text style={styles.timelineTitle}>{t('AI Interview')}</Text>
+                <Text style={styles.timelineStatus}>{t('Invited')}</Text>
+              </View>
+            </View>
+
+            {/* Step 2: AI Interview - Completed */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineIndicator}>
+                <Image source={IMAGES.checked} style={[styles.timelineIcon, { tintColor: colors._0B3970 }]} />
+                <View style={styles.timelineLine} />
+              </View>
+              <View style={styles.timelineContent}>
+                <View style={styles.timelineRow}>
+                  <Text style={styles.timelineTime}>2:35 PM - 04Jan</Text>
+                </View>
+                <Text style={styles.timelineTitle}>{t('AI Interview')}</Text>
+                <Text style={styles.timelineStatus}>{t('Completed')}</Text>
+              </View>
+            </View>
+
+            {/* Step 3: Assessment - Invited */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineIndicator}>
+                <Image source={IMAGES.checked} style={[styles.timelineIcon, { tintColor: '#D9D9D9' }]} />
+                <View style={styles.timelineLine} />
+              </View>
+              <View style={styles.timelineContent}>
+                <View style={styles.timelineRow}>
+                  <Text style={styles.timelineTime}>3:30 PM - 04Jan</Text>
+                </View>
+                <Text style={[styles.timelineTitle, { color: '#939393' }]}>{t('Assessment')}</Text>
+                <Text style={[styles.timelineStatus, { color: '#939393' }]}>{t('Invited')}</Text>
+              </View>
+            </View>
+
+            {/* Step 4: Assessment - Completed */}
+            <View style={styles.timelineItem}>
+              <View style={styles.timelineIndicator}>
+                <Image source={IMAGES.checked} style={[styles.timelineIcon, { tintColor: '#D9D9D9' }]} />
+              </View>
+              <View style={styles.timelineContent}>
+                <View style={styles.timelineRow}>
+                  <Text style={styles.timelineTime}>3:35 PM - 04Jan</Text>
+                </View>
+                <Text style={[styles.timelineTitle, { color: '#939393' }]}>{t('Assessment')}</Text>
+                <Text style={[styles.timelineStatus, { color: '#939393' }]}>{t('Completed')}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   const renderEmployee = (item: any) => {
     if (!item || !item._id) {
@@ -323,62 +443,124 @@ const SuggestedEmployeeScreen = () => {
               </View>
             </View>
 
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
+            {/* Tabs */}
+            <View style={styles.tabContainer}>
               <TouchableOpacity
-                style={[
-                  styles.inviteAllButton,
-                  inviteAllSelected && styles.inviteAllButtonSelected,
-                ]}
-                onPress={handleInviteAll}>
-                <View
-                  style={[
-                    styles.inviteAllIcon,
-                    inviteAllSelected && styles.inviteAllIconSelected,
-                  ]}>
-                  <Text
+                style={[styles.tabButton, activeTab === 'suggested' && styles.activeTabButton]}
+                onPress={() => setActiveTab('suggested')}>
+                <Image
+                  source={IMAGES.people}
+                  style={[styles.tabIcon, activeTab === 'suggested' && { tintColor: colors._0B3970 }]}
+                />
+                <Text style={[styles.tabText, activeTab === 'suggested' && styles.activeTabText]}>{t('Suggested List')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.tabButton, activeTab === 'shortlisted' && styles.activeTabButton, activeTab === 'shortlisted' && { backgroundColor: colors._0B3970, borderColor: colors._0B3970 }]}
+                onPress={() => setActiveTab('shortlisted')}>
+                <View style={styles.starIconContainer}>
+                  <Image
+                    source={IMAGES.star1}
                     style={[
-                      styles.inviteAllIconText,
-                      inviteAllSelected && styles.inviteAllIconTextSelected,
-                    ]}>
-                    ✓
-                  </Text>
+                      styles.starSmall,
+                      { tintColor: activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970' }
+                    ]}
+                  />
+                  <Image
+                    source={IMAGES.star2}
+                    style={[
+                      styles.starLarge,
+                      { tintColor: activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970' }
+                    ]}
+                  />
                 </View>
-                <Text
-                  style={[
-                    styles.inviteAllText,
-                    inviteAllSelected && styles.inviteAllTextSelected,
-                  ]}>
-                  {t('Invite All')}
-                </Text>
+                <Text style={[styles.tabText, activeTab === 'shortlisted' && { color: colors.white }]}>{t('AI Shortlisted')}</Text>
               </TouchableOpacity>
             </View>
 
-            {employees && employees.length > 0 ? (
-              employees
-                .filter((item: any) => item && item._id)
-                .map((item: any, index: number) => renderEmployee(item))
+            {activeTab === 'suggested' ? (
+              <>
+
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.inviteAllButton,
+                      inviteAllSelected && styles.inviteAllButtonSelected,
+                    ]}
+                    onPress={handleInviteAll}>
+                    <View
+                      style={[
+                        styles.inviteAllIcon,
+                        inviteAllSelected && styles.inviteAllIconSelected,
+                      ]}>
+                      <Text
+                        style={[
+                          styles.inviteAllIconText,
+                          inviteAllSelected && styles.inviteAllIconTextSelected,
+                        ]}>
+                        ✓
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.inviteAllText,
+                        inviteAllSelected && styles.inviteAllTextSelected,
+                      ]}>
+                      {t('Invite All')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {employees && employees.length > 0 ? (
+                  employees
+                    .filter((item: any) => item && item._id)
+                    .map((item: any, index: number) => renderEmployee(item))
+                ) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyTitle}>
+                      {t('No suggestions available yet')}
+                    </Text>
+                    <Text style={styles.emptyMessage}>
+                      {t(
+                        'Once candidates start matching your job, they will appear here.',
+                      )}
+                    </Text>
+                  </View>
+                )}
+              </>
             ) : (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>
-                  {t('No suggestions available yet')}
-                </Text>
-                <Text style={styles.emptyMessage}>
-                  {t(
-                    'Once candidates start matching your job, they will appear here.',
-                  )}
-                </Text>
-              </View>
+              // Shortlisted Tab Content
+              <>
+                {invitedEmployees && invitedEmployees.length > 0 ? (
+                  invitedEmployees.map((item: any) => (
+                    <React.Fragment key={item.user_id?._id || item._id || 'sample'}>
+                      {renderShortlistedEmployee(item)}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyTitle}>
+                      {t('No shortlisted candidates yet')}
+                    </Text>
+                    <Text style={styles.emptyMessage}>
+                      {t('Invited candidates will appear here.')}
+                    </Text>
+                  </View>
+                )}
+              </>
             )}
           </ScrollView>
-          <View style={styles.ctaWrapper}>
-            <GradientButton
-              style={styles.ctaButton}
-              type="Company"
-              title={t('Invite for AI Interview')}
-              onPress={handleBulkInvite}
-            />
-          </View>
+          {activeTab === 'suggested' && (
+            <View style={styles.ctaWrapper}>
+              <GradientButton
+                style={styles.ctaButton}
+                type="Company"
+                title={t('Invite for AI Interview')}
+                onPress={handleBulkInvite}
+              />
+            </View>
+          )}
         </>
       )}
     </LinearContainer>
@@ -622,7 +804,182 @@ const styles = StyleSheet.create({
     padding: wp(10),
   },
   invitedCard: {
-    backgroundColor: '#F9FAFB', // Light gray bg for invited cards
+    backgroundColor: '#F9FAFB',
     borderColor: '#EEE',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    gap: wp(10),
+    marginBottom: hp(20),
+  },
+  tabButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: hp(12),
+    backgroundColor: '#F2F2F2',
+    borderRadius: wp(20),
+    gap: wp(8),
+    borderWidth: 1,
+    borderColor: '#F2F2F2',
+  },
+  activeTabButton: {
+    backgroundColor: '#EBEBEB',
+  },
+  tabIcon: {
+    width: wp(18),
+    height: wp(18),
+    resizeMode: 'contain',
+  },
+  tabText: {
+    ...commonFontStyle(600, 14, '#939393'),
+  },
+  activeTabText: {
+    color: colors._0B3970,
+  },
+  shortlistedCard: {
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    borderRadius: wp(24),
+    padding: wp(14),
+    backgroundColor: '#F0F8FF',
+    marginBottom: hp(16),
+    height: hp(190), // Fixed height as requested
+    justifyContent: 'center', // Center content vertically
+    overflow: 'hidden', // Ensure no overflow
+  },
+  shortlistedContent: {
+    flexDirection: 'row',
+  },
+  shortlistedLeft: {
+    flex: 1, // Reduced from 1.2
+    marginRight: wp(8), // Reduced margin
+  },
+  shortlistedHeader: {
+    flexDirection: 'row',
+    marginBottom: hp(10), // Slightly reduced
+    alignItems: 'center',
+  },
+  shortlistedAvatar: {
+    width: wp(65), // Slightly smaller to help with spacing
+    height: wp(65),
+    borderRadius: wp(14),
+    marginRight: wp(10), // Reduced spacing
+  },
+  shortlistedInfo: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: hp(2),
+  },
+  employeeName: {
+    ...commonFontStyle(700, 17, colors._0B3970),
+  },
+  employeeRole: {
+    ...commonFontStyle(400, 14, colors.black),
+  },
+  shortlistedExp: {
+    ...commonFontStyle(400, 15, colors._4A4A4A),
+    marginTop: hp(2), // Reduced top margin
+    marginBottom: hp(16),
+  },
+  shortlistedActions: {
+    flexDirection: 'row',
+    gap: wp(8), // Reduced gap
+  },
+  viewAiButton: {
+    backgroundColor: '#341A95',
+    borderRadius: wp(24),
+    paddingVertical: hp(12),
+    paddingHorizontal: wp(8), // Reduced horizontal padding
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  viewAiButtonText: {
+    ...commonFontStyle(600, 11, colors.white),
+    textAlign: 'center',
+  },
+  assessmentButton: {
+    backgroundColor: '#1F8A4D',
+    borderRadius: wp(24),
+    paddingVertical: hp(12),
+    paddingHorizontal: wp(8),
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  assessmentButtonText: {
+    ...commonFontStyle(600, 11, colors.white),
+    textAlign: 'center',
+  },
+  timelineContainer: {
+    width: wp(100),
+    borderLeftWidth: 2,
+    borderLeftColor: '#D9D9D9',
+    paddingLeft: wp(14),
+    paddingVertical: hp(2),
+    justifyContent: 'space-between', // Distribute items evenly
+  },
+  timelineItem: {
+    marginBottom: hp(6), // Significantly reduced from 20 to fit 4 items
+  },
+  timelineIndicator: {
+    position: 'absolute',
+    left: wp(-24),
+    top: hp(11), // Align with timelineTitle
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: wp(20),
+    height: wp(20), // Use wp for height to keep circle
+    backgroundColor: '#F0F8FF',
+  },
+  timelineIcon: {
+    width: wp(18), // Slightly smaller icons
+    height: wp(18),
+    resizeMode: 'contain',
+  },
+  timelineLine: {
+  },
+  timelineContent: {
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    marginBottom: hp(0), // Remove extra margin
+  },
+  timelineTime: {
+    fontSize: wp(8), // Sligthly smaller
+    color: '#939393',
+    fontWeight: '400',
+    marginBottom: hp(2),
+  },
+  timelineTitle: {
+    ...commonFontStyle(700, 11, colors._0B3970), // Slightly smaller font
+    marginBottom: hp(0),
+    lineHeight: hp(14),
+  },
+  timelineStatus: {
+    ...commonFontStyle(400, 10, '#939393'),
+    lineHeight: hp(14),
+  },
+  starIconContainer: {
+    width: wp(28),
+    height: wp(24),
+  },
+  starSmall: {
+    width: wp(14),
+    height: wp(14),
+    resizeMode: 'contain',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  starLarge: {
+    width: wp(18),
+    height: wp(18),
+    resizeMode: 'contain',
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
   },
 });

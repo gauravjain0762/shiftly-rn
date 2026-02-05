@@ -148,6 +148,9 @@ export const IMAGES = {
   suggested_candidate: require('./image/suggested_candidate.png'),
   save: require('./image/save.png'),
   saved: require('./image/saved.png'),
+  people: require('./image/people.png'),
+  star1: require('./image/star1.png'),
+  star2: require('./image/star2.png'),
 
   //extra
   logo: require('./extra/logo.png'),
