@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
@@ -53,6 +54,27 @@ const contractTypes: object[] = [
   { type: 'Freelance', value: 'Freelance' },
 ];
 
+const BannerItem = ({ item }: { item: any }) => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <View style={styles.carouselItemContainer}>
+      <Image
+        resizeMode="cover"
+        style={styles.carouselImage}
+        source={{ uri: item?.image }}
+        onLoadStart={() => setIsLoading(true)}
+        onLoadEnd={() => setIsLoading(false)}
+      />
+      {isLoading && (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="small" color={colors._0B3970} />
+        </View>
+      )}
+    </View>
+  );
+};
+
 const JobsScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
@@ -68,7 +90,6 @@ const JobsScreen = () => {
 
   const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
-  // console.log("🔥 ~ JobsScreen ~ jobList:", jobList)
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
   const pagination = data?.data?.pagination;
@@ -529,15 +550,7 @@ const JobsScreen = () => {
 
   const renderBannerItem = useCallback(({ item }: any) => {
     if (!item) return null;
-    return (
-      <View style={styles.carouselItemContainer}>
-        <Image
-          resizeMode="cover"
-          style={styles.carouselImage}
-          source={{ uri: item?.image }}
-        />
-      </View>
-    );
+    return <BannerItem item={item} />;
   }, []);
 
   const handleSnapToItem = useCallback(
@@ -1023,6 +1036,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors._F7F7F7, // Optional: background while loading
+  },
+  loaderContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    zIndex: 1,
   },
   paginationWrapper: {
     marginTop: hp(16),
