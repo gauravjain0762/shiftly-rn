@@ -227,15 +227,12 @@ const PostJob = () => {
     setIsDropdownOpen(false);
   }, []);
 
-  const dropdownDepartmentsOptions = useMemo(
-    () =>
-      departments?.map(item => ({
-        label: item.title,
-        value: item._id,
-        title: item.title,
-      })),
-    [departments],
-  );
+  const dropdownDepartmentsOptions =
+    departments?.map(item => ({
+      label: item.title,
+      value: item._id,
+      title: item.title,
+    })) || [];
 
   const [userAddress, setUserAddress] = useState<
     | {
@@ -971,13 +968,20 @@ const PostJob = () => {
                   />
                 </View>
 
-                {/* Other Requirements Text Input */}
                 <View style={[styles.field, { zIndex: 100 }]}>
                   <CustomDropdown
                     label={t('Other Requirements')}
                     data={otherRequirementsData}
-                    value={other_requirements}
-                    onChange={(value: any) => updateJobForm({ other_requirements: value })}
+                    labelField="label"
+                    valueField="value"
+                    value={other_requirements?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({ other_requirements: e });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
                     placeholder={t('Select Requirements')}
                   />
                 </View>
@@ -1189,7 +1193,6 @@ const PostJob = () => {
           />
         )}
 
-        {/* Step 0 with KeyboardAwareScrollView */}
         {steps == 0 ? (
           <Animated.View
             key="step-0"
@@ -1255,25 +1258,20 @@ const PostJob = () => {
                       onPress={(data, details = null) => {
                         console.log('Selected:', data.description);
 
-                        // Extract address components
                         const addressComponents = details?.address_components || [];
 
-                        // Find sublocality/neighborhood for more specific location
                         const sublocalityComponent = addressComponents.find((c: any) =>
                           c.types.includes('sublocality') || c.types.includes('sublocality_level_1') || c.types.includes('neighborhood')
                         );
 
-                        // Find route/street name
                         const routeComponent = addressComponents.find((c: any) =>
                           c.types.includes('route')
                         );
 
-                        // Find city
                         const cityComponent = addressComponents.find((c: any) =>
                           c.types.includes('locality') || c.types.includes('administrative_area_level_1')
                         );
 
-                        // Find country
                         const countryComponent = addressComponents.find((c: any) =>
                           c.types.includes('country')
                         );
@@ -1283,25 +1281,20 @@ const PostJob = () => {
                         const city = cityComponent?.long_name || '';
                         const country = countryComponent?.long_name || '';
 
-                        // Build clean display address without plus codes
-                        // Priority: sublocality/neighborhood, city, country
-                        let displayParts = [];
+                        let displayParts: any[] = [];
                         if (sublocality) displayParts.push(sublocality);
                         else if (route) displayParts.push(route);
                         if (city) displayParts.push(city);
                         if (country) displayParts.push(country);
 
-                        // Remove duplicates (sometimes city and sublocality can be same)
                         displayParts = displayParts.filter((item, index) => displayParts.indexOf(item) === index);
 
                         let displayAddress = displayParts.length > 0
                           ? displayParts.join(' - ')
                           : data.description;
 
-                        // Remove plus codes like "674C+4GC - " from the address using regex
                         displayAddress = displayAddress.replace(/^[A-Z0-9]{4}\+[A-Z0-9]{2,4}\s*[-–]\s*/i, '');
 
-                        // Get coordinates from place details
                         const lat = details?.geometry?.location?.lat;
                         const lng = details?.geometry?.location?.lng;
 
@@ -1314,7 +1307,6 @@ const PostJob = () => {
                           },
                         });
 
-                        // Update userAddress with selected place coordinates and clean address
                         if (lat && lng) {
                           setUserAddress({
                             address: displayAddress,
@@ -1529,7 +1521,6 @@ const PostJob = () => {
                   />
                 </View>
                 <View
-                  ref={jobDepartmentFieldRef}
                   style={styles.field}
                   collapsable={false}>
                   <Text style={styles.label}>
@@ -1550,8 +1541,6 @@ const PostJob = () => {
                     renderRightIcon={IMAGES.ic_down}
                     RightIconStyle={styles.rightIcon}
                     selectedTextStyle={styles.selectedTextStyle}
-                    onDropdownOpen={handleJobDepartmentFocus}
-                    onDropdownClose={handleJobDepartmentBlur}
                   />
                 </View>
                 <View style={styles.field}>
