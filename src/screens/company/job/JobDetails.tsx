@@ -63,7 +63,7 @@ const CoJobDetails = () => {
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const [closeJob] = useCloseCompanyJobMutation();
-  const jobDetail = data?.data;
+  const jobDetail = data?.data?.job;
   
   const metricOptions = [
     { key: 'job_view', label: 'Total', subLabel: 'Job View', icon: IMAGES.jobview },
@@ -128,8 +128,6 @@ ${salary}${shareUrlText}`;
         url: shareUrl,
       };
 
-      // Use cover image if available, otherwise use company logo
-      // Only use string URLs for sharing (not require resources)
       const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
         ? coverImages[0]
         : (jobDetail?.company_id?.logo && typeof jobDetail.company_id.logo === 'string'

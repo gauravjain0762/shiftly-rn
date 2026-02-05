@@ -229,7 +229,14 @@ const SuggestedEmployeeScreen = () => {
               <TouchableOpacity style={styles.viewAiButton}>
                 <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.assessmentButton}>
+              <TouchableOpacity
+                style={styles.assessmentButton}
+                onPress={() =>
+                  navigateTo(SCREENS.InterviewStatus, {
+                    jobData: jobInfo,
+                    candidateData: user,
+                  })
+                }>
                 <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
               </TouchableOpacity>
             </View>

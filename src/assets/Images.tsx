@@ -151,6 +151,8 @@ export const IMAGES = {
   people: require('./image/people.png'),
   star1: require('./image/star1.png'),
   star2: require('./image/star2.png'),
+  sound: require('./image/sound.png'),
+  watch: require('./image/watch.png'),
 
   //extra
   logo: require('./extra/logo.png'),

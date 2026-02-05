@@ -57,6 +57,7 @@ import PreviewPost from '../screens/company/post/PreviewPost';
 import EmpLocation from '../component/employe/EmpLocation';
 import JobInvitationScreen from '../screens/employer/jobs/JobInvitationScreen';
 import EmployeeProfile from '../screens/company/job/EmployeeProfile';
+import InterviewStatus from '../screens/company/job/InterviewStatus';
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -415,6 +416,11 @@ const StackNavigator: FC = () => {
           options={({ navigation }) => ({ headerShown: false })}
           name={SCREENS.PreviewPost}
           component={PreviewPost}
+        />
+        <Stack.Screen
+          options={({ navigation }) => ({ headerShown: false })}
+          name={SCREENS.InterviewStatus}
+          component={InterviewStatus}
         />
       </Stack.Navigator>
     );

@@ -625,13 +625,14 @@ const JobsScreen = () => {
                 <BannerSkeleton backgroundColor="#E0E0E0" highlightColor="#F5F5F5" />
               ) : (
                 <Carousel
+                  key={`banner-carousel-${carouselImages?.length || 0}`}
                   ref={carouselRef}
                   data={carouselImages || []}
                   renderItem={renderBannerItem}
                   sliderWidth={SCREEN_WIDTH - 32}
                   itemWidth={SCREEN_WIDTH - 32}
                   loop={carouselImages && carouselImages.length > 1}
-                  autoplay={carouselImages && carouselImages.length > 1}
+                  autoplay={false}
                   autoplayInterval={3000}
                   autoplayDelay={1000}
                   onSnapToItem={handleSnapToItem}

@@ -153,7 +153,7 @@ const PostJob = () => {
   }, [languageDataVals]);
 
   const otherRequirementsData = useMemo(() => {
-    return otherRequirementsDataVals?.data?.other_requirements?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+    return otherRequirementsDataVals?.data?.otherRequirements?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
   }, [otherRequirementsDataVals]);
 
   const {
@@ -1785,7 +1785,7 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
   selectedTextStyle: {
-    ...commonFontStyle(400, 18, colors._181818),
+    ...commonFontStyle(400, 16, colors._181818),
   },
   inputContainer: {
     marginBottom: hp(0),

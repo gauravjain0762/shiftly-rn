@@ -52,6 +52,7 @@ interface Props extends DropdownProps<any> {
   datePicker?: any;
   icon?: any;
   renderEmptyComponent?: any;
+  itemTextStyle?: any;
 }
 
 export interface CustomDropdownRef {
@@ -116,14 +117,15 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
       <View style={styles.rowStyle}>
         <Text
           style={[
-            styles.inputStyle,
+            styles.itemTextStyle,
+            props.itemTextStyle,
             { color: isSelected ? '#C9B68B' : '#DADADA' },
           ]}>
           {res?.label}
         </Text>
       </View>
     );
-  }, []);
+  }, [props.itemTextStyle]);
 
   return (
     <>
@@ -233,7 +235,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputStyle: {
-    ...commonFontStyle(400, 18, colors._050505),
+    ...commonFontStyle(400, 16, colors._050505),
   },
   placeholderStyle: {
     flex: 1,
@@ -266,5 +268,8 @@ const styles = StyleSheet.create({
     height: 24,
     resizeMode: 'contain',
     marginRight: 6,
+  },
+  itemTextStyle: {
+    ...commonFontStyle(400, 16, colors._050505),
   },
 });
