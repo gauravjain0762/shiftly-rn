@@ -1,8 +1,8 @@
-import {createApi} from '@reduxjs/toolkit/query/react';
-import {API, HTTP_METHOD} from '../utils/apiConstant';
-import {axiosBaseQuery} from '../services/api/baseQuery';
-import {errorToast} from '../utils/commonFunction';
-import {setAsyncUserInfo} from '../utils/asyncStorage';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { API, HTTP_METHOD } from '../utils/apiConstant';
+import { axiosBaseQuery } from '../services/api/baseQuery';
+import { errorToast } from '../utils/commonFunction';
+import { setAsyncUserInfo } from '../utils/asyncStorage';
 import {
   setBusinessType,
   setCompanyProfileAllData,
@@ -49,9 +49,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetJobs'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'GetJobs >>> datadata');
         } catch (error) {
           console.log('GetJobs Error', error);
@@ -86,9 +86,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetPost', 'GetCompanyProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
           // dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
@@ -103,9 +103,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetPost'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'Business Types');
           dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
@@ -127,9 +127,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetFacilities'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'getFacilities');
           // dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
@@ -149,9 +149,9 @@ export const dashboardApi = createApi({
         },
       }),
       invalidatesTags: ['CreatePost', 'GetPost'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -174,9 +174,9 @@ export const dashboardApi = createApi({
         },
       }),
       invalidatesTags: ['CreatePost', 'GetPost'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'editCompanyPost response');
           if (!data?.status) {
             errorToast(data?.message);
@@ -198,9 +198,9 @@ export const dashboardApi = createApi({
         },
       }),
       invalidatesTags: ['CreateProfile', 'GetCompanyProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
             dispatch(setCompanyProfileAllData(data?.data?.company));
@@ -219,9 +219,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetCompanyProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status && data.data?.company) {
             console.log(data, 'datadatadatadata');
             dispatch(setUserInfo(data.data.company));
@@ -240,9 +240,9 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
           dispatch(setCompanyServices(data?.data?.services));
         } catch (error) {
@@ -260,9 +260,9 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('getCompanyJobDetails Error', error);
@@ -275,9 +275,9 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
           dispatch(setSkills(data?.data?.skills));
         } catch (error) {
@@ -293,9 +293,9 @@ export const dashboardApi = createApi({
         data: credentials,
       }),
       invalidatesTags: ['GetJobs'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('EditCompanyJob Error', error);
@@ -310,9 +310,9 @@ export const dashboardApi = createApi({
         data: credentials,
       }),
       invalidatesTags: ['GetJobs'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'CloseCompanyJob datadata');
         } catch (error) {
           console.log('CloseCompanyJob Error', error);
@@ -325,9 +325,9 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'getCompanyChats datadata');
         } catch (error) {
           console.log('getCompanyChats Error', error);
@@ -336,9 +336,9 @@ export const dashboardApi = createApi({
     }),
     getCompanyChatMessages: builder.query<
       any,
-      {chat_id?: string; job_id?: string; user_id?: string}
+      { chat_id?: string; job_id?: string; user_id?: string }
     >({
-      query: ({chat_id, user_id, job_id}) => {
+      query: ({ chat_id, user_id, job_id }) => {
         const params = new URLSearchParams();
 
         if (chat_id) {
@@ -354,9 +354,9 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log('getCompanyChatMessages', data);
         } catch (error) {
           console.log('getCompanyChatMessages Error', error);
@@ -375,9 +375,9 @@ export const dashboardApi = createApi({
           'Content-Type': 'multipart/form-data',
         },
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('sendCompanyMessage Error', error);
@@ -391,9 +391,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
         params: params,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('getCompanyNotification Error', error);
@@ -410,9 +410,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, '>>>>>>>> GetProfile datadata');
         } catch (error) {
           console.log('Guest Login Error', error);
@@ -433,9 +433,9 @@ export const dashboardApi = createApi({
         };
       },
       invalidatesTags: ['GetProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             dispatch(setUserInfo(data?.data?.user));
           } else {
@@ -487,9 +487,9 @@ export const dashboardApi = createApi({
         };
       },
       providesTags: ['GetEmployeeJobDetails'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'GetEmployeeJobDetails datadata >>>>>>>');
         } catch (error) {
           console.log('Guest Login Error', error);
@@ -507,9 +507,9 @@ export const dashboardApi = createApi({
         };
       },
       providesTags: ['GetEmployeeSkills'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'getEmployeeSkills datadata >>>>>>>');
         } catch (error) {
           console.log('getEmployeeSkills Error', error);
@@ -530,9 +530,9 @@ export const dashboardApi = createApi({
         };
       },
       invalidatesTags: ['EmployeeApplyJob'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'employeeApplyJob datadata >>>>>>>');
         } catch (error) {
           console.error('employeeApplyJob Error', error);
@@ -547,9 +547,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetEmployeePost'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('getEmployeePosts Error', error);
@@ -564,9 +564,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       invalidatesTags: ['AddUpdateEducation'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('AddUpdateEducation Error', error);
@@ -581,9 +581,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       invalidatesTags: ['AddUpdateExperience'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('AddUpdateExperience Error', error);
@@ -598,9 +598,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       invalidatesTags: ['AddRemoveFavourite'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('AddRemoveFavourite Error', error);
@@ -614,9 +614,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       providesTags: ['GetFavouriteJob'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('GetFavouriteJob Error', error);
@@ -630,9 +630,9 @@ export const dashboardApi = createApi({
         skipLoader: true,
         data: credentials,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('addShortlistEmployee Error', error);
@@ -659,42 +659,87 @@ export const dashboardApi = createApi({
         },
       }),
       invalidatesTags: ['GetProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('updateAboutMe Error', error);
         }
       },
     }),
-    getEducations: builder.query<any, any>({
+    getCompanyEducations: builder.query<any, any>({
       query: () => ({
-        url: API.getEducations,
+        url: API.getCompanyEducations,
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
-          console.log('getEducations Error', error);
+          console.log('getCompanyEducations Error', error);
         }
       },
     }),
-    getExperiences: builder.query<any, any>({
+    getCompanyExperiences: builder.query<any, any>({
       query: () => ({
-        url: API.getExperiences,
+        url: API.getCompanyExperiences,
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
-          console.log('getExperiences Error', error);
+          console.log('getCompanyExperiences Error', error);
+        }
+      },
+    }),
+    getCompanyCertifications: builder.query<any, any>({
+      query: () => ({
+        url: API.getCompanyCertifications,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getCompanyCertifications Error', error);
+        }
+      },
+    }),
+    getCompanyLanguages: builder.query<any, any>({
+      query: () => ({
+        url: API.getCompanyLanguages,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getCompanyLanguages Error', error);
+        }
+      },
+    }),
+    getCompanyOtherRequirements: builder.query<any, any>({
+      query: () => ({
+        url: API.getCompanyOtherRequirements,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(data, 'datadata');
+        } catch (error) {
+          console.log('getCompanyOtherRequirements Error', error);
         }
       },
     }),
@@ -711,9 +756,9 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('employeeGetChats Error', error);
@@ -729,9 +774,9 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('employeeGetChatMessages Error', error);
@@ -749,9 +794,9 @@ export const dashboardApi = createApi({
           'Content-Type': 'multipart/form-data',
         },
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
         } catch (error) {
           console.log('employeeSendMessage Error', error);
@@ -819,9 +864,9 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log("🔥 ~ getAppData:", data)
           if (data?.status && data?.data) {
             dispatch(setGetAppData(data.data));
@@ -832,7 +877,7 @@ export const dashboardApi = createApi({
       },
     }),
     // Get company profile by ID (for viewing other companies)
-    getCompanyProfileById: builder.query<any, {company_id: string; tab?: string; page?: number}>({
+    getCompanyProfileById: builder.query<any, { company_id: string; tab?: string; page?: number }>({
       query: params => ({
         url: API.getCompanyProfileById,
         method: HTTP_METHOD.GET,
@@ -879,8 +924,11 @@ export const {
   useEditCompanyJobMutation,
   useUpdateAboutMeMutation,
   useGetEmployeeJobsQuery,
-  useGetEducationsQuery,
-  useGetExperiencesQuery,
+  useGetCompanyEducationsQuery,
+  useGetCompanyExperiencesQuery,
+  useGetCompanyCertificationsQuery,
+  useGetCompanyLanguagesQuery,
+  useGetCompanyOtherRequirementsQuery,
   useEmployeeGetChatsQuery,
   useEmployeeGetChatMessagesQuery,
   useEmployeeSendMessageMutation,

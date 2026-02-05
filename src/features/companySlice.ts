@@ -1,18 +1,18 @@
 // companySlice.ts
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {RootState} from '../store';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 interface JobFormState {
   title: string;
-  contract_type: {label: string; value: string};
-  area: {label: string; value: string};
-  duration: {label: string; value: string};
-  job_sector: {label: string; value: string} | null;
-  startDate: {label: string; value: string};
-  contract: {label: string; value: string};
-  salary: {label: string; value: string};
-  currency: {label: string; value: string};
-  position: {label: string; value: string};
+  contract_type: { label: string; value: string };
+  area: { label: string; value: string };
+  duration: { label: string; value: string };
+  job_sector: { label: string; value: string } | null;
+  startDate: { label: string; value: string };
+  contract: { label: string; value: string };
+  salary: { label: string; value: string };
+  currency: { label: string; value: string };
+  position: { label: string; value: string };
   describe: string;
   selected: any[];
   jobSkills: string[];
@@ -28,6 +28,11 @@ interface JobFormState {
   job_id: string;
   invite_users: string[];
   expiry_date: any | string;
+  education: { label: string; value: string } | null;
+  experience: { label: string; value: string } | null;
+  certification: { label: string; value: string } | null;
+  language: { label: string; value: string } | null;
+  other_requirements: { label: string; value: string } | null;
 }
 
 interface PostFormState {
@@ -66,14 +71,15 @@ const initialState: CompanyState = {
   coPostSteps: 1,
   jobForm: {
     title: '',
-    contract_type: {label: 'Full Time', value: 'Full Time'},
-    area: {label: '', value: ''},
-    duration: {label: '1 Month', value: '1 Month'},
+    contract_type: { label: 'Full Time', value: 'Full Time' },
+    area: { label: '', value: '' },
+    duration: { label: '1 Month', value: '1 Month' },
     job_sector: null,
-    startDate: {label: 'Immediately', value: 'Immediately'},
-    salary: {label: '2,000 - 5,000', value: '2,000 - 5,000'},
-    currency: {label: 'AED', value: 'AED'},
-    position: {label: '1', value: '1'},
+    startDate: { label: 'Immediately', value: 'Immediately' },
+    contract: { label: '', value: '' },
+    salary: { label: '2,000 - 5,000', value: '2,000 - 5,000' },
+    currency: { label: 'AED', value: 'AED' },
+    position: { label: '1', value: '1' },
     describe: __DEV__ ? 'Testing Testing' : '',
     selected: [],
     jobSkills: [],
@@ -89,6 +95,11 @@ const initialState: CompanyState = {
     job_id: '',
     invite_users: [],
     expiry_date: '',
+    education: null,
+    experience: null,
+    certification: null,
+    language: null,
+    other_requirements: null,
   },
   postForm: {
     title: '',
@@ -119,7 +130,7 @@ const companySlice = createSlice({
       state.coPostJobSteps = action.payload;
     },
     setJobFormState: (state, action: PayloadAction<Partial<JobFormState>>) => {
-      state.jobForm = {...state.jobForm, ...action.payload};
+      state.jobForm = { ...state.jobForm, ...action.payload };
     },
     resetJobFormState: state => {
       state.jobForm = initialState.jobForm;
@@ -140,7 +151,7 @@ const companySlice = createSlice({
       state,
       action: PayloadAction<Partial<PostFormState>>,
     ) => {
-      state.postForm = {...state.postForm, ...action.payload};
+      state.postForm = { ...state.postForm, ...action.payload };
     },
     incrementCoPostSteps: state => {
       state.coPostSteps += 1;
@@ -149,7 +160,7 @@ const companySlice = createSlice({
       state.postForm = initialState.postForm;
     },
     setFilters: (state, action: PayloadAction<Partial<FiltersState>>) => {
-      state.filters = {...state.filters, ...action.payload};
+      state.filters = { ...state.filters, ...action.payload };
     },
     resetFilters: state => {
       state.filters = initialState.filters;

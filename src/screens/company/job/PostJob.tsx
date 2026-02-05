@@ -43,12 +43,18 @@ import {
 import { SCREENS } from '../../../navigation/screenNames';
 import { RFValue } from 'react-native-responsive-fontsize';
 import BottomModal from '../../../component/common/BottomModal';
+
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
 import { useCreateJobMutation } from '../../../api/authApi';
 import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 import { getAddress } from '../../../utils/locationHandler';
 import {
   useEditCompanyJobMutation,
+  useGetCompanyCertificationsQuery,
+  useGetCompanyEducationsQuery,
+  useGetCompanyExperiencesQuery,
+  useGetCompanyLanguagesQuery,
+  useGetCompanyOtherRequirementsQuery,
   useGetDepartmentsQuery,
   useGetEssentialBenefitsQuery,
   useGetSkillsQuery,
@@ -115,12 +121,41 @@ const currencyData = [
   { label: 'USD', value: 'USD' },
   { label: 'EUR', value: 'EUR' },
   { label: 'INR', value: 'INR' },
-  { label: 'GBP', value: 'GBP' },
 ];
+
+
+
 
 const PostJob = () => {
   const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
+
+  const { data: educationDataVals } = useGetCompanyEducationsQuery({});
+  const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
+  const { data: certificationDataVals } = useGetCompanyCertificationsQuery({});
+  const { data: languageDataVals } = useGetCompanyLanguagesQuery({});
+  const { data: otherRequirementsDataVals } = useGetCompanyOtherRequirementsQuery({});
+
+  const educationData = useMemo(() => {
+    return educationDataVals?.data?.educations?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+  }, [educationDataVals]);
+
+  const experienceData = useMemo(() => {
+    return experienceDataVals?.data?.experiences?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+  }, [experienceDataVals]);
+
+  const certificationData = useMemo(() => {
+    return certificationDataVals?.data?.certifications?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+  }, [certificationDataVals]);
+
+  const languageData = useMemo(() => {
+    return languageDataVals?.data?.languages?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+  }, [languageDataVals]);
+
+  const otherRequirementsData = useMemo(() => {
+    return otherRequirementsDataVals?.data?.other_requirements?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+  }, [otherRequirementsDataVals]);
+
   const {
     title,
     contract_type,
@@ -143,6 +178,11 @@ const PostJob = () => {
     editMode,
     job_id,
     expiry_date,
+    education,
+    experience,
+    certification,
+    language,
+    other_requirements,
   } = useAppSelector((state: any) => selectJobForm(state));
 
   const insets = useSafeAreaInsets();
@@ -452,11 +492,11 @@ const PostJob = () => {
       facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
       currency: currency?.value,
       essential_benefits: "697b3675c433816cfd6c6928",
-      educations: "697b3591c433816cfd6c687e",
-      experiences: "697b35b3c433816cfd6c6896",
-      certifications: "697b3621c433816cfd6c68e6",
-      languages: "697b3641c433816cfd6c68fe",
-      job_requirements: "697b3675c433816cfd6c6928",
+      educations: education?.value,
+      experiences: experience?.value,
+      certifications: certification?.value,
+      languages: language?.value,
+      other_requiremnet: other_requirements?.value,
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);
@@ -849,91 +889,101 @@ const PostJob = () => {
               <View />
             </View>
 
-            {/* FIXED: Proper flex container with non-scrollable button */}
             <View style={styles.requirementsContainer}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.inputLabelLarge}>
-                  {t('Job Requirements')}
-                </Text>
-                <Tooltip
-                  tooltipBoxStyle={{ right: '-100%' }}
-                  message={
-                    'Choose from our predefined list of requirements to ensure accurate candidate matching.'
-                  }
-                />
-              </View>
+              <KeyboardAwareScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: hp(100) }}
+                showsVerticalScrollIndicator={false}>
 
-              {/* Scrollable requirements list */}
-              <View style={{ flex: 1 }}>
-                {(() => {
-                  const validRequirements =
-                    requirements?.filter(
-                      (req: string) => req && req.trim().length > 0,
-                    ) || [];
+                {/* Education Dropdown */}
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Education')}</Text>
+                  <CustomDropdown
+                    data={educationData}
+                    labelField="label"
+                    valueField="value"
+                    value={education?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({ education: { label: e.label, value: e.value } });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    placeholder={t('Select one')}
+                  />
+                </View>
 
-                  return validRequirements.length > 0 ? (
-                    <FlatList
-                      data={validRequirements}
-                      contentContainerStyle={{
-                        flexGrow: 1,
-                        paddingRight: wp(10),
-                      }}
-                      keyExtractor={(_, index) => index.toString()}
-                      style={{ flex: 1 }}
-                      renderItem={({ item }) => (
-                        <View style={styles.boxContainer}>
-                          <View style={styles.checkRound}>
-                            <Image
-                              source={IMAGES.mark}
-                              style={styles.markIcon}
-                            />
-                          </View>
-                          <Text
-                            style={styles.requirementText}
-                            numberOfLines={2}>
-                            {item}
-                          </Text>
-                        </View>
-                      )}
-                      ListEmptyComponent={() => (
-                        <View style={styles.emptyReqContainer}>
-                          <BaseText
-                            style={{
-                              ...commonFontStyle(400, 16, colors._2F2F2F),
-                            }}>
-                            {'No requirements added yet'}
-                          </BaseText>
-                        </View>
-                      )}
-                      showsVerticalScrollIndicator={true}
-                    />
-                  ) : (
-                    <View style={styles.emptyReqContainer}>
-                      <BaseText
-                        style={{ ...commonFontStyle(400, 16, colors.black) }}>
-                        {'No requirements added yet'}
-                      </BaseText>
-                    </View>
-                  );
-                })()}
-              </View>
+                {/* Work Experience Dropdown */}
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Work Experience')}</Text>
+                  <CustomDropdown
+                    data={experienceData}
+                    labelField="label"
+                    valueField="value"
+                    value={experience?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({ experience: { label: e.label, value: e.value } });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    placeholder={t('Select one')}
+                  />
+                </View>
 
-              {/* Fixed bottom buttons */}
+                {/* Certifications Dropdown */}
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Certifications')}</Text>
+                  <CustomDropdown
+                    data={certificationData}
+                    labelField="label"
+                    valueField="value"
+                    value={certification?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({ certification: { label: e.label, value: e.value } });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    placeholder={t('Select one')}
+                  />
+                </View>
+
+                {/* Languages Dropdown */}
+                <View style={styles.field}>
+                  <Text style={styles.label}>{t('Languages')}</Text>
+                  <CustomDropdown
+                    data={languageData}
+                    labelField="label"
+                    valueField="value"
+                    value={language?.value}
+                    onChange={(e: any) => {
+                      updateJobForm({ language: { label: e.label, value: e.value } });
+                    }}
+                    dropdownStyle={styles.dropdown}
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    placeholder={t('Select one')}
+                  />
+                </View>
+
+                {/* Other Requirements Text Input */}
+                <View style={[styles.field, { zIndex: 100 }]}>
+                  <CustomDropdown
+                    label={t('Other Requirements')}
+                    data={otherRequirementsData}
+                    value={other_requirements}
+                    onChange={(value: any) => updateJobForm({ other_requirements: value })}
+                    placeholder={t('Select Requirements')}
+                  />
+                </View>
+              </KeyboardAwareScrollView>
+
               <View style={styles.fixedBottomSection}>
-                <Pressable
-                  onPress={() => updateJobForm({ isModalVisible: true })}
-                  style={styles.addRequirementButton}>
-                  <View style={styles.checkRound}>
-                    <Image
-                      source={IMAGES.close1}
-                      style={styles.closeIcon}
-                      tintColor={colors.white}
-                    />
-                  </View>
-                  <Text style={styles.addRequirementText}>
-                    {t('Add New Requirements')}
-                  </Text>
-                </Pressable>
                 <GradientButton
                   style={styles.btn}
                   type="Company"
@@ -944,44 +994,6 @@ const PostJob = () => {
                 />
               </View>
             </View>
-
-            <BottomModal
-              visible={isModalVisible}
-              onClose={() => {
-                updateJobForm({ isModalVisible: false });
-              }}>
-              <Pressable
-                onPress={() => {
-                  updateJobForm({ requirementText: '', isModalVisible: false });
-                }}>
-                <Image
-                  source={IMAGES.close}
-                  style={styles.modalCloseIcon}
-                  tintColor={colors.black}
-                />
-              </Pressable>
-              <Text
-                onPress={() => updateJobForm({ isModalVisible: true })}
-                style={styles.modalTitleText}>
-                {t('Add New Requirements')}
-              </Text>
-              <CustomTextInput
-                multiline
-                maxLength={400}
-                value={requirementText}
-                onChangeText={text => updateJobForm({ requirementText: text })}
-                containerStyle={styles.modalInputContainer}
-                placeholder={t('Write requirements')}
-                inputStyle={styles.modalInputStyle}
-              />
-              <CharLength chars={400} value={requirementText} />
-              <GradientButton
-                type="Company"
-                style={styles.btn}
-                title={t('Add Requirement')}
-                onPress={handleAddRequirements}
-              />
-            </BottomModal>
           </Animated.View>
         );
       case 4:
@@ -2212,5 +2224,21 @@ const styles = StyleSheet.create({
     gap: hp(12),
     marginBottom: hp(14),
     zIndex: 1,
+  },
+
+  textAreaInput: {
+    flex: 1,
+    textAlignVertical: 'top',
+    paddingTop: hp(15),
+    paddingHorizontal: wp(15),
+    ...commonFontStyle(400, 16, colors._181818),
+  },
+  textAreaContainer: {
+    height: hp(120),
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: colors._234F86,
+    backgroundColor: colors.white,
+    marginTop: hp(10),
   },
 });
