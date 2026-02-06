@@ -48,7 +48,7 @@ const ApplyJob = () => {
     (state: RootState) => state.employee,
   );
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; 
 
   const checkFileSize = async (filePath: string): Promise<number> => {
     try {
@@ -83,7 +83,6 @@ const ApplyJob = () => {
       const res = await applyJob(formData).unwrap();
 
       if (res?.status) {
-        // successToast(res?.message);
         dispatch(setIsSuccessModalVisible(true));
       } else {
         errorToast(res?.message);
@@ -125,9 +124,8 @@ const ApplyJob = () => {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
-              <Text style={{...commonFontStyle(400, 15, colors._050505)}}>{data?.company_id?.company_name || "N/A"}</Text>
-              <Text style={styles.location}>{data?.address}</Text>
-              <Text style={[styles.meta, { flex: 0 }]}>{data?.area}</Text>
+              <Text style={{ ...commonFontStyle(400, 15, colors._050505) }}>{data?.company_id?.company_name || "N/A"}</Text>
+              <Text style={styles.location}>{`${data?.city || "N/A"}, ${data?.country || "N/A"}`}</Text>
               <View
                 style={{
                   gap: wp(10),
@@ -213,6 +211,15 @@ const ApplyJob = () => {
               }}>
               {'PDF or word document up to 5MB'}
             </Text>
+
+            <Text
+              style={{
+                marginTop: hp(12),
+                paddingHorizontal: wp(20),
+                ...commonFontStyle(400, 12, colors._7B7878),
+              }}>
+              {'Add optional documents (cover letter, recommendation letters, certificates) if supported.'}
+            </Text>
           </View>
           <GradientButton
             type="Company"
@@ -244,7 +251,7 @@ const ApplyJob = () => {
 
           // Check file size
           let fileSize = image?.size || 0;
-          
+
           // If size is not provided, get it from file system
           if (!fileSize || fileSize === 0) {
             fileSize = await checkFileSize(filePath);

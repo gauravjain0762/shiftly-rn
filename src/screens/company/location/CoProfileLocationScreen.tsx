@@ -63,6 +63,7 @@ const CoProfileLocationScreen = () => {
       address: userInfo.address,
       lat: userInfo.lat,
       lng: userInfo.lng,
+      city: userInfo.city,
       state: userInfo.state,
       country: userInfo.country,
     } : null
@@ -83,6 +84,7 @@ const CoProfileLocationScreen = () => {
         address: userInfo.address,
         lat: userInfo.lat,
         lng: userInfo.lng,
+        city: userInfo.city,
         state: userInfo.state,
         country: userInfo.country,
       });
@@ -114,6 +116,9 @@ const CoProfileLocationScreen = () => {
             const address = data?.results?.[0]?.formatted_address;
             const components = data?.results?.[0]?.address_components || [];
 
+            const cityObj = components.find((c: any) =>
+              c.types.includes('locality'),
+            );
             const stateObj = components.find((c: any) =>
               c.types.includes('administrative_area_level_1'),
             );
@@ -121,6 +126,7 @@ const CoProfileLocationScreen = () => {
               c.types.includes('country'),
             );
 
+            const city = cityObj?.long_name || '';
             const state = stateObj?.long_name || '';
             const country = countryObj?.long_name || '';
 
@@ -131,6 +137,7 @@ const CoProfileLocationScreen = () => {
                 address,
                 lat: currentLocation.latitude,
                 lng: currentLocation.longitude,
+                city,
                 state,
                 country,
               });
@@ -214,11 +221,15 @@ const CoProfileLocationScreen = () => {
     const address = details.formatted_address || data.description;
     const components = details.address_components || [];
 
+    const cityObj = components.find((c: any) =>
+      c.types.includes('locality'),
+    );
     const stateObj = components.find((c: any) =>
       c.types.includes('administrative_area_level_1'),
     );
     const countryObj = components.find((c: any) => c.types.includes('country'));
 
+    const city = cityObj?.long_name || '';
     const state = stateObj?.long_name || '';
     const country = countryObj?.long_name || '';
 
@@ -229,6 +240,7 @@ const CoProfileLocationScreen = () => {
       address,
       lat,
       lng,
+      city,
       state,
       country,
     });
@@ -291,6 +303,9 @@ const CoProfileLocationScreen = () => {
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
 
+          const cityObj = components.find((c: any) =>
+            c.types.includes('locality'),
+          );
           const stateObj = components.find((c: any) =>
             c.types.includes('administrative_area_level_1'),
           );
@@ -298,6 +313,7 @@ const CoProfileLocationScreen = () => {
             c.types.includes('country'),
           );
 
+          const city = cityObj?.long_name || '';
           const state = stateObj?.long_name || '';
           const country = countryObj?.long_name || '';
 
@@ -308,6 +324,7 @@ const CoProfileLocationScreen = () => {
               address,
               lat: region.latitude,
               lng: region.longitude,
+              city,
               state,
               country,
             });
@@ -343,6 +360,9 @@ const CoProfileLocationScreen = () => {
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
 
+          const cityObj = components.find((c: any) =>
+            c.types.includes('locality'),
+          );
           const stateObj = components.find((c: any) =>
             c.types.includes('administrative_area_level_1'),
           );
@@ -350,6 +370,7 @@ const CoProfileLocationScreen = () => {
             c.types.includes('country'),
           );
 
+          const city = cityObj?.long_name || '';
           const state = stateObj?.long_name || '';
           const country = countryObj?.long_name || '';
 
@@ -360,6 +381,7 @@ const CoProfileLocationScreen = () => {
               address,
               lat: coords.latitude,
               lng: coords.longitude,
+              city,
               state,
               country,
             });
@@ -396,6 +418,9 @@ const CoProfileLocationScreen = () => {
           const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
 
+          const cityObj = components.find((c: any) =>
+            c.types.includes('locality'),
+          );
           const stateObj = components.find((c: any) =>
             c.types.includes('administrative_area_level_1'),
           );
@@ -403,6 +428,7 @@ const CoProfileLocationScreen = () => {
             c.types.includes('country'),
           );
 
+          const city = cityObj?.long_name || '';
           const state = stateObj?.long_name || '';
           const country = countryObj?.long_name || '';
 
@@ -413,6 +439,7 @@ const CoProfileLocationScreen = () => {
               address,
               lat: location.latitude,
               lng: location.longitude,
+              city,
               state,
               country,
             });
@@ -446,6 +473,8 @@ const CoProfileLocationScreen = () => {
             address: selectedAddress.address,
             lat: selectedAddress.lat,
             lng: selectedAddress.lng,
+            city: selectedAddress.city,
+            country: selectedAddress.country,
             location: selectedAddress.address,
           }),
         );

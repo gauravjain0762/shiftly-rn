@@ -40,7 +40,6 @@ import CoPost from '../screens/company/post/CoPost';
 import CreatePost from '../screens/company/post/CreatePost';
 import CoHome from '../screens/company/home/CoHome';
 import CoJobDetails from '../screens/company/job/JobDetails';
-import LocationScreen from '../component/common/LocationScreen';
 import CoPostJobLocationScreen from '../screens/company/location/CoPostJobLocationScreen';
 import CoProfileLocationScreen from '../screens/company/location/CoProfileLocationScreen';
 import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
@@ -463,7 +462,6 @@ const StackNavigator: FC = () => {
       />
       <Stack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
       <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
-      <Stack.Screen name={SCREENS.LocationScreen} component={LocationScreen} />
       <Stack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CoPostJobLocationScreen}

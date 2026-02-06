@@ -33,6 +33,8 @@ interface AppState {
     address: string;
     lat: number;
     lng: number;
+    city: string;
+    country: string;
     about: string;
     mission: string;
     values: string;
@@ -109,6 +111,8 @@ const initialState: AppState = {
     address: '',
     lat: 0,
     lng: 0,
+    city: '',
+    country: '',
     about: '',
     mission: '',
     values: '',

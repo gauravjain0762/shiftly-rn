@@ -51,7 +51,6 @@ export const SCREENS = {
   CoMyProfile: 'CoMyProfile',
   ChangePassword: 'ChangePassword',
   CoJobDetails: 'CoJobDetails',
-  LocationScreen: 'LocationScreen',
   CoPostJobLocationScreen: 'CoPostJobLocationScreen',
   CoProfileLocationScreen: 'CoProfileLocationScreen',
   CoEditMyProfile: 'CoEditMyProfile',
@@ -114,7 +113,6 @@ export interface ScreenNames {
   CoMyProfile: string;
   ChangePassword: string;
   CoJobDetails: string;
-  LocationScreen: string;
   CoPostJobLocationScreen: string;
   CoProfileLocationScreen: string;
   CoEditMyProfile: string;

@@ -73,26 +73,20 @@ const HomeHeader: FC<props> = ({
 
         <View style={styles.info}>
           <Text
-            style={[
-              styles.name,
-              { color: type == 'company' ? colors._0B3970 : colors._0B3970 },
-            ]}>
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.name}>
             {companyProfile?.company_name || companyProfile?.name || 'N/A'}
           </Text>
 
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', gap: wp(6) }}>
+          <View style={styles.locationRow}>
             <CustomImage
               size={wp(18)}
               source={IMAGES.marker}
-              tintColor={type == 'company' ? colors.empPrimary : colors._0B3970}
+              tintColor={colors._0B3970}
             />
-            <Text
-              style={[
-                styles.location,
-                { color: type == 'company' ? colors._0B3970 : colors._0B3970 },
-              ]}>
-              {companyProfile?.location || companyProfile?.address || 'N/A'}
+            <Text style={styles.location}>
+              {`${companyProfile?.city}, ${companyProfile?.country}` || 'N/A'}
             </Text>
           </View>
         </View>
@@ -103,10 +97,7 @@ const HomeHeader: FC<props> = ({
         <View>
           <Image
             source={IMAGES.notification}
-            style={[
-              styles.bell,
-              { tintColor: type == 'company' ? colors._0B3970 : colors._0B3970 },
-            ]}
+            style={styles.bell}
           />
           {hasUnreadNotification && <View style={styles.redDot} />}
         </View>
@@ -129,10 +120,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   name: {
-    ...commonFontStyle(700, 20, '#FFFFFF'),
+    ...commonFontStyle(700, 20, colors._0B3970),
   },
   location: {
-    ...commonFontStyle(500, 15, '#DDEBFF'),
+    ...commonFontStyle(500, 15, colors._0B3970),
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(6),
   },
   bellIcon: {
     bottom: hp(8),
@@ -142,6 +138,7 @@ const styles = StyleSheet.create({
     width: wp(30),
     height: wp(30),
     resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
   redDot: {
     position: 'absolute',

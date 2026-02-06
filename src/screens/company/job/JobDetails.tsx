@@ -64,6 +64,7 @@ const CoJobDetails = () => {
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const [closeJob] = useCloseCompanyJobMutation();
   const jobDetail = data?.data?.job;
+  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
   
   const metricOptions = [
     { key: 'job_view', label: 'Total', subLabel: 'Job View', icon: IMAGES.jobview },
@@ -376,7 +377,7 @@ ${salary}${shareUrlText}`;
                       </View>
                     ))}
                     <Text style={styles.applicantCountText}>
-                      +{jobDetail?.applicants?.length || 0} Applicants
+                      +{jobDetail?.applicants_count || 0} Applicants
                     </Text>
                   </View>
                   <View style={styles.jobTypeTag}>

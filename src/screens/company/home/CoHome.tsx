@@ -60,7 +60,7 @@ const CoHome = () => {
   ];
 
   return (
-    <LinearContainer colors={['#F7F7F7', '#FFFFFF']} containerStyle={{ paddingHorizontal: wp(25) }}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']} containerStyle={styles.containerStyle}>
       <View style={styles.header}>
         <HomeHeader
           type="company"
@@ -71,18 +71,18 @@ const CoHome = () => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
-        <View style={{ borderRadius: hp(15), borderColor: colors._E0C688, borderWidth: 1, paddingHorizontal: wp(16), paddingVertical: hp(20) }}>
-          <Text style={{ ...commonFontStyle(600, 16, colors.black) }}>{"Job Status Summary"}</Text>
+        <View style={styles.jobSummaryContainer}>
+          <Text style={styles.jobSummaryTitle}>{"Job Status Summary"}</Text>
 
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: wp(10) }}>
+          <View style={styles.jobSummaryRow}>
             {
               job_summary?.map((item, index) => {
                 return (
-                  <View key={index} style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: hp(10), backgroundColor: item?.color, paddingVertical: hp(10), marginTop: hp(18) }}>
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: wp(10) }}>
-                      <Image source={IMAGES.work} style={{ width: wp(20), height: hp(20) }} />
-                      <Text style={{ ...commonFontStyle(500, 14, colors.black) }}>{item.title}</Text>
-                      <Text style={{ ...commonFontStyle(500, 20, colors.black) }}>{item.value}</Text>
+                  <View key={index} style={[styles.jobSummaryCard, { backgroundColor: item?.color }]}>
+                    <View style={styles.jobSummaryCardContent}>
+                      <Image source={IMAGES.work} style={styles.workIcon} />
+                      <Text style={styles.jobSummaryCardTitle}>{item.title}</Text>
+                      <Text style={styles.jobSummaryCardValue}>{item.value}</Text>
                     </View>
                   </View>
                 )
@@ -91,13 +91,13 @@ const CoHome = () => {
 
         </View>
 
-        <View style={{ backgroundColor: colors._0B3970, width: '100%', height: hp(60), marginVertical: hp(18), borderRadius: hp(10), justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: wp(16), }}>
-          <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: colors._F3E1B7, width: wp(25), height: wp(25), borderRadius: wp(25) }}>
-            <Image source={IMAGES.check} style={{ width: wp(15), height: hp(15) }} />
+        <View style={styles.aiMatchBanner}>
+          <View style={styles.aiMatchIconContainer}>
+            <Image source={IMAGES.check} style={styles.checkIcon} />
           </View>
-          <Text style={{ ...commonFontStyle(500, 15, colors.white), textAlign: 'center' }}>
+          <Text style={styles.aiMatchText}>
             {`${job_stats?.ai_matched_candidates} new candidates matched by`}{" "}
-            <Text style={{ ...commonFontStyle(700, 17, colors._F3E1B7) }}>{"AI"}</Text>
+            <Text style={styles.aiMatchHighlight}>{"AI"}</Text>
           </Text>
         </View>
 
@@ -118,7 +118,7 @@ const CoHome = () => {
                   resizeMode="contain"
                   style={[
                     styles.metricIcon,
-                    { tintColor: isSelected ? colors.white : '#CDA953' }
+                    isSelected ? styles.metricIconSelected : styles.metricIconDefault
                   ]}
                 />
                 <View style={styles.metricTextContainer}>
@@ -148,7 +148,7 @@ const CoHome = () => {
           })}
         </View>
 
-        <View style={{ gap: hp(25), marginVertical: hp(30) }}>
+        <View style={styles.buttonsContainer}>
           <GradientButton
             type="Company"
             title="Create a Job"
@@ -174,6 +174,9 @@ const CoHome = () => {
 export default CoHome;
 
 const styles = StyleSheet.create({
+  containerStyle: {
+    paddingHorizontal: wp(25),
+  },
   header: {
     marginTop: hp(20),
     paddingBottom: hp(21),
@@ -204,6 +207,76 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  jobSummaryContainer: {
+    borderRadius: hp(15),
+    borderColor: colors._E0C688,
+    borderWidth: 1,
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(20),
+  },
+  jobSummaryTitle: {
+    ...commonFontStyle(600, 16, colors.black),
+  },
+  jobSummaryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: wp(10),
+  },
+  jobSummaryCard: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: hp(10),
+    paddingVertical: hp(10),
+    marginTop: hp(18),
+  },
+  jobSummaryCardContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: wp(10),
+  },
+  workIcon: {
+    width: wp(20),
+    height: hp(20),
+  },
+  jobSummaryCardTitle: {
+    ...commonFontStyle(500, 14, colors.black),
+  },
+  jobSummaryCardValue: {
+    ...commonFontStyle(500, 20, colors.black),
+  },
+  aiMatchBanner: {
+    backgroundColor: colors._0B3970,
+    width: '100%',
+    height: hp(60),
+    marginVertical: hp(18),
+    borderRadius: hp(10),
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: wp(16),
+  },
+  aiMatchIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors._F3E1B7,
+    width: wp(25),
+    height: wp(25),
+    borderRadius: wp(25),
+  },
+  checkIcon: {
+    width: wp(15),
+    height: hp(15),
+  },
+  aiMatchText: {
+    ...commonFontStyle(500, 15, colors.white),
+    textAlign: 'center',
+  },
+  aiMatchHighlight: {
+    ...commonFontStyle(700, 17, colors._F3E1B7),
+  },
   metricCardsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -232,6 +305,12 @@ const styles = StyleSheet.create({
     width: wp(34),
     height: hp(34),
   },
+  metricIconDefault: {
+    tintColor: '#CDA953',
+  },
+  metricIconSelected: {
+    tintColor: colors.white,
+  },
   metricTextContainer: {
     flex: 1,
     alignItems: 'flex-start',
@@ -251,5 +330,9 @@ const styles = StyleSheet.create({
   },
   metricLabelWhite: {
     ...commonFontStyle(500, 12, colors.white),
+  },
+  buttonsContainer: {
+    gap: hp(25),
+    marginVertical: hp(30),
   },
 });

@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -14,13 +14,13 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import {useTranslation} from 'react-i18next';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {IMAGES} from '../../../assets/Images';
-import {colors} from '../../../theme/colors';
+import { useTranslation } from 'react-i18next';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { IMAGES } from '../../../assets/Images';
+import { colors } from '../../../theme/colors';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import {useAppDispatch} from '../../../redux/hooks';
-import {setCompanyProfileData, setUserInfo} from '../../../features/authSlice';
+import { useAppDispatch } from '../../../redux/hooks';
+import { setCompanyProfileData, setUserInfo } from '../../../features/authSlice';
 import {
   useCreateCompanyProfileMutation,
   useGetBusinessTypesQuery,
@@ -31,24 +31,25 @@ import {
   navigateTo,
   successToast,
 } from '../../../utils/commonFunction';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {SCREENS} from '../../../navigation/screenNames';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
-import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
-import {Flag} from 'react-native-country-picker-modal';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { SCREENS } from '../../../navigation/screenNames';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import { callingCodeToCountry } from '../../employer/profile/ViewProfileScreen';
+import { Flag } from 'react-native-country-picker-modal';
 import CustomImage from '../../../component/common/CustomImage';
-import {companySize} from './CreateAccount';
+import { companySize } from './CreateAccount';
 import CharLength from '../../../component/common/CharLength';
 
 const CoEditMyProfile = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  console.log("🔥 ~ CoEditMyProfile ~ userInfo:", userInfo)
   const [updateCompanyProfile] = useCreateCompanyProfileMutation();
-  const {data: businessTypes} = useGetBusinessTypesQuery({});
-  const {data: profileData} = useGetProfileQuery();
+  const { data: businessTypes } = useGetBusinessTypesQuery({});
+  const { data: profileData } = useGetProfileQuery();
   const updatedData = profileData?.data?.company;
 
   const [companyName, setCompanyName] = useState(userInfo?.company_name || '');
@@ -161,11 +162,14 @@ const CoEditMyProfile = () => {
       formData.append('address', userInfo?.address || '');
       formData.append('lat', userInfo?.lat?.toString() || '');
       formData.append('lng', userInfo?.lng?.toString() || '');
+      formData.append('city', userInfo?.city || '');
+      formData.append('country', userInfo?.country || '');
       formData.append('website', website || '');
       formData.append('company_size', coSize || '');
       formData.append('business_type_id', businessType?.toString() || '');
 
       const res = await updateCompanyProfile(formData).unwrap();
+      console.log("🔥 ~ handleUpdateProfile ~ res:", res)
       const resData = res?.data?.company;
 
       if (res?.status) {
@@ -198,12 +202,12 @@ const CoEditMyProfile = () => {
                 <CustomImage
                   source={
                     logo?.uri
-                      ? {uri: logo?.uri}
+                      ? { uri: logo?.uri }
                       : userInfo?.logo
-                      ? {uri: userInfo.logo}
-                      : IMAGES.hotel_cover
+                        ? { uri: userInfo.logo }
+                        : IMAGES.hotel_cover
                   }
-                  imageStyle={{height: '100%', width: '100%'}}
+                  imageStyle={{ height: '100%', width: '100%' }}
                   containerStyle={styles.logoImage}
                   resizeMode="cover"
                 />
@@ -238,9 +242,9 @@ const CoEditMyProfile = () => {
                 <View key={index} style={styles.coverImageWrapper}>
                   <CustomImage
                     resizeMode="cover"
-                    source={{uri: img?.uri || img}}
+                    source={{ uri: img?.uri || img }}
                     containerStyle={styles.coverImage}
-                    imageStyle={{height: '100%', width: '100%'}}
+                    imageStyle={{ height: '100%', width: '100%' }}
                   />
                   <TouchableOpacity
                     style={styles.removeCoverBtn}
@@ -251,7 +255,7 @@ const CoEditMyProfile = () => {
                       );
                       setCoverImages(updatedCovers);
                       dispatch(
-                        setCompanyProfileData({cover_images: updatedCovers}),
+                        setCompanyProfileData({ cover_images: updatedCovers }),
                       );
                     }}>
                     <Text style={styles.removeText}>X</Text>
@@ -264,12 +268,12 @@ const CoEditMyProfile = () => {
                 onPress={() => {
                   setImageModal(true), setImageType('cover');
                 }}>
-                <Image source={IMAGES.pluse} style={{width: 30, height: 30}} />
+                <Image source={IMAGES.pluse} style={{ width: 30, height: 30 }} />
               </TouchableOpacity>
             </ScrollView>
           </View>
 
-          <View style={{marginTop: hp(10)}}>
+          <View style={{ marginTop: hp(10) }}>
             <Text style={styles.labelText}>{t('Description')}</Text>
             <TextInput
               multiline
@@ -284,7 +288,7 @@ const CoEditMyProfile = () => {
           </View>
 
           {/* Fields */}
-          <View style={[styles.fieldsWrapper, {marginTop: hp(10)}]}>
+          <View style={[styles.fieldsWrapper, { marginTop: hp(10) }]}>
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Email')}</Text>
               <TextInput
@@ -306,7 +310,7 @@ const CoEditMyProfile = () => {
             <View style={styles.space}>
               <Text style={styles.labelText}>{t('Phone')}</Text>
 
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Flag
                   withEmoji
                   flagSize={hp(26)}
@@ -315,9 +319,8 @@ const CoEditMyProfile = () => {
                     callingCodeToCountry(userInfo?.phone_code) as any
                   }
                 />
-                <Text style={styles.labelDesc}>{`+${
-                  userInfo?.phone_code || ''
-                } ${userInfo?.phone || ''}`}</Text>
+                <Text style={styles.labelDesc}>{`+${userInfo?.phone_code || ''
+                  } ${userInfo?.phone || ''}`}</Text>
               </View>
             </View>
 
@@ -392,7 +395,7 @@ const CoEditMyProfile = () => {
                 }}>
                 <Image
                   source={IMAGES.location}
-                  style={{width: wp(16), height: hp(16)}}
+                  style={{ width: wp(16), height: hp(16) }}
                 />
                 <Text style={styles.changeLocationText}>
                   {t(
