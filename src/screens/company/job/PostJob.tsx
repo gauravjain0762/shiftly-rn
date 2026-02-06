@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -1165,6 +1166,10 @@ const PostJob = () => {
                 type="Company"
                 title={t('Submit')}
                 onPress={() => {
+                  ReactNativeHapticFeedback.trigger('impactLight', {
+                    enableVibrateFallback: true,
+                    ignoreAndroidSystemSettings: false,
+                  });
                   handleCreateJob();
                 }}
               />

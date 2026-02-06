@@ -6,6 +6,8 @@ import {
     ScrollView,
     Image,
 } from 'react-native';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../../assets/animation';
 import { useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -74,6 +76,7 @@ const JobPreview = () => {
     const [createdJobId, setCreatedJobId] = useState<string>('');
     const [createdJobData, setCreatedJobData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showHiringAnimation, setShowHiringAnimation] = useState(false);
 
     const formatSalary = () => {
         if (!salary?.value) return '';
@@ -82,6 +85,27 @@ const JobPreview = () => {
             return `${currency?.value || 'AED'} ${from} - ${to}`;
         }
         return '';
+    };
+
+    // Animation finish handler - called after 3.5 seconds
+    const handleAnimationFinish = () => {
+        setTimeout(() => {
+            const jobIdToUse = createdJobId || job_id;
+            const jobDataToUse = createdJobData;
+
+            setShowHiringAnimation(false);
+            dispatch(resetJobFormState());
+            dispatch(setCoPostJobSteps(1));
+
+            if (jobIdToUse) {
+                navigateTo(SCREENS.SuggestedEmployee, {
+                    jobId: jobIdToUse,
+                    jobData: jobDataToUse,
+                });
+            } else {
+                navigationRef?.current?.goBack();
+            }
+        }, 3500);
     };
 
     const handlePostJob = async () => {
@@ -161,23 +185,11 @@ const JobPreview = () => {
     };
 
     const handleViewSuggestedEmployees = () => {
+        console.log('[DEBUG] handleViewSuggestedEmployees: START');
         updateJobForm({ isSuccessModalVisible: false });
-        const jobIdToUse = createdJobId || job_id;
-        const jobDataToUse = createdJobData;
-
-        dispatch(resetJobFormState());
-        dispatch(setCoPostJobSteps(1));
-
-        setTimeout(() => {
-            if (jobIdToUse) {
-                navigateTo(SCREENS.SuggestedEmployee, {
-                    jobId: jobIdToUse,
-                    jobData: jobDataToUse,
-                });
-            } else {
-                navigationRef?.current?.goBack();
-            }
-        }, 100);
+        console.log('[DEBUG] Set animation true');
+        setShowHiringAnimation(true);
+        // Navigation will be handled by onAnimationFinish callback
     };
 
     const handleGoHome = () => {
@@ -346,16 +358,29 @@ const JobPreview = () => {
                 <GradientButton
                     type="Company"
                     style={styles.modalButton}
+                    onPress={handleViewSuggestedEmployees}
                     textStyle={{ textAlign: 'center', alignSelf: 'center' }}
                     title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
-                    onPress={handleViewSuggestedEmployees}
                 />
 
                 <Text onPress={handleGoHome} style={styles.modalHomeText}>
                     {t('Home')}
                 </Text>
             </BottomModal>
-        </LinearContainer>
+
+            {showHiringAnimation && (
+                <View style={[styles.animationContainer, StyleSheet.absoluteFillObject]}>
+                    <LottieView
+                        source={animation.hiring}
+                        autoPlay={true}
+                        loop={false}
+                        style={styles.lottie}
+                        resizeMode="contain"
+                        onAnimationFinish={handleAnimationFinish}
+                    />
+                </View>
+            )}
+        </LinearContainer >
     );
 };
 
@@ -524,5 +549,15 @@ const styles = StyleSheet.create({
         marginBottom: hp(20),
         textAlign: 'center',
         ...commonFontStyle(400, 19, colors._050505),
+    },
+    animationContainer: {
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999,
+    },
+    lottie: {
+        width: wp(300),
+        height: wp(300),
     },
 });

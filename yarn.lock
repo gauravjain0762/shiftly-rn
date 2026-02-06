@@ -5744,10 +5744,10 @@ loose-envify@^1.0.0, loose-envify@^1.4.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
-lottie-react-native@^7.3.4:
-  version "7.3.5"
-  resolved "https://registry.npmjs.org/lottie-react-native/-/lottie-react-native-7.3.5.tgz#515c703e8a8845c54dbd54d489467c0c1f21d8bd"
-  integrity sha512-5VPrHGbEmpNxrcEfmxyFZBvDksMaZ6LhyQZL0S0VIDwMRVrhGwOZQZKVFSEFU5HxNuDjxm/vPSoEhlKKfbYKHw==
+lottie-react-native@7.3.4:
+  version "7.3.4"
+  resolved "https://registry.npmjs.org/lottie-react-native/-/lottie-react-native-7.3.4.tgz#774bc028e2b93dd88cd87ab84ac51a1c3e015cad"
+  integrity sha512-XUh7eGFb7ID8JRdU6U4N4cYQeYmjtdQRvd8ZXJ6xrdSsn5gZD0c79ITOREPcwJg4YupBFHgyV1GXdAHQP+KYUQ==
 
 lru-cache@^5.1.1:
   version "5.1.1"
@@ -6730,6 +6730,11 @@ react-native-google-places-autocomplete@^2.6.3:
     lodash.debounce "^4.0.8"
     qs "^6.14.1"
     react-native-uuid "^2.0.3"
+
+react-native-haptic-feedback@^2.3.3:
+  version "2.3.3"
+  resolved "https://registry.npmjs.org/react-native-haptic-feedback/-/react-native-haptic-feedback-2.3.3.tgz#88b6876e91399a69bd1b551fe1681b2f3dc1214e"
+  integrity sha512-svS4D5PxfNv8o68m9ahWfwje5NqukM3qLS48+WTdhbDkNUkOhP9rDfDSRHzlhk4zq+ISjyw95EhLeh8NkKX5vQ==
 
 react-native-image-crop-picker@^0.42.0:
   version "0.42.0"

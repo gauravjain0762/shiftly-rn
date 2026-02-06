@@ -117,7 +117,7 @@ PODS:
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
   - lottie-ios (4.5.0)
-  - lottie-react-native (7.3.5):
+  - lottie-react-native (7.3.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2255,6 +2255,30 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNReactNativeHapticFeedback (2.3.3):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNReanimated (4.1.6):
     - DoubleConversion
     - glog
@@ -2640,6 +2664,7 @@ DEPENDENCIES:
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNPermissions (from `../node_modules/react-native-permissions`)
+  - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -2873,6 +2898,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@notifee/react-native"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
+  RNReactNativeHapticFeedback:
+    :path: "../node_modules/react-native-haptic-feedback"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2915,7 +2942,7 @@ SPEC CHECKSUMS:
   hermes-engine: 94ed01537bdeccaab1adbf94b040d115d6fa1a7f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   lottie-ios: a881093fab623c467d3bce374367755c272bdd59
-  lottie-react-native: c555e699e6aa57b62dfaaebfafbcd208567a4390
+  lottie-react-native: 9ea691634bed4b78387252ebb1c84c063aa31534
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
@@ -3007,6 +3034,7 @@ SPEC CHECKSUMS:
   RNImageCropPicker: b0afedeefd8655254a15c34103718455fde6ce59
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
   RNPermissions: fd7a2c0410230c9b2fe6bd6bdd3de782346425e4
+  RNReactNativeHapticFeedback: 1597ab4e15cabb38f0f0c62faa17a5e295430170
   RNReanimated: 34f5a65606f038eb85448fc4444590ec300407af
   RNScreens: a25b818417609cbd805474dffd2d28b229704cfc
   RNShare: 9fd9e02f3b6f58d59c340d366863756339f8cc8b

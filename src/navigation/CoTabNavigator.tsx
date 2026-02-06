@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { IMAGES } from '../assets/Images';
 import FastImage from 'react-native-fast-image';
 import { colors } from '../theme/colors';
@@ -75,7 +76,13 @@ const CustomTabBar = ({ state, navigation }: any) => {
         return (
           <TouchableOpacity
             key={route.name}
-            onPress={() => navigation.navigate(route.name)}
+            onPress={() => {
+              ReactNativeHapticFeedback.trigger('impactLight', {
+                enableVibrateFallback: true,
+                ignoreAndroidSystemSettings: false,
+              });
+              navigation.navigate(route.name);
+            }}
             style={[styles.tabButton]}>
             <FastImage
               source={iconName}

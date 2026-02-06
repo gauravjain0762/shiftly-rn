@@ -1,18 +1,18 @@
-import {createApi} from '@reduxjs/toolkit/query/react';
-import {API, HTTP_METHOD} from '../utils/apiConstant';
-import {axiosBaseQuery} from '../services/api/baseQuery';
-import {setAsyncToken, setAsyncUserInfo} from '../utils/asyncStorage';
-import {errorToast, navigateTo, resetNavigation} from '../utils/commonFunction';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { API, HTTP_METHOD } from '../utils/apiConstant';
+import { axiosBaseQuery } from '../services/api/baseQuery';
+import { setAsyncToken, setAsyncUserInfo } from '../utils/asyncStorage';
+import { errorToast, navigateTo, resetNavigation } from '../utils/commonFunction';
 import {
   setAuthToken,
   setBusinessType,
   setGuestLogin,
   setUserInfo,
 } from '../features/authSlice';
-import {SCREENS} from '../navigation/screenNames';
-import {dashboardApi} from './dashboardApi';
-import {navigationRef} from '../navigation/RootContainer';
-import {CommonActions} from '@react-navigation/native';
+import { SCREENS } from '../navigation/screenNames';
+import { dashboardApi } from './dashboardApi';
+import { navigationRef } from '../navigation/RootContainer';
+import { CommonActions } from '@react-navigation/native';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -28,9 +28,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
             if (data?.data?.auth_token) {
@@ -61,9 +61,9 @@ export const authApi = createApi({
         },
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data.data?.company) {
               dispatch(setUserInfo(data.data?.company));
@@ -83,12 +83,12 @@ export const authApi = createApi({
           url: API.createCompanyJob,
           method: HTTP_METHOD.POST,
           data: params,
-          skipLoader: false,
+          skipLoader: true,
         };
       },
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data) {
               console.log('Create Job Data', data);
@@ -136,9 +136,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             await setAsyncToken(data?.data?.auth_token);
             dispatch(setAuthToken(data.data?.auth_token));
@@ -161,9 +161,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
               console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
@@ -189,9 +189,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
               await setAsyncToken(data?.data?.auth_token);
@@ -216,9 +216,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
               await setAsyncToken(data?.data?.auth_token);
@@ -243,9 +243,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
               console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
@@ -270,9 +270,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -291,9 +291,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -310,9 +310,9 @@ export const authApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadata');
           dispatch(setBusinessType(data?.data?.types));
         } catch (error) {
@@ -330,9 +330,9 @@ export const authApi = createApi({
         // skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
             if (data?.data?.auth_token) {
@@ -359,9 +359,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
             dispatch(setAuthToken(data.data?.auth_token));
@@ -377,7 +377,7 @@ export const authApi = createApi({
     }),
     employeeSendOTP: builder.mutation<any, any>({
       query: (credentials: any) => {
-        const {skipLoader, ...data} = credentials;
+        const { skipLoader, ...data } = credentials;
         return {
           url: API.employeeSendOTP,
           method: HTTP_METHOD.POST,
@@ -386,9 +386,9 @@ export const authApi = createApi({
         };
       },
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.data?.user?.status) {
             dispatch(setAuthToken(data.data?.auth_token));
@@ -410,9 +410,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.data?.user?.status) {
             dispatch(setAuthToken(data.data?.auth_token));
@@ -428,7 +428,7 @@ export const authApi = createApi({
     }),
     employeeSignUp: builder.mutation<any, any>({
       query: (credentials: any) => {
-        const {skipLoader, ...data} = credentials;
+        const { skipLoader, ...data } = credentials;
         return {
           url: API.employeeSignup,
           method: HTTP_METHOD.POST,
@@ -437,9 +437,9 @@ export const authApi = createApi({
         };
       },
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data.data?.company) {
               dispatch(setUserInfo(data.data?.company));
@@ -464,9 +464,9 @@ export const authApi = createApi({
         };
       },
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
               await setAsyncToken(data?.data?.auth_token);
@@ -491,9 +491,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -512,9 +512,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -533,9 +533,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -554,9 +554,9 @@ export const authApi = createApi({
         skipLoader: true,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
           if (data?.status) {
           } else {
@@ -575,9 +575,9 @@ export const authApi = createApi({
         skipLoader: true,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
           } else {
             errorToast(data?.message);
@@ -595,9 +595,9 @@ export const authApi = createApi({
         skipLoader: false,
       }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(_: any, {dispatch, queryFulfilled}: any) {
+      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
         try {
-          const {data} = await queryFulfilled;
+          const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
               console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);

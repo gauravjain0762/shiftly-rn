@@ -8,6 +8,7 @@ import {
     Platform,
     ActivityIndicator,
 } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
     BackHeader,
     GradientButton,
@@ -205,7 +206,13 @@ const PreviewPost = () => {
                     style={styles.publishBtn}
                     type="Company"
                     title={postEditMode ? t('Update Post') : t('Publish Post')}
-                    onPress={handlePublishPost}
+                    onPress={() => {
+                        ReactNativeHapticFeedback.trigger('impactLight', {
+                            enableVibrateFallback: true,
+                            ignoreAndroidSystemSettings: false,
+                        });
+                        handlePublishPost();
+                    }}
                     disabled={isPostUploading}
                 />
             </View>

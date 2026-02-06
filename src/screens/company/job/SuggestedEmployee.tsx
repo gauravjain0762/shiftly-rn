@@ -43,7 +43,9 @@ const SuggestedEmployeeScreen = () => {
     isLoading: isJobLoading,
   } = useGetCompanyJobDetailsQuery(jobId, { skip: !jobId });
 
-  const jobInfo = jobData || jobDetailsResponse?.data || {};
+  const jobInfo = jobData?.data?.job || jobDetailsResponse?.data?.job || {};
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobInfo:", jobInfo)
+
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -52,7 +54,6 @@ const SuggestedEmployeeScreen = () => {
   const invitedEmployees = useMemo(() => {
     const list = jobInfo?.invited_users || [];
     if (list.length === 0) {
-      // Sample data for demonstration as per user request
       return [{
         _id: 'sample_1',
         name: 'Fdfdf fdf',
