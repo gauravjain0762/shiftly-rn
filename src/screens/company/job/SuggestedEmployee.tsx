@@ -199,6 +199,11 @@ const SuggestedEmployeeScreen = () => {
 
   const contractTypeLabel = jobInfo?.contract_type || '';
 
+  const handleNavigateToProfile = (user: any) => {
+    if (!user || !user._id) return;
+    navigateTo(SCREENS.EmployeeProfile, { user });
+  };
+
   const renderShortlistedEmployee = (item: any) => {
     // Handle structure where user details might be nested in user_id
     const user = item?.user_id || item;
@@ -212,7 +217,11 @@ const SuggestedEmployeeScreen = () => {
       <View key={user._id || 'sample'} style={styles.shortlistedCard}>
         <View style={styles.shortlistedContent}>
           <View style={styles.shortlistedLeft}>
-            <View style={styles.shortlistedHeader}>
+            <TouchableOpacity
+              style={styles.shortlistedHeader}
+              onPress={() => handleNavigateToProfile(user)}
+              activeOpacity={0.7}
+            >
               <CustomImage
                 uri={user?.picture || 'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'}
                 containerStyle={styles.shortlistedAvatar}
@@ -222,7 +231,7 @@ const SuggestedEmployeeScreen = () => {
                 <Text style={styles.employeeName}>{user?.name || t('Candidate Name')}</Text>
                 <Text style={styles.employeeRole}>{user?.responsibility || user?.job_title || t('Job Role')}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
 
             <Text style={styles.shortlistedExp}>{`${experience || 0}y ${t('Experience')}`}</Text>
 
@@ -336,15 +345,24 @@ const SuggestedEmployeeScreen = () => {
           isSelected && styles.selectedEmployeeCard,
           isInvited && styles.invitedCard
         ]}>
-        <CustomImage
-          uri={
-            item?.picture ||
-            'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'
-          }
-          containerStyle={styles.employeeAvatar}
-          imageStyle={styles.employeeAvatar}
-        />
-        <View style={styles.employeeInfo}>
+        <TouchableOpacity
+          onPress={() => handleNavigateToProfile(item)}
+          activeOpacity={0.7}
+        >
+          <CustomImage
+            uri={
+              item?.picture ||
+              'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'
+            }
+            containerStyle={styles.employeeAvatar}
+            imageStyle={styles.employeeAvatar}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.employeeInfo}
+          onPress={() => handleNavigateToProfile(item)}
+          activeOpacity={0.7}
+        >
           <Text style={styles.employeeName}>
             {item?.name || t('Candidate Name')}
           </Text>
@@ -354,7 +372,7 @@ const SuggestedEmployeeScreen = () => {
           <Text style={styles.employeeExperience}>
             {`${experience || 0}y ${t('Experience')}`}
           </Text>
-        </View>
+        </TouchableOpacity>
 
         {isInvited || isSelected ? (
           <View style={styles.invitedIconContainer}>

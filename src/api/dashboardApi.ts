@@ -803,6 +803,22 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    getEducations: builder.query<any, any>({
+      query: () => ({
+        url: API.getEducations,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['AddUpdateEducation'],
+    }),
+    getExperiences: builder.query<any, any>({
+      query: () => ({
+        url: API.getExperiences,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      providesTags: ['AddUpdateExperience'],
+    }),
     getEmployeeNotifications: builder.query<any, any>({
       query: params => {
         return {
@@ -955,4 +971,6 @@ export const {
   useLazyGetCompanyProfileByIdQuery,
   useCloseCompanyJobMutation,
   useGetEssentialBenefitsQuery,
+  useGetEducationsQuery,
+  useGetExperiencesQuery,
 } = dashboardApi;

@@ -23,6 +23,7 @@ type Props = {
 };
 
 export const isEmptyEducation = (edu: EducationItem) => {
+  if (!edu) return true;
   // Check if degree is empty or just "Other" without actual text
   const isDegreeEmpty = !edu.degree || edu.degree === 'Other';
 
@@ -60,6 +61,7 @@ const EducationList: FC<Props> = ({
 
   // Check if "Other" is selected and set the state
   React.useEffect(() => {
+    if (!educationListEdit) return;
     const isOther =
       educationListEdit?.degree === 'Other' ||
       (!!educationListEdit?.degree &&
@@ -203,7 +205,7 @@ const EducationList: FC<Props> = ({
             onChange={(text: string) => {
               // Allow letters and spaces only - preserve all spaces between words
               const cleanedText = text.replace(/[^A-Za-z ]/g, '');
-              
+
               setEducationListEdit({
                 ...educationListEdit,
                 province: cleanedText,
