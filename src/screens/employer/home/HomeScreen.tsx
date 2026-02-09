@@ -27,7 +27,6 @@ const HomeScreen = () => {
   const { userInfo }: any = useSelector((state: RootState) => state.auth);
   const { data: profileData } = useGetEmployeeProfileQuery({});
 
-  // Fetch Jobs
   const {
     data: getJobs,
     isLoading: isLoadingJobs,
@@ -38,17 +37,11 @@ const HomeScreen = () => {
   const jobs = getJobs?.data?.jobs || [];
   const totalPages = getJobs?.data?.pagination?.total_pages ?? 1;
 
-  // Fetch Stats - Using getActivities for now as it seemed most relevant from previous context
-  // or we might need to map specific fields if getDashboard is not correct for employees.
-  // Based on apiConstant, getDashboard is company side. getActivities is employee side.
-  // Let's see what getActivities returns or just use placeholders if data is missing.
   const { data: activitiesData } = useGetActivitiesQuery({});
 
-  // Dummy stats if API doesn't provide them directly
   const interviewCount = activitiesData?.data?.interview_requests || 25;
   const appliedCount = activitiesData?.data?.applied_jobs || 21;
   const matchedCount = activitiesData?.data?.matched_jobs || 11;
-
 
   useEffect(() => {
     if (userInfo?._id) {
@@ -111,8 +104,8 @@ const HomeScreen = () => {
         renderItem={({ item }) => (
           <RecentJobCard
             item={item}
-            onPress={() => navigateTo(SCREENS.JobDetail, { role: 'employee', job_id: item?._id })}
-            onPressView={() => navigateTo(SCREENS.JobDetail, { role: 'employee', job_id: item?._id })}
+            onPress={() => navigateTo(SCREENS.JobDetail, { role: 'employee', jobId: item?._id })}
+            onPressView={() => navigateTo(SCREENS.JobDetail, { role: 'employee', jobId: item?._id })}
           />
         )}
         ListHeaderComponent={renderHeader}

@@ -17,7 +17,6 @@ import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
 
 const EmployeeProfile = () => {
-  const navigation = useNavigation();
   const { params } = useRoute<any>();
   const user = params?.user;
 
@@ -53,15 +52,26 @@ const EmployeeProfile = () => {
     languages: ['Arabic', 'English', 'Urdu', 'French', 'Russian', 'Spanish'],
   };
 
+  const jobData = params?.jobData;
+  const jobId = params?.jobId;
+
   const handleChat = () => {
-    // Navigate to chat screen
-    navigateTo(SCREENS.CoChat, {});
+    if (!user?._id) return;
+
+    // Navigate to chat screen with required params for company chat
+    navigateTo(SCREENS.CoChat, {
+      isFromJobDetail: true,
+      data: {
+        user_id: user
+      },
+      mainjob_data: jobData || { _id: jobId }
+    });
   };
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
-      <BackHeader 
-        title="Employee Profile" 
+      <BackHeader
+        title="Employee Profile"
         containerStyle={styles.headerContainer}
       />
       <ScrollView
@@ -73,10 +83,10 @@ const EmployeeProfile = () => {
           <View style={styles.profileImageContainer}>
             <CustomImage
               uri={profileData.picture}
-              source={IMAGES.avatar}
-              containerStyle={styles.profileImage}
+              source={IMAGES.logoText}
               imageStyle={styles.profileImage}
-              resizeMode="cover"
+              containerStyle={styles.profileImage}
+              resizeMode={profileData.picture ? "cover" : "contain"}
             />
           </View>
           <Text style={styles.profileName}>{profileData.name}</Text>

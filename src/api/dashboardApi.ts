@@ -37,6 +37,7 @@ export const dashboardApi = createApi({
     'AddRemoveFavourite',
     'GetFavouriteJob',
     'GetEssentialBenefits',
+    'GetCompanyChats',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -325,6 +326,7 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.GET,
         skipLoader: true,
       }),
+      providesTags: ['GetCompanyChats'],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -375,6 +377,7 @@ export const dashboardApi = createApi({
           'Content-Type': 'multipart/form-data',
         },
       }),
+      invalidatesTags: ['GetCompanyChats'],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;

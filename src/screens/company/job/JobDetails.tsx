@@ -40,14 +40,7 @@ import { setJobFormState } from '../../../features/companySlice';
 import moment from 'moment';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
-import {
-  Briefcase,
-  Wallet,
-  CalendarDays,
-  Timer,
-  Building2,
-  Users,
-} from 'lucide-react-native';
+import InterviewScoresModal from '../../../component/common/InterviewScoresModal';
 
 const CoJobDetails = () => {
   const { t } = useTranslation();
@@ -58,6 +51,8 @@ const CoJobDetails = () => {
     useState<boolean>(false);
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<'General' | 'Languages'>('General');
 
   const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
   const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
@@ -65,13 +60,6 @@ const CoJobDetails = () => {
   const [closeJob] = useCloseCompanyJobMutation();
   const jobDetail = data?.data?.job;
   console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
-  
-  const metricOptions = [
-    { key: 'job_view', label: 'Total', subLabel: 'Job View', icon: IMAGES.jobview },
-    { key: 'applied', label: 'Total Job', subLabel: 'Applied', icon: IMAGES.appliedjob },
-    { key: 'suggested', label: 'Suggested', subLabel: 'Candidate', icon: IMAGES.suggested_candidate },
-    { key: 'shortlisted', label: 'Total', subLabel: 'Shortlisted', icon: IMAGES.shortlisted },
-  ];
 
   const shareUrl = data?.data?.share_url;
 
@@ -160,102 +148,6 @@ ${salary}${shareUrlText}`;
     }, [refetch]),
   );
 
-  const JobDetailsArr = [
-    {
-      key: 'Job Type',
-      value: jobDetail?.contract_type,
-      icon: <Briefcase size={18} color={colors._0B3970} />,
-    },
-    {
-      key: 'Salary',
-      value: `${jobDetail?.monthly_salary_from} - ${jobDetail?.monthly_salary_to}`,
-      icon: <Wallet size={18} color={colors._0B3970} />,
-    },
-    {
-      key: 'Expiry Date',
-      value:
-        jobDetail?.expiry_date !== null
-          ? moment(jobDetail?.expiry_date).format('D MMMM')
-          : 'Open until filled',
-      icon: <CalendarDays size={18} color={colors._0B3970} />,
-    },
-    {
-      key: 'Duration',
-      value: jobDetail?.duration,
-      icon: <Timer size={18} color={colors._0B3970} />,
-    },
-    {
-      key: 'Department',
-      value: jobDetail?.job_sector,
-      icon: <Building2 size={18} color={colors._0B3970} />,
-    },
-    {
-      key: 'Vacancy',
-      value: jobDetail?.no_positions,
-      icon: <Users size={18} color={colors._0B3970} />,
-    },
-  ];
-
-  const keyValueArray = Object.entries(JobDetailsArr);
-
-  const handleShortListEmployee = async (item: any) => {
-    const params = {
-      applicant_id: item?.user_id?._id,
-      job_id: job_id,
-    };
-    try {
-      const res = await addShortListEmployee(params).unwrap();
-
-      if (res?.status === true) {
-        successToast(res?.message);
-        refetch();
-      } else {
-        errorToast(res?.message);
-      }
-    } catch (error) {
-      console.error('Error shortlisting employee:', error);
-    }
-  };
-
-  const handleRemoveShortListEmployee = async (item: any) => {
-    const params = {
-      applicant_id: item?.user_id?._id,
-      job_id: job_id,
-    };
-    try {
-      const res = await removeShortListEmployee(params).unwrap();
-
-      if (res?.status === true) {
-        successToast(res?.message);
-        refetch();
-      } else {
-        errorToast(res?.message);
-      }
-    } catch (error) {
-      console.error('Error shortlisting employee:', error);
-    }
-  };
-
-  const handleInviteCandidate = (user: any) => {
-    const userId = user?.user_id?._id || user?._id;
-    if (!userId) {
-      errorToast('User ID not found');
-      return;
-    }
-    if (!job_id) {
-      errorToast('Job ID not found');
-      return;
-    }
-
-    navigateTo(SCREENS.CreateQuestion, {
-      jobId: job_id,
-      invitePayload: {
-        invite_to: 'specific',
-        user_ids: [userId],
-      },
-    });
-  };
-
   const handleCloseJob = async () => {
     try {
       const res = await closeJob({ job_id: job_id }).unwrap();
@@ -286,371 +178,121 @@ ${salary}${shareUrlText}`;
             titleStyle={styles.title}
             containerStyle={styles.header}
           />
-          <ScrollView
-            style={{ flex: 1 }}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: hp(120) }}>
 
+          <ScrollView>
             <View style={styles.bodyContainer}>
-              <View style={styles.jobPostCard}>
-                <View style={styles.jobPostHeader}>
-                  <View style={styles.companyLogoContainer}>
-                    <CustomImage
-                      resizeMode="contain"
-                      source={IMAGES.logoText}
-                      uri={jobDetail?.company_id?.logo}
-                      containerStyle={styles.companyLogo}
-                      imageStyle={{ width: '100%', height: '100%' }}
-                    />
+              {/* Job Card (Interview Status Style) */}
+              <View style={styles.card}>
+                <View style={styles.row}>
+                  <View style={styles.logoContainer}>
+                    <Text style={styles.logoText}>{jobDetail?.company_id?.company_name?.[0] || 'A'}</Text>
                   </View>
-                  <View style={styles.jobPostHeaderRight}>
-                    <Text style={styles.companyLocation}>
-                      {jobDetail?.address || 'N/A'}
-                    </Text>
+                  <View style={styles.jobInfo}>
                     <Text style={styles.jobTitle}>{jobDetail?.title || 'N/A'}</Text>
-                    {jobDetail?.job_code && (
-                      <Text style={styles.jobCode}>
-                        #{jobDetail?.job_code}
+                    <Text style={styles.companyName}>{jobDetail?.company_id?.company_name || 'N/A'}</Text>
+                    <View style={styles.jobMetaRow}>
+                      <Text style={styles.jobMeta}>
+                        {`${jobDetail?.area || jobDetail?.address || 'Location'} - ${jobDetail?.contract_type || 'Full Time'}`}
                       </Text>
-                    )}
-                  </View>
-                  <View style={styles.jobPostActions}>
-                    <TouchableOpacity
-                      onPress={handleShare}
-                      style={styles.actionIconButton}>
-                      <Image
-                        source={IMAGES.share}
-                        resizeMode="contain"
-                        style={styles.actionIcon}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setIsFavorite(!isFavorite)}
-                      style={styles.actionIconButton}>
-                      <Image
-                        source={isFavorite ? IMAGES.like : IMAGES.hart}
-                        resizeMode="contain"
-                        style={styles.actionIcon}
-                      />
-                    </TouchableOpacity>
+                      <Text style={styles.salary}>
+                        {jobDetail?.monthly_salary_to
+                          ? `${jobDetail?.currency} ${Number(jobDetail?.monthly_salary_to).toLocaleString()}`
+                          : 'N/A'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
+              </View>
 
+              {/* Candidate Card (Using first applicant/invited user or placeholder) */}
+              <View style={[styles.card, { backgroundColor: '#BEDEFF3B', marginTop: hp(20) }]}>
+                <View style={[styles.row, { alignItems: 'center' }]}>
+                  <CustomImage
+                    uri={jobDetail?.applicants?.[0]?.user_id?.picture || 'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'}
+                    containerStyle={styles.avatar}
+                    imageStyle={styles.avatar}
+                  />
+                  <View style={styles.candidateInfo}>
+                    <Text style={styles.candidateName}>{jobDetail?.applicants?.[0]?.user_id?.name || 'Tafnol Theresa'}</Text>
+                    <Text style={styles.candidateRole}>{jobDetail?.applicants?.[0]?.user_id?.responsibility || 'Hotel Management'}</Text>
+                  </View>
+                  <View style={styles.statusCol}>
+                    <View style={styles.statusBadge}>
+                      <Text style={styles.statusText}>{t('Completed')}</Text>
+                    </View>
+                    <Text style={styles.dateText}>2:30 PM - 04Jan</Text>
+                  </View>
+                </View>
+              </View>
 
-                <Text numberOfLines={3} style={styles.jobDescriptionSnippet}>
-                  {jobDetail?.description || 'N/A'}
+              {/* Media Buttons */}
+              <View style={styles.mediaRow}>
+                <TouchableOpacity style={styles.mediaButton}>
+                  <Image source={IMAGES.sound} style={styles.mediaIcon} />
+                  <Text style={styles.mediaText}>{t('Listen Audio')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.mediaButton}>
+                  <Image source={IMAGES.watch} style={styles.mediaIcon} />
+                  <Text style={styles.mediaText}>{t('Watch Interview')}</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Transcript */}
+              <Text style={styles.sectionTitle}>{t('Transcript')}</Text>
+              <View style={styles.transcriptBox}>
+                <Text style={styles.transcriptText}>
+                  <Text style={styles.speaker}>{t('Agent')}: </Text>
+                  Hi, I'm from Emirates Catering calling about your AI-powered
+                  interview. How are you doing?
                 </Text>
+                <Text style={[styles.transcriptText, { marginTop: hp(12) }]}>
+                  <Text style={styles.speaker}>{t('User')}: </Text>
+                  I'm very good. Thank you so much. How are you?
+                </Text>
+                <Text style={[styles.transcriptText, { marginTop: hp(12) }]}>
+                  <Text style={styles.speaker}>{t('Agent')}: </Text>
+                  I'm doing great, thanks for asking! I appreciate you taking the time
+                  to chat today. So, thanks for your interest in the Flight Attendant
+                  position with us. I'm really looking forward to learning more about
+                  your background and seeing how this role Read More...
+                </Text>
+              </View>
 
-                {(jobDetail?.monthly_salary_from || jobDetail?.monthly_salary_to) && (
-                  <View style={styles.salaryContainerDetails}>
-                    <Image
-                      source={IMAGES.currency}
-                      style={styles.salaryIconDetails}
-                      tintColor={colors._656464}
-                    />
-                    <Text style={styles.salaryTextDetails}>
-                      {`${jobDetail?.currency} ${jobDetail?.monthly_salary_from?.toLocaleString()} - ${jobDetail?.monthly_salary_to?.toLocaleString()}`}
-                    </Text>
-                  </View>
-                )}
-
-                {jobDetail?.expiry_date && (
-                  <View style={styles.expiryContainerDetails}>
-                    <Timer size={wp(18)} color={colors._EE4444} />
-                    <Text style={styles.expiryTextDetails}>
-                      {getExpiryDays(jobDetail.expiry_date)}
-                    </Text>
-                  </View>
-                )}
-
-                <View style={styles.jobPostFooter}>
-                  <View style={styles.applicantCountContainer}>
-                    {jobDetail?.applicants?.slice(0, 3).map((item: any, index: number) => (
-                      <View key={index} style={[styles.applicantAvatar, { marginLeft: index > 0 ? wp(-8) : 0 }]}>
-                        <CustomImage
-                          resizeMode="cover"
-                          source={IMAGES.avatar}
-                          uri={item?.user_id?.picture}
-                          containerStyle={styles.applicantAvatarImage}
-                          imageStyle={{ width: '100%', height: '100%' }}
-                        />
-                      </View>
-                    ))}
-                    <Text style={styles.applicantCountText}>
-                      +{jobDetail?.applicants_count || 0} Applicants
-                    </Text>
-                  </View>
-                  <View style={styles.jobTypeTag}>
-                    <Text style={styles.jobTypeText}>
-                      {jobDetail?.contract_type || 'N/A'}
-                    </Text>
-                  </View>
+              {/* Chat with Admin */}
+              <TouchableOpacity style={styles.chatButton}>
+                <View style={styles.chatIconWrapper}>
+                  <Image source={IMAGES.chat} style={styles.chatIcon} resizeMode="contain" />
                 </View>
-              </View>
+                <View>
+                  <Text style={styles.chatTitle}>{t('Chat With Admin')}</Text>
+                  <Text style={styles.chatSubtitle}>
+                    {t('Get feel free information')}
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-              {/* Metric Cards */}
-              <View style={styles.metricCardsContainer}>
-                {metricOptions.map((option, index) => {
-                  const isSelected = selectedMetricIndex === index;
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      activeOpacity={0.7}
-                      onPress={() => setSelectedMetricIndex(index)}
-                      style={[
-                        styles.metricCard,
-                        isSelected && styles.metricCardHighlighted,
-                      ]}>
-                      <Image
-                        source={option.icon}
-                        resizeMode="contain"
-                        style={[
-                          styles.metricIcon,
-                          { tintColor: isSelected ? colors.white : '#CDA953' }
-                        ]}
-                      />
-                      <View style={styles.metricTextContainer}>
-                        <Text
-                          style={
-                            isSelected
-                              ? styles.metricLabelBoldWhite
-                              : styles.metricLabelBold
-                          }>
-                          {option.label}
-                        </Text>
-                        <Text
-                          style={
-                            isSelected
-                              ? styles.metricLabelBoldWhite
-                              : styles.metricLabelBold
-                          }>
-                          {option.subLabel}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {/* Candidate List */}
-              <View style={styles.candidateListContainer}>
-                {selectedMetricIndex === 0 && (
-                  // Total Job View - Show empty or placeholder
-                  <View style={styles.emptyState}>
-                    <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No job viewers</BaseText>
-                  </View>
-                )}
-
-                {selectedMetricIndex === 1 && (
-                  // Total Job Applied - Show applicants
-                  jobDetail?.applicants?.length > 0 ? (
-                    jobDetail.applicants.map((item: any, index: number) => {
-                      if (item === null) return null;
-
-                      // Check if this applicant is also in invited_users
-                      const isInvited = jobDetail?.invited_users?.some(
-                        (invited: any) =>
-                          invited?.user_id?._id === item?.user_id?._id ||
-                          invited?.user_id === item?.user_id?._id
-                      );
-
-                      return (
-                        <TouchableOpacity
-                          key={index}
-                          style={styles.candidateCard}
-                          onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: item?.user_id || item })}>
-                          <CustomImage
-                            uri={item?.user_id?.picture}
-                            source={IMAGES.avatar}
-                            containerStyle={styles.candidateAvatar}
-                            imageStyle={{ width: '100%', height: '100%' }}
-                            resizeMode="cover"
-                          />
-                          <View style={styles.candidateInfo}>
-                            <Text style={styles.candidateName}>
-                              {item?.user_id?.name || 'N/A'}
-                            </Text>
-                            <Text style={styles.candidateRole}>
-                              {item?.user_id?.responsibility || 'N/A'}
-                            </Text>
-                            <Text style={styles.candidateExperience}>
-                              {item?.user_id?.years_of_experience || item?.user_id?.experience || '0'}y Experience
-                            </Text>
-                          </View>
-                          {isInvited ? (
-                            <View style={styles.invitedBadge}>
-                              <Text style={styles.invitedBadgeText}>Invited</Text>
-                            </View>
-                          ) : (
-                            <TouchableOpacity
-                              style={styles.inviteButton}
-                              onPress={(e) => {
-                                e.stopPropagation();
-                                handleInviteCandidate(item);
-                              }}>
-                              <Text style={styles.inviteButtonText}>Invite</Text>
-                            </TouchableOpacity>
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })
-                  ) : (
-                    <View style={styles.emptyState}>
-                      <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No applicants</BaseText>
-                    </View>
-                  )
-                )}
-
-                {selectedMetricIndex === 2 && (
-                  <>
-                    {/* Invited Users Section */}
-                    {jobDetail?.invited_users && Array.isArray(jobDetail.invited_users) && jobDetail.invited_users.length > 0 && (
-                      <>
-                        <View style={styles.sectionHeader}>
-                          <Text style={styles.sectionTitle}>Invited Candidates</Text>
-                        </View>
-                        {jobDetail.invited_users.map((item: any, index: number) => {
-                          if (!item || item === null) return null;
-                          // Handle both structures: item.user_id or direct user object
-                          const user = item?.user_id || item;
-                          if (!user || !user._id) return null;
-
-                          return (
-                            <TouchableOpacity
-                              key={`invited-${item._id || index}`}
-                              style={[styles.candidateCard, styles.invitedCard]}
-                              onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: user })}>
-                              <CustomImage
-                                resizeMode="cover"
-                                source={IMAGES.avatar}
-                                containerStyle={styles.candidateAvatar}
-                                uri={user?.picture}
-                                imageStyle={{ width: '100%', height: '100%' }}
-                              />
-                              <View style={styles.candidateInfo}>
-                                <Text style={styles.candidateName}>
-                                  {user?.name || 'N/A'}
-                                </Text>
-                                <Text style={styles.candidateRole}>
-                                  {user?.responsibility || user?.job_title || 'N/A'}
-                                </Text>
-                                <Text style={styles.candidateExperience}>
-                                  {user?.years_of_experience || user?.experience || '0'}y Experience
-                                </Text>
-                              </View>
-                              <View style={styles.invitedBadge}>
-                                <Text style={styles.invitedBadgeText}>Invited</Text>
-                              </View>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </>
-                    )}
-
-                    {/* Suggested Matches Section */}
-                    {jobDetail?.suggested_matches && jobDetail.suggested_matches.length > 0 && (
-                      <>
-                        {jobDetail?.invited_users && jobDetail.invited_users.length > 0 && (
-                          <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Suggested Candidates</Text>
-                          </View>
-                        )}
-                        {jobDetail.suggested_matches.map((item: any, index: number) => {
-                          if (item === null) return null;
-                          const user = item?.user_id || item;
-                          return (
-                            <TouchableOpacity
-                              key={`suggested-${index}`}
-                              style={styles.candidateCard}
-                              onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: user })}>
-                              <CustomImage
-                                resizeMode="cover"
-                                source={IMAGES.avatar}
-                                containerStyle={styles.candidateAvatar}
-                                uri={user?.picture || item?.picture}
-                                imageStyle={{ width: '100%', height: '100%' }}
-                              />
-                              <View style={styles.candidateInfo}>
-                                <Text style={styles.candidateName}>
-                                  {user?.name || item?.name || 'N/A'}
-                                </Text>
-                                <Text style={styles.candidateRole}>
-                                  {user?.responsibility || item?.responsibility || 'N/A'}
-                                </Text>
-                                <Text style={styles.candidateExperience}>
-                                  {user?.years_of_experience || item?.years_of_experience || item?.experience || '0'}y Experience
-                                </Text>
-                              </View>
-                              <TouchableOpacity
-                                style={styles.inviteButton}
-                                onPress={(e) => {
-                                  e.stopPropagation();
-                                  handleInviteCandidate(item);
-                                }}>
-                                <Text style={styles.inviteButtonText}>Invite</Text>
-                              </TouchableOpacity>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </>
-                    )}
-
-                    {(!jobDetail?.invited_users || !Array.isArray(jobDetail.invited_users) || jobDetail.invited_users.length === 0) &&
-                      (!jobDetail?.suggested_matches || !Array.isArray(jobDetail.suggested_matches) || jobDetail.suggested_matches.length === 0) && (
-                        <View style={styles.emptyState}>
-                          <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No suggested candidates</BaseText>
-                        </View>
-                      )}
-                  </>
-                )}
-
-                {selectedMetricIndex === 3 && (
-                  jobDetail?.shortlisted?.length > 0 ? (
-                    jobDetail.shortlisted.map((item: any, index: number) => {
-                      if (item === null) return null;
-                      return (
-                        <TouchableOpacity
-                          key={index}
-                          style={styles.candidateCard}
-                          onPress={() => navigateTo(SCREENS.EmployeeProfile, { user: item?.user_id || item })}>
-                          <CustomImage
-                            uri={item?.user_id?.picture}
-                            source={IMAGES.avatar}
-                            containerStyle={styles.candidateAvatar}
-                            imageStyle={{ width: '100%', height: '100%' }}
-                            resizeMode="cover"
-                          />
-                          <View style={styles.candidateInfo}>
-                            <Text style={styles.candidateName}>
-                              {item?.user_id?.name || 'N/A'}
-                            </Text>
-                            <Text style={styles.candidateRole}>
-                              {item?.user_id?.responsibility || 'N/A'}
-                            </Text>
-                            <Text style={styles.candidateExperience}>
-                              {item?.user_id?.years_of_experience || item?.user_id?.experience || '0'}y Experience
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            style={styles.inviteButton}
-                            onPress={(e) => {
-                              e.stopPropagation();
-                              handleInviteCandidate(item);
-                            }}>
-                            <Text style={styles.inviteButtonText}>Invite</Text>
-                          </TouchableOpacity>
-                        </TouchableOpacity>
-                      );
-                    })
-                  ) : (
-                    <View style={styles.emptyState}>
-                      <BaseText style={{ ...commonFontStyle(500, 16, colors._2F2F2F) }}>No shortlisted applicants</BaseText>
-                    </View>
-                  )
-                )}
+              {/* View Interview Scores */}
+              <Text style={styles.sectionTitle}>{t('View Interview Scores')}</Text>
+              <View style={styles.scoreButtonsRow}>
+                <TouchableOpacity
+                  style={[styles.scoreButton, styles.scoreButtonActive]}
+                  onPress={() => { setActiveTab('General'); setModalVisible(true); }}>
+                  <Text style={styles.scoreButtonTextActive}>{t('General')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.scoreButton, styles.scoreButtonActive]}
+                  onPress={() => { setActiveTab('Languages'); setModalVisible(true); }}>
+                  <Text style={styles.scoreButtonTextActive}>{t('Languages')}</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </ScrollView>
+
+          <InterviewScoresModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            initialTab={activeTab}
+          />
 
           <GradientButton
             type="Company"
@@ -837,7 +479,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    // flexWrap: 'wrap',
   },
   iconWrapper: {
     width: wp(30),
@@ -864,12 +505,93 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     marginTop: hp(45),
+    ...commonFontStyle(600, 18, colors._0B3970),
+    marginTop: hp(20),
+    marginBottom: hp(10),
+  },
+  transcriptBox: {
+    borderWidth: 1,
+    borderColor: '#E2E6F0',
+    borderRadius: wp(12),
+    padding: wp(16),
+    backgroundColor: colors.white,
+  },
+  transcriptText: {
+    ...commonFontStyle(400, 14, colors.black),
+    lineHeight: hp(22),
+  },
+  speaker: {
+    fontWeight: '700',
+  },
+  chatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F8FE',
+    borderWidth: 1,
+    borderColor: '#B0C4DE',
+    borderRadius: wp(40),
+    paddingHorizontal: wp(20),
+    paddingVertical: hp(14),
+    gap: wp(14),
+    marginTop: hp(20),
+  },
+  chatIconWrapper: {
+    width: wp(40),
+    height: wp(40),
+    borderRadius: wp(20),
+    backgroundColor: '#2FB465',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  chatIcon: {
+    width: wp(20),
+    height: wp(20),
+    tintColor: colors.white,
+  },
+  chatTitle: {
+    ...commonFontStyle(600, 16, colors.black),
+  },
+  chatSubtitle: {
+    ...commonFontStyle(400, 13, '#666'),
+  },
+  scoreButtonsRow: {
+    flexDirection: 'row',
+    gap: wp(16),
+    marginBottom: hp(20),
+  },
+  scoreButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: hp(16),
+    borderRadius: wp(30),
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#E2E6F0',
+  },
+  scoreButtonActive: {
+    backgroundColor: colors._0B3970,
+    borderColor: colors._0B3970,
+  },
+  scoreButtonTextActive: {
+    ...commonFontStyle(600, 16, colors.white),
+  },
+  button: {
+    marginBottom: hp(10),
+    marginHorizontal: wp(20),
+  },
+  closeJobButton: {
+    marginBottom: hp(20),
+    alignSelf: 'center',
+    padding: 10,
+  },
+  closeJobText: {
+    ...commonFontStyle(600, 16, colors._EE4444),
   },
   tabContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     marginHorizontal: wp(0),
-    // justifyContent: 'space-between',
   },
   tabItem: {
     flex: 1,
@@ -896,236 +618,6 @@ const styles = StyleSheet.create({
     marginVertical: hp(16),
     backgroundColor: '#D9D9D9',
   },
-  button: {
-    bottom: '10%',
-    left: 0,
-    right: 0,
-    position: 'absolute',
-    marginVertical: hp(45),
-    marginHorizontal: wp(22),
-    marginBottom: hp(40),
-  },
-  emptyState: {
-    alignItems: 'center',
-    marginVertical: hp(20),
-  },
-  salaryRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  },
-  jobPostCard: {
-    backgroundColor: colors.white,
-    borderRadius: wp(20),
-    padding: hp(15),
-    marginBottom: hp(20),
-  },
-  jobPostHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: hp(12),
-  },
-  companyLogoContainer: {
-    width: wp(60),
-    height: hp(60),
-    borderRadius: wp(30),
-    overflow: 'hidden',
-    backgroundColor: colors._F4E2B8,
-  },
-  companyLogo: {
-    width: '100%',
-    height: '100%',
-    borderRadius: wp(30),
-  },
-  jobPostHeaderRight: {
-    flex: 1,
-    gap: hp(7),
-    marginLeft: wp(12),
-  },
-  companyName: {
-    ...commonFontStyle(600, 16, colors._0B3970),
-    marginBottom: hp(4),
-  },
-  companyLocation: {
-    ...commonFontStyle(400, 14, colors._4A4A4A),
-  },
-  jobPostActions: {
-    gap: wp(8),
-  },
-  actionIconButton: {
-    width: wp(32),
-    height: hp(32),
-    borderRadius: hp(16),
-    backgroundColor: colors._FDF4DF,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionIcon: {
-    width: wp(16),
-    height: hp(16),
-    tintColor: colors._0B3970,
-  },
-  jobTitle: {
-    ...commonFontStyle(600, 18, colors.black),
-  },
-  jobCode: {
-    ...commonFontStyle(500, 14, colors._0B3970),
-    marginTop: hp(-4),
-  },
-  jobDescriptionSnippet: {
-    ...commonFontStyle(400, 14, colors._4A4A4A),
-    marginBottom: hp(12),
-    lineHeight: hp(20),
-  },
-  jobPostFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  applicantCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  applicantAvatar: {
-    width: wp(28),
-    height: hp(28),
-    borderRadius: wp(14),
-    borderWidth: 2,
-    borderColor: colors.white,
-    overflow: 'hidden',
-  },
-  applicantAvatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  applicantCountText: {
-    marginLeft: wp(8),
-    ...commonFontStyle(400, 14, colors._4A4A4A),
-  },
-  jobTypeTag: {
-    backgroundColor: colors._0B3970,
-    paddingVertical: hp(6),
-    paddingHorizontal: wp(16),
-    borderRadius: hp(20),
-  },
-  jobTypeText: {
-    ...commonFontStyle(500, 12, colors.white),
-  },
-  metricCardsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: wp(12),
-    marginBottom: hp(20),
-  },
-  metricCard: {
-    width: '47%',
-    backgroundColor: colors.white,
-    borderRadius: wp(15),
-    padding: hp(15),
-    paddingVertical: hp(20),
-    alignItems: 'center',
-    borderWidth: 1,
-    flexDirection: 'row',
-    borderColor: '#CDA953',
-    justifyContent: 'flex-start',
-    gap: wp(12),
-  },
-  metricCardHighlighted: {
-    backgroundColor: colors._0B3970,
-    borderColor: colors._0B3970,
-  },
-  metricIcon: {
-    width: wp(34),
-    height: hp(34),
-  },
-  metricTextContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  metricLabelBold: {
-    ...commonFontStyle(700, 14, colors.black),
-    marginBottom: hp(2),
-  },
-  metricLabel: {
-    ...commonFontStyle(500, 16, colors.black),
-  },
-  metricLabelBoldWhite: {
-    ...commonFontStyle(500, 16, colors.white),
-    marginBottom: hp(2),
-  },
-  metricLabelWhite: {
-    ...commonFontStyle(500, 12, colors.white),
-  },
-  candidateListContainer: {
-    marginTop: hp(20),
-  },
-  candidateCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: wp(20),
-    padding: hp(12),
-    marginBottom: hp(10),
-    borderWidth: 1,
-    borderColor: colors._C9B68B,
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    // Shadow for Android
-    elevation: 3,
-  },
-  candidateAvatar: {
-    width: wp(60),
-    height: hp(60),
-    borderRadius: wp(30),
-    overflow: 'hidden',
-  },
-  candidateInfo: {
-    flex: 1,
-    marginLeft: wp(12),
-  },
-  candidateName: {
-    ...commonFontStyle(700, 18, colors._0B3970),
-    marginBottom: hp(4),
-  },
-  candidateRole: {
-    ...commonFontStyle(400, 14, colors._4A4A4A),
-    marginBottom: hp(2),
-  },
-  candidateExperience: {
-    ...commonFontStyle(400, 13, colors._939393),
-  },
-  inviteButton: {
-    backgroundColor: colors._0B3970,
-    paddingVertical: hp(8),
-    paddingHorizontal: wp(20),
-    borderRadius: hp(50),
-  },
-  inviteButtonText: {
-    ...commonFontStyle(500, 12, colors.white),
-  },
-  sectionHeader: {
-    marginBottom: hp(12),
-  },
-  invitedCard: {
-    backgroundColor: '#EEF4FF',
-    borderColor: colors._0B3970,
-  },
-  invitedBadge: {
-    backgroundColor: colors._0B3970,
-    paddingVertical: hp(8),
-    paddingHorizontal: wp(20),
-    borderRadius: hp(50),
-  },
-  invitedBadgeText: {
-    ...commonFontStyle(500, 12, colors.white),
-  },
   salaryContainerDetails: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1149,21 +641,126 @@ const styles = StyleSheet.create({
   expiryTextDetails: {
     ...commonFontStyle(500, 14, colors._EE4444),
   },
-  closeJobButton: {
-    left: 0,
-    right: 0,
-    bottom: '7%',
-    height: hp(52),
-    borderWidth: 1.5,
-    position: 'absolute',
-    alignItems: 'center',
-    borderRadius: hp(50),
-    marginHorizontal: wp(22),
-    justifyContent: 'center',
-    borderColor: colors._EE4444,
-    backgroundColor: 'transparent',
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: wp(12),
+    padding: wp(16),
+    marginBottom: hp(16),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  closeJobText: {
-    ...commonFontStyle(600, 18, colors._EE4444),
+  row: {
+    flexDirection: 'row',
+    gap: wp(12),
+  },
+  logoContainer: {
+    width: wp(48),
+    height: wp(48),
+    borderRadius: wp(12),
+    backgroundColor: '#F2F4F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: hp(24),
+    fontWeight: '700',
+    color: colors._0B3970,
+  },
+  jobInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  jobTitle: {
+    fontSize: hp(16),
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: hp(4),
+  },
+  companyName: {
+    fontSize: hp(14),
+    color: '#666666',
+    marginBottom: hp(4),
+  },
+  jobMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  jobMeta: {
+    fontSize: hp(12),
+    color: '#999999',
+  },
+  salary: {
+    fontSize: hp(12),
+    fontWeight: '600',
+    color: colors._0B3970,
+  },
+  avatar: {
+    width: wp(48),
+    height: wp(48),
+    borderRadius: wp(24),
+  },
+  candidateInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  candidateName: {
+    fontSize: hp(16),
+    fontWeight: '600',
+    color: colors.black,
+  },
+  candidateRole: {
+    fontSize: hp(14),
+    color: '#666666',
+    marginTop: hp(2),
+  },
+  statusCol: {
+    alignItems: 'flex-end',
+  },
+  statusBadge: {
+    backgroundColor: '#E7F9E9',
+    paddingHorizontal: wp(8),
+    paddingVertical: hp(4),
+    borderRadius: wp(4),
+    marginBottom: hp(4),
+  },
+  statusText: {
+    fontSize: hp(12),
+    color: '#2FB465',
+    fontWeight: '600',
+  },
+  dateText: {
+    fontSize: hp(10),
+    color: '#999999',
+  },
+  mediaRow: {
+    flexDirection: 'row',
+    gap: wp(16),
+    marginBottom: hp(24),
+  },
+  mediaButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    paddingVertical: hp(12),
+    borderRadius: wp(30),
+    borderWidth: 1,
+    borderColor: '#E2E6F0',
+    gap: wp(8),
+  },
+  mediaIcon: {
+    width: wp(20),
+    height: wp(20),
+    resizeMode: 'contain',
+  },
+  mediaText: {
+    fontSize: hp(14),
+    fontWeight: '600',
+    color: colors.black,
   },
 });

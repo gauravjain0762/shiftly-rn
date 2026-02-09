@@ -44,6 +44,11 @@ const WebViewScreen = () => {
           <WebViewRender
             url={params?.link}
             onLoadEnd={() => setIsLoading(false)}
+            onNavigationStateChange={(navState: any) => {
+              if (navState.url.includes('step=confirm')) {
+                goBack();
+              }
+            }}
           />
           {isLoading && <Loader />}
         </View>

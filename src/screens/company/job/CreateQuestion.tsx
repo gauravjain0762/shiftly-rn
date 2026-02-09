@@ -20,8 +20,8 @@ import {
   goBack,
   errorToast,
   successToast,
-  resetNavigation,
 } from '../../../utils/commonFunction';
+import { navigationRef } from '../../../navigation/RootContainer';
 import { useRoute } from '@react-navigation/native';
 import { useSendInterviewInvitesMutation } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
@@ -204,7 +204,21 @@ const CreateQuestion = () => {
             title={t('View pending interviews')}
             onPress={() => {
               updateJobForm({ isSuccessModalVisible: false });
-              resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
+              navigationRef.reset({
+                index: 1,
+                routes: [
+                  {
+                    name: SCREENS.CoTabNavigator,
+                    state: {
+                      routes: [{ name: SCREENS.CoJob }],
+                    },
+                  },
+                  {
+                    name: SCREENS.SuggestedEmployee,
+                    params: { jobId: jobId, isFromJobCard: true },
+                  },
+                ],
+              });
             }}
           />
           <GradientButton
@@ -213,7 +227,10 @@ const CreateQuestion = () => {
             title={t('Back to dashboard')}
             onPress={() => {
               updateJobForm({ isSuccessModalVisible: false });
-              resetNavigation(SCREENS.CoStack, SCREENS.CoTabNavigator);
+              navigationRef.reset({
+                index: 0,
+                routes: [{ name: SCREENS.CoTabNavigator }],
+              });
             }}
           />
         </BottomModal>

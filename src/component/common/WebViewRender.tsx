@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import WebView from 'react-native-webview';
 
-const WebViewRender = ({ url, onLoadEnd }: { url?: string; onLoadEnd?: any }) => {
+const WebViewRender = ({ url, onLoadEnd, onNavigationStateChange }: { url?: string; onLoadEnd?: any, onNavigationStateChange?: any }) => {
   const injectedJavaScript = `
     (function() {
       const style = document.createElement('style');
@@ -28,6 +28,7 @@ const WebViewRender = ({ url, onLoadEnd }: { url?: string; onLoadEnd?: any }) =>
         source={{ uri: url ? url : 'https://www.google.com/' }}
         style={{ flex: 1 }}
         onLoadEnd={onLoadEnd}
+        onNavigationStateChange={onNavigationStateChange}
         javaScriptEnabled={true}
         originWhitelist={['*']}
         injectedJavaScript={injectedJavaScript}

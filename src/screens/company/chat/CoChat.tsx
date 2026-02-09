@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef, useEffect, useCallback} from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   FlatList,
   Image,
@@ -11,16 +11,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useRoute} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import moment from 'moment';
 
-import {LinearContainer} from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {navigationRef} from '../../../navigation/RootContainer';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
+import { LinearContainer } from '../../../component';
+import { IMAGES } from '../../../assets/Images';
+import { navigationRef } from '../../../navigation/RootContainer';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
 import {
   errorToast,
   formatDate,
@@ -31,12 +31,13 @@ import {
 import {
   useLazyGetCompanyChatMessagesQuery,
   useSendCompanyMessageMutation,
+  useGetCompanyChatsQuery,
 } from '../../../api/dashboardApi';
-import {onChatMessage} from '../../../hooks/socketManager';
+import { onChatMessage } from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import ChatInput from '../../../component/chat/ChatInput';
 import FastImage from 'react-native-fast-image';
-import {SCREENS} from '../../../navigation/screenNames';
+import { SCREENS } from '../../../navigation/screenNames';
 import CustomImage from '../../../component/common/CustomImage';
 // import MessageBubble from '../../../component/chat/MessageBubble';
 
@@ -59,11 +60,11 @@ type LogoFile = {
 // ---------- Components ----------
 
 const CoChat = () => {
-  const {params} = useRoute<any>();
+  const { params } = useRoute<any>();
   const jobdetail_chatData = params?.data ?? {};
   const mainjob_data = params?.mainjob_data ?? {};
-  const isFromJobDetail = params?.isFromJobDetail ?? {};
-  const chatId = params?.data?.chat_id || params?.data?._id || {};
+  const isFromJobDetail = params?.isFromJobDetail ?? false;
+  const chatId = params?.data?.chat_id || params?.data?._id || null;
 
   const userInfo = useSelector((state: any) => state.auth.userInfo);
 
@@ -78,7 +79,7 @@ const CoChat = () => {
   const [showDownIcon, setShowDownIcon] = useState(false);
 
   const handleChatScrollDown = () => {
-    flatListRef.current?.scrollToOffset({offset: 0, animated: true});
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     setShowDownIcon(false);
   };
 
@@ -97,7 +98,7 @@ const CoChat = () => {
       return (
         <View style={styles.messageContainer}>
           {!isCompany && (
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: 'row' }}>
               <View style={styles.avatarContainer}>
                 <Image
                   source={{
@@ -115,9 +116,9 @@ const CoChat = () => {
             </View>
           )}
 
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             {isCompany && (
-              <Text style={{...styles.timeText, alignSelf: 'flex-end'}}>
+              <Text style={{ ...styles.timeText, alignSelf: 'flex-end' }}>
                 {moment(item?.createdAt).format('hh:mm A')}
               </Text>
             )}
@@ -139,8 +140,8 @@ const CoChat = () => {
 
             {item.file ? (
               item.file?.includes('pdf') ||
-              item.file?.includes('doc') ||
-              item.file?.includes('docx') ? (
+                item.file?.includes('doc') ||
+                item.file?.includes('docx') ? (
                 <TouchableOpacity
                   onPress={() => {
                     navigateTo(SCREENS.WebviewScreen, {
@@ -171,7 +172,7 @@ const CoChat = () => {
                     });
                   }}>
                   <FastImage
-                    source={{uri: item?.file}}
+                    source={{ uri: item?.file }}
                     style={{
                       ...styles.attachment,
                       alignSelf: isCompany ? 'flex-end' : 'flex-start',
@@ -198,25 +199,44 @@ const CoChat = () => {
 
   // ----- API hooks -----
   const [sendCompanyMessage] = useSendCompanyMessageMutation();
-  const [getCompanyChatMessages, {data: chats}] =
+  const [getCompanyChatMessages, { data: chats }] =
     useLazyGetCompanyChatMessagesQuery();
+
+  // ----- Load messages -----
+  const { data: allChatsData, isLoading: isLoadingChats } = useGetCompanyChatsQuery(
+    {},
+    { skip: !isFromJobDetail }
+  );
 
   // ----- Load messages -----
   useEffect(() => {
     if (isFromJobDetail) {
-      console.log('>>> user_id', jobdetail_chatData?.user_id?._id);
-      console.log('>>> job_id', mainjob_data?._id);
-      getCompanyChatMessages({
-        user_id: jobdetail_chatData?.user_id?._id,
-        job_id: mainjob_data?._id,
+      if (isLoadingChats || !allChatsData) return;
+
+      const targetUserId = jobdetail_chatData?.user_id?._id || jobdetail_chatData?.user_id;
+      const targetJobId = mainjob_data?._id;
+
+      const existingChat = allChatsData?.data?.chats?.find((chat: any) => {
+        const chatUserId = chat?.user_id?._id || chat?.user_id;
+        const chatJobId = chat?.job_id?._id || chat?.job_id;
+        return chatUserId === targetUserId && chatJobId === targetJobId;
       });
-    } else {
+
+      if (existingChat) {
+        console.log('>>> Found existing chat:', existingChat._id);
+        getCompanyChatMessages({
+          chat_id: existingChat._id,
+        });
+      } else {
+        console.log('>>> No existing chat found, skipping fetch to avoid 500');
+      }
+    } else if (chatId) {
       console.log('🔥 ~ CoChat ~ chatId:', chatId);
       getCompanyChatMessages({
         chat_id: chatId,
       });
     }
-  }, [chatId, getCompanyChatMessages]);
+  }, [chatId, getCompanyChatMessages, isFromJobDetail, allChatsData, isLoadingChats, jobdetail_chatData, mainjob_data]);
 
   useEffect(() => {
     if (chats?.data?.messages) {
@@ -286,9 +306,9 @@ const CoChat = () => {
 
   return (
     <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
-      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <KeyboardAvoidingView
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           {/* HEADER */}
@@ -297,7 +317,7 @@ const CoChat = () => {
               <TouchableOpacity onPress={() => navigationRef.goBack()}>
                 <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
               </TouchableOpacity>
-              <View style={{flex: 1}}>
+              <View style={{ flex: 1 }}>
                 <Text style={styles.company}>
                   {chats?.data?.chat?.user_id?.name ||
                     jobdetail_chatData?.user_id?.name}
@@ -315,7 +335,7 @@ const CoChat = () => {
           </View>
 
           {/* BODY */}
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             {showJobCard && (
               <View style={styles.card}>
                 <Text style={styles.dateText}>
@@ -323,15 +343,13 @@ const CoChat = () => {
                   {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
                 </Text>
                 <Text style={styles.jobTitle}>
-                  {`${
-                    mainjob_data?.title ||
+                  {`${mainjob_data?.title ||
                     jobdetail_chatData?.job_id?.title ||
                     'N/A'
-                  } - ${
-                    mainjob_data?.contract_type ||
+                    } - ${mainjob_data?.contract_type ||
                     jobdetail_chatData?.job_id?.contract_type ||
                     'N/A'
-                  }`}
+                    }`}
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
@@ -352,11 +370,14 @@ const CoChat = () => {
             <FlatList
               ref={flatListRef}
               data={chatList}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <MessageBubble
                   item={item}
                   type={'company'}
-                  recipientName={chats?.data?.chat?.user_id?.name}
+                  recipientName={
+                    chats?.data?.chat?.user_id?.name ||
+                    jobdetail_chatData?.user_id?.name
+                  }
                 />
               )}
               keyExtractor={(item, index) => item._id ?? index.toString()}
@@ -578,7 +599,7 @@ const styles = StyleSheet.create({
     width: wp(22),
     height: hp(22),
   },
-  logo: {height: hp(55), width: wp(55)},
+  logo: { height: hp(55), width: wp(55) },
   downIcon: {
     position: 'absolute',
     bottom: hp(100),

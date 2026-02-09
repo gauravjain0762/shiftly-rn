@@ -13,7 +13,6 @@ type Props = {
 };
 
 const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
-    console.log("🔥 ~ RecentJobCard ~ item:", item)
     const logoUri = item?.company_id?.logo;
 
     return (

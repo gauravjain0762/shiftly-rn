@@ -54,9 +54,9 @@ const HomeHeader: FC<props> = ({
 
           {hasValidImage ? (
             <Image
+              resizeMode="cover"
               source={{ uri: imageUri }}
               style={StyleSheet.absoluteFillObject}
-              resizeMode="cover"
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
@@ -86,7 +86,9 @@ const HomeHeader: FC<props> = ({
               tintColor={colors._0B3970}
             />
             <Text style={styles.location}>
-              {`${companyProfile?.city}, ${companyProfile?.country}` || 'N/A'}
+              {type === 'company'
+                ? `${companyProfile?.city}, ${companyProfile?.country}` || 'N/A'
+                : companyProfile?.country || 'N/A'}
             </Text>
           </View>
         </View>

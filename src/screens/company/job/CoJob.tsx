@@ -216,10 +216,16 @@ const CoJob = () => {
             contentContainerStyle={styles.contentContainer}
             keyExtractor={(item, index) => item?._id || item?.id || index.toString()}
             renderItem={({ item, index }) => (
-              <View key={index} style={{ marginBottom: hp(10) }}>
+              <View style={{ marginBottom: hp(10) }}>
                 <MyJobCard
                   item={item}
-                  onPressCard={() => navigateTo(SCREENS.CoJobDetails, item)}
+                  onPressCard={() =>
+                    navigateTo(SCREENS.SuggestedEmployee, {
+                      jobId: item?._id,
+                      jobData: { data: { job: item } },
+                      isFromJobCard: true,
+                    })
+                  }
                 />
               </View>
             )}
