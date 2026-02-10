@@ -24,6 +24,7 @@ import { useAppDispatch } from '../../../redux/hooks';
 import {
   setCompanyProfileAllData,
   setCompanyProfileData,
+  setSelectedTabIndex,
 } from '../../../features/authSlice';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
@@ -40,45 +41,57 @@ import CustomImage from '../../../component/common/CustomImage';
 import ExpandableText from '../../../component/common/ExpandableText';
 import { resetNavigation } from '../../../utils/commonFunction';
 
-const ProfileTabs = ['About', 'Post', 'Jobs'];
+const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
 const CompanyProfile = () => {
   const { params } = useRoute<any>();
   const fromOnboarding = params?.fromOnboarding || false;
   const companyId = params?.companyId;
+  console.log("🔥 ~ CompanyProfile ~ companyId:", companyId)
 
   const { data: JobData } = useGetCompanyJobsQuery({}, { skip: !!companyId });
   const jobsList = JobData?.data?.jobs || [];
 
-  const { companyProfileData, companyProfileAllData, userInfo } = useSelector(
+  const { companyProfileData, companyProfileAllData, userInfo, selectedTabIndex } = useSelector(
     (state: RootState) => state.auth,
   );
 
   const { data: getPost } = useGetCompanyPostsQuery({}, { skip: !!companyId });
   const allPosts = getPost?.data?.posts || [];
+  console.log("🔥 ~ CompanyProfile ~ allPosts:", allPosts)
 
   const dispatch = useAppDispatch();
   const { data, isLoading, isFetching } = useGetProfileQuery(undefined, { skip: !!companyId });
 
-  const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+
   const [isLogoLoading, setIsLogoLoading] = useState(false);
   const [logoLoadError, setLogoLoadError] = useState(false);
   const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [viewedCompanyPosts, setViewedCompanyPosts] = useState<any[]>([]);
   const [viewedCompanyJobs, setViewedCompanyJobs] = useState<any[]>([]);
 
+  // Track if data has been fetched for each tab to prevent re-fetching
+  const [postsFetched, setPostsFetched] = useState(false);
+  const [jobsFetched, setJobsFetched] = useState(false);
+
   // Use lazy query for external company profile
   const [getCompanyProfile, { data: companyData, isLoading: isCompanyLoading }] =
     useLazyGetCompanyProfileByIdQuery();
 
+  const [companyInfo, setCompanyInfo] = useState<any>(null);
+
   useEffect(() => {
     if (companyId) {
-      // Clear previous data state when fetching new company
-      setViewedCompanyPosts([]);
-      setViewedCompanyJobs([]);
-      getCompanyProfile({ company_id: companyId, tab: 'posts', page: 1 });
+      if (selectedTabIndex === 1 && !postsFetched) {
+        getCompanyProfile({ company_id: companyId, tab: 'posts', page: 1 });
+      } else if (selectedTabIndex === 2 && !jobsFetched) {
+        getCompanyProfile({ company_id: companyId, tab: 'jobs', page: 1 });
+      } else if (selectedTabIndex === 0 && !companyInfo) {
+        // Only fetch about info if not already present
+        getCompanyProfile({ company_id: companyId, tab: 'about', page: 1 });
+      }
     }
-  }, [companyId, getCompanyProfile]);
+  }, [companyId, selectedTabIndex, getCompanyProfile, postsFetched, jobsFetched, companyInfo]);
 
   useEffect(() => {
     if (data?.status && data.data?.company && !companyId) {
@@ -89,18 +102,30 @@ const CompanyProfile = () => {
 
   useEffect(() => {
     if (companyData?.status && companyId) {
-      setViewedCompanyPosts(companyData?.data?.posts || []);
-      setViewedCompanyJobs(companyData?.data?.jobs || []);
+      if (companyData?.data?.posts) {
+        setViewedCompanyPosts(companyData.data.posts);
+        setPostsFetched(true);
+      }
+      if (companyData?.data?.jobs) {
+        setViewedCompanyJobs(companyData.data.jobs);
+        setJobsFetched(true);
+      }
     }
   }, [companyData, companyId]);
 
+  useEffect(() => {
+    if (companyData?.data?.company && !companyInfo) {
+      setCompanyInfo(companyData.data.company);
+    }
+  }, [companyData, companyInfo]);
+
   const displayProfile = useMemo(() => {
+    if (companyInfo) return companyInfo;
     if (companyId && companyData?.data?.company) {
       return companyData.data.company;
     }
-    // Fallback to own profile only if NOT in external viewing mode
     return companyId ? null : (companyProfileAllData || companyProfileData || data?.data?.company);
-  }, [companyId, companyData, companyProfileAllData, companyProfileData, data]);
+  }, [companyId, companyData, companyProfileAllData, companyProfileData, data, companyInfo]);
 
   const coverImages = useMemo(() => {
     const profile = displayProfile || (companyId ? null : userInfo);
@@ -138,11 +163,16 @@ const CompanyProfile = () => {
   }, [displayProfile, companyId, userInfo]);
 
   const shouldShowCoverLoader = useMemo(() => {
-    return companyId ? isCompanyLoading : (isLoading || isFetching);
-  }, [companyId, isCompanyLoading, isLoading, isFetching]);
+    // Only show cover loader if we are loading the main profile info (About tab)
+    // and we don't have companyInfo yet.
+    if (companyId) {
+      return isCompanyLoading && !companyInfo;
+    }
+    return isLoading || isFetching;
+  }, [companyId, isCompanyLoading, isLoading, isFetching, companyInfo]);
 
-  const displayPosts = companyId ? (viewedCompanyPosts || []) : (allPosts || []);
-  const displayJobs = companyId ? (viewedCompanyJobs || []) : (jobsList || []);
+  const displayPosts = companyId ? (Array.isArray(viewedCompanyPosts) ? viewedCompanyPosts : []) : (Array.isArray(allPosts) ? allPosts : []);
+  const displayJobs = companyId ? (Array.isArray(viewedCompanyJobs) ? viewedCompanyJobs : []) : (Array.isArray(jobsList) ? jobsList : []);
 
   const navigation = useNavigation();
   const handleBackPress = useCallback(() => {
@@ -154,13 +184,17 @@ const CompanyProfile = () => {
   }, [navigation]);
 
   const handleTabPress = useCallback((index: number) => {
-    setSelectedTabIndex(index);
-  }, []);
+    dispatch(setSelectedTabIndex(index));
+  }, [dispatch]);
 
   const renderJobs = useMemo(() => {
     if (selectedTabIndex !== 2) return null;
 
-    if (!displayJobs || displayJobs.length === 0) {
+    if (isCompanyLoading && !jobsFetched) {
+      return <ActivityIndicator size="small" color={colors._0B3970} style={{ marginTop: hp(20) }} />;
+    }
+
+    if (!Array.isArray(displayJobs) || displayJobs.length === 0) {
       return (
         <View style={styles.emptyContainer}>
           <Text
@@ -174,14 +208,17 @@ const CompanyProfile = () => {
       );
     }
 
-    return displayJobs.map((item: any, index: number) => (
-      <View style={{ marginBottom: hp(15) }} key={`job-${item.id || index}`}>
-        <MyJobCard
-          item={item}
-          onPressShare={() => { }}
-        />
-      </View>
-    ));
+    return displayJobs?.map((item: any, index: number) => {
+      if (!item) return null;
+      return (
+        <View style={{ marginBottom: hp(15) }} key={`job-${item.id || index}`}>
+          <MyJobCard
+            item={item}
+            onPressShare={() => { }}
+          />
+        </View>
+      )
+    });
   }, [selectedTabIndex, displayJobs]);
 
   const hasValidLogo = useMemo(() => {
@@ -228,16 +265,7 @@ const CompanyProfile = () => {
     };
   }, [hasValidLogo, logoUri]);
 
-  if (companyId && isCompanyLoading && viewedCompanyPosts.length === 0) {
-    return (
-      <SafeAreaView
-        edges={['bottom']}
-        style={{ flex: 1, backgroundColor: colors.white, justifyContent: 'center', alignItems: 'center' }}
-      >
-        <ActivityIndicator size="large" color={colors._0B3970} />
-      </SafeAreaView>
-    );
-  }
+
 
   return (
     <SafeAreaView
@@ -357,20 +385,24 @@ const CompanyProfile = () => {
 
             {selectedTabIndex === 1 && (
               <View style={{ marginTop: hp(10) }}>
-                {displayPosts && displayPosts.length > 0 ? (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                    {displayPosts.map((item: any, index: number) => (
-                      <View key={`post-${item.id || index}`} style={{ width: '48%', marginBottom: hp(10) }}>
-                        <CustomPostCard title={item?.title} image={item?.images} />
-                      </View>
-                    ))}
-                  </View>
+                {isCompanyLoading && !postsFetched ? (
+                  <ActivityIndicator size="small" color={colors._0B3970} style={{ marginTop: hp(20) }} />
                 ) : (
-                  <View style={styles.emptyContainer}>
-                    <Text style={[commonFontStyle(500, 16, colors._0B3970), { textAlign: 'center' }]}>
-                      No Posts Found
-                    </Text>
-                  </View>
+                  displayPosts && displayPosts.length > 0 ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                      {displayPosts.map((item: any, index: number) => (
+                        <View key={`post-${item.id || index}`} style={{ width: '48%', marginBottom: hp(10) }}>
+                          <CustomPostCard title={item?.title} image={item?.images} />
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <View style={styles.emptyContainer}>
+                      <Text style={[commonFontStyle(500, 16, colors._0B3970), { textAlign: 'center' }]}>
+                        No Posts Found
+                      </Text>
+                    </View>
+                  )
                 )}
               </View>
             )}
@@ -389,8 +421,8 @@ const CompanyProfile = () => {
             )}
           </LinearContainer>
         </ParallaxContainer>
-      </ScrollView>
-    </SafeAreaView>
+      </ScrollView >
+    </SafeAreaView >
   );
 };
 

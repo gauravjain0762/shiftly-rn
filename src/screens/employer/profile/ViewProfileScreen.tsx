@@ -43,8 +43,6 @@ const ViewProfileScreen = () => {
   const [updateAboutMe, { isLoading: isUpdating }] = useUpdateAboutMeMutation();
   const [isOpenForWork, setIsOpenForWork] = useState(userInfo?.open_for_job || false);
 
-  console.log("🔥 ~ ViewProfileScreen ~ userInfo:", userInfo)
-
   const countryCode = userInfo?.phone_code || 'AE';
 
   useFocusEffect(
@@ -67,6 +65,7 @@ const ViewProfileScreen = () => {
       formData.append('open_for_job', newValue);
 
       const response = await updateAboutMe(formData).unwrap();
+      console.log(">>>>>>>>>>> ~ handleToggleOpenForWork ~ response:", response)
       
       if (response?.status) {
         setIsOpenForWork(newValue);

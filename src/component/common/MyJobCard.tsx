@@ -25,29 +25,25 @@ const downloadImage = async (url: string) => {
   return `file://${filePath}`;
 };
 
+import { getCurrencySymbol } from '../../utils/currencySymbols';
+
 const MyJobCard = (props: JobCardProps) => {
   const { onPressCard, item } = props;
 
-  // Ensure coverImages always has valid image sources, fallback to logoText if not found
   const coverImages = (() => {
     const coverImgs = item?.company_id?.cover_images;
     const logo = item?.company_id?.logo;
 
-    // Check if cover_images exists and has valid entries
     if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
-      // Filter out null/undefined/empty values
       const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
       if (validCoverImages.length > 0) {
         return validCoverImages;
       }
     }
 
-    // Fallback to logo if available
     if (logo && typeof logo === 'string' && logo.trim() !== '') {
       return [logo];
     }
-
-    // Final fallback to logoText
     return [IMAGES.logoText];
   })();
 
@@ -58,7 +54,7 @@ const MyJobCard = (props: JobCardProps) => {
       const description = item?.description || '';
       const salary =
         item?.monthly_salary_from || item?.monthly_salary_to
-          ? `Salary: ${item?.currency} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${getCurrencySymbol(item?.currency)} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrl = item?.share_url || '';
@@ -124,13 +120,15 @@ ${salary}${shareUrlText}`;
 
         {(item?.monthly_salary_from || item?.monthly_salary_to) && (
           <View style={styles.salaryContainer}>
-            <Image
-              source={IMAGES.currency}
-              style={styles.salaryIcon}
-              tintColor={colors._656464}
-            />
+            {item?.currency?.toUpperCase() === 'AED' && (
+              <Image
+                source={IMAGES.currency}
+                style={styles.salaryIcon}
+                tintColor={colors._656464}
+              />
+            )}
             <Text style={styles.salaryText}>
-              {`${item?.currency} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+              {`${getCurrencySymbol(item?.currency)} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
             </Text>
           </View>
         )}

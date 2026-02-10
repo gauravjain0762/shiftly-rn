@@ -80,6 +80,7 @@ interface AppState {
     appleId?: string
   };
   hasUnreadNotification?: boolean;
+  selectedTabIndex: number;
 }
 
 const initialState: AppState = {
@@ -160,6 +161,7 @@ const initialState: AppState = {
     appleId: ''
   },
   hasUnreadNotification: false,
+  selectedTabIndex: 0,
 };
 
 const authSlice = createSlice({
@@ -259,6 +261,9 @@ const authSlice = createSlice({
     setHasUnreadNotification: (state, action: PayloadAction<boolean>) => {
       state.hasUnreadNotification = action.payload;
     },
+    setSelectedTabIndex: (state, action: PayloadAction<number>) => {
+      state.selectedTabIndex = action.payload;
+    },
   },
 });
 
@@ -299,6 +304,7 @@ export const {
   clearEmployeeAccount,
   clearCompanyRegisterData,
   setHasUnreadNotification,
+  setSelectedTabIndex,
 } = authSlice.actions;
 
 export default authSlice.reducer;

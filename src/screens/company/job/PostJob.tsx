@@ -1259,7 +1259,7 @@ const PostJob = () => {
                       isAutocompleteOpen && styles.autocompleteWrapperOpen,
                     ]}>
                     <GooglePlacesAutocomplete
-                      placeholder={area?.label || 'Search your job area'}
+                      placeholder={'Search your job area'}
                       onPress={(data, details = null) => {
                         console.log('Selected:', data.description);
 
@@ -1357,7 +1357,7 @@ const PostJob = () => {
                           height: hp(56),
                           borderWidth: 2,
                           borderRadius: 10,
-                          paddingVertical: hp(16),
+                          paddingVertical: 0, // Reset vertical padding for better centering
                           paddingHorizontal: wp(13),
                           paddingRight: wp(45),
                           borderColor: colors._234F86,
@@ -1365,6 +1365,8 @@ const PostJob = () => {
                           backgroundColor: colors.white,
                           marginTop: 0,
                           marginBottom: 0,
+                          textAlignVertical: 'center', // Fix for Android input vertical alignment
+                          includeFontPadding: false, // Fix for Android font padding issues
                         },
                         listView: {
                           position: 'absolute',
@@ -1412,6 +1414,10 @@ const PostJob = () => {
                       textInputProps={{
                         placeholderTextColor: colors._7B7878,
                         returnKeyType: 'search',
+                        numberOfLines: 1,
+                        multiline: false,
+                        autoCorrect: false,
+                        ellipsizeMode: 'tail',
                         onFocus: () => {
                           setIsAutocompleteOpen(true);
                         },
@@ -1421,7 +1427,6 @@ const PostJob = () => {
                         },
                         clearButtonMode: 'while-editing',
                       }}
-                      numberOfLines={1}
                     />
                   </View>
                 </View>
