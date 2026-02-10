@@ -59,27 +59,28 @@ const PhoneInput: FC<picker> = ({
   const [detectedCallingCode, setDetectedCallingCode] = useState<string>('971');
   const { t } = useTranslation();
 
-  // Auto-detect country on component mount
-  useEffect(() => {
-    detectUserCountry();
-  }, []);
+  // Auto-detect country on component mount - REMOVED
+  // useEffect(() => {
+  //   detectUserCountry();
+  // }, []);
 
   const handlePhoneChange = (text: string) => {
     // Determine expected length based on country code
-    const expectedLength = currentCallingCode === '971' ? 9 : 10;
-    const formatted = formatPhoneNumber(text, expectedLength);
+    // const expectedLength = currentCallingCode === '971' ? 9 : 10;
+    const formatted = formatPhoneNumber(text, 12);
 
     onPhoneChange?.(formatted);
 
     // Check if we have the expected number of digits
     const digits = formatted.replace(/\D/g, '');
-    setValid(digits.length === expectedLength && new RegExp(`^\\d{${expectedLength}}$`).test(digits));
+    const isValidLength = digits.length >= 5 && digits.length <= 12;
+    setValid(isValidLength && new RegExp(`^\\d{5,12}$`).test(digits));
   };
 
-  const formatPhoneNumber = (value: string, maxDigits: number = 10) => {
+  const formatPhoneNumber = (value: string, maxDigits: number = 12) => {
     const digits = value.replace(/\D/g, '').slice(0, maxDigits);
 
-    if (maxDigits === 9) {
+    if (currentCallingCode === '971') {
       // UAE format: XX XXX XXXX (9 digits)
       if (digits.length <= 2) {
         return digits;
@@ -89,95 +90,26 @@ const PhoneInput: FC<picker> = ({
       }
       return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
     } else {
-      // Default format: XX XXX XXXXX (10 digits)
+      // Generic format: XX XXX XXXXX or just space every 3-4? 
+      // Keeping it simple for variable length
       if (digits.length <= 2) {
         return digits;
       }
       if (digits.length <= 5) {
         return `${digits.slice(0, 2)} ${digits.slice(2)}`;
       }
-      return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+      if (digits.length <= 9) {
+        return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+      }
+      return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 9)} ${digits.slice(9)}`;
     }
   };
 
-  const detectUserCountry = async () => {
-    try {
-      const ipResult = await detectCountryByIP();
-
-      if (ipResult) {
-        console.log('✅ IP detection successful:', ipResult);
-        setDetectedCountry(ipResult.countryCode);
-        setDetectedCallingCode(ipResult.callingCode);
-
-        onCallingCodeChange?.({
-          cca2: ipResult.countryCode,
-          callingCode: [ipResult.callingCode],
-        });
-
-        return;
-      }
-
-      console.log('⚠️ Falling back to UAE default');
-      setDetectedCountry('AE');
-      setDetectedCallingCode('971');
-
-      onCallingCodeChange?.({
-        cca2: 'AE',
-        callingCode: ['971'],
-      });
-
-    } catch (error) {
-      console.error('❌ Error detecting country:', error);
-
-      setDetectedCountry('AE');
-      setDetectedCallingCode('971');
-
-      onCallingCodeChange?.({
-        cca2: 'AE',
-        callingCode: ['971'],
-      });
-    }
-  };
-
-  const detectCountryByIP = async (): Promise<{
-    countryCode: string;
-    callingCode: string;
-  } | null> => {
-    try {
-      const response = await fetch('https://ipapi.co/json/', {
-        timeout: 5000,
-      } as any);
-
-      if (!response.ok) {
-        console.log('⚠️ IP API response not OK:', response.status);
-        return null;
-      }
-
-      const data = await response.json();
-      console.log('🌐 IP API data:', data);
-
-      const countryCode = data.country_code?.toUpperCase();
-
-      if (countryCode && countryCodeToCallingCode[countryCode]) {
-        const callingCode = countryCodeToCallingCode[countryCode];
-
-        return {
-          countryCode,
-          callingCode,
-        };
-      }
-
-      return null;
-    } catch (error) {
-      console.error('❌ Error detecting country by IP:', error);
-      return null;
-    }
-  };
 
   const currentCountryCode = countryCode || detectedCountry;
   const currentCallingCode = callingCode || detectedCallingCode;
-  const expectedDigits = currentCallingCode === '971' ? 9 : 10;
-  const maxInputLength = expectedDigits === 9 ? 11 : 12; // Account for spaces in formatting
+  // const expectedDigits = currentCallingCode === '971' ? 9 : 10;
+  const maxInputLength = 16; // Allow enough space for 12 digits + spaces
 
   return (
     <View style={styles.container}>
@@ -230,7 +162,7 @@ const PhoneInput: FC<picker> = ({
           maxLength={maxInputLength}
           {...TextInputProps}
         />
-        {valid && phone && phone.replace(/\D/g, '').length === expectedDigits && (
+        {valid && phone && phone.replace(/\D/g, '').length >= 5 && phone.replace(/\D/g, '').length <= 12 && (
           <Image
             source={IMAGES.right}
             tintColor={colors.green}

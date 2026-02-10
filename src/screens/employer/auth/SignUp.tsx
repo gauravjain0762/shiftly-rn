@@ -624,8 +624,8 @@ const SignUp = () => {
       case 4:
         // Get digits only from phone number (remove spaces and non-digits)
         const phoneDigits = phone?.replace(/\D/g, '') || '';
-        const isValidPhone = phoneDigits.length === 10;
-        
+        const isValidPhone = phoneDigits.length >= 5 && phoneDigits.length <= 12;
+
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
@@ -655,7 +655,7 @@ const SignUp = () => {
                     return;
                   }
                   if (!isValidPhone) {
-                    errorToast('Please enter a valid 10-digit phone number');
+                    errorToast('Please enter a valid phone number (5-12 digits)');
                     return;
                   }
                   handleRegister();
@@ -674,7 +674,7 @@ const SignUp = () => {
                   return;
                 }
                 if (!isValidPhone) {
-                  errorToast('Please enter a valid 10-digit phone number');
+                  errorToast('Please enter a valid phone number (5-12 digits)');
                   return;
                 }
                 handleRegister();

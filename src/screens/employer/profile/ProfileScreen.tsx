@@ -6,38 +6,38 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
-import {LinearContainer} from '../../../component';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {IMAGES} from '../../../assets/Images';
-import {getInitials, hasValidImage, navigateTo} from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../store';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, { useCallback, useState } from 'react';
+import { LinearContainer } from '../../../component';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { IMAGES } from '../../../assets/Images';
+import { getInitials, hasValidImage, navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
 import { navigationRef } from '../../../navigation/RootContainer';
 
 const ProfileScreen = () => {
-  const {userInfo} = useSelector((state: RootState) => state.auth);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const [showAllSkills, setShowAllSkills] = useState(false);
   console.log("🔥 ~ ProfileScreen ~ userInfo:", userInfo)
 
   const handleEditProfile = async () => {
-    navigateTo(SCREENS.CreateProfileScreen);
+    navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
   };
 
   const skills = userInfo?.skills || [];
   const hasMoreThan8Skills = skills.length > 8;
-  const displayedSkills = hasMoreThan8Skills && !showAllSkills 
-    ? skills.slice(0, 8) 
+  const displayedSkills = hasMoreThan8Skills && !showAllSkills
+    ? skills.slice(0, 8)
     : skills;
 
   const HeaderWithAdd = useCallback(
-    ({title}: any) => (
+    ({ title }: any) => (
       <View style={styles.headerRow}>
         <BaseText style={styles.title}>{title}</BaseText>
       </View>
@@ -46,7 +46,7 @@ const ProfileScreen = () => {
   );
 
   const Section = useCallback(
-    ({title, content}: any) => (
+    ({ title, content }: any) => (
       <View style={styles.card}>
         <HeaderWithAdd title={title} />
         <BaseText style={styles.content}>{content}</BaseText>
@@ -62,17 +62,17 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}>
         <Pressable
           onPress={() => navigationRef.goBack()}
-          style={{padding: wp(23), paddingBottom: 0}}>
+          style={{ padding: wp(23), paddingBottom: 0 }}>
           <Image
             source={IMAGES.backArrow}
-            style={{height: hp(20), width: wp(24), tintColor: colors._0B3970}}
+            style={{ height: hp(20), width: wp(24), tintColor: colors._0B3970 }}
           />
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
           {hasValidImage(userInfo?.picture) ? (
             <CustomImage
-              source={{uri: userInfo?.picture}}
-              imageStyle={{height: '100%', width: '100%'}}
+              source={{ uri: userInfo?.picture }}
+              imageStyle={{ height: '100%', width: '100%' }}
               containerStyle={styles.avatar}
               resizeMode="cover"
             />
@@ -87,7 +87,7 @@ const ProfileScreen = () => {
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
             <BaseText style={styles.location}>
-              {userInfo?.location || 'N/A'}
+              {userInfo?.country || 'N/A'}
             </BaseText>
           </View>
 
@@ -113,7 +113,7 @@ const ProfileScreen = () => {
           </TouchableOpacity> */}
 
           {!userInfo?.profile_completion && (
-            <View style={{marginTop: hp(15)}} />
+            <View style={{ marginTop: hp(15) }} />
           )}
 
           {userInfo?.profile_completion && (
@@ -228,7 +228,7 @@ const ProfileScreen = () => {
           )}
 
           {/* Section: My Languages */}
-          <View style={[styles.card, {width: '90%'}]}>
+          <View style={[styles.card, { width: '90%' }]}>
             <HeaderWithAdd title="My Languages" />
             <View style={styles.languageContainer}>
               {userInfo?.languages?.length ? (
@@ -334,13 +334,16 @@ const styles = StyleSheet.create({
   },
   locationRow: {
     gap: wp(6),
-    width: "75%",
+    width: "90%",
     marginTop: hp(8),
     alignSelf: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   location: {
     ...commonFontStyle(400, 20, colors._0B3970),
+    textAlign: 'center',
   },
   locationicon: {
     width: wp(24),
@@ -443,7 +446,7 @@ const styles = StyleSheet.create({
     width: wp(18),
     height: wp(18),
     resizeMode: 'contain',
-    transform: [{rotate: '180deg'}],
+    transform: [{ rotate: '180deg' }],
     tintColor: colors._F4E2B8,
     marginLeft: 20,
   },

@@ -202,7 +202,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
               );
               return (
                 <View key={id} style={styles.languageChip}>
-                  <Text style={styles.languageChipText}>
+                  <Text style={[styles.languageChipText, { fontSize: 16 }]}>
                     {skill?.title || id}
                   </Text>
                 </View>
@@ -251,42 +251,54 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
         <View style={styles.languageListContainer}>
           {aboutEdit.selectedLanguages.map((lang: any, index: number) => (
             <View key={`${lang.name}-${index}`} style={styles.languageChipWithDots}>
-              <Text style={styles.languageChipText}>{lang.name}</Text>
-              <Text style={styles.separator}>•</Text>
-              <View style={styles.dotsContainer}>
-                {proficiencyLevels.map((level, dotIndex) => (
-                  <View key={level} style={styles.dotContainer}>
-                    <TouchableOpacity
-                      style={[
-                        styles.dot,
-                        lang.level === level && styles.selectedDot,
-                        { backgroundColor: getDotColor(level) },
-                      ]}
-                      onPress={() => {
-                        const updatedLanguages = aboutEdit.selectedLanguages.map(
-                          (l: any) => (l.name === lang.name ? { ...l, level } : l),
-                        );
-
-                        setAboutEdit({
-                          ...aboutEdit,
-                          selectedLanguages: updatedLanguages,
-                        });
-                        // Show label on tap
-                        setPressedDot({ langName: lang.name, level });
-                        // Hide label after 2 seconds
-                        setTimeout(() => setPressedDot(null), 2000);
-                      }}
-                    />
-                    {/* Show label when this dot is pressed */}
-                    {pressedDot?.langName === lang.name && pressedDot?.level === level && (
-                      <View style={styles.dotLabelContainer}>
-                        <Text style={styles.dotLabel} numberOfLines={1}>
-                          {proficiencyLabels[level]}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ))}
+              <View style={styles.languageRow}>
+                <Text style={[styles.languageName, { fontSize: 16 }]}>{lang.name}</Text>
+                <View style={styles.dotsContainer}>
+                  {proficiencyLevels.map(level => {
+                    const isSelected = lang.level === level;
+                    return (
+                      <TouchableOpacity
+                        key={level}
+                        onPress={() => {
+                          const updatedLanguages = [...aboutEdit.selectedLanguages];
+                          updatedLanguages[index] = { ...updatedLanguages[index], level: level };
+                          setAboutEdit({
+                            ...aboutEdit,
+                            selectedLanguages: updatedLanguages,
+                          });
+                          setPressedDot({ langName: lang.name, level });
+                          setTimeout(() => setPressedDot(null), 2000);
+                        }}
+                        style={[
+                          styles.dotWrapper,
+                          isSelected && {
+                            borderWidth: 2,
+                            borderColor: getDotColor(level),
+                            borderRadius: 16, // Increased radius to half of 32
+                            width: 32, // Increased size
+                            height: 32, // Increased size
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.dot,
+                            { backgroundColor: getDotColor(level) },
+                          ]}
+                        />
+                        {pressedDot?.langName === lang.name && pressedDot?.level === level && (
+                          <View style={styles.dotLabelContainer}>
+                            <Text style={styles.dotLabel} numberOfLines={1}>
+                              {proficiencyLabels[level]}
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
             </View>
           ))}
@@ -508,5 +520,21 @@ const styles = StyleSheet.create({
     height: hp(20),
     tintColor: colors._0B3970,
     marginLeft: wp(8),
+  },
+  languageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  languageName: {
+    ...commonFontStyle(400, 16, colors._050505),
+    flex: 1,
+  },
+  dotWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 24,
+    height: 24,
   },
 });

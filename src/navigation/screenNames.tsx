@@ -29,6 +29,7 @@ export const SCREENS = {
   SearchJob: 'SearchJob',
   FavoriteJobList: 'FavoriteJobList',
   JobInvitationScreen: 'JobInvitationScreen',
+  PostsScreen: 'PostsScreen',
 
   //company
   CoLogin: 'CoLogin',
@@ -93,6 +94,7 @@ export interface ScreenNames {
   EmpForgotPassword: string;
   EditAccount: string;
   SearchJob: string;
+  PostsScreen: string;
 
   //company
   CoLogin: string;

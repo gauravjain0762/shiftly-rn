@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
@@ -59,7 +59,12 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                 </Text>
 
                 <View style={styles.tagsRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: wp(8) }}>
+                    <ScrollView
+                        horizontal
+                        style={{ flex: 1 }}
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', gap: wp(8) }}
+                    >
                         {item?.contract_type && (
                             <View style={[styles.tag, { backgroundColor: '#0B1C39' }]}>
                                 <Text style={styles.tagText}>{item?.contract_type}</Text>
@@ -75,10 +80,10 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                         <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
                             <Text style={styles.tagText}>1 Year Contract</Text>
                         </View>
-                    </View>
+                    </ScrollView>
                     <View>
                         <Text style={styles.timeAgo}>
-                            {getTimeAgo(item?.createdAt) || '2h ago'}
+                            {getTimeAgo(item?.createdAt) || 'N/A'}
                         </Text>
                     </View>
                 </View>
@@ -176,10 +181,11 @@ const styles = StyleSheet.create({
     },
     tagsRow: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        // flexWrap: 'wrap',
         gap: wp(8),
         marginTop: hp(4),
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     tag: {
         paddingVertical: hp(6),

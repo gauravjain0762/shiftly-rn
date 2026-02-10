@@ -12,8 +12,9 @@ import { SCREENS } from './screenNames';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import JobsScreen from '../screens/employer/jobs/JobsScreen';
 import HomeScreen from '../screens/employer/home/HomeScreen';
-import ActivityScreen from '../screens/employer/activity/ActivityScreen';
 import AccountScreen from '../screens/employer/profile/AccountScreen';
+import ActivityScreen from '../screens/employer/activity/ActivityScreen';
+import PostsScreen from '../screens/employer/posts/PostsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,12 +35,15 @@ const CustomTabBar = ({ state, navigation }: any) => {
           case SCREENS.HomeScreen:
             iconName = isFocused ? IMAGES.home_on : IMAGES.home_off;
             break;
+          case SCREENS.PostsScreen:
+            iconName = IMAGES.posts;
+            break;
           case SCREENS.JobsScreen:
             iconName = isFocused ? IMAGES.Jobs_on : IMAGES.Jobs_off;
             break;
 
           case SCREENS.ActivityScreen:
-            iconName = isFocused ? IMAGES.Activity_on : IMAGES.Activity_off;
+            iconName = IMAGES.ic_chat;
             break;
           case SCREENS.AccountScreen:
             iconName = isFocused ? IMAGES.user_on : IMAGES.user_off;
@@ -53,12 +57,15 @@ const CustomTabBar = ({ state, navigation }: any) => {
           case SCREENS.HomeScreen:
             labelName = 'Home';
             break;
+          case SCREENS.PostsScreen:
+            labelName = 'Posts';
+            break;
           case SCREENS.JobsScreen:
             labelName = 'Jobs';
             break;
 
           case SCREENS.ActivityScreen:
-            labelName = 'Activity';
+            labelName = 'Messages';
             break;
           case SCREENS.AccountScreen:
             labelName = 'Profile';
@@ -117,6 +124,7 @@ export default function TabNavigator() {
       initialRouteName={SCREENS.HomeScreen}
       tabBar={(props: any) => <CustomTabBar {...props} />}>
       <Tab.Screen name={SCREENS.HomeScreen} component={HomeScreen} />
+      <Tab.Screen name={SCREENS.PostsScreen} component={PostsScreen} />
       <Tab.Screen name={SCREENS.JobsScreen} component={JobsScreen} />
       <Tab.Screen name={SCREENS.ActivityScreen} component={ActivityScreen} />
       <Tab.Screen name={SCREENS.AccountScreen} component={AccountScreen} />

@@ -68,6 +68,7 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
+  console.log("🔥 ~ CreateProfileScreen ~ experienceList:", experienceList)
   console.log(">>>>>>> ~ CreateProfileScreen ~ educationList length: >>>>>>>>>>", educationList?.length)
 
   const { data: getEducation, refetch: refetchEducation } = useGetEducationsQuery(
@@ -540,13 +541,12 @@ const CreateProfileScreen = () => {
       <LinearContainer
         containerStyle={{ flex: 1 }}
         colors={[colors._F7F7F7, colors._F7F7F7]}>
-        {/* Fixed Header */}
         <View style={styles.topConrainer}>
           <BackHeader
             type="employe"
             isRight={true}
             titleStyle={{ color: colors._0B3970 }}
-            title={'Create Your Profile'}
+            title={route.params?.isEdit ? 'Edit your Profile' : 'Create Your Profile'}
             RightIcon={<View />}
             onBackPress={() => {
               if (activeStep === 1) {
@@ -610,10 +610,8 @@ const CreateProfileScreen = () => {
           />
         </View>
 
-        {/* Fixed Stepper */}
-        <Stepper activeStep={activeStep} />
+        <Stepper activeStep={activeStep} onPress={(step) => dispatch(setActiveStep(step))} />
 
-        {/* Scrollable Content Area */}
         <KeyboardAwareScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
@@ -667,8 +665,8 @@ const CreateProfileScreen = () => {
 
           {activeStep === 2 && (
             <>
-              {experienceList?.length > 0 &&
-                experienceList?.map((item, index) => (
+              {(experienceData || experienceList)?.length > 0 &&
+                (experienceData || experienceList)?.map((item: ExperienceItem, index: number) => (
                   <EducationCard
                     key={index}
                     item={item}
@@ -775,7 +773,7 @@ const CreateProfileScreen = () => {
               }
             />
             <BaseText style={styles.addEduText}>
-              {educationListEdit?.isEditing
+              {educationListEdit?.isEditing || educationList.length === 0
                 ? 'Save Education'
                 : 'Add Education'}
             </BaseText>
@@ -790,6 +788,16 @@ const CreateProfileScreen = () => {
             }}
           // disabled={educationList?.length === 0}
           />
+          {route.params?.isEdit && (
+            <GradientButton
+              type="Company"
+              style={styles.btn}
+              title="Update Profile"
+              onPress={() => {
+                handleUpdateProfile();
+              }}
+            />
+          )}
         </View>
       )}
 
@@ -830,28 +838,62 @@ const CreateProfileScreen = () => {
             }}
           // disabled={experienceList?.length === 0}
           />
+          {route.params?.isEdit && (
+            <GradientButton
+              type="Company"
+              style={styles.btn}
+              title={'Update Profile'}
+              onPress={() => {
+                handleUpdateProfile();
+              }}
+            />
+          )}
         </View>
       )}
 
       {activeStep === 3 && (
-        <GradientButton
-          type="Company"
-          style={[
-            styles.btn,
-            {
-              marginHorizontal: wp(25),
-            },
-          ]}
-          title={'Next'}
-          disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
-          onPress={() => {
-            if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
-              errorToast('Please select at least one skill');
-              return;
-            }
-            dispatch(setActiveStep(4));
-          }}
-        />
+        <>
+          <GradientButton
+            type="Company"
+            style={[
+              styles.btn,
+              {
+                marginHorizontal: wp(25),
+              },
+            ]}
+            title={'Next'}
+            disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
+            onPress={() => {
+              if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
+                errorToast('Please select at least one skill');
+                return;
+              }
+              dispatch(setActiveStep(4));
+            }}
+          />
+          {route.params?.isEdit && (
+            <GradientButton
+              type="Company"
+              style={[
+                styles.btn,
+                {
+                  marginHorizontal: wp(25),
+                },
+              ]}
+              title={'Update Profile'}
+              onPress={() => {
+                if (
+                  !aboutEdit?.selectedSkills ||
+                  aboutEdit?.selectedSkills?.length === 0
+                ) {
+                  errorToast('Please select at least one skill');
+                  return;
+                }
+                handleUpdateProfile();
+              }}
+            />
+          )}
+        </>
       )}
 
       {activeStep === 4 && (

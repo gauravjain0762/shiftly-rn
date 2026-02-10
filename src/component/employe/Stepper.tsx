@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import {commonFontStyle, hp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { commonFontStyle, hp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
 
 const stepperColors = {
   background: colors._050505,
@@ -12,19 +12,24 @@ const stepperColors = {
 };
 
 const stepData = [
-  {label: 'Education', step: 1},
-  {label: 'Experience', step: 2},
-  {label: 'About Me', step: 3},
-  {label: 'Upload', step: 4},
+  { label: 'Education', step: 1 },
+  { label: 'Experience', step: 2 },
+  { label: 'About Me', step: 3 },
+  { label: 'Upload', step: 4 },
 ];
 
-const Stepper = ({activeStep = 1}) => {
+const Stepper = ({ activeStep = 1, onPress }: { activeStep?: number, onPress?: (step: number) => void }) => {
   return (
     <View style={styles.container}>
-      {stepData.map(({label, step}) => {
+      {stepData.map(({ label, step }) => {
         const isActive = step === activeStep;
         return (
-          <View key={step} style={styles.stepItem}>
+          <TouchableOpacity
+            key={step}
+            style={styles.stepItem}
+            onPress={() => onPress?.(step)}
+            activeOpacity={0.7}
+          >
             <View
               style={[
                 styles.circle,
@@ -37,7 +42,7 @@ const Stepper = ({activeStep = 1}) => {
             <Text style={isActive ? styles.activeLabel : styles.inactiveLabel}>
               {label}
             </Text>
-          </View>
+          </TouchableOpacity>
         );
       })}
     </View>

@@ -121,7 +121,7 @@ const ViewProfileScreen = () => {
                 source={IMAGES.marker}
                 style={[styles.locationicon, { tintColor: colors._0B3970 }]}
               />
-              <Text style={styles.location}>{userInfo?.location || 'N/A'}</Text>
+              <Text style={styles.location}>{userInfo?.country || 'N/A'}</Text>
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
