@@ -341,10 +341,12 @@ const JobPreview = () => {
                 backgroundColor={colors._FAEED2}
                 onClose={() => updateJobForm({ isSuccessModalVisible: false })}>
                 <View style={styles.modalIconWrapper}>
-                    <Image
-                        source={IMAGES.check}
-                        tintColor={colors._FAEED2}
+                    <LottieView
+                        source={animation.success_check}
+                        autoPlay
+                        loop={false}
                         style={styles.modalCheckIcon}
+                        resizeMode="cover"
                     />
                 </View>
 
@@ -519,17 +521,16 @@ const styles = StyleSheet.create({
     },
     modalIconWrapper: {
         width: wp(90),
-        height: hp(90),
+        height: wp(90),
+        overflow: 'hidden',
         alignSelf: 'center',
         borderRadius: wp(90),
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors._0B3970,
     },
     modalCheckIcon: {
-        width: wp(30),
-        height: hp(30),
-        borderRadius: wp(30),
+        width: wp(90),
+        height: wp(90),
     },
     modalTitle: {
         textAlign: 'center',

@@ -123,8 +123,7 @@ const CoEditMyProfile = () => {
     if (imgType === 'logo') {
       setLogo(newImage);
     } else {
-      const updatedCovers = [...coverImages, newImage];
-      setCoverImages(updatedCovers);
+      setCoverImages([newImage]);
     }
   };
 
@@ -262,13 +261,15 @@ const CoEditMyProfile = () => {
                 </View>
               ))}
 
-              <TouchableOpacity
-                style={styles.addCoverBtn}
-                onPress={() => {
-                  setImageModal(true), setImageType('cover');
-                }}>
-                <Image source={IMAGES.pluse} style={{ width: 30, height: 30 }} />
-              </TouchableOpacity>
+              {coverImages?.length < 1 && (
+                <TouchableOpacity
+                  style={styles.addCoverBtn}
+                  onPress={() => {
+                    setImageModal(true), setImageType('cover');
+                  }}>
+                  <Image source={IMAGES.pluse} style={{ width: 30, height: 30 }} />
+                </TouchableOpacity>
+              )}
             </ScrollView>
           </View>
 

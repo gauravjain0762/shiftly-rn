@@ -357,7 +357,7 @@ const CreateAccount = () => {
 
         dispatch(
           setCompanyProfileData({
-            cover_images: [...(cover_images || []), newImage],
+            cover_images: [newImage],
           }),
         );
       } else {
@@ -1617,14 +1617,16 @@ const CreateAccount = () => {
                 )}
 
                 <View style={styles.coverContainer}>
-                  <TouchableOpacity
-                    onPress={() => (setType('cover'), setImageModal(true))}
-                    style={styles.uploadPlaceholder}>
-                    <Image
-                      source={IMAGES.uploadImg}
-                      style={{ width: wp(72), height: hp(72) }}
-                    />
-                  </TouchableOpacity>
+                  {(!cover_images || cover_images.length === 0) && (
+                    <TouchableOpacity
+                      onPress={() => (setType('cover'), setImageModal(true))}
+                      style={styles.uploadPlaceholder}>
+                      <Image
+                        source={IMAGES.uploadImg}
+                        style={{ width: wp(72), height: hp(72) }}
+                      />
+                    </TouchableOpacity>
+                  )}
 
                   <View style={styles.coverGrid}>
                     {(cover_images || [])?.map((img: any, index: number) => (
