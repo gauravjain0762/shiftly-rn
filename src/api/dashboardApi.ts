@@ -417,6 +417,11 @@ export const dashboardApi = createApi({
         try {
           const { data } = await queryFulfilled;
           console.log(data, '>>>>>>>> GetProfile datadata');
+          if (data?.status) {
+            dispatch(setUserInfo(data?.data?.user));
+          } else {
+            errorToast(data?.message);
+          }
         } catch (error) {
           console.log('Guest Login Error', error);
         }
@@ -566,10 +571,11 @@ export const dashboardApi = createApi({
         data: credentials,
         skipLoader: true,
       }),
-      invalidatesTags: ['AddUpdateEducation'],
+      invalidatesTags: ['AddUpdateEducation', 'GetProfile'],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setUserInfo(data?.data?.user));
           console.log(data, 'datadata');
         } catch (error) {
           console.log('AddUpdateEducation Error', error);
@@ -583,10 +589,11 @@ export const dashboardApi = createApi({
         data: credentials,
         skipLoader: true,
       }),
-      invalidatesTags: ['AddUpdateExperience'],
+      invalidatesTags: ['AddUpdateExperience', 'GetProfile'],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setUserInfo(data?.data?.user));
           console.log(data, 'datadata');
         } catch (error) {
           console.log('AddUpdateExperience Error', error);
@@ -665,6 +672,7 @@ export const dashboardApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setUserInfo(data?.data?.user));
           console.log(data, 'datadata');
         } catch (error) {
           console.log('updateAboutMe Error', error);

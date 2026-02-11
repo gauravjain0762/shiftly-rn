@@ -11,7 +11,7 @@ import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
-import { getInitials, hasValidImage, navigateTo } from '../../../utils/commonFunction';
+import { navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -20,11 +20,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
 import { navigationRef } from '../../../navigation/RootContainer';
+import { useGetEmployeeProfileQuery } from '../../../api/dashboardApi';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = () => {
-  const { userInfo } = useSelector((state: RootState) => state.auth);
-  const [showAllSkills, setShowAllSkills] = useState(false);
+  const { data: getProfile, refetch } = useGetEmployeeProfileQuery({});
+  const { userInfo: reduxUserInfo } = useSelector((state: RootState) => state.auth);
+  const userInfo = getProfile?.data?.user || reduxUserInfo;
+
+  console.log("🔥 ~ ProfileScreen ~ getProfile:", getProfile)
   console.log("🔥 ~ ProfileScreen ~ userInfo:", userInfo)
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
@@ -35,6 +48,18 @@ const ProfileScreen = () => {
   const displayedSkills = hasMoreThan8Skills && !showAllSkills
     ? skills.slice(0, 8)
     : skills;
+
+  const educationList = Array.isArray(userInfo?.education)
+    ? userInfo?.education
+    : userInfo?.education
+      ? [userInfo?.education]
+      : [];
+
+  const experienceList = Array.isArray(userInfo?.experience)
+    ? userInfo?.experience
+    : userInfo?.experience
+      ? [userInfo?.experience]
+      : [];
 
   const HeaderWithAdd = useCallback(
     ({ title }: any) => (
@@ -69,20 +94,12 @@ const ProfileScreen = () => {
           />
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
-          {hasValidImage(userInfo?.picture) ? (
-            <CustomImage
-              source={{ uri: userInfo?.picture }}
-              imageStyle={{ height: '100%', width: '100%' }}
-              containerStyle={styles.avatar}
-              resizeMode="cover"
-            />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <BaseText style={styles.avatarText}>
-                {getInitials(userInfo?.name)}
-              </BaseText>
-            </View>
-          )}
+          <CustomImage
+            source={userInfo?.picture ? { uri: userInfo?.picture } : IMAGES.logoText}
+            imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
+            containerStyle={styles.avatar}
+            resizeMode={userInfo?.picture ? "cover" : "contain"}
+          />
           <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
@@ -148,81 +165,85 @@ const ProfileScreen = () => {
           <Section title="About Me" content={userInfo?.about || 'N/A'} />
 
           {/* Section: Professional Experience */}
-          {userInfo?.experience && (
+          {experienceList?.length > 0 && (
             <View style={styles.card}>
               <HeaderWithAdd title="Professional Experience" />
               <View style={styles.experienceContainer}>
-                {userInfo.experience.title && (
-                  <BaseText style={styles.experienceTitle}>
-                    {userInfo.experience.title}
-                  </BaseText>
-                )}
-                {userInfo.experience.company && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Company:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.company}
-                    </BaseText>
+                {experienceList?.map((exp: any, index: number) => (
+                  <View key={index} style={{ marginBottom: hp(20), borderBottomWidth: index === experienceList?.length - 1 ? 0 : 1, borderBottomColor: '#eee', paddingBottom: hp(10) }}>
+                    {exp?.title && (
+                      <BaseText style={styles.experienceTitle}>
+                        {exp?.title}
+                      </BaseText>
+                    )}
+                    {exp?.company && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Company:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.company}
+                        </BaseText>
+                      </View>
+                    )}
+                    {exp?.department && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Department:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.department}
+                        </BaseText>
+                      </View>
+                    )}
+                    {exp?.preferred_position && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Position:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.preferred_position}
+                        </BaseText>
+                      </View>
+                    )}
+                    {exp?.country && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Location:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.country}
+                        </BaseText>
+                      </View>
+                    )}
+                    {(exp?.job_start || (exp?.jobStart_month && exp?.jobStart_year)) && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Start Date:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.job_start?.month || exp?.jobStart_month} {exp?.job_start?.year || exp?.jobStart_year}
+                        </BaseText>
+                      </View>
+                    )}
+                    {(exp?.job_end || (exp?.jobEnd_month && exp?.jobEnd_year)) && !exp?.still_working && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>End Date:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.job_end?.month || exp?.jobEnd_month} {exp?.job_end?.year || exp?.jobEnd_year}
+                        </BaseText>
+                      </View>
+                    )}
+                    {exp?.still_working && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Status:</BaseText>
+                        <BaseText style={[styles.infoValue, styles.currentStatus]}>
+                          Currently Working
+                        </BaseText>
+                      </View>
+                    )}
+                    {exp?.experience_type && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Type:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {exp?.experience_type
+                            .replace(/_/g, ' ')
+                            .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </BaseText>
+                      </View>
+                    )}
                   </View>
-                )}
-                {userInfo.experience.department && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Department:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.department}
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.experience.preferred_position && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Position:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.preferred_position}
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.experience.country && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Location:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.country}
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.experience.job_start && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Start Date:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.job_start.month} {userInfo.experience.job_start.year}
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.experience.job_end && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>End Date:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.job_end.month} {userInfo.experience.job_end.year}
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.experience.still_working && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Status:</BaseText>
-                    <BaseText style={[styles.infoValue, styles.currentStatus]}>
-                      Currently Working
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.experience.experience_type && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Type:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.experience.experience_type
-                        .replace(/_/g, ' ')
-                        .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                    </BaseText>
-                  </View>
-                )}
+                ))}
               </View>
             </View>
           )}
@@ -244,41 +265,45 @@ const ProfileScreen = () => {
           </View>
 
           {/* Section: Education */}
-          {userInfo?.education && (
+          {educationList?.length > 0 && (
             <View style={styles.card}>
               <HeaderWithAdd title="Education" />
               <View style={styles.educationContainer}>
-                {userInfo.education.degree && (
-                  <BaseText style={styles.educationDegree}>
-                    {userInfo.education.degree}
-                  </BaseText>
-                )}
-                {userInfo.education.university && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>University:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.education.university}
-                    </BaseText>
+                {educationList?.map((edu: any, index: number) => (
+                  <View key={index} style={{ marginBottom: hp(20), borderBottomWidth: index === educationList?.length - 1 ? 0 : 1, borderBottomColor: '#eee', paddingBottom: hp(10) }}>
+                    {edu?.degree && (
+                      <BaseText style={styles.educationDegree}>
+                        {edu?.degree}
+                      </BaseText>
+                    )}
+                    {edu?.university && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>University:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {edu?.university}
+                        </BaseText>
+                      </View>
+                    )}
+                    {(edu?.country || edu?.province) && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Location:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {[edu?.province, edu?.country]
+                            .filter(Boolean)
+                            .join(', ')}
+                        </BaseText>
+                      </View>
+                    )}
+                    {(edu?.start_date || (edu?.startDate_month && edu?.startDate_year)) && (edu?.end_date || (edu?.endDate_month && edu?.endDate_year)) && (
+                      <View style={styles.infoRow}>
+                        <BaseText style={styles.infoLabel}>Duration:</BaseText>
+                        <BaseText style={styles.infoValue}>
+                          {edu?.start_date?.month || edu?.startDate_month} {edu?.start_date?.year || edu?.startDate_year} - {edu?.end_date?.month || edu?.endDate_month} {edu?.end_date?.year || edu?.endDate_year}
+                        </BaseText>
+                      </View>
+                    )}
                   </View>
-                )}
-                {(userInfo.education.country || userInfo.education.province) && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Location:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {[userInfo.education.province, userInfo.education.country]
-                        .filter(Boolean)
-                        .join(', ')}
-                    </BaseText>
-                  </View>
-                )}
-                {userInfo.education.start_date && userInfo.education.end_date && (
-                  <View style={styles.infoRow}>
-                    <BaseText style={styles.infoLabel}>Duration:</BaseText>
-                    <BaseText style={styles.infoValue}>
-                      {userInfo.education.start_date.month} {userInfo.education.start_date.year} - {userInfo.education.end_date.month} {userInfo.education.end_date.year}
-                    </BaseText>
-                  </View>
-                )}
+                ))}
               </View>
             </View>
           )}
@@ -326,7 +351,12 @@ const styles = StyleSheet.create({
     width: wp(130),
     height: wp(130),
     borderRadius: 100,
-    overflow: 'hidden',
+    backgroundColor: colors.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   name: {
     ...commonFontStyle(600, 25, colors._0B3970),

@@ -73,8 +73,6 @@ ${salary}${shareUrlText}`;
         url: shareUrl,
       };
 
-      // Use cover image if available, otherwise use company logo
-      // Only use string URLs for sharing (not require resources)
       const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
         ? coverImages[0]
         : (item?.company_id?.logo && typeof item.company_id.logo === 'string'

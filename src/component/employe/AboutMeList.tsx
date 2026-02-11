@@ -171,7 +171,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
 
       <View>
         <Text style={[styles.headerText, { marginTop: hp(20) }]}>
-          Select your skills
+          Select your skills<Text style={styles.required}>*</Text>
         </Text>
         <CustomDropdownMulti
           disable={false}
@@ -214,7 +214,9 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
 
       <View style={{ marginTop: hp(0), overflow: 'visible', zIndex: 1 }}>
         <View style={[styles.fieldHeader, { overflow: 'visible' }]}>
-          <Text style={styles.fieldLabel}>Select your language</Text>
+          <Text style={styles.fieldLabel}>
+            Select your language<Text style={styles.required}>*</Text>
+          </Text>
           <Tooltip
             message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
             position="bottom"
@@ -536,5 +538,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 24,
     height: 24,
+  },
+  required: {
+    color: 'red',
+    marginLeft: 2,
   },
 });

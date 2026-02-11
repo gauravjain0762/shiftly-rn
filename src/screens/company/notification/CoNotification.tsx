@@ -17,6 +17,7 @@ import { useGetCompanyNotificationQuery } from '../../../api/dashboardApi';
 import { formatted } from '../../../utils/commonFunction';
 import { useAppDispatch } from '../../../redux/hooks';
 import { setHasUnreadNotification } from '../../../features/authSlice';
+import { AppStyles } from '../../../theme/appStyles';
 
 const CoNotification = () => {
   const { t } = useTranslation();

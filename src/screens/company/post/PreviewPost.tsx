@@ -102,7 +102,7 @@ const PreviewPost = () => {
             }
 
             if (response?.status) {
-                successToast(response?.message);
+                // successToast(response?.message);
                 updatePostForm({ isPostModalVisible: true });
             } else {
                 errorToast(response?.message || (postEditMode ? 'Failed to update post' : 'Failed to create post'));

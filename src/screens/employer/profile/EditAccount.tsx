@@ -84,12 +84,12 @@ const EditAccountScreen = () => {
     }
 
     console.log('🔥 ~ handleSave ~ formData:', formData);
-    
+
     // Set loading state if image is being uploaded
     if (picture?.path) {
       setIsUploadingImage(true);
     }
-    
+
     try {
       const updateData = new FormData();
       updateData.append('name', formData.name);
@@ -161,7 +161,7 @@ const EditAccountScreen = () => {
                       source={
                         picture?.path || formData?.picture
                           ? { uri: picture?.path || formData?.picture }
-                          : null
+                          : IMAGES.logoText
                       }
                       style={styles.avatarImage}
                       resizeMode="cover"
@@ -388,13 +388,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     borderRadius: wp(60),
+    backgroundColor: colors.white, // Ensure shadow is visible
   },
   avatar: {
     width: wp(120),
     height: wp(120),
-    borderRadius: wp(60),
     overflow: 'hidden',
-    backgroundColor: '#E0E0E0', // Fallback background color
+    borderRadius: wp(60),
   },
   avatarImage: {
     width: wp(120),

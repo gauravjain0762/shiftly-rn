@@ -68,8 +68,6 @@ const CreateProfileScreen = () => {
     activeStep,
     showModal,
   } = useSelector((state: RootState) => state.employee);
-  console.log("🔥 ~ CreateProfileScreen ~ experienceList:", experienceList)
-  console.log(">>>>>>> ~ CreateProfileScreen ~ educationList length: >>>>>>>>>>", educationList?.length)
 
   const { data: getEducation, refetch: refetchEducation } = useGetEducationsQuery(
     {},
@@ -147,6 +145,8 @@ const CreateProfileScreen = () => {
           location: selectedLocation,
         })
       );
+    } else {
+      dispatch(setActiveStep(1));
     }
   }, [route.params?.selectedLocation]);
 
@@ -318,7 +318,11 @@ const CreateProfileScreen = () => {
         };
 
         try {
+
+          console.log('✅ ~ Education Payload:', JSON.stringify(payload, null, 2));
           const response = await addUpdateEducation(payload).unwrap();
+          console.log('✅ ~ Education Response:', JSON.stringify(response, null, 2));
+
 
           if (response?.status) {
             // successToast(response?.message);
@@ -332,6 +336,7 @@ const CreateProfileScreen = () => {
 
       dispatch(setEducationList([]));
       refetchEducation();
+      dispatch(setActiveStep(2));
     } catch (error) {
       console.error('Error adding education:', error);
     }
@@ -360,11 +365,16 @@ const CreateProfileScreen = () => {
             },
           }),
         };
+
+        console.log('✅ ~ Experience Payload:', JSON.stringify(payload, null, 2));
         const response = await addUpdateExperience(payload).unwrap();
+        console.log('✅ ~ Experience Response:', JSON.stringify(response, null, 2));
+
+
 
         if (response?.status) {
           // successToast(response?.message);
-          dispatch(setActiveStep(3));
+          // dispatch(setActiveStep(3)); 
         } else {
           errorToast(response?.message);
         }
@@ -372,6 +382,8 @@ const CreateProfileScreen = () => {
 
       dispatch(setExperienceList([]));
       refetchExperience();
+      dispatch(setActiveStep(3));
+
     } catch (error) {
       console.error('Error adding experience:', error);
     }
@@ -665,8 +677,8 @@ const CreateProfileScreen = () => {
 
           {activeStep === 2 && (
             <>
-              {(experienceData || experienceList)?.length > 0 &&
-                (experienceData || experienceList)?.map((item: ExperienceItem, index: number) => (
+              {experienceList?.length > 0 &&
+                experienceList?.map((item: ExperienceItem, index: number) => (
                   <EducationCard
                     key={index}
                     item={item}
@@ -713,7 +725,7 @@ const CreateProfileScreen = () => {
                   />
                 ))}
               <ExperienceList
-                experienceList={experienceData || experienceList}
+                experienceList={experienceList}
                 experienceListEdit={experienceListEdit}
                 setExperienceListEdit={(val: any) =>
                   dispatch(setExperienceListEdit(val))
@@ -784,7 +796,7 @@ const CreateProfileScreen = () => {
             style={styles.btn}
             title="Next"
             onPress={() => {
-              dispatch(setActiveStep(2));
+              handleAddEducation();
             }}
           // disabled={educationList?.length === 0}
           />
@@ -834,7 +846,7 @@ const CreateProfileScreen = () => {
             style={styles.btn}
             title={'Next'}
             onPress={() => {
-              dispatch(setActiveStep(3));
+              handleAddUExperience();
             }}
           // disabled={experienceList?.length === 0}
           />
@@ -843,6 +855,7 @@ const CreateProfileScreen = () => {
               type="Company"
               style={styles.btn}
               title={'Update Profile'}
+              disabled={experienceList?.length === 0}
               onPress={() => {
                 handleUpdateProfile();
               }}

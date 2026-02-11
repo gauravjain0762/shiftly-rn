@@ -205,13 +205,12 @@ const CoEditMyProfile = () => {
                       ? { uri: logo?.uri }
                       : userInfo?.logo
                         ? { uri: userInfo.logo }
-                        : IMAGES.hotel_cover
+                        : IMAGES.logoText
                   }
                   imageStyle={{ height: '100%', width: '100%' }}
                   containerStyle={styles.logoImage}
                   resizeMode="cover"
                 />
-                {/* Edit Icon */}
                 <TouchableOpacity
                   style={styles.editIconWrapper}
                   onPress={() => {

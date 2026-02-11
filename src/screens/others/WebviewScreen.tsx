@@ -45,6 +45,7 @@ const WebViewScreen = () => {
             url={params?.link}
             onLoadEnd={() => setIsLoading(false)}
             onNavigationStateChange={(navState: any) => {
+              console.log("🔥 ~ WebViewScreen ~ navState:", navState)
               if (navState.url.includes('step=confirm')) {
                 goBack();
               }

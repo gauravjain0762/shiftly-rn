@@ -66,7 +66,7 @@ const ViewProfileScreen = () => {
 
       const response = await updateAboutMe(formData).unwrap();
       console.log(">>>>>>>>>>> ~ handleToggleOpenForWork ~ response:", response)
-      
+
       if (response?.status) {
         setIsOpenForWork(newValue);
         // Update userInfo in Redux if response contains updated user data
@@ -100,20 +100,13 @@ const ViewProfileScreen = () => {
             />
           </Pressable>
           <View style={styles.container}>
-            {hasValidImage(userInfo?.picture) ? (
-              <CustomImage
-                uri={userInfo?.picture}
-                imageStyle={{ height: '100%', width: '100%' }}
-                containerStyle={styles.avatar}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                <Text style={styles.avatarText}>
-                  {getInitials(userInfo?.name)}
-                </Text>
-              </View>
-            )}
+            <CustomImage
+              uri={userInfo?.picture}
+              source={IMAGES.logoText}
+              imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
+              containerStyle={styles.avatar}
+              resizeMode={userInfo?.picture ? "cover" : "contain"}
+            />
             <Text style={styles.name}>{userInfo?.name}</Text>
             <View style={styles.locationRow}>
               <Image
@@ -124,7 +117,7 @@ const ViewProfileScreen = () => {
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleToggleOpenForWork}
                 disabled={isUpdating}
                 style={[
@@ -235,7 +228,12 @@ const styles = StyleSheet.create({
     width: wp(115),
     height: wp(115),
     borderRadius: 100,
-    overflow: 'hidden',
+    backgroundColor: colors.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   name: {
     marginTop: hp(8),

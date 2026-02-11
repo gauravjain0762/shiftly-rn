@@ -560,6 +560,10 @@ const CreateAccount = () => {
     formData.append('values', companyProfileData?.values || '');
     formData.append('services', companyProfileData?.services?.join(',') || '');
     formData.append('company_name', companyRegisterData?.company_name || '');
+    formData.append('city', companyProfileData?.city || '');
+    formData.append('country', companyProfileData?.country || '');
+
+    console.log('>>>>>>>>>>>>. ~ handleCreateProfile ~ formData:', JSON.stringify(formData));
 
     // console.log(
     //   '🔥 ~ handleCreateProfile ~ formData:',
@@ -1093,7 +1097,7 @@ const CreateAccount = () => {
                   return;
                 }
                 // Require at least 10 digits before proceeding
-                if (numericPhone.length < 10) {
+                if (numericPhone.length < 5) {
                   errorToast('Please enter a valid phone number');
                   return;
                 }
@@ -1312,6 +1316,8 @@ const CreateAccount = () => {
                                   address: item.description,
                                   lat: location?.lat,
                                   lng: location?.lng,
+                                  city: location?.city,
+                                  country: location?.country,
                                 }),
                               );
 
@@ -1320,6 +1326,8 @@ const CreateAccount = () => {
                                   address: item.description,
                                   lat: location?.lat,
                                   lng: location?.lng,
+                                  city: location?.city,
+                                  country: location?.country,
                                 }),
                               );
                             }
@@ -1700,7 +1708,7 @@ const CreateAccount = () => {
 
             <View style={styles.buttonContainer}>
               <GradientButton
-                style={styles.btn}
+                style={[styles.btn, { marginTop: hp(40) }]}
                 type="Company"
                 title={t('Continue')}
                 onPress={() => handleCreateProfile('complete')}

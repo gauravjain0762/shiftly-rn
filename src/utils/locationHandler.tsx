@@ -344,10 +344,27 @@ export const getPlaceDetails = async (placeId: string, mapKey?: string) => {
 
     if (result?.result?.geometry?.location) {
       const { lat, lng } = result.result.geometry.location;
+      const addressComponents = result.result.address_components;
+
+      let city = '';
+      let country = '';
+
+      if (addressComponents) {
+        addressComponents.forEach((component: any) => {
+          if (component.types.includes('locality')) {
+            city = component.long_name;
+          }
+          if (component.types.includes('country')) {
+            country = component.long_name;
+          }
+        });
+      }
 
       console.log('📍 Selected Place Coordinates:', lat, lng);
+      console.log('📍 Selected Place City:', city);
+      console.log('📍 Selected Place Country:', country);
 
-      return { lat, lng };
+      return { lat, lng, city, country };
     }
   } catch (error) {
     console.error('Error fetching place details:', error);

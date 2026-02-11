@@ -41,7 +41,6 @@ const AccountScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [empLogout] = useEmployeeLogoutMutation({});
   const { userInfo } = useSelector((state: RootState) => state.auth);
-  console.log("🔥 ~ AccountScreen ~ userInfo:", userInfo)
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [employeeDeleteAccount] = useEmployeeDeleteAccountMutation({});
   const [deletepopupVisible, setdeletePopupVisible] = useState<boolean>(false);
