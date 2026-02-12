@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Pressable,
   Image,
+  Linking,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -245,8 +246,8 @@ const SuggestedEmployeeScreen = () => {
                 imageStyle={styles.shortlistedAvatar}
               />
               <View style={styles.shortlistedInfo}>
-                <Text style={styles.shortlistedEmployeeName}>{user?.name || t('Candidate Name')}</Text>
-                <Text style={styles.shortlistedEmployeeRole}>{user?.responsibility || user?.job_title || t('Job Role')}</Text>
+                <Text style={styles.shortlistedEmployeeName}>{user?.name || 'N/A'}</Text>
+                <Text style={styles.shortlistedEmployeeRole}>{user?.responsibility || user?.job_title || 'N/A'}</Text>
               </View>
             </TouchableOpacity>
 
@@ -257,15 +258,32 @@ const SuggestedEmployeeScreen = () => {
             </Text>
 
             <View style={styles.shortlistedActions}>
-              <TouchableOpacity style={styles.viewAiButton}>
+              <TouchableOpacity
+                style={[
+                  styles.viewAiButton,
+                  item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
+                ]}
+                disabled={item?.status !== 'Interview_completed'}
+                onPress={() => {
+                  if (item?.interview_response?.video_url) {
+                    Linking.openURL(item.interview_response.video_url);
+                  } else {
+                    errorToast(t('Video recording not available'));
+                  }
+                }}>
                 <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.assessmentButton}
+                style={[
+                  styles.assessmentButton,
+                  item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
+                ]}
+                disabled={item?.status !== 'Interview_completed'}
                 onPress={() =>
                   navigateTo(SCREENS.InterviewStatus, {
                     jobData: jobInfo,
                     candidateData: user,
+                    inviteData: item,
                   })
                 }>
                 <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
@@ -358,10 +376,10 @@ const SuggestedEmployeeScreen = () => {
           activeOpacity={0.7}
         >
           <Text style={styles.employeeName}>
-            {item?.name || t('Candidate Name')}
+            {item?.name || 'N/A'}
           </Text>
           <Text style={styles.employeeRole}>
-            {item?.responsibility || item?.job_title || t('Job Role')}
+            {item?.responsibility || item?.job_title || 'N/A'}
           </Text>
           <Text style={styles.employeeExperience}>
             {`${experience || 0}y ${t('Experience')}`}

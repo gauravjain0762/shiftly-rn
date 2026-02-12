@@ -1,4 +1,6 @@
 import React from 'react'
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import { Image, StyleSheet, View } from 'react-native'
 
 import { colors } from '../../../theme/colors'
@@ -12,6 +14,7 @@ import { BackHeader, LinearContainer } from '../../../component'
 import CommonButton from '../../../component/common/CommonButton'
 
 const JobInvitationScreen = () => {
+    const { userInfo } = useSelector((state: RootState) => state.auth);
 
     const route = useRoute();
     const { jobDetail, link } = route.params as {
@@ -48,7 +51,7 @@ const JobInvitationScreen = () => {
                         </BaseText>
 
                         <View style={styles.empRow}>
-                            <BaseText style={[styles.location, {flex: 1}]}>
+                            <BaseText style={[styles.location, { flex: 1 }]}>
                                 {`${job?.area ?? ''}, ${job?.country ?? ''}`}
                             </BaseText>
                         </View>
@@ -62,7 +65,7 @@ const JobInvitationScreen = () => {
                 </View>
 
                 <View style={{ marginTop: hp(50), flex: 1, }}>
-                    <BaseText style={{ ...commonFontStyle(700, 20, colors._0B3970) }}>{"Dear David,"}</BaseText>
+                    <BaseText style={{ ...commonFontStyle(700, 20, colors._0B3970) }}>{`Dear ${userInfo?.name || 'Candidate'},`}</BaseText>
                     <BaseText style={{ ...commonFontStyle(400, 16, colors._0B3970), marginTop: hp(12), lineHeight: hp(25) }}>{"Thank you for applying for the "}
                         <BaseText style={{ ...commonFontStyle(700, 16, colors._0B3970) }}>
                             {`${job?.title} `}

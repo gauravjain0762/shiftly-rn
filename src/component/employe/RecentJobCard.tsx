@@ -5,6 +5,8 @@ import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { getTimeAgo } from '../../utils/commonFunction';
+import Share from 'react-native-share';
+import { Eye } from 'lucide-react-native';
 
 type Props = {
     item: any;
@@ -15,6 +17,34 @@ type Props = {
 const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
     const logoUri = item?.company_id?.logo;
 
+    const handleShare = async () => {
+        try {
+            const title = item?.title || 'Job Opportunity';
+            const description = item?.description || '';
+            const salary =
+                item?.monthly_salary_from || item?.monthly_salary_to
+                    ? `Salary: ${item?.currency || 'USD'} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+                    : '';
+
+            const shareUrl = item?.share_url || '';
+            const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
+
+            const message = `${title}\n\n${description}\n\n${salary}${shareUrlText}`;
+
+            const shareOptions = {
+                title: title,
+                message: message,
+                url: shareUrl,
+            };
+
+            await Share.open(shareOptions);
+        } catch (err: any) {
+            if (err?.message !== 'User did not share') {
+                console.log('❌ Share error:', err);
+            }
+        }
+    };
+
     return (
         <TouchableOpacity
             activeOpacity={0.9}
@@ -24,23 +54,23 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
             <View style={styles.header}>
                 <View style={styles.logoContainer}>
                     <FastImage
-                        source={logoUri ? { uri: logoUri } : IMAGES.logoText}
-                        style={styles.logo}
                         resizeMode="cover"
+                        style={styles.logo}
+                        source={logoUri ? { uri: logoUri } : IMAGES.logoText}
                     />
                 </View>
                 <View style={styles.headerInfo}>
                     <View style={styles.headerTopRow}>
                         <Text style={styles.companyName} numberOfLines={1}>
-                            {item?.company_id?.company_name || 'Company Name'}
+                            {item?.company_id?.company_name || 'N/A'}
                         </Text>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleShare}>
                             <Image source={IMAGES.share} style={[styles.shareIcon, { tintColor: colors.black }]} resizeMode="contain" />
                         </TouchableOpacity>
 
                     </View>
                     <Text style={styles.location} numberOfLines={1}>
-                        {`${item?.city || 'N/A'}, ${item?.country || 'N/A'}`}
+                        {(item?.city || item?.country) ? `${item?.city}${item?.city && item?.country ? ', ' : ''}${item?.country}` : (item?.location || 'N/A')}
                     </Text>
                 </View>
             </View>
@@ -49,42 +79,48 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                 <View style={styles.titleRow}>
                     <Text style={styles.jobTitle}>{item?.title}</Text>
                     <TouchableOpacity style={styles.viewButton} onPress={onPressView}>
-                        <Image source={IMAGES.eye} style={[styles.viewIcon, { tintColor: colors.white }]} resizeMode="contain" />
+                        <Eye size={wp(14)} color={colors.white} />
                         <Text style={styles.viewText}>View</Text>
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.description} numberOfLines={2}>
-                    {item?.description || 'We are looking for experienced restaurant manager to..'}
-                </Text>
+                <View style={styles.descriptionRow}>
+                    <Text style={styles.description} numberOfLines={2}>
+                        {item?.description || 'N/A'}
+                    </Text>
+                    <Text style={styles.timeAgo}>
+                        {getTimeAgo(item?.createdAt) || 'N/A'}
+                    </Text>
+                </View>
+
+                {item?.contract_type && (
+                    <View style={[styles.tag, { backgroundColor: '#F0F4F8', alignSelf: 'flex-start' }]}>
+                        <Text style={[styles.tagText, { color: '#0B1C39' }]}>{item?.contract_type}</Text>
+                    </View>
+                )}
 
                 <View style={styles.tagsRow}>
-                    <ScrollView
-                        horizontal
-                        style={{ flex: 1 }}
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', gap: wp(8) }}
-                    >
-                        {item?.contract_type && (
-                            <View style={[styles.tag, { backgroundColor: '#0B1C39' }]}>
-                                <Text style={styles.tagText}>{item?.contract_type}</Text>
-                            </View>
-                        )}
-                        {(item?.monthly_salary_from || item?.monthly_salary_to) && (
-                            <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
-                                <Text style={styles.tagText}>
-                                    {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()} {item?.currency}
-                                </Text>
-                            </View>
-                        )}
-                        <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
-                            <Text style={styles.tagText}>1 Year Contract</Text>
-                        </View>
-                    </ScrollView>
-                    <View>
-                        <Text style={styles.timeAgo}>
-                            {getTimeAgo(item?.createdAt) || 'N/A'}
-                        </Text>
+                    <View style={{ flex: 1 }}>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ gap: wp(8) }}
+                        >
+                            {(item?.monthly_salary_from || item?.monthly_salary_to) && (
+                                <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
+                                    <Text style={styles.tagText}>
+                                        {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()} {item?.currency}
+                                    </Text>
+                                </View>
+                            )}
+                            {(item?.contract_period || item?.duration) && (
+                                <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
+                                    <Text style={styles.tagText}>
+                                        {item?.contract_period || item?.duration}{!(item?.contract_period || item?.duration)?.toLowerCase().includes('contract') ? ' Contract' : ''}
+                                    </Text>
+                                </View>
+                            )}
+                        </ScrollView>
                     </View>
                 </View>
             </View>
@@ -168,24 +204,26 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         gap: wp(4)
     },
-    viewIcon: {
-        width: wp(14),
-        height: wp(14)
-    },
     viewText: {
         ...commonFontStyle(500, 12, colors.white)
     },
+    descriptionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: wp(10),
+    },
     description: {
+        flex: 1,
         ...commonFontStyle(400, 13, colors._656464),
         lineHeight: hp(18),
     },
     tagsRow: {
         flexDirection: 'row',
-        // flexWrap: 'wrap',
+        alignItems: 'center',
         gap: wp(8),
         marginTop: hp(4),
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        flexWrap: 'wrap'
     },
     tag: {
         paddingVertical: hp(6),
@@ -196,8 +234,7 @@ const styles = StyleSheet.create({
         ...commonFontStyle(500, 10, colors.white),
     },
     timeAgo: {
-        ...commonFontStyle(400, 12, colors.black),
-        textAlign: 'right',
-        marginTop: hp(4)
+        ...commonFontStyle(400, 11, colors._656464),
+        marginTop: hp(2),
     }
 });

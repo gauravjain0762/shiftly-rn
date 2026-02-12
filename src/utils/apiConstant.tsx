@@ -89,6 +89,9 @@ export const API = {
   getFavouritesJob: '/getFavourites',
   getFilterData: '/getFilterData',
   getActivities: '/getActivities',
+  getEmployeeDashboard: '/getDashboard',
+  getAppliedJobs: '/getAppliedJobs',
+  getInterviews: '/getInterviews',
 
   // UserDetails
   getProfile: '/getProfile',

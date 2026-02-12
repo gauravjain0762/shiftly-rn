@@ -203,10 +203,10 @@ export const getTimeAgo = (createdAt: string): string => {
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffDays > 0) return `${diffDays}d`;
-  if (diffHours > 0) return `${diffHours}h`;
-  if (diffMinutes > 0) return `${diffMinutes}m`;
-  return `${diffSeconds}s`;
+  if (diffDays > 0) return `${diffDays}d ago`;
+  if (diffHours > 0) return `${diffHours}h ago`;
+  if (diffMinutes > 0) return `${diffMinutes}m ago`;
+  return `${diffSeconds}s ago`;
 };
 
 export const getExpiryDays = (expiryDate: string): string | null => {

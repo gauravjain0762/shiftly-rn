@@ -129,6 +129,7 @@ export const IMAGES = {
   illustration8: require('./image/illustration8.png'),
   work: require('./image/work.png'),
   ic_chat: require('./image/ic_chat.png'),
+  tag: require('./image/tag.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

@@ -464,6 +464,7 @@ export const dashboardApi = createApi({
         departments,
         search,
         page,
+        type,
       }) => {
         const params = new URLSearchParams();
 
@@ -476,6 +477,7 @@ export const dashboardApi = createApi({
         if (departments) params.append('departments', departments);
         if (search) params.append('search', search);
         if (page) params.append('page', page.toString());
+        if (type) params.append('type', type);
 
         return {
           url: `${API.getEmployeeJobs}?${params.toString()}`,
@@ -484,6 +486,22 @@ export const dashboardApi = createApi({
         };
       },
       providesTags: ['GetEmployeeJobs'],
+    }),
+    getAppliedJobs: builder.query<any, any>({
+      query: params => ({
+        url: API.getAppliedJobs,
+        method: HTTP_METHOD.GET,
+        params: params,
+        skipLoader: true,
+      }),
+    }),
+    getInterviews: builder.query<any, any>({
+      query: params => ({
+        url: API.getInterviews,
+        method: HTTP_METHOD.GET,
+        params: params,
+        skipLoader: true,
+      }),
     }),
     getEmployeeJobDetails: builder.query<any, any>({
       query: job_id => {
@@ -876,6 +894,15 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    getEmployeeDashboard: builder.query<any, any>({
+      query: () => {
+        return {
+          url: API.getEmployeeDashboard,
+          method: HTTP_METHOD.GET,
+          skipLoader: true,
+        };
+      },
+    }),
     getDashboard: builder.query<any, any>({
       query: () => {
         return {
@@ -977,6 +1004,7 @@ export const {
   useSendInterviewInvitesMutation,
   useLazyGetEmployeeProfileQuery,
   useGetDashboardQuery,
+  useGetEmployeeDashboardQuery,
   useGetAppDataQuery,
   useGetCompanyProfileByIdQuery,
   useLazyGetCompanyProfileByIdQuery,
@@ -984,4 +1012,6 @@ export const {
   useGetEssentialBenefitsQuery,
   useGetEducationsQuery,
   useGetExperiencesQuery,
+  useGetAppliedJobsQuery,
+  useGetInterviewsQuery,
 } = dashboardApi;

@@ -6,10 +6,14 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
+    Linking,
 } from 'react-native';
+import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useRoute } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
+import { navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
 import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import CustomImage from '../../../component/common/CustomImage';
@@ -19,24 +23,46 @@ import InterviewScoresModal from '../../../component/common/InterviewScoresModal
 const InterviewStatus = () => {
     const { t } = useTranslation();
     const route = useRoute<any>();
-    const { jobData, candidateData } = route.params || {};
+    const { jobData, candidateData, inviteData } = route.params || {};
+    console.log("🔥🔥🔥 ~ InterviewStatus ~ jobData:", jobData)
 
-    // Mock data fallbacks for UI visualization
-    const jobTitle = jobData?.title || 'Restaurant Manager';
-    const companyName = jobData?.company_name || 'Atlantis, The Palm, Dubai';
-    const location =
-        jobData?.city || jobData?.location
-            ? `${jobData?.city || ''} ${jobData?.country || ''}`
-            : 'Dubai, UAE';
-    const contract = jobData?.contract_type || 'Full Time';
-    const salary =
-        jobData?.monthly_salary_to
-            ? `${jobData?.currency} ${jobData?.monthly_salary_to / 1000}k`
-            : 'AED 10k';
+    const jobTitle = jobData?.title || 'N/A';
+    const companyName = jobData?.company_id?.company_name || 'N/A';
+    const location = jobData?.address ||
+        (jobData?.city || jobData?.country
+            ? `${jobData?.city ? jobData?.city + ', ' : ''}${jobData?.country || ''}`
+            : 'N/A');
+    const contract = jobData?.contract_type || 'N/A';
+    const getSalary = () => {
+        const from = jobData?.monthly_salary_from;
+        const to = jobData?.monthly_salary_to;
+        if (from && to) {
+            return `${jobData?.currency} ${from} - ${to}`;
+        }
+        if (from) return `${jobData?.currency} ${from}`;
+        if (to) return `${jobData?.currency} ${to}`;
+        return 'N/A';
+    };
+    const salary = getSalary();
 
-    const candidateName = candidateData?.name || 'Tafnol Theresa';
-    const candidateRole = candidateData?.responsibility || 'Hotel Management';
-    const candidateImg = candidateData?.picture;
+    // Candidate Data Fallbacks
+    const candidateName = candidateData?.name || inviteData?.user_id?.name || 'N/A';
+    const candidateRole = candidateData?.responsibility || inviteData?.user_id?.responsibility || 'N/A';
+    const candidateImg = candidateData?.picture || inviteData?.user_id?.picture;
+
+    // Interview Status Data
+    const rawStatus = inviteData?.status || 'Pending';
+    const interviewStatus = rawStatus === 'Interview_completed' ? 'Completed' : rawStatus;
+    const isInterviewCompleted = rawStatus === 'Interview_completed';
+    const interviewDate = inviteData?.interview_completed
+        ? moment(inviteData.interview_completed).format('h:mm A - DDMMM')
+        : '';
+
+    // Transcript Data
+    const transcriptData = inviteData?.interview_response?.transcript_with_timestamp || [];
+    const interviewAudioUrl = inviteData?.interview_response?.audio_url;
+    const interviewVideoUrl = inviteData?.interview_response?.video_url;
+    const interviewScores = inviteData?.interview_response?.scores;
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [activeTab, setActiveTab] = React.useState<'General' | 'Languages'>('General');
@@ -61,15 +87,20 @@ const InterviewStatus = () => {
                 <View style={styles.card}>
                     <View style={styles.row}>
                         <View style={styles.logoContainer}>
-                            <Text style={styles.logoText}>{companyName?.[0] || 'A'}</Text>
+                            <CustomImage
+                                uri={jobData?.company_id?.logo}
+                                containerStyle={styles.logoImage}
+                                imageStyle={styles.logoImage}
+                                resizeMode='cover'
+                            />
                         </View>
                         <View style={styles.jobInfo}>
                             <Text style={styles.jobTitle}>{jobTitle}</Text>
                             <Text style={styles.companyName}>{companyName}</Text>
                             <View style={styles.jobMetaRow}>
                                 <Text style={styles.jobMeta}>{`${location} - ${contract}`}</Text>
-                                <Text style={styles.salary}>{salary}</Text>
                             </View>
+                            <Text style={[styles.salary, { marginTop: hp(6) }]}>{salary}</Text>
                         </View>
                     </View>
                 </View>
@@ -90,56 +121,77 @@ const InterviewStatus = () => {
                             <Text style={styles.candidateRole}>{candidateRole}</Text>
                         </View>
                         <View style={styles.statusCol}>
-                            <View style={styles.statusBadge}>
-                                <Text style={styles.statusText}>{t('Completed')}</Text>
+                            <View style={[styles.statusBadge, !isInterviewCompleted && { backgroundColor: '#FFA500' }]}>
+                                <Text style={styles.statusText}>{t(interviewStatus)}</Text>
                             </View>
-                            <Text style={styles.dateText}>2:30 PM - 04Jan</Text>
+                            {!!interviewDate && <Text style={styles.dateText}>{interviewDate}</Text>}
                         </View>
                     </View>
                 </View>
 
                 {/* Media Buttons */}
                 <View style={styles.mediaRow}>
-                    <TouchableOpacity style={styles.mediaButton}>
-                        <Image source={IMAGES.sound} style={styles.mediaIcon} />
-                        <Text style={styles.mediaText}>{t('Listen Audio')}</Text>
+                    <TouchableOpacity
+                        style={[styles.mediaButton, !isInterviewCompleted && { borderColor: '#D3D3D3' }]}
+                        disabled={!isInterviewCompleted || !interviewAudioUrl}
+                        onPress={() => {
+                            if (interviewAudioUrl) {
+                                Linking.openURL(interviewAudioUrl);
+                            }
+                        }}
+                    >
+                        <Image source={IMAGES.sound} style={[styles.mediaIcon, !isInterviewCompleted && { tintColor: '#D3D3D3' }]} />
+                        <Text style={[styles.mediaText, !isInterviewCompleted && { color: '#D3D3D3' }]}>{t('Listen Audio')}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.mediaButton}>
-                        <Image source={IMAGES.watch} style={styles.mediaIcon} />
-                        <Text style={styles.mediaText}>{t('Watch Interview')}</Text>
+                    <TouchableOpacity
+                        style={[styles.mediaButton, !isInterviewCompleted && { borderColor: '#D3D3D3' }]}
+                        disabled={!isInterviewCompleted || !interviewVideoUrl}
+                        onPress={() => {
+                            if (interviewVideoUrl) {
+                                Linking.openURL(interviewVideoUrl);
+                            }
+                        }}
+                    >
+                        <Image source={IMAGES.watch} style={[styles.mediaIcon, !isInterviewCompleted && { tintColor: '#D3D3D3' }]} />
+                        <Text style={[styles.mediaText, !isInterviewCompleted && { color: '#D3D3D3' }]}>{t('Watch Interview')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Transcript */}
                 <Text style={styles.sectionTitle}>{t('Transcript')}</Text>
                 <View style={styles.transcriptBox}>
-                    <Text style={styles.transcriptText}>
-                        <Text style={styles.speaker}>{t('Agent')}: </Text>
-                        Hi, I'm from Emirates Catering calling about your AI-powered
-                        interview. How are you doing?
-                    </Text>
-                    <Text style={[styles.transcriptText, { marginTop: hp(12) }]}>
-                        <Text style={styles.speaker}>{t('User')}: </Text>
-                        I'm very good. Thank you so much. How are you?
-                    </Text>
-                    <Text style={[styles.transcriptText, { marginTop: hp(12) }]}>
-                        <Text style={styles.speaker}>{t('Agent')}: </Text>
-                        I'm doing great, thanks for asking! I appreciate you taking the time
-                        to chat today. So, thanks for your interest in the Flight Attendant
-                        position with us. I'm really looking forward to learning more about
-                        your background and seeing how this role Read More...
-                    </Text>
+                    {transcriptData.length > 0 ? (
+                        transcriptData.map((item: any, index: number) => (
+                            <Text key={index} style={[styles.transcriptText, index > 0 && { marginTop: hp(12) }]}>
+                                <Text style={styles.speaker}>{item.role === 'agent' ? t('Agent') : t('User')}: </Text>
+                                {item.content}
+                            </Text>
+                        ))
+                    ) : (
+                        <Text style={styles.transcriptText}>{t('No transcript available')}</Text>
+                    )}
                 </View>
 
                 {/* Chat with Admin */}
-                <TouchableOpacity style={styles.chatButton}>
+                <TouchableOpacity
+                    style={styles.chatButton}
+                    onPress={() => {
+                        navigateTo(SCREENS.CoChat, {
+                            data: {
+                                user_id: inviteData?.user_id,
+                            },
+                            mainjob_data: jobData,
+                            isFromJobDetail: true,
+                        });
+                    }}
+                >
                     <View style={styles.chatIconWrapper}>
                         <Image source={IMAGES.chat} style={styles.chatIcon} resizeMode="contain" />
                     </View>
                     <View>
-                        <Text style={styles.chatTitle}>{t('Chat With Admin')}</Text>
+                        <Text style={styles.chatTitle}>{t('Chat With Candidate')}</Text>
                         <Text style={styles.chatSubtitle}>
-                            {t('Get feel free information')}
+                            {t('Start a conversation')}
                         </Text>
                     </View>
                 </TouchableOpacity>
@@ -164,6 +216,7 @@ const InterviewStatus = () => {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 initialTab={activeTab}
+                scores={interviewScores}
             />
         </LinearContainer>
     );
@@ -201,6 +254,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: wp(12),
+    },
+    logoImage: {
+        width: wp(50),
+        height: wp(50),
+        borderRadius: wp(25),
     },
     logoText: {
         ...commonFontStyle(600, 18, colors._0B3970),

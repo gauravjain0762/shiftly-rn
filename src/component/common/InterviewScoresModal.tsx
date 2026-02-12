@@ -10,12 +10,22 @@ interface InterviewScoresModalProps {
     visible: boolean;
     onClose: () => void;
     initialTab?: 'General' | 'Languages';
+    scores?: {
+        communication?: number | null;
+        language_comprehension?: number | null;
+        language_fluency_and_pace?: number | null;
+        language_grammar_and_structure?: number | null;
+        language_vocabulary_and_expression?: number | null;
+        motivation?: number | null;
+        skills?: number | null;
+    };
 }
 
 const InterviewScoresModal = ({
     visible,
     onClose,
     initialTab = 'General',
+    scores,
 }: InterviewScoresModalProps) => {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'General' | 'Languages'>(initialTab);
@@ -54,10 +64,12 @@ const InterviewScoresModal = ({
                         </View>
                     </View>
                 </View>
-                <Text style={styles.description}>
-                    {description}{' '}
-                    <Text style={styles.readMore}>{t('Read More...')}</Text>
-                </Text>
+                {!!description && (
+                    <Text style={styles.description}>
+                        {description}{' '}
+                        <Text style={styles.readMore}>{t('Read More...')}</Text>
+                    </Text>
+                )}
             </View>
         );
     };
@@ -65,30 +77,30 @@ const InterviewScoresModal = ({
     const generalScores = [
         {
             title: t('Overall'),
-            score: 3,
+            score: 0, // Overall score logic might need to be defined, keeping 0 or calculating average
             max: 5,
-            desc: t('Candidate demonstrates the core competencies required for the role & shows potential for success within the organization. Consider'),
+            desc: '',
             color: '#2FB465',
         },
         {
             title: t('Enthusiasm & Motivation'),
-            score: 5,
+            score: scores?.motivation || 0,
             max: 5,
-            desc: t('Candidate displays genuine interest in the role & Ribbon AI’s mission. Evaluate their energy level during the interview, curiosity'),
+            desc: '',
             color: '#2FB465',
         },
         {
             title: t('Skills and Experience'),
-            score: 4,
+            score: scores?.skills || 0,
             max: 5,
-            desc: t('Candidate displays genuine interest in the role & Ribbon AI’s mission. Evaluate their energy level during the interview, curiosity'),
+            desc: '',
             color: '#2FB465',
         },
         {
             title: t('Communication'),
-            score: 5,
+            score: scores?.communication || 0,
             max: 5,
-            desc: t('Candidate expresses ideas clearly and listens effectively. Evaluate their ability to articulate thoughts, respond thoughtfully'),
+            desc: '',
             color: '#2FB465',
         },
     ];
@@ -96,30 +108,30 @@ const InterviewScoresModal = ({
     const languageScores = [
         {
             title: t('Comprehension'),
-            score: 3,
+            score: scores?.language_comprehension || 0,
             max: 5,
-            desc: t('Candidate demonstrates ability to understand spoken & written English in professional contexts. Assess their comprehension'),
+            desc: '',
             color: '#2FB465',
         },
         {
             title: t('Fluency and pace'),
-            score: 5,
+            score: scores?.language_fluency_and_pace || 0,
             max: 5,
-            desc: t('Candidate communicates in English with appropriate fluency & natural pace. Evaluate their ability to express'),
+            desc: '',
             color: '#2FB465',
         },
         {
             title: t('Grammar and structure'),
-            score: 4,
+            score: scores?.language_grammar_and_structure || 0,
             max: 5,
-            desc: t('Candidate uses correct English grammar and sentence structures appropriate for professional environments. Assess their consistent'),
+            desc: '',
             color: '#2FB465',
         },
         {
             title: t('Vocabulary & expressions'),
-            score: 5,
+            score: scores?.language_vocabulary_and_expression || 0,
             max: 5,
-            desc: t('Candidate possesses sufficient English vocabulary & expressions for professional use. Evaluate their command of industry-appropriate'),
+            desc: '',
             color: '#2FB465',
         },
     ];

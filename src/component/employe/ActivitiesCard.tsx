@@ -18,9 +18,10 @@ const ActivitiesCard: FC<props> = ({ item }) => {
   const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
     item?.job_id,
     {
-      skip: !item?.job_id, // Skip query if job_id is not available
+      skip: !item?.job_id,
     }
   );
+  console.log("🔥🔥🔥 ~ ActivitiesCard ~ jobDetail:", jobDetail)
 
   const getStatusText = () => {
     if (item?.type) {
@@ -31,6 +32,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
 
   const handleViewPress = () => {
     const interviewLink = item?.interview_link || jobDetail?.data?.interview_link;
+    console.log("🔥🔥🔥 ~ handleViewPress ~ interviewLink:", interviewLink)
 
     if (jobDetail?.data) {
       navigateTo(SCREENS.JobInvitationScreen, {

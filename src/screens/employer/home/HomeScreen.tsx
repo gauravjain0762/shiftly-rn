@@ -9,7 +9,7 @@ import { SCREENS } from '../../../navigation/screenNames';
 import {
   useGetEmployeeJobsQuery,
   useGetEmployeeProfileQuery,
-  useGetActivitiesQuery
+  useGetEmployeeDashboardQuery,
 } from '../../../api/dashboardApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -34,14 +34,16 @@ const HomeScreen = () => {
     refetch: refetchJobs
   } = useGetEmployeeJobsQuery({ page: currentPage });
 
-  const jobs = getJobs?.data?.jobs || [];
+  const { data: dashboardData, isLoading: isLoadingDashboard, refetch: refetchDashboard } = useGetEmployeeDashboardQuery({});
+
+  const stats = dashboardData?.data?.stats;
+  const recentJobs = dashboardData?.data?.recent_matched_jobs || [];
+
+  const interviewCount = stats?.interview_requests || 0;
+  const appliedCount = stats?.applied_jobs || 0;
+  const matchedCount = stats?.matched_jobs || 0;
+
   const totalPages = getJobs?.data?.pagination?.total_pages ?? 1;
-
-  const { data: activitiesData } = useGetActivitiesQuery({});
-
-  const interviewCount = activitiesData?.data?.interview_requests || 25;
-  const appliedCount = activitiesData?.data?.applied_jobs || 21;
-  const matchedCount = activitiesData?.data?.matched_jobs || 11;
 
   useEffect(() => {
     if (userInfo?._id) {
@@ -66,6 +68,7 @@ const HomeScreen = () => {
       setCurrentPage(1);
     }
     refetchJobs();
+    refetchDashboard();
   };
 
   const renderHeader = () => {
@@ -83,9 +86,9 @@ const HomeScreen = () => {
           interviewCount={interviewCount}
           appliedCount={appliedCount}
           matchedCount={matchedCount}
-          onPressInterview={() => { }}
-          onPressApplied={() => { }}
-          onPressMatched={() => { }}
+          onPressInterview={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Interviews' })}
+          onPressApplied={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Applied Jobs' })}
+          onPressMatched={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Applied Jobs' })}
         />
 
         <Text style={styles.sectionTitle}>Recent Jobs</Text>
@@ -96,7 +99,7 @@ const HomeScreen = () => {
   return (
     <LinearContainer colors={[colors.white, colors.white]}>
       <FlatList
-        data={jobs}
+        data={recentJobs.length > 0 ? recentJobs : getJobs?.data?.jobs || []}
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         keyExtractor={(item, index) => item?._id || index.toString()}
@@ -109,7 +112,7 @@ const HomeScreen = () => {
           />
         )}
         ListHeaderComponent={renderHeader}
-        refreshing={isFetchingJobs && currentPage === 1}
+        refreshing={(isFetchingJobs || isLoadingDashboard) && currentPage === 1}
         onRefresh={handleRefresh}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
@@ -119,7 +122,7 @@ const HomeScreen = () => {
           ) : null
         }
         ListEmptyComponent={
-          !isLoadingJobs ? (
+          !isLoadingJobs && !isLoadingDashboard ? (
             <Text style={{ textAlign: 'center', marginTop: 20 }}>No jobs found</Text>
           ) : null
         }
