@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: hp(12),
     paddingHorizontal: wp(20),
-    backgroundColor: colors._F7F7F7,
+    backgroundColor: colors.white,
   },
   headerTitle: {
     marginLeft: wp(15),

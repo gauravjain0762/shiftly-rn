@@ -46,7 +46,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
   style,
   textStyle,
   radialStops,
-  gradientColors = [colors.white, colors._F7F7F7],
+  gradientColors = ['#024AA1', '#041428'],
   cx = '50%',
   cy = '50%',
   fx = '50%',
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   CombuttonText: {
-    ...commonFontStyle(600, 20, colors._0B3970),
+    ...commonFontStyle(600, 20, colors.white),
   },
 });
 

@@ -69,8 +69,9 @@ const SuggestedEmployeeScreen = () => {
 
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ ai_data:", ai_data)
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted'>('suggested');
+  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted'>('shortlisted');
   const dispatch = useDispatch<any>();
   const [closeJob] = useCloseCompanyJobMutation();
 
@@ -318,7 +319,7 @@ const SuggestedEmployeeScreen = () => {
               activeOpacity={0.7}
             >
               <CustomImage
-                uri={user?.picture || 'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'}
+                uri={user?.picture || ''}
                 containerStyle={styles.shortlistedAvatar}
                 imageStyle={styles.shortlistedAvatar}
               />
@@ -334,25 +335,10 @@ const SuggestedEmployeeScreen = () => {
                 : t('No Experience')}
             </Text>
 
-            <View style={styles.shortlistedActions}>
+            {item?.status === 'Interview_completed' && <View style={styles.shortlistedActions}>
               <TouchableOpacity
                 style={[
                   styles.viewAiButton,
-                  item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
-                ]}
-                disabled={item?.status !== 'Interview_completed'}
-                onPress={() => {
-                  if (item?.interview_response?.video_url) {
-                    Linking.openURL(item.interview_response.video_url);
-                  } else {
-                    errorToast(t('Video recording not available'));
-                  }
-                }}>
-                <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.assessmentButton,
                   item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
                 ]}
                 disabled={item?.status !== 'Interview_completed'}
@@ -363,9 +349,18 @@ const SuggestedEmployeeScreen = () => {
                     inviteData: item,
                   })
                 }>
+                <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.assessmentButton,
+                  item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
+                ]}
+                disabled={item?.status !== 'Interview_completed'}
+              >
                 <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
               </TouchableOpacity>
-            </View>
+            </View>}
           </View>
 
           <View style={styles.timelineContainer}>
@@ -586,13 +581,13 @@ const SuggestedEmployeeScreen = () => {
             {isFromJobCard && (
               <View style={styles.tabContainer}>
                 <TouchableOpacity
-                  style={[styles.tabButton, activeTab === 'suggested' && styles.activeTabButton]}
+                  style={[styles.tabButton, activeTab === 'suggested' && styles.activeTabButton, activeTab === 'suggested' && { backgroundColor: colors._0B3970, borderColor: colors._0B3970 }]}
                   onPress={() => setActiveTab('suggested')}>
                   <Image
                     source={IMAGES.people}
-                    style={[styles.tabIcon, activeTab === 'suggested' && { tintColor: colors._0B3970 }]}
+                    style={[styles.tabIcon, activeTab === 'suggested' && { tintColor: colors.white }]}
                   />
-                  <Text style={[styles.tabText, activeTab === 'suggested' && styles.activeTabText]}>{t('Suggested List')}</Text>
+                  <Text style={[styles.tabText, activeTab === 'suggested' && styles.activeTabText, activeTab === 'suggested' && { color: colors.white }]}>{t('Suggested List')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1005,7 +1000,6 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     gap: wp(10),
-    marginBottom: hp(20),
   },
   tabButton: {
     flex: 1,
@@ -1086,8 +1080,8 @@ const styles = StyleSheet.create({
   viewAiButton: {
     backgroundColor: '#341A95',
     borderRadius: wp(24),
-    paddingVertical: hp(12),
-    paddingHorizontal: wp(8), // Reduced horizontal padding
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(6), // Reduced horizontal padding
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,

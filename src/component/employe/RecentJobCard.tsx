@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native';
-import FastImage from 'react-native-fast-image';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
@@ -17,6 +16,7 @@ type Props = {
 };
 
 const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
+    console.log("🔥 ~ RecentJobCard ~ item:", item)
     const logoUri = item?.company_id?.logo;
 
     const handleShare = async () => {
@@ -52,16 +52,13 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
             <TouchableOpacity
                 style={styles.header}
                 onPress={() => {
-                    const companyId = (typeof item?.company_id === 'object' ? item?.company_id?._id : item?.company_id) ||
-                        (typeof item?.company === 'object' ? item?.company?._id || item?.company?.id : item?.company);
-
-                    if (companyId && typeof companyId === 'string') {
-                        navigateTo(SCREENS.CompanyProfile, { companyId });
-                    }
+                    const companyId = item?.company_id?._id;
+                    console.log("🔥 ~ RecentJobCard ~ companyId:", companyId)
+                    navigateTo(SCREENS.ViewCompanyProfile, { companyId });
                 }}
             >
                 <View style={styles.logoContainer}>
-                    <FastImage
+                    <Image
                         resizeMode="cover"
                         style={styles.logo}
                         source={logoUri ? { uri: logoUri } : IMAGES.logoText}
@@ -75,7 +72,6 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                         <TouchableOpacity onPress={handleShare}>
                             <Image source={IMAGES.share} style={[styles.shareIcon, { tintColor: colors.black }]} resizeMode="contain" />
                         </TouchableOpacity>
-
                     </View>
                     <Text style={styles.location} numberOfLines={1}>
                         {(item?.city || item?.country) ? `${item?.city}${item?.city && item?.country ? ', ' : ''}${item?.country}` : (item?.location || 'N/A')}

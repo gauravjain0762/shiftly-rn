@@ -77,7 +77,7 @@ const InterviewScoresModal = ({
     const generalScores = [
         {
             title: t('Overall'),
-            score: 0, // Overall score logic might need to be defined, keeping 0 or calculating average
+            score: 0,
             max: 5,
             desc: '',
             color: '#2FB465',

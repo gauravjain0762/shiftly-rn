@@ -111,12 +111,9 @@ const CreatePost = () => {
         <BackHeader
           onBackPress={goBack}
           type="company"
-          title=""
+          title={postEditMode ? t('Edit Post') : t('Create a post')}
           isRight={false}
         />
-        <Text style={styles.screenTitle}>
-          {postEditMode ? t('Edit Post') : t('Create a post')}
-        </Text>
       </View>
 
       <KeyboardAwareScrollView
@@ -192,7 +189,7 @@ const CreatePost = () => {
           <Text style={styles.sectionLabel}>{t('Description')}</Text>
           <CustomTextInput
             multiline
-            maxLength={200}
+            maxLength={1000}
             value={description}
             inputStyle={[styles.input, styles.descriptionInput]}
             placeholderTextColor={colors._7B7878}
@@ -200,7 +197,7 @@ const CreatePost = () => {
             onChangeText={(e: any) => updatePostForm({ description: e })}
             containerStyle={styles.inputContainer}
           />
-          <CharLength chars={200} value={description} style={styles.charLength} />
+          <CharLength chars={1000} value={description} style={styles.charLength} />
         </View>
       </KeyboardAwareScrollView>
 
@@ -229,10 +226,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingHorizontal: wp(25),
     paddingTop: hp(15),
-    gap: hp(10),
-  },
-  screenTitle: {
-    ...commonFontStyle(600, 24, colors._0B3970),
   },
   scrollContent: {
     flexGrow: 1,

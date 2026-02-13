@@ -25,11 +25,10 @@ import {
   successToast,
 } from '../../../utils/commonFunction';
 import { logouts } from '../../../features/authSlice';
-import { persistor, resetStore, RootState } from '../../../store';
+import { resetStore, RootState } from '../../../store';
 import { useAppDispatch } from '../../../redux/hooks';
 import { colors } from '../../../theme/colors';
 import { useTranslation } from 'react-i18next';
-import LanguageModal from '../../../component/common/LanguageModel';
 import { useSelector } from 'react-redux';
 import CustomImage from '../../../component/common/CustomImage';
 

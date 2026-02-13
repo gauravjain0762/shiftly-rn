@@ -25,7 +25,8 @@ const InterviewStatus = () => {
     const { t } = useTranslation();
     const route = useRoute<any>();
     const { jobData, candidateData, inviteData } = route.params || {};
-    console.log("🔥🔥🔥 ~ InterviewStatus ~ jobData:", jobData)
+    console.log("🔥 ~ InterviewStatus ~ candidateData:", candidateData)
+    console.log("🔥 ~ InterviewStatus ~ jobData:", jobData)
 
     const jobTitle = jobData?.title || 'N/A';
     const companyName = jobData?.company_id?.company_name || 'N/A';
@@ -58,12 +59,10 @@ const InterviewStatus = () => {
         );
     };
 
-    // Candidate Data Fallbacks
     const candidateName = candidateData?.name || inviteData?.user_id?.name || 'N/A';
     const candidateRole = candidateData?.responsibility || inviteData?.user_id?.responsibility || 'N/A';
     const candidateImg = candidateData?.picture || inviteData?.user_id?.picture;
 
-    // Interview Status Data
     const rawStatus = inviteData?.status || 'Pending';
     const interviewStatus = rawStatus === 'Interview_completed' ? 'Completed' : rawStatus;
     const isInterviewCompleted = rawStatus === 'Interview_completed';
@@ -71,7 +70,6 @@ const InterviewStatus = () => {
         ? moment(inviteData.interview_completed).format('h:mm A - DDMMM')
         : '';
 
-    // Transcript Data
     const transcriptData = inviteData?.interview_response?.transcript_with_timestamp || [];
     const interviewAudioUrl = inviteData?.interview_response?.audio_url;
     const interviewVideoUrl = inviteData?.interview_response?.video_url;
@@ -124,7 +122,7 @@ const InterviewStatus = () => {
                         <CustomImage
                             uri={
                                 candidateImg ||
-                                'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'
+                                ''
                             }
                             containerStyle={styles.avatar}
                             imageStyle={styles.avatar}
@@ -142,14 +140,13 @@ const InterviewStatus = () => {
                     </View>
                 </View>
 
-                {/* Media Buttons */}
                 <View style={styles.mediaRow}>
                     <TouchableOpacity
                         style={[styles.mediaButton, !isInterviewCompleted && { borderColor: '#D3D3D3' }]}
                         disabled={!isInterviewCompleted || !interviewAudioUrl}
                         onPress={() => {
                             if (interviewAudioUrl) {
-                                Linking.openURL(interviewAudioUrl);
+                                navigateTo(SCREENS.WebviewScreen, { link: interviewAudioUrl, title: t('Listen Audio') });
                             }
                         }}
                     >
@@ -161,7 +158,7 @@ const InterviewStatus = () => {
                         disabled={!isInterviewCompleted || !interviewVideoUrl}
                         onPress={() => {
                             if (interviewVideoUrl) {
-                                Linking.openURL(interviewVideoUrl);
+                                navigateTo(SCREENS.WebviewScreen, { link: interviewVideoUrl, title: t('Watch Interview') });
                             }
                         }}
                     >

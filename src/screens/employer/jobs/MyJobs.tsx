@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+
 import { useRoute } from '@react-navigation/native';
 import { colors } from '../../../theme/colors';
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
@@ -41,7 +42,7 @@ const MyJobs = () => {
         }
     };
 
-    const { data, isLoading, isFetching } = getActiveQuery();
+    const { isLoading, isFetching } = getActiveQuery();
 
     useEffect(() => {
         if (appliedJobsQuery.data?.status) {

@@ -25,6 +25,7 @@ import useRole from '../hooks/useRole';
 import CoSignUp from '../screens/company/auth/CoSignUp';
 import CreateAccount from '../screens/company/auth/CreateAccount';
 import CompanyProfile from '../screens/company/profile/CompanyProfile';
+import ViewCompanyProfile from '../screens/company/profile/ViewCompanyProfile';
 import CoTabNavigator from './CoTabNavigator';
 import CoMessage from '../screens/company/chat/CoMessage';
 import CoChat from '../screens/company/chat/CoChat';
@@ -304,6 +305,11 @@ const StackNavigator: FC = () => {
           options={({ navigation }) => ({ headerShown: false })}
           name={SCREENS.CompanyProfile}
           component={CompanyProfile}
+        />
+        <Stack.Screen
+          options={({ navigation }) => ({ headerShown: false })}
+          name={SCREENS.ViewCompanyProfile}
+          component={ViewCompanyProfile}
         />
         <Stack.Screen
           options={({ navigation }) => ({ headerShown: false })}

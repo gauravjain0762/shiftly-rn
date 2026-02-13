@@ -65,6 +65,7 @@ export const SCREENS = {
   EmpLocation: 'EmpLocation',
   EmployeeProfile: 'EmployeeProfile',
   InterviewStatus: 'InterviewStatus',
+  ViewCompanyProfile: 'ViewCompanyProfile',
 };
 
 export interface ScreenNames {
@@ -123,6 +124,7 @@ export interface ScreenNames {
   CreateQuestion: string;
   EmployeeProfile: string;
   InterviewStatus: string;
+  ViewCompanyProfile: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

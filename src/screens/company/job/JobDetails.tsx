@@ -298,8 +298,8 @@ ${salary}${shareUrlText}`;
 
           <InterviewScoresModal
             visible={modalVisible}
-            onClose={() => setModalVisible(false)}
             initialTab={activeTab}
+            onClose={() => setModalVisible(false)}
           />
 
           <GradientButton
