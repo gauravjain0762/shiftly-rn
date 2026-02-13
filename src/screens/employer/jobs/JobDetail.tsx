@@ -30,6 +30,7 @@ import {
   navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -183,8 +184,7 @@ const JobDetail = () => {
       const salary =
         curr_jobdetails?.monthly_salary_from ||
           curr_jobdetails?.monthly_salary_to
-          ? `Salary: ${curr_jobdetails?.currency
-          } ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${getCurrencySymbol(curr_jobdetails?.currency)}${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
@@ -358,14 +358,16 @@ ${salary}${shareUrlText}`;
                 {(curr_jobdetails?.monthly_salary_from ||
                   curr_jobdetails?.monthly_salary_to) && (
                     <View style={styles.salaryContainerHeader}>
-                      <Image
-                        source={IMAGES.currency}
-                        style={styles.salaryIconHeader}
-                        tintColor={colors._656464}
-                      />
                       <Text style={styles.salaryTextHeader}>
-                        {`${curr_jobdetails?.currency
-                          } ${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                        {curr_jobdetails?.currency?.toUpperCase()}
+                      </Text>
+                      {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
+                        <Image source={IMAGES.currency} style={styles.currencyImage} />
+                      ) : (
+                        <Text style={styles.salaryTextHeader}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
+                      )}
+                      <Text style={styles.salaryTextHeader}>
+                        {`${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
                       </Text>
                     </View>
                   )}
@@ -405,11 +407,19 @@ ${salary}${shareUrlText}`;
                 curr_jobdetails?.monthly_salary_to && (
                   <View style={styles.snapshotItem}>
                     <Text style={styles.snapshotLabel}>Salary</Text>
-                    <Text style={styles.snapshotValue}>
-                      {curr_jobdetails?.currency}{' '}
-                      {curr_jobdetails?.monthly_salary_from} -{' '}
-                      {curr_jobdetails?.monthly_salary_to}
-                    </Text>
+                    <View style={styles.valueRow}>
+                      <Text style={styles.snapshotValue}>
+                        {curr_jobdetails?.currency?.toUpperCase()}
+                      </Text>
+                      {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
+                        <Image source={IMAGES.currency} style={styles.currencyImageSnapshot} />
+                      ) : (
+                        <Text style={styles.snapshotValue}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
+                      )}
+                      <Text style={styles.snapshotValue}>
+                        {`${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                      </Text>
+                    </View>
                   </View>
                 )}
 
@@ -488,8 +498,24 @@ ${salary}${shareUrlText}`;
                       <Text style={styles.detailKey}>{key}</Text>
 
                       <View style={styles.valueWrapper}>
-                        {key === 'Salary' && <Image source={IMAGES.currency} />}
-                        <Text style={styles.detailValue}>{value || '-'}</Text>
+                        <Text style={styles.detailValue}>
+                          {key === 'Salary' && value ? (
+                            <Text>
+                              {`${curr_jobdetails?.currency?.toUpperCase()} `}
+                              {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
+                                <Image
+                                  source={IMAGES.currency}
+                                  style={styles.currencyImageSnapshot}
+                                />
+                              ) : (
+                                <BaseText style={styles.snapshotValue}>
+                                  {getCurrencySymbol(curr_jobdetails?.currency)}
+                                </BaseText>
+                              )}
+                              {`${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                            </Text>
+                          ) : (value || '-')}
+                        </Text>
                       </View>
                     </View>
                   );
@@ -796,11 +822,33 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 14, colors._0B3970),
     textDecorationLine: 'underline',
   },
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   salaryContainerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: wp(5),
+    gap: wp(4),
     marginTop: hp(4),
+  },
+  currencyImage: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    tintColor: colors.black,
+  },
+  currencyImageSnapshot: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
+  },
+  currencyImageDetail: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
   },
   salaryIconHeader: {
     width: wp(14),

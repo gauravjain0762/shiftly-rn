@@ -4,9 +4,11 @@ import FastImage from 'react-native-fast-image';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
-import { getTimeAgo } from '../../utils/commonFunction';
+import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
+import { getCurrencySymbol } from '../../utils/currencySymbols';
 import Share from 'react-native-share';
 import { Eye } from 'lucide-react-native';
+import { SCREENS } from '../../navigation/screenNames';
 
 type Props = {
     item: any;
@@ -23,7 +25,7 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
             const description = item?.description || '';
             const salary =
                 item?.monthly_salary_from || item?.monthly_salary_to
-                    ? `Salary: ${item?.currency || 'USD'} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+                    ? `Salary: ${getCurrencySymbol(item?.currency || 'USD')}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
                     : '';
 
             const shareUrl = item?.share_url || '';
@@ -46,12 +48,18 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
     };
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={onPress}
-            style={styles.card}
-        >
-            <View style={styles.header}>
+        <View style={styles.card}>
+            <TouchableOpacity
+                style={styles.header}
+                onPress={() => {
+                    const companyId = (typeof item?.company_id === 'object' ? item?.company_id?._id : item?.company_id) ||
+                        (typeof item?.company === 'object' ? item?.company?._id || item?.company?.id : item?.company);
+
+                    if (companyId && typeof companyId === 'string') {
+                        navigateTo(SCREENS.CompanyProfile, { companyId });
+                    }
+                }}
+            >
                 <View style={styles.logoContainer}>
                     <FastImage
                         resizeMode="cover"
@@ -73,9 +81,9 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                         {(item?.city || item?.country) ? `${item?.city}${item?.city && item?.country ? ', ' : ''}${item?.country}` : (item?.location || 'N/A')}
                     </Text>
                 </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.body}>
+            <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.body}>
                 <View style={styles.titleRow}>
                     <Text style={styles.jobTitle}>{item?.title}</Text>
                     <TouchableOpacity style={styles.viewButton} onPress={onPressView}>
@@ -108,9 +116,16 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                         >
                             {(item?.monthly_salary_from || item?.monthly_salary_to) && (
                                 <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
-                                    <Text style={styles.tagText}>
-                                        {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()} {item?.currency}
-                                    </Text>
+                                    <View style={styles.salaryRow}>
+                                        {item?.currency?.toUpperCase() === 'AED' ? (
+                                            <Image source={IMAGES.currency} style={styles.currencyImage} />
+                                        ) : (
+                                            <Text style={styles.currencySymbol}>{getCurrencySymbol(item?.currency || 'USD')}</Text>
+                                        )}
+                                        <Text style={styles.tagText}>
+                                            {`${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+                                        </Text>
+                                    </View>
                                 </View>
                             )}
                             {(item?.contract_period || item?.duration) && (
@@ -123,8 +138,8 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                         </ScrollView>
                     </View>
                 </View>
-            </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
+        </View>
     );
 };
 
@@ -232,9 +247,26 @@ const styles = StyleSheet.create({
     },
     tagText: {
         ...commonFontStyle(500, 10, colors.white),
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    currencyImage: {
+        width: wp(13),
+        height: hp(10),
+        resizeMode: 'contain',
+        marginHorizontal: wp(2),
+        tintColor: colors.white,
     },
     timeAgo: {
         ...commonFontStyle(400, 11, colors._656464),
         marginTop: hp(2),
-    }
+    },
+    salaryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    currencySymbol: {
+        ...commonFontStyle(500, 10, colors.white),
+        marginRight: wp(2),
+    },
 });

@@ -8,6 +8,7 @@ import { IMAGES } from '../../../assets/Images';
 import { useGetAppliedJobsQuery, useGetEmployeeJobsQuery, useGetInterviewsQuery } from '../../../api/dashboardApi';
 import FastImage from 'react-native-fast-image';
 import { getTimeAgo, navigateTo } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import Share from 'react-native-share';
 import { SCREENS } from '../../../navigation/screenNames';
 import { Eye } from 'lucide-react-native';
@@ -127,7 +128,7 @@ const MyJobs = () => {
             const description = job?.description || '';
             const salary =
                 job?.monthly_salary_from || job?.monthly_salary_to
-                    ? `Salary: ${job?.currency || 'USD'} ${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`
+                    ? `Salary: ${getCurrencySymbol(job?.currency || 'USD')}${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`
                     : '';
 
             const shareUrl = job?.share_url || '';
@@ -169,7 +170,7 @@ const MyJobs = () => {
 
     const renderJobCard = ({ item }: { item: any }) => {
         const job = item?.job_id || item?.job || item;
-        console.log("🔥🔥🔥 ~ renderJobCard ~ job:", job)
+        console.log("🔥 ~ renderJobCard ~ job:", job)
 
         const companyName = job?.company_id?.company_name || job?.company?.name || 'N/A';
         const companyLogo = job?.company_id?.logo || job?.company?.logo;
@@ -177,7 +178,17 @@ const MyJobs = () => {
 
         return (
             <View style={styles.card}>
-                <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.header}
+                    onPress={() => {
+                        const companyId = (typeof job?.company_id === 'object' ? job?.company_id?._id : job?.company_id) ||
+                            (typeof job?.company === 'object' ? job?.company?._id || job?.company?.id : job?.company);
+
+                        if (companyId && typeof companyId === 'string') {
+                            navigateTo(SCREENS.CompanyProfile, { companyId });
+                        }
+                    }}
+                >
                     <View style={styles.logoContainer}>
                         {companyLogo ? (
                             <FastImage
@@ -198,14 +209,14 @@ const MyJobs = () => {
                         </View>
                         <Text style={styles.location} numberOfLines={1}>{location}</Text>
                     </View>
-                </View>
+                </TouchableOpacity>
 
                 <View style={styles.body}>
                     <View style={styles.titleRow}>
                         <Text style={styles.jobTitle} numberOfLines={1}>{job?.title || 'N/A'}</Text>
                         <TouchableOpacity
                             style={styles.viewButton}
-                            // onPress={() => navigateTo(SCREENS.JobDetail, { jobId: job?._id, is_applied: activeTab === 'Applied Jobs' })}
+                            onPress={() => navigateTo(SCREENS.JobDetail, { jobId: job?._id, is_applied: activeTab === 'Applied Jobs' })}
                         >
                             <Eye size={wp(14)} color={colors.white} />
                             <Text style={styles.viewText}>View</Text>
@@ -222,7 +233,7 @@ const MyJobs = () => {
                     </View>
 
                     {job?.contract_type && (
-                        <View style={[styles.tag, { backgroundColor: '#F0F4F8', width: 'fit-content', alignSelf: 'flex-start' }]}>
+                        <View style={[styles.tag, { backgroundColor: '#F0F4F8', alignSelf: 'flex-start' }]}>
                             <Text style={[styles.tagText, { color: '#0B1C39' }]}>{job?.contract_type}</Text>
                         </View>
                     )}
@@ -235,9 +246,16 @@ const MyJobs = () => {
                         >
                             {(job?.monthly_salary_from || job?.monthly_salary_to) && (
                                 <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
-                                    <Text style={styles.tagText}>
-                                        {job?.monthly_salary_from?.toLocaleString()} - {job?.monthly_salary_to?.toLocaleString()} {job?.currency || 'USD'}
-                                    </Text>
+                                    <View style={styles.salaryRow}>
+                                        {job?.currency?.toUpperCase() === 'AED' ? (
+                                            <Image source={IMAGES.currency} style={styles.currencyImage} />
+                                        ) : (
+                                            <Text style={styles.currencySymbol}>{getCurrencySymbol(job?.currency || 'USD')}</Text>
+                                        )}
+                                        <Text style={styles.tagText}>
+                                            {`${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`}
+                                        </Text>
+                                    </View>
                                 </View>
                             )}
                             {(job?.contract_period || job?.duration) && (
@@ -258,7 +276,7 @@ const MyJobs = () => {
                         </ImageBackground>
                     )}
                 </View>
-            </View>
+            </View >
         );
     };
 
@@ -438,6 +456,21 @@ const styles = StyleSheet.create({
     },
     tagText: {
         ...commonFontStyle(500, 10, colors.white),
+    },
+    salaryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    currencyImage: {
+        width: wp(13),
+        height: hp(10),
+        resizeMode: 'contain',
+        marginHorizontal: wp(2),
+        tintColor: colors.white,
+    },
+    currencySymbol: {
+        ...commonFontStyle(500, 10, colors.white),
+        marginRight: wp(2),
     },
     tagImage: {
         position: 'absolute',

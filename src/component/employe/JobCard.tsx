@@ -7,8 +7,10 @@ import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
 import FastImage from 'react-native-fast-image';
-import { getTimeAgo } from '../../utils/commonFunction';
+import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import RNFS from 'react-native-fs';
+import { getCurrencySymbol } from '../../utils/currencySymbols';
+import { SCREENS } from '../../navigation/screenNames';
 
 type props = {
   item?: any;
@@ -47,7 +49,7 @@ const JobCard: FC<props> = ({
       const description = item?.description || '';
       const salary =
         item?.monthly_salary_from || item?.monthly_salary_to
-          ? `Salary: ${item?.currency} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${getCurrencySymbol(item?.currency)}${item?.monthly_salary_from?.toLocaleString()}-${item?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrl = item?.share_url || '';
@@ -98,13 +100,23 @@ ${salary}${shareUrlText}`;
         />
 
         {/* Company Logo - Overlapping */}
-        <View style={styles.logo}>
+        <TouchableOpacity
+          onPress={() => {
+            const companyId = (typeof item?.company_id === 'object' ? item?.company_id?._id : item?.company_id) ||
+              (typeof item?.company === 'object' ? item?.company?._id || item?.company?.id : item?.company);
+
+            if (companyId && typeof companyId === 'string') {
+              navigateTo(SCREENS.CompanyProfile, { companyId });
+            }
+          }}
+          style={styles.logo}
+        >
           <FastImage
             style={styles.companyLogoImage}
             resizeMode={logoUri ? "cover" : "contain"}
             source={logoUri ? { uri: logoUri } : IMAGES.logoText}
           />
-        </View>
+        </TouchableOpacity>
 
         {/* Action Buttons */}
         <View
@@ -161,14 +173,14 @@ ${salary}${shareUrlText}`;
 
         {(item?.monthly_salary_from || item?.monthly_salary_to) && (
           <View style={styles.salaryContainer}>
-            <Image
-              source={IMAGES.currency}
-              style={styles.salaryIcon}
-              tintColor={colors._656464}
-            />
-            <Text style={styles.salaryLabel}>Salary range: </Text>
             <Text style={styles.salaryAmount}>
-              {item?.currency} {item?.monthly_salary_from?.toLocaleString()} - {item?.monthly_salary_to?.toLocaleString()}
+              {`${item?.currency?.toUpperCase()} `}
+              {item?.currency?.toUpperCase() === 'AED' ? (
+                <Image source={IMAGES.currency} style={styles.currencyImage} />
+              ) : (
+                getCurrencySymbol(item?.currency)
+              )}
+              {`${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
             </Text>
           </View>
         )}
@@ -238,6 +250,15 @@ const styles = StyleSheet.create({
   },
   salaryAmount: {
     ...commonFontStyle(700, 13, colors.empPrimary),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currencyImage: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    marginHorizontal: wp(2),
+    tintColor: colors.empPrimary,
   },
   jobDescription: {
     ...commonFontStyle(400, 13, colors._656464),

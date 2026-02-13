@@ -2569,6 +2569,13 @@
   dependencies:
     undici-types "~7.16.0"
 
+"@types/react-native-snap-carousel@^3.8.12":
+  version "3.8.12"
+  resolved "https://registry.yarnpkg.com/@types/react-native-snap-carousel/-/react-native-snap-carousel-3.8.12.tgz#887d1a49b8b35b2247fea46f5fc8136d0d4f1399"
+  integrity sha512-J840OqAvfeZpNgBO9dDyJi8rUgC6UzMRBhfPSkqV4EpkQsBXB8EYgRNCQmT282yGO6HLywKql1Wijvuuf9Zx8w==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-test-renderer@^19.0.0":
   version "19.1.0"
   resolved "https://registry.npmjs.org/@types/react-test-renderer/-/react-test-renderer-19.1.0.tgz#1d0af8f2e1b5931e245b8b5b234d1502b854dc10"

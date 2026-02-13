@@ -324,8 +324,8 @@ const CompanyProfile = () => {
 
               <View style={styles.titleTextContainer}>
                 <Text style={styles.companyName}>
-                  {displayProfile?.company_name
-                    ? String(displayProfile.company_name)
+                  {typeof displayProfile?.company_name === 'string'
+                    ? displayProfile.company_name
                       .split(' ')
                       .filter(Boolean)
                       .map((word: string) =>
@@ -334,7 +334,9 @@ const CompanyProfile = () => {
                           : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
                       )
                       .join(' ')
-                    : (companyId && isCompanyLoading ? 'Loading...' : 'N/A')}
+                    : displayProfile?.company_name
+                      ? String(displayProfile.company_name)
+                      : (companyId && isCompanyLoading ? 'Loading...' : 'N/A')}
                 </Text>
 
                 {displayProfile?.mission && (
@@ -350,7 +352,7 @@ const CompanyProfile = () => {
                 maxLines={3}
                 showStyle={{ paddingHorizontal: 0 }}
                 descriptionStyle={styles.description}
-                description={displayProfile?.about}
+                description={String(displayProfile?.about)}
               />
             )}
 

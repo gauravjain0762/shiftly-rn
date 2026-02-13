@@ -25,12 +25,20 @@ import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
-import { navigateTo, errorToast } from '../../../utils/commonFunction';
+import { navigateTo, errorToast, goBack } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useFocusEffect } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  setCoPostJobSteps,
+  setJobFormState,
+} from '../../../features/companySlice';
+import { Alert } from 'react-native';
+import { successToast } from '../../../utils/commonFunction';
+import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
 
 const SuggestedEmployeeScreen = () => {
   const { t } = useTranslation();
@@ -56,19 +64,17 @@ const SuggestedEmployeeScreen = () => {
       refetchJobDetails();
     }, [jobId])
   );
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobDetailsResponse:", jobDetailsResponse)
 
   const jobInfo = jobData?.data?.job || jobDetailsResponse?.data?.job || {};
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobData:", jobData)
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobInfo:", jobInfo)
 
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted'>('suggested');
+  const dispatch = useDispatch<any>();
+  const [closeJob] = useCloseCompanyJobMutation();
 
   const invitedEmployees = useMemo(() => {
-    // Check various locations where invited_users might be populated
     const list =
       jobDetailsResponse?.data?.invited_users ||
       jobData?.data?.invited_users ||
@@ -188,20 +194,29 @@ const SuggestedEmployeeScreen = () => {
     });
   }, [employees]);
 
-  const salaryRange = useMemo(() => {
+  const renderSalaryRange = () => {
     const from = jobInfo?.monthly_salary_from;
     const to = jobInfo?.monthly_salary_to;
-    if (from && to) {
-      return `${jobInfo?.currency} ${formatCurrency(from)} - ${formatCurrency(to)}`;
-    }
-    if (from) {
-      return `${jobInfo?.currency} ${formatCurrency(from)}`;
-    }
-    if (to) {
-      return `${jobInfo?.currency} ${formatCurrency(to)}`;
-    }
-    return '';
-  }, [jobInfo]);
+    const cur = (jobInfo?.currency || 'AED').toUpperCase();
+    const symbol = getCurrencySymbol(cur);
+
+    if (!from && !to) return null;
+
+    return (
+      <View style={styles.salaryRow}>
+        {cur === 'AED' ? (
+          <Image source={IMAGES.currency} style={styles.currencyImage} />
+        ) : (
+          <Text style={styles.currencySymbol}>{symbol}</Text>
+        )}
+        <Text style={styles.jobSalary}>
+          {from && to
+            ? `${from.toLocaleString()} - ${to.toLocaleString()}`
+            : (from ? from.toLocaleString() : to.toLocaleString())}
+        </Text>
+      </View>
+    );
+  };
 
   const jobLocation = useMemo(() => {
     // Show only city and country, not the full address
@@ -221,6 +236,68 @@ const SuggestedEmployeeScreen = () => {
       jobId: jobId || jobInfo?._id,
       jobData: jobInfo
     });
+  };
+
+  const handleEditJob = () => {
+    if (!jobInfo) return;
+
+    const from_salary = jobInfo?.monthly_salary_from?.toString() || '';
+    const to_salary = jobInfo?.monthly_salary_to?.toString() || '';
+
+    dispatch(
+      setJobFormState({
+        job_id: jobInfo?._id,
+        title: jobInfo?.title,
+        describe: jobInfo?.description,
+        job_sector: {
+          label: jobInfo?.department_id?.title,
+          value: jobInfo?.department_id?._id,
+        },
+        contract_type: { label: jobInfo?.contract_type, value: jobInfo?.contract_type },
+        area: { label: jobInfo?.address, value: jobInfo?.address },
+        salary: {
+          label: `${from_salary} - ${to_salary}`,
+          value: `${from_salary} - ${to_salary}`,
+        },
+        currency: { label: jobInfo?.currency, value: jobInfo?.currency },
+        position: { label: jobInfo?.no_positions?.toString(), value: jobInfo?.no_positions?.toString() },
+        duration: { label: jobInfo?.duration, value: jobInfo?.duration },
+        expiry_date: jobInfo?.expiry_date,
+        startDate: { label: jobInfo?.start_date, value: jobInfo?.start_date },
+        skillId: typeof jobInfo?.skills === 'string' ? jobInfo.skills.split(',') : [],
+        selected: jobInfo?.facilities || [],
+        editMode: true,
+      }),
+    );
+    dispatch(setCoPostJobSteps(0));
+    navigateTo(SCREENS.PostJob);
+  };
+
+  const handleCloseJob = () => {
+    Alert.alert(
+      t('Close Job'),
+      t('Are you sure you want to close this job?'),
+      [
+        { text: t('Cancel'), style: 'cancel' },
+        {
+          text: t('Close'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await closeJob({ job_id: jobId }).unwrap();
+              if (res?.status) {
+                successToast(res?.message || t('Job closed successfully'));
+                goBack();
+              } else {
+                errorToast(res?.message || t('Failed to close job'));
+              }
+            } catch (error: any) {
+              errorToast(error?.data?.message || t('Something went wrong'));
+            }
+          },
+        },
+      ],
+    );
   };
 
   const renderShortlistedEmployee = (item: any) => {
@@ -445,11 +522,35 @@ const SuggestedEmployeeScreen = () => {
                       {contractTypeLabel ? ` - ${contractTypeLabel}` : ''}
                     </Text>
                   )}
-                  {!!salaryRange && (
-                    <Text style={styles.jobSalary}>{salaryRange}</Text>
-                  )}
+                  {renderSalaryRange()}
                 </View>
               </View>
+
+              {isFromJobCard && (
+                <View style={styles.jobActionsRow}>
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.editBtn]}
+                    onPress={handleEditJob}>
+                    <Image
+                      source={IMAGES.edit}
+                      style={styles.actionIcon}
+                      tintColor={colors.white}
+                    />
+                    <Text style={styles.actionBtnText}>{t('Edit Job')}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.closeBtn]}
+                    onPress={handleCloseJob}>
+                    <Image
+                      source={IMAGES.close}
+                      style={[styles.actionIcon, styles.closeIcon]}
+                      tintColor={colors.white}
+                    />
+                    <Text style={styles.actionBtnText}>{t('Close Job')}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
             <View style={styles.analyticsCard}>
@@ -629,7 +730,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: wp(25),
     paddingBottom: '40%',
-    gap: hp(20),
+    gap: hp(16),
   },
   jobCard: {
     borderWidth: 1,
@@ -661,6 +762,60 @@ const styles = StyleSheet.create({
   },
   jobCardInfo: {
     flex: 1,
+  },
+  jobActionsRow: {
+    flexDirection: 'row',
+    marginTop: hp(16),
+    gap: wp(10),
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    paddingTop: hp(12),
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: hp(10),
+    borderRadius: wp(12),
+    gap: wp(8),
+  },
+  editBtn: {
+    backgroundColor: colors._0B3970,
+  },
+  closeBtn: {
+    backgroundColor: '#DC2626',
+  },
+  actionIcon: {
+    width: wp(14),
+    height: wp(14),
+    resizeMode: 'contain',
+  },
+  closeIcon: {
+    width: wp(10),
+    height: wp(10),
+  },
+  actionBtnText: {
+    ...commonFontStyle(600, 13, colors.white),
+  },
+  closeBtnText: {
+    ...commonFontStyle(600, 13, '#DC2626'),
+  },
+  salaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(4),
+  },
+  currencyImage: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    marginRight: wp(4),
+    tintColor: colors._0B3970,
+  },
+  currencySymbol: {
+    ...commonFontStyle(700, 14, colors._0B3970),
+    marginRight: wp(2),
   },
   jobTitle: {
     ...commonFontStyle(700, 18, colors._0B3970),

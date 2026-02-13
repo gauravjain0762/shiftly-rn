@@ -10,8 +10,10 @@ import BaseText from '../../../component/common/BaseText'
 import { navigateTo } from '../../../utils/commonFunction'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { commonFontStyle, hp, wp } from '../../../theme/fonts'
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { BackHeader, LinearContainer } from '../../../component'
 import CommonButton from '../../../component/common/CommonButton'
+import { IMAGES } from '../../../assets/Images';
 
 const JobInvitationScreen = () => {
     const { userInfo } = useSelector((state: RootState) => state.auth);
@@ -59,7 +61,13 @@ const JobInvitationScreen = () => {
                             {job?.contract_type}
                         </BaseText>
                         <BaseText style={styles.salary}>
-                            {`${job?.currency} ${job?.monthly_salary_from} - ${job?.monthly_salary_to}`}
+                            {`${job?.currency?.toUpperCase()} `}
+                            {job?.currency?.toUpperCase() === 'AED' ? (
+                                <Image source={IMAGES.currency} style={styles.currencyImage} />
+                            ) : (
+                                getCurrencySymbol(job?.currency)
+                            )}
+                            {` ${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`}
                         </BaseText>
                     </View>
                 </View>
@@ -159,6 +167,15 @@ const styles = StyleSheet.create({
     },
     salary: {
         ...commonFontStyle(700, 16, colors._0D468C),
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    currencyImage: {
+        width: wp(14),
+        height: hp(11),
+        resizeMode: 'contain',
+        marginHorizontal: wp(2),
+        tintColor: colors._0D468C,
     },
     sectionHeader: {
         flexDirection: 'row',

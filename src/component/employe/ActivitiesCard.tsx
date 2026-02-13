@@ -1,9 +1,10 @@
 import React, { FC } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 import { colors } from '../../theme/colors';
 import CustomImage from '../common/CustomImage';
 import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
+import { getCurrencySymbol } from '../../utils/currencySymbols';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { SCREENS } from '../../navigation/screenNames';
 import { IMAGES } from '../../assets/Images';
@@ -64,7 +65,17 @@ const ActivitiesCard: FC<props> = ({ item }) => {
   return (
     <Pressable style={styles.card}>
       {/* Header with Logo, Company Name and Time */}
-      <View style={styles.headerRow}>
+      <TouchableOpacity
+        onPress={() => {
+          const companyId = (typeof item?.job_id?.company_id === 'object' ? item?.job_id?.company_id?._id : item?.job_id?.company_id) ||
+            (typeof item?.company_id === 'object' ? item?.company_id?._id || item?.company_id?.id : item?.company_id);
+
+          if (companyId && typeof companyId === 'string') {
+            navigateTo(SCREENS.CompanyProfile, { companyId });
+          }
+        }}
+        style={styles.headerRow}
+      >
         <View style={styles.leftSection}>
           <CustomImage
             resizeMode="cover"
@@ -80,7 +91,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
         <Text style={styles.timeAgo}>
           {getTimeAgo(item?.created_at)} ago
         </Text>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.bottomRow}>
         <View style={{ flex: 1, gap: hp(6) }}>
@@ -88,18 +99,17 @@ const ActivitiesCard: FC<props> = ({ item }) => {
             {item?.job_title} - {item?.contract_type || "N/A"}
           </Text>
 
-          {(item?.monthly_salary_from || item?.monthly_salary_to || jobDetail?.data?.job?.monthly_salary_from) && (
-            <View style={styles.salaryContainer}>
-              <Image
-                source={IMAGES.currency}
-                style={styles.salaryIcon}
-                tintColor={colors._656464}
-              />
-              <Text style={styles.salaryText}>
-                {`${item?.currency || jobDetail?.data?.job?.currency || 'AED'} ${item?.monthly_salary_from || jobDetail?.data?.job?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to || jobDetail?.data?.job?.monthly_salary_to?.toLocaleString()}`}
-              </Text>
-            </View>
-          )}
+          <View style={styles.salaryContainer}>
+            <Text style={styles.salaryText}>
+              {`${(item?.currency || jobDetail?.data?.job?.currency || 'AED').toUpperCase()} `}
+              {(item?.currency || jobDetail?.data?.job?.currency || 'AED').toUpperCase() === 'AED' ? (
+                <Image source={IMAGES.currency} style={styles.currencyImage} />
+              ) : (
+                getCurrencySymbol(item?.currency || jobDetail?.data?.job?.currency || 'AED')
+              )}
+              {` ${(item?.monthly_salary_from || jobDetail?.data?.job?.monthly_salary_from)?.toLocaleString()} - ${(item?.monthly_salary_to || jobDetail?.data?.job?.monthly_salary_to)?.toLocaleString()}`}
+            </Text>
+          </View>
 
           <View
             style={[
@@ -117,7 +127,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
         </View>
 
         <View style={styles.actionButtons}>
-          {item?.chat_status == 'chat' && (
+          {item?.chat_status && item?.chat_status !== 'no_chat' && (
             <Pressable
               onPress={() => {
                 navigateTo(SCREENS.Chat, { data: item });
@@ -239,5 +249,14 @@ const styles = StyleSheet.create({
   },
   salaryText: {
     ...commonFontStyle(600, 12, colors.black),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currencyImage: {
+    width: wp(13),
+    height: hp(10),
+    resizeMode: 'contain',
+    marginHorizontal: wp(2),
+    tintColor: colors.black,
   },
 });

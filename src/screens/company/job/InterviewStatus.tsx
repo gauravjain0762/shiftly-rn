@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useRoute } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
 import { navigateTo } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -33,17 +34,29 @@ const InterviewStatus = () => {
             ? `${jobData?.city ? jobData?.city + ', ' : ''}${jobData?.country || ''}`
             : 'N/A');
     const contract = jobData?.contract_type || 'N/A';
-    const getSalary = () => {
+    const renderSalary = () => {
         const from = jobData?.monthly_salary_from;
         const to = jobData?.monthly_salary_to;
-        if (from && to) {
-            return `${jobData?.currency} ${from} - ${to}`;
-        }
-        if (from) return `${jobData?.currency} ${from}`;
-        if (to) return `${jobData?.currency} ${to}`;
-        return 'N/A';
+        const cur = (jobData?.currency || 'AED').toUpperCase();
+        const sym = getCurrencySymbol(cur);
+
+        if (!from && !to) return <Text style={styles.salary}>N/A</Text>;
+
+        return (
+            <View style={styles.salaryRow}>
+                {cur === 'AED' ? (
+                    <Image source={IMAGES.currency} style={styles.currencyImage} />
+                ) : (
+                    <Text style={styles.currencySymbol}>{sym}</Text>
+                )}
+                <Text style={styles.salary}>
+                    {from && to
+                        ? `${from.toLocaleString()} - ${to.toLocaleString()}`
+                        : (from ? from.toLocaleString() : to.toLocaleString())}
+                </Text>
+            </View>
+        );
     };
-    const salary = getSalary();
 
     // Candidate Data Fallbacks
     const candidateName = candidateData?.name || inviteData?.user_id?.name || 'N/A';
@@ -100,7 +113,7 @@ const InterviewStatus = () => {
                             <View style={styles.jobMetaRow}>
                                 <Text style={styles.jobMeta}>{`${location} - ${contract}`}</Text>
                             </View>
-                            <Text style={[styles.salary, { marginTop: hp(6) }]}>{salary}</Text>
+                            {renderSalary()}
                         </View>
                     </View>
                 </View>
@@ -284,6 +297,22 @@ const styles = StyleSheet.create({
     },
     salary: {
         ...commonFontStyle(700, 14, colors._0B3970),
+    },
+    salaryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: hp(6),
+    },
+    currencyImage: {
+        width: wp(14),
+        height: hp(11),
+        resizeMode: 'contain',
+        marginRight: wp(4),
+        tintColor: colors._0B3970,
+    },
+    currencySymbol: {
+        ...commonFontStyle(700, 14, colors._0B3970),
+        marginRight: wp(2),
     },
     avatar: {
         width: wp(50),

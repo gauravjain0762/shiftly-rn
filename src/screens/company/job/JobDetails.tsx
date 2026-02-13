@@ -34,6 +34,7 @@ import {
   getExpiryDays,
   goBack,
 } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useDispatch } from 'react-redux';
 import { setJobFormState } from '../../../features/companySlice';
@@ -99,7 +100,7 @@ const CoJobDetails = () => {
       const description = jobDetail?.description || '';
       const salary =
         jobDetail?.monthly_salary_from || jobDetail?.monthly_salary_to
-          ? `Salary: ${jobDetail?.currency} ${jobDetail?.monthly_salary_from?.toLocaleString()} - ${jobDetail?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${jobDetail?.currency === 'AED' ? 'AED' : getCurrencySymbol(jobDetail?.currency)}${jobDetail?.monthly_salary_from?.toLocaleString()} - ${jobDetail?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
@@ -194,11 +195,18 @@ ${salary}${shareUrlText}`;
                       <Text style={styles.jobMeta}>
                         {`${jobDetail?.area || jobDetail?.address || 'Location'} - ${jobDetail?.contract_type || 'Full Time'}`}
                       </Text>
-                      <Text style={styles.salary}>
-                        {jobDetail?.monthly_salary_to
-                          ? `${jobDetail?.currency} ${Number(jobDetail?.monthly_salary_to).toLocaleString()}`
-                          : 'N/A'}
-                      </Text>
+                      <View style={styles.salaryContainer}>
+                        {jobDetail?.currency === 'AED' ? (
+                          <Image source={IMAGES.currency} style={styles.currencyImage} />
+                        ) : (
+                          <Text style={styles.currencySymbol}>{getCurrencySymbol(jobDetail?.currency)}</Text>
+                        )}
+                        <Text style={styles.salary}>
+                          {jobDetail?.monthly_salary_to
+                            ? Number(jobDetail?.monthly_salary_to).toLocaleString()
+                            : 'N/A'}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </View>
@@ -504,10 +512,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomContainer: {
-    marginTop: hp(45),
     ...commonFontStyle(600, 18, colors._0B3970),
     marginTop: hp(20),
     marginBottom: hp(10),
+  },
+  salaryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(6),
+  },
+  currencyImage: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    marginRight: wp(4),
+    tintColor: colors._0B3970,
+  },
+  currencySymbol: {
+    ...commonFontStyle(700, 14, colors._0B3970),
+    marginRight: wp(2),
   },
   transcriptBox: {
     borderWidth: 1,

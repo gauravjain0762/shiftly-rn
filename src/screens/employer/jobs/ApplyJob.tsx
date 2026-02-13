@@ -24,6 +24,7 @@ import {
   errorToast,
   resetNavigation,
 } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { SCREENS } from '../../../navigation/screenNames';
 import { RootState } from '../../../store';
@@ -48,7 +49,7 @@ const ApplyJob = () => {
     (state: RootState) => state.employee,
   );
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
   const checkFileSize = async (filePath: string): Promise<number> => {
     try {
@@ -134,10 +135,17 @@ const ApplyJob = () => {
                   alignItems: 'center',
                 }}>
                 <Text numberOfLines={2} style={[styles.meta, { maxWidth: '50%' }]}>{`${data?.contract_type}`}</Text>
-                <Text
-                  style={
-                    styles.salary
-                  }>{`${data?.currency} ${data?.monthly_salary_from} - ${data?.monthly_salary_to}`}</Text>
+                <View style={styles.salaryRow}>
+                  {data?.currency === 'AED' ? (
+                    <Image source={IMAGES.currency} style={styles.currencyImage} />
+                  ) : (
+                    <Text style={styles.currencySymbol}>{getCurrencySymbol(data?.currency)}</Text>
+                  )}
+                  <Text
+                    style={
+                      styles.salary
+                    }>{`${data?.monthly_salary_from?.toLocaleString()} - ${data?.monthly_salary_to?.toLocaleString()}`}</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -322,6 +330,21 @@ const styles = StyleSheet.create({
   },
   salary: {
     ...commonFontStyle(700, 15, '#33485B'),
+  },
+  salaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currencyImage: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    marginRight: wp(4),
+    tintColor: '#33485B',
+  },
+  currencySymbol: {
+    ...commonFontStyle(700, 15, '#33485B'),
+    marginRight: wp(2),
   },
   divider: {
     height: 1,

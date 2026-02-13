@@ -54,7 +54,7 @@ const MyJobCard = (props: JobCardProps) => {
       const description = item?.description || '';
       const salary =
         item?.monthly_salary_from || item?.monthly_salary_to
-          ? `Salary: ${getCurrencySymbol(item?.currency)} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+          ? `Salary: ${getCurrencySymbol(item?.currency)}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
           : '';
 
       const shareUrl = item?.share_url || '';
@@ -118,21 +118,20 @@ ${salary}${shareUrlText}`;
 
         {(item?.monthly_salary_from || item?.monthly_salary_to) && (
           <View style={styles.salaryContainer}>
-            {item?.currency?.toUpperCase() === 'AED' && (
-              <Image
-                source={IMAGES.currency}
-                style={styles.salaryIcon}
-                tintColor={colors._656464}
-              />
-            )}
             <Text style={styles.salaryText}>
-              {`${getCurrencySymbol(item?.currency)} ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+              {`${item?.currency?.toUpperCase()} `}
+              {item?.currency?.toUpperCase() === 'AED' ? (
+                <Image source={IMAGES.currency} style={styles.currencyImage} />
+              ) : (
+                getCurrencySymbol(item?.currency)
+              )}
+              {` ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
             </Text>
           </View>
         )}
 
         <View style={styles.footerRow}>
-          {item?.applicants?.length && (
+          {!!item?.applicants?.length && (
             <Text
               style={
                 styles.applicantsText
@@ -229,13 +228,17 @@ const styles = StyleSheet.create({
     gap: wp(8),
     marginTop: hp(12),
   },
-  salaryIcon: {
-    width: wp(16),
-    height: hp(16),
-    resizeMode: 'contain',
-  },
   salaryText: {
     ...commonFontStyle(600, 14, colors.black),
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currencyImage: {
+    width: wp(14),
+    height: hp(11),
+    resizeMode: 'contain',
+    marginHorizontal: wp(2),
+    tintColor: colors.empPrimary,
   },
   expiryText: {
     ...commonFontStyle(500, 12, colors._EE4444),

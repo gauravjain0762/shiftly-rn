@@ -28,6 +28,7 @@ import {
     successToast,
     goBack,
 } from '../../../utils/commonFunction';
+import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useEditCompanyJobMutation } from '../../../api/dashboardApi';
 import { useCreateJobMutation } from '../../../api/authApi';
@@ -79,12 +80,24 @@ const JobPreview = () => {
     const [showHiringAnimation, setShowHiringAnimation] = useState(false);
 
     const formatSalary = () => {
-        if (!salary?.value) return '';
+        if (!salary?.value) return null;
         const [from, to] = salary.value.split('-').map((s: string) => s.trim());
         if (from && to) {
-            return `${currency?.value || 'AED'} ${from} - ${to}`;
+            const currencyCode = currency?.value || 'AED';
+            return (
+                <View style={styles.salaryContainer}>
+                    {currencyCode === 'AED' ? (
+                        <Image source={IMAGES.currency} style={styles.currencyImage} />
+                    ) : (
+                        <Text style={styles.currencySymbol}>{getCurrencySymbol(currencyCode)}</Text>
+                    )}
+                    <Text style={styles.jobSalary}>
+                        {`${Number(from.replace(/,/g, '')).toLocaleString()} - ${Number(to.replace(/,/g, '')).toLocaleString()}`}
+                    </Text>
+                </View>
+            );
         }
-        return '';
+        return null;
     };
 
     // Animation finish handler - called after 3.5 seconds
@@ -244,7 +257,7 @@ const JobPreview = () => {
                                 <Text style={styles.jobLocation}>
                                     {locationDisplay()} - {contract_type?.label || contract_type?.value || 'Full Time'}
                                 </Text>
-                                <Text style={styles.jobSalary}>{formatSalary()}</Text>
+                                {formatSalary()}
                             </View>
                         </View>
                     </View>
@@ -458,6 +471,21 @@ const styles = StyleSheet.create({
     },
     jobSalary: {
         ...commonFontStyle(700, 14, colors._0B3970),
+    },
+    salaryContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    currencyImage: {
+        width: wp(14),
+        height: hp(11),
+        resizeMode: 'contain',
+        marginRight: wp(4),
+        tintColor: colors._0B3970,
+    },
+    currencySymbol: {
+        ...commonFontStyle(700, 14, colors._0B3970),
+        marginRight: wp(2),
     },
     section: {
         marginBottom: hp(20),
