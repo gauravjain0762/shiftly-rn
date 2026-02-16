@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
@@ -9,6 +9,7 @@ import ExpandableText from '../common/ExpandableText';
 import CustomImage from '../common/CustomImage';
 import { SCREENS } from '../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
+import { useTogglePostLikeMutation } from '../../api/dashboardApi';
 
 type card = {
   onPressCard?: () => void;
@@ -17,6 +18,8 @@ type card = {
   isLiked?: boolean;
   item?: any;
   showMenu?: boolean; // Show three-dot menu for company posts
+  onScrollToTop?: () => void;
+  itemIndex?: number;
 };
 
 const FeedCard: FC<card> = ({
@@ -26,22 +29,42 @@ const FeedCard: FC<card> = ({
   isLiked = false,
   item,
   showMenu = false,
+  onScrollToTop,
+  itemIndex,
 }) => {
   const { t } = useTranslation();
   const hasImage = item?.images?.length > 0;
   const [imageLoading, setImageLoading] = useState(hasImage);
-  const [localLiked, setLocalLiked] = useState(isLiked);
+  const [localLiked, setLocalLiked] = useState(item?.is_liked || false);
+  const [likesCount, setLikesCount] = useState(item?.likes_count || 0);
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [togglePostLike] = useTogglePostLikeMutation();
 
-  const handleLike = () => {
-    setLocalLiked(!localLiked);
+  useEffect(() => {
+    setLocalLiked(item?.is_liked || false);
+    setLikesCount(item?.likes_count || 0);
+  }, [item]);
+
+  const handleLike = async () => {
+    const newLikedState = !localLiked;
+    setLocalLiked(newLikedState);
+    setLikesCount((prev: number) => (newLikedState ? prev + 1 : prev - 1));
     onPressLike();
+
+    try {
+      const formData = new FormData();
+      formData.append('post_id', item?._id);
+      await togglePostLike(formData).unwrap();
+    } catch (error) {
+      console.log('Error toggling like:', error);
+      setLocalLiked(localLiked);
+      setLikesCount((prev: number) => (localLiked ? prev + 1 : prev - 1));
+    }
   };
 
   const handleEdit = () => {
     setMenuVisible(false);
-    // Navigate to CreatePost with post data for editing
     navigateTo(SCREENS.CreatePost, {
       editMode: true,
       postData: {
@@ -56,8 +79,8 @@ const FeedCard: FC<card> = ({
   return (
     <TouchableOpacity
       activeOpacity={1}
-      onPress={() => onPressCard()}
-      style={styles.card}>
+      style={styles.card}
+      onPress={() => onPressCard()}>
       <View style={styles.cardHeader}>
         <CustomImage
           onPress={onPressLogo}
@@ -101,13 +124,16 @@ const FeedCard: FC<card> = ({
           )}
           <TouchableOpacity
             onPress={handleLike}
-            style={styles.actionButton}
+            style={[styles.actionButton, { flexDirection: 'column', gap: 2, alignItems: 'center' }]}
           >
             <CustomImage
               size={wp(26)}
               resizeMode={!localLiked ? "cover" : "contain"}
               source={localLiked ? IMAGES.like : IMAGES.hart}
             />
+            {likesCount > 0 && (
+              <Text style={styles.likesCountText}>{likesCount}</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -137,9 +163,13 @@ const FeedCard: FC<card> = ({
         maxLines={3}
         descriptionStyle={styles.description}
         description={item?.description || 'N/A'}
+        onShowLess={() => {
+          if (onScrollToTop) {
+            onScrollToTop();
+          }
+        }}
       />
 
-      {/* Dropdown Menu Modal */}
       <Modal
         visible={menuVisible}
         transparent
@@ -175,7 +205,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   description: {
-    lineHeight: hp(20),
+    // lineHeight: hp(20),
     paddingVertical: hp(15),
     paddingHorizontal: wp(14),
     ...commonFontStyle(400, 16, colors._6A6A6A),
@@ -315,5 +345,10 @@ const styles = StyleSheet.create({
   },
   menuText: {
     ...commonFontStyle(500, 15, colors._1F1F1F),
+  },
+  likesCountText: {
+    ...commonFontStyle(500, 10, colors._6A6A6A),
+    marginTop: -2,
+    marginRight: 0,
   },
 });

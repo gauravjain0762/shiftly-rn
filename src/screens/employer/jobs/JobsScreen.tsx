@@ -45,6 +45,7 @@ import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
 import CustomImage from '../../../component/common/CustomImage';
 import Tooltip from '../../../component/common/Tooltip';
 import { getAsyncUserLocation } from '../../../utils/asyncStorage';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const contractTypes: object[] = [
   { type: 'Full Time', value: 'Full Time' },
@@ -68,7 +69,12 @@ const BannerItem = ({ item }: { item: any }) => {
       />
       {isLoading && (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="small" color={colors._0B3970} />
+          <SkeletonPlaceholder borderRadius={12}>
+            <SkeletonPlaceholder.Item
+              width={SCREEN_WIDTH - wp(32)}
+              height={hp(180)}
+            />
+          </SkeletonPlaceholder>
         </View>
       )}
     </View>
@@ -92,8 +98,8 @@ const JobsScreen = () => {
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
+  console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages)
   const pagination = data?.data?.pagination;
-
 
   const [filters, setFilters] = useState<{
     job_sectors: string[];
@@ -548,6 +554,17 @@ const JobsScreen = () => {
     }
   };
 
+  const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(false);
+
+  useEffect(() => {
+    if (carouselImages?.length) {
+      const images = carouselImages.map((item: any) => item?.image).filter(Boolean);
+      Promise.all(images.map((url: string) => Image.prefetch(url)))
+        .then(() => setIsAutoplayEnabled(true))
+        .catch(() => setIsAutoplayEnabled(true));
+    }
+  }, [carouselImages]);
+
   const renderBannerItem = useCallback(({ item }: any) => {
     if (!item) return null;
     return <BannerItem item={item} />;
@@ -567,14 +584,14 @@ const JobsScreen = () => {
     [carouselImages],
   );
 
-  // Explicitly start autoplay when banners are ready (library can miss mount-time start)
+  // Explicitly start autoplay when banners are ready
   useEffect(() => {
-    if (!carouselImages?.length || carouselImages.length < 2) return;
+    if (!carouselImages?.length || carouselImages.length < 2 || !isAutoplayEnabled) return;
     const t = setTimeout(() => {
       carouselRef.current?.startAutoplay?.();
     }, 1200);
     return () => clearTimeout(t);
-  }, [carouselImages]);
+  }, [carouselImages, isAutoplayEnabled]);
 
   const renderHeader = () => (
     <>
@@ -632,7 +649,7 @@ const JobsScreen = () => {
                   sliderWidth={SCREEN_WIDTH - 32}
                   itemWidth={SCREEN_WIDTH - 32}
                   loop={carouselImages && carouselImages.length > 1}
-                  autoplay={false}
+                  autoplay={isAutoplayEnabled}
                   autoplayInterval={3000}
                   autoplayDelay={1000}
                   onSnapToItem={handleSnapToItem}

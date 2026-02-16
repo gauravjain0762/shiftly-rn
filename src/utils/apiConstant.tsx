@@ -60,6 +60,7 @@ export const API = {
 
   // Notifications
   sendInterviewInvites: '/company/sendInterviewInvites',
+  togglePostLike: 'togglePostLike',
 
   // CompanyLogin: '',
 

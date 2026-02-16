@@ -71,6 +71,8 @@ export interface EmployeeState {
   isSuccessModalVisible: boolean;
   auth: AuthState;
   profile_completion: number;
+  viewCompanyProfileTabIndex: number;
+  viewCompanyProfileInfo: any;
 }
 
 const initialState: EmployeeState = {
@@ -141,6 +143,8 @@ const initialState: EmployeeState = {
     password: __DEV__ ? 'Test@123' : '',
   },
   profile_completion: 0,
+  viewCompanyProfileTabIndex: 0,
+  viewCompanyProfileInfo: null,
 };
 
 const employeeSlice = createSlice({
@@ -202,6 +206,12 @@ const employeeSlice = createSlice({
         ...action.payload,
       };
     },
+    setViewCompanyProfileTabIndex: (state, action: PayloadAction<number>) => {
+      state.viewCompanyProfileTabIndex = action.payload;
+    },
+    setViewCompanyProfileInfo: (state, action: PayloadAction<any>) => {
+      state.viewCompanyProfileInfo = action.payload;
+    },
     resetEmployeeState: () => initialState,
   },
 });
@@ -224,6 +234,8 @@ export const {
   setIsSuccessModalVisible,
   setAuthData,
   setProfileCompletion,
+  setViewCompanyProfileTabIndex,
+  setViewCompanyProfileInfo,
 } = employeeSlice.actions;
 
 export const selectEmployeeState = (state: RootState): EmployeeState =>

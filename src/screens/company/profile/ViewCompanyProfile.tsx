@@ -13,17 +13,17 @@ import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
     GradientButton,
     LinearContainer,
-    ParallaxContainer,
 } from '../../../component';
 import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
-import { useLazyGetCompanyProfileByIdQuery } from '../../../api/dashboardApi';
+import { useGetCompanyProfileByIdQuery } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import CustomImage from '../../../component/common/CustomImage';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectEmployeeState, setViewCompanyProfileInfo, setViewCompanyProfileTabIndex } from '../../../features/employeeSlice';
 import ExpandableText from '../../../component/common/ExpandableText';
 
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
@@ -31,12 +31,14 @@ const ProfileTabs = ['About', 'Posts', 'Jobs'];
 const ViewCompanyProfile = () => {
     const { params } = useRoute<any>();
     const companyId = params?.companyId;
-    console.log('🔥 ~ ViewCompanyProfile ~ companyId:', companyId);
-
     const navigation = useNavigation();
 
-    const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-    const [companyInfo, setCompanyInfo] = useState<any>(null);
+    const dispatch = useDispatch();
+    const { viewCompanyProfileTabIndex, viewCompanyProfileInfo } = useSelector(selectEmployeeState);
+    const selectedTabIndex = viewCompanyProfileTabIndex;
+    const companyInfo = viewCompanyProfileInfo;
+
+    // const [companyInfo, setCompanyInfo] = useState<any>(null); // Removed local state
     const [companyPosts, setCompanyPosts] = useState<any[]>([]);
     const [companyJobs, setCompanyJobs] = useState<any[]>([]);
 
@@ -44,39 +46,43 @@ const ViewCompanyProfile = () => {
     const [logoLoadError, setLogoLoadError] = useState(false);
     const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    const lastLogoUriRef = useRef<string | null>(null);
     const [postsFetched, setPostsFetched] = useState(false);
     const [jobsFetched, setJobsFetched] = useState(false);
 
-    const [getCompanyProfile, { data: companyData, isLoading: isCompanyLoading }] =
-        useLazyGetCompanyProfileByIdQuery();
+    const queryTab = useMemo(() => {
+        if (selectedTabIndex === 0) return 'info';
+        if (selectedTabIndex === 1) return 'posts';
+        if (selectedTabIndex === 2) return 'jobs';
+        return 'info';
+    }, [selectedTabIndex]);
 
-    useEffect(() => {
-        if (!companyId) return;
-
-        if (selectedTabIndex === 0 && !companyInfo) {
-            getCompanyProfile({ company_id: companyId, tab: 'about', page: 1 });
-        } else if (selectedTabIndex === 1 && !postsFetched) {
-            getCompanyProfile({ company_id: companyId, tab: 'posts', page: 1 });
-        } else if (selectedTabIndex === 2 && !jobsFetched) {
-            getCompanyProfile({ company_id: companyId, tab: 'jobs', page: 1 });
-        }
-    }, [companyId, selectedTabIndex, getCompanyProfile, companyInfo, postsFetched, jobsFetched]);
+    const { data: companyData, isLoading: isCompanyLoading } =
+        useGetCompanyProfileByIdQuery(
+            { company_id: companyId, tab: queryTab, page: 1 },
+            { skip: !companyId }
+        );
 
     useEffect(() => {
         if (!companyData?.status) return;
 
-        if (companyData?.data?.company && !companyInfo) {
-            setCompanyInfo(companyData.data.company);
+        if (companyData?.data?.company) {
+            if (!companyInfo || companyInfo._id !== companyData.data.company._id) {
+                dispatch(setViewCompanyProfileInfo(companyData.data.company));
+            }
         }
-        if (companyData?.data?.posts) {
-            setCompanyPosts(companyData.data.posts);
-            setPostsFetched(true);
+
+        const tabData = companyData?.data?.tab_data;
+        if (Array.isArray(tabData)) {
+            if (selectedTabIndex === 1) {
+                setCompanyPosts(tabData);
+                setPostsFetched(true);
+            } else if (selectedTabIndex === 2) {
+                setCompanyJobs(tabData);
+                setJobsFetched(true);
+            }
         }
-        if (companyData?.data?.jobs) {
-            setCompanyJobs(companyData.data.jobs);
-            setJobsFetched(true);
-        }
-    }, [companyData, companyInfo]);
+    }, [companyData, companyInfo, selectedTabIndex, dispatch]);
 
     const displayProfile = companyInfo || companyData?.data?.company || null;
 
@@ -123,16 +129,35 @@ const ViewCompanyProfile = () => {
 
     const displayPosts = Array.isArray(companyPosts) ? companyPosts : [];
     const displayJobs = Array.isArray(companyJobs) ? companyJobs : [];
+    console.log("🔥 ~ ViewCompanyProfile ~ displayJobs:", displayJobs)
+
+    // Clear info when leaving the screen completely (optional, depends on UX preference)
+    // For now, let's clear it on unmount to force fresh fetch next time the screen is opened
+    useEffect(() => {
+        return () => {
+            dispatch(setViewCompanyProfileInfo(null));
+        };
+    }, [dispatch]);
 
     const handleBackPress = useCallback(() => {
+        dispatch(setViewCompanyProfileTabIndex(0));
+        dispatch(setViewCompanyProfileInfo(null)); // Clear info on back press explicitly
         if (navigation.canGoBack()) {
             navigation.goBack();
         }
-    }, [navigation]);
+    }, [navigation, dispatch]);
+
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         return () => {
+    //             dispatch(setViewCompanyProfileTabIndex(0));
+    //         };
+    //     }, [dispatch])
+    // );
 
     const handleTabPress = useCallback((index: number) => {
-        setSelectedTabIndex(index);
-    }, []);
+        dispatch(setViewCompanyProfileTabIndex(index));
+    }, [dispatch]);
 
     const renderJobs = useMemo(() => {
         if (selectedTabIndex !== 2) return null;
@@ -161,7 +186,7 @@ const ViewCompanyProfile = () => {
             );
         }
 
-        return displayJobs.map((item: any, index: number) => {
+        return displayJobs?.map((item: any, index: number) => {
             if (!item) return null;
             return (
                 <View style={{ marginBottom: hp(15) }} key={`job-${item.id || index}`}>
@@ -194,26 +219,12 @@ const ViewCompanyProfile = () => {
             clearTimeout(logoLoadTimeoutRef.current);
             logoLoadTimeoutRef.current = null;
         }
-
-        if (hasValidLogo && logoUri) {
-            setIsLogoLoading(true);
-            setLogoLoadError(false);
-
-            logoLoadTimeoutRef.current = setTimeout(() => {
-                setIsLogoLoading(false);
-                logoLoadTimeoutRef.current = null;
-            }, 500);
-        } else {
-            setIsLogoLoading(false);
-            setLogoLoadError(false);
-        }
-
         return () => {
             if (logoLoadTimeoutRef.current) {
                 clearTimeout(logoLoadTimeoutRef.current);
             }
         };
-    }, [hasValidLogo, logoUri]);
+    }, []);
 
     return (
         <SafeAreaView
@@ -228,58 +239,79 @@ const ViewCompanyProfile = () => {
                     backgroundColor: colors.white,
                 }}
                 showsVerticalScrollIndicator={false}>
-                {/* <ParallaxContainer
-                    imagePath={coverImages}
-                    ContainerStyle={styles.container}
-                    showLoader={shouldShowCoverLoader}
-                    loaderColor={colors._0B3970}> */}
+                <View style={styles.container}>
+                    <View style={{ width: '100%', height: 250 }}>
+                        {useMemo(() => (
+                            <>
+                                {coverImages.length > 0 && coverImages[0]?.uri ? (
+                                    <Image
+                                        source={{ uri: coverImages[0].uri }}
+                                        style={{ width: '100%', height: '100%' }}
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    !shouldShowCoverLoader && (
+                                        <Image
+                                            source={IMAGES.logoText}
+                                            style={{ width: '100%', height: '100%' }}
+                                            resizeMode="contain"
+                                        />
+                                    )
+                                )}
+                            </>
+                        ), [coverImages, shouldShowCoverLoader])}
+                        {shouldShowCoverLoader && (
+                            <View style={[styles.logoLoaderContainer, { backgroundColor: 'rgba(255,255,255,0.5)' }]}>
+                                <ActivityIndicator size="small" color={colors._0B3970} />
+                            </View>
+                        )}
+                    </View>
+
                     <LinearContainer
                         SafeAreaProps={{ edges: ['bottom'] }}
                         containerStyle={styles.linearContainer}
                         colors={[colors.white, colors.white]}>
                         <View style={styles.profileHeader}>
                             <View style={styles.logoContainer}>
-                                {hasValidLogo && logoUri && !logoLoadError ? (
-                                    <View
-                                        style={{
-                                            position: 'relative',
-                                            width: '100%',
-                                            height: '100%',
-                                        }}>
-                                        {/* <CustomImage
-                                            uri={logoUri}
-                                            containerStyle={{ height: '100%', width: '100%' }}
-                                            imageStyle={{ height: '100%', width: '100%' }}
-                                            resizeMode="cover"
-                                            props={{
-                                                onLoad: () => {
+                                {useMemo(() => (
+                                    hasValidLogo && logoUri && !logoLoadError ? (
+                                        <View style={styles.logoContainerWrapper}>
+                                            <Image
+                                                source={{ uri: logoUri }}
+                                                style={styles.logoImage}
+                                                resizeMode="cover"
+                                                onLoadStart={() => {
+                                                    if (logoUri !== lastLogoUriRef.current) {
+                                                        setIsLogoLoading(true);
+                                                        setLogoLoadError(false);
+                                                    }
+                                                }}
+                                                onLoad={() => {
                                                     setIsLogoLoading(false);
                                                     setLogoLoadError(false);
-                                                },
-                                                onError: () => {
+                                                    lastLogoUriRef.current = logoUri;
+                                                }}
+                                                onError={() => {
                                                     setIsLogoLoading(false);
                                                     setLogoLoadError(true);
-                                                },
-                                            }}
-                                        /> */}
-                                        {isLogoLoading && (
-                                            <View
-                                                style={styles.logoLoaderContainer}
-                                                pointerEvents="none">
-                                                <ActivityIndicator
-                                                    size="small"
-                                                    color={colors._0B3970}
-                                                />
-                                            </View>
-                                        )}
-                                    </View>
-                                ) : (
-                                    <Image
-                                        source={IMAGES.logoText}
-                                        style={styles.logoPlaceholderImage}
-                                        resizeMode="contain"
-                                    />
-                                )}
+                                                }}
+                                            />
+                                            {isLogoLoading && (
+                                                <View style={styles.logoLoaderContainer}>
+                                                    <ActivityIndicator size="small" color={colors._0B3970} />
+                                                </View>
+                                            )}
+                                        </View>
+                                    ) : (
+                                        !isLogoLoading && !shouldShowCoverLoader && (
+                                            <Image
+                                                resizeMode="contain"
+                                                source={IMAGES.logoText}
+                                                style={styles.logoPlaceholderImage}
+                                            />
+                                        )
+                                    )
+                                ), [hasValidLogo, logoUri, logoLoadError, isLogoLoading, shouldShowCoverLoader])}
                             </View>
 
                             <View style={styles.titleTextContainer}>
@@ -385,8 +417,10 @@ const ViewCompanyProfile = () => {
                         )}
 
                         {renderJobs}
+
+
                     </LinearContainer>
-                {/* </ParallaxContainer> */}
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -474,7 +508,7 @@ const styles = StyleSheet.create({
     description: {
         ...commonFontStyle(400, 15, colors._3D3D3D),
         marginTop: hp(11),
-        lineHeight: hp(25),
+        // lineHeight: hp(25), // Potential crash cause with certain fonts/Android versions
     },
     tabRow: {
         marginTop: hp(25),
@@ -507,5 +541,14 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.white,
         paddingVertical: hp(20),
+    },
+    logoContainerWrapper: {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+    },
+    logoImage: {
+        width: '100%',
+        height: '100%',
     },
 });

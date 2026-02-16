@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   StyleProp,
   StyleSheet,
@@ -8,9 +8,9 @@ import {
   View,
 } from 'react-native';
 
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import BaseText from './BaseText';
-import {colors} from '../../theme/colors';
+import { colors } from '../../theme/colors';
 
 interface Props {
   style?: StyleProp<TextStyle>;
@@ -18,6 +18,7 @@ interface Props {
   maxLines?: number;
   showStyle?: StyleProp<TextStyle>;
   descriptionStyle?: StyleProp<TextStyle>;
+  onShowLess?: () => void;
 }
 
 const ExpandableText: React.FC<Props> = ({
@@ -26,41 +27,38 @@ const ExpandableText: React.FC<Props> = ({
   maxLines = 5,
   showStyle,
   descriptionStyle,
+  onShowLess,
 }) => {
   const [showMore, setShowMore] = useState(false);
   const [shouldShowButton, setShouldShowButton] = useState(false);
-  const [textLayoutComplete, setTextLayoutComplete] = useState(false);
 
   const toggleShowMore = () => {
+    if (showMore && onShowLess) {
+      onShowLess();
+    }
     setShowMore(prev => !prev);
   };
 
   const onTextLayout = (e: any) => {
-    if (!textLayoutComplete) {
-      const totalLines = e.nativeEvent.lines.length;
-      setShouldShowButton(totalLines > maxLines);
-      setTextLayoutComplete(true);
+    try {
+      if (e?.nativeEvent?.lines) {
+        const totalLines = e.nativeEvent.lines.length;
+        if (totalLines > maxLines) {
+          setShouldShowButton(true);
+        }
+      }
+    } catch (error) {
+      console.warn('ExpandableText onTextLayout error:', error);
     }
   };
 
   return (
     <View>
-      {!textLayoutComplete && (
-        <BaseText
-          onTextLayout={onTextLayout}
-          style={[
-            style,
-            {
-              position: 'absolute',
-              opacity: 0,
-              top: -1000,
-              left: 0,
-              right: 0,
-            },
-          ]}>
-          {description}
-        </BaseText>
-      )}
+      <BaseText
+        style={[descriptionStyle, { position: 'absolute', opacity: 0, height: 0 }]}
+        onTextLayout={onTextLayout}>
+        {description}
+      </BaseText>
 
       <BaseText
         style={descriptionStyle}

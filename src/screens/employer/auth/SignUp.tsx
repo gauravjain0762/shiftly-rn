@@ -238,6 +238,7 @@ const SignUp = () => {
     console.log(' ~ handleOTPVerify ~ verifyData:', verifyData);
     try {
       const response = await empOTPVerify(verifyData).unwrap() as any;
+      console.log("🔥 ~ handleOTPVerify ~ response:", response)
       if (response?.status) {
         successToast(response?.message);
         dispatch(setUserInfo(response?.data?.user));

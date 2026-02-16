@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -18,6 +18,11 @@ const PostsScreen = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [allPosts, setAllPosts] = useState<any[]>([]);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const flatListRef = useRef<FlatList>(null);
+
+    const handleScrollToTop = (index: number) => {
+        flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
+    };
 
     const {
         data: getPost,
@@ -65,15 +70,18 @@ const PostsScreen = () => {
                     <PostSkeleton backgroundColor={colors._DADADA} />
                 ) : (
                     <FlatList
+                        ref={flatListRef}
                         data={allPosts}
                         style={AppStyles.flex}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.scrollcontainer}
                         ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-                        renderItem={({ item }) => (
+                        renderItem={({ item, index }) => (
                             <FeedCard
                                 item={item}
                                 showMenu={false}
+                                itemIndex={index}
+                                onScrollToTop={() => handleScrollToTop(index)}
                                 onPressLogo={() => {
                                     navigation.navigate(SCREENS.CompanyProfile, {
                                         companyId: item?.company_id?._id,

