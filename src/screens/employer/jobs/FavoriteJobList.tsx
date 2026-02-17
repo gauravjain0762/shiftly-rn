@@ -4,7 +4,6 @@ import {
   BackHeader,
   JobCard,
   LinearContainer,
-  ShareModal,
 } from '../../../component';
 import { useGetFavouritesJobQuery } from '../../../api/dashboardApi';
 import { AppStyles } from '../../../theme/appStyles';
@@ -16,7 +15,6 @@ import { colors } from '../../../theme/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const FavoriteJobList = () => {
-  const [modal, setModal] = useState<boolean>(false);
   const { data: getFavoriteJobs } = useGetFavouritesJobQuery({});
   const favJobList = getFavoriteJobs?.data?.jobs;
 
@@ -40,9 +38,6 @@ const FavoriteJobList = () => {
                 key={index}
                 item={item}
                 isShowFavIcon={false}
-                onPressShare={() => {
-                  setModal(true);
-                }}
                 onPress={() =>
                   navigateTo(SCREEN_NAMES.JobDetail, {
                     item: item,
@@ -60,7 +55,6 @@ const FavoriteJobList = () => {
             </View>
           }
         />
-        <ShareModal visible={modal} onClose={() => setModal(!modal)} />
       </LinearContainer>
     </SafeAreaView>
   );

@@ -14,6 +14,9 @@ type JobCardProps = {
   onPressShare?: () => void;
 };
 
+import { shareJob } from '../../utils/shareUtils';
+
+/*
 const downloadImage = async (url: string) => {
   const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
 
@@ -24,6 +27,7 @@ const downloadImage = async (url: string) => {
 
   return `file://${filePath}`;
 };
+*/
 
 import { getCurrencySymbol } from '../../utils/currencySymbols';
 
@@ -47,55 +51,8 @@ const MyJobCard = (props: JobCardProps) => {
     return [IMAGES.logoText];
   })();
 
-  const handleShare = async () => {
-    try {
-      const title = item?.title || 'Job Opportunity';
-      const area = item?.address || item?.area || '';
-      const description = item?.description || '';
-      const salary =
-        item?.monthly_salary_from || item?.monthly_salary_to
-          ? `Salary: ${getCurrencySymbol(item?.currency)}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
-          : '';
-
-      const shareUrl = item?.share_url || '';
-      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-
-      const message = `${title}
-${area}
-
-${description}
-
-${salary}${shareUrlText}`;
-
-      const shareOptions: any = {
-        title: title,
-        message: message,
-        url: shareUrl,
-      };
-
-      const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
-        ? coverImages[0]
-        : (item?.company_id?.logo && typeof item.company_id.logo === 'string'
-          ? item.company_id.logo
-          : null);
-
-      if (coverImageUri && typeof coverImageUri === 'string') {
-        try {
-          const imagePath = await downloadImage(coverImageUri);
-          shareOptions.url = imagePath;
-          shareOptions.type = 'image/jpeg';
-        } catch (imageError) {
-          console.log('❌ Image download error:', imageError);
-        }
-      }
-
-      await Share.open(shareOptions);
-
-    } catch (err: any) {
-      if (err?.message !== 'User did not share') {
-        console.log('❌ Share error:', err);
-      }
-    }
+  const handleShare = () => {
+    shareJob(item);
   };
 
   return (

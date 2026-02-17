@@ -127,12 +127,26 @@ const ViewProfileScreen = () => {
                 {isUpdating ? (
                   <ActivityIndicator size="small" color={isOpenForWork ? colors.white : colors._0B3970} />
                 ) : (
-                  <Text style={[
-                    styles.editButtonText,
-                    isOpenForWork && styles.editButtonTextActive
-                  ]}>
-                    Open to Work
-                  </Text>
+                  <>
+                    {isOpenForWork && (
+                      <Image
+                        source={IMAGES.check}
+                        style={{
+                          width: wp(16),
+                          height: wp(16),
+                          tintColor: colors.white,
+                          marginRight: wp(5)
+                        }}
+                        resizeMode='contain'
+                      />
+                    )}
+                    <Text style={[
+                      styles.editButtonText,
+                      isOpenForWork && styles.editButtonTextActive
+                    ]}>
+                      Open to Work
+                    </Text>
+                  </>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
@@ -254,6 +268,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(21),
     borderRadius: 10,
     backgroundColor: '#E6E6E6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   editButtonActive: {
     backgroundColor: colors._0B3970,

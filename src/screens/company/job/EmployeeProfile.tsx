@@ -370,16 +370,16 @@ const styles = StyleSheet.create({
     gap: wp(12),
   },
   chatIcon: {
-    width: wp(24),
-    height: wp(24),
+    width: wp(22),
+    height: wp(22),
     left: '39%',
-    top: "30%",
+    top: "32%",
     position: 'absolute',
     alignSelf: 'center',
-    tintColor: colors._0B3970,
+    tintColor: colors.white,
   },
   chatButtonText: {
-    ...commonFontStyle(600, 20, colors._0B3970),
+    ...commonFontStyle(600, 20, colors.white),
     marginLeft: wp(24),
   },
 });

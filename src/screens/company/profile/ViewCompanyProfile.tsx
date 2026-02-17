@@ -63,12 +63,23 @@ const ViewCompanyProfile = () => {
             { skip: !companyId }
         );
 
+    const linearColors = useMemo(() => [colors.white, colors.white], []);
+    const safeAreaProps = useMemo(() => ({ edges: ['bottom'] as const }), []);
+
     useEffect(() => {
         if (!companyData?.status) return;
 
         if (companyData?.data?.company) {
+            // Check if company object is effectively different before dispatching
+            // JSON stringify is a quick way to check deep equality for simple objects without lodash, 
+            // but might be expensive. For now, rely on ID and maybe a key field if ID isn't enough, 
+            // OR trust the user's claim that it's reloading, implying state update.
+            // Let's Log it.
             if (!companyInfo || companyInfo._id !== companyData.data.company._id) {
+                console.log('Dispatching setViewCompanyProfileInfo - ID mismatch or null');
                 dispatch(setViewCompanyProfileInfo(companyData.data.company));
+            } else {
+                console.log('Skipping setViewCompanyProfileInfo - Data matches');
             }
         }
 
@@ -125,19 +136,41 @@ const ViewCompanyProfile = () => {
         return [];
     }, [displayProfile]);
 
+    // Memoize the source object for Image to prevent unnecessary re-fetches/updates
+    const coverImageSource = useMemo(() => {
+        if (coverImages.length > 0 && coverImages[0]?.uri) {
+            return { uri: coverImages[0].uri };
+        }
+        return null;
+    }, [coverImages]);
+
     const shouldShowCoverLoader = isCompanyLoading && !companyInfo;
 
     const displayPosts = Array.isArray(companyPosts) ? companyPosts : [];
     const displayJobs = Array.isArray(companyJobs) ? companyJobs : [];
-    console.log("🔥 ~ ViewCompanyProfile ~ displayJobs:", displayJobs)
+
+    // Debug render counts
+    const renderCount = useRef(0);
+    renderCount.current += 1;
+    // console.log(`ViewCompanyProfile Render #${renderCount.current} - Tab: ${selectedTabIndex} IsLoading: ${isCompanyLoading}`);
+
+    // Log important state for debugging (can be removed later)
+    useEffect(() => {
+        console.log('DEBUG: displayProfile:', displayProfile);
+        console.log('DEBUG: shouldShowCoverLoader:', shouldShowCoverLoader);
+        // console.log(`Stable Check - Loading: ${isCompanyLoading}, Info: ${!!companyInfo}, ShowLoader: ${shouldShowCoverLoader}`);
+    }, [isCompanyLoading, companyInfo, shouldShowCoverLoader, displayProfile]);
 
     // Clear info when leaving the screen completely (optional, depends on UX preference)
     // For now, let's clear it on unmount to force fresh fetch next time the screen is opened
+    /* 
+    // REMOVED CLEANUP TO PREVENT FLICKER ON TAB CHANGE / REMOUNT
     useEffect(() => {
         return () => {
             dispatch(setViewCompanyProfileInfo(null));
         };
     }, [dispatch]);
+    */
 
     const handleBackPress = useCallback(() => {
         dispatch(setViewCompanyProfileTabIndex(0));
@@ -214,6 +247,8 @@ const ViewCompanyProfile = () => {
         return null;
     }, [displayProfile?.logo]);
 
+    const logoSource = useMemo(() => logoUri ? { uri: logoUri } : null, [logoUri]);
+
     useEffect(() => {
         if (logoLoadTimeoutRef.current) {
             clearTimeout(logoLoadTimeoutRef.current);
@@ -243,9 +278,9 @@ const ViewCompanyProfile = () => {
                     <View style={{ width: '100%', height: 250 }}>
                         {useMemo(() => (
                             <>
-                                {coverImages.length > 0 && coverImages[0]?.uri ? (
+                                {coverImageSource ? (
                                     <Image
-                                        source={{ uri: coverImages[0].uri }}
+                                        source={coverImageSource}
                                         style={{ width: '100%', height: '100%' }}
                                         resizeMode="cover"
                                     />
@@ -259,7 +294,7 @@ const ViewCompanyProfile = () => {
                                     )
                                 )}
                             </>
-                        ), [coverImages, shouldShowCoverLoader])}
+                        ), [coverImageSource, shouldShowCoverLoader])}
                         {shouldShowCoverLoader && (
                             <View style={[styles.logoLoaderContainer, { backgroundColor: 'rgba(255,255,255,0.5)' }]}>
                                 <ActivityIndicator size="small" color={colors._0B3970} />
@@ -268,16 +303,16 @@ const ViewCompanyProfile = () => {
                     </View>
 
                     <LinearContainer
-                        SafeAreaProps={{ edges: ['bottom'] }}
+                        SafeAreaProps={safeAreaProps}
                         containerStyle={styles.linearContainer}
-                        colors={[colors.white, colors.white]}>
+                        colors={linearColors}>
                         <View style={styles.profileHeader}>
                             <View style={styles.logoContainer}>
                                 {useMemo(() => (
-                                    hasValidLogo && logoUri && !logoLoadError ? (
+                                    hasValidLogo && logoSource && !logoLoadError ? (
                                         <View style={styles.logoContainerWrapper}>
                                             <Image
-                                                source={{ uri: logoUri }}
+                                                source={logoSource}
                                                 style={styles.logoImage}
                                                 resizeMode="cover"
                                                 onLoadStart={() => {
