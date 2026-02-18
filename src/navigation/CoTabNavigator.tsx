@@ -14,6 +14,7 @@ import CoJob from '../screens/company/job/CoJob';
 import CoPost from '../screens/company/post/CoPost';
 import CoProfile from '../screens/company/profile/CoProfile';
 import CoActivity from '../screens/company/activity/CoActivity';
+import CoMessage from '../screens/company/chat/CoMessage';
 
 const Tab = createBottomTabNavigator();
 
@@ -115,8 +116,7 @@ export default function CoTabNavigator() {
       <Tab.Screen name={SCREENS.CoHome} component={CoHome} />
       <Tab.Screen name={SCREENS.CoJob} component={CoJob} />
       <Tab.Screen name={SCREENS.CoPost} component={CoPost} />
-      {/* <Tab.Screen name={SCREENS.CoActivity} component={CoJobDetails} /> */}
-      <Tab.Screen name={SCREENS.CoActivity} component={CoActivity} />
+      <Tab.Screen name={SCREENS.CoActivity} component={CoMessage} />
       <Tab.Screen name={SCREENS.CoProfile} component={CoProfile} />
     </Tab.Navigator>
   );

@@ -69,7 +69,7 @@ const CoHome = () => {
         />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+      <ScrollView showsVerticalScrollIndicator={false} bounces={true}>
         <View style={styles.jobSummaryContainer}>
           <Text style={styles.jobSummaryTitle}>{"Job Status Summary"}</Text>
 
@@ -123,8 +123,7 @@ const CoHome = () => {
                   />
                   <View style={styles.metricTextContainer}>
                     <Text
-                      // numberOfLines={1}
-                      ellipsizeMode="tail"
+                      numberOfLines={2}
                       style={
                         isSelected
                           ? styles.metricLabelBoldWhite
@@ -133,8 +132,7 @@ const CoHome = () => {
                       {option.label}
                     </Text>
                     <Text
-                      // numberOfLines={1}
-                      ellipsizeMode="tail"
+                      numberOfLines={2}
                       style={
                         isSelected
                           ? styles.metricLabelBoldWhite
@@ -151,7 +149,7 @@ const CoHome = () => {
           <GradientButton
             type="Company"
             title="View Completed Interviews"
-            onPress={() => navigateTo(SCREENS.InterviewStatus)}
+            onPress={() => navigateTo(SCREENS.CompletedInterviews)}
             gradientColors={['#CDA953', '#C8B380']}
             style={{ borderWidth: 0, borderRadius: 0, width: '100%' }}
             textStyle={{ color: colors.white }}
@@ -311,17 +309,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metricCard: {
-    width: '47%',
+    width: '48%',
     backgroundColor: colors.white,
     borderRadius: wp(15),
-    padding: hp(15),
-    paddingVertical: hp(20),
+    padding: hp(12),
+    paddingVertical: hp(18),
     alignItems: 'center',
     borderWidth: 1,
     flexDirection: 'row',
     borderColor: '#CDA953',
     justifyContent: 'flex-start',
-    gap: wp(12),
+    gap: wp(8),
     minHeight: hp(80),
   },
   metricCardHighlighted: {
@@ -329,8 +327,8 @@ const styles = StyleSheet.create({
     borderColor: colors._0B3970,
   },
   metricIcon: {
-    width: wp(34),
-    height: hp(34),
+    width: wp(30),
+    height: hp(30),
   },
   metricIconDefault: {
     tintColor: '#CDA953',
@@ -342,7 +340,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    flexShrink: 1,
   },
   metricLabelBold: {
     ...commonFontStyle(700, 14, colors.black),
@@ -360,7 +357,7 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     gap: hp(15),
-    // marginVertical: hp(30),
+    marginBottom: hp(30),
     flexDirection: 'row',
   },
 });

@@ -32,7 +32,9 @@ export const SCREENS = {
   PostsScreen: 'PostsScreen',
   MyJobs: 'MyJobs',
 
-  //company
+  CompletedInterviews: 'CompletedInterviews',
+  // Company
+  CoHome: 'CoHome',
   CoLogin: 'CoLogin',
   CoSignUp: 'CoSignUp',
   CreateAccount: 'CreateAccount',
@@ -43,7 +45,6 @@ export const SCREENS = {
   CreatePost: 'CreatePost',
   CoChat: 'CoChat',
   CoTabNavigator: 'CoTabNavigator',
-  CoHome: 'CoHome',
   CoProfile: 'CoProfile',
   CoMessage: 'CoMessage',
   CoNotification: 'CoNotification',
@@ -66,6 +67,7 @@ export const SCREENS = {
   EmployeeProfile: 'EmployeeProfile',
   InterviewStatus: 'InterviewStatus',
   ViewCompanyProfile: 'ViewCompanyProfile',
+  CompletedInterviews: 'CompletedInterviews',
 };
 
 export interface ScreenNames {
@@ -125,6 +127,7 @@ export interface ScreenNames {
   EmployeeProfile: string;
   InterviewStatus: string;
   ViewCompanyProfile: string;
+  CompletedInterviews: string;
 }
 
 export const SCREEN_NAMES: ScreenNames = {

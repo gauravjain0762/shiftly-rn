@@ -1,21 +1,25 @@
-import React, {useState} from 'react';
-import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
-import {BackHeader, LinearContainer, SearchBar} from '../../../component';
-import {useTranslation} from 'react-i18next';
+import { BackHeader, LinearContainer, SearchBar } from '../../../component';
+import { useTranslation } from 'react-i18next';
 import MessageList from '../../../component/employe/MessageList';
-import {navigateTo} from '../../../utils/commonFunction';
-import {SCREENS} from '../../../navigation/screenNames';
-import {hp, wp} from '../../../theme/fonts';
-import {colors} from '../../../theme/colors';
-import {useGetCompanyChatsQuery} from '../../../api/dashboardApi';
+import { navigateTo } from '../../../utils/commonFunction';
+import { SCREENS } from '../../../navigation/screenNames';
+import { hp, wp } from '../../../theme/fonts';
+import { colors } from '../../../theme/colors';
+import { useGetCompanyChatsQuery } from '../../../api/dashboardApi';
 import NoDataText from '../../../component/common/NoDataText';
 
 const CoMessage = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [value, setValue] = useState<string>('');
-  const {data: chats, isLoading, refetch} = useGetCompanyChatsQuery({});
+  const { data: chats, isLoading, refetch } = useGetCompanyChatsQuery({});
   const chatList = chats?.data?.chats || [];
+
+  const filteredChatList = chatList.filter((item: any) =>
+    item?.user_id?.name?.toLowerCase().includes(value.toLowerCase()),
+  );
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
@@ -37,24 +41,27 @@ const CoMessage = () => {
         <ActivityIndicator size={'large'} color={colors._D5D5D5} />
       ) : (
         <FlatList
-          data={chatList}
+          data={filteredChatList}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{flexGrow: 1}}
+          contentContainerStyle={{ flexGrow: 1 }}
           keyExtractor={(_, index) => index.toString()}
-          renderItem={({item, index}: any) => (
-            <MessageList
-              key={index}
-              item={item}
-              type="company"
-              onPressMessage={e =>
-                navigateTo(SCREENS.CoChat, {
-                  data: e,
-                  accessChatId: true,
-                  isFromJobDetail: false,
-                })
-              }
-            />
-          )}
+          renderItem={({ item, index }: any) => {
+            console.log("🔥 ~ CoMessage ~ item:", item)
+            return (
+              <MessageList
+                key={index}
+                item={item}
+                type="company"
+                onPressMessage={e =>
+                  navigateTo(SCREENS.CoChat, {
+                    data: e,
+                    accessChatId: true,
+                    isFromJobDetail: false,
+                  })
+                }
+              />
+            );
+          }}
           ListEmptyComponent={() => {
             return <NoDataText text="You don’t have any activity yet. Once you post jobs or content, updates will appear here." />;
           }}

@@ -134,31 +134,22 @@ const ProfileScreen = () => {
           )}
 
           {userInfo?.profile_completion && (
-            <View style={[styles.completionCard]}>
-              <BaseText style={styles.completionTitle}>
-                Profile Completion
-              </BaseText>
-              <View style={styles.row}>
-                <View style={styles.progressBarBg}>
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      {
-                        width: `${userInfo?.profile_completion || 0}%`,
-                      },
-                    ]}
-                  />
-                </View>
-                <BaseText style={styles.percentage}>
-                  {`${userInfo?.profile_completion}%` || 'N/A'}
+            <TouchableOpacity style={styles.assessmentCard}>
+              <View style={styles.iconCircle}>
+                <Image
+                  source={Number(userInfo?.profile_completion) === 100 ? IMAGES.check : IMAGES.document}
+                  style={[styles.assessmentIcon, Number(userInfo?.profile_completion) === 100 && { tintColor: colors._0B3970 }]}
+                />
+              </View>
+              <View style={styles.assessmentTextContainer}>
+                <BaseText style={styles.assessmentTitle}>
+                  {Number(userInfo?.profile_completion) === 100 ? 'Assessment Completed' : 'Complete Assessment'}
+                </BaseText>
+                <BaseText style={styles.assessmentSubtitle}>
+                  {userInfo?.name || 'User'} {userInfo?.profile_completion}% complete Assessment
                 </BaseText>
               </View>
-              <View style={styles.progressRow}>
-                <BaseText style={styles.progressText}>
-                  Keep it up! you’re halfway there.
-                </BaseText>
-              </View>
-            </View>
+            </TouchableOpacity>
           )}
 
           {/* Section: About Me */}
@@ -617,5 +608,46 @@ const styles = StyleSheet.create({
   currentStatus: {
     color: colors.empPrimary || '#4CAF50',
     fontWeight: '600',
+  },
+  assessmentCard: {
+    backgroundColor: colors._0B3970,
+    borderRadius: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: hp(15),
+    paddingHorizontal: wp(20),
+    marginHorizontal: wp(20),
+    marginVertical: hp(20),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  iconCircle: {
+    width: wp(45),
+    height: wp(45),
+    borderRadius: wp(22.5),
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: wp(15),
+  },
+  assessmentIcon: {
+    width: wp(24),
+    height: wp(24),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
+  },
+  assessmentTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  assessmentTitle: {
+    ...commonFontStyle(700, 16, colors.white),
+    marginBottom: hp(2),
+  },
+  assessmentSubtitle: {
+    ...commonFontStyle(400, 12, 'rgba(255, 255, 255, 0.8)'),
   },
 });

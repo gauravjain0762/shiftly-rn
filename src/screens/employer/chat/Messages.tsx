@@ -11,24 +11,30 @@ const Messages = () => {
   const [value, setValue] = useState('');
   const { data: activitiesData, isLoading, refetch } = useGetActivitiesQuery({});
   const activities = activitiesData?.data?.activities || [];
+
+  const filteredActivities = activities.filter((item: any) =>
+    item?.company_name?.toLowerCase().includes(value.toLowerCase())
+  );
   console.log("🔥 ~ Messages ~ activities:", activities)
 
   return (
-    <LinearContainer colors={['#0D468C', '#041326']}>
+    <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <View style={styles.headerContainer}>
         <BackHeader
           title={'Messages'}
           isRight={false}
+          type="company"
           containerStyle={styles.header}
         />
         <SearchBar
           value={value}
+          type="company"
           containerStyle={styles.search}
           onChangeText={e => setValue(e)}
         />
       </View>
       <FlatList
-        data={activities}
+        data={filteredActivities}
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => <ActivitiesCard item={item} />}
         contentContainerStyle={styles.listContainer}
@@ -39,7 +45,7 @@ const Messages = () => {
           return (
             <NoDataText
               text="You don’t have any activity yet."
-              textStyle={{ color: colors.white }}
+              textStyle={{ color: colors._0B3970 }}
             />
           );
         }}
@@ -59,7 +65,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingHorizontal: wp(22),
     borderBottomWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: '#E8E8E8',
   },
   search: {
     marginTop: hp(10),

@@ -100,10 +100,29 @@ const EmployeeProfile = () => {
           </View>
         </View>
 
+        {user?.profile_completion && (
+          <View style={styles.assessmentCard}>
+            <View style={styles.iconCircle}>
+              <Image
+                source={Number(user?.profile_completion) === 100 ? IMAGES.check : IMAGES.document}
+                style={[styles.assessmentIcon, Number(user?.profile_completion) === 100 && { tintColor: colors._0B3970 }]}
+              />
+            </View>
+            <View style={styles.assessmentTextContainer}>
+              <BaseText style={styles.assessmentTitle}>
+                {Number(user?.profile_completion) === 100 ? 'Assessment Completed' : 'Complete Assessment'}
+              </BaseText>
+              <BaseText style={styles.assessmentSubtitle}>
+                {user?.name || 'User'} {user?.profile_completion}% complete Assessment
+              </BaseText>
+            </View>
+          </View>
+        )}
+
         {/* About me Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About me</Text>
-          <BaseText style={styles.cardText}>{profileData.about}</BaseText>
+          <BaseText style={styles.cardText}>{profileData?.about}</BaseText>
         </View>
 
         {/* Education Card */}
@@ -200,7 +219,7 @@ const EmployeeProfile = () => {
           />
         </View>
       </View>
-    </LinearContainer>
+    </LinearContainer >
   );
 };
 
@@ -381,5 +400,45 @@ const styles = StyleSheet.create({
   chatButtonText: {
     ...commonFontStyle(600, 20, colors.white),
     marginLeft: wp(24),
+  },
+  assessmentCard: {
+    backgroundColor: colors._0B3970,
+    borderRadius: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: hp(15),
+    paddingHorizontal: wp(20),
+    marginBottom: hp(20),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  iconCircle: {
+    width: wp(45),
+    height: wp(45),
+    borderRadius: wp(22.5),
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: wp(15),
+  },
+  assessmentIcon: {
+    width: wp(24),
+    height: wp(24),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
+  },
+  assessmentTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  assessmentTitle: {
+    ...commonFontStyle(700, 16, colors.white),
+    marginBottom: hp(2),
+  },
+  assessmentSubtitle: {
+    ...commonFontStyle(400, 12, 'rgba(255, 255, 255, 0.8)'),
   },
 });

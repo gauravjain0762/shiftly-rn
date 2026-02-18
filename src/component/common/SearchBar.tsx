@@ -1,8 +1,8 @@
 import React from 'react';
-import {View, TextInput, StyleSheet, Image, ViewStyle} from 'react-native';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
+import { View, TextInput, StyleSheet, Image, ViewStyle } from 'react-native';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
 import { isAndroid } from '../../utils/commonFunction';
 
 type SearchBarProps = {
@@ -24,7 +24,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   return (
     <View style={[
-      styles.container, 
+      styles.container,
       type === 'company' && styles.companyContainer,
       containerStyle
     ]}>
@@ -32,13 +32,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         source={IMAGES.search}
         style={[
           styles.img,
-          {tintColor: type == 'company' ? colors._0B3970 : colors.white},
+          { tintColor: type == 'company' ? colors._7B7878 : colors.white },
         ]}
       />
       <TextInput
         style={[
           styles.input,
-          {color: type == 'company' ? colors._0B3970 : colors.white},
+          { color: type == 'company' ? colors._0B3970 : colors.white },
           inputStyle,
         ]}
         value={value}

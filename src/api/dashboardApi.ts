@@ -573,7 +573,7 @@ export const dashboardApi = createApi({
         return {
           url: API.employeeApplyJob,
           method: HTTP_METHOD.POST,
-          skipLoader: false,
+          skipLoader: true,
           data: credentials,
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',

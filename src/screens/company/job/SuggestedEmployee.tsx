@@ -1028,10 +1028,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: hp(12),
-    paddingHorizontal: wp(4),
+    paddingHorizontal: wp(10),
     backgroundColor: '#F2F2F2',
     borderRadius: wp(20),
-    gap: wp(8),
+    gap: wp(6),
     borderWidth: 1,
     borderColor: '#F2F2F2',
   },
@@ -1042,9 +1042,11 @@ const styles = StyleSheet.create({
     width: wp(18),
     height: wp(18),
     resizeMode: 'contain',
+    marginLeft: wp(4), // Add a bit of margin to the icon itself on the left?
+    // "space around icon on left side" might mean it's too close to the edge?
   },
   tabText: {
-    ...commonFontStyle(600, 14, '#939393'),
+    ...commonFontStyle(600, 12, '#939393'), // Reduced from 14
     textAlign: 'center',
     flexShrink: 1,
   },

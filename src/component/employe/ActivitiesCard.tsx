@@ -99,7 +99,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
           </View>
         </View>
         <Text style={styles.timeAgo}>
-          {getTimeAgo(item?.created_at)} ago
+          {getTimeAgo(item?.created_at)}
         </Text>
       </TouchableOpacity>
 
