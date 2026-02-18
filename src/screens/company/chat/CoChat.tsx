@@ -339,7 +339,10 @@ const CoChat = () => {
             {showJobCard && (
               <View style={styles.card}>
                 <Text style={styles.dateText}>
-                  You applied to this position on{' '}
+                  {chats?.data?.chat?.user_id?.name ||
+                    jobdetail_chatData?.user_id?.name ||
+                    'Candidate'}{' '}
+                  applied to this position on{' '}
                   {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
                 </Text>
                 <Text style={styles.jobTitle}>

@@ -1,10 +1,10 @@
-import React, {FC} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import React, { FC } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {IMAGES} from '../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { IMAGES } from '../../assets/Images';
 
 type modal = {
   visible?: boolean;
@@ -16,7 +16,7 @@ type modal = {
 
 const ApplicationSuccessModal: FC<modal> = ({
   visible,
-  onClose = () => {},
+  onClose = () => { },
   onJobList,
   onViewApps,
   onExploreJobs,
@@ -34,21 +34,15 @@ const ApplicationSuccessModal: FC<modal> = ({
         <View style={styles.iconCircle}>
           <Image style={styles.checkmark} source={IMAGES.check} />
         </View>
-        
+
         <Text style={styles.title}>
           Check your email — your application was submitted successfully.
         </Text>
 
-        <TouchableOpacity 
-          style={styles.button} 
+        <TouchableOpacity
+          style={styles.button}
           onPress={onJobList}
           activeOpacity={0.8}>
-          <LinearGradient
-            colors={[colors.white, colors._F7F7F7]}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            style={StyleSheet.absoluteFill}
-          />
           <View style={styles.buttonGradient}>
             <Text style={styles.buttonText}>Go back to job listings</Text>
           </View>
@@ -58,27 +52,15 @@ const ApplicationSuccessModal: FC<modal> = ({
           style={styles.button} 
           onPress={onViewApps}
           activeOpacity={0.8}>
-          <LinearGradient
-            colors={[colors.white, colors._F7F7F7]}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            style={StyleSheet.absoluteFill}
-          />
           <View style={styles.buttonGradient}>
             <Text style={styles.buttonText}>View my applications</Text>
           </View>
         </TouchableOpacity> */}
 
-        <TouchableOpacity 
-          style={styles.button} 
+        <TouchableOpacity
+          style={styles.button}
           onPress={onExploreJobs}
           activeOpacity={0.8}>
-          <LinearGradient
-            colors={[colors.white, colors._F7F7F7]}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            style={StyleSheet.absoluteFill}
-          />
           <View style={styles.buttonGradient}>
             <Text style={styles.buttonText}>Explore similar jobs</Text>
           </View>

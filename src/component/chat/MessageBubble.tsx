@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {memo, useState} from 'react';
+import React, { memo, useState } from 'react';
 import moment from 'moment';
 import {
   StyleSheet,
@@ -9,12 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {Message} from '../../screens/employer/chat/Chat';
-import {IMAGES} from '../../assets/Images';
-import {navigateTo} from '../../utils/commonFunction';
-import {SCREENS} from '../../navigation/screenNames';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { Message } from '../../screens/employer/chat/Chat';
+import { IMAGES } from '../../assets/Images';
+import { navigateTo } from '../../utils/commonFunction';
+import { SCREENS } from '../../navigation/screenNames';
 import CustomImage from '../common/CustomImage';
 import BaseText from '../common/BaseText';
 
@@ -23,7 +23,7 @@ const MessageBubble: React.FC<{
   recipientName: string;
   type: 'user' | 'company';
   chatData: any;
-}> = ({item, recipientName, type, chatData}) => {
+}> = ({ item, recipientName, type, chatData }) => {
   console.log('>>>>>>>> ~ MessageBubble ~ item:', item?.file);
   const isUser = item.sender !== 'company';
 
@@ -43,7 +43,7 @@ const MessageBubble: React.FC<{
   return (
     <View style={styles.messageContainer}>
       {!isUser && (
-        <View style={{flexDirection: 'row'}}>
+        <View style={{ flexDirection: 'row' }}>
           <View style={styles.avatarContainer}>
             <FastImage
               source={{
@@ -72,9 +72,9 @@ const MessageBubble: React.FC<{
         </View>
       )}
 
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         {isUser && (
-          <Text style={{...styles.timeText, alignSelf: 'flex-end', color: type === 'user' ? colors._2F2F2F : colors.white}}>
+          <Text style={{ ...styles.timeText, alignSelf: 'flex-end', color: type === 'user' ? colors._2F2F2F : colors.white }}>
             {moment(item?.createdAt).format('hh:mm A')}
           </Text>
         )}
@@ -86,9 +86,9 @@ const MessageBubble: React.FC<{
               isUser
                 ? styles.userBubble
                 : {
-                    ...styles.otherBubble,
-                    backgroundColor: colors._0B3970,
-                  },
+                  ...styles.otherBubble,
+                  backgroundColor: colors._0B3970,
+                },
             ]}>
             <Text
               style={[
@@ -104,7 +104,7 @@ const MessageBubble: React.FC<{
           <View
             style={[
               styles.attachmentContainer,
-              {alignSelf: isUser ? 'flex-end' : 'flex-start'},
+              { alignSelf: isUser ? 'flex-end' : 'flex-start' },
             ]}>
             {isDocument ? (
               // Document attachment
@@ -127,7 +127,7 @@ const MessageBubble: React.FC<{
             ) : (
               <>
                 <CustomImage
-                  source={{uri: item?.file}}
+                  source={{ uri: item?.file }}
                   onPress={() => {
                     navigateTo(SCREENS.WebviewScreen, {
                       link: item.file,
@@ -135,7 +135,7 @@ const MessageBubble: React.FC<{
                       type: 'employe',
                     });
                   }}
-                  imageStyle={{width: '100%', height: '100%'}}
+                  imageStyle={{ width: '100%', height: '100%' }}
                   containerStyle={styles.imageContainer}
                   resizeMode="cover"
                 />
@@ -193,6 +193,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopRightRadius: 0,
     alignSelf: 'flex-end',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   messageText: {
     ...commonFontStyle(400, 14, '#000'),

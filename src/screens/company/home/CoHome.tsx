@@ -35,8 +35,8 @@ const CoHome = () => {
   const metricOptions = [
     { key: 'job_view', label: 'Total Job', subLabel: 'Views', icon: IMAGES.jobview },
     { key: 'applied', label: 'Total', subLabel: 'Applications', icon: IMAGES.appliedjob },
-    { key: 'suggested', label: 'AI Suggested', subLabel: 'Candidates', icon: IMAGES.suggested_candidate },
-    { key: 'shortlisted', label: 'Shortlisted', subLabel: 'Candidates', icon: IMAGES.shortlisted },
+    { key: 'suggested', label: 'AI Suggested', subLabel: 'Talent', icon: IMAGES.suggested_candidate },
+    { key: 'shortlisted', label: 'Shortlisted', subLabel: 'Talent', icon: IMAGES.shortlisted },
   ];
 
   useEffect(() => {
@@ -54,9 +54,8 @@ const CoHome = () => {
   }, [userInfo]);
 
   const job_summary = [
-    { id: "1", title: "Active Jobs", value: job_stats?.active_jobs, color: "#F3F3F3" },
-    { id: "2", title: "Pending Jobs", value: job_stats?.pending_jobs, color: "#E5F7FF" },
-    { id: "3", title: "Expired Jobs", value: job_stats?.expired_jobs, color: "#FFEFF0" },
+    { id: "1", title: "Live Jobs", value: job_stats?.active_jobs, color: "#F3F3F3" },
+    { id: "3", title: "Closed Jobs", value: job_stats?.expired_jobs, color: "#FFEFF0" },
   ];
 
   return (
@@ -96,56 +95,67 @@ const CoHome = () => {
             <Image source={IMAGES.check} style={styles.checkIcon} />
           </View>
           <Text style={styles.aiMatchText}>
-            {`${job_stats?.ai_matched_candidates} new candidates matched by`}{" "}
+            {`${job_stats?.ai_matched_candidates || 0} new candidates matched by`}{" "}
             <Text style={styles.aiMatchHighlight}>{"AI"}</Text>
           </Text>
         </View>
 
-        <View style={styles.metricCardsContainer}>
-          {metricOptions.map((option, index) => {
-            const isSelected = selectedMetricIndex === index;
-            return (
-              <TouchableOpacity
-                key={index}
-                activeOpacity={0.7}
-                onPress={() => setSelectedMetricIndex(index)}
-                style={[
-                  styles.metricCard,
-                  isSelected && styles.metricCardHighlighted,
-                ]}>
-                <Image
-                  source={option.icon}
-                  resizeMode="contain"
+        <View style={styles.combinedMetricsContainer}>
+          <View style={styles.innerMetricsGrid}>
+            {metricOptions.map((option, index) => {
+              const isSelected = false;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.7}
+                  // onPress={() => setSelectedMetricIndex(index)}
                   style={[
-                    styles.metricIcon,
-                    isSelected ? styles.metricIconSelected : styles.metricIconDefault
-                  ]}
-                />
-                <View style={styles.metricTextContainer}>
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={
-                      isSelected
-                        ? styles.metricLabelBoldWhite
-                        : styles.metricLabelBold
-                    }>
-                    {option.label}
-                  </Text>
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={
-                      isSelected
-                        ? styles.metricLabelBoldWhite
-                        : styles.metricLabelBold
-                    }>
-                    {option.subLabel}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                    styles.metricCard,
+                    isSelected && styles.metricCardHighlighted,
+                  ]}>
+                  <Image
+                    source={option.icon}
+                    resizeMode="contain"
+                    style={[
+                      styles.metricIcon,
+                      isSelected ? styles.metricIconSelected : styles.metricIconDefault
+                    ]}
+                  />
+                  <View style={styles.metricTextContainer}>
+                    <Text
+                      // numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={
+                        isSelected
+                          ? styles.metricLabelBoldWhite
+                          : styles.metricLabelBold
+                      }>
+                      {option.label}
+                    </Text>
+                    <Text
+                      // numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={
+                        isSelected
+                          ? styles.metricLabelBoldWhite
+                          : styles.metricLabelBold
+                      }>
+                      {option.subLabel}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <GradientButton
+            type="Company"
+            title="View Completed Interviews"
+            onPress={() => navigateTo(SCREENS.InterviewStatus)}
+            gradientColors={['#CDA953', '#C8B380']}
+            style={{ borderWidth: 0, borderRadius: 0, width: '100%' }}
+            textStyle={{ color: colors.white }}
+          />
         </View>
 
         <View style={styles.buttonsContainer}>
@@ -158,11 +168,17 @@ const CoHome = () => {
             }}
             textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
             gradientColors={[colors._2D5486, colors._0B3970, colors._051C38]}
+            style={{ flex: 1 }}
+            textContainerStyle={{ paddingHorizontal: wp(5) }}
           />
           <GradientButton
             type="Company"
             title="Manage Job"
             onPress={() => navigateTo(SCREENS.CoJob)}
+            gradientColors={[colors.white, colors.white]}
+            textStyle={{ color: colors._0B3970 }}
+            style={{ borderColor: colors._0B3970, borderWidth: 1.5, flex: 1 }}
+            textContainerStyle={{ paddingHorizontal: wp(5) }}
           />
         </View>
 
@@ -223,29 +239,31 @@ const styles = StyleSheet.create({
     gap: wp(10),
   },
   jobSummaryCard: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    width: '48%',
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: hp(10),
-    paddingVertical: hp(10),
+    paddingVertical: hp(15),
     marginTop: hp(18),
   },
   jobSummaryCardContent: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: wp(10),
+    gap: hp(8),
   },
   workIcon: {
-    width: wp(20),
-    height: hp(20),
+    width: wp(24),
+    height: wp(24),
+    resizeMode: 'contain',
+    tintColor: colors.black,
   },
   jobSummaryCardTitle: {
-    ...commonFontStyle(500, 14, colors.black),
+    ...commonFontStyle(500, 12, colors.black),
+    textAlign: 'center',
   },
   jobSummaryCardValue: {
-    ...commonFontStyle(500, 20, colors.black),
+    ...commonFontStyle(600, 24, colors.black),
+    marginTop: hp(4),
   },
   aiMatchBanner: {
     backgroundColor: colors._0B3970,
@@ -277,11 +295,20 @@ const styles = StyleSheet.create({
   aiMatchHighlight: {
     ...commonFontStyle(700, 17, colors._F3E1B7),
   },
-  metricCardsContainer: {
+  combinedMetricsContainer: {
+    borderWidth: 1,
+    borderColor: '#CDA953',
+    borderRadius: wp(15),
+    overflow: 'hidden',
+    marginBottom: hp(20),
+    backgroundColor: colors.white,
+  },
+  innerMetricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: wp(12),
-    marginBottom: hp(20),
+    padding: wp(15),
+    justifyContent: 'center',
   },
   metricCard: {
     width: '47%',
@@ -332,7 +359,8 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 12, colors.white),
   },
   buttonsContainer: {
-    gap: hp(25),
-    marginVertical: hp(30),
+    gap: hp(15),
+    // marginVertical: hp(30),
+    flexDirection: 'row',
   },
 });

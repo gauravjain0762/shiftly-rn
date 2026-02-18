@@ -26,6 +26,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectEmployeeState, setViewCompanyProfileInfo, setViewCompanyProfileTabIndex } from '../../../features/employeeSlice';
 import ExpandableText from '../../../component/common/ExpandableText';
 
+import CompanyProfileSkeleton from '../../../component/skeletons/CompanyProfileSkeleton';
+
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
 const ViewCompanyProfile = () => {
@@ -261,6 +263,70 @@ const ViewCompanyProfile = () => {
         };
     }, []);
 
+    const coverImageContent = useMemo(() => (
+        <>
+            {coverImageSource ? (
+                <Image
+                    source={coverImageSource}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode="cover"
+                />
+            ) : (
+                !shouldShowCoverLoader && (
+                    <Image
+                        source={IMAGES.logoText}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="contain"
+                    />
+                )
+            )}
+        </>
+    ), [coverImageSource, shouldShowCoverLoader]);
+
+    const logoImageContent = useMemo(() => (
+        hasValidLogo && logoSource && !logoLoadError ? (
+            <View style={styles.logoContainerWrapper}>
+                <Image
+                    source={logoSource}
+                    style={styles.logoImage}
+                    resizeMode="cover"
+                    onLoadStart={() => {
+                        if (logoUri !== lastLogoUriRef.current) {
+                            setIsLogoLoading(true);
+                            setLogoLoadError(false);
+                        }
+                    }}
+                    onLoad={() => {
+                        setIsLogoLoading(false);
+                        setLogoLoadError(false);
+                        lastLogoUriRef.current = logoUri;
+                    }}
+                    onError={() => {
+                        setIsLogoLoading(false);
+                        setLogoLoadError(true);
+                    }}
+                />
+                {isLogoLoading && (
+                    <View style={styles.logoLoaderContainer}>
+                        <ActivityIndicator size="small" color={colors._0B3970} />
+                    </View>
+                )}
+            </View>
+        ) : (
+            !isLogoLoading && !shouldShowCoverLoader && (
+                <Image
+                    resizeMode="contain"
+                    source={IMAGES.logoText}
+                    style={styles.logoPlaceholderImage}
+                />
+            )
+        )
+    ), [hasValidLogo, logoUri, logoLoadError, isLogoLoading, shouldShowCoverLoader, logoSource]);
+
+    if (isCompanyLoading && !companyInfo) {
+        return <CompanyProfileSkeleton />;
+    }
+
     return (
         <SafeAreaView
             edges={['bottom']}
@@ -276,25 +342,7 @@ const ViewCompanyProfile = () => {
                 showsVerticalScrollIndicator={false}>
                 <View style={styles.container}>
                     <View style={{ width: '100%', height: 250 }}>
-                        {useMemo(() => (
-                            <>
-                                {coverImageSource ? (
-                                    <Image
-                                        source={coverImageSource}
-                                        style={{ width: '100%', height: '100%' }}
-                                        resizeMode="cover"
-                                    />
-                                ) : (
-                                    !shouldShowCoverLoader && (
-                                        <Image
-                                            source={IMAGES.logoText}
-                                            style={{ width: '100%', height: '100%' }}
-                                            resizeMode="contain"
-                                        />
-                                    )
-                                )}
-                            </>
-                        ), [coverImageSource, shouldShowCoverLoader])}
+                        {coverImageContent}
                         {shouldShowCoverLoader && (
                             <View style={[styles.logoLoaderContainer, { backgroundColor: 'rgba(255,255,255,0.5)' }]}>
                                 <ActivityIndicator size="small" color={colors._0B3970} />
@@ -308,45 +356,7 @@ const ViewCompanyProfile = () => {
                         colors={linearColors}>
                         <View style={styles.profileHeader}>
                             <View style={styles.logoContainer}>
-                                {useMemo(() => (
-                                    hasValidLogo && logoSource && !logoLoadError ? (
-                                        <View style={styles.logoContainerWrapper}>
-                                            <Image
-                                                source={logoSource}
-                                                style={styles.logoImage}
-                                                resizeMode="cover"
-                                                onLoadStart={() => {
-                                                    if (logoUri !== lastLogoUriRef.current) {
-                                                        setIsLogoLoading(true);
-                                                        setLogoLoadError(false);
-                                                    }
-                                                }}
-                                                onLoad={() => {
-                                                    setIsLogoLoading(false);
-                                                    setLogoLoadError(false);
-                                                    lastLogoUriRef.current = logoUri;
-                                                }}
-                                                onError={() => {
-                                                    setIsLogoLoading(false);
-                                                    setLogoLoadError(true);
-                                                }}
-                                            />
-                                            {isLogoLoading && (
-                                                <View style={styles.logoLoaderContainer}>
-                                                    <ActivityIndicator size="small" color={colors._0B3970} />
-                                                </View>
-                                            )}
-                                        </View>
-                                    ) : (
-                                        !isLogoLoading && !shouldShowCoverLoader && (
-                                            <Image
-                                                resizeMode="contain"
-                                                source={IMAGES.logoText}
-                                                style={styles.logoPlaceholderImage}
-                                            />
-                                        )
-                                    )
-                                ), [hasValidLogo, logoUri, logoLoadError, isLogoLoading, shouldShowCoverLoader])}
+                                {logoImageContent}
                             </View>
 
                             <View style={styles.titleTextContainer}>

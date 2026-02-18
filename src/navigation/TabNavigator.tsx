@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import JobsScreen from '../screens/employer/jobs/JobsScreen';
 import HomeScreen from '../screens/employer/home/HomeScreen';
 import AccountScreen from '../screens/employer/profile/AccountScreen';
-import ActivityScreen from '../screens/employer/activity/ActivityScreen';
+import Messages from '../screens/employer/chat/Messages';
 import PostsScreen from '../screens/employer/posts/PostsScreen';
 
 const Tab = createBottomTabNavigator();
@@ -126,7 +126,7 @@ export default function TabNavigator() {
       <Tab.Screen name={SCREENS.HomeScreen} component={HomeScreen} />
       <Tab.Screen name={SCREENS.PostsScreen} component={PostsScreen} />
       <Tab.Screen name={SCREENS.JobsScreen} component={JobsScreen} />
-      <Tab.Screen name={SCREENS.ActivityScreen} component={ActivityScreen} />
+      <Tab.Screen name={SCREENS.ActivityScreen} component={Messages} />
       <Tab.Screen name={SCREENS.AccountScreen} component={AccountScreen} />
     </Tab.Navigator>
   );

@@ -1,18 +1,17 @@
-import React, {useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import React, { useState } from 'react';
+import { FlatList, StyleSheet, View } from 'react-native';
 
-import {hp, wp} from '../../../theme/fonts';
-import {useTranslation} from 'react-i18next';
-import {SCREENS} from '../../../navigation/screenNames';
-import {navigateTo} from '../../../utils/commonFunction';
-import MessageList from '../../../component/employe/MessageList';
-import {useEmployeeGetChatsQuery} from '../../../api/dashboardApi';
-import {BackHeader, LinearContainer, SearchBar} from '../../../component';
+import { hp, wp } from '../../../theme/fonts';
+import { useGetActivitiesQuery } from '../../../api/dashboardApi';
+import { ActivitiesCard, BackHeader, LinearContainer, SearchBar } from '../../../component';
+import NoDataText from '../../../component/common/NoDataText';
+import { colors } from '../../../theme/colors';
 
 const Messages = () => {
   const [value, setValue] = useState('');
-  const {data: chats, isLoading, refetch} = useEmployeeGetChatsQuery({});
-  const chatList = chats?.data?.chats || [];
+  const { data: activitiesData, isLoading, refetch } = useGetActivitiesQuery({});
+  const activities = activitiesData?.data?.activities || [];
+  console.log("🔥 ~ Messages ~ activities:", activities)
 
   return (
     <LinearContainer colors={['#0D468C', '#041326']}>
@@ -29,17 +28,21 @@ const Messages = () => {
         />
       </View>
       <FlatList
-        data={chatList}
+        data={activities}
         keyExtractor={(_, index) => index.toString()}
-        renderItem={({item, index}: any) => (
-          <MessageList
-            key={index}
-            item={item}
-            onPressMessage={e => navigateTo(SCREENS.Chat, {data: e})}
-          />
-        )}
+        renderItem={({ item }) => <ActivitiesCard item={item} />}
+        contentContainerStyle={styles.listContainer}
+        ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
         onRefresh={refetch}
         refreshing={isLoading}
+        ListEmptyComponent={() => {
+          return (
+            <NoDataText
+              text="You don’t have any activity yet."
+              textStyle={{ color: colors.white }}
+            />
+          );
+        }}
       />
     </LinearContainer>
   );
@@ -57,9 +60,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(22),
     borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
-    paddingBottom: hp(25),
   },
   search: {
     marginTop: hp(10),
+  },
+  listContainer: {
+    paddingHorizontal: wp(22),
+    paddingBottom: hp(20),
+    paddingTop: hp(20),
   },
 });

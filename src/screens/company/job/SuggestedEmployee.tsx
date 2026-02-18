@@ -71,7 +71,7 @@ const SuggestedEmployeeScreen = () => {
   const ai_data = suggestedResponse?.data || {};
   console.log("🔥 ~ SuggestedEmployeeScreen ~ ai_data:", ai_data)
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted'>('shortlisted');
+  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>('shortlisted');
   const dispatch = useDispatch<any>();
   const [closeJob] = useCloseCompanyJobMutation();
 
@@ -303,6 +303,7 @@ const SuggestedEmployeeScreen = () => {
 
   const renderShortlistedEmployee = (item: any) => {
     const user = item?.user_id || item;
+    console.log('DEBUG: renderShortlistedEmployee item:', JSON.stringify(item, null, 2));
 
     if (!user || (!user._id && !item.isSample)) return null;
 
@@ -354,9 +355,9 @@ const SuggestedEmployeeScreen = () => {
               <TouchableOpacity
                 style={[
                   styles.assessmentButton,
-                  item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
+                  !item?.assessment_completed && { backgroundColor: '#D3D3D3' }
                 ]}
-                disabled={item?.status !== 'Interview_completed'}
+                disabled={!item?.assessment_completed}
               >
                 <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
               </TouchableOpacity>
@@ -587,7 +588,7 @@ const SuggestedEmployeeScreen = () => {
                     source={IMAGES.people}
                     style={[styles.tabIcon, activeTab === 'suggested' && { tintColor: colors.white }]}
                   />
-                  <Text style={[styles.tabText, activeTab === 'suggested' && styles.activeTabText, activeTab === 'suggested' && { color: colors.white }]}>{t('Suggested List')}</Text>
+                  <Text style={[styles.tabText, activeTab === 'suggested' && styles.activeTabText, activeTab === 'suggested' && { color: colors.white }]} numberOfLines={2}>{t('Suggested List')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -609,7 +610,17 @@ const SuggestedEmployeeScreen = () => {
                       ]}
                     />
                   </View>
-                  <Text style={[styles.tabText, activeTab === 'shortlisted' && { color: colors.white }]}>{t('AI Shortlisted')}</Text>
+                  <Text style={[styles.tabText, activeTab === 'shortlisted' && { color: colors.white }]} numberOfLines={2}>{t('AI Shortlisted')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.tabButton, activeTab === 'applicants' && styles.activeTabButton, activeTab === 'applicants' && { backgroundColor: colors._0B3970, borderColor: colors._0B3970 }]}
+                  onPress={() => setActiveTab('applicants')}>
+                  <Image
+                    source={IMAGES.people} // Using same icon as Suggested for now
+                    style={[styles.tabIcon, activeTab === 'applicants' && { tintColor: colors.white }]}
+                  />
+                  <Text style={[styles.tabText, activeTab === 'applicants' && { color: colors.white }]} numberOfLines={2}>{t('Applicants')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -665,7 +676,7 @@ const SuggestedEmployeeScreen = () => {
                   </View>
                 )}
               </>
-            ) : (
+            ) : activeTab === 'shortlisted' ? (
               // Shortlisted Tab Content
               <>
                 {invitedEmployees && invitedEmployees.length > 0 ? (
@@ -685,6 +696,16 @@ const SuggestedEmployeeScreen = () => {
                   </View>
                 )}
               </>
+            ) : (
+              // Applicants Tab Content (Empty State)
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>
+                  {t('No applicants yet')}
+                </Text>
+                <Text style={styles.emptyMessage}>
+                  {t('Candidates who apply will appear here.')}
+                </Text>
+              </View>
             )}
           </ScrollView>
           {activeTab === 'suggested' && (
@@ -1007,6 +1028,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: hp(12),
+    paddingHorizontal: wp(4),
     backgroundColor: '#F2F2F2',
     borderRadius: wp(20),
     gap: wp(8),
@@ -1023,6 +1045,8 @@ const styles = StyleSheet.create({
   },
   tabText: {
     ...commonFontStyle(600, 14, '#939393'),
+    textAlign: 'center',
+    flexShrink: 1,
   },
   activeTabText: {
     color: colors._0B3970,

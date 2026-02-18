@@ -38,6 +38,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from '../../../component/common/CustomImage';
 import { resetNavigation } from '../../../utils/commonFunction';
+import CompanyProfileSkeleton from '../../../component/skeletons/CompanyProfileSkeleton';
 
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
@@ -262,6 +263,10 @@ const CompanyProfile = () => {
   }, [hasValidLogo, logoUri]);
 
 
+
+  if (isLoading || isCompanyLoading) {
+    return <CompanyProfileSkeleton />;
+  }
 
   return (
     <SafeAreaView

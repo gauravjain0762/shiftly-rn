@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 
 import { colors } from '../../theme/colors';
 import CustomImage from '../common/CustomImage';
@@ -9,12 +9,14 @@ import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { SCREENS } from '../../navigation/screenNames';
 import { IMAGES } from '../../assets/Images';
 import { useGetEmployeeJobDetailsQuery } from '../../api/dashboardApi';
+import { useNavigation } from '@react-navigation/native';
 
 type props = {
   item?: any;
 };
 
 const ActivitiesCard: FC<props> = ({ item }) => {
+  const navigation = useNavigation<any>();
   console.log(">>>>>>>>>>>>>>... ~ ActivitiesCard ~ item:", item)
   const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
     item?.job_id,
@@ -36,12 +38,12 @@ const ActivitiesCard: FC<props> = ({ item }) => {
     console.log("🔥🔥🔥 ~ handleViewPress ~ interviewLink:", interviewLink)
 
     if (jobDetail?.data) {
-      navigateTo(SCREENS.JobInvitationScreen, {
+      navigation.navigate(SCREENS.JobInvitationScreen, {
         link: interviewLink || '',
         jobDetail: jobDetail.data,
       });
     } else if (item?.job_id) {
-      navigateTo(SCREENS.JobInvitationScreen, {
+      navigation.navigate(SCREENS.JobInvitationScreen, {
         link: interviewLink || '',
         jobDetail: {
           job: {
@@ -70,8 +72,16 @@ const ActivitiesCard: FC<props> = ({ item }) => {
           const companyId = (typeof item?.job_id?.company_id === 'object' ? item?.job_id?.company_id?._id : item?.job_id?.company_id) ||
             (typeof item?.company_id === 'object' ? item?.company_id?._id || item?.company_id?.id : item?.company_id);
 
+          console.log('DEBUG: ActivitiesCard onPress - item:', item);
+          console.log('DEBUG: ActivitiesCard onPress - extracted companyId:', companyId, 'type:', typeof companyId);
+
           if (companyId && typeof companyId === 'string') {
-            navigateTo(SCREENS.CompanyProfile, { companyId });
+            console.log('DEBUG: Navigating to ViewCompanyProfile');
+            navigation.navigate(SCREENS.ViewCompanyProfile, { companyId });
+          } else {
+            console.log('DEBUG: Navigation aborted - invalid companyId');
+            // TEMPORARY DEBUG ALERT
+            Alert.alert(`Debug: Invalid Company ID. Extracted: ${JSON.stringify(companyId)} type: ${typeof companyId}`);
           }
         }}
         style={styles.headerRow}
@@ -130,7 +140,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
           {item?.chat_status && item?.chat_status !== 'no_chat' && (
             <Pressable
               onPress={() => {
-                navigateTo(SCREENS.Chat, { data: item });
+                navigation.navigate(SCREENS.Chat, { data: item });
               }}
               style={styles.button}>
               <Image
@@ -141,16 +151,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
             </Pressable>
           )}
 
-          <Pressable
-            onPress={handleViewPress}
-            style={styles.button}>
-            <Image
-              source={IMAGES.eye_on}
-              style={styles.buttonIcon}
-              tintColor={colors.white}
-            />
-            <Text style={styles.viewButtonText}>View</Text>
-          </Pressable>
+
         </View>
       </View>
     </Pressable>

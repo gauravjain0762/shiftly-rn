@@ -63,7 +63,6 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
       {...rest}
       style={[
         styles.wrapper,
-        style,
         {
           borderWidth: type == 'Employee' ? 2.5 : 1,
           backgroundColor: type == 'Company' ? colors.coPrimary : colors.white,
@@ -78,6 +77,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
             elevation: 0,
           }),
         },
+        style,
       ]}>
       {type === 'Employee' ? (
         <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>

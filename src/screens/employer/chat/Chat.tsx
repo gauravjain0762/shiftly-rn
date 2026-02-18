@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useEffect, useRef, useState, useCallback} from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -11,11 +11,11 @@ import {
   View,
   ScrollView,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useRoute} from '@react-navigation/native';
-import {BackHeader, LinearContainer} from '../../../component';
-import {IMAGES} from '../../../assets/Images';
-import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
+import { BackHeader, LinearContainer } from '../../../component';
+import { IMAGES } from '../../../assets/Images';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
   useEmployeeSendMessageMutation,
   useLazyEmployeeGetChatMessagesQuery,
@@ -25,13 +25,13 @@ import {
   formatDateWithoutTime,
   navigateTo,
 } from '../../../utils/commonFunction';
-import {onChatMessage} from '../../../hooks/socketManager';
+import { onChatMessage } from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MessageBubble from '../../../component/chat/MessageBubble';
 import ChatInput from '../../../component/chat/ChatInput';
 import CustomImage from '../../../component/common/CustomImage';
-import {colors} from '../../../theme/colors';
-import {SCREENS} from '../../../navigation/screenNames';
+import { colors } from '../../../theme/colors';
+import { SCREENS } from '../../../navigation/screenNames';
 
 // ---------- Types ----------
 export type Message = {
@@ -53,7 +53,7 @@ type LogoFile = {
 } | null;
 
 const Chat = () => {
-  const {params} = useRoute<any>() ?? {};
+  const { params } = useRoute<any>() ?? {};
   const jobdetail_chatData = params?.data ?? {};
   const chatId = params?.data?.chat_id;
   const flatListRef = useRef<FlatList>(null);
@@ -63,7 +63,7 @@ const Chat = () => {
   const [logo, setLogo] = useState<LogoFile>(null);
 
   const [sendMessage] = useEmployeeSendMessageMutation();
-  const [getEmployeeChatMessages, {data: chats}] =
+  const [getEmployeeChatMessages, { data: chats }] =
     useLazyEmployeeGetChatMessagesQuery(chatId);
   const chatData = chats?.data?.chat;
   const [chatList, setChatList] = useState<Message[]>([]);
@@ -73,7 +73,7 @@ const Chat = () => {
   const quickReplies = ['Confirm Interview', 'Send Resume', 'Reschedule'];
 
   const handleChatScrollDown = () => {
-    flatListRef.current?.scrollToOffset({offset: 0, animated: true});
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     setShowDownIcon(false);
   };
 
@@ -156,7 +156,7 @@ const Chat = () => {
 
   return (
     <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
-      <SafeAreaView style={{flex: 1}} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         {/* Header */}
         <View style={styles.container}>
           <BackHeader
@@ -180,7 +180,7 @@ const Chat = () => {
 
         {/* Chat body */}
         <KeyboardAvoidingView
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           {/* Job card */}
@@ -192,14 +192,16 @@ const Chat = () => {
               </Text>
               <Text style={styles.jobTitle}>
                 {' '}
-                {`${jobdetail_chatData?.job_title || 'N/A'} - ${
-                  jobdetail_chatData?.contract_type || 'N/A'
-                }`}
+                {`${jobdetail_chatData?.job_title || 'N/A'} - ${jobdetail_chatData?.contract_type || 'N/A'
+                  }`}
               </Text>
               <TouchableOpacity
                 onPress={() => {
                   navigateTo(SCREENS.JobDetail, {
-                    item: jobdetail_chatData?.job_id,
+                    jobId:
+                      typeof jobdetail_chatData?.job_id === 'object'
+                        ? jobdetail_chatData?.job_id?._id
+                        : jobdetail_chatData?.job_id,
                   });
                 }}
                 style={styles.button}>
@@ -212,7 +214,7 @@ const Chat = () => {
           <FlatList
             ref={flatListRef}
             data={chatList}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <MessageBubble
                 item={item}
                 recipientName={
@@ -354,6 +356,8 @@ const styles = StyleSheet.create({
     paddingVertical: hp(10),
     borderRadius: 20,
     marginRight: wp(10),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   quickReplyText: {
     ...commonFontStyle(600, 14, colors.white),
