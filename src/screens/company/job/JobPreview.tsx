@@ -64,6 +64,11 @@ const JobPreview = () => {
         job_id,
         expiry_date,
         isSuccessModalVisible,
+        education,
+        experience,
+        certification,
+        language,
+        other_requirements,
     } = useAppSelector((state: any) => selectJobForm(state));
 
     const { userInfo } = useAppSelector((state: any) => state.auth);
@@ -142,7 +147,7 @@ const JobPreview = () => {
             people_anywhere: true,
             duration: duration?.value,
             department_id: job_sector?.value,
-            job_sector: job_sector?.value,
+            job_sector: job_sector?.label || job_sector?.value,
             expiry_date: expiry_date,
             start_date: startDate?.value,
             monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
@@ -151,13 +156,14 @@ const JobPreview = () => {
             skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
             facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
             currency: currency?.value,
-            essential_benefits: "697b3675c433816cfd6c6928",
-            educations: "697b3591c433816cfd6c687e",
-            experiences: "697b35b3c433816cfd6c6896",
-            certifications: "697b3621c433816cfd6c68e6",
-            languages: "697b3641c433816cfd6c68fe",
-            job_requirements: "697b3675c433816cfd6c6928",
+            essential_benefits: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
+            educations: education?.value || '',
+            experiences: experience?.value || '',
+            certifications: certification?.value || '',
+            languages: language?.value || '',
+            job_requirements: Array.isArray(requirements) ? requirements.filter(Boolean).join(',') : '',
         };
+        console.log(">>>>>>>>>>> ~ handlePostJob ~ params:", params)
 
         try {
             let response;

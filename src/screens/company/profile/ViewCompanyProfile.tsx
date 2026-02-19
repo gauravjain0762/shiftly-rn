@@ -27,6 +27,7 @@ import { selectEmployeeState, setViewCompanyProfileInfo, setViewCompanyProfileTa
 import ExpandableText from '../../../component/common/ExpandableText';
 
 import CompanyProfileSkeleton from '../../../component/skeletons/CompanyProfileSkeleton';
+import PostGridSkeleton from '../../../component/skeletons/PostGridSkeleton';
 
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
@@ -424,11 +425,7 @@ const ViewCompanyProfile = () => {
                         {selectedTabIndex === 1 && (
                             <View style={{ marginTop: hp(10) }}>
                                 {isCompanyLoading && !postsFetched ? (
-                                    <ActivityIndicator
-                                        size="small"
-                                        color={colors._0B3970}
-                                        style={{ marginTop: hp(20) }}
-                                    />
+                                    <PostGridSkeleton />
                                 ) : displayPosts && displayPosts.length > 0 ? (
                                     <View
                                         style={{

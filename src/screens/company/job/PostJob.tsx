@@ -192,7 +192,6 @@ const PostJob = () => {
   const [editJob] = useEditCompanyJobMutation();
   const { data: facilitiesData } = useGetEssentialBenefitsQuery({});
   const facilities = facilitiesData?.data?.benefits;
-  console.log("🔥 ~ PostJob ~ benefits:", facilities)
   const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
   const { data: departmentsData } = useGetDepartmentsQuery({});
@@ -428,14 +427,6 @@ const PostJob = () => {
     }
   }, [location, userInfo?.address]);
 
-  // Unused or redundant logic removed
-  const getLocation = async () => {
-    // const res = await getAsyncUserLocation();
-    // if (res) {
-    //   setLocation(res);
-    // }
-  };
-
   const handleCreateJob = async () => {
     if (!title || title.trim() === '') {
       errorToast(t('Please enter a job title'));
@@ -480,7 +471,7 @@ const PostJob = () => {
       people_anywhere: canApply,
       duration: duration?.value,
       department_id: job_sector?.value,
-      job_sector: job_sector?.value,
+      job_sector: job_sector?.label || job_sector?.value,
       expiry_date: expiry_date,
       start_date: startDate?.value,
       monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
@@ -489,12 +480,12 @@ const PostJob = () => {
       skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
       facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
       currency: currency?.value,
-      essential_benefits: "697b3675c433816cfd6c6928",
-      educations: education?.value,
-      experiences: experience?.value,
-      certifications: certification?.value,
-      languages: language?.value,
-      other_requiremnet: other_requirements?.value,
+      essential_benefits: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
+      educations: [education?.value].filter(Boolean).join(','),
+      experiences: [experience?.value].filter(Boolean).join(','),
+      certifications: [certification?.value].filter(Boolean).join(','),
+      languages: [language?.value].filter(Boolean).join(','),
+      job_requirements: Array.isArray(requirements) ? requirements.filter(Boolean).join(',') : '',
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);

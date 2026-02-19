@@ -46,19 +46,19 @@ const CoMessage = () => {
           contentContainerStyle={{ flexGrow: 1 }}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item, index }: any) => {
-            console.log("🔥 ~ CoMessage ~ item:", item)
             return (
               <MessageList
                 key={index}
                 item={item}
                 type="company"
-                onPressMessage={e =>
+                onPressMessage={e => {
+                  console.log('DEBUG: CoMessage onPressMessage item:', e);
                   navigateTo(SCREENS.CoChat, {
                     data: e,
                     accessChatId: true,
                     isFromJobDetail: false,
-                  })
-                }
+                  });
+                }}
               />
             );
           }}

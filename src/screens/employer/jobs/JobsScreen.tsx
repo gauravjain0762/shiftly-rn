@@ -98,7 +98,6 @@ const JobsScreen = () => {
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
-  console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages)
   const pagination = data?.data?.pagination;
 
   const [filters, setFilters] = useState<{
@@ -687,7 +686,7 @@ const JobsScreen = () => {
               position="bottom"
               containerStyle={styles.tooltipIcon}
               message="Recommended for you, based on your profile and AI matching."
-              tooltipBoxStyle={{ left: wp(-100), top: '-200%', width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute', overflow: 'visible' }}
+              tooltipBoxStyle={{ left: wp(-135), top: '-200%', width: wp(280), maxWidth: wp(280), zIndex: 1000, position: 'absolute', overflow: 'visible' }}
             />
           </View>
           <FlatList

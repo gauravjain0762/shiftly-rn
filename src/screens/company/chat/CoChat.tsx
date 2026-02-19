@@ -10,6 +10,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
@@ -39,17 +40,20 @@ import ChatInput from '../../../component/chat/ChatInput';
 import FastImage from 'react-native-fast-image';
 import { SCREENS } from '../../../navigation/screenNames';
 import CustomImage from '../../../component/common/CustomImage';
-// import MessageBubble from '../../../component/chat/MessageBubble';
+import MessageBubble from '../../../component/chat/MessageBubble';
 
 // ---------- Types ----------
-type Message = {
+type LocalMessage = {
   _id?: string;
   sender: 'user' | 'company';
   message: string;
   createdAt: string;
   file?: string | null;
   file_type?: 'image' | null;
+  isSending?: boolean;
 };
+
+type Message = LocalMessage;
 
 type LogoFile = {
   name: string;
@@ -57,12 +61,14 @@ type LogoFile = {
   type: string;
 } | null;
 
+const quickReplies = ['Hi', 'How are you?', 'Are you available?', 'Check your email'];
+
 // ---------- Components ----------
 
 const CoChat = () => {
   const { params } = useRoute<any>();
-  const jobdetail_chatData = params?.data ?? {};
-  const mainjob_data = params?.mainjob_data ?? {};
+  const jobdetail_chatData = params?.data;
+  const mainjob_data = params?.mainjob_data;
   const isFromJobDetail = params?.isFromJobDetail ?? false;
   const chatId = params?.data?.chat_id || params?.data?._id || null;
 
@@ -83,109 +89,6 @@ const CoChat = () => {
     setShowDownIcon(false);
   };
 
-  const MessageBubble = React.memo(
-    ({
-      item,
-      recipientName,
-      type,
-    }: {
-      item: Message;
-      recipientName: string;
-      type: 'user' | 'company';
-    }) => {
-      const isCompany = item.sender !== 'user';
-
-      return (
-        <View style={styles.messageContainer}>
-          {!isCompany && (
-            <View style={{ flexDirection: 'row' }}>
-              <View style={styles.avatarContainer}>
-                <Image
-                  source={{
-                    uri: jobdetail_chatData?.user_id?.picture,
-                  }}
-                  style={styles.avatar}
-                />
-              </View>
-              <View>
-                <Text style={styles.senderName}>{recipientName}</Text>
-                <Text style={styles.timeText}>
-                  {moment(item?.createdAt).format('hh:mm A')}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          <View style={{ flex: 1 }}>
-            {isCompany && (
-              <Text style={{ ...styles.timeText, alignSelf: 'flex-end' }}>
-                {moment(item?.createdAt).format('hh:mm A')}
-              </Text>
-            )}
-            {item.message && (
-              <View
-                style={[
-                  styles.bubble,
-                  isCompany ? styles.userBubble : styles.otherBubble,
-                ]}>
-                <Text
-                  style={[
-                    styles.messageText,
-                    isCompany ? styles.userText : styles.otherText,
-                  ]}>
-                  {item.message}
-                </Text>
-              </View>
-            )}
-
-            {item.file ? (
-              item.file?.includes('pdf') ||
-                item.file?.includes('doc') ||
-                item.file?.includes('docx') ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigateTo(SCREENS.WebviewScreen, {
-                      link: item.file,
-                      title: '',
-                      type: 'company',
-                    });
-                  }}>
-                  <FastImage
-                    source={IMAGES.document}
-                    defaultSource={IMAGES.document}
-                    tintColor={
-                      type === 'user' ? colors._E8CE92 : colors._0B3970
-                    }
-                    style={{
-                      ...styles.attachment,
-                      alignSelf: isCompany ? 'flex-end' : 'flex-start',
-                    }}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigateTo(SCREENS.WebviewScreen, {
-                      link: item?.file,
-                      title: '',
-                      type: 'company',
-                    });
-                  }}>
-                  <FastImage
-                    source={{ uri: item?.file }}
-                    style={{
-                      ...styles.attachment,
-                      alignSelf: isCompany ? 'flex-end' : 'flex-start',
-                    }}
-                  />
-                </TouchableOpacity>
-              )
-            ) : null}
-          </View>
-        </View>
-      );
-    },
-  );
 
   // ----- Detect scroll -----
   const handleScroll = (event: any) => {
@@ -216,6 +119,8 @@ const CoChat = () => {
       const targetUserId = jobdetail_chatData?.user_id?._id || jobdetail_chatData?.user_id;
       const targetJobId = mainjob_data?._id;
 
+      if (!targetUserId || !targetJobId) return;
+
       const existingChat = allChatsData?.data?.chats?.find((chat: any) => {
         const chatUserId = chat?.user_id?._id || chat?.user_id;
         const chatJobId = chat?.job_id?._id || chat?.job_id;
@@ -223,20 +128,16 @@ const CoChat = () => {
       });
 
       if (existingChat) {
-        console.log('>>> Found existing chat:', existingChat._id);
         getCompanyChatMessages({
           chat_id: existingChat._id,
         });
-      } else {
-        console.log('>>> No existing chat found, skipping fetch to avoid 500');
       }
     } else if (chatId) {
-      console.log('🔥 ~ CoChat ~ chatId:', chatId);
       getCompanyChatMessages({
         chat_id: chatId,
       });
     }
-  }, [chatId, getCompanyChatMessages, isFromJobDetail, allChatsData, isLoadingChats, jobdetail_chatData, mainjob_data]);
+  }, [chatId, isFromJobDetail, allChatsData, isLoadingChats]);
 
   useEffect(() => {
     if (chats?.data?.messages) {
@@ -250,7 +151,6 @@ const CoChat = () => {
   // ----- Socket listener -----
   useEffect(() => {
     onChatMessage((newMessage: any) => {
-      console.log('📩 New chat message:', newMessage);
       setChatList(prev => [newMessage, ...prev]);
     });
   }, []);
@@ -278,18 +178,41 @@ const CoChat = () => {
       formData.append('file', logo as any);
     }
 
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: any = {
+      _id: tempId,
+      message: message,
+      sender: 'company',
+      createdAt: new Date().toISOString(),
+      file: logo ? logo.uri : null,
+      file_type: logo ? 'image' : null,
+      isSending: true,
+    };
+
+    setChatList(prev => [optimisticMessage, ...prev]);
+    setMessage('');
+    setLogo(null);
+
     try {
       const res = await sendCompanyMessage(formData).unwrap();
       if (res?.status) {
-        setChatList(prev => [res?.data?.message, ...prev]);
-        setMessage('');
-        setLogo(null);
+        setChatList(prev =>
+          prev.map(msg => (msg._id === tempId ? { ...res?.data?.message, isSending: false } : msg))
+        );
       } else {
+        setChatList(prev => prev.filter(msg => msg._id !== tempId));
         errorToast(res?.message || 'Failed to send message');
       }
     } catch (error) {
+      setChatList(prev => prev.filter(msg => msg._id !== tempId));
       console.error('❌ Error sending message', error);
+      errorToast('Failed to send message');
     }
+  };
+
+  // ----- Quick reply handler -----
+  const handleQuickReply = (reply: string) => {
+    setMessage(reply);
   };
 
   // ----- Image picker -----
@@ -375,12 +298,17 @@ const CoChat = () => {
               data={chatList}
               renderItem={({ item }) => (
                 <MessageBubble
-                  item={item}
+                  item={item as any}
                   type={'company'}
                   recipientName={
                     chats?.data?.chat?.user_id?.name ||
                     jobdetail_chatData?.user_id?.name
                   }
+                  chatData={{
+                    company_id: {
+                      logo: jobdetail_chatData?.user_id?.picture // Use user picture as avatar for company view
+                    }
+                  }}
                 />
               )}
               keyExtractor={(item, index) => item._id ?? index.toString()}
@@ -403,6 +331,22 @@ const CoChat = () => {
           )}
 
           {/* INPUT */}
+
+          {/* Quick Replies */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickRepliesContainer}
+            style={styles.quickRepliesScrollView}>
+            {quickReplies.map((reply, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.quickReplyButton}
+                onPress={() => handleQuickReply(reply)}>
+                <Text style={styles.quickReplyText}>{reply}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
           <ChatInput
             image={logo}
@@ -635,5 +579,25 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
+  },
+  quickRepliesScrollView: {
+    maxHeight: hp(50),
+    marginBottom: hp(8),
+  },
+  quickRepliesContainer: {
+    paddingHorizontal: wp(22),
+    gap: wp(10),
+  },
+  quickReplyButton: {
+    backgroundColor: colors._0B3970,
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(10),
+    borderRadius: 20,
+    marginRight: wp(10),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quickReplyText: {
+    ...commonFontStyle(600, 14, colors.white),
   },
 });

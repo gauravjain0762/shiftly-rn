@@ -2,8 +2,10 @@
 import React, { FC } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAppDispatch } from '../redux/hooks';
-import { colors } from '../theme/colors';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 import HomeScreen from '../screens/employer/home/HomeScreen';
+import { colors } from '../theme/colors';
 import { ScreenNames, SCREENS } from './screenNames';
 import SplashScreen from '../screens/auth/Splash';
 import EmployeeWelcomeScreen from '../screens/auth/EmployeeWelcomeScreen';
@@ -21,7 +23,6 @@ import CreateProfileScreen from '../screens/employer/profile/CreateProfileScreen
 import Chat from '../screens/employer/chat/Chat';
 import ViewProfileScreen from '../screens/employer/profile/ViewProfileScreen';
 import CoLogin from '../screens/company/auth/CoLogin';
-import useRole from '../hooks/useRole';
 import CoSignUp from '../screens/company/auth/CoSignUp';
 import CreateAccount from '../screens/company/auth/CreateAccount';
 import CompanyProfile from '../screens/company/profile/CompanyProfile';
@@ -30,8 +31,6 @@ import CoTabNavigator from './CoTabNavigator';
 import CoMessage from '../screens/company/chat/CoMessage';
 import CoChat from '../screens/company/chat/CoChat';
 import CoNotification from '../screens/company/notification/CoNotification';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
 import PostJob from '../screens/company/job/PostJob';
 import SuggestedEmployee from '../screens/company/job/SuggestedEmployee';
 import ForgotPassword from '../screens/company/auth/ForgotPassword';
@@ -60,6 +59,8 @@ import EmployeeProfile from '../screens/company/job/EmployeeProfile';
 import InterviewStatus from '../screens/company/job/InterviewStatus';
 import MyJobs from '../screens/employer/jobs/MyJobs';
 import CompletedInterviews from '../screens/company/job/CompletedInterviews';
+import ActivityScreen from '../screens/employer/activity/ActivityScreen';
+import useRole from '../hooks/useRole'; // Keep useRole as it's used in StackNavigator
 
 export type RootStackParamList = {
   HomeScreen: undefined;
@@ -76,7 +77,263 @@ const headerStyleTransparent = {
   headerTitleAlign: 'center',
   // ...TransitionPresets.SlideFromRightIOS,
 };
-const Stack = createStackNavigator<ScreenNames>();
+const RootStack = createStackNavigator<any>();
+const EmpStack = createStackNavigator<any>();
+const CmpStack = createStackNavigator<any>();
+
+const EmployeeStack = () => {
+  const authToken = useSelector((state: RootState) => state.auth?.authToken);
+  const isAuthenticated = !!authToken;
+
+  const initialRouteName = isAuthenticated
+    ? SCREENS.TabNavigator
+    : SCREENS.LoginScreen;
+
+  return (
+    <EmpStack.Navigator initialRouteName={initialRouteName}>
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.TabNavigator}
+        component={TabNavigator}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.LoginScreen}
+        component={LoginScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.HomeScreen}
+        component={HomeScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.SignUp}
+        component={SignUp}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.JobDetail}
+        component={JobDetail}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ApplyJob}
+        component={ApplyJob}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.Messages}
+        component={Messages}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.NotificationScreen}
+        component={NotificationScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.AccountScreen}
+        component={AccountScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CreateProfileScreen}
+        component={CreateProfileScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.Chat}
+        component={Chat}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ViewProfileScreen}
+        component={ViewProfileScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.EmpChangePassword}
+        component={EmpChangePassword}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.EmpForgotPassword}
+        component={EmpForgotPassword}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ProfileScreen}
+        component={ProfileScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.EditAccount}
+        component={EditAccountScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.SearchJob}
+        component={SearchJob}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.FavoriteJobList}
+        component={FavoriteJobList}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.EmpLocation}
+        component={EmpLocation}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.JobInvitationScreen}
+        component={JobInvitationScreen}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CompanyProfile}
+        component={CompanyProfile}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ViewCompanyProfile}
+        component={ViewCompanyProfile}
+      />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.MyJobs}
+        component={MyJobs}
+      />
+    </EmpStack.Navigator>
+  );
+};
+
+const CoStack = () => {
+  const authToken = useSelector((state: RootState) => state.auth?.authToken);
+  const isAuthenticated = !!authToken;
+
+  const initialRouteName = isAuthenticated
+    ? SCREENS.CoTabNavigator
+    : SCREENS.CoLogin;
+
+  return (
+    <CmpStack.Navigator initialRouteName={initialRouteName}>
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoTabNavigator}
+        component={CoTabNavigator}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoLogin}
+        component={CoLogin}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoSignUp}
+        component={CoSignUp}
+      />
+
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CreateAccount}
+        component={CreateAccount}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CompanyProfile}
+        component={CompanyProfile}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoMessage}
+        component={CoMessage}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoChat}
+        component={CoChat}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoNotification}
+        component={CoNotification}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.PostJob}
+        component={PostJob}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoMyProfile}
+        component={CoMyProfile}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ForgotPassword}
+        component={ForgotPassword}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ChangePassword}
+        component={ChangePassword}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoPost}
+        component={CoPost}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CreatePost}
+        component={CreatePost}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoHome}
+        component={CoHome}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoEditMyProfile}
+        component={CoEditMyProfile}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.SuggestedEmployee}
+        component={SuggestedEmployee}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CreateQuestion}
+        component={CreateQuestion}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.JobPreview}
+        component={JobPreview}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.PreviewPost}
+        component={PreviewPost}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.InterviewStatus}
+        component={InterviewStatus}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CompletedInterviews}
+        component={CompletedInterviews}
+      />
+    </CmpStack.Navigator>
+  );
+};
 
 const StackNavigator: FC = () => {
   const dispatch = useAppDispatch();
@@ -129,7 +386,7 @@ const StackNavigator: FC = () => {
   //       }
   //     })
   //     .catch(error => {
-  //       let err = `FCm token get error${error}`;
+  //       let err = `FCm token get error${ error } `;
   //       console.log(err);
   //     });
   // };
@@ -190,318 +447,54 @@ const StackNavigator: FC = () => {
   //     },
   //   });
   // }
-  const EmployeeStack = () => {
-    const initialRoute = isAuthenticated
-      ? SCREENS.TabNavigator
-      : SCREENS.LoginScreen;
-
-    return (
-      <Stack.Navigator initialRouteName={initialRoute}>
-        {/* Employer */}
-
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.TabNavigator}
-          component={TabNavigator}
-        />
-
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.LoginScreen}
-          component={LoginScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.HomeScreen}
-          component={HomeScreen}
-        />
-
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.SignUp}
-          component={SignUp}
-        />
-
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.JobDetail}
-          component={JobDetail}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.ApplyJob}
-          component={ApplyJob}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.Messages}
-          component={Messages}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.NotificationScreen}
-          component={NotificationScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.AccountScreen}
-          component={AccountScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CreateProfileScreen}
-          component={CreateProfileScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.Chat}
-          component={Chat}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.ViewProfileScreen}
-          component={ViewProfileScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.EmpChangePassword}
-          component={EmpChangePassword}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.EmpForgotPassword}
-          component={EmpForgotPassword}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.ProfileScreen}
-          component={ProfileScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.EditAccount}
-          component={EditAccountScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.SearchJob}
-          component={SearchJob}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.FavoriteJobList}
-          component={FavoriteJobList}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.EmpLocation}
-          component={EmpLocation}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.JobInvitationScreen}
-          component={JobInvitationScreen}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CompanyProfile}
-          component={CompanyProfile}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.ViewCompanyProfile}
-          component={ViewCompanyProfile}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.MyJobs}
-          component={MyJobs}
-        />
-      </Stack.Navigator>
-    );
-  };
-
-  const CoStack = () => {
-    const initialRoute = isAuthenticated
-      ? SCREENS.CoTabNavigator
-      : SCREENS.CoLogin;
-
-    return (
-      <Stack.Navigator initialRouteName={initialRoute}>
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoTabNavigator}
-          component={CoTabNavigator}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoLogin}
-          component={CoLogin}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoSignUp}
-          component={CoSignUp}
-        />
-
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CreateAccount}
-          component={CreateAccount}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CompanyProfile}
-          component={CompanyProfile}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoMessage}
-          component={CoMessage}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoChat}
-          component={CoChat}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoNotification}
-          component={CoNotification}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.PostJob}
-          component={PostJob}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoMyProfile}
-          component={CoMyProfile}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.ForgotPassword}
-          component={ForgotPassword}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.ChangePassword}
-          component={ChangePassword}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoPost}
-          component={CoPost}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CreatePost}
-          component={CreatePost}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoHome}
-          component={CoHome}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CoEditMyProfile}
-          component={CoEditMyProfile}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.SuggestedEmployee}
-          component={SuggestedEmployee}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CreateQuestion}
-          component={CreateQuestion}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.JobPreview}
-          component={JobPreview}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.PreviewPost}
-          component={PreviewPost}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.InterviewStatus}
-          component={InterviewStatus}
-        />
-        <Stack.Screen
-          options={({ navigation }) => ({ headerShown: false })}
-          name={SCREENS.CompletedInterviews}
-          component={CompletedInterviews}
-        />
-      </Stack.Navigator>
-    );
-  };
 
   return (
-    <Stack.Navigator
+    <RootStack.Navigator
       initialRouteName={SCREENS.SplashScreen}
       screenOptions={{ headerShown: false }}>
-      <Stack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
-      <Stack.Screen
+      <RootStack.Screen name={SCREENS.SplashScreen} component={SplashScreen} />
+      <RootStack.Screen
         name={SCREENS.CreateProfileScreen}
         component={CreateProfileScreen}
       />
-      <Stack.Screen name={SCREENS.CoJobDetails} component={CoJobDetails} />
-      <Stack.Screen name={SCREENS.CoChat} component={CoChat} />
-      <Stack.Screen
+      <RootStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CreateQuestion}
         component={CreateQuestion}
       />
-      <Stack.Screen
+      <RootStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.EmployeeProfile}
         component={EmployeeProfile}
       />
-      <Stack.Screen
+      <RootStack.Screen
         name={SCREENS.SelectRollScreen}
         component={SelectRollScreen}
       />
-      <Stack.Screen
+      <RootStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.EmployeeWelcomeScreen}
         component={EmployeeWelcomeScreen}
       />
-      <Stack.Screen
+      <RootStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CompanyWelcomeScreen}
         component={CompanyWelcomeScreen}
       />
-      <Stack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
-      <Stack.Screen name={SCREENS.CoStack} component={CoStack} />
-      <Stack.Screen
+      <RootStack.Screen name={SCREENS.EmployeeStack} component={EmployeeStack} />
+      <RootStack.Screen name={SCREENS.CoStack} component={CoStack} />
+      <RootStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CoPostJobLocationScreen}
         component={CoPostJobLocationScreen}
       />
-      <Stack.Screen
+      <RootStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CoProfileLocationScreen}
         component={CoProfileLocationScreen}
       />
-      <Stack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
-      <Stack.Screen
-        options={({ navigation }) => ({ headerShown: false })}
-        name={SCREENS.CoMessage}
-        component={CoMessage}
-      />
-      <Stack.Screen
-        options={({ navigation }) => ({ headerShown: false })}
-        name={SCREENS.PostJob}
-        component={PostJob}
-      />
-    </Stack.Navigator>
+      <RootStack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
+    </RootStack.Navigator>
   );
 };
 export default StackNavigator;

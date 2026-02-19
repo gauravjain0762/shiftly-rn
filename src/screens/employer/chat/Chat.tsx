@@ -44,6 +44,7 @@ export type Message = {
   updatedAt: string;
   __v: number;
   _id: string;
+  isSending?: boolean;
 };
 
 type LogoFile = {
@@ -52,9 +53,11 @@ type LogoFile = {
   type: string;
 } | null;
 
+const quickReplies = ['Confirm Interview', 'Send Resume', 'Reschedule'];
+
 const Chat = () => {
-  const { params } = useRoute<any>() ?? {};
-  const jobdetail_chatData = params?.data ?? {};
+  const { params } = useRoute<any>();
+  const jobdetail_chatData = params?.data;
   const chatId = params?.data?.chat_id;
   const flatListRef = useRef<FlatList>(null);
 
@@ -69,8 +72,6 @@ const Chat = () => {
   const [chatList, setChatList] = useState<Message[]>([]);
   const [showDownIcon, setShowDownIcon] = useState(false);
   const [showJobCard, setShowJobCard] = useState<boolean>(true);
-
-  const quickReplies = ['Confirm Interview', 'Send Resume', 'Reschedule'];
 
   const handleChatScrollDown = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -92,7 +93,7 @@ const Chat = () => {
     if (chatId) {
       getEmployeeChatMessages(chatId);
     }
-  }, [chatId, getEmployeeChatMessages]);
+  }, [chatId]);
 
   useEffect(() => {
     if (chats?.data?.messages) {
@@ -123,17 +124,36 @@ const Chat = () => {
       formData.append('file', logo as any);
     }
 
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: any = {
+      _id: tempId,
+      chat_id: chatId,
+      message: message,
+      sender: 'user',
+      createdAt: new Date().toISOString(),
+      file: logo ? logo.uri : null,
+      file_type: logo ? 'image' : null,
+      isSending: true,
+    };
+
+    setChatList(prev => [optimisticMessage, ...prev]);
+    setMessage('');
+    setLogo(null);
+
     try {
       const res = await sendMessage(formData).unwrap();
       if (res?.status) {
-        setChatList(prev => [res?.data?.message, ...prev]);
-        setMessage('');
-        setLogo(null);
+        setChatList(prev =>
+          prev.map(msg => (msg._id === tempId ? { ...res?.data?.message, isSending: false } : msg))
+        );
       } else {
+        setChatList(prev => prev.filter(msg => msg._id !== tempId));
         errorToast(res?.message || 'Failed to send message');
       }
     } catch (err) {
+      setChatList(prev => prev.filter(msg => msg._id !== tempId));
       console.error('❌ Error sending message:', err);
+      errorToast('Failed to send message');
     }
   };
 

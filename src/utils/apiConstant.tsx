@@ -41,6 +41,7 @@ export const API = {
   // UserDetails
   getCompanyProfile: '/company/getProfile',
   updateCompanyProfile: '/company/updateProfile',
+  getEmployeeProfile: '/company/getEmployeeProfile',
   getCompanyProfileById: '/getCompanyProfile',
 
   getDepartments: '/company/getDepartments',

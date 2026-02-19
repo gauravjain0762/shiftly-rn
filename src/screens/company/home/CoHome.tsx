@@ -152,7 +152,7 @@ const CoHome = () => {
             onPress={() => navigateTo(SCREENS.CompletedInterviews)}
             gradientColors={['#CDA953', '#C8B380']}
             style={{ borderWidth: 0, borderRadius: 0, width: '100%' }}
-            textStyle={{ color: colors.white }}
+            textStyle={{ color: colors.white, fontSize: 16 }}
           />
         </View>
 

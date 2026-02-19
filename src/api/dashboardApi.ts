@@ -106,6 +106,14 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    getEmployeeProfileById: builder.query<any, {user_id: string}>({
+      query: ({user_id}) => ({
+        url: `${API.getEmployeeProfile}?user_id=${user_id}`,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+    }),
+
     getCompanyPosts: builder.query<any, any>({
       query: () => ({
         url: API.getCompanyPosts,
@@ -1043,4 +1051,5 @@ export const {
   useGetAppliedJobsQuery,
   useGetInterviewsQuery,
   useTogglePostLikeMutation,
+  useGetEmployeeProfileByIdQuery,
 } = dashboardApi;

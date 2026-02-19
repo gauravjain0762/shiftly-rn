@@ -16,14 +16,13 @@ const ActivityScreen = () => {
   const { t } = useTranslation();
   const { data: activitiesData, isLoading, refetch } = useGetActivitiesQuery({});
   const activities = activitiesData?.data?.activities || [];
-  console.log("🔥 ~ ActivityScreen ~ activities:", activities)
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <View style={styles.topConrainer}>
         <BackHeader
-          containerStyle={styles.header}
           title={t('My Activities')}
+          containerStyle={styles.header}
           titleStyle={styles.headerTitle}
         />
       </View>
@@ -32,18 +31,20 @@ const ActivityScreen = () => {
         data={activities}
         style={AppStyles.flex}
         keyExtractor={(_, index) => index.toString()}
-        renderItem={(item: any) => <ActivitiesCard {...item} />}
         contentContainerStyle={styles.scrollContainer}
+        renderItem={(item: any) => <ActivitiesCard {...item} />}
         ItemSeparatorComponent={() => <View style={{ height: hp(22) }} />}
         showsVerticalScrollIndicator={false}
         refreshing={isLoading}
         onRefresh={refetch}
         ListEmptyComponent={() => {
           return (
-            <NoDataText
-              text="You don’t have any activity yet."
-              textStyle={{ color: colors._0B3970 }}
-            />
+            <View style={styles.emptyContainer}>
+              <NoDataText
+                text="You don’t have any activity yet."
+                textStyle={{ color: colors._0B3970 }}
+              />
+            </View>
           );
         }}
       />
@@ -87,5 +88,10 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...commonFontStyle(600, 22, colors._0B3970),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

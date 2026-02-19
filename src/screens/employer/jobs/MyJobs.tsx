@@ -20,7 +20,7 @@ const MyJobs = () => {
     const [activeTab, setActiveTab] = useState(initialTab);
     const [refreshing, setRefreshing] = useState(false);
 
-    const tabs = ['Applied Jobs', 'Interviews', 'Matched Job'];
+    const tabs = ['Applied Jobs', 'Interviews', 'Matched Jobs'];
     const [pageApplied, setPageApplied] = useState(1);
     const [pageInterviews, setPageInterviews] = useState(1);
     const [pageMatched, setPageMatched] = useState(1);
@@ -31,13 +31,13 @@ const MyJobs = () => {
 
     const appliedJobsQuery = useGetAppliedJobsQuery({ page: pageApplied }, { skip: activeTab !== 'Applied Jobs' });
     const interviewsQuery = useGetInterviewsQuery({ page: pageInterviews }, { skip: activeTab !== 'Interviews' });
-    const matchedJobsQuery = useGetEmployeeJobsQuery({ type: 'matched', page: pageMatched }, { skip: activeTab !== 'Matched Job' });
+    const matchedJobsQuery = useGetEmployeeJobsQuery({ type: 'matched', page: pageMatched }, { skip: activeTab !== 'Matched Jobs' });
 
     const getActiveQuery = () => {
         switch (activeTab) {
             case 'Applied Jobs': return appliedJobsQuery;
             case 'Interviews': return interviewsQuery;
-            case 'Matched Job': return matchedJobsQuery;
+            case 'Matched Jobs': return matchedJobsQuery;
             default: return appliedJobsQuery;
         }
     };
@@ -289,33 +289,49 @@ const MyJobs = () => {
                     {tabs.map(renderTab)}
                 </View>
 
-                {(isLoading || isFetching) && jobsList.length === 0 ? (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <ActivityIndicator size="large" color={colors._0B3970} />
-                    </View>
-                ) : (
-                    <FlatList
-                        data={jobsList}
-                        renderItem={renderJobCard}
-                        keyExtractor={(item, index) => item?._id || index.toString()}
-                        contentContainerStyle={styles.contentContainer}
-                        ListEmptyComponent={() => (
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: hp(50) }}>
-                                <Text style={{ ...commonFontStyle(500, 16, colors._656464) }}>No jobs found</Text>
-                            </View>
-                        )}
-                        onEndReached={handleLoadMore}
-                        onEndReachedThreshold={0.5}
-                        refreshControl={
-                            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                <FlatList
+                    data={jobsList}
+                    renderItem={renderJobCard}
+                    keyExtractor={(item, index) => item?._id || index.toString()}
+                    contentContainerStyle={[
+                        styles.contentContainer,
+                        jobsList.length === 0 && { flex: 1, justifyContent: 'center' }
+                    ]}
+                    ListEmptyComponent={() => {
+                        const query = getActiveQuery();
+                        const rawData = activeTab === 'Applied Jobs' ? query.data?.data?.applicants :
+                            activeTab === 'Interviews' ? (query.data?.data?.invitations || query.data?.data?.interviews) :
+                                query.data?.data?.jobs;
+
+                        const isActuallyEmpty = query.isSuccess && (!Array.isArray(rawData) || rawData.length === 0);
+
+                        if ((isLoading || isFetching) && !refreshing) {
+                            return <ActivityIndicator size="large" color={colors._0B3970} />;
                         }
-                        ListFooterComponent={isFetching && jobsList.length > 0 ? (
-                            <ActivityIndicator size="small" color={colors._0B3970} />
-                        ) : null}
-                        showsVerticalScrollIndicator={false}
-                    />
-                )}
+
+                        if (isActuallyEmpty) {
+                            return (
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={{ ...commonFontStyle(500, 16, colors._656464) }}>No jobs found</Text>
+                                </View>
+                            );
+                        }
+
+                        return <ActivityIndicator size="large" color={colors._0B3970} />;
+                    }}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                    }
+                    ListFooterComponent={isFetching && jobsList.length > 0 ? (
+                        <ActivityIndicator size="small" color={colors._0B3970} />
+                    ) : null}
+                    showsVerticalScrollIndicator={false}
+                />
+
             </View>
+
         </LinearContainer>
     );
 };
@@ -323,6 +339,7 @@ const MyJobs = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingBottom: hp(25)
     },
     tabsContainer: {
         flexDirection: 'row',
@@ -347,6 +364,7 @@ const styles = StyleSheet.create({
     },
     tabText: {
         ...commonFontStyle(500, 14, '#999'),
+        textAlign: 'center'
     },
     activeTabText: {
         color: colors.white,

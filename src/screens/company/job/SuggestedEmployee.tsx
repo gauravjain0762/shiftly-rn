@@ -25,7 +25,7 @@ import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
-import { navigateTo, errorToast, goBack } from '../../../utils/commonFunction';
+import { navigateTo, errorToast, goBack, resetNavigation } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
@@ -493,6 +493,9 @@ const SuggestedEmployeeScreen = () => {
         type="company"
         title={t('Candidates List')}
         containerStyle={styles.header}
+        onBackPress={() => {
+          resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
+        }}
       />
       {showSkeleton ? (
         <SuggestedEmployeeSkeleton />
@@ -580,49 +583,108 @@ const SuggestedEmployeeScreen = () => {
 
             {/* Tabs - Only visible if coming from Job Card */}
             {isFromJobCard && (
-              <View style={styles.tabContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.tabContainer}
+                style={styles.tabScroll}>
                 <TouchableOpacity
-                  style={[styles.tabButton, activeTab === 'suggested' && styles.activeTabButton, activeTab === 'suggested' && { backgroundColor: colors._0B3970, borderColor: colors._0B3970 }]}
+                  style={[
+                    styles.tabButton,
+                    activeTab === 'suggested' && styles.activeTabButton,
+                    activeTab === 'suggested' && {
+                      backgroundColor: colors._0B3970,
+                      borderColor: colors._0B3970,
+                    },
+                  ]}
                   onPress={() => setActiveTab('suggested')}>
                   <Image
                     source={IMAGES.people}
-                    style={[styles.tabIcon, activeTab === 'suggested' && { tintColor: colors.white }]}
+                    style={[
+                      styles.tabIcon,
+                      activeTab === 'suggested' && { tintColor: colors.white },
+                    ]}
                   />
-                  <Text style={[styles.tabText, activeTab === 'suggested' && styles.activeTabText, activeTab === 'suggested' && { color: colors.white }]} numberOfLines={2}>{t('Suggested List')}</Text>
+                  <Text
+                    style={[
+                      styles.tabText,
+                      activeTab === 'suggested' && styles.activeTabText,
+                      activeTab === 'suggested' && { color: colors.white },
+                    ]}
+                    numberOfLines={1}>
+                    {t('Suggested List')}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.tabButton, activeTab === 'shortlisted' && styles.activeTabButton, activeTab === 'shortlisted' && { backgroundColor: colors._0B3970, borderColor: colors._0B3970 }]}
+                  style={[
+                    styles.tabButton,
+                    activeTab === 'shortlisted' && styles.activeTabButton,
+                    activeTab === 'shortlisted' && {
+                      backgroundColor: colors._0B3970,
+                      borderColor: colors._0B3970,
+                    },
+                  ]}
                   onPress={() => setActiveTab('shortlisted')}>
                   <View style={styles.starIconContainer}>
                     <Image
                       source={IMAGES.star1}
                       style={[
                         styles.starSmall,
-                        { tintColor: activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970' }
+                        {
+                          tintColor:
+                            activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970',
+                        },
                       ]}
                     />
                     <Image
                       source={IMAGES.star2}
                       style={[
                         styles.starLarge,
-                        { tintColor: activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970' }
+                        {
+                          tintColor:
+                            activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970',
+                        },
                       ]}
                     />
                   </View>
-                  <Text style={[styles.tabText, activeTab === 'shortlisted' && { color: colors.white }]} numberOfLines={2}>{t('AI Shortlisted')}</Text>
+                  <Text
+                    style={[
+                      styles.tabText,
+                      activeTab === 'shortlisted' && { color: colors.white },
+                    ]}
+                    numberOfLines={1}>
+                    {t('AI Shortlisted')}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.tabButton, activeTab === 'applicants' && styles.activeTabButton, activeTab === 'applicants' && { backgroundColor: colors._0B3970, borderColor: colors._0B3970 }]}
+                  style={[
+                    styles.tabButton,
+                    activeTab === 'applicants' && styles.activeTabButton,
+                    activeTab === 'applicants' && {
+                      backgroundColor: colors._0B3970,
+                      borderColor: colors._0B3970,
+                    },
+                  ]}
                   onPress={() => setActiveTab('applicants')}>
                   <Image
                     source={IMAGES.people} // Using same icon as Suggested for now
-                    style={[styles.tabIcon, activeTab === 'applicants' && { tintColor: colors.white }]}
+                    style={[
+                      styles.tabIcon,
+                      activeTab === 'applicants' && { tintColor: colors.white },
+                    ]}
                   />
-                  <Text style={[styles.tabText, activeTab === 'applicants' && { color: colors.white }]} numberOfLines={2}>{t('Applicants')}</Text>
+                  <Text
+                    style={[
+                      styles.tabText,
+                      activeTab === 'applicants' && { color: colors.white },
+                    ]}
+                    numberOfLines={1}>
+                    {t('Applicants')}
+                  </Text>
                 </TouchableOpacity>
-              </View>
+              </ScrollView>
             )}
 
             {activeTab === 'suggested' ? (
@@ -1018,22 +1080,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderColor: '#EEE',
   },
+  tabScroll: {
+    maxHeight: hp(65),
+    marginBottom: hp(10),
+  },
   tabContainer: {
     flexDirection: 'row',
     gap: wp(10),
+    paddingHorizontal: wp(2),
   },
   tabButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: hp(12),
-    paddingHorizontal: wp(10),
+    paddingHorizontal: wp(16),
     backgroundColor: '#F2F2F2',
     borderRadius: wp(20),
     gap: wp(6),
     borderWidth: 1,
     borderColor: '#F2F2F2',
+    minWidth: wp(120),
   },
   activeTabButton: {
     backgroundColor: '#EBEBEB',

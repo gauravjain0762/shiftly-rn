@@ -18,14 +18,19 @@ import { SCREENS } from '../../navigation/screenNames';
 import CustomImage from '../common/CustomImage';
 import BaseText from '../common/BaseText';
 
+type MessageProps = {
+  isSending?: boolean;
+} & Message;
+
 const MessageBubble: React.FC<{
-  item: Message;
+  item: MessageProps;
   recipientName: string;
   type: 'user' | 'company';
   chatData: any;
 }> = ({ item, recipientName, type, chatData }) => {
-  console.log('>>>>>>>> ~ MessageBubble ~ item:', item?.file);
-  const isUser = item.sender !== 'company';
+  //   console.log('>>>>>>>> ~ MessageBubble ~ item:', item?.file);
+  // Determine if the message belongs to the current viewer based on their role
+  const isMyMessage = type === 'company' ? item.sender === 'company' : item.sender !== 'company';
 
   const openFile = () => {
     navigateTo(SCREENS.WebviewScreen, {
@@ -42,7 +47,7 @@ const MessageBubble: React.FC<{
 
   return (
     <View style={styles.messageContainer}>
-      {!isUser && (
+      {!isMyMessage && (
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.avatarContainer}>
             <FastImage
@@ -73,7 +78,7 @@ const MessageBubble: React.FC<{
       )}
 
       <View style={{ flex: 1 }}>
-        {isUser && (
+        {isMyMessage && (
           <Text style={{ ...styles.timeText, alignSelf: 'flex-end', color: type === 'user' ? colors._2F2F2F : colors.white }}>
             {moment(item?.createdAt).format('hh:mm A')}
           </Text>
@@ -83,20 +88,20 @@ const MessageBubble: React.FC<{
           <View
             style={[
               styles.bubble,
-              isUser
+              isMyMessage
                 ? styles.userBubble
                 : {
                   ...styles.otherBubble,
                   backgroundColor: colors._0B3970,
                 },
             ]}>
-            <Text
+            <BaseText
               style={[
                 styles.messageText,
-                isUser ? styles.userText : styles.otherText,
+                isMyMessage ? styles.userText : styles.otherText,
               ]}>
               {item.message}
-            </Text>
+            </BaseText>
           </View>
         )}
 
@@ -104,7 +109,7 @@ const MessageBubble: React.FC<{
           <View
             style={[
               styles.attachmentContainer,
-              { alignSelf: isUser ? 'flex-end' : 'flex-start' },
+              { alignSelf: isMyMessage ? 'flex-end' : 'flex-start' },
             ]}>
             {isDocument ? (
               // Document attachment
@@ -129,6 +134,7 @@ const MessageBubble: React.FC<{
                 <CustomImage
                   source={{ uri: item?.file }}
                   onPress={() => {
+                    if (item.isSending) return;
                     navigateTo(SCREENS.WebviewScreen, {
                       link: item.file,
                       title: '',
@@ -139,6 +145,12 @@ const MessageBubble: React.FC<{
                   containerStyle={styles.imageContainer}
                   resizeMode="cover"
                 />
+                {item.isSending && (
+                  <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="small" color={colors._0B3970} />
+                    <Text style={styles.loadingText}>Sending...</Text>
+                  </View>
+                )}
               </>
             )}
           </View>

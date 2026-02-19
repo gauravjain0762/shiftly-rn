@@ -1,72 +1,76 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { BackHeader, GradientButton, LinearContainer } from '../../../component';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { SCREENS } from '../../../navigation/screenNames';
-import { navigateTo } from '../../../utils/commonFunction';
-import CustomImage from '../../../component/common/CustomImage';
+import { BackHeader, GradientButton, LinearContainer } from '../../../component';
 import BaseText from '../../../component/common/BaseText';
+import CustomImage from '../../../component/common/CustomImage';
+import { SCREENS } from '../../../navigation/screenNames';
+import { colors } from '../../../theme/colors';
+import { commonFontStyle, hp, wp } from '../../../theme/fonts';
+import { navigateTo } from '../../../utils/commonFunction';
+import { useGetEmployeeProfileByIdQuery } from '../../../api/dashboardApi';
 
 const EmployeeProfile = () => {
   const { params } = useRoute<any>();
-  const user = params?.user;
+  const userParam = params?.user;
+  const userId = userParam?._id;
 
-  // Dummy data matching the image (will use real data from user param if available)
+  const { data: profileResponse, isLoading } = useGetEmployeeProfileByIdQuery(
+    { user_id: userId },
+    { skip: !userId }
+  );
+
+  const userData = profileResponse?.data?.user;
+
+  // Real data from API or fallback to userParam/placeholder
   const profileData = {
-    name: user?.name || 'Smith Williamson',
-    location: user?.location || user?.area || 'Dubai Marina, Dubai - U.A.E',
-    picture: user?.picture || null, // Will use placeholder
-    about: 'Sed ut perspiciatis unde omns iste natus error site voluptatem accusantum dolorem queitters lipsum lipslaudantiuml ipsum text.',
-    education: [
-      {
-        degree: 'MBA Hotel Management',
-        years: '2001 - 2004',
-        institution: 'American Univversity',
-        location: 'London, UK',
-      },
-    ],
-    experience: [
-      {
-        title: 'Front Desk Manager',
-        years: '2005 - 2009',
-        company: 'Sofitel Hotel',
-        location: 'Dubai, UAE',
-      },
-    ],
-    skills: [
-      'Guest Welcoming',
-      'Inventory Reporting',
-      'Customer Service',
-      'Staff Management',
-      'Emergency Management',
-    ],
-    languages: ['Arabic', 'English', 'Urdu', 'French', 'Russian', 'Spanish'],
+    name: userData?.name || userParam?.name || 'User',
+    location: userData?.location || userParam?.location || userParam?.area || 'Location not available',
+    picture: userData?.picture || userParam?.picture || null,
+    about: userData?.about || 'No about information provided.',
+    education: userData?.education || [],
+    experience: userData?.experience || [],
+    skills: userData?.skills?.map((s: any) => s.title) || [],
+    languages: userData?.languages?.map((l: any) => l.name) || [],
   };
 
   const jobData = params?.jobData;
   const jobId = params?.jobId;
 
   const handleChat = () => {
-    if (!user?._id) return;
+    if (!userId) return;
 
     // Navigate to chat screen with required params for company chat
     navigateTo(SCREENS.CoChat, {
       isFromJobDetail: true,
       data: {
-        user_id: user
+        user_id: userData || userParam
       },
       mainjob_data: jobData || { _id: jobId }
     });
   };
+
+  if (isLoading) {
+    return (
+      <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
+        <BackHeader
+          title="Employee Profile"
+          containerStyle={styles.headerContainer}
+        />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors._0B3970} />
+        </View>
+      </LinearContainer>
+    );
+  }
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
@@ -100,20 +104,20 @@ const EmployeeProfile = () => {
           </View>
         </View>
 
-        {user?.profile_completion && (
+        {(userData?.profile_completion || userParam?.profile_completion) && (
           <View style={styles.assessmentCard}>
             <View style={styles.iconCircle}>
               <Image
-                source={Number(user?.profile_completion) === 100 ? IMAGES.check : IMAGES.document}
-                style={[styles.assessmentIcon, Number(user?.profile_completion) === 100 && { tintColor: colors._0B3970 }]}
+                source={Number(userData?.profile_completion || userParam?.profile_completion) === 100 ? IMAGES.check : IMAGES.document}
+                style={[styles.assessmentIcon, Number(userData?.profile_completion || userParam?.profile_completion) === 100 && { tintColor: colors._0B3970 }]}
               />
             </View>
             <View style={styles.assessmentTextContainer}>
               <BaseText style={styles.assessmentTitle}>
-                {Number(user?.profile_completion) === 100 ? 'Assessment Completed' : 'Complete Assessment'}
+                {Number(userData?.profile_completion || userParam?.profile_completion) === 100 ? 'Assessment Completed' : 'Complete Assessment'}
               </BaseText>
               <BaseText style={styles.assessmentSubtitle}>
-                {user?.name || 'User'} {user?.profile_completion}% complete Assessment
+                {profileData.name} {userData?.profile_completion || userParam?.profile_completion}% complete Assessment
               </BaseText>
             </View>
           </View>
@@ -126,76 +130,84 @@ const EmployeeProfile = () => {
         </View>
 
         {/* Education Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Education</Text>
-          {profileData.education.map((edu, index) => (
-            <View key={index} style={styles.entryContainer}>
-              <View style={styles.entryHeader}>
-                <Text style={styles.entryTitle}>{edu.degree}</Text>
-                <Text style={styles.entryYears}>{edu.years}</Text>
-              </View>
-              <View style={styles.entryDetails}>
-                <Text style={styles.entryLink}>{edu.institution}</Text>
-                <View style={styles.entryLocation}>
-                  <Image
-                    source={IMAGES.location}
-                    style={styles.smallLocationIcon}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.entryLocationText}>{edu.location}</Text>
+        {profileData.education.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Education</Text>
+            {profileData.education.map((edu: any, index: number) => (
+              <View key={index} style={[styles.entryContainer, index > 0 && { marginTop: hp(15) }]}>
+                <View style={styles.entryHeader}>
+                  <Text style={styles.entryTitle}>{edu.degree}</Text>
+                  <Text style={styles.entryYears}>{edu.years}</Text>
+                </View>
+                <View style={styles.entryDetails}>
+                  <Text style={styles.entryLink}>{edu.institution}</Text>
+                  <View style={styles.entryLocation}>
+                    <Image
+                      source={IMAGES.location}
+                      style={styles.smallLocationIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.entryLocationText}>{edu.location}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
 
         {/* Recent Past Experience Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Recent Past Experience</Text>
-          {profileData.experience.map((exp, index) => (
-            <View key={index} style={styles.entryContainer}>
-              <View style={styles.entryHeader}>
-                <Text style={styles.entryTitle}>{exp.title}</Text>
-                <Text style={styles.entryYears}>{exp.years}</Text>
-              </View>
-              <View style={styles.entryDetails}>
-                <Text style={styles.entryLink}>{exp.company}</Text>
-                <View style={styles.entryLocation}>
-                  <Image
-                    source={IMAGES.location}
-                    style={styles.smallLocationIcon}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.entryLocationText}>{exp.location}</Text>
+        {profileData.experience.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Recent Past Experience</Text>
+            {profileData.experience.map((exp: any, index: number) => (
+              <View key={index} style={[styles.entryContainer, index > 0 && { marginTop: hp(15) }]}>
+                <View style={styles.entryHeader}>
+                  <Text style={styles.entryTitle}>{exp.title}</Text>
+                  <Text style={styles.entryYears}>{exp.years}</Text>
+                </View>
+                <View style={styles.entryDetails}>
+                  <Text style={styles.entryLink}>{exp.company}</Text>
+                  <View style={styles.entryLocation}>
+                    <Image
+                      source={IMAGES.location}
+                      style={styles.smallLocationIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.entryLocationText}>{exp.location}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
 
         {/* Skills Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Skills</Text>
-          <View style={styles.pillsContainer}>
-            {profileData.skills.map((skill, index) => (
-              <View key={index} style={styles.pill}>
-                <Text style={styles.pillText}>{skill}</Text>
-              </View>
-            ))}
+        {profileData.skills.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Skills</Text>
+            <View style={styles.pillsContainer}>
+              {profileData.skills.map((skill: string, index: number) => (
+                <View key={index} style={styles.pill}>
+                  <Text style={styles.pillText}>{skill}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Languages Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Languages</Text>
-          <View style={styles.pillsContainer}>
-            {profileData.languages.map((language, index) => (
-              <View key={index} style={styles.pill}>
-                <Text style={styles.pillText}>{language}</Text>
-              </View>
-            ))}
+        {profileData.languages.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Languages</Text>
+            <View style={styles.pillsContainer}>
+              {profileData.languages.map((language: string, index: number) => (
+                <View key={index} style={styles.pill}>
+                  <Text style={styles.pillText}>{language}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Bottom spacing for Chat button */}
         <View style={styles.bottomSpacing} />
@@ -222,6 +234,7 @@ const EmployeeProfile = () => {
     </LinearContainer >
   );
 };
+
 
 export default EmployeeProfile;
 
@@ -441,4 +454,10 @@ const styles = StyleSheet.create({
   assessmentSubtitle: {
     ...commonFontStyle(400, 12, 'rgba(255, 255, 255, 0.8)'),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
+

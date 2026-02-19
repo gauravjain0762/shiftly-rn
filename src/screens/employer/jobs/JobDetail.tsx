@@ -58,7 +58,7 @@ const JobDetail = () => {
   );
   console.log("~ JobDetail ~ jobDetail:", jobDetail)
   const curr_jobdetails = jobDetail?.data?.job;
-  // console.log('~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
+  console.log('~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
   const shareUrl = jobDetail?.data?.share_url;
@@ -453,32 +453,31 @@ ${salary}${shareUrlText}`;
             {/* Requirements */}
             <Text style={styles.sectionTitle}>Requirements</Text>
             <View style={styles.bulletList}>
-              {curr_jobdetails?.requirements?.map(
-                (item: any, index: number) => {
-                  if (item?.length) {
-                    return (
-                      <View key={index}>
-                        <BaseText
-                          style={styles.description}>{`• ${item}`}</BaseText>
-                      </View>
-                    );
-                  }
-                },
+              {curr_jobdetails?.job_requirements?.length > 0 ? (
+                curr_jobdetails?.job_requirements?.map((item: any, index: number) => (
+                  <View key={index}>
+                    <BaseText style={styles.description}>{`• ${item?.title}`}</BaseText>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.description}>N/A</Text>
               )}
             </View>
 
             {/* Offer */}
             <Text style={styles.sectionTitle}>What we offer</Text>
             <View style={styles.bulletList}>
-              {job_facilities?.map((item: any, index: number) => {
-                return (
+              {curr_jobdetails?.essential_benefits?.length > 0 ? (
+                curr_jobdetails?.essential_benefits?.map((item: any, index: number) => (
                   <View key={index}>
-                    <BaseText
-                      style={styles.description}>{`• ${item?.title}`}</BaseText>
+                    <BaseText style={styles.description}>{`• ${item?.title}`}</BaseText>
                   </View>
-                );
-              })}
+                ))
+              ) : (
+                <Text style={styles.description}>N/A</Text>
+              )}
             </View>
+
 
             <View style={styles.jobDetailsContainer}>
               <Text style={styles.sectionTitle}>{t('Job Details')}</Text>

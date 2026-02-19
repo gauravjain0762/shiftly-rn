@@ -13,7 +13,6 @@ import CoHome from '../screens/company/home/CoHome';
 import CoJob from '../screens/company/job/CoJob';
 import CoPost from '../screens/company/post/CoPost';
 import CoProfile from '../screens/company/profile/CoProfile';
-import CoActivity from '../screens/company/activity/CoActivity';
 import CoMessage from '../screens/company/chat/CoMessage';
 
 const Tab = createBottomTabNavigator();
@@ -44,7 +43,7 @@ const CustomTabBar = ({ state, navigation }: any) => {
             break;
 
           case SCREENS.CoActivity:
-            iconName = isFocused ? IMAGES.Activity_on : IMAGES.Activity_off;
+            iconName = isFocused ? IMAGES.chat2 : IMAGES.chat2;
             break;
           case SCREENS.CoProfile:
             iconName = isFocused ? IMAGES.user_on : IMAGES.user_off;
@@ -65,7 +64,7 @@ const CustomTabBar = ({ state, navigation }: any) => {
             labelName = 'Posts';
             break;
           case SCREENS.CoActivity:
-            labelName = 'Activity';
+            labelName = 'Messages';
             break;
           case SCREENS.CoProfile:
             labelName = 'Profile';
@@ -106,13 +105,15 @@ const CustomTabBar = ({ state, navigation }: any) => {
   );
 };
 
+const renderTabBar = (props: any) => <CustomTabBar {...props} />;
+
 // Main App with Tab Navigation
 export default function CoTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false, tabBarHideOnKeyboard: true }}
       initialRouteName={SCREENS.CoHome}
-      tabBar={(props: any) => <CustomTabBar {...props} />}>
+      tabBar={renderTabBar}>
       <Tab.Screen name={SCREENS.CoHome} component={CoHome} />
       <Tab.Screen name={SCREENS.CoJob} component={CoJob} />
       <Tab.Screen name={SCREENS.CoPost} component={CoPost} />

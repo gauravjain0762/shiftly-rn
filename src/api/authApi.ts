@@ -86,27 +86,6 @@ export const authApi = createApi({
           skipLoader: true,
         };
       },
-      async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
-        try {
-          const { data } = await queryFulfilled;
-          if (data?.status) {
-            if (data?.data) {
-              console.log('Create Job Data', data);
-              // Invalidate company jobs so lists refetch instantly
-              // dispatch(
-              //   dashboardApi.util.invalidateTags([
-              //     'GetJobs',
-              //     'GetEmployeeJobs',
-              //   ]),
-              // );
-            }
-          } else {
-            errorToast(data?.message);
-          }
-        } catch (error) {
-          console.error('Create Job Error', error);
-        }
-      },
     }),
     // getServices: builder.query<any, void>({
     //   query: () => ({

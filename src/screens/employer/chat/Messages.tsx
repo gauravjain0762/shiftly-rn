@@ -37,7 +37,7 @@ const Messages = () => {
         data={filteredActivities}
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => <ActivitiesCard item={item} />}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={[styles.listContainer, { flexGrow: 1 }]}
         ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
         onRefresh={refetch}
         refreshing={isLoading}

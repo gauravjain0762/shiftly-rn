@@ -226,7 +226,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
         </View>
         <CustomDropdownMulti
           disable={false}
-          dropdownPosition="auto"
+          dropdownPosition="top"
           data={languages.map(lang => ({ label: lang, value: lang }))}
           placeholder={'Add your languages'}
           value={aboutEdit?.selectedLanguages.map((l: any) => l.name)}

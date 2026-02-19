@@ -116,13 +116,15 @@ const CustomTabBar = ({ state, navigation }: any) => {
   );
 };
 
+const renderTabBar = (props: any) => <CustomTabBar {...props} />;
+
 // Main App with Tab Navigation
 export default function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false }}
       initialRouteName={SCREENS.HomeScreen}
-      tabBar={(props: any) => <CustomTabBar {...props} />}>
+      tabBar={renderTabBar}>
       <Tab.Screen name={SCREENS.HomeScreen} component={HomeScreen} />
       <Tab.Screen name={SCREENS.PostsScreen} component={PostsScreen} />
       <Tab.Screen name={SCREENS.JobsScreen} component={JobsScreen} />

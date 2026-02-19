@@ -26,6 +26,7 @@ const CustomPostCard = ({ title, image }: Props) => {
           containerStyle={styles.image}
           imageStyle={styles.image}
           resizeMode="cover"
+          showDefaultSource={false}
         />
       </View>
       <View style={styles.textContainer}>

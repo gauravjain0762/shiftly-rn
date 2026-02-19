@@ -22,6 +22,7 @@ interface Props {
   children?: any;
   onLoadStart?: () => void;
   onLoad?: () => void;
+  showDefaultSource?: boolean;
 }
 
 const CustomImage = ({
@@ -38,6 +39,7 @@ const CustomImage = ({
   bgColor,
   viewRef,
   children,
+  showDefaultSource = true,
   ...props
 }: Props) => {
   // Ensure we always have a valid source for FastImage
@@ -65,7 +67,7 @@ const CustomImage = ({
         resizeMode={resizeMode}
         source={imageSource}
         tintColor={tintColor}
-        defaultSource={IMAGES.logoText}
+        defaultSource={showDefaultSource ? IMAGES.logoText : undefined}
         style={[{ width: size, height: size }, imageStyle]}
         {...props}>
         {children}
