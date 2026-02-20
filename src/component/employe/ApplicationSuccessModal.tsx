@@ -57,14 +57,14 @@ const ApplicationSuccessModal: FC<modal> = ({
           </View>
         </TouchableOpacity> */}
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.button}
           onPress={onExploreJobs}
           activeOpacity={0.8}>
           <View style={styles.buttonGradient}>
             <Text style={styles.buttonText}>Explore similar jobs</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </Modal>
   );

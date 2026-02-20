@@ -51,6 +51,7 @@ const SuggestedEmployeeScreen = () => {
     isFetching,
     refetch: refetchSuggested,
   } = useGetSuggestedEmployeesQuery(jobId, { skip: !jobId });
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ suggestedResponse:", suggestedResponse)
 
   const {
     data: jobDetailsResponse,
@@ -66,10 +67,10 @@ const SuggestedEmployeeScreen = () => {
   );
 
   const jobInfo = jobData?.data?.job || jobDetailsResponse?.data?.job || {};
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobInfo:", jobInfo)
 
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ ai_data:", ai_data)
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>('shortlisted');
   const dispatch = useDispatch<any>();
@@ -88,6 +89,13 @@ const SuggestedEmployeeScreen = () => {
     return list;
   }, [jobInfo, jobData, jobDetailsResponse]);
 
+  const applications = useMemo(() => {
+    return (
+      jobDetailsResponse?.data?.applications ||
+      jobData?.data?.applications ||
+      []
+    );
+  }, [jobData, jobDetailsResponse]);
 
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
   const isScreenLoading = isJobLoading || isLoading || isFetching;
@@ -525,7 +533,7 @@ const SuggestedEmployeeScreen = () => {
                 </View>
               </View>
 
-              {isFromJobCard && (
+              {isFromJobCard && jobInfo?.status !== 'Closed' && !(jobInfo?.expiry_date && new Date(jobInfo.expiry_date) < new Date()) && (
                 <View style={styles.jobActionsRow}>
                   <TouchableOpacity
                     style={[styles.actionBtn, styles.editBtn]}
@@ -759,15 +767,59 @@ const SuggestedEmployeeScreen = () => {
                 )}
               </>
             ) : (
-              // Applicants Tab Content (Empty State)
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>
-                  {t('No applicants yet')}
-                </Text>
-                <Text style={styles.emptyMessage}>
-                  {t('Candidates who apply will appear here.')}
-                </Text>
-              </View>
+              // Applicants Tab Content
+              <>
+                {applications && applications.length > 0 ? (
+                  applications.map((item: any) => {
+                    const user = item?.user_id || item;
+                    const experience =
+                      user?.experience ||
+                      user?.years_of_experience ||
+                      user?.total_experience ||
+                      0;
+
+                    return (
+                      <Pressable
+                        key={user?._id || item?._id}
+                        onPress={() => handleNavigateToProfile(user)}
+                        style={styles.employeeCard}>
+                        <TouchableOpacity
+                          onPress={() => handleNavigateToProfile(user)}
+                          activeOpacity={0.7}>
+                          <CustomImage
+                            uri={user?.picture || ''}
+                            containerStyle={styles.employeeAvatar}
+                            imageStyle={styles.employeeAvatar}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.employeeInfo}
+                          onPress={() => handleNavigateToProfile(user)}
+                          activeOpacity={0.7}>
+                          <Text style={styles.employeeName}>
+                            {user?.name || 'N/A'}
+                          </Text>
+                          <Text style={styles.employeeRole}>
+                            {user?.responsibility || user?.job_title || 'N/A'}
+                          </Text>
+                          <Text style={styles.employeeExperience}>
+                            {`${experience || 0}y ${t('Experience')}`}
+                          </Text>
+                        </TouchableOpacity>
+                      </Pressable>
+                    );
+                  })
+                ) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyTitle}>
+                      {t('No applicants yet')}
+                    </Text>
+                    <Text style={styles.emptyMessage}>
+                      {t('Candidates who apply will appear here.')}
+                    </Text>
+                  </View>
+                )}
+              </>
             )}
           </ScrollView>
           {activeTab === 'suggested' && (

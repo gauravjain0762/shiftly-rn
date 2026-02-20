@@ -83,7 +83,6 @@ const BannerItem = ({ item }: { item: any }) => {
 
 const JobsScreen = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
   const [activeIndex, setActiveIndex] = useState(0);
   const carouselRef = useRef<any>(null);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
@@ -283,6 +282,7 @@ const JobsScreen = () => {
     }
 
     let sorted = [...allJobs];
+    console.log('🔥 [EMP SORT] sortBy:', sortBy, '| allJobs count:', allJobs.length);
 
     if (sortBy === 'newest') {
       sorted.sort(
@@ -333,6 +333,7 @@ const JobsScreen = () => {
       }
     }
 
+    console.log('🔥 [EMP SORT] sorted first 3:', sorted.slice(0, 3).map(j => ({ _id: j?._id, title: j?.title, salary_from: j?.monthly_salary_from, salary_to: j?.monthly_salary_to, createdAt: j?.createdAt })));
     setSortedJobList(sorted);
   }, [allJobs, sortBy, userLocation]);
 

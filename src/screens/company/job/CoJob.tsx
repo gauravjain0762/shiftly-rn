@@ -78,6 +78,7 @@ const CoJob = () => {
     ...filters,
     page: page,
   };
+  console.log('🔥 [CO FILTER] queryParams sent to API:', queryParams);
 
   const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(queryParams);
   const jobList = data?.data?.jobs || [];
@@ -94,6 +95,13 @@ const CoJob = () => {
 
   useEffect(() => {
     if (data) {
+      console.log('🔥 [CO FILTER] API Response:', {
+        status: data?.status,
+        message: data?.message,
+        jobsCount: jobList?.length,
+        pagination: pagination,
+        filters: filters,
+      });
       const newData = jobList;
       setAllJobs(prev =>
         pagination?.current_page === 1 ? newData : [...prev, ...newData],
@@ -125,14 +133,14 @@ const CoJob = () => {
 
   const handleApplyFilter = async () => {
     try {
-      dispatch(
-        setFilters({
-          location: location,
-          job_types: value,
-          salary_from: range[0],
-          salary_to: range[1],
-        }),
-      );
+      const filterPayload = {
+        location: location,
+        job_types: value,
+        salary_from: range[0],
+        salary_to: range[1],
+      };
+      console.log('🔥 [CO FILTER] handleApplyFilter dispatch:', filterPayload);
+      dispatch(setFilters(filterPayload));
       setIsFilterModalVisible(false);
     } catch (error) {
       errorToast('Failed to apply filter');
