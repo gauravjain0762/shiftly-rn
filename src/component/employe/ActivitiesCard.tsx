@@ -24,7 +24,6 @@ const ActivitiesCard: FC<props> = ({ item }) => {
       skip: !item?.job_id,
     }
   );
-  console.log("🔥🔥🔥 ~ ActivitiesCard ~ jobDetail:", jobDetail)
 
   const getStatusText = () => {
     if (item?.type) {
@@ -35,7 +34,6 @@ const ActivitiesCard: FC<props> = ({ item }) => {
 
   const handleViewPress = () => {
     const interviewLink = item?.interview_link || jobDetail?.data?.interview_link;
-    console.log("🔥🔥🔥 ~ handleViewPress ~ interviewLink:", interviewLink)
 
     if (jobDetail?.data) {
       navigation.navigate(SCREENS.JobInvitationScreen, {

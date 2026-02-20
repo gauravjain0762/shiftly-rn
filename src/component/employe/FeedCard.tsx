@@ -17,7 +17,8 @@ type card = {
   onPressLogo?: () => void;
   isLiked?: boolean;
   item?: any;
-  showMenu?: boolean; // Show three-dot menu for company posts
+  showMenu?: boolean;
+  hideLike?: boolean;
   onScrollToTop?: () => void;
   itemIndex?: number;
 };
@@ -29,6 +30,7 @@ const FeedCard: FC<card> = ({
   isLiked = false,
   item,
   showMenu = false,
+  hideLike = false,
   onScrollToTop,
   itemIndex,
 }) => {
@@ -122,19 +124,21 @@ const FeedCard: FC<card> = ({
               />
             </TouchableOpacity>
           )}
-          <TouchableOpacity
-            onPress={handleLike}
-            style={[styles.actionButton, { flexDirection: 'column', gap: 2, alignItems: 'center' }]}
-          >
-            <CustomImage
-              size={wp(26)}
-              resizeMode={!localLiked ? "cover" : "contain"}
-              source={localLiked ? IMAGES.like : IMAGES.hart}
-            />
-            {likesCount > 0 && (
-              <Text style={styles.likesCountText}>{likesCount}</Text>
-            )}
-          </TouchableOpacity>
+          {!hideLike && (
+            <TouchableOpacity
+              onPress={handleLike}
+              style={[styles.actionButton, { flexDirection: 'row', gap: wp(6), alignItems: 'center' }]}
+            >
+              <CustomImage
+                size={wp(26)}
+                resizeMode={!localLiked ? "cover" : "contain"}
+                source={localLiked ? IMAGES.like : IMAGES.hart}
+              />
+              {likesCount > 0 && (
+                <Text style={styles.likesCountText}>{likesCount}</Text>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -347,8 +351,6 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 15, colors._1F1F1F),
   },
   likesCountText: {
-    ...commonFontStyle(500, 10, colors._6A6A6A),
-    marginTop: -2,
-    marginRight: 0,
+    ...commonFontStyle(600, 16, colors._2F2F2F),
   },
 });

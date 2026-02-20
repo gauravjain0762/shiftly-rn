@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import CustomImage from './CustomImage';
+import { IMAGES } from '../../assets/Images';
 
 type Props = {
   title?: string;
@@ -27,6 +28,7 @@ const CustomPostCard = ({ title, image }: Props) => {
           imageStyle={styles.image}
           resizeMode="cover"
           showDefaultSource={false}
+          source={IMAGES.logoText}
         />
       </View>
       <View style={styles.textContainer}>

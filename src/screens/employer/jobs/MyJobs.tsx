@@ -31,6 +31,7 @@ const MyJobs = () => {
 
     const appliedJobsQuery = useGetAppliedJobsQuery({ page: pageApplied }, { skip: activeTab !== 'Applied Jobs' });
     const interviewsQuery = useGetInterviewsQuery({ page: pageInterviews }, { skip: activeTab !== 'Interviews' });
+    console.log("🔥 ~ MyJobs ~ interviewsQuery:", interviewsQuery)
     const matchedJobsQuery = useGetEmployeeJobsQuery({ type: 'matched', page: pageMatched }, { skip: activeTab !== 'Matched Jobs' });
 
     const getActiveQuery = () => {
@@ -171,113 +172,124 @@ const MyJobs = () => {
 
     const renderJobCard = ({ item }: { item: any }) => {
         const job = item?.job_id || item?.job || item;
-        console.log("🔥 ~ renderJobCard ~ job:", job)
 
         const companyName = job?.company_id?.company_name || job?.company?.name || 'N/A';
         const companyLogo = job?.company_id?.logo || job?.company?.logo;
         const location = (job?.city || job?.country) ? `${job?.city}${job?.city && job?.country ? ', ' : ''}${job?.country}` : (job?.location || job?.company?.location || 'N/A');
 
         return (
-            <View style={styles.card}>
-                <TouchableOpacity
-                    style={styles.header}
-                    onPress={() => {
-                        const companyId = (typeof job?.company_id === 'object' ? job?.company_id?._id : job?.company_id) ||
-                            (typeof job?.company === 'object' ? job?.company?._id || job?.company?.id : job?.company);
+            <TouchableOpacity
+                activeOpacity={activeTab === 'Interviews' ? 0.7 : 1}
+                onPress={() => {
+                    if (activeTab === 'Interviews') {
+                        navigateTo(SCREENS.JobInvitationScreen, {
+                            jobDetail: { job },
+                            link: item?.interview_link,
+                        });
+                    }
+                }}
+            >
+                <View style={styles.card}>
+                    <TouchableOpacity
+                        style={styles.header}
+                        onPress={() => {
+                            const companyId = (typeof job?.company_id === 'object' ? job?.company_id?._id : job?.company_id) ||
+                                (typeof job?.company === 'object' ? job?.company?._id || job?.company?.id : job?.company);
 
-                        if (companyId && typeof companyId === 'string') {
-                            navigateTo(SCREENS.CompanyProfile, { companyId });
-                        }
-                    }}
-                >
-                    <View style={styles.logoContainer}>
-                        {companyLogo ? (
-                            <FastImage
-                                source={{ uri: companyLogo }}
-                                style={{ width: wp(48), height: wp(48), borderRadius: wp(24) }}
-                                resizeMode="cover"
-                            />
-                        ) : (
-                            <Text style={styles.logoText}>{companyName.charAt(0)}</Text>
-                        )}
-                    </View>
-                    <View style={styles.headerInfo}>
-                        <View style={styles.headerTopRow}>
-                            <Text style={styles.companyName} numberOfLines={1}>{companyName}</Text>
-                            <TouchableOpacity onPress={() => handleShare(job)}>
-                                <Image source={IMAGES.share} style={styles.shareIcon} resizeMode="contain" />
+                            if (companyId && typeof companyId === 'string') {
+                                navigateTo(SCREENS.CompanyProfile, { companyId });
+                            }
+                        }}
+                    >
+                        <View style={styles.logoContainer}>
+                            {companyLogo ? (
+                                <FastImage
+                                    source={{ uri: companyLogo }}
+                                    style={{ width: wp(48), height: wp(48), borderRadius: wp(24) }}
+                                    resizeMode="cover"
+                                />
+                            ) : (
+                                <Text style={styles.logoText}>{companyName.charAt(0)}</Text>
+                            )}
+                        </View>
+                        <View style={styles.headerInfo}>
+                            <View style={styles.headerTopRow}>
+                                <Text style={styles.companyName} numberOfLines={1}>{companyName}</Text>
+                                <TouchableOpacity onPress={() => handleShare(job)}>
+                                    <Image source={IMAGES.share} style={styles.shareIcon} resizeMode="contain" />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.location} numberOfLines={1}>{location}</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <View style={styles.body}>
+                        <View style={styles.titleRow}>
+                            <Text style={styles.jobTitle} numberOfLines={1}>{job?.title || 'N/A'}</Text>
+                            <TouchableOpacity
+                                style={styles.viewButton}
+                                onPress={() => navigateTo(SCREENS.JobDetail, { jobId: job?._id, is_applied: activeTab === 'Applied Jobs', hide_apply: activeTab === 'Interviews' })}
+                            >
+                                <Eye size={wp(14)} color={colors.white} />
+                                <Text style={styles.viewText}>View</Text>
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.location} numberOfLines={1}>{location}</Text>
-                    </View>
-                </TouchableOpacity>
 
-                <View style={styles.body}>
-                    <View style={styles.titleRow}>
-                        <Text style={styles.jobTitle} numberOfLines={1}>{job?.title || 'N/A'}</Text>
-                        <TouchableOpacity
-                            style={styles.viewButton}
-                            onPress={() => navigateTo(SCREENS.JobDetail, { jobId: job?._id, is_applied: activeTab === 'Applied Jobs' })}
-                        >
-                            <Eye size={wp(14)} color={colors.white} />
-                            <Text style={styles.viewText}>View</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.descriptionRow}>
-                        <Text style={styles.description} numberOfLines={2}>
-                            {job?.description || 'N/A'}
-                        </Text>
-                        <Text style={styles.timeAgo}>
-                            {getTimeAgo(job?.createdAt) || 'N/A'}
-                        </Text>
-                    </View>
-
-                    {job?.contract_type && (
-                        <View style={[styles.tag, { backgroundColor: '#F0F4F8', alignSelf: 'flex-start' }]}>
-                            <Text style={[styles.tagText, { color: '#0B1C39' }]}>{job?.contract_type}</Text>
+                        <View style={styles.descriptionRow}>
+                            <Text style={styles.description} numberOfLines={2}>
+                                {job?.description || 'N/A'}
+                            </Text>
+                            <Text style={styles.timeAgo}>
+                                {getTimeAgo(job?.createdAt) || 'N/A'}
+                            </Text>
                         </View>
-                    )}
 
-                    <View style={styles.tagsRow}>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ gap: wp(8) }}
-                        >
-                            {(job?.monthly_salary_from || job?.monthly_salary_to) && (
-                                <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
-                                    <View style={styles.salaryRow}>
-                                        {job?.currency?.toUpperCase() === 'AED' ? (
-                                            <Image source={IMAGES.currency} style={styles.currencyImage} />
-                                        ) : (
-                                            <Text style={styles.currencySymbol}>{getCurrencySymbol(job?.currency || 'USD')}</Text>
-                                        )}
+                        {job?.contract_type && (
+                            <View style={[styles.tag, { backgroundColor: '#F0F4F8', alignSelf: 'flex-start' }]}>
+                                <Text style={[styles.tagText, { color: '#0B1C39' }]}>{job?.contract_type}</Text>
+                            </View>
+                        )}
+
+                        <View style={styles.tagsRow}>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ gap: wp(8) }}
+                            >
+                                {(job?.monthly_salary_from || job?.monthly_salary_to) && (
+                                    <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
+                                        <View style={styles.salaryRow}>
+                                            {job?.currency?.toUpperCase() === 'AED' ? (
+                                                <Image source={IMAGES.currency} style={styles.currencyImage} />
+                                            ) : (
+                                                <Text style={styles.currencySymbol}>{getCurrencySymbol(job?.currency || 'USD')}</Text>
+                                            )}
+                                            <Text style={styles.tagText}>
+                                                {`${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+                                {(job?.contract_period || job?.duration) && (
+                                    <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
                                         <Text style={styles.tagText}>
-                                            {`${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`}
+                                            {job?.contract_period || job?.duration}{!(job?.contract_period || job?.duration)?.toLowerCase().includes('contract') ? ' Contract' : ''}
                                         </Text>
                                     </View>
-                                </View>
-                            )}
-                            {(job?.contract_period || job?.duration) && (
-                                <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
-                                    <Text style={styles.tagText}>
-                                        {job?.contract_period || job?.duration}{!(job?.contract_period || job?.duration)?.toLowerCase().includes('contract') ? ' Contract' : ''}
-                                    </Text>
-                                </View>
-                            )}
-                        </ScrollView>
-                    </View>
+                                )}
+                            </ScrollView>
+                        </View>
 
-                    {(activeTab === 'Applied Jobs' || activeTab === 'Interviews') && (
-                        <ImageBackground source={IMAGES.tag} style={styles.tagImage} resizeMode="cover">
-                            <Text style={styles.appliedTagText}>
-                                {activeTab === 'Applied Jobs' ? 'Applied' : (item?.status || 'Invited')}
-                            </Text>
-                        </ImageBackground>
-                    )}
+                        {activeTab === 'Interviews' && (
+                            <ImageBackground source={IMAGES.tag} style={styles.tagImage} resizeMode="cover">
+                                <Text style={styles.appliedTagText}>
+                                    {item?.status || 'Invited'}
+                                </Text>
+                            </ImageBackground>
+                        )}
+                    </View>
                 </View>
-            </View >
+            </TouchableOpacity>
         );
     };
 

@@ -31,7 +31,7 @@ import { SCREENS } from '../../../navigation/screenNames';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
 
 import { useFocusEffect } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
   setCoPostJobSteps,
   setJobFormState,

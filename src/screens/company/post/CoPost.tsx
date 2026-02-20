@@ -95,7 +95,7 @@ const CoPost = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollcontainer}
             ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-            renderItem={({ item }) => <FeedCard item={item} showMenu={true} />}
+            renderItem={({ item }) => <FeedCard item={item} showMenu={true} hideLike={true} />}
             onEndReachedThreshold={0.5}
             onEndReached={handleLoadMore}
             refreshing={isFetching && currentPage === 1}

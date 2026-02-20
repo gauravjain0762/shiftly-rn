@@ -53,7 +53,7 @@ type LogoFile = {
   type: string;
 } | null;
 
-const quickReplies = ['Confirm Interview', 'Send Resume', 'Reschedule'];
+const quickReplies = ['I am interested', 'When is the interview?', 'I am available', 'Can we reschedule?'];
 
 const Chat = () => {
   const { params } = useRoute<any>();
@@ -203,54 +203,57 @@ const Chat = () => {
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
-          {/* Job card */}
-          {showJobCard && (
-            <View style={styles.card}>
-              <Text style={styles.dateText}>
-                You applied to this position on{' '}
-                {formatDateWithoutTime(jobdetail_chatData?.created_at)}
-              </Text>
-              <Text style={styles.jobTitle}>
-                {' '}
-                {`${jobdetail_chatData?.job_title || 'N/A'} - ${jobdetail_chatData?.contract_type || 'N/A'
-                  }`}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  navigateTo(SCREENS.JobDetail, {
-                    jobId:
-                      typeof jobdetail_chatData?.job_id === 'object'
-                        ? jobdetail_chatData?.job_id?._id
-                        : jobdetail_chatData?.job_id,
-                  });
-                }}
-                style={styles.button}>
-                <Text style={styles.buttonText}>View Job</Text>
-              </TouchableOpacity>
-            </View>
-          )}
 
-          {/* Messages */}
-          <FlatList
-            ref={flatListRef}
-            data={chatList}
-            renderItem={({ item }) => (
-              <MessageBubble
-                item={item}
-                recipientName={
-                  chats?.data?.chat?.company_id?.company_name || ''
-                }
-                type={'user'}
-                chatData={chatData}
-              />
+          {/* BODY: job card + messages — flex:1 so bottom items stay pinned */}
+          <View style={{ flex: 1 }}>
+            {/* Job card */}
+            {showJobCard && (
+              <View style={styles.card}>
+                <Text style={styles.dateText}>
+                  You applied to this position on{' '}
+                  {formatDateWithoutTime(jobdetail_chatData?.created_at)}
+                </Text>
+                <Text style={styles.jobTitle}>
+                  {' '}
+                  {`${jobdetail_chatData?.job_title || 'N/A'}`}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigateTo(SCREENS.JobDetail, {
+                      jobId:
+                        typeof jobdetail_chatData?.job_id === 'object'
+                          ? jobdetail_chatData?.job_id?._id
+                          : jobdetail_chatData?.job_id,
+                    });
+                  }}
+                  style={styles.button}>
+                  <Text style={styles.buttonText}>View Job</Text>
+                </TouchableOpacity>
+              </View>
             )}
-            keyExtractor={(item, index) => item._id ?? index.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.chatContent}
-            inverted
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          />
+
+            {/* Messages */}
+            <FlatList
+              ref={flatListRef}
+              data={chatList}
+              renderItem={({ item }) => (
+                <MessageBubble
+                  item={item}
+                  recipientName={
+                    chats?.data?.chat?.company_id?.company_name || ''
+                  }
+                  type={'user'}
+                  chatData={chatData}
+                />
+              )}
+              keyExtractor={(item, index) => item._id ?? index.toString()}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.chatContent}
+              inverted
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+            />
+          </View>
 
           {showDownIcon && (
             <Pressable onPress={handleChatScrollDown} style={styles.downIcon}>
@@ -364,18 +367,19 @@ const styles = StyleSheet.create({
   },
   quickRepliesScrollView: {
     maxHeight: hp(50),
+    flexShrink: 0,
     marginBottom: hp(8),
   },
   quickRepliesContainer: {
     paddingHorizontal: wp(22),
     gap: wp(10),
+    alignItems: 'center',
   },
   quickReplyButton: {
     backgroundColor: colors._0B3970,
     paddingHorizontal: wp(16),
     paddingVertical: hp(10),
     borderRadius: 20,
-    marginRight: wp(10),
     justifyContent: 'center',
     alignItems: 'center',
   },

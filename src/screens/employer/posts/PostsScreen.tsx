@@ -83,7 +83,7 @@ const PostsScreen = () => {
                                 itemIndex={index}
                                 onScrollToTop={() => handleScrollToTop(index)}
                                 onPressLogo={() => {
-                                    navigation.navigate(SCREENS.CompanyProfile, {
+                                    navigation.navigate(SCREENS.ViewCompanyProfile, {
                                         companyId: item?.company_id?._id,
                                     });
                                 }}

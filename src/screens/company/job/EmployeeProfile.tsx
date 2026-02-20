@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Alert
 } from 'react-native';
 import { IMAGES } from '../../../assets/Images';
 import { BackHeader, GradientButton, LinearContainer } from '../../../component';
@@ -46,16 +47,27 @@ const EmployeeProfile = () => {
   const jobId = params?.jobId;
 
   const handleChat = () => {
-    if (!userId) return;
+    console.log("Chat button pressed", { userId, userData, userParam, jobData, jobId });
+    if (!userId) {
+      console.log("No userId, returning");
+      return;
+    }
 
-    // Navigate to chat screen with required params for company chat
-    navigateTo(SCREENS.CoChat, {
-      isFromJobDetail: true,
-      data: {
-        user_id: userData || userParam
-      },
-      mainjob_data: jobData || { _id: jobId }
-    });
+    try {
+      navigateTo(SCREENS.CoStack, {
+        screen: SCREENS.CoChat,
+        params: {
+          isFromJobDetail: true,
+          data: {
+            user_id: userData || userParam
+          },
+          mainjob_data: jobData || { _id: jobId }
+        }
+      });
+    } catch (e: any) {
+      console.error("Navigation failed", e);
+      Alert.alert("Error", `Nav failed: ${e.message}`);
+    }
   };
 
   if (isLoading) {

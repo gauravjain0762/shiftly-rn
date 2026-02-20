@@ -272,9 +272,6 @@ const CoChat = () => {
                   {`${mainjob_data?.title ||
                     jobdetail_chatData?.job_id?.title ||
                     'N/A'
-                    } - ${mainjob_data?.contract_type ||
-                    jobdetail_chatData?.job_id?.contract_type ||
-                    'N/A'
                     }`}
                 </Text>
                 <TouchableOpacity

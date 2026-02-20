@@ -69,6 +69,7 @@ const JobDetail = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
   const is_applied = params?.is_applied;
+  const hide_apply = params?.hide_apply;
 
   const JobDetailsArr = {
     'Job Type': curr_jobdetails?.contract_type,
@@ -523,21 +524,23 @@ ${salary}${shareUrlText}`;
             </View>
 
             <View style={{ height: hp(40) }} />
-            <GradientButton
-              type="Company"
-              disabled={is_applied}
-              onPress={() => {
-                if (is_applied) {
-                  errorToast('You already applied for this job.');
-                  return;
-                }
-                navigateTo(SCREEN_NAMES.ApplyJob, {
-                  data: curr_jobdetails,
-                  resumeList: resumeList,
-                });
-              }}
-              title={is_applied ? 'Applied' : 'Apply Now'}
-            />
+            {!hide_apply && (
+              <GradientButton
+                type="Company"
+                disabled={is_applied}
+                onPress={() => {
+                  if (is_applied) {
+                    errorToast('You already applied for this job.');
+                    return;
+                  }
+                  navigateTo(SCREEN_NAMES.ApplyJob, {
+                    data: curr_jobdetails,
+                    resumeList: resumeList,
+                  });
+                }}
+                title={is_applied ? 'Applied' : 'Apply Now'}
+              />
+            )}
 
             <TouchableOpacity
               style={styles.learnMoreContainer}

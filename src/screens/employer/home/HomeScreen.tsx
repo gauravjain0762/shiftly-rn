@@ -104,13 +104,15 @@ const HomeScreen = () => {
         contentContainerStyle={styles.contentContainer}
         keyExtractor={(item, index) => item?._id || index.toString()}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <RecentJobCard
-            item={item}
-            onPress={() => navigateTo(SCREENS.JobDetail, { role: 'employee', jobId: item?._id })}
-            onPressView={() => navigateTo(SCREENS.JobDetail, { role: 'employee', jobId: item?._id })}
-          />
-        )}
+        renderItem={({ item }) => {
+          return (
+            <RecentJobCard
+              item={item}
+              onPress={() => navigateTo(SCREENS.JobDetail, { role: 'employee', jobId: item?._id, is_applied: item?.is_applied })}
+              onPressView={() => navigateTo(SCREENS.JobDetail, { role: 'employee', jobId: item?._id, is_applied: item?.is_applied })}
+            />
+          );
+        }}
         ListHeaderComponent={renderHeader}
         refreshing={(isFetchingJobs || isLoadingDashboard) && currentPage === 1}
         onRefresh={handleRefresh}

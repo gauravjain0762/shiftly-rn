@@ -161,7 +161,7 @@ const JobPreview = () => {
             experiences: experience?.value || '',
             certifications: certification?.value || '',
             languages: language?.value || '',
-            job_requirements: Array.isArray(requirements) ? requirements.filter(Boolean).join(',') : '',
+            job_requirements: Array.isArray(other_requirements) ? other_requirements.filter(Boolean).join(',') : '',
         };
         console.log(">>>>>>>>>>> ~ handlePostJob ~ params:", params)
 

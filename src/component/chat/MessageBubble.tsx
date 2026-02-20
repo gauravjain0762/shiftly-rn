@@ -112,7 +112,6 @@ const MessageBubble: React.FC<{
               { alignSelf: isMyMessage ? 'flex-end' : 'flex-start' },
             ]}>
             {isDocument ? (
-              // Document attachment
               <TouchableOpacity onPress={openFile}>
                 <FastImage
                   source={IMAGES.document}

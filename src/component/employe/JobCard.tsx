@@ -67,7 +67,7 @@ const JobCard: FC<props> = ({
               (typeof item?.company === 'object' ? item?.company?._id || item?.company?.id : item?.company);
 
             if (companyId && typeof companyId === 'string') {
-              navigateTo(SCREENS.CompanyProfile, { companyId });
+              navigateTo(SCREENS.ViewCompanyProfile, { companyId });
             }
           }}
           style={styles.logo}

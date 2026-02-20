@@ -3,70 +3,69 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
   TouchableOpacity,
   Image,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import {IMAGES} from '../../assets/Images';
-import {commonFontStyle} from '../../theme/fonts';
-import {colors} from '../../theme/colors';
-import {useTranslation} from 'react-i18next';
-import {navigateTo, resetNavigation} from '../../utils/commonFunction';
-import {SCREENS} from '../../navigation/screenNames';
+import Modal from 'react-native-modal';
+import { IMAGES } from '../../assets/Images';
+import { commonFontStyle } from '../../theme/fonts';
+import { colors } from '../../theme/colors';
+import { useTranslation } from 'react-i18next';
+import { navigateTo, resetNavigation } from '../../utils/commonFunction';
+import { SCREENS } from '../../navigation/screenNames';
 
-const SuccessffullyModal = ({visible, name = 'William', onClose}) => {
-  const {t, i18n} = useTranslation();
+const SuccessffullyModal = ({ visible, name = 'William', onClose }) => {
+  const { t, i18n } = useTranslation();
 
   return (
     <Modal
-      animationType="slide"
-      transparent
-      visible={visible}
-      onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          <Image
-            source={IMAGES.welcome_icon}
-            style={{
-              width: 90,
-              height: 90,
-              resizeMode: 'contain',
-              alignSelf: 'center',
-            }}
-          />
+      isVisible={visible}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      style={styles.modal}
+      useNativeDriver>
+      <View style={styles.modalContent}>
+        <Image
+          source={IMAGES.welcome_icon}
+          style={{
+            width: 90,
+            height: 90,
+            resizeMode: 'contain',
+            alignSelf: 'center',
+          }}
+        />
 
-          <Text style={styles.messageText}>
-            {t('Great job! Your profile is ready — let’s find you a role.')}
-          </Text>
+        <Text style={styles.messageText}>
+          {t('Great job! Your profile is ready — let’s find you a role.')}
+        </Text>
 
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => {
-              onClose();
-              resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
-            }}>
-            <Text style={styles.primaryButtonText}>{t('Explore Jobs')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => {
-              onClose();
-              navigateTo(SCREENS.TabNavigator);
-            }}>
-            <Text style={styles.secondaryButtonText}>{t('Home')}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => {
+            onClose();
+            resetNavigation(SCREENS.TabNavigator, SCREENS.JobsScreen);
+          }}>
+          <Text style={styles.primaryButtonText}>{t('Explore Jobs')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => {
+            onClose();
+            navigateTo(SCREENS.TabNavigator);
+          }}>
+          <Text style={styles.secondaryButtonText}>{t('Home')}</Text>
+        </TouchableOpacity>
       </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
+  modal: {
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    margin: 0,
   },
   modalContent: {
     backgroundColor: colors._F7F7F7,
