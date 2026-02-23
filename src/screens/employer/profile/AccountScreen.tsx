@@ -22,10 +22,7 @@ import {
   successToast,
 } from '../../../utils/commonFunction';
 import {
-  clearEmployeeAccount,
   logouts,
-  setAuthToken,
-  setCompanyRegisterData,
 } from '../../../features/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearAsync } from '../../../utils/asyncStorage';
@@ -33,7 +30,7 @@ import {
   useEmployeeDeleteAccountMutation,
   useEmployeeLogoutMutation,
 } from '../../../api/authApi';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, resetStore, RootState } from '../../../store';
 import LanguageModal from '../../../component/common/LanguageModel';
 import CustomImage from '../../../component/common/CustomImage';
 
@@ -169,9 +166,9 @@ const AccountScreen = () => {
     console.log("🔥 ~ handleLogout ~ res:", res)
     if (res.status) {
       successToast(res.message);
-      dispatch(setAuthToken(''));
-      dispatch(clearEmployeeAccount());
+      dispatch(logouts());
       await clearAsync();
+      await resetStore();
       resetNavigation(SCREENS.SelectRollScreen);
       setPopupVisible(false);
     }
@@ -182,12 +179,10 @@ const AccountScreen = () => {
       const res = await employeeDeleteAccount({}).unwrap() as any;
       if (res?.status) {
         successToast(res?.message);
-        resetNavigation(SCREEN_NAMES.SelectRollScreen);
-        dispatch(setAuthToken(''));
-        dispatch(setCompanyRegisterData({}));
-        dispatch(clearEmployeeAccount());
         dispatch(logouts());
         await clearAsync();
+        await resetStore();
+        resetNavigation(SCREEN_NAMES.SelectRollScreen);
       }
     } catch (error) {
       console.error('Error deleting account: ', error);

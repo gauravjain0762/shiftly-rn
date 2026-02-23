@@ -21,6 +21,7 @@ type card = {
   hideLike?: boolean;
   onScrollToTop?: () => void;
   itemIndex?: number;
+  currentCompanyId?: string;
 };
 
 const FeedCard: FC<card> = ({
@@ -33,6 +34,7 @@ const FeedCard: FC<card> = ({
   hideLike = false,
   onScrollToTop,
   itemIndex,
+  currentCompanyId,
 }) => {
   const { t } = useTranslation();
   const hasImage = item?.images?.length > 0;
@@ -108,7 +110,7 @@ const FeedCard: FC<card> = ({
 
         {/* Action buttons container */}
         <View style={styles.headerActions}>
-          {showMenu && (
+          {showMenu && currentCompanyId && currentCompanyId === item?.company_id?._id && (
             <TouchableOpacity
               onLayout={(event) => {
                 event.target.measureInWindow((x: number, y: number, width: number, height: number) => {

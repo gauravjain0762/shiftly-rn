@@ -3,15 +3,15 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   FlatList,
   Image,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ScrollView,
+  Platform,
 } from 'react-native';
+import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -230,92 +230,93 @@ const CoChat = () => {
   return (
     <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
       <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
-          {/* HEADER */}
-          <View style={styles.container}>
-            <View style={styles.headerRow}>
-              <TouchableOpacity onPress={() => navigationRef.goBack()}>
-                <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
-              </TouchableOpacity>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.company}>
-                  {chats?.data?.chat?.user_id?.name ||
-                    jobdetail_chatData?.user_id?.name}
-                </Text>
-              </View>
-              <CustomImage
-                onPress={() => {
-                  setShowJobCard(prev => !prev);
-                }}
-                size={wp(24)}
-                tintColor={colors.black}
-                source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
-              />
+        {/* HEADER */}
+        <View style={styles.container}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => navigationRef.goBack()}>
+              <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.company}>
+                {chats?.data?.chat?.user_id?.name ||
+                  jobdetail_chatData?.user_id?.name}
+              </Text>
             </View>
-          </View>
-
-          {/* BODY */}
-          <View style={{ flex: 1 }}>
-            {showJobCard && (
-              <View style={styles.card}>
-                <Text style={styles.dateText}>
-                  {chats?.data?.chat?.user_id?.name ||
-                    jobdetail_chatData?.user_id?.name ||
-                    'Candidate'}{' '}
-                  applied to this position on{' '}
-                  {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
-                </Text>
-                <Text style={styles.jobTitle}>
-                  {`${mainjob_data?.title ||
-                    jobdetail_chatData?.job_id?.title ||
-                    'N/A'
-                    }`}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (isFromJobDetail) {
-                      goBack();
-                    } else {
-                      navigateTo(SCREENS.CoJobDetails, {
-                        _id: jobdetail_chatData?.job_id?._id,
-                      });
-                    }
-                  }}
-                  style={styles.button}>
-                  <Text style={styles.buttonText}>View Job</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <FlatList
-              ref={flatListRef}
-              data={chatList}
-              renderItem={({ item }) => (
-                <MessageBubble
-                  item={item as any}
-                  type={'company'}
-                  recipientName={
-                    chats?.data?.chat?.user_id?.name ||
-                    jobdetail_chatData?.user_id?.name
-                  }
-                  chatData={{
-                    company_id: {
-                      logo: jobdetail_chatData?.user_id?.picture // Use user picture as avatar for company view
-                    }
-                  }}
-                />
-              )}
-              keyExtractor={(item, index) => item._id ?? index.toString()}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.chatContent}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-              inverted
+            <CustomImage
+              onPress={() => {
+                setShowJobCard(prev => !prev);
+              }}
+              size={wp(24)}
+              tintColor={colors.black}
+              source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
             />
           </View>
+        </View>
+
+        {showJobCard && (
+          <View style={styles.card}>
+            <Text style={styles.dateText}>
+              {chats?.data?.chat?.user_id?.name ||
+                jobdetail_chatData?.user_id?.name ||
+                'Candidate'}{' '}
+              applied to this position on{' '}
+              {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
+            </Text>
+            <Text style={styles.jobTitle}>
+              {`${mainjob_data?.title ||
+                jobdetail_chatData?.job_id?.title ||
+                'N/A'
+                }`}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                if (isFromJobDetail) {
+                  goBack();
+                } else {
+                  navigateTo(SCREENS.JobDetail, {
+                    jobId:
+                      typeof jobdetail_chatData?.job_id === 'object'
+                        ? jobdetail_chatData?.job_id?._id
+                        : jobdetail_chatData?.job_id,
+                    hide_apply: true,
+                  });
+                }
+              }}
+              style={styles.button}>
+              <Text style={styles.buttonText}>View Job</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          {/* BODY */}
+          <FlatList
+            ref={flatListRef}
+            data={chatList}
+            renderItem={({ item }) => (
+              <MessageBubble
+                item={item as any}
+                type={'company'}
+                recipientName={
+                  chats?.data?.chat?.user_id?.name ||
+                  jobdetail_chatData?.user_id?.name
+                }
+                chatData={{
+                  company_id: {
+                    logo: jobdetail_chatData?.user_id?.picture
+                  }
+                }}
+              />
+            )}
+            keyExtractor={(item, index) => item._id ?? index.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.chatContent}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            inverted
+          />
 
           {showDownIcon && (
             <Pressable onPress={handleChatScrollDown} style={styles.downIcon}>
@@ -326,8 +327,6 @@ const CoChat = () => {
               />
             </Pressable>
           )}
-
-          {/* INPUT */}
 
           {/* Quick Replies */}
           <ScrollView

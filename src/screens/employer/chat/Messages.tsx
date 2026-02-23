@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -10,7 +9,7 @@ import {
 } from 'react-native';
 
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
-import { useEmployeeGetChatsQuery } from '../../../api/dashboardApi';
+import { useEmployeeGetChatsQuery, useLazyEmployeeGetChatsQuery } from '../../../api/dashboardApi';
 import { BackHeader, LinearContainer, SearchBar } from '../../../component';
 import NoDataText from '../../../component/common/NoDataText';
 import { colors } from '../../../theme/colors';
@@ -21,11 +20,55 @@ import FastImage from 'react-native-fast-image';
 
 const Messages = () => {
   const [value, setValue] = useState('');
-  const { data: chatsData, isLoading, refetch } = useEmployeeGetChatsQuery({});
+  const { data: chatsData, isLoading, refetch } = useEmployeeGetChatsQuery({ page: 1 });
   const chats: any[] = chatsData?.data?.chats || chatsData?.data || [];
-  console.log("🔥 ~ Messages ~ chats:", chats)
 
-  const filteredChats = chats.filter((item: any) => {
+  const [fetchMoreChats, { isFetching }] = useLazyEmployeeGetChatsQuery();
+  const [extraChats, setExtraChats] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (chatsData?.data) {
+      const pagination = chatsData?.data?.pagination;
+      if (pagination) {
+        setHasMore(pagination.current_page < pagination.total_pages);
+      } else {
+        setHasMore((chats?.length || 0) >= 10);
+      }
+    }
+  }, [chatsData, chats]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasMore || isFetching) return;
+    
+    const nextPage = currentPage + 1;
+    try {
+      const result = await fetchMoreChats({ page: nextPage }).unwrap();
+      const newChats = result?.data?.chats || result?.data || [];
+      
+      if (newChats.length > 0) {
+        setExtraChats(prev => [...prev, ...newChats]);
+        setCurrentPage(nextPage);
+        
+        const pagination = result?.data?.pagination;
+        if (pagination) {
+          setHasMore(pagination.current_page < pagination.total_pages);
+        } else {
+          setHasMore(newChats.length >= 10);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.log('Error loading more chats:', error);
+      setHasMore(false);
+    }
+  }, [hasMore, isFetching, currentPage, fetchMoreChats]);
+
+  const displayChats = [...chats, ...extraChats];
+
+  const filteredChats = displayChats.filter((item: any) => {
     const companyName = item?.company_id?.company_name || item?.company_name || '';
     return companyName.toLowerCase().includes(value.toLowerCase());
   });
@@ -127,6 +170,17 @@ const Messages = () => {
               textStyle={{ color: colors._0B3970 }}
             />
           )}
+          ListFooterComponent={
+            isFetching && !value ? (
+              <ActivityIndicator
+                size="large"
+                color={colors._0B3970}
+                style={{marginVertical: hp(20)}}
+              />
+            ) : null
+          }
+          onEndReached={!value ? handleLoadMore : undefined}
+          onEndReachedThreshold={0.5}
         />
       )}
     </LinearContainer>

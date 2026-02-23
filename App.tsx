@@ -2,6 +2,7 @@
 import {View, Animated, Easing, LogBox} from 'react-native';
 import React, {useRef} from 'react';
 import {Provider} from 'react-redux';
+import {KeyboardProvider} from 'react-native-keyboard-controller';
 // import store from './src/redux';
 import Toast from 'react-native-toast-message';
 import RootContainer from './src/navigation/RootContainer';
@@ -40,18 +41,20 @@ const App = ({}: Props) => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <View style={{flex: 1}}>
-          <RootContainer />
-          <Toast
-            config={toastConfig}
-            position="bottom"
-            topOffset={0}
-            visibilityTime={2000}
-            onShow={() => {
-              startLineAnimation(); // Reset and trigger the animation
-            }}
-          />
-        </View>
+        <KeyboardProvider>
+          <View style={{flex: 1}}>
+            <RootContainer />
+            <Toast
+              config={toastConfig}
+              position="bottom"
+              topOffset={0}
+              visibilityTime={2000}
+              onShow={() => {
+                startLineAnimation();
+              }}
+            />
+          </View>
+        </KeyboardProvider>
       </PersistGate>
     </Provider>
   );

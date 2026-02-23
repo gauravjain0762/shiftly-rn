@@ -37,7 +37,7 @@ export const getCurrencySymbol = (currencyCode: string): string => {
     BDT: '৳',
 
     // Middle East
-    AED: 'د.إ',
+    AED: 'AED',
     SAR: '﷼',
     QAR: 'QAR',
     KWD: 'KD',

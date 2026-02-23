@@ -98,10 +98,15 @@ export const dashboardApi = createApi({
       }),
     }),
     getSuggestedEmployees: builder.query<any, any>({
-      query: jobId => {
-        const queryParam = jobId ? `?job_id=${jobId}` : '';
+      query: (params) => {
+        const jobId = typeof params === 'string' ? params : params?.job_id;
+        const page = typeof params === 'object' ? params?.page : undefined;
+        const tab = typeof params === 'object' ? params?.tab : undefined;
+        let queryString = jobId ? `?job_id=${jobId}` : '';
+        if (page) queryString += `${queryString ? '&' : '?'}page=${page}`;
+        if (tab) queryString += `${queryString ? '&' : '?'}tab=${tab}`;
         return {
-          url: `${API.getSuggestedEmployees}${queryParam}`,
+          url: `${API.getSuggestedEmployees}${queryString}`,
           method: HTTP_METHOD.GET,
         };
       },
@@ -115,9 +120,10 @@ export const dashboardApi = createApi({
     }),
 
     getCompanyPosts: builder.query<any, any>({
-      query: () => ({
+      query: (params) => ({
         url: API.getCompanyPosts,
         method: HTTP_METHOD.GET,
+        params: params,
         skipLoader: true,
       }),
       providesTags: ['GetPost', 'GetCompanyProfile'],
@@ -355,9 +361,10 @@ export const dashboardApi = createApi({
       },
     }),
     getCompanyChats: builder.query<any, any>({
-      query: () => ({
+      query: (params) => ({
         url: API.getCompanyChats,
         method: HTTP_METHOD.GET,
+        params: params,
         skipLoader: true,
       }),
       providesTags: ['GetCompanyChats'],
@@ -670,9 +677,10 @@ export const dashboardApi = createApi({
       },
     }),
     getFavouritesJob: builder.query<any, any>({
-      query: () => ({
+      query: (params) => ({
         url: API.getFavouritesJob,
         method: HTTP_METHOD.GET,
+        params: params,
         skipLoader: true,
       }),
       providesTags: ['GetFavouriteJob'],
@@ -814,9 +822,10 @@ export const dashboardApi = createApi({
       }),
     }),
     employeeGetChats: builder.query<any, any>({
-      query: () => ({
+      query: (params) => ({
         url: API.employeeGetChats,
         method: HTTP_METHOD.GET,
+        params: params,
         skipLoader: true,
       }),
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
@@ -920,10 +929,11 @@ export const dashboardApi = createApi({
       },
     }),
     getActivities: builder.query<any, any>({
-      query: () => {
+      query: (params) => {
         return {
           url: API.getActivities,
           method: HTTP_METHOD.GET,
+          params: params,
           skipLoader: true,
         };
       },
@@ -1044,6 +1054,15 @@ export const {
   useGetEmployeeDashboardQuery,
   useGetAppDataQuery,
   useGetCompanyProfileByIdQuery,
+  useLazyGetCompanyProfileByIdQuery,
+  useLazyGetCompanyJobsQuery,
+  useLazyGetCompanyPostsQuery,
+  useLazyGetSuggestedEmployeesQuery,
+  useLazyGetCompanyJobDetailsQuery,
+  useLazyGetFavouritesJobQuery,
+  useLazyGetActivitiesQuery,
+  useLazyEmployeeGetChatsQuery,
+  useLazyGetCompanyChatsQuery,
   useCloseCompanyJobMutation,
   useGetEssentialBenefitsQuery,
   useGetEducationsQuery,

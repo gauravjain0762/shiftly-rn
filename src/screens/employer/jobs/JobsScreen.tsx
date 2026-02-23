@@ -127,13 +127,13 @@ const JobsScreen = () => {
   const [sortedJobList, setSortedJobList] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
+  console.log("🔥 ~ JobsScreen ~ allJobs:", allJobs)
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMorePages, setHasMorePages] = useState(true);
   const lastLoadedPageRef = useRef(0);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const isFilterAppliedRef = useRef(false);
 
-  // Get user location for closest location sorting
   useEffect(() => {
     const fetchUserLocation = async () => {
       try {
@@ -146,13 +146,11 @@ const JobsScreen = () => {
           return;
         }
 
-        // Priority 2: Check AsyncStorage
         const location = await getAsyncUserLocation();
-        if (location?.lat && location?.lng) {
-          setUserLocation({
-            lat: location.lat,
-            lng: location.lng,
-          });
+        const lat = location?.lat ?? location?.latitude;
+        const lng = location?.lng ?? location?.longitude;
+        if (lat && lng) {
+          setUserLocation({ lat, lng });
         }
       } catch (error) {
         console.log('Error fetching user location:', error);
@@ -308,7 +306,6 @@ const JobsScreen = () => {
           const bLat = b?.lat || b?.location?.lat;
           const bLng = b?.lng || b?.location?.lng;
 
-          // If job doesn't have coordinates, put it at the end
           if (!aLat || !aLng) return 1;
           if (!bLat || !bLng) return -1;
 
@@ -328,7 +325,6 @@ const JobsScreen = () => {
           return distanceA - distanceB;
         });
       } else {
-        // If no user location, don't sort by distance
         console.log('User location not available for closest location sorting');
       }
     }
@@ -360,7 +356,6 @@ const JobsScreen = () => {
       page: 1,
     };
 
-    // Only add location if it's provided and not empty
     if (newFilters.location && newFilters.location.trim() !== '') {
       newQueryParams.location = newFilters.location;
     }
@@ -475,7 +470,6 @@ const JobsScreen = () => {
       page: nextPage,
     };
 
-    // Only add location if it's provided and not empty
     if (filters.location && filters.location.trim() !== '') {
       queryParams.location = filters.location;
     }

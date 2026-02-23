@@ -2,15 +2,15 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ScrollView,
+  Platform,
 } from 'react-native';
+import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
@@ -198,62 +198,57 @@ const Chat = () => {
           />
         </View>
 
+        {/* Job card */}
+        {showJobCard && (
+          <View style={styles.card}>
+            <Text style={styles.dateText}>
+              You applied to this position on{' '}
+              {formatDateWithoutTime(jobdetail_chatData?.created_at)}
+            </Text>
+            <Text style={styles.jobTitle}>
+              {' '}
+              {`${jobdetail_chatData?.job_title || 'N/A'}`}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigateTo(SCREENS.JobDetail, {
+                  jobId:
+                    typeof jobdetail_chatData?.job_id === 'object'
+                      ? jobdetail_chatData?.job_id?._id
+                      : jobdetail_chatData?.job_id,
+                });
+              }}
+              style={styles.button}>
+              <Text style={styles.buttonText}>View Job</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Chat body */}
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
-
-          {/* BODY: job card + messages — flex:1 so bottom items stay pinned */}
-          <View style={{ flex: 1 }}>
-            {/* Job card */}
-            {showJobCard && (
-              <View style={styles.card}>
-                <Text style={styles.dateText}>
-                  You applied to this position on{' '}
-                  {formatDateWithoutTime(jobdetail_chatData?.created_at)}
-                </Text>
-                <Text style={styles.jobTitle}>
-                  {' '}
-                  {`${jobdetail_chatData?.job_title || 'N/A'}`}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigateTo(SCREENS.JobDetail, {
-                      jobId:
-                        typeof jobdetail_chatData?.job_id === 'object'
-                          ? jobdetail_chatData?.job_id?._id
-                          : jobdetail_chatData?.job_id,
-                    });
-                  }}
-                  style={styles.button}>
-                  <Text style={styles.buttonText}>View Job</Text>
-                </TouchableOpacity>
-              </View>
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          {/* Messages */}
+          <FlatList
+            ref={flatListRef}
+            data={chatList}
+            renderItem={({ item }) => (
+              <MessageBubble
+                item={item}
+                recipientName={
+                  chats?.data?.chat?.company_id?.company_name || ''
+                }
+                type={'user'}
+                chatData={chatData}
+              />
             )}
-
-            {/* Messages */}
-            <FlatList
-              ref={flatListRef}
-              data={chatList}
-              renderItem={({ item }) => (
-                <MessageBubble
-                  item={item}
-                  recipientName={
-                    chats?.data?.chat?.company_id?.company_name || ''
-                  }
-                  type={'user'}
-                  chatData={chatData}
-                />
-              )}
-              keyExtractor={(item, index) => item._id ?? index.toString()}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.chatContent}
-              inverted
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-            />
-          </View>
+            keyExtractor={(item, index) => item._id ?? index.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.chatContent}
+            inverted
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          />
 
           {showDownIcon && (
             <Pressable onPress={handleChatScrollDown} style={styles.downIcon}>

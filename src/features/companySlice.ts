@@ -60,7 +60,7 @@ interface CompanyState {
 }
 
 interface FiltersState {
-  job_types: string | null;
+  contract_types: string[];
   salary_from: number;
   salary_to: number;
   location: string;
@@ -111,7 +111,7 @@ const initialState: CompanyState = {
     postId: '',
   },
   filters: {
-    job_types: null,
+    contract_types: [],
     salary_from: 1000,
     salary_to: 50000,
     location: '',

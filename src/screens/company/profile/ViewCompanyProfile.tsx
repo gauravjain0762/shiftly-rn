@@ -18,7 +18,7 @@ import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
-import { useGetCompanyProfileByIdQuery } from '../../../api/dashboardApi';
+import { useGetCompanyProfileByIdQuery, useLazyGetCompanyProfileByIdQuery } from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -53,6 +53,14 @@ const ViewCompanyProfile = () => {
     const [postsFetched, setPostsFetched] = useState(false);
     const [jobsFetched, setJobsFetched] = useState(false);
 
+    // Extra pages (page 2+) accumulated from lazy load-more calls
+    const [extraPosts, setExtraPosts] = useState<any[]>([]);
+    const [extraJobs, setExtraJobs] = useState<any[]>([]);
+    const [postsPage, setPostsPage] = useState(1);
+    const [jobsPage, setJobsPage] = useState(1);
+    const [postsHasMore, setPostsHasMore] = useState(false);
+    const [jobsHasMore, setJobsHasMore] = useState(false);
+
     const queryTab = useMemo(() => {
         if (selectedTabIndex === 0) return 'info';
         if (selectedTabIndex === 1) return 'posts';
@@ -66,37 +74,97 @@ const ViewCompanyProfile = () => {
             { skip: !companyId }
         );
 
+    // Lazy query used only for loading additional pages (page 2+)
+    const [fetchMorePages, { isFetching: isFetchingMore }] = useLazyGetCompanyProfileByIdQuery();
+
     const linearColors = useMemo(() => [colors.white, colors.white], []);
     const safeAreaProps = useMemo(() => ({ edges: ['bottom'] as const }), []);
+
+    // Reset extra-page buffers whenever the tab changes (fresh start for load-more)
+    useEffect(() => {
+        setExtraPosts([]);
+        setExtraJobs([]);
+        setPostsPage(1);
+        setJobsPage(1);
+    }, [selectedTabIndex]);
 
     useEffect(() => {
         if (!companyData?.status) return;
 
         if (companyData?.data?.company) {
-            // Check if company object is effectively different before dispatching
-            // JSON stringify is a quick way to check deep equality for simple objects without lodash, 
-            // but might be expensive. For now, rely on ID and maybe a key field if ID isn't enough, 
-            // OR trust the user's claim that it's reloading, implying state update.
-            // Let's Log it.
             if (!companyInfo || companyInfo._id !== companyData.data.company._id) {
-                console.log('Dispatching setViewCompanyProfileInfo - ID mismatch or null');
                 dispatch(setViewCompanyProfileInfo(companyData.data.company));
-            } else {
-                console.log('Skipping setViewCompanyProfileInfo - Data matches');
             }
         }
 
         const tabData = companyData?.data?.tab_data;
+        const pagination = companyData?.data?.pagination;
         if (Array.isArray(tabData)) {
             if (selectedTabIndex === 1) {
                 setCompanyPosts(tabData);
+                setExtraPosts([]);
+                const hasMore = pagination
+                    ? pagination.current_page < pagination.total_pages
+                    : tabData.length >= 10;
+                setPostsHasMore(hasMore);
+                setPostsPage(1);
                 setPostsFetched(true);
             } else if (selectedTabIndex === 2) {
                 setCompanyJobs(tabData);
+                setExtraJobs([]);
+                const hasMore = pagination
+                    ? pagination.current_page < pagination.total_pages
+                    : tabData.length >= 10;
+                setJobsHasMore(hasMore);
+                setJobsPage(1);
                 setJobsFetched(true);
             }
         }
     }, [companyData, companyInfo, selectedTabIndex, dispatch]);
+
+    const handleLoadMorePosts = useCallback(async () => {
+        if (!postsHasMore || isFetchingMore) return;
+        const nextPage = postsPage + 1;
+        try {
+            const result = await fetchMorePages({
+                company_id: companyId,
+                tab: 'posts',
+                page: nextPage,
+            }).unwrap();
+            if (result?.status && Array.isArray(result?.data?.tab_data)) {
+                setExtraPosts(prev => [...prev, ...result.data.tab_data]);
+                const pagination = result?.data?.pagination;
+                setPostsHasMore(
+                    pagination
+                        ? pagination.current_page < pagination.total_pages
+                        : result.data.tab_data.length >= 10,
+                );
+                setPostsPage(nextPage);
+            }
+        } catch (_) {}
+    }, [postsHasMore, isFetchingMore, postsPage, companyId, fetchMorePages]);
+
+    const handleLoadMoreJobs = useCallback(async () => {
+        if (!jobsHasMore || isFetchingMore) return;
+        const nextPage = jobsPage + 1;
+        try {
+            const result = await fetchMorePages({
+                company_id: companyId,
+                tab: 'jobs',
+                page: nextPage,
+            }).unwrap();
+            if (result?.status && Array.isArray(result?.data?.tab_data)) {
+                setExtraJobs(prev => [...prev, ...result.data.tab_data]);
+                const pagination = result?.data?.pagination;
+                setJobsHasMore(
+                    pagination
+                        ? pagination.current_page < pagination.total_pages
+                        : result.data.tab_data.length >= 10,
+                );
+                setJobsPage(nextPage);
+            }
+        } catch (_) {}
+    }, [jobsHasMore, isFetchingMore, jobsPage, companyId, fetchMorePages]);
 
     const displayProfile = companyInfo || companyData?.data?.company || null;
 
@@ -149,8 +217,8 @@ const ViewCompanyProfile = () => {
 
     const shouldShowCoverLoader = isCompanyLoading && !companyInfo;
 
-    const displayPosts = Array.isArray(companyPosts) ? companyPosts : [];
-    const displayJobs = Array.isArray(companyJobs) ? companyJobs : [];
+    const displayPosts = [...(Array.isArray(companyPosts) ? companyPosts : []), ...extraPosts];
+    const displayJobs = [...(Array.isArray(companyJobs) ? companyJobs : []), ...extraJobs];
 
     // Debug render counts
     const renderCount = useRef(0);
@@ -222,15 +290,26 @@ const ViewCompanyProfile = () => {
             );
         }
 
-        return displayJobs?.map((item: any, index: number) => {
-            if (!item) return null;
-            return (
-                <View style={{ marginBottom: hp(15) }} key={`job-${item.id || index}`}>
-                    <MyJobCard item={item} onPressShare={() => { }} />
-                </View>
-            );
-        });
-    }, [selectedTabIndex, displayJobs, isCompanyLoading, jobsFetched]);
+        return (
+            <>
+                {displayJobs.map((item: any, index: number) => {
+                    if (!item) return null;
+                    return (
+                        <View style={{ marginBottom: hp(15) }} key={`job-${item._id || item.id || index}`}>
+                            <MyJobCard item={item} onPressShare={() => { }} />
+                        </View>
+                    );
+                })}
+                {isFetchingMore && (
+                    <ActivityIndicator
+                        size="large"
+                        color={colors._0B3970}
+                        style={{marginVertical: hp(20)}}
+                    />
+                )}
+            </>
+        );
+    }, [selectedTabIndex, displayJobs, isCompanyLoading, jobsFetched, jobsHasMore, isFetchingMore, handleLoadMoreJobs]);
 
     const hasValidLogo = useMemo(() => {
         const logo = displayProfile?.logo;
@@ -340,7 +419,19 @@ const ViewCompanyProfile = () => {
                     paddingBottom: hp(40),
                     backgroundColor: colors.white,
                 }}
-                showsVerticalScrollIndicator={false}>
+                showsVerticalScrollIndicator={false}
+                onScroll={({ nativeEvent }) => {
+                    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+                    const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
+                    if (isCloseToBottom) {
+                        if (selectedTabIndex === 0 && postsHasMore && !isFetchingMore) {
+                            handleLoadMorePosts();
+                        } else if (selectedTabIndex === 1 && jobsHasMore && !isFetchingMore) {
+                            handleLoadMoreJobs();
+                        }
+                    }
+                }}
+                scrollEventThrottle={400}>
                 <View style={styles.container}>
                     <View style={{ width: '100%', height: 250 }}>
                         {coverImageContent}
@@ -427,23 +518,32 @@ const ViewCompanyProfile = () => {
                                 {isCompanyLoading && !postsFetched ? (
                                     <PostGridSkeleton />
                                 ) : displayPosts && displayPosts.length > 0 ? (
-                                    <View
-                                        style={{
-                                            flexDirection: 'row',
-                                            flexWrap: 'wrap',
-                                            justifyContent: 'space-between',
-                                        }}>
-                                        {displayPosts.map((item: any, index: number) => (
-                                            <View
-                                                key={`post-${item.id || index}`}
-                                                style={{ width: '48%', marginBottom: hp(10) }}>
-                                                <CustomPostCard
-                                                    title={item?.title}
-                                                    image={item?.images}
-                                                />
-                                            </View>
-                                        ))}
-                                    </View>
+                                    <>
+                                        <View
+                                            style={{
+                                                flexDirection: 'row',
+                                                flexWrap: 'wrap',
+                                                justifyContent: 'space-between',
+                                            }}>
+                                            {displayPosts.map((item: any, index: number) => (
+                                                <View
+                                                    key={`post-${item._id || item.id || index}`}
+                                                    style={{ width: '48%', marginBottom: hp(10) }}>
+                                                    <CustomPostCard
+                                                        title={item?.title}
+                                                        image={item?.images}
+                                                    />
+                                                </View>
+                                            ))}
+                                        </View>
+                                        {isFetchingMore && (
+                                            <ActivityIndicator
+                                                size="large"
+                                                color={colors._0B3970}
+                                                style={{marginVertical: hp(20)}}
+                                            />
+                                        )}
+                                    </>
                                 ) : (
                                     <View style={styles.emptyContainer}>
                                         <Text
@@ -592,5 +692,20 @@ const styles = StyleSheet.create({
     logoImage: {
         width: '100%',
         height: '100%',
+    },
+    loadMoreButton: {
+        alignSelf: 'center',
+        marginVertical: hp(16),
+        paddingVertical: hp(10),
+        paddingHorizontal: wp(32),
+        borderRadius: hp(50),
+        borderWidth: 1.5,
+        borderColor: colors._0B3970,
+        minWidth: wp(120),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loadMoreText: {
+        ...commonFontStyle(600, 15, colors._0B3970),
     },
 });

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { ActivitiesCard, BackHeader, LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -10,12 +11,57 @@ import { colors } from '../../../theme/colors';
 import { useTranslation } from 'react-i18next';
 import { AppStyles } from '../../../theme/appStyles';
 import NoDataText from '../../../component/common/NoDataText';
-import { useGetActivitiesQuery } from '../../../api/dashboardApi';
+import { useGetActivitiesQuery, useLazyGetActivitiesQuery } from '../../../api/dashboardApi';
 
 const ActivityScreen = () => {
   const { t } = useTranslation();
-  const { data: activitiesData, isLoading, refetch } = useGetActivitiesQuery({});
+  const { data: activitiesData, isLoading, refetch } = useGetActivitiesQuery({ page: 1 });
   const activities = activitiesData?.data?.activities || [];
+  
+  const [fetchMoreActivities, { isFetching }] = useLazyGetActivitiesQuery();
+  const [extraActivities, setExtraActivities] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (activitiesData?.data) {
+      const pagination = activitiesData?.data?.pagination;
+      if (pagination) {
+        setHasMore(pagination.current_page < pagination.total_pages);
+      } else {
+        setHasMore((activities?.length || 0) >= 10);
+      }
+    }
+  }, [activitiesData, activities]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasMore || isFetching) return;
+    
+    const nextPage = currentPage + 1;
+    try {
+      const result = await fetchMoreActivities({ page: nextPage }).unwrap();
+      const newActivities = result?.data?.activities || [];
+      
+      if (newActivities.length > 0) {
+        setExtraActivities(prev => [...prev, ...newActivities]);
+        setCurrentPage(nextPage);
+        
+        const pagination = result?.data?.pagination;
+        if (pagination) {
+          setHasMore(pagination.current_page < pagination.total_pages);
+        } else {
+          setHasMore(newActivities.length >= 10);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.log('Error loading more activities:', error);
+      setHasMore(false);
+    }
+  }, [hasMore, isFetching, currentPage, fetchMoreActivities]);
+
+  const displayActivities = [...activities, ...extraActivities];
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
@@ -28,9 +74,9 @@ const ActivityScreen = () => {
       </View>
 
       <FlatList
-        data={activities}
+        data={displayActivities}
         style={AppStyles.flex}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item, index) => item?._id || index.toString()}
         contentContainerStyle={styles.scrollContainer}
         renderItem={(item: any) => <ActivitiesCard {...item} />}
         ItemSeparatorComponent={() => <View style={{ height: hp(22) }} />}
@@ -41,12 +87,23 @@ const ActivityScreen = () => {
           return (
             <View style={styles.emptyContainer}>
               <NoDataText
-                text="You don’t have any activity yet."
+                text="You don't have any activity yet."
                 textStyle={{ color: colors._0B3970 }}
               />
             </View>
           );
         }}
+        ListFooterComponent={
+          isFetching ? (
+            <ActivityIndicator
+              size="large"
+              color={colors._0B3970}
+              style={{marginVertical: hp(20)}}
+            />
+          ) : null
+        }
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
       />
     </LinearContainer>
   );
@@ -71,7 +128,6 @@ const styles = StyleSheet.create({
   topConrainer: {
     paddingHorizontal: wp(25),
     paddingTop: hp(18),
-    // borderBottomWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   header: {

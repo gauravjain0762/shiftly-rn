@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import moment from 'moment';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   Pressable,
   Image,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -24,6 +25,8 @@ import { IMAGES } from '../../../assets/Images';
 import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
+  useLazyGetSuggestedEmployeesQuery,
+  useLazyGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
 import { navigateTo, errorToast, goBack, resetNavigation } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
@@ -75,6 +78,22 @@ const SuggestedEmployeeScreen = () => {
   const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>('shortlisted');
   const dispatch = useDispatch<any>();
   const [closeJob] = useCloseCompanyJobMutation();
+
+  // Pagination state for each tab
+  const [suggestedPage, setSuggestedPage] = useState(1);
+  const [shortlistedPage, setShortlistedPage] = useState(1);
+  const [applicantsPage, setApplicantsPage] = useState(1);
+  
+  const [extraSuggested, setExtraSuggested] = useState<any[]>([]);
+  const [extraShortlisted, setExtraShortlisted] = useState<any[]>([]);
+  const [extraApplicants, setExtraApplicants] = useState<any[]>([]);
+  
+  const [suggestedHasMore, setSuggestedHasMore] = useState(true);
+  const [shortlistedHasMore, setShortlistedHasMore] = useState(true);
+  const [applicantsHasMore, setApplicantsHasMore] = useState(true);
+  
+  const [fetchMoreSuggested, { isFetching: isFetchingSuggested }] = useLazyGetSuggestedEmployeesQuery();
+  const [fetchMoreJobDetails, { isFetching: isFetchingJobDetails }] = useLazyGetCompanyJobDetailsQuery();
 
   const invitedEmployees = useMemo(() => {
     const list =
@@ -202,6 +221,132 @@ const SuggestedEmployeeScreen = () => {
       return filtered;
     });
   }, [employees]);
+
+  // Reset pagination when tab changes
+  useEffect(() => {
+    setExtraSuggested([]);
+    setExtraShortlisted([]);
+    setExtraApplicants([]);
+    setSuggestedPage(1);
+    setShortlistedPage(1);
+    setApplicantsPage(1);
+    setSuggestedHasMore(true);
+    setShortlistedHasMore(true);
+    setApplicantsHasMore(true);
+  }, [activeTab]);
+
+  // Set initial hasMore based on response
+  useEffect(() => {
+    if (suggestedResponse?.data) {
+      const pagination = suggestedResponse?.data?.pagination;
+      if (pagination) {
+        setSuggestedHasMore(pagination.current_page < pagination.total_pages);
+      } else {
+        setSuggestedHasMore((employees?.length || 0) >= 10);
+      }
+    }
+  }, [suggestedResponse, employees]);
+
+  useEffect(() => {
+    if (jobDetailsResponse?.data) {
+      const pagination = jobDetailsResponse?.data?.pagination;
+      if (pagination) {
+        setShortlistedHasMore(pagination.current_page < pagination.total_pages);
+        setApplicantsHasMore(pagination.current_page < pagination.total_pages);
+      } else {
+        setShortlistedHasMore((invitedEmployees?.length || 0) >= 10);
+        setApplicantsHasMore((applications?.length || 0) >= 10);
+      }
+    }
+  }, [jobDetailsResponse, invitedEmployees, applications]);
+
+  const handleLoadMoreSuggested = useCallback(async () => {
+    if (!suggestedHasMore || isFetchingSuggested) return;
+    
+    const nextPage = suggestedPage + 1;
+    try {
+      const result = await fetchMoreSuggested({ job_id: jobId, page: nextPage, tab: 'suggested' }).unwrap();
+      const newUsers = result?.data?.users || [];
+      
+      if (newUsers.length > 0) {
+        setExtraSuggested(prev => [...prev, ...newUsers]);
+        setSuggestedPage(nextPage);
+        
+        const pagination = result?.data?.pagination;
+        if (pagination) {
+          setSuggestedHasMore(pagination.current_page < pagination.total_pages);
+        } else {
+          setSuggestedHasMore(newUsers.length >= 10);
+        }
+      } else {
+        setSuggestedHasMore(false);
+      }
+    } catch (error) {
+      console.log('Error loading more suggested:', error);
+      setSuggestedHasMore(false);
+    }
+  }, [suggestedHasMore, isFetchingSuggested, suggestedPage, jobId, fetchMoreSuggested]);
+
+  const handleLoadMoreShortlisted = useCallback(async () => {
+    if (!shortlistedHasMore || isFetchingJobDetails) return;
+    
+    const nextPage = shortlistedPage + 1;
+    try {
+      const result = await fetchMoreJobDetails(jobId).unwrap();
+      const newInvited = result?.data?.invited_users || [];
+      const startIndex = shortlistedPage * 10;
+      const newItems = newInvited.slice(startIndex, startIndex + 10);
+      
+      if (newItems.length > 0) {
+        setExtraShortlisted(prev => [...prev, ...newItems]);
+        setShortlistedPage(nextPage);
+        setShortlistedHasMore(newInvited.length > startIndex + 10);
+      } else {
+        setShortlistedHasMore(false);
+      }
+    } catch (error) {
+      console.log('Error loading more shortlisted:', error);
+      setShortlistedHasMore(false);
+    }
+  }, [shortlistedHasMore, isFetchingJobDetails, shortlistedPage, jobId, fetchMoreJobDetails]);
+
+  const handleLoadMoreApplicants = useCallback(async () => {
+    if (!applicantsHasMore || isFetchingJobDetails) return;
+    
+    const nextPage = applicantsPage + 1;
+    try {
+      const result = await fetchMoreJobDetails(jobId).unwrap();
+      const newApplications = result?.data?.applications || [];
+      const startIndex = applicantsPage * 10;
+      const newItems = newApplications.slice(startIndex, startIndex + 10);
+      
+      if (newItems.length > 0) {
+        setExtraApplicants(prev => [...prev, ...newItems]);
+        setApplicantsPage(nextPage);
+        setApplicantsHasMore(newApplications.length > startIndex + 10);
+      } else {
+        setApplicantsHasMore(false);
+      }
+    } catch (error) {
+      console.log('Error loading more applicants:', error);
+      setApplicantsHasMore(false);
+    }
+  }, [applicantsHasMore, isFetchingJobDetails, applicantsPage, jobId, fetchMoreJobDetails]);
+
+  // Combined data for each tab
+  const displaySuggested = useMemo(() => {
+    return [...(employees || []), ...extraSuggested].filter((item: any) => item && item._id);
+  }, [employees, extraSuggested]);
+
+  const displayShortlisted = useMemo(() => {
+    const initial = invitedEmployees?.slice(0, 10) || [];
+    return [...initial, ...extraShortlisted];
+  }, [invitedEmployees, extraShortlisted]);
+
+  const displayApplicants = useMemo(() => {
+    const initial = applications?.slice(0, 10) || [];
+    return [...initial, ...extraApplicants];
+  }, [applications, extraApplicants]);
 
   const renderSalaryRange = () => {
     const from = jobInfo?.monthly_salary_from;
@@ -509,9 +654,23 @@ const SuggestedEmployeeScreen = () => {
         <SuggestedEmployeeSkeleton />
       ) : (
         <>
-          <ScrollView
+          <FlatList
+            data={[1]}
+            keyExtractor={() => 'main'}
             contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            onEndReached={() => {
+              if (activeTab === 'suggested' && suggestedHasMore && !isFetchingSuggested) {
+                handleLoadMoreSuggested();
+              } else if (activeTab === 'shortlisted' && shortlistedHasMore && !isFetchingJobDetails) {
+                handleLoadMoreShortlisted();
+              } else if (activeTab === 'applicants' && applicantsHasMore && !isFetchingJobDetails) {
+                handleLoadMoreApplicants();
+              }
+            }}
+            onEndReachedThreshold={0.5}
+            renderItem={() => (
+              <>
             <View style={styles.jobCard}>
               <View style={styles.jobCardRow}>
                 <View style={styles.companyLogo}>
@@ -729,10 +888,17 @@ const SuggestedEmployeeScreen = () => {
                   </TouchableOpacity>
                 </View>
 
-                {employees && employees.length > 0 ? (
-                  employees
-                    .filter((item: any) => item && item._id)
-                    .map((item: any, index: number) => renderEmployee(item))
+                {displaySuggested && displaySuggested.length > 0 ? (
+                  <>
+                    {displaySuggested.map((item: any, index: number) => renderEmployee(item))}
+                    {isFetchingSuggested && (
+                      <ActivityIndicator
+                        size="large"
+                        color={colors._0B3970}
+                        style={{marginVertical: hp(20)}}
+                      />
+                    )}
+                  </>
                 ) : (
                   <View style={styles.emptyState}>
                     <Text style={styles.emptyTitle}>
@@ -749,12 +915,21 @@ const SuggestedEmployeeScreen = () => {
             ) : activeTab === 'shortlisted' ? (
               // Shortlisted Tab Content
               <>
-                {invitedEmployees && invitedEmployees.length > 0 ? (
-                  invitedEmployees.map((item: any) => (
-                    <React.Fragment key={item.user_id?._id || item._id || 'sample'}>
-                      {renderShortlistedEmployee(item)}
-                    </React.Fragment>
-                  ))
+                {displayShortlisted && displayShortlisted.length > 0 ? (
+                  <>
+                    {displayShortlisted.map((item: any) => (
+                      <React.Fragment key={item.user_id?._id || item._id || 'sample'}>
+                        {renderShortlistedEmployee(item)}
+                      </React.Fragment>
+                    ))}
+                    {isFetchingJobDetails && (
+                      <ActivityIndicator
+                        size="large"
+                        color={colors._0B3970}
+                        style={{marginVertical: hp(20)}}
+                      />
+                    )}
+                  </>
                 ) : (
                   <View style={styles.emptyState}>
                     <Text style={styles.emptyTitle}>
@@ -769,46 +944,55 @@ const SuggestedEmployeeScreen = () => {
             ) : (
               // Applicants Tab Content
               <>
-                {applications && applications.length > 0 ? (
-                  applications.map((item: any) => {
-                    const user = item?.user_id || item;
-                    const experience =
-                      user?.experience ||
-                      user?.years_of_experience ||
-                      user?.total_experience ||
-                      0;
+                {displayApplicants && displayApplicants.length > 0 ? (
+                  <>
+                    {displayApplicants.map((item: any) => {
+                      const user = item?.user_id || item;
+                      const experience =
+                        user?.experience ||
+                        user?.years_of_experience ||
+                        user?.total_experience ||
+                        0;
 
-                    return (
-                      <Pressable
-                        key={user?._id || item?._id}
-                        onPress={() => handleNavigateToProfile(user)}
-                        style={styles.employeeCard}>
-                        <TouchableOpacity
+                      return (
+                        <Pressable
+                          key={user?._id || item?._id}
                           onPress={() => handleNavigateToProfile(user)}
-                          activeOpacity={0.7}>
-                          <CustomImage
-                            uri={user?.picture || ''}
-                            containerStyle={styles.employeeAvatar}
-                            imageStyle={styles.employeeAvatar}
-                          />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.employeeInfo}
-                          onPress={() => handleNavigateToProfile(user)}
-                          activeOpacity={0.7}>
-                          <Text style={styles.employeeName}>
-                            {user?.name || 'N/A'}
-                          </Text>
-                          <Text style={styles.employeeRole}>
-                            {user?.responsibility || user?.job_title || 'N/A'}
-                          </Text>
-                          <Text style={styles.employeeExperience}>
-                            {`${experience || 0}y ${t('Experience')}`}
-                          </Text>
-                        </TouchableOpacity>
-                      </Pressable>
-                    );
-                  })
+                          style={styles.employeeCard}>
+                          <TouchableOpacity
+                            onPress={() => handleNavigateToProfile(user)}
+                            activeOpacity={0.7}>
+                            <CustomImage
+                              uri={user?.picture || ''}
+                              containerStyle={styles.employeeAvatar}
+                              imageStyle={styles.employeeAvatar}
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.employeeInfo}
+                            onPress={() => handleNavigateToProfile(user)}
+                            activeOpacity={0.7}>
+                            <Text style={styles.employeeName}>
+                              {user?.name || 'N/A'}
+                            </Text>
+                            <Text style={styles.employeeRole}>
+                              {user?.responsibility || user?.job_title || 'N/A'}
+                            </Text>
+                            <Text style={styles.employeeExperience}>
+                              {`${experience || 0}y ${t('Experience')}`}
+                            </Text>
+                          </TouchableOpacity>
+                        </Pressable>
+                      );
+                    })}
+                    {isFetchingJobDetails && (
+                      <ActivityIndicator
+                        size="large"
+                        color={colors._0B3970}
+                        style={{marginVertical: hp(20)}}
+                      />
+                    )}
+                  </>
                 ) : (
                   <View style={styles.emptyState}>
                     <Text style={styles.emptyTitle}>
@@ -821,7 +1005,9 @@ const SuggestedEmployeeScreen = () => {
                 )}
               </>
             )}
-          </ScrollView>
+              </>
+            )}
+          />
           {activeTab === 'suggested' && (
             <View style={styles.ctaWrapper}>
               <GradientButton
@@ -1316,5 +1502,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
+  },
+  loadMoreButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: hp(14),
+    marginTop: hp(10),
+    marginBottom: hp(10),
+    borderRadius: wp(12),
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors._0B3970,
+  },
+  loadMoreText: {
+    ...commonFontStyle(600, 14, colors._0B3970),
   },
 });

@@ -308,6 +308,16 @@ const CoStack = () => {
       />
       <CmpStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoJobDetails}
+        component={CoJobDetails}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.JobDetail}
+        component={JobDetail}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CreateQuestion}
         component={CreateQuestion}
       />

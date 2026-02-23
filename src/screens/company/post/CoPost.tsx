@@ -25,6 +25,9 @@ const CoPost = () => {
   console.log("🔥 ~ CoPost ~ allPosts:", allPosts)
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  const { data: profileData } = useGetProfileQuery({});
+  const currentCompanyId = profileData?.data?._id;
+
   const {
     data: getPost,
     isFetching,
@@ -95,7 +98,7 @@ const CoPost = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollcontainer}
             ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-            renderItem={({ item }) => <FeedCard item={item} showMenu={true} hideLike={true} />}
+            renderItem={({ item }) => <FeedCard item={item} showMenu={true} hideLike={true} currentCompanyId={currentCompanyId} />}
             onEndReachedThreshold={0.5}
             onEndReached={handleLoadMore}
             refreshing={isFetching && currentPage === 1}

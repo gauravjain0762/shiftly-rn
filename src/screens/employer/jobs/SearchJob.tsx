@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+import React, {useEffect, useState, useCallback} from 'react';
+import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import {
   JobCard,
   LinearContainer,
@@ -18,6 +18,7 @@ import {colors} from '../../../theme/colors';
 import {
   useAddRemoveFavouriteMutation,
   useGetEmployeeJobsQuery,
+  useLazyGetEmployeeJobsQuery,
 } from '../../../api/dashboardApi';
 import {useDebounce} from '../../../hooks/useRole';
 import {useSelector} from 'react-redux';
@@ -38,9 +39,62 @@ const SearchJob = () => {
 
   const {data, isLoading, refetch} = useGetEmployeeJobsQuery({
     search: debouncedSearch,
+    page: 1,
   });
 
   const jobList = data?.data?.jobs ?? [];
+  
+  const [fetchMoreJobs, { isFetching }] = useLazyGetEmployeeJobsQuery();
+  const [extraJobs, setExtraJobs] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (data?.data) {
+      const pagination = data?.data?.pagination;
+      if (pagination) {
+        setHasMore(pagination.current_page < pagination.total_pages);
+      } else {
+        setHasMore((jobList?.length || 0) >= 10);
+      }
+    }
+  }, [data, jobList]);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setExtraJobs([]);
+    setCurrentPage(1);
+    setHasMore(true);
+  }, [debouncedSearch]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasMore || isFetching) return;
+    
+    const nextPage = currentPage + 1;
+    try {
+      const result = await fetchMoreJobs({ search: debouncedSearch, page: nextPage }).unwrap();
+      const newJobs = result?.data?.jobs || [];
+      
+      if (newJobs.length > 0) {
+        setExtraJobs(prev => [...prev, ...newJobs]);
+        setCurrentPage(nextPage);
+        
+        const pagination = result?.data?.pagination;
+        if (pagination) {
+          setHasMore(pagination.current_page < pagination.total_pages);
+        } else {
+          setHasMore(newJobs.length >= 10);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.log('Error loading more search jobs:', error);
+      setHasMore(false);
+    }
+  }, [hasMore, isFetching, currentPage, debouncedSearch, fetchMoreJobs]);
+
+  const displayJobs = [...jobList, ...extraJobs];
 
   const handleToggleFavorite = async (job: any) => {
     const jobId = job._id;
@@ -101,7 +155,7 @@ const SearchJob = () => {
         <ActivityIndicator size={'large'} color={colors._D5D5D5} />
       ) : (
         <KeyboardAwareFlatList
-          data={jobList}
+          data={displayJobs}
           style={AppStyles.flex}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -131,6 +185,17 @@ const SearchJob = () => {
               <BaseText style={styles.emptyText}>{'No jobs found'}</BaseText>
             </View>
           }
+          ListFooterComponent={
+            isFetching ? (
+              <ActivityIndicator
+                size="large"
+                color={colors._0B3970}
+                style={{marginVertical: hp(20)}}
+              />
+            ) : null
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
           onRefresh={refetch}
           refreshing={isLoading}
         />
