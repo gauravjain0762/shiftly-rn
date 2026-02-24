@@ -36,6 +36,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   useAddRemoveFavouriteMutation,
   useGetEmployeeJobDetailsQuery,
+  useGetCompanyJobDetailsQuery,
   useGetFavouritesJobQuery,
 } from '../../../api/dashboardApi';
 import { useSelector } from 'react-redux';
@@ -53,10 +54,18 @@ const JobDetail = () => {
   const [modal, setModal] = useState(false);
   const { params } = useRoute<RouteProp<any, any>>() as any;
   const data = params || params?.item;
-  const { data: jobDetail, isLoading } = useGetEmployeeJobDetailsQuery(
-    data?.item?._id || data?.jobId,
+  const jobId = data?.item?._id || data?.jobId;
+  const fromCompany = !!params?.hide_apply;
+  const { data: employeeJobDetail, isLoading: isLoadingEmployee } = useGetEmployeeJobDetailsQuery(
+    jobId,
+    { skip: fromCompany },
   );
-  console.log("~ JobDetail ~ jobDetail:", jobDetail)
+  const { data: companyJobDetail, isLoading: isLoadingCompany } = useGetCompanyJobDetailsQuery(
+    jobId,
+    { skip: !fromCompany },
+  );
+  const jobDetail = fromCompany ? companyJobDetail : employeeJobDetail;
+  const isLoading = fromCompany ? isLoadingCompany : isLoadingEmployee;
   const curr_jobdetails = jobDetail?.data?.job;
   console.log('~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
   const resumeList = jobDetail?.data?.resumes;

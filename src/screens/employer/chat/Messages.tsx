@@ -13,7 +13,7 @@ import { useEmployeeGetChatsQuery, useLazyEmployeeGetChatsQuery } from '../../..
 import { BackHeader, LinearContainer, SearchBar } from '../../../component';
 import NoDataText from '../../../component/common/NoDataText';
 import { colors } from '../../../theme/colors';
-import { navigateTo } from '../../../utils/commonFunction';
+import { getInitials, hasValidImage, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { IMAGES } from '../../../assets/Images';
 import FastImage from 'react-native-fast-image';
@@ -101,7 +101,7 @@ const Messages = () => {
           })
         }>
         {/* Avatar */}
-        {companyLogo ? (
+        {hasValidImage(companyLogo) ? (
           <FastImage
             source={{ uri: companyLogo }}
             style={styles.avatar}
@@ -109,7 +109,7 @@ const Messages = () => {
           />
         ) : (
           <View style={styles.avatarFallback}>
-            <Text style={styles.avatarInitial}>{companyName.charAt(0)}</Text>
+            <Text style={styles.avatarInitial}>{getInitials(companyName)}</Text>
           </View>
         )}
 
@@ -239,6 +239,12 @@ const styles = StyleSheet.create({
     height: wp(56),
     borderRadius: wp(28),
     marginRight: wp(14),
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
   },
   avatarFallback: {
     width: wp(56),
@@ -248,6 +254,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: wp(14),
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
   },
   avatarInitial: {
     ...commonFontStyle(600, 20, '#fff'),

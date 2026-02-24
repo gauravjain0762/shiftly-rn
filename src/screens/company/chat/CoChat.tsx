@@ -12,11 +12,8 @@ import {
   Platform,
 } from 'react-native';
 import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import moment from 'moment';
-
 import { LinearContainer } from '../../../component';
 import { IMAGES } from '../../../assets/Images';
 import { navigationRef } from '../../../navigation/RootContainer';
@@ -24,7 +21,6 @@ import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import {
   errorToast,
-  formatDate,
   formatDateWithoutTime,
   goBack,
   navigateTo,
@@ -37,7 +33,6 @@ import {
 import { onChatMessage } from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import ChatInput from '../../../component/chat/ChatInput';
-import FastImage from 'react-native-fast-image';
 import { SCREENS } from '../../../navigation/screenNames';
 import CustomImage from '../../../component/common/CustomImage';
 import MessageBubble from '../../../component/chat/MessageBubble';
@@ -66,13 +61,12 @@ const quickReplies = ['Hi', 'How are you?', 'Are you available?', 'Check your em
 // ---------- Components ----------
 
 const CoChat = () => {
+  const insets = useSafeAreaInsets();
   const { params } = useRoute<any>();
   const jobdetail_chatData = params?.data;
   const mainjob_data = params?.mainjob_data;
   const isFromJobDetail = params?.isFromJobDetail ?? false;
   const chatId = params?.data?.chat_id || params?.data?._id || null;
-
-  const userInfo = useSelector((state: any) => state.auth.userInfo);
 
   const [isImagePickerVisible, setImagePickerVisible] = useState(false);
   const [message, setMessage] = useState('');
@@ -229,7 +223,7 @@ const CoChat = () => {
 
   return (
     <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+      <View style={{ flex: 1 }}>
         {/* HEADER */}
         <View style={styles.container}>
           <View style={styles.headerRow}>
@@ -295,6 +289,7 @@ const CoChat = () => {
           <FlatList
             ref={flatListRef}
             data={chatList}
+            keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => (
               <MessageBubble
                 item={item as any}
@@ -328,31 +323,34 @@ const CoChat = () => {
             </Pressable>
           )}
 
-          {/* Quick Replies */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quickRepliesContainer}
-            style={styles.quickRepliesScrollView}>
-            {quickReplies.map((reply, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.quickReplyButton}
-                onPress={() => handleQuickReply(reply)}>
-                <Text style={styles.quickReplyText}>{reply}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          {/* Quick Replies + Input */}
+          <View style={[styles.quickRepliesWrapper, { paddingBottom: Math.max(insets.bottom, hp(12)) }]}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.quickRepliesContainer}
+              style={styles.quickRepliesScrollView}>
+              {quickReplies.map((reply, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.quickReplyButton}
+                  onPress={() => handleQuickReply(reply)}
+                  activeOpacity={0.7}>
+                  <Text style={styles.quickReplyText}>{reply}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
 
-          <ChatInput
-            image={logo}
-            setImage={setLogo}
-            handleSendChat={handleSendChat}
-            message={message}
-            setMessage={setMessage}
-            onPressAttachment={() => setImagePickerVisible(true)}
-            type={'company'}
-          />
+            <ChatInput
+              image={logo}
+              setImage={setLogo}
+              handleSendChat={handleSendChat}
+              message={message}
+              setMessage={setMessage}
+              onPressAttachment={() => setImagePickerVisible(true)}
+              type={'company'}
+            />
+          </View>
         </KeyboardAvoidingView>
 
         {/* Image picker */}
@@ -363,7 +361,7 @@ const CoChat = () => {
           allowDocument
           isGalleryEnable={false}
         />
-      </SafeAreaView>
+      </View>
     </LinearContainer>
   );
 };
@@ -372,8 +370,7 @@ export default CoChat;
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
-    paddingTop: hp(18),
+    paddingTop: hp(8),
     paddingHorizontal: wp(22),
   },
   back: {
@@ -383,8 +380,7 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    // alignItems: 'center',
-    marginBottom: hp(18),
+    marginBottom: hp(12),
   },
   arrowIcon: {
     width: 20,
@@ -436,7 +432,7 @@ const styles = StyleSheet.create({
 
   chatContent: {
     paddingTop: hp(15),
-    paddingBottom: hp(10),
+    paddingBottom: hp(100),
     paddingHorizontal: wp(22),
   },
   messageContainer: {
@@ -563,7 +559,7 @@ const styles = StyleSheet.create({
   logo: { height: hp(55), width: wp(55) },
   downIcon: {
     position: 'absolute',
-    bottom: hp(100),
+    bottom: hp(140),
     alignSelf: 'center',
     width: wp(40),
     height: wp(40),
@@ -576,22 +572,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
+  quickRepliesWrapper: {
+    paddingVertical: hp(12),
+    paddingHorizontal: wp(22),
+    backgroundColor: colors.white,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
   quickRepliesScrollView: {
-    maxHeight: hp(50),
-    marginBottom: hp(8),
+    flexGrow: 0,
   },
   quickRepliesContainer: {
-    paddingHorizontal: wp(22),
-    gap: wp(10),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: wp(22),
   },
   quickReplyButton: {
     backgroundColor: colors._0B3970,
     paddingHorizontal: wp(16),
     paddingVertical: hp(10),
     borderRadius: 20,
-    marginRight: wp(10),
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginRight: wp(10),
   },
   quickReplyText: {
     ...commonFontStyle(600, 14, colors.white),

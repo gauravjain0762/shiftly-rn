@@ -100,13 +100,19 @@ const ViewProfileScreen = () => {
             />
           </Pressable>
           <View style={styles.container}>
-            <CustomImage
-              uri={userInfo?.picture}
-              source={IMAGES.logoText}
-              imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
-              containerStyle={styles.avatar}
-              resizeMode={userInfo?.picture ? "cover" : "contain"}
-            />
+            {hasValidImage(userInfo?.picture) ? (
+              <CustomImage
+                uri={userInfo?.picture}
+                source={IMAGES.logoText}
+                imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
+                containerStyle={styles.avatar}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>{getInitials(userInfo?.name)}</Text>
+              </View>
+            )}
             <Text style={styles.name}>{userInfo?.name}</Text>
             <View style={styles.locationRow}>
               <Image

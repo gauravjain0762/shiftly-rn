@@ -25,6 +25,7 @@ export const SCREENS = {
   Chat: 'Chat',
   ViewProfileScreen: 'ViewProfileScreen',
   WebviewScreen: 'WebviewScreen',
+  AttachmentViewerScreen: 'AttachmentViewerScreen',
   EditAccount: 'EditAccount',
   SearchJob: 'SearchJob',
   FavoriteJobList: 'FavoriteJobList',

@@ -28,6 +28,7 @@ export const dashboardApi = createApi({
     'GetFacilities',
     'GetEmployeeJobs',
     'GetEmployeeJobDetails',
+    'GetEmployeeDashboard',
     'GetEmployeeSkills',
     'EmployeeApplyJob',
     'GetEmployeePost',
@@ -596,7 +597,7 @@ export const dashboardApi = createApi({
           },
         };
       },
-      invalidatesTags: ['EmployeeApplyJob'],
+      invalidatesTags: ['GetEmployeeJobs', 'GetEmployeeJobDetails', 'GetEmployeeDashboard'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -946,6 +947,7 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
+      providesTags: ['GetEmployeeDashboard'],
     }),
     getDashboard: builder.query<any, any>({
       query: () => {

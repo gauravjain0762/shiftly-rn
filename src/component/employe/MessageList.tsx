@@ -1,10 +1,10 @@
 import React, {FC} from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 import {colors} from '../../theme/colors';
-import CustomImage from '../common/CustomImage';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
-import {IMAGES} from '../../assets/Images';
+import {getInitials, hasValidImage} from '../../utils/commonFunction';
 
 type MessageItem = {
   id: string;
@@ -31,15 +31,19 @@ const MessageList: FC<Props> = ({
     <TouchableOpacity
       style={styles.itemContainer}
       onPress={() => onPressMessage(item)}>
-      <CustomImage
-        resizeMode="cover"
-        containerStyle={styles.logoBg}
-        size={
-          item?.company_id?.logo || item?.user_id?.picture ? '100%' : wp(30)
-        }
-        uri={item?.company_id?.logo || item?.user_id?.picture}
-        source={IMAGES.dummy_image}
-      />
+      {hasValidImage(item?.company_id?.logo || item?.user_id?.picture) ? (
+        <FastImage
+          source={{ uri: item?.company_id?.logo || item?.user_id?.picture }}
+          style={styles.avatar}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={styles.avatarFallback}>
+          <Text style={styles.avatarInitial}>
+            {getInitials(item?.company_id?.company_name || item?.user_id?.name)}
+          </Text>
+        </View>
+      )}
       <View style={styles.textContainer}>
         <Text
           style={[
@@ -153,5 +157,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
     overflow: 'hidden',
+  },
+  avatar: {
+    width: wp(62),
+    height: wp(62),
+    borderRadius: wp(31),
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  avatarFallback: {
+    width: wp(62),
+    height: wp(62),
+    borderRadius: wp(31),
+    backgroundColor: colors._0B3970,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  avatarInitial: {
+    ...commonFontStyle(600, 20, '#fff'),
   },
 });

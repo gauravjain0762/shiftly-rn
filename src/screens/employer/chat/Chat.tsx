@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
 import { IMAGES } from '../../../assets/Images';
@@ -23,6 +23,7 @@ import {
 import {
   errorToast,
   formatDateWithoutTime,
+  isAndroid,
   navigateTo,
 } from '../../../utils/commonFunction';
 import { onChatMessage } from '../../../hooks/socketManager';
@@ -32,6 +33,8 @@ import ChatInput from '../../../component/chat/ChatInput';
 import CustomImage from '../../../component/common/CustomImage';
 import { colors } from '../../../theme/colors';
 import { SCREENS } from '../../../navigation/screenNames';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { IS_IOS } from 'react-native-reanimated/lib/typescript/common';
 
 // ---------- Types ----------
 export type Message = {
@@ -56,6 +59,7 @@ type LogoFile = {
 const quickReplies = ['I am interested', 'When is the interview?', 'I am available', 'Can we reschedule?'];
 
 const Chat = () => {
+  const insets = useSafeAreaInsets();
   const { params } = useRoute<any>();
   const jobdetail_chatData = params?.data;
   const chatId = params?.data?.chat_id;
@@ -175,9 +179,7 @@ const Chat = () => {
   };
 
   return (
-    <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
-        {/* Header */}
+      <View style={{ flex: 1, paddingBottom: isAndroid ? 0 : hp(25), paddingTop: insets.top, backgroundColor: Colors.white}}>
         <View style={styles.container}>
           <BackHeader
             title={jobdetail_chatData?.company_name || 'Unknown'}
@@ -198,7 +200,6 @@ const Chat = () => {
           />
         </View>
 
-        {/* Job card */}
         {showJobCard && (
           <View style={styles.card}>
             <Text style={styles.dateText}>
@@ -224,14 +225,14 @@ const Chat = () => {
           </View>
         )}
 
-        {/* Chat body */}
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          {/* Messages */}
+          style={{ flex: 1, }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
           <FlatList
             ref={flatListRef}
             data={chatList}
+            keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => (
               <MessageBubble
                 item={item}
@@ -256,35 +257,34 @@ const Chat = () => {
             </Pressable>
           )}
 
-          {/* Quick Replies */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quickRepliesContainer}
-            style={styles.quickRepliesScrollView}>
-            {quickReplies.map((reply, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.quickReplyButton}
-                onPress={() => handleQuickReply(reply)}>
-                <Text style={styles.quickReplyText}>{reply}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={{ paddingBottom: hp(0) }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.quickRepliesContainer}
+              style={styles.quickRepliesScrollView}>
+              {quickReplies.map((reply, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.quickReplyButton}
+                  onPress={() => handleQuickReply(reply)}>
+                  <Text style={styles.quickReplyText}>{reply}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
 
-          {/* Input */}
-          <ChatInput
-            image={logo}
-            setImage={setLogo}
-            handleSendChat={handleSendChat}
-            message={message}
-            setMessage={setMessage}
-            onPressAttachment={() => setImagePickerVisible(true)}
-            type={'user'}
-          />
+            <ChatInput
+              image={logo}
+              setImage={setLogo}
+              handleSendChat={handleSendChat}
+              message={message}
+              setMessage={setMessage}
+              onPressAttachment={() => setImagePickerVisible(true)}
+              type={'user'}
+            />
+          </View>
         </KeyboardAvoidingView>
 
-        {/* Image picker */}
         <ImagePickerModal
           actionSheet={isImagePickerVisible}
           setActionSheet={() => setImagePickerVisible(false)}
@@ -292,8 +292,7 @@ const Chat = () => {
           allowDocument={true}
           isGalleryEnable={false}
         />
-      </SafeAreaView>
-    </LinearContainer>
+      </View>
   );
 };
 
@@ -301,8 +300,7 @@ export default Chat;
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
-    paddingTop: hp(18),
+    paddingTop: hp(8),
     paddingHorizontal: wp(22),
   },
 
@@ -347,7 +345,7 @@ const styles = StyleSheet.create({
   },
   downIcon: {
     position: 'absolute',
-    bottom: hp(100),
+    bottom: hp(140),
     alignSelf: 'center',
     width: wp(40),
     height: wp(40),

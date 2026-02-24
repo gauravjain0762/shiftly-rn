@@ -25,8 +25,8 @@ const CoPost = () => {
   console.log("🔥 ~ CoPost ~ allPosts:", allPosts)
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const { data: profileData } = useGetProfileQuery({});
-  const currentCompanyId = profileData?.data?._id;
+  const { data: profileData } = useGetProfileQuery();
+  const currentCompanyId = profileData?.data?.company?._id;
 
   const {
     data: getPost,
@@ -63,6 +63,7 @@ const CoPost = () => {
     dispatch(setCoPostSteps(1));
     navigateTo(SCREENS.CreatePost);
   };
+
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <View style={AppStyles.flex}>

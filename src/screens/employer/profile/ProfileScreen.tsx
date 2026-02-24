@@ -3,6 +3,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -11,7 +12,7 @@ import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
-import { navigateTo } from '../../../utils/commonFunction';
+import { getInitials, hasValidImage, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -94,12 +95,18 @@ const ProfileScreen = () => {
           />
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
-          <CustomImage
-            source={userInfo?.picture ? { uri: userInfo?.picture } : IMAGES.logoText}
-            imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
-            containerStyle={styles.avatar}
-            resizeMode={userInfo?.picture ? "cover" : "contain"}
-          />
+          {hasValidImage(userInfo?.picture) ? (
+            <CustomImage
+              source={{ uri: userInfo?.picture }}
+              imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
+              containerStyle={styles.avatar}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.avatar, styles.avatarPlaceholder]}>
+              <Text style={styles.avatarText}>{getInitials(userInfo?.name)}</Text>
+            </View>
+          )}
           <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />

@@ -1,7 +1,7 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useRef } from 'react';
 import { ActivityIndicator, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import { commonFontStyle, hp, wp, SCREEN_WIDTH } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { colors } from '../../theme/colors';
 import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
@@ -43,6 +43,7 @@ const FeedCard: FC<card> = ({
   const [likesCount, setLikesCount] = useState(item?.likes_count || 0);
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const menuButtonRef = useRef<View>(null);
   const [togglePostLike] = useTogglePostLikeMutation();
 
   useEffect(() => {
@@ -67,6 +68,13 @@ const FeedCard: FC<card> = ({
     }
   };
 
+  const itemCompanyId = item?.company_id?._id ?? item?.company_id;
+  const canShowMenu =
+    showMenu &&
+    !!currentCompanyId &&
+    !!itemCompanyId &&
+    String(currentCompanyId) === String(itemCompanyId);
+
   const handleEdit = () => {
     setMenuVisible(false);
     navigateTo(SCREENS.CreatePost, {
@@ -80,16 +88,26 @@ const FeedCard: FC<card> = ({
     });
   };
 
+  const updateMenuPosition = () => {
+    menuButtonRef.current?.measureInWindow((x: number, y: number, width: number, height: number) => {
+      const menuWidth = wp(150);
+      const left = Math.max(wp(4), Math.min(x, SCREEN_WIDTH - menuWidth - wp(4)));
+      setMenuPosition({ x: left, y: y + height + hp(5) });
+    });
+  };
+
+  const handleMenuPress = () => {
+    updateMenuPosition();
+    setMenuVisible(true);
+  };
+
   return (
-    <TouchableOpacity
-      activeOpacity={1}
-      style={styles.card}
-      onPress={() => onPressCard()}>
+    <View style={styles.card}>
       <View style={styles.cardHeader}>
         <CustomImage
           onPress={onPressLogo}
-          resizeMode="cover"
-          source={IMAGES.logoImg}
+          resizeMode={item?.company_id?.logo ? "cover" : "contain"}
+          source={IMAGES.logoText}
           uri={item?.company_id?.logo}
           containerStyle={styles.logo}
           imageStyle={{ height: '100%', width: '100%' }}
@@ -108,23 +126,21 @@ const FeedCard: FC<card> = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Action buttons container */}
+        {/* Action buttons - outside parent TouchableOpacity so they receive touches */}
         <View style={styles.headerActions}>
-          {showMenu && currentCompanyId && currentCompanyId === item?.company_id?._id && (
-            <TouchableOpacity
-              onLayout={(event) => {
-                event.target.measureInWindow((x: number, y: number, width: number, height: number) => {
-                  setMenuPosition({ x: x - wp(100), y: y + height + hp(5) });
-                });
-              }}
-              onPress={() => setMenuVisible(true)}
-              style={styles.menuButton}>
-              <Image
-                source={IMAGES.dots}
-                style={styles.dotsIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+          {canShowMenu && (
+            <View ref={menuButtonRef} collapsable={false}>
+              <TouchableOpacity
+                onPress={handleMenuPress}
+                style={styles.menuButton}
+                activeOpacity={0.7}>
+                <Image
+                  source={IMAGES.dots}
+                  style={styles.dotsIcon}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
           )}
           {!hideLike && (
             <TouchableOpacity
@@ -144,37 +160,42 @@ const FeedCard: FC<card> = ({
         </View>
       </View>
 
-      <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={() => onPressCard()}
+        style={styles.cardBody}>
+        <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
 
-      {hasImage && (
-        <View style={styles.banner}>
-          <View style={styles.post}>
-            {imageLoading && (
-              <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color={colors._D5D5D5} />
-              </View>
-            )}
-            <Image
-              style={styles.post}
-              resizeMode={'cover'}
-              source={{ uri: item?.images[0] }}
-              onLoad={() => setImageLoading(false)}
-              onLoadStart={() => hasImage && setImageLoading(true)}
-            />
+        {hasImage && (
+          <View style={styles.banner}>
+            <View style={styles.post}>
+              {imageLoading && (
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator size="large" color={colors._D5D5D5} />
+                </View>
+              )}
+              <Image
+                style={styles.post}
+                resizeMode={'cover'}
+                source={{ uri: item?.images[0] }}
+                onLoad={() => setImageLoading(false)}
+                onLoadStart={() => hasImage && setImageLoading(true)}
+              />
+            </View>
           </View>
-        </View>
-      )}
+        )}
 
-      <ExpandableText
-        maxLines={3}
-        descriptionStyle={styles.description}
-        description={item?.description || 'N/A'}
-        onShowLess={() => {
-          if (onScrollToTop) {
-            onScrollToTop();
-          }
-        }}
-      />
+        <ExpandableText
+          maxLines={3}
+          descriptionStyle={styles.description}
+          description={item?.description || 'N/A'}
+          onShowLess={() => {
+            if (onScrollToTop) {
+              onScrollToTop();
+            }
+          }}
+        />
+      </TouchableOpacity>
 
       <Modal
         visible={menuVisible}
@@ -198,8 +219,7 @@ const FeedCard: FC<card> = ({
           </View>
         </Pressable>
       </Modal>
-
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -219,6 +239,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#F4F3F3',
     borderRadius: 10,
+  },
+  cardBody: {
+    flex: 1,
   },
   cardHeader: {
     gap: wp(10),

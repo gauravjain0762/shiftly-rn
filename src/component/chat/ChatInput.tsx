@@ -107,7 +107,8 @@ export default ChatInput;
 const styles = StyleSheet.create({
   inputContainer: {
     paddingHorizontal: wp(14),
-    paddingVertical: hp(15),
+    paddingTop: hp(15),
+    // paddingVertical: hp(15),
     borderTopWidth: 1,
     borderTopColor: 'rgba(0, 0, 0, 0.1)',
     backgroundColor: colors.white,

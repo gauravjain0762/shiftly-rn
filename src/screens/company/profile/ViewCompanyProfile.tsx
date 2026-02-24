@@ -1,5 +1,6 @@
 import {
     ActivityIndicator,
+    Dimensions,
     Image,
     Pressable,
     ScrollView,
@@ -28,6 +29,7 @@ import ExpandableText from '../../../component/common/ExpandableText';
 
 import CompanyProfileSkeleton from '../../../component/skeletons/CompanyProfileSkeleton';
 import PostGridSkeleton from '../../../component/skeletons/PostGridSkeleton';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
@@ -48,6 +50,8 @@ const ViewCompanyProfile = () => {
     const [isLogoLoading, setIsLogoLoading] = useState(false);
     const [logoLoadError, setLogoLoadError] = useState(false);
     const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [isCoverImageLoading, setIsCoverImageLoading] = useState(true);
+    const coverImageUriRef = useRef<string | null>(null);
 
     const lastLogoUriRef = useRef<string | null>(null);
     const [postsFetched, setPostsFetched] = useState(false);
@@ -217,6 +221,14 @@ const ViewCompanyProfile = () => {
 
     const shouldShowCoverLoader = isCompanyLoading && !companyInfo;
 
+    useEffect(() => {
+        const uri = coverImageSource?.uri || null;
+        if (uri !== coverImageUriRef.current) {
+            coverImageUriRef.current = uri;
+            setIsCoverImageLoading(!!uri);
+        }
+    }, [coverImageSource]);
+
     const displayPosts = [...(Array.isArray(companyPosts) ? companyPosts : []), ...extraPosts];
     const displayJobs = [...(Array.isArray(companyJobs) ? companyJobs : []), ...extraJobs];
 
@@ -346,11 +358,35 @@ const ViewCompanyProfile = () => {
     const coverImageContent = useMemo(() => (
         <>
             {coverImageSource ? (
-                <Image
-                    source={coverImageSource}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="cover"
-                />
+                <>
+                    <Image
+                        source={coverImageSource}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="cover"
+                        onLoadStart={() => setIsCoverImageLoading(true)}
+                        onLoad={() => setIsCoverImageLoading(false)}
+                        onError={() => setIsCoverImageLoading(false)}
+                    />
+                    {isCoverImageLoading && (
+                        <View
+                            style={[StyleSheet.absoluteFillObject, { overflow: 'hidden' }]}
+                            pointerEvents="none"
+                        >
+                            <SkeletonPlaceholder
+                                backgroundColor={colors._F7F7F7}
+                                highlightColor={colors.white}
+                                borderRadius={4}
+                            >
+                                <View
+                                    style={{
+                                        width: Dimensions.get('window').width,
+                                        height: 250,
+                                    }}
+                                />
+                            </SkeletonPlaceholder>
+                        </View>
+                    )}
+                </>
             ) : (
                 !shouldShowCoverLoader && (
                     <Image
@@ -361,7 +397,7 @@ const ViewCompanyProfile = () => {
                 )
             )}
         </>
-    ), [coverImageSource, shouldShowCoverLoader]);
+    ), [coverImageSource, shouldShowCoverLoader, isCoverImageLoading]);
 
     const logoImageContent = useMemo(() => (
         hasValidLogo && logoSource && !logoLoadError ? (

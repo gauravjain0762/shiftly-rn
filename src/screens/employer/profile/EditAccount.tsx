@@ -13,7 +13,7 @@ import { LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
-import { goBack, successToast, errorToast } from '../../../utils/commonFunction';
+import { getInitials, goBack, hasValidImage, successToast, errorToast } from '../../../utils/commonFunction';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Flag } from 'react-native-country-picker-modal';
 import { callingCodeToCountryCode } from '../../../utils/countryFlags';
@@ -156,16 +156,16 @@ const EditAccountScreen = () => {
                     <View style={styles.loaderContainer}>
                       <ActivityIndicator size="large" color={colors._0B3970} />
                     </View>
-                  ) : (
+                  ) : hasValidImage(picture?.path || formData?.picture) ? (
                     <Image
-                      source={
-                        picture?.path || formData?.picture
-                          ? { uri: picture?.path || formData?.picture }
-                          : IMAGES.logoText
-                      }
+                      source={{ uri: picture?.path || formData?.picture }}
                       style={styles.avatarImage}
                       resizeMode="cover"
                     />
+                  ) : (
+                    <View style={[StyleSheet.absoluteFillObject, styles.avatarPlaceholder]}>
+                      <Text style={styles.avatarText}>{getInitials(formData?.name || userInfo?.name)}</Text>
+                    </View>
                   )}
                 </View>
                 {!isUploadingImage && (
@@ -399,6 +399,17 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: wp(120),
     height: wp(120),
+  },
+  avatarPlaceholder: {
+    backgroundColor: colors._0B3970,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: wp(60),
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: wp(22),
+    fontWeight: '700',
   },
   loaderContainer: {
     width: wp(120),

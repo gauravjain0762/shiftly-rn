@@ -13,7 +13,7 @@ import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 import { Message } from '../../screens/employer/chat/Chat';
 import { IMAGES } from '../../assets/Images';
-import { navigateTo } from '../../utils/commonFunction';
+import { getInitials, hasValidImage, navigateTo } from '../../utils/commonFunction';
 import { SCREENS } from '../../navigation/screenNames';
 import CustomImage from '../common/CustomImage';
 import BaseText from '../common/BaseText';
@@ -32,31 +32,36 @@ const MessageBubble: React.FC<{
   // Determine if the message belongs to the current viewer based on their role
   const isMyMessage = type === 'company' ? item.sender === 'company' : item.sender !== 'company';
 
-  const openFile = () => {
-    navigateTo(SCREENS.WebviewScreen, {
-      link: item.file,
-      title: '',
-      type: 'employe',
-    });
-  };
-
   const isDocument =
     item.file?.includes('pdf') ||
     item.file?.includes('doc') ||
     item.file?.includes('docx');
+
+  const openAttachment = () => {
+    navigateTo(SCREENS.AttachmentViewerScreen, {
+      url: item.file,
+      type: isDocument ? 'pdf' : 'image',
+    });
+  };
 
   return (
     <View style={styles.messageContainer}>
       {!isMyMessage && (
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.avatarContainer}>
-            <FastImage
-              source={{
-                uri: chatData?.company_id?.logo,
-              }}
-              style={styles.avatar}
-              resizeMode={FastImage.resizeMode.contain}
-            />
+            {hasValidImage(chatData?.company_id?.logo) ? (
+              <FastImage
+                source={{ uri: chatData?.company_id?.logo }}
+                style={styles.avatar}
+                resizeMode={FastImage.resizeMode.cover}
+              />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarInitial}>
+                  {getInitials(recipientName)}
+                </Text>
+              </View>
+            )}
           </View>
           <View>
             <Text
@@ -112,7 +117,7 @@ const MessageBubble: React.FC<{
               { alignSelf: isMyMessage ? 'flex-end' : 'flex-start' },
             ]}>
             {isDocument ? (
-              <TouchableOpacity onPress={openFile}>
+              <TouchableOpacity onPress={openAttachment}>
                 <FastImage
                   source={IMAGES.document}
                   style={styles.attachment}
@@ -134,11 +139,7 @@ const MessageBubble: React.FC<{
                   source={{ uri: item?.file }}
                   onPress={() => {
                     if (item.isSending) return;
-                    navigateTo(SCREENS.WebviewScreen, {
-                      link: item.file,
-                      title: '',
-                      type: 'employe',
-                    });
+                    openAttachment();
                   }}
                   imageStyle={{ width: '100%', height: '100%' }}
                   containerStyle={styles.imageContainer}
@@ -175,11 +176,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
     marginRight: 15,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
   },
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 100,
+  },
+  avatarFallback: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 100,
+    backgroundColor: colors._0B3970,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    ...commonFontStyle(600, 12, '#fff'),
   },
   senderName: {
     ...commonFontStyle(600, 16, colors.white),

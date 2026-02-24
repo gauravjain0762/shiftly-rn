@@ -750,11 +750,7 @@ const SuggestedEmployeeScreen = () => {
 
             {/* Tabs - Only visible if coming from Job Card */}
             {isFromJobCard && (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.tabContainer}
-                style={styles.tabScroll}>
+              <View style={[styles.tabContainer, styles.tabScroll]}>
                 <TouchableOpacity
                   style={[
                     styles.tabButton,
@@ -851,7 +847,7 @@ const SuggestedEmployeeScreen = () => {
                     {t('Applicants')}
                   </Text>
                 </TouchableOpacity>
-              </ScrollView>
+              </View>
             )}
 
             {activeTab === 'suggested' ? (
@@ -1000,7 +996,7 @@ const SuggestedEmployeeScreen = () => {
                     </Text>
                     <Text style={styles.emptyMessage}>
                       {t('Candidates who apply will appear here.')}
-                    </Text>
+                    </Text> 
                   </View>
                 )}
               </>
@@ -1059,6 +1055,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+    marginBottom: hp(16),
   },
   jobCardRow: {
     flexDirection: 'row',
@@ -1150,6 +1147,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(18),
     paddingHorizontal: wp(20),
     gap: hp(18),
+    marginBottom: hp(16),
   },
   analyticsRow: {
     flexDirection: 'row',
@@ -1183,6 +1181,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: hp(16),
   },
   sectionTitle: {
     ...commonFontStyle(600, 18, colors._4A4A4A),
@@ -1239,6 +1238,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
+    marginBottom: hp(12),
   },
   selectedEmployeeCard: {
     borderColor: colors._0B3970,
@@ -1299,11 +1299,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: wp(20),
     right: wp(20),
-    bottom: hp(20),
+    bottom: hp(0),
   },
   ctaButton: {
     borderRadius: wp(22),
-    marginBottom: hp(30)
+    marginBottom: hp(10)
   },
   invitedIcon: {
     width: wp(24),
@@ -1320,7 +1320,7 @@ const styles = StyleSheet.create({
   },
   tabScroll: {
     maxHeight: hp(65),
-    marginBottom: hp(10),
+    marginBottom: hp(16),
   },
   tabContainer: {
     flexDirection: 'row',

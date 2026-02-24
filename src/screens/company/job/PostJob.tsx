@@ -190,7 +190,7 @@ const PostJob = () => {
   const { updateJobForm } = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
-  const { data: facilitiesData } = useGetEssentialBenefitsQuery({});
+  const { data: facilitiesData } = useGetEssentialBenefitsQuery();
   const facilities = facilitiesData?.data?.benefits;
   const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];

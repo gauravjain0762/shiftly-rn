@@ -46,6 +46,7 @@ import CoEditMyProfile from '../screens/company/auth/CoEditMyProfile';
 import EmpChangePassword from '../screens/employer/auth/EmpChangePassword';
 import EmpForgotPassword from '../screens/employer/auth/EmpForgotPassword';
 import WebviewScreen from '../screens/others/WebviewScreen';
+import AttachmentViewerScreen from '../screens/others/AttachmentViewerScreen';
 import ProfileScreen from '../screens/employer/profile/ProfileScreen';
 import EditAccountScreen from '../screens/employer/profile/EditAccount';
 import SearchJob from '../screens/employer/jobs/SearchJob';
@@ -504,6 +505,11 @@ const StackNavigator: FC = () => {
         component={CoProfileLocationScreen}
       />
       <RootStack.Screen name={SCREENS.WebviewScreen} component={WebviewScreen} />
+      <RootStack.Screen
+        name={SCREENS.AttachmentViewerScreen}
+        component={AttachmentViewerScreen}
+        options={{ headerShown: false }}
+      />
     </RootStack.Navigator>
   );
 };
