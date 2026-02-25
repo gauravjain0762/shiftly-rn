@@ -113,7 +113,7 @@ const JobCard: FC<props> = ({
             {item?.area?.slice(0, 30)}
           </Text>
           <Text style={[styles.companyName]}>
-            {`Posted ${getTimeAgo(item?.createdAt)} ago`}
+            {`Posted ${getTimeAgo(item?.createdAt)}`}
           </Text>
         </View>
         <View style={styles.titleRow}>

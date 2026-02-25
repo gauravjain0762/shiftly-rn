@@ -184,18 +184,18 @@ const FeedCard: FC<card> = ({
             </View>
           </View>
         )}
-
-        <ExpandableText
-          maxLines={3}
-          descriptionStyle={styles.description}
-          description={item?.description || 'N/A'}
-          onShowLess={() => {
-            if (onScrollToTop) {
-              onScrollToTop();
-            }
-          }}
-        />
       </TouchableOpacity>
+
+      <ExpandableText
+        maxLines={3}
+        descriptionStyle={styles.description}
+        description={item?.description || 'N/A'}
+        onShowLess={() => {
+          if (onScrollToTop) {
+            onScrollToTop();
+          }
+        }}
+      />
 
       <Modal
         visible={menuVisible}

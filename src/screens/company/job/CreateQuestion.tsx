@@ -25,6 +25,8 @@ import { navigationRef } from '../../../navigation/RootContainer';
 import { useRoute } from '@react-navigation/native';
 import { useSendInterviewInvitesMutation } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../../assets/animation';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectJobForm } from '../../../features/companySlice';
@@ -188,9 +190,13 @@ const CreateQuestion = () => {
           backgroundColor={colors.white}
           onClose={() => { }}>
           <View style={styles.modalIconWrapper}>
-            <View style={styles.modalIconCircle}>
-              <Text style={styles.modalIconCheck}>✓</Text>
-            </View>
+            <LottieView
+              source={animation.success_check}
+              autoPlay
+              loop={false}
+              style={styles.modalCheckIcon}
+              resizeMode="cover"
+            />
           </View>
           <Text style={styles.modalTitle}>
             {t('AI interviews successfully sent')}
@@ -362,16 +368,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: hp(16),
   },
-  modalIconCircle: {
-    width: wp(72),
-    height: wp(72),
-    borderRadius: wp(36),
-    backgroundColor: colors._0B3970,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalIconCheck: {
-    ...commonFontStyle(700, 28, colors.white),
+  modalCheckIcon: {
+    width: wp(90),
+    height: wp(90),
   },
   modalTitle: {
     textAlign: 'center',

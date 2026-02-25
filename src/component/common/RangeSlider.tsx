@@ -4,13 +4,16 @@ import {View, Text, StyleSheet} from 'react-native';
 import {colors} from '../../theme/colors';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import {commonFontStyle, hp, SCREEN_WIDTH, wp} from '../../theme/fonts';
+import {getCurrencySymbol} from '../../utils/currencySymbols';
 
 type Props = {
   range?: number[] | any;
   setRange: React.Dispatch<React.SetStateAction<number[]>>;
+  currency?: string;
 };
 
-const RangeSlider = ({range, setRange}: Props) => {
+const RangeSlider = ({range, setRange, currency = 'AED'}: Props) => {
+  const symbol = getCurrencySymbol(currency);
   return (
     <View style={styles.container}>
       <MultiSlider
@@ -31,7 +34,7 @@ const RangeSlider = ({range, setRange}: Props) => {
         }}
       />
       <Text style={styles.label}>
-        ₹{range[0]} - ₹{range[1]}
+        {symbol} {range[0]} - {symbol} {range[1]}
       </Text>
     </View>
   );

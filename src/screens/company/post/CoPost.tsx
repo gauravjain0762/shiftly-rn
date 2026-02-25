@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GradientButton, LinearContainer } from '../../../component';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,8 +22,14 @@ const CoPost = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
-  console.log("🔥 ~ CoPost ~ allPosts:", allPosts)
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
+
+  const handleScrollToPost = (index: number) => {
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
+    }, 100);
+  };
 
   const { data: profileData } = useGetProfileQuery();
   const currentCompanyId = profileData?.data?.company?._id;
@@ -31,6 +37,7 @@ const CoPost = () => {
   const {
     data: getPost,
     isFetching,
+    refetch,
   } = useGetCompanyPostsQuery({ page: currentPage });
 
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
@@ -55,8 +62,11 @@ const CoPost = () => {
   };
 
   const handleRefresh = () => {
-    setCurrentPage(1);
-    setAllPosts([]);
+    if (currentPage === 1) {
+      refetch();
+    } else {
+      setCurrentPage(1);
+    }
   };
 
   const handleCreatePost = () => {
@@ -94,12 +104,26 @@ const CoPost = () => {
           <PostSkeleton backgroundColor={colors._DADADA} />
         ) : (
           <FlatList
+            ref={flatListRef}
             data={allPosts}
             style={AppStyles.flex}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollcontainer}
             ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-            renderItem={({ item }) => <FeedCard item={item} showMenu={true} hideLike={true} currentCompanyId={currentCompanyId} />}
+            renderItem={({ item, index }) => (
+              <FeedCard
+                item={item}
+                showMenu={true}
+                hideLike={true}
+                currentCompanyId={currentCompanyId}
+                onScrollToTop={() => handleScrollToPost(index)}
+              />
+            )}
+            onScrollToIndexFailed={(info) => {
+              setTimeout(() => {
+                flatListRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0 });
+              }, 200);
+            }}
             onEndReachedThreshold={0.5}
             onEndReached={handleLoadMore}
             refreshing={isFetching && currentPage === 1}
@@ -203,7 +227,7 @@ const styles = StyleSheet.create({
   scrollcontainer: {
     flexGrow: 1,
     paddingBottom: hp(21),
-    paddingHorizontal: wp(25),
+    paddingHorizontal: wp(10),
   },
   emptyContainer: {
     flex: 1,

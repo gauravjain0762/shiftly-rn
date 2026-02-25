@@ -46,7 +46,6 @@ const DashboardStats: FC<Props> = ({
 
             {/* Right Column */}
             <View style={styles.rightColumn}>
-                {/* Top Small Card - Applied Jobs */}
                 <TouchableOpacity
                     onPress={onPressApplied}
                     style={[styles.card, styles.smallCard, { backgroundColor: '#EBE3FF' }]}

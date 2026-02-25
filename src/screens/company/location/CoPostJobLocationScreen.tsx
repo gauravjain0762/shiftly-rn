@@ -17,6 +17,7 @@ import { AppStyles } from '../../../theme/appStyles';
 import { colors } from '../../../theme/colors';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  formatAreaNameFromComponents,
   getAddress,
   requestLocationPermission,
 } from '../../../utils/locationHandler';
@@ -261,8 +262,8 @@ const CoPostJobLocationScreen = () => {
         getAddress(
           currentLocation,
           (data: any) => {
-            const address = data?.results?.[0]?.formatted_address;
             const components = data?.results?.[0]?.address_components || [];
+            const address = formatAreaNameFromComponents(components) || stripPlusCode(data?.results?.[0]?.formatted_address);
 
             const stateObj = components.find((c: any) =>
               c.types.includes('administrative_area_level_1'),
@@ -397,9 +398,8 @@ const CoPostJobLocationScreen = () => {
       longitudeDelta: 0.01,
     };
 
-    const rawAddress = details.formatted_address || data.description;
-    const address = stripPlusCode(rawAddress);
     const components = details.address_components || [];
+    const address = formatAreaNameFromComponents(components) || stripPlusCode(details.formatted_address || data.description);
 
     const stateObj = components.find((c: any) =>
       c.types.includes('administrative_area_level_1'),
@@ -480,9 +480,8 @@ const CoPostJobLocationScreen = () => {
     getAddress(
       { latitude: region.latitude, longitude: region.longitude },
       (data: any) => {
-        const rawAddress = data?.results?.[0]?.formatted_address;
-        const address = stripPlusCode(rawAddress);
         const components = data?.results?.[0]?.address_components || [];
+        const address = formatAreaNameFromComponents(components) || stripPlusCode(data?.results?.[0]?.formatted_address);
 
         const stateObj = components.find((c: any) =>
           c.types.includes('administrative_area_level_1'),
@@ -526,9 +525,8 @@ const CoPostJobLocationScreen = () => {
     getAddress(
       coords,
       (data: any) => {
-        const rawAddress = data?.results?.[0]?.formatted_address;
-        const address = stripPlusCode(rawAddress);
         const components = data?.results?.[0]?.address_components || [];
+        const address = formatAreaNameFromComponents(components) || stripPlusCode(data?.results?.[0]?.formatted_address);
 
         const stateObj = components.find((c: any) =>
           c.types.includes('administrative_area_level_1'),
@@ -579,9 +577,8 @@ const CoPostJobLocationScreen = () => {
       getAddress(
         location,
         (data: any) => {
-          const rawAddress = data?.results?.[0]?.formatted_address;
-          const address = stripPlusCode(rawAddress);
           const components = data?.results?.[0]?.address_components || [];
+          const address = formatAreaNameFromComponents(components) || stripPlusCode(data?.results?.[0]?.formatted_address);
 
           const stateObj = components.find((c: any) =>
             c.types.includes('administrative_area_level_1'),

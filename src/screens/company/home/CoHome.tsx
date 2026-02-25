@@ -15,6 +15,7 @@ import {
   setCompanyProfileData,
   setUserInfo,
 } from '../../../features/authSlice';
+import { resetJobFormState, setCoPostJobSteps } from '../../../features/companySlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { connectSocket } from '../../../hooks/socketManager';
@@ -161,8 +162,9 @@ const CoHome = () => {
             type="Company"
             title="Create a Job"
             onPress={() => {
-              console.log("Create a Job >>>>>>>>>>>>..");
-              navigateTo(SCREENS.PostJob)
+              dispatch(resetJobFormState());
+              dispatch(setCoPostJobSteps(0));
+              navigateTo(SCREENS.PostJob);
             }}
             textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
             gradientColors={[colors._2D5486, colors._0B3970, colors._051C38]}

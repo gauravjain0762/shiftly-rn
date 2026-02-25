@@ -16,11 +16,11 @@ import { Eye } from 'lucide-react-native';
 
 const MyJobs = () => {
     const route = useRoute<any>();
-    const initialTab = route.params?.initialTab || 'Applied Jobs';
+    const initialTab = route.params?.initialTab || 'Applied';
     const [activeTab, setActiveTab] = useState(initialTab);
     const [refreshing, setRefreshing] = useState(false);
 
-    const tabs = ['Applied Jobs', 'Interviews', 'Matched Jobs'];
+    const tabs = ['Applied', 'Interviews', 'Matched'];
     const [pageApplied, setPageApplied] = useState(1);
     const [pageInterviews, setPageInterviews] = useState(1);
     const [pageMatched, setPageMatched] = useState(1);
@@ -29,16 +29,16 @@ const MyJobs = () => {
     const [listInterviews, setListInterviews] = useState<any[]>([]);
     const [listMatched, setListMatched] = useState<any[]>([]);
 
-    const appliedJobsQuery = useGetAppliedJobsQuery({ page: pageApplied }, { skip: activeTab !== 'Applied Jobs' });
+    const appliedJobsQuery = useGetAppliedJobsQuery({ page: pageApplied }, { skip: activeTab !== 'Applied' });
     const interviewsQuery = useGetInterviewsQuery({ page: pageInterviews }, { skip: activeTab !== 'Interviews' });
     console.log("🔥 ~ MyJobs ~ interviewsQuery:", interviewsQuery)
-    const matchedJobsQuery = useGetEmployeeJobsQuery({ type: 'matched', page: pageMatched }, { skip: activeTab !== 'Matched Jobs' });
+    const matchedJobsQuery = useGetEmployeeJobsQuery({ type: 'matched', page: pageMatched }, { skip: activeTab !== 'Matched' });
 
     const getActiveQuery = () => {
         switch (activeTab) {
-            case 'Applied Jobs': return appliedJobsQuery;
+            case 'Applied': return appliedJobsQuery;
             case 'Interviews': return interviewsQuery;
-            case 'Matched Jobs': return matchedJobsQuery;
+            case 'Matched': return matchedJobsQuery;
             default: return appliedJobsQuery;
         }
     };
@@ -91,13 +91,13 @@ const MyJobs = () => {
         }
     }, [matchedJobsQuery.data, pageMatched]);
 
-    const jobsList = activeTab === 'Applied Jobs' ? listApplied :
+    const jobsList = activeTab === 'Applied' ? listApplied :
         activeTab === 'Interviews' ? listInterviews :
             listMatched;
 
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
-        if (activeTab === 'Applied Jobs') {
+        if (activeTab === 'Applied') {
             setPageApplied(1);
             await appliedJobsQuery.refetch();
         } else if (activeTab === 'Interviews') {
@@ -113,12 +113,12 @@ const MyJobs = () => {
     const handleLoadMore = () => {
         const query = getActiveQuery();
         const totalPages = query.data?.data?.pagination?.total_pages || 1;
-        const currentPage = activeTab === 'Applied Jobs' ? pageApplied :
+        const currentPage = activeTab === 'Applied' ? pageApplied :
             activeTab === 'Interviews' ? pageInterviews :
                 pageMatched;
 
         if (!isFetching && currentPage < totalPages) {
-            if (activeTab === 'Applied Jobs') setPageApplied(prev => prev + 1);
+            if (activeTab === 'Applied') setPageApplied(prev => prev + 1);
             else if (activeTab === 'Interviews') setPageInterviews(prev => prev + 1);
             else setPageMatched(prev => prev + 1);
         }
@@ -228,7 +228,7 @@ const MyJobs = () => {
                             <Text style={styles.jobTitle} numberOfLines={1}>{job?.title || 'N/A'}</Text>
                             <TouchableOpacity
                                 style={styles.viewButton}
-                                onPress={() => navigateTo(SCREENS.JobDetail, { jobId: job?._id, is_applied: activeTab === 'Applied Jobs', hide_apply: activeTab === 'Interviews' })}
+                                onPress={() => navigateTo(SCREENS.JobDetail, { jobId: job?._id, is_applied: activeTab === 'Applied', hide_apply: activeTab === 'Interviews' })}
                             >
                                 <Eye size={wp(14)} color={colors.white} />
                                 <Text style={styles.viewText}>View</Text>
@@ -311,7 +311,7 @@ const MyJobs = () => {
                     ]}
                     ListEmptyComponent={() => {
                         const query = getActiveQuery();
-                        const rawData = activeTab === 'Applied Jobs' ? query.data?.data?.applicants :
+                        const rawData = activeTab === 'Applied' ? query.data?.data?.applicants :
                             activeTab === 'Interviews' ? (query.data?.data?.invitations || query.data?.data?.interviews) :
                                 query.data?.data?.jobs;
 

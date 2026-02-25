@@ -62,7 +62,7 @@ import {
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../../redux/hooks';
 import {
@@ -186,6 +186,7 @@ const PostJob = () => {
     other_requirements,
   } = useAppSelector((state: any) => selectJobForm(state));
 
+  const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { updateJobForm } = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
@@ -1644,7 +1645,7 @@ const PostJob = () => {
         )}
 
         <BottomModal
-          visible={isSuccessModalVisible}
+          visible={isSuccessModalVisible && isFocused}
           backgroundColor={colors._FAEED2}
           onClose={() => {
             updateJobForm({ isSuccessModalVisible: false });

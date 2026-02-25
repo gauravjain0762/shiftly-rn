@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { IMAGES } from '../../assets/Images';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../assets/animation';
 import { commonFontStyle, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 import { useTranslation } from 'react-i18next';
@@ -28,12 +29,15 @@ const WelcomeModal = ({
       animationIn={'slideInUp'}
       isVisible={visible}>
       <View style={styles.modalContent}>
-        <Image
-          source={IMAGES.welcome_icon}
+        <LottieView
+          source={animation.success_check}
+          autoPlay
+          loop={false}
           style={{
             width: 90,
             height: 90,
-            resizeMode: 'contain',
+            borderRadius: 90,
+            overflow: 'hidden',
             alignSelf: 'center',
           }}
         />

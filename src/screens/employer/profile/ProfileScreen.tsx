@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native';
 import React, { useCallback, useState } from 'react';
-import { LinearContainer } from '../../../component';
+import { GradientButton, LinearContainer } from '../../../component';
+import BottomModal from '../../../component/common/BottomModal';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
@@ -39,6 +40,7 @@ const ProfileScreen = () => {
   );
 
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
@@ -140,24 +142,48 @@ const ProfileScreen = () => {
             <View style={{ marginTop: hp(15) }} />
           )}
 
-          {userInfo?.profile_completion && (
-            <TouchableOpacity style={styles.assessmentCard}>
+          {userInfo?.assess_first == null && (
+            <TouchableOpacity
+              style={styles.assessmentCard}
+              onPress={() => setShowAssessmentModal(true)}
+              activeOpacity={0.8}>
               <View style={styles.iconCircle}>
                 <Image
-                  source={Number(userInfo?.profile_completion) === 100 ? IMAGES.check : IMAGES.document}
-                  style={[styles.assessmentIcon, Number(userInfo?.profile_completion) === 100 && { tintColor: colors._0B3970 }]}
+                  source={IMAGES.document}
+                  style={styles.assessmentIcon}
                 />
               </View>
               <View style={styles.assessmentTextContainer}>
-                <BaseText style={styles.assessmentTitle}>
-                  {Number(userInfo?.profile_completion) === 100 ? 'Assessment Completed' : 'Complete Assessment'}
-                </BaseText>
+                <BaseText style={styles.assessmentTitle}>Skill assessment</BaseText>
                 <BaseText style={styles.assessmentSubtitle}>
-                  {userInfo?.name || 'User'} {userInfo?.profile_completion}% complete Assessment
+                  Soft Skill Assessment is pending
                 </BaseText>
               </View>
             </TouchableOpacity>
           )}
+
+          <BottomModal
+            visible={showAssessmentModal}
+            onClose={() => setShowAssessmentModal(false)}
+            backgroundColor={colors.white}>
+            <BaseText style={styles.modalHeading}>Skill Assessment</BaseText>
+            <BaseText style={styles.modalDescription}>
+              Request a new link for your soft skill assessment.
+            </BaseText>
+            <GradientButton
+              type="Company"
+              title="Send Link"
+              style={styles.sendLinkButton}
+              onPress={() => {
+                setShowAssessmentModal(false);
+              }}
+            />
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowAssessmentModal(false)}>
+              <BaseText style={styles.cancelButtonText}>Cancel</BaseText>
+            </TouchableOpacity>
+          </BottomModal>
 
           {/* Section: About Me */}
           <Section title="About Me" content={userInfo?.about || 'N/A'} />
@@ -656,5 +682,26 @@ const styles = StyleSheet.create({
   },
   assessmentSubtitle: {
     ...commonFontStyle(400, 12, 'rgba(255, 255, 255, 0.8)'),
+  },
+  modalHeading: {
+    ...commonFontStyle(600, 22, colors._0B3970),
+    marginBottom: hp(12),
+    textAlign: 'center',
+  },
+  modalDescription: {
+    ...commonFontStyle(400, 16, colors._4A4A4A),
+    marginBottom: hp(24),
+    textAlign: 'center',
+    lineHeight: hp(24),
+  },
+  sendLinkButton: {
+    marginBottom: hp(12),
+  },
+  cancelButton: {
+    paddingVertical: hp(12),
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    ...commonFontStyle(500, 16, colors._4A4A4A),
   },
 });

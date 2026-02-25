@@ -667,7 +667,7 @@ export const dashboardApi = createApi({
         data: credentials,
         skipLoader: true,
       }),
-      invalidatesTags: ['AddRemoveFavourite'],
+      invalidatesTags: ['AddRemoveFavourite', 'GetFavouriteJob'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;

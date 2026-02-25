@@ -87,8 +87,8 @@ const HomeScreen = () => {
           appliedCount={appliedCount}
           matchedCount={matchedCount}
           onPressInterview={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Interviews' })}
-          onPressApplied={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Applied Jobs' })}
-          onPressMatched={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Matched Jobs' })}
+          onPressApplied={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Applied' })}
+          onPressMatched={() => navigateTo(SCREENS.MyJobs, { initialTab: 'Matched' })}
         />
 
         <Text style={styles.sectionTitle}>Recent Jobs</Text>

@@ -167,15 +167,22 @@ const CreateProfileScreen = () => {
         userInfo?.address ||
         '';
 
+      // Preserve existing skills/languages when user has local selections (e.g. returning from EmpLocation)
+      // API data doesn't include unsaved form selections, so we avoid overwriting them
+      const skillsFromApi = (aboutmeandResumes?.skills || []).map((s: any) =>
+        typeof s === 'string' ? s : s._id,
+      );
+      const languagesFromApi = aboutmeandResumes?.languages || [];
+      const preserveLocalSkills = (aboutEdit?.selectedSkills?.length ?? 0) > 0;
+      const preserveLocalLanguages = (aboutEdit?.selectedLanguages?.length ?? 0) > 0;
+
       dispatch(
         setAboutEdit({
           open_for_jobs: aboutmeandResumes?.open_for_job || false,
           responsibilities: aboutmeandResumes?.responsibility || '',
           location: locationValue,
-          selectedSkills: (aboutmeandResumes?.skills || []).map((s: any) =>
-            typeof s === 'string' ? s : s._id,
-          ),
-          selectedLanguages: aboutmeandResumes?.languages || [],
+          selectedSkills: preserveLocalSkills ? aboutEdit.selectedSkills : skillsFromApi,
+          selectedLanguages: preserveLocalLanguages ? aboutEdit.selectedLanguages : languagesFromApi,
         }),
       );
     }

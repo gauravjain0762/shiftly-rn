@@ -280,6 +280,46 @@ export const _openAppSetting = () => {
   );
 };
 
+/**
+ * Build a human-readable area name from address_components, excluding street numbers
+ * and route identifiers. Prioritizes locality, neighborhood, admin area.
+ */
+export const formatAreaNameFromComponents = (components: any[]): string => {
+  if (!components?.length) return '';
+
+  const get = (types: string[]) => {
+    const c = components.find((comp: any) => types.some(t => comp.types?.includes(t)));
+    return c?.long_name || '';
+  };
+
+  const neighborhood = get(['neighborhood']);
+  const sublocality = get(['sublocality', 'sublocality_level_1']);
+  const locality = get(['locality']);
+  const admin1 = get(['administrative_area_level_1']);
+  const admin2 = get(['administrative_area_level_2']);
+  const country = get(['country']);
+
+  const parts: string[] = [];
+  const add = (v: string) => {
+    if (v && !parts.includes(v)) parts.push(v);
+  };
+
+  add(neighborhood || sublocality);
+  add(locality);
+  add(admin2);
+  if (admin1 && admin1 !== locality) add(admin1);
+  add(country);
+
+  const result = parts.filter(Boolean).join(', ').trim();
+  if (result) return result;
+  const excludeTypes = ['street_number', 'route', 'premise'];
+  const fallback = components
+    .filter((c: any) => !c.types?.some((t: string) => excludeTypes.includes(t)))
+    .map((c: any) => c.long_name)
+    .filter(Boolean);
+  return fallback.join(', ') || '';
+};
+
 export const getAddress = async (
   region: any,
   onSucess?: any,

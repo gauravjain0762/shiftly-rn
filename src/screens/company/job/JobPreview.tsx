@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { animation } from '../../../assets/animation';
-import { useRoute } from '@react-navigation/native';
+import { useIsFocused, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
@@ -40,6 +40,7 @@ import { navigationRef } from '../../../navigation/RootContainer';
 const JobPreview = () => {
     const { t } = useTranslation();
     const route = useRoute<any>();
+    const isFocused = useIsFocused();
     const dispatch = useDispatch<any>();
     const insets = useSafeAreaInsets();
     const { updateJobForm } = useJobFormUpdater();
@@ -356,7 +357,7 @@ const JobPreview = () => {
 
             {/* Success Modal */}
             <BottomModal
-                visible={isSuccessModalVisible}
+                visible={isSuccessModalVisible && isFocused}
                 backgroundColor={colors._FAEED2}
                 onClose={() => updateJobForm({ isSuccessModalVisible: false })}>
                 <View style={styles.modalIconWrapper}>

@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  ScrollView,
   TouchableOpacity,
   Pressable,
   Image,
@@ -48,13 +49,17 @@ const SuggestedEmployeeScreen = () => {
   const route = useRoute<any>();
   const { jobId, jobData, isFromJobCard } = route.params || {};
 
+  // When coming from job post, show suggested tab; when from job card, default to shortlisted
+  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>(
+    isFromJobCard ? 'shortlisted' : 'suggested'
+  );
+
   const {
     data: suggestedResponse,
     isLoading,
     isFetching,
     refetch: refetchSuggested,
   } = useGetSuggestedEmployeesQuery(jobId, { skip: !jobId });
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ suggestedResponse:", suggestedResponse)
 
   const {
     data: jobDetailsResponse,
@@ -69,13 +74,24 @@ const SuggestedEmployeeScreen = () => {
     }, [jobId])
   );
 
+  // Delayed refetch when suggested list is empty - backend AI matching may take time after job post
+  const hasDelayedRefetched = useRef(false);
+  useEffect(() => {
+    hasDelayedRefetched.current = false;
+  }, [jobId]);
+  useEffect(() => {
+    const users = suggestedResponse?.data?.users || [];
+    if (!jobId || users.length > 0 || hasDelayedRefetched.current) return;
+    hasDelayedRefetched.current = true;
+    const timer = setTimeout(() => refetchSuggested(), 4000);
+    return () => clearTimeout(timer);
+  }, [jobId, suggestedResponse?.data?.users?.length, refetchSuggested]);
+
   const jobInfo = jobData?.data?.job || jobDetailsResponse?.data?.job || {};
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobInfo:", jobInfo)
 
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>('shortlisted');
   const dispatch = useDispatch<any>();
   const [closeJob] = useCloseCompanyJobMutation();
 
@@ -119,6 +135,37 @@ const SuggestedEmployeeScreen = () => {
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
   const isScreenLoading = isJobLoading || isLoading || isFetching;
   const hasDataLoaded = useRef(false);
+  const tabScrollRef = useRef<ScrollView>(null);
+  const tabLayouts = useRef<Record<string, number>>({});
+
+  const scrollToTab = useCallback(
+    (tab: 'suggested' | 'shortlisted' | 'applicants') => {
+      if (tab === 'suggested') {
+        tabScrollRef.current?.scrollTo({ x: 0, animated: true });
+      } else {
+        const x = tabLayouts.current[tab];
+        if (typeof x === 'number') {
+          tabScrollRef.current?.scrollTo({ x, animated: true });
+        }
+      }
+    },
+    []
+  );
+
+  const selectTab = useCallback(
+    (tab: 'suggested' | 'shortlisted' | 'applicants') => {
+      setActiveTab(tab);
+      scrollToTab(tab);
+    },
+    [scrollToTab]
+  );
+
+  // Scroll active tab into view when tabs first mount
+  useEffect(() => {
+    if (!isFromJobCard) return;
+    const id = setTimeout(() => scrollToTab(activeTab), 250);
+    return () => clearTimeout(id);
+  }, [isFromJobCard]);
 
   const showSkeleton = useMemo(() => {
     if (hasDataLoaded.current || (employees && employees.length > 0) || (jobInfo && Object.keys(jobInfo).length > 0)) {
@@ -456,7 +503,6 @@ const SuggestedEmployeeScreen = () => {
 
   const renderShortlistedEmployee = (item: any) => {
     const user = item?.user_id || item;
-    console.log('DEBUG: renderShortlistedEmployee item:', JSON.stringify(item, null, 2));
 
     if (!user || (!user._id && !item.isSample)) return null;
 
@@ -750,17 +796,27 @@ const SuggestedEmployeeScreen = () => {
 
             {/* Tabs - Only visible if coming from Job Card */}
             {isFromJobCard && (
-              <View style={[styles.tabContainer, styles.tabScroll]}>
-                <TouchableOpacity
-                  style={[
-                    styles.tabButton,
-                    activeTab === 'suggested' && styles.activeTabButton,
-                    activeTab === 'suggested' && {
-                      backgroundColor: colors._0B3970,
-                      borderColor: colors._0B3970,
-                    },
-                  ]}
-                  onPress={() => setActiveTab('suggested')}>
+              <ScrollView
+                ref={tabScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={[styles.tabContainer, styles.tabScroll]}
+                style={styles.tabScrollView}>
+                <View
+                  onLayout={(e) => {
+                    tabLayouts.current.suggested = e.nativeEvent.layout.x;
+                  }}
+                  collapsable={false}>
+                  <TouchableOpacity
+                    style={[
+                      styles.tabButton,
+                      activeTab === 'suggested' && styles.activeTabButton,
+                      activeTab === 'suggested' && {
+                        backgroundColor: colors._0B3970,
+                        borderColor: colors._0B3970,
+                      },
+                    ]}
+                    onPress={() => selectTab('suggested')}>
                   <Image
                     source={IMAGES.people}
                     style={[
@@ -778,7 +834,13 @@ const SuggestedEmployeeScreen = () => {
                     {t('Suggested List')}
                   </Text>
                 </TouchableOpacity>
+                </View>
 
+                <View
+                  onLayout={(e) => {
+                    tabLayouts.current.shortlisted = e.nativeEvent.layout.x;
+                  }}
+                  collapsable={false}>
                 <TouchableOpacity
                   style={[
                     styles.tabButton,
@@ -788,7 +850,7 @@ const SuggestedEmployeeScreen = () => {
                       borderColor: colors._0B3970,
                     },
                   ]}
-                  onPress={() => setActiveTab('shortlisted')}>
+                  onPress={() => selectTab('shortlisted')}>
                   <View style={styles.starIconContainer}>
                     <Image
                       source={IMAGES.star1}
@@ -820,7 +882,13 @@ const SuggestedEmployeeScreen = () => {
                     {t('AI Shortlisted')}
                   </Text>
                 </TouchableOpacity>
+                </View>
 
+                <View
+                  onLayout={(e) => {
+                    tabLayouts.current.applicants = e.nativeEvent.layout.x;
+                  }}
+                  collapsable={false}>
                 <TouchableOpacity
                   style={[
                     styles.tabButton,
@@ -830,7 +898,7 @@ const SuggestedEmployeeScreen = () => {
                       borderColor: colors._0B3970,
                     },
                   ]}
-                  onPress={() => setActiveTab('applicants')}>
+                  onPress={() => selectTab('applicants')}>
                   <Image
                     source={IMAGES.people} // Using same icon as Suggested for now
                     style={[
@@ -847,7 +915,8 @@ const SuggestedEmployeeScreen = () => {
                     {t('Applicants')}
                   </Text>
                 </TouchableOpacity>
-              </View>
+                </View>
+              </ScrollView>
             )}
 
             {activeTab === 'suggested' ? (
@@ -898,7 +967,7 @@ const SuggestedEmployeeScreen = () => {
                 ) : (
                   <View style={styles.emptyState}>
                     <Text style={styles.emptyTitle}>
-                      {t('No suggestions available yet')}
+                      {t('No suggested candidates found')}
                     </Text>
                     <Text style={styles.emptyMessage}>
                       {t(
@@ -1299,7 +1368,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: wp(20),
     right: wp(20),
-    bottom: hp(0),
+    bottom: hp(25),
   },
   ctaButton: {
     borderRadius: wp(22),
@@ -1318,14 +1387,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderColor: '#EEE',
   },
-  tabScroll: {
-    maxHeight: hp(65),
+  tabScrollView: {
     marginBottom: hp(16),
+  },
+  tabScroll: {
+    flexGrow: 0,
+    paddingRight: wp(20),
   },
   tabContainer: {
     flexDirection: 'row',
     gap: wp(10),
     paddingHorizontal: wp(2),
+    alignItems: 'center',
   },
   tabButton: {
     flexDirection: 'row',
@@ -1334,7 +1407,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(12),
     paddingHorizontal: wp(16),
     backgroundColor: '#F2F2F2',
-    borderRadius: wp(20),
+    borderRadius: wp(50),
     gap: wp(6),
     borderWidth: 1,
     borderColor: '#F2F2F2',

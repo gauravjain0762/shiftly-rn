@@ -20,8 +20,10 @@ const PostsScreen = () => {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const flatListRef = useRef<FlatList>(null);
 
-    const handleScrollToTop = (index: number) => {
-        flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
+    const handleScrollToPost = (index: number) => {
+        setTimeout(() => {
+            flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
+        }, 100);
     };
 
     const {
@@ -81,7 +83,7 @@ const PostsScreen = () => {
                                 item={item}
                                 showMenu={false}
                                 itemIndex={index}
-                                onScrollToTop={() => handleScrollToTop(index)}
+                                onScrollToTop={() => handleScrollToPost(index)}
                                 onPressLogo={() => {
                                     navigation.navigate(SCREENS.ViewCompanyProfile, {
                                         companyId: item?.company_id?._id,
@@ -89,6 +91,11 @@ const PostsScreen = () => {
                                 }}
                             />
                         )}
+                        onScrollToIndexFailed={(info) => {
+                            setTimeout(() => {
+                                flatListRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0 });
+                            }, 200);
+                        }}
                         onEndReachedThreshold={0.5}
                         onEndReached={handleLoadMore}
                         refreshing={isFetching && currentPage === 1}
@@ -139,7 +146,7 @@ const styles = StyleSheet.create({
     scrollcontainer: {
         flexGrow: 1,
         paddingBottom: hp(21),
-        paddingHorizontal: wp(25),
+        paddingHorizontal: wp(12),
     },
     emptyContainer: {
         flex: 1,

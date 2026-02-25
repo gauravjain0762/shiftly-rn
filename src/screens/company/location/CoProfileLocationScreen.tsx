@@ -17,6 +17,7 @@ import { AppStyles } from '../../../theme/appStyles';
 import { colors } from '../../../theme/colors';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  formatAreaNameFromComponents,
   getAddress,
   requestLocationPermission,
 } from '../../../utils/locationHandler';
@@ -113,8 +114,8 @@ const CoProfileLocationScreen = () => {
         getAddress(
           currentLocation,
           (data: any) => {
-            const address = data?.results?.[0]?.formatted_address;
             const components = data?.results?.[0]?.address_components || [];
+            const address = formatAreaNameFromComponents(components) || data?.results?.[0]?.formatted_address;
 
             const cityObj = components.find((c: any) =>
               c.types.includes('locality'),
@@ -218,8 +219,8 @@ const CoProfileLocationScreen = () => {
       longitudeDelta: 0.01,
     };
 
-    const address = details.formatted_address || data.description;
     const components = details.address_components || [];
+    const address = formatAreaNameFromComponents(components) || details.formatted_address || data.description;
 
     const cityObj = components.find((c: any) =>
       c.types.includes('locality'),
@@ -300,8 +301,8 @@ const CoProfileLocationScreen = () => {
       getAddress(
         { latitude: region.latitude, longitude: region.longitude },
         (data: any) => {
-          const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
+          const address = formatAreaNameFromComponents(components) || data?.results?.[0]?.formatted_address;
 
           const cityObj = components.find((c: any) =>
             c.types.includes('locality'),
@@ -357,8 +358,8 @@ const CoProfileLocationScreen = () => {
       getAddress(
         coords,
         (data: any) => {
-          const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
+          const address = formatAreaNameFromComponents(components) || data?.results?.[0]?.formatted_address;
 
           const cityObj = components.find((c: any) =>
             c.types.includes('locality'),
@@ -415,8 +416,8 @@ const CoProfileLocationScreen = () => {
       getAddress(
         location,
         (data: any) => {
-          const address = data?.results?.[0]?.formatted_address;
           const components = data?.results?.[0]?.address_components || [];
+          const address = formatAreaNameFromComponents(components) || data?.results?.[0]?.formatted_address;
 
           const cityObj = components.find((c: any) =>
             c.types.includes('locality'),

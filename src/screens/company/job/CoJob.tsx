@@ -31,6 +31,7 @@ import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   resetJobFormState,
+  setCoPostJobSteps,
   setFilters,
   resetFilters,
 } from '../../../features/companySlice';
@@ -163,6 +164,7 @@ const CoJob = () => {
         activeOpacity={0.5}
         onPress={() => {
           dispatch(resetJobFormState());
+          dispatch(setCoPostJobSteps(0));
           navigateTo(SCREENS.PostJob);
         }}
         style={styles.postJobButton}>
