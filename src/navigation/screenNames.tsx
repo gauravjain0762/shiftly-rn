@@ -69,6 +69,7 @@ export const SCREENS = {
   InterviewStatus: 'InterviewStatus',
   ViewCompanyProfile: 'ViewCompanyProfile',
   CompletedInterviews: 'CompletedInterviews',
+  CoJobSummary: 'CoJobSummary',
 };
 
 export interface ScreenNames {

@@ -22,3 +22,15 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+subprojects { subproject ->
+    if (subproject.name == "react-native-text-size") {
+        afterEvaluate {
+            if (subproject.hasProperty("android")) {
+                subproject.android {
+                    compileSdkVersion rootProject.ext.compileSdkVersion
+                }
+            }
+        }
+    }
+}

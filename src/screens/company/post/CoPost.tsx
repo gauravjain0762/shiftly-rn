@@ -37,6 +37,7 @@ const CoPost = () => {
   const {
     data: getPost,
     isFetching,
+    isLoading,
     refetch,
   } = useGetCompanyPostsQuery({ page: currentPage });
 
@@ -100,7 +101,7 @@ const CoPost = () => {
             </View>
           </View>
         </View>
-        {isFetching && currentPage === 1 ? (
+        {isLoading && currentPage === 1 ? (
           <PostSkeleton backgroundColor={colors._DADADA} />
         ) : (
           <FlatList
@@ -114,9 +115,9 @@ const CoPost = () => {
               <FeedCard
                 item={item}
                 showMenu={true}
-                hideLike={true}
+                hideLike={false}
                 currentCompanyId={currentCompanyId}
-                onScrollToTop={() => handleScrollToPost(index)}
+                onScrollToTop={() => handleScrollToTop(index)}
               />
             )}
             onScrollToIndexFailed={(info) => {
@@ -126,7 +127,7 @@ const CoPost = () => {
             }}
             onEndReachedThreshold={0.5}
             onEndReached={handleLoadMore}
-            refreshing={isFetching && currentPage === 1}
+            refreshing={isFetching && currentPage === 1 && !isLoading}
             onRefresh={handleRefresh}
             keyExtractor={(_, index) => index.toString()}
             ListEmptyComponent={() => {

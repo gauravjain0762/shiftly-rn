@@ -29,7 +29,7 @@ import {
   useLazyGetSuggestedEmployeesQuery,
   useLazyGetCompanyJobDetailsQuery,
 } from '../../../api/dashboardApi';
-import { navigateTo, errorToast, goBack, resetNavigation } from '../../../utils/commonFunction';
+import { navigateTo, errorToast, goBack, resetNavigation, getInitials, hasValidImage } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
@@ -160,7 +160,6 @@ const SuggestedEmployeeScreen = () => {
     [scrollToTab]
   );
 
-  // Scroll active tab into view when tabs first mount
   useEffect(() => {
     if (!isFromJobCard) return;
     const id = setTimeout(() => scrollToTab(activeTab), 250);
@@ -518,11 +517,17 @@ const SuggestedEmployeeScreen = () => {
               onPress={() => handleNavigateToProfile(user)}
               activeOpacity={0.7}
             >
-              <CustomImage
-                uri={user?.picture || ''}
-                containerStyle={styles.shortlistedAvatar}
-                imageStyle={styles.shortlistedAvatar}
-              />
+              {hasValidImage(user?.picture) ? (
+                <CustomImage
+                  uri={user?.picture || ''}
+                  containerStyle={styles.shortlistedAvatar}
+                  imageStyle={styles.shortlistedAvatar}
+                />
+              ) : (
+                <View style={[styles.shortlistedAvatar, styles.avatarFallback]}>
+                  <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
+                </View>
+              )}
               <View style={styles.shortlistedInfo}>
                 <Text style={styles.shortlistedEmployeeName}>{user?.name || 'N/A'}</Text>
                 <Text style={styles.shortlistedEmployeeRole}>{user?.responsibility || user?.job_title || 'N/A'}</Text>
@@ -633,14 +638,17 @@ const SuggestedEmployeeScreen = () => {
           onPress={() => handleNavigateToProfile(item)}
           activeOpacity={0.7}
         >
-          <CustomImage
-            uri={
-              item?.picture ||
-              'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'
-            }
-            containerStyle={styles.employeeAvatar}
-            imageStyle={styles.employeeAvatar}
-          />
+          {hasValidImage(item?.picture) ? (
+            <CustomImage
+              uri={item?.picture}
+              containerStyle={styles.employeeAvatar}
+              imageStyle={styles.employeeAvatar}
+            />
+          ) : (
+            <View style={[styles.employeeAvatar, styles.avatarFallback]}>
+              <Text style={styles.avatarInitial}>{getInitials(item?.name)}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.employeeInfo}
@@ -1027,11 +1035,17 @@ const SuggestedEmployeeScreen = () => {
                           <TouchableOpacity
                             onPress={() => handleNavigateToProfile(user)}
                             activeOpacity={0.7}>
-                            <CustomImage
-                              uri={user?.picture || ''}
-                              containerStyle={styles.employeeAvatar}
-                              imageStyle={styles.employeeAvatar}
-                            />
+                            {hasValidImage(user?.picture) ? (
+                              <CustomImage
+                                uri={user?.picture}
+                                containerStyle={styles.employeeAvatar}
+                                imageStyle={styles.employeeAvatar}
+                              />
+                            ) : (
+                              <View style={[styles.employeeAvatar, styles.avatarFallback]}>
+                                <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
+                              </View>
+                            )}
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={styles.employeeInfo}
@@ -1460,6 +1474,14 @@ const styles = StyleSheet.create({
     height: wp(65),
     borderRadius: wp(14),
     marginRight: wp(10), // Reduced spacing
+  },
+  avatarFallback: {
+    backgroundColor: colors._0B3970,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    ...commonFontStyle(600, 22, '#fff'),
   },
   shortlistedInfo: {
     flex: 1,

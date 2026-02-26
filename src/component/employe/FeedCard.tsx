@@ -126,22 +126,8 @@ const FeedCard: FC<card> = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Action buttons - outside parent TouchableOpacity so they receive touches */}
+        {/* Action buttons - outside parent TouchableOpacity so they receive touches (heart left, menu right) */}
         <View style={styles.headerActions}>
-          {canShowMenu && (
-            <View ref={menuButtonRef} collapsable={false}>
-              <TouchableOpacity
-                onPress={handleMenuPress}
-                style={styles.menuButton}
-                activeOpacity={0.7}>
-                <Image
-                  source={IMAGES.dots}
-                  style={styles.dotsIcon}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            </View>
-          )}
           {!hideLike && (
             <TouchableOpacity
               onPress={handleLike}
@@ -156,6 +142,20 @@ const FeedCard: FC<card> = ({
                 <Text style={styles.likesCountText}>{likesCount}</Text>
               )}
             </TouchableOpacity>
+          )}
+          {canShowMenu && (
+            <View ref={menuButtonRef} collapsable={false}>
+              <TouchableOpacity
+                onPress={handleMenuPress}
+                style={styles.menuButton}
+                activeOpacity={0.7}>
+                <Image
+                  source={IMAGES.dots}
+                  style={styles.dotsIcon}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>

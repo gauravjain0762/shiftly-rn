@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -25,6 +25,7 @@ import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
 import { Dropdown } from 'react-native-element-dropdown';
+import CountryPicker from 'react-native-country-picker-modal';
 import { useGetCompanyJobsQuery } from '../../../api/dashboardApi';
 import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
@@ -65,6 +66,7 @@ const CoJob = () => {
   const [allJobs, setAllJobs] = useState<any[]>([]);
   console.log("🔥 ~ CoJob ~ allJobs:", allJobs)
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
+  const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
 
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
@@ -86,12 +88,15 @@ const CoJob = () => {
   console.log("🔥 ~ CoJob ~ jobList:", jobList)
   const pagination = data?.data?.pagination;
 
+  const hasMountedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      if (page === 1 && !isLoading) {
-        refetch();
+      if (hasMountedRef.current) {
+        dispatch(resetFilters());
+      } else {
+        hasMountedRef.current = true;
       }
-    }, [filters, page]),
+    }, [dispatch]),
   );
 
   useEffect(() => {
@@ -247,14 +252,16 @@ const CoJob = () => {
               if (isLoading && !data) {
                 return null;
               }
+              const isFilteredEmpty =
+                filters?.location ||
+                filters?.contract_types?.length ||
+                filters?.salary_from !== 1000 ||
+                filters?.salary_to !== 50000;
               return (
                 <View style={styles.emptyContainer}>
-                  {renderPostJobButton()}
+                  {!isFilteredEmpty && renderPostJobButton()}
                   <Text style={styles.emptyText}>
-                    {filters?.location ||
-                      filters?.contract_types ||
-                      filters?.salary_from !== 1000 ||
-                      filters?.salary_to !== 50000
+                    {isFilteredEmpty
                       ? 'No filtered jobs found'
                       : 'Create your first job to start hiring talent.'}
                   </Text>
@@ -286,14 +293,47 @@ const CoJob = () => {
               </Pressable>
             </View>
             <View style={styles.inputWrapper}>
-              <CustomTextInput
-                value={location}
-                placeholder={t('Location')}
-                inputStyle={styles.locationInput}
-                onChangeText={text => setLocation(text)}
-              />
+              <TouchableOpacity
+                onPress={() => setIsCountryPickerVisible(true)}
+                style={styles.countrySelector}>
+                <Text
+                  style={
+                    location
+                      ? styles.countryText
+                      : styles.countryPlaceholder
+                  }
+                  numberOfLines={1}>
+                  {location || t('Select Country')}
+                </Text>
+                <Image source={IMAGES.dropdown} style={styles.dropdownIcon} />
+              </TouchableOpacity>
               <View style={styles.underline} />
             </View>
+            {isCountryPickerVisible && (
+              <CountryPicker
+                visible={isCountryPickerVisible}
+                countryCode="US"
+                withFilter
+                withCountryNameButton
+                withCallingCode={false}
+                withFlag
+                withEmoji={false}
+                modalProps={{
+                  animationType: 'slide',
+                  transparent: true,
+                  presentationStyle: 'overFullScreen',
+                }}
+                onSelect={(item: any) => {
+                  const countryName =
+                    typeof item?.name === 'string'
+                      ? item.name
+                      : item?.name?.common || '';
+                  setLocation(countryName);
+                  setIsCountryPickerVisible(false);
+                }}
+                onClose={() => setIsCountryPickerVisible(false)}
+              />
+            )}
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
               <RangeSlider range={range} setRange={setRange} />
@@ -455,10 +495,23 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors._181818),
   },
   dropdownIcon: {
-    width: wp(16),
-    height: wp(16),
+    width: wp(14),
+    height: wp(14),
     resizeMode: 'contain',
     tintColor: colors._7B7878,
+  },
+  countrySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  countryText: {
+    ...commonFontStyle(400, 18, colors._181818),
+    flex: 1,
+  },
+  countryPlaceholder: {
+    ...commonFontStyle(400, 18, colors._7B7878),
+    flex: 1,
   },
   btn: {
     marginTop: hp(40),

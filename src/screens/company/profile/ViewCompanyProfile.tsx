@@ -460,9 +460,9 @@ const ViewCompanyProfile = () => {
                     const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
                     const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
                     if (isCloseToBottom) {
-                        if (selectedTabIndex === 0 && postsHasMore && !isFetchingMore) {
+                        if (selectedTabIndex === 1 && postsHasMore && !isFetchingMore) {
                             handleLoadMorePosts();
-                        } else if (selectedTabIndex === 1 && jobsHasMore && !isFetchingMore) {
+                        } else if (selectedTabIndex === 2 && jobsHasMore && !isFetchingMore) {
                             handleLoadMoreJobs();
                         }
                     }

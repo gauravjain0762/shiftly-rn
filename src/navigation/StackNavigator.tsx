@@ -60,6 +60,7 @@ import EmployeeProfile from '../screens/company/job/EmployeeProfile';
 import InterviewStatus from '../screens/company/job/InterviewStatus';
 import MyJobs from '../screens/employer/jobs/MyJobs';
 import CompletedInterviews from '../screens/company/job/CompletedInterviews';
+import JobSummary from '../screens/company/job/JobSummary';
 import ActivityScreen from '../screens/employer/activity/ActivityScreen';
 import useRole from '../hooks/useRole'; // Keep useRole as it's used in StackNavigator
 
@@ -341,6 +342,11 @@ const CoStack = () => {
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CompletedInterviews}
         component={CompletedInterviews}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.CoJobSummary}
+        component={JobSummary}
       />
     </CmpStack.Navigator>
   );

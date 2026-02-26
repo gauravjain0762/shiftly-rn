@@ -8,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from 'react-native';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
@@ -27,6 +26,7 @@ import {
   navigateTo,
 } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import {
   useAddRemoveFavouriteMutation,
@@ -38,7 +38,7 @@ import BottomModal from '../../../component/common/BottomModal';
 import RangeSlider from '../../../component/common/RangeSlider';
 import { SLIDER_WIDTH } from '../../company/job/CoJob';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import BaseText from '../../../component/common/BaseText';
 import BannerSkeleton from '../../../component/skeletons/BannerSkeleton';
@@ -46,6 +46,7 @@ import CustomImage from '../../../component/common/CustomImage';
 import Tooltip from '../../../component/common/Tooltip';
 import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import CountryPicker from 'react-native-country-picker-modal';
 
 const contractTypes: object[] = [
   { type: 'Full Time', value: 'Full Time' },
@@ -127,12 +128,14 @@ const JobsScreen = () => {
   const [sortedJobList, setSortedJobList] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
-  console.log("🔥 ~ JobsScreen ~ allJobs:", allJobs)
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMorePages, setHasMorePages] = useState(true);
   const lastLoadedPageRef = useRef(0);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const isFilterAppliedRef = useRef(false);
+  const [isRefetchingOnReturn, setIsRefetchingOnReturn] = useState(false);
+  const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
+  const [departmentSearch, setDepartmentSearch] = useState('');
 
   useEffect(() => {
     const fetchUserLocation = async () => {
@@ -214,6 +217,7 @@ const JobsScreen = () => {
         setAllJobs(jobList);
         lastLoadedPageRef.current = 1;
         setCurrentPage(1);
+        setIsRefetchingOnReturn(false);
         // Update hasMorePages based on pagination
         if (pagination.total_pages <= 1) {
           setHasMorePages(false);
@@ -402,6 +406,7 @@ const JobsScreen = () => {
   };
 
   const clearFilters = () => {
+    setIsRefetchingOnReturn(true);
     setFilters({
       job_sectors: [],
       contract_types: [],
@@ -418,11 +423,34 @@ const JobsScreen = () => {
     setIsLoadingMore(false);
     lastLoadedPageRef.current = 0;
     isFilterAppliedRef.current = true; // Mark that filter was just applied
-    trigger({ page: 1, salary_from: 0 });
+    trigger({ page: 1, salary_from: 0 })
+      .then((result: any) => {
+        // Explicitly process result - ensures jobs show on return when RTK cache
+        // returns same refs (useEffect may not run)
+        const jobs = result?.data?.data?.jobs;
+        const paginationData = result?.data?.data?.pagination;
+        if (jobs && paginationData?.current_page === 1) {
+          setAllJobs(jobs);
+          lastLoadedPageRef.current = 1;
+          setCurrentPage(1);
+          setHasMorePages(paginationData.current_page < paginationData.total_pages);
+          isFilterAppliedRef.current = false;
+        }
+      })
+      .finally(() => {
+        setIsRefetchingOnReturn(false);
+      });
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        clearFilters();
+      };
+    }, []),
+  );
+
   const loadMoreJobs = () => {
-    // Prevent multiple simultaneous loads
     if (isLoadingMore || isLoading) {
       return;
     }
@@ -593,9 +621,12 @@ const JobsScreen = () => {
     </>
   );
 
+  const showInitialSkeleton =
+    ((isLoading || !data) && currentPage === 1) || isRefetchingOnReturn;
+
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
-      {isLoading && currentPage === 1 ? (
+      {showInitialSkeleton ? (
         <>
           <MyJobsSkeleton />
         </>
@@ -757,63 +788,100 @@ const JobsScreen = () => {
           </View>
 
           <Text style={styles.sectionLabel}>{t('Department')}</Text>
-          <View style={styles.pillRow}>
-            {(showAllDepartments ? departments : departments?.slice(0, 6))?.map((dept: any, index: number) => {
-              const deptId = dept?._id;
-              // Check if selected - handle both string IDs and objects
-              const isSelected = filters.job_sectors.some(
-                (d: any) => (typeof d === 'string' ? d : d?._id) === deptId
-              );
-              return (
-                <Pressable
-                  key={deptId || dept?.title || dept || index}
-                  style={[styles.pill, isSelected && styles.pillSelected]}
-                  onPress={() => {
-                    setFilters(prev => {
-                      // Clean up any existing non-string values and ensure only IDs are stored
-                      const cleanSectors = prev.job_sectors.filter(
-                        (d: any) => typeof d === 'string' && d.trim() !== ''
-                      );
-
-                      return {
-                        ...prev,
-                        job_sectors: isSelected
-                          ? cleanSectors.filter((d: string) => d !== deptId)
-                          : [...cleanSectors, deptId],
-                      };
-                    });
-                  }}>
-                  <Text
-                    style={[
-                      styles.pillText,
-                      isSelected && styles.pillTextSelected,
-                    ]}>
-                    {dept?.title}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          {departments && departments.length > 6 && !showAllDepartments && (
-            <TouchableOpacity
-              onPress={() => setShowAllDepartments(true)}
-              style={styles.showMoreContainer}>
-              <Text style={styles.showMoreText}>{t('Show more')}</Text>
-            </TouchableOpacity>
-          )}
-
           <View style={styles.inputWrapper}>
             <CustomTextInput
-              value={filters.location}
-              onChangeText={txt =>
-                setFilters(prev => ({ ...prev, location: txt }))
-              }
-              placeholder={t('Location')}
-              placeholderTextColor={colors.black}
-              inputStyle={styles.locationInput}
+              value={departmentSearch}
+              onChangeText={txt => setDepartmentSearch(txt)}
+              placeholder={t('Search Department')}
+              placeholderTextColor={colors._7B7878}
+              inputStyle={styles.deptSearchInput}
             />
             <View style={styles.underline} />
           </View>
+          <View style={styles.pillRow}>
+            {(departments || [])
+              .filter((dept: any) => {
+                if (!departmentSearch.trim()) return true;
+                const title = dept?.title || '';
+                return title.toLowerCase().includes(departmentSearch.toLowerCase());
+              })
+              .map((dept: any, index: number) => {
+                const deptId = dept?._id;
+                const isSelected = filters.job_sectors.some(
+                  (d: any) => (typeof d === 'string' ? d : d?._id) === deptId,
+                );
+                return (
+                  <Pressable
+                    key={deptId || dept?.title || dept || index}
+                    style={[styles.pill, isSelected && styles.pillSelected]}
+                    onPress={() => {
+                      setFilters(prev => {
+                        const cleanSectors = prev.job_sectors.filter(
+                          (d: any) => typeof d === 'string' && d.trim() !== '',
+                        );
+                        return {
+                          ...prev,
+                          job_sectors: isSelected
+                            ? cleanSectors.filter((d: string) => d !== deptId)
+                            : [...cleanSectors, deptId],
+                        };
+                      });
+                    }}>
+                    <Text
+                      style={[
+                        styles.pillText,
+                        isSelected && styles.pillTextSelected,
+                      ]}>
+                      {dept?.title}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <TouchableOpacity
+              onPress={() => setIsCountryPickerVisible(true)}
+              style={styles.countrySelector}>
+              <Text
+                style={
+                  filters.location
+                    ? styles.countryText
+                    : styles.countryPlaceholder
+                }
+                numberOfLines={1}>
+                {filters.location || t('Select Country')}
+              </Text>
+              <Image source={IMAGES.down1} style={styles.dropdownIcon} />
+            </TouchableOpacity>
+            <View style={styles.underline} />
+          </View>
+
+          {isCountryPickerVisible && (
+            <CountryPicker
+              visible={isCountryPickerVisible}
+              countryCode="US"
+              withFilter
+              withCountryNameButton
+              withCallingCode={false}
+              withFlag
+              withEmoji={false}
+              modalProps={{
+                animationType: 'slide',
+                transparent: true,
+                presentationStyle: 'overFullScreen',
+              }}
+              onSelect={(item: any) => {
+                const countryName =
+                  typeof item?.name === 'string'
+                    ? item.name
+                    : item?.name?.common || '';
+                setFilters(prev => ({ ...prev, location: countryName }));
+                setIsCountryPickerVisible(false);
+              }}
+              onClose={() => setIsCountryPickerVisible(false)}
+            />
+          )}
 
           <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
           <View style={styles.pillRow}>
@@ -853,7 +921,8 @@ const JobsScreen = () => {
               <Text>{'Clear'}</Text>
             </Pressable>
             <GradientButton
-              type="Employee"
+              type="Company"
+              gradientColors={['#2D5486', '#0B3970', '#051C38']}
               style={styles.btn}
               title={t('Apply Filter')}
               onPress={handleApplyFilter}
@@ -1019,7 +1088,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: hp(12),
-    gap: wp(8),
+    gap: wp(3),
     overflow: 'visible',
     paddingHorizontal: wp(25),
   },
@@ -1157,10 +1226,23 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   dropdownIcon: {
-    width: wp(16),
-    height: wp(16),
+    width: wp(14),
+    height: wp(14),
     resizeMode: 'contain',
     tintColor: colors._7B7878,
+  },
+  countrySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  countryText: {
+    ...commonFontStyle(400, 16, colors._050505),
+    flex: 1,
+  },
+  countryPlaceholder: {
+    ...commonFontStyle(400, 16, colors._7B7878),
+    flex: 1,
   },
   btn: {
     flex: 1,
@@ -1169,6 +1251,9 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 16, colors.black),
     marginTop: hp(36),
     marginBottom: hp(8),
+  },
+  deptSearchInput: {
+    ...commonFontStyle(400, 16, colors._050505),
   },
   pillRow: {
     flexDirection: 'row',

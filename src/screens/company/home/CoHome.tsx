@@ -34,10 +34,34 @@ const CoHome = () => {
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(3);
 
   const metricOptions = [
-    { key: 'job_view', label: 'Total Job', subLabel: 'Views', icon: IMAGES.jobview },
-    { key: 'applied', label: 'Total', subLabel: 'Applications', icon: IMAGES.appliedjob },
-    { key: 'suggested', label: 'AI Suggested', subLabel: 'Talent', icon: IMAGES.suggested_candidate },
-    { key: 'shortlisted', label: 'Shortlisted', subLabel: 'Talent', icon: IMAGES.shortlisted },
+    {
+      key: 'job_view',
+      label: 'Total Job Views',
+      subLabel: '',
+      value: job_stats?.total_job_views ?? 0,
+      icon: IMAGES.jobview,
+    },
+    {
+      key: 'applied',
+      label: 'Total Applications',
+      subLabel: '',
+      value: job_stats?.total_applications ?? 0,
+      icon: IMAGES.appliedjob,
+    },
+    {
+      key: 'suggested',
+      label: 'AI Suggested Talent',
+      subLabel: '',
+      value: job_stats?.ai_suggested_talent ?? 0,
+      icon: IMAGES.suggested_candidate,
+    },
+    {
+      key: 'shortlisted',
+      label: 'Shortlisted Talent',
+      subLabel: '',
+      value: job_stats?.shortlisted_talent ?? 0,
+      icon: IMAGES.shortlisted,
+    },
   ];
 
   useEffect(() => {
@@ -78,13 +102,22 @@ const CoHome = () => {
             {
               job_summary?.map((item, index) => {
                 return (
-                  <View key={index} style={[styles.jobSummaryCard, { backgroundColor: item?.color }]}>
+                  <TouchableOpacity
+                    key={index}
+                    activeOpacity={0.7}
+                    style={[styles.jobSummaryCard, { backgroundColor: item?.color }]}
+                    onPress={() =>
+                      navigateTo(SCREENS.CoJobSummary, {
+                        initialTab: item.title === 'Live Jobs' ? 'Live Jobs' : 'Closed Jobs',
+                      })
+                    }
+                  >
                     <View style={styles.jobSummaryCardContent}>
                       <Image source={IMAGES.work} style={styles.workIcon} />
                       <Text style={styles.jobSummaryCardTitle}>{item.title}</Text>
                       <Text style={styles.jobSummaryCardValue}>{item.value}</Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 )
               })}
           </View>
@@ -133,13 +166,9 @@ const CoHome = () => {
                       {option.label}
                     </Text>
                     <Text
-                      numberOfLines={2}
-                      style={
-                        isSelected
-                          ? styles.metricLabelBoldWhite
-                          : styles.metricLabelBold
-                      }>
-                      {option.subLabel}
+                      numberOfLines={1}
+                      style={styles.metricValue}>
+                      {option.value}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -349,6 +378,9 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     ...commonFontStyle(500, 16, colors.black),
+  },
+  metricValue: {
+    ...commonFontStyle(600, 20, colors.black),
   },
   metricLabelBoldWhite: {
     ...commonFontStyle(700, 14, colors.white),

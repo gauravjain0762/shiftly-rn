@@ -16,7 +16,6 @@ type Props = {
 };
 
 const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
-    console.log("🔥 ~ RecentJobCard ~ item:", item)
     const logoUri = item?.company_id?.logo;
 
     const handleShare = async () => {
@@ -29,7 +28,6 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                     : '';
 
             const shareUrl = item?.share_url || '';
-            console.log("🔥 ~ handleShare ~ shareUrl:", shareUrl)
             const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
             const message = `${title}\n\n${description}\n\n${salary}${shareUrlText}`;
@@ -39,7 +37,6 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                 message: message,
                 url: shareUrl,
             };
-            console.log("🔥 ~ handleShare ~ shareOptions:", shareOptions)
 
             await Share.open(shareOptions);
         } catch (err: any) {
@@ -55,7 +52,6 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                 style={styles.header}
                 onPress={() => {
                     const companyId = item?.company_id?._id;
-                    console.log("🔥 ~ RecentJobCard ~ companyId:", companyId)
                     navigateTo(SCREENS.ViewCompanyProfile, { companyId });
                 }}
             >
