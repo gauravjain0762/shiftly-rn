@@ -47,7 +47,7 @@ import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
 const SuggestedEmployeeScreen = () => {
   const { t } = useTranslation();
   const route = useRoute<any>();
-  const { jobId, jobData, isFromJobCard } = route.params || {};
+  const { jobId, jobData, isFromJobCard, fromPostJob } = route.params || {};
 
   // When coming from job post, show suggested tab; when from job card, default to shortlisted
   const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>(
@@ -267,6 +267,25 @@ const SuggestedEmployeeScreen = () => {
       return filtered;
     });
   }, [employees]);
+
+  // All suggested employees already invited?
+  const allSuggestedInvited = useMemo(() => {
+    if (!Array.isArray(employees) || employees.length === 0) return false;
+    if (!Array.isArray(invitedEmployees) || invitedEmployees.length === 0)
+      return false;
+
+    const invitedIds = invitedEmployees
+      .map((inv: any) => inv?.user_id?._id || inv?.user_id || inv)
+      .filter(Boolean);
+
+    const suggestedIds = employees
+      .map((emp: any) => emp?._id)
+      .filter(Boolean);
+
+    if (suggestedIds.length === 0) return false;
+
+    return suggestedIds.every(id => invitedIds.includes(id));
+  }, [employees, invitedEmployees]);
 
   // Reset pagination when tab changes
   useEffect(() => {
@@ -559,10 +578,16 @@ const SuggestedEmployeeScreen = () => {
               <TouchableOpacity
                 style={[
                   styles.assessmentButton,
-                  !item?.assessment_completed && { backgroundColor: '#D3D3D3' }
+                  !item?.assessment_completed && { backgroundColor: '#D3D3D3' },
                 ]}
                 disabled={!item?.assessment_completed}
-              >
+                onPress={() =>
+                  navigateTo(SCREENS.InterviewStatus, {
+                    jobData: jobInfo,
+                    candidateData: user,
+                    inviteData: item,
+                  })
+                }>
                 <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
               </TouchableOpacity>
             </View>}
@@ -701,7 +726,11 @@ const SuggestedEmployeeScreen = () => {
         title={t('Candidates List')}
         containerStyle={styles.header}
         onBackPress={() => {
-          resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
+          if (fromPostJob) {
+            resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoJob);
+          } else {
+            goBack();
+          }
         }}
       />
       {showSkeleton ? (
@@ -936,7 +965,9 @@ const SuggestedEmployeeScreen = () => {
                     style={[
                       styles.inviteAllButton,
                       inviteAllSelected && styles.inviteAllButtonSelected,
+                      allSuggestedInvited && {opacity: 0.5},
                     ]}
+                    disabled={allSuggestedInvited}
                     onPress={handleInviteAll}>
                     <View
                       style={[
@@ -1093,6 +1124,7 @@ const SuggestedEmployeeScreen = () => {
                 type="Company"
                 style={styles.ctaButton}
                 onPress={handleBulkInvite}
+                disabled={allSuggestedInvited}
                 title={t('Invite for AI Interview')}
               />
             </View>
@@ -1124,7 +1156,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: wp(25),
-    paddingBottom: '40%',
+    // Extra bottom space so list ends above the fixed CTA button
+    paddingBottom: hp(120),
     gap: hp(16),
   },
   jobCard: {
@@ -1380,13 +1413,17 @@ const styles = StyleSheet.create({
   },
   ctaWrapper: {
     position: 'absolute',
-    left: wp(20),
-    right: wp(20),
-    bottom: hp(25),
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: wp(20),
+    paddingTop: hp(10),
+    paddingBottom: hp(25),
+    backgroundColor: colors.white,
   },
   ctaButton: {
     borderRadius: wp(22),
-    marginBottom: hp(10)
+    marginBottom: 0,
   },
   invitedIcon: {
     width: wp(24),

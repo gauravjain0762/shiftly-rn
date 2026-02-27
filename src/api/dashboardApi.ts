@@ -446,6 +446,22 @@ export const dashboardApi = createApi({
       },
     }),
 
+    getCompletedInterviews: builder.query<any, void>({
+      query: () => ({
+        url: API.getCompletedInterviews,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'getCompletedInterviews datadata');
+        } catch (error) {
+          console.log('getCompletedInterviews Error', error);
+        }
+      },
+    }),
+
     //  -------   Employee   --------
     // getEmployeeDashboard
     getEmployeeProfile: builder.query<any, any>({
@@ -466,6 +482,22 @@ export const dashboardApi = createApi({
           }
         } catch (error) {
           console.log('Guest Login Error', error);
+        }
+      },
+    }),
+    sendAssessmentLink: builder.mutation<any, void>({
+      query: () => ({
+        url: API.sendAssessmentLink,
+        method: HTTP_METHOD.POST,
+        data: {},
+        skipLoader: false,
+      }),
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'sendAssessmentLink response');
+        } catch (error) {
+          console.log('sendAssessmentLink Error', error);
         }
       },
     }),
@@ -1073,4 +1105,6 @@ export const {
   useGetInterviewsQuery,
   useTogglePostLikeMutation,
   useGetEmployeeProfileByIdQuery,
+  useGetCompletedInterviewsQuery,
+  useSendAssessmentLinkMutation,
 } = dashboardApi;

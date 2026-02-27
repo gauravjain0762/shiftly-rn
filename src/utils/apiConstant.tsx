@@ -32,6 +32,7 @@ export const API = {
   getFacilities: '/company/getFacilities',
   getCompanyJobDetails: '/company/getJobDetails',
   getCompanyOtherRequirements: '/company/getOtherRequirements',
+  getCompletedInterviews: '/company/getCompletedInterviews',
   addShortlistEmployee: '/company/shortlistEmployee',
   unshortlistEmployee: '/company/unshortlistEmployee',
   editCompanyJob: '/company/editJob',
@@ -98,6 +99,7 @@ export const API = {
   // UserDetails
   getProfile: '/getProfile',
   empUpdateProfile: '/updateProfile',
+  sendAssessmentLink: '/sendAssessmentLink',
   addUpdateEducation: '/addUpdateEducation',
   addUpdateExperience: '/addUpdateExperience',
   updateAboutMe: '/updateAboutMe',

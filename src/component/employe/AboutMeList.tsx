@@ -36,12 +36,13 @@ const languages = [
 
 type Props = {
   aboutEdit: any;
-  experienceList: any;
-  item: MessageItem[];
-  setAboutEdit: any;
+  setAboutEdit: (val: any) => void;
   skillsList: any[];
-  onNextPress: () => void;
-  onPressMessage: (item: MessageItem) => void;
+  // Optional props for other usages
+  experienceList?: any;
+  item?: MessageItem[];
+  onNextPress?: () => void;
+  onPressMessage?: (item: MessageItem) => void;
 };
 
 const getDotColor = (level: string) => {
@@ -68,7 +69,7 @@ const proficiencyLabels: { [key: string]: string } = {
   'Native': 'Native',
 };
 
-const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) => {
+const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
   const [pressedDot, setPressedDot] = useState<{ langName: string; level: string } | null>(null);
 
   return (
@@ -221,7 +222,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }: any) =>
             message="Choose all languages you can work in. Add your proficiency level (Basic / Fluent / Native)."
             position="bottom"
             containerStyle={styles.tooltipIcon}
-            tooltipBoxStyle={{ left: '-250%', top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+            tooltipBoxStyle={{ left: wp(-110), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
           />
         </View>
         <CustomDropdownMulti

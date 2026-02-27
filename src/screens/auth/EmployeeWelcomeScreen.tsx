@@ -143,7 +143,7 @@ const EmployeeWelcomeScreen = () => {
           email: data.user.email,
           device_type: Platform.OS,
           googleId: idToken,
-          device_token: fcmToken ?? 'ddd',
+          device_token: fcmToken ?? '',
         };
 
         updateSignupData({
@@ -198,7 +198,7 @@ const EmployeeWelcomeScreen = () => {
           email: email || decoded?.email,
           appleId: appleAuthRequestResponse.user,
           device_type: Platform.OS,
-          devce_token: fcmToken ?? 'ddd',
+          device_token: fcmToken ?? '',
         };
 
         updateSignupData({

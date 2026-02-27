@@ -232,7 +232,7 @@ const SignUp = () => {
     const verifyData = {
       otp: otp.join(''),
       user_id: userInfo?._id,
-      device_token: fcmToken ?? 'ddd',
+      device_token: fcmToken ?? '',
       device_type: Platform.OS,
     };
     console.log(' ~ handleOTPVerify ~ verifyData:', verifyData);

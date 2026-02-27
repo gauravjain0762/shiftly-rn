@@ -15,10 +15,11 @@ import CustomDropdown from '../common/CustomDropdown';
 type Props = {
   educationListEdit: EducationItem;
   setEducationListEdit: (item: EducationItem) => void;
-  addNewEducation: () => void;
-  onNextPress: () => void;
+  // Optional props for other screens (not required here)
+  addNewEducation?: () => void;
+  onNextPress?: () => void;
   onSaveEducation?: () => void;
-  educationList: EducationItem[];
+  educationList?: EducationItem[];
   educationData?: EducationItem[];
 };
 

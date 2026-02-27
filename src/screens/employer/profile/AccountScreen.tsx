@@ -260,7 +260,7 @@ const AccountScreen = () => {
                   ]}>
                   {item.label}
                 </Text>
-                {item.label !== 'Logout' && (
+                {item.label !== 'Logout' && item.label !== 'Delete Account' && (
                   <Image
                     source={IMAGES.right_icon}
                     style={{

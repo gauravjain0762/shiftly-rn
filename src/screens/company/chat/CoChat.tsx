@@ -236,18 +236,18 @@ const CoChat = () => {
                   jobdetail_chatData?.user_id?.name}
               </Text>
             </View>
-            <CustomImage
+            {/* <CustomImage
               onPress={() => {
                 setShowJobCard(prev => !prev);
               }}
               size={wp(24)}
               tintColor={colors.black}
               source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
-            />
+            /> */}
           </View>
         </View>
 
-        {showJobCard && (
+        {/* {showJobCard && (
           <View style={styles.card}>
             <Text style={styles.dateText}>
               {chats?.data?.chat?.user_id?.name ||
@@ -280,7 +280,7 @@ const CoChat = () => {
               <Text style={styles.buttonText}>View Job</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )} */}
 
         <KeyboardAvoidingView
           style={{ flex: 1 }}

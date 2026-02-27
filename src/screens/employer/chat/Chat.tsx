@@ -183,16 +183,16 @@ const Chat = () => {
         <View style={styles.container}>
           <BackHeader
             title={jobdetail_chatData?.company_name || 'Unknown'}
-            RightIcon={
-              <CustomImage
-                onPress={() => {
-                  setShowJobCard(prev => !prev);
-                }}
-                size={wp(24)}
-                tintColor={colors._0B3970}
-                source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
-              />
-            }
+            // RightIcon={
+            //   <CustomImage
+            //     onPress={() => {
+            //       setShowJobCard(prev => !prev);
+            //     }}
+            //     size={wp(24)}
+            //     tintColor={colors._0B3970}
+            //     source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
+            //   />
+            // }
             titleStyle={{
               flex: 1,
               paddingHorizontal: hp(10),
@@ -200,7 +200,7 @@ const Chat = () => {
           />
         </View>
 
-        {showJobCard && (
+        {/* {showJobCard && (
           <View style={styles.card}>
             <Text style={styles.dateText}>
               You applied to this position on{' '}
@@ -223,7 +223,7 @@ const Chat = () => {
               <Text style={styles.buttonText}>View Job</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )} */}
 
         <KeyboardAvoidingView
           style={{ flex: 1, }}

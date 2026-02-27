@@ -56,7 +56,7 @@ const LoginScreen = () => {
           email: email.trim().toLowerCase(),
           password: password.trim(),
           language: language,
-          deviceToken: fcmToken ?? 'ddd',
+          device_token: fcmToken ?? '',
           deviceType: Platform.OS,
         };
         console.log(">>>>>>>>>>>>> ~ handleLogin ~ data:", data)

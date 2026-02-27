@@ -341,9 +341,7 @@ const CreateProfileScreen = () => {
         }
       }
 
-      dispatch(setEducationList([]));
       refetchEducation();
-      dispatch(setActiveStep(2));
     } catch (error) {
       console.error('Error adding education:', error);
     }
@@ -351,7 +349,8 @@ const CreateProfileScreen = () => {
 
   const handleAddUExperience = async () => {
     try {
-      for (const exp of experienceList) {
+      const list = Array.isArray(experienceList) ? experienceList : [];
+      for (const exp of list) {
         const payload = {
           experience_id: exp._id || '',
           title: exp?.title,
@@ -387,10 +386,7 @@ const CreateProfileScreen = () => {
         }
       }
 
-      dispatch(setExperienceList([]));
       refetchExperience();
-      dispatch(setActiveStep(3));
-
     } catch (error) {
       console.error('Error adding experience:', error);
     }
@@ -678,6 +674,8 @@ const CreateProfileScreen = () => {
                 setEducationListEdit={val =>
                   dispatch(setEducationListEdit(val))
                 }
+                addNewEducation={() => {}}
+                onNextPress={() => {}}
               />
             </>
           )}
@@ -753,6 +751,8 @@ const CreateProfileScreen = () => {
               }}
               experienceList={experienceList}
               setAboutEdit={(val: any) => dispatch(setAboutEdit(val))}
+              item={[]}
+              onPressMessage={() => {}}
             />
           )}
 
@@ -802,8 +802,9 @@ const CreateProfileScreen = () => {
             type="Company"
             style={styles.btn}
             title="Next"
-            onPress={() => {
-              handleAddEducation();
+            onPress={async () => {
+              await handleAddEducation();
+              dispatch(setActiveStep(2));
             }}
           // disabled={educationList?.length === 0}
           />
@@ -853,16 +854,14 @@ const CreateProfileScreen = () => {
             style={styles.btn}
             title={'Next'}
             onPress={() => {
-              handleAddUExperience();
+              dispatch(setActiveStep(3));
             }}
-          // disabled={experienceList?.length === 0}
           />
           {route.params?.isEdit && (
             <GradientButton
               type="Company"
               style={styles.btn}
               title={'Update Profile'}
-              disabled={experienceList?.length === 0}
               onPress={() => {
                 handleUpdateProfile();
               }}

@@ -117,12 +117,13 @@ const JobPreview = () => {
             dispatch(setCoPostJobSteps(1));
 
             if (jobIdToUse) {
-                navigateTo(SCREENS.SuggestedEmployee, {
-                    jobId: jobIdToUse,
-                    jobData: jobDataToUse,
-                });
+              navigateTo(SCREENS.SuggestedEmployee, {
+                jobId: jobIdToUse,
+                jobData: jobDataToUse,
+                fromPostJob: true,
+              });
             } else {
-                navigationRef?.current?.goBack();
+              navigationRef?.current?.goBack();
             }
         }, 3500);
     };
@@ -162,7 +163,10 @@ const JobPreview = () => {
             experiences: experience?.value || '',
             certifications: certification?.value || '',
             languages: language?.value || '',
-            job_requirements: Array.isArray(other_requirements) ? other_requirements.filter(Boolean).join(',') : '',
+            // Send other requirement IDs as comma-separated string (same as facilities)
+            job_requirements: Array.isArray(other_requirements)
+                ? other_requirements.filter(Boolean).join(',')
+                : '',
         };
         console.log(">>>>>>>>>>> ~ handlePostJob ~ params:", params)
 

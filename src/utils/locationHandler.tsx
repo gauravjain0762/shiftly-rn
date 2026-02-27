@@ -158,7 +158,7 @@ const getCurrentLocation = (onSuccess: (location: any) => void) => {
   Geolocation?.getCurrentPosition(
     position => {
       const { latitude, longitude } = position.coords;
-      console.log('latitude, longitude', latitude, longitude);
+      // console.log('latitude, longitude', latitude, longitude);
       const location = {
         latitude,
         longitude,

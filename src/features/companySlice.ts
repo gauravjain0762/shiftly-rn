@@ -32,7 +32,10 @@ interface JobFormState {
   experience: { label: string; value: string } | null;
   certification: { label: string; value: string } | null;
   language: { label: string; value: string } | null;
-  other_requirements: { label: string; value: string } | null;
+  /**
+   * Selected "Other Requirements" IDs
+   */
+  other_requirements: string[];
 }
 
 interface PostFormState {
@@ -99,7 +102,7 @@ const initialState: CompanyState = {
     experience: null,
     certification: null,
     language: null,
-    other_requirements: null,
+    other_requirements: [],
   },
   postForm: {
     title: '',

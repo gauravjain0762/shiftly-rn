@@ -239,6 +239,7 @@ const CoJob = () => {
                       jobId: item?._id,
                       jobData: { data: { job: item } },
                       isFromJobCard: true,
+                      fromMyJobs: true,
                     })
                   }
                 />

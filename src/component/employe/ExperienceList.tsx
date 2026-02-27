@@ -75,7 +75,7 @@ const ExperienceList: FC<any> = ({
           message="Select the job title you are looking for (e.g., Receptionist, Waiter, Housekeeping Attendant). This helps us match you with the right employers."
           position="bottom"
           containerStyle={styles.tooltipIcon}
-          tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+          tooltipBoxStyle={{left: wp(-80), top: hp(28), width: wp(300), maxWidth: wp(280), zIndex: 1000}}
         />
       </View>
       <CustomInput

@@ -1,84 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BackHeader, LinearContainer } from '../../../component';
 import { colors } from '../../../theme/colors';
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
-import { useGetCompanyJobsQuery } from '../../../api/dashboardApi';
-import { navigateTo, getTimeAgo } from '../../../utils/commonFunction';
+import { useGetCompletedInterviewsQuery } from '../../../api/dashboardApi';
+import { getTimeAgo, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import FastImage from 'react-native-fast-image';
 
 const CompletedInterviews = () => {
     const { t } = useTranslation();
-    const [page, setPage] = useState(1);
-    const [jobsList, setJobsList] = useState<any[]>([]);
+    const { data, isLoading, isFetching, refetch } = useGetCompletedInterviewsQuery();
 
-    // queryParams for getCompanyJobs
-    const queryParams = {
-        page: page,
-        limit: 10,
-    };
-
-    const { data, isLoading, isFetching } = useGetCompanyJobsQuery(queryParams);
-
-    useEffect(() => {
-        if (data?.data?.jobs) {
-            if (page === 1) {
-                setJobsList(data.data.jobs);
-            } else {
-                setJobsList(prev => [...prev, ...data.data.jobs]);
-            }
-        }
-    }, [data, page]);
-
-    const handleLoadMore = () => {
-        if (data?.data?.pagination?.total_pages > page && !isFetching) {
-            setPage(prev => prev + 1);
-        }
-    };
+    const interviews = data?.data?.interviews ?? [];
 
     const renderItem = ({ item }: { item: any }) => {
-        // Note: We are listing Jobs here because we don't have a direct API for "Completed Interviews" list.
-        // Ideally, we would list specific interview sessions. 
-        // For now, we allow navigation to the Job's suggested employees or details where interviews can be found.
-        // User requested "Candidate Name" and "Status". Without that data in 'job' object, we show Job info.
+        const job = item?.job_id;
+        const company = job?.company_id;
+        const user = item?.user_id;
+        const interviewCompletedAt = item?.interview_completed || item?.updatedAt || item?.createdAt;
+        const scores = item?.interview_response?.scores || {};
+        const hasScores =
+            scores &&
+            Object.values(scores).some((v: any) => v !== null && v !== undefined);
 
-        // Check if job has interview stats if possible, otherwise just show job.
+        const handleOpenInterviewStatus = () => {
+            if (!job || !user) {
+                return;
+            }
+
+            navigateTo(SCREENS.InterviewStatus, {
+                jobData: job,
+                candidateData: user,
+                inviteData: item,
+            });
+        };
 
         return (
             <TouchableOpacity
                 style={styles.card}
-                onPress={() => {
-                    // Navigate to SuggestedEmployee which lists candidates (including completed interviews) or InterviewStatus directly if we had candidate data
-                    navigateTo(SCREENS.SuggestedEmployee, { jobData: item, initialTab: 'Shortlisted' });
-                }}
+                activeOpacity={0.8}
+                onPress={handleOpenInterviewStatus}
             >
                 <View style={styles.header}>
                     <View style={styles.logoContainer}>
-                        {item?.company?.logo ? (
+                        {company?.logo ? (
                             <FastImage
-                                source={{ uri: item.company.logo }}
+                                source={{ uri: company.logo }}
                                 style={styles.logo}
                                 resizeMode="cover"
                             />
                         ) : (
-                            <Text style={styles.logoText}>{item?.company?.name?.charAt(0) || 'C'}</Text>
+                            <Text style={styles.logoText}>
+                                {company?.company_name?.charAt(0) || 'C'}
+                            </Text>
                         )}
                     </View>
                     <View style={styles.headerInfo}>
-                        <Text style={styles.jobTitle} numberOfLines={1}>{item?.title}</Text>
-                        <Text style={styles.companyName} numberOfLines={1}>{item?.company?.name || 'Company'}</Text>
-                        <Text style={styles.location} numberOfLines={1}>{item?.location || item?.city || 'Location N/A'}</Text>
+                        <Text style={styles.jobTitle} numberOfLines={1}>
+                            {job?.title || 'N/A'}
+                        </Text>
+                        <Text style={styles.companyName} numberOfLines={1}>
+                            {company?.company_name || 'Company'}
+                        </Text>
+                        <Text style={styles.candidateName} numberOfLines={1}>
+                            {user?.name || t('Candidate')}
+                        </Text>
+                        <Text style={styles.location} numberOfLines={1}>
+                            {job?.country || job?.area || 'Location N/A'}
+                        </Text>
                     </View>
                 </View>
 
+                {hasScores && (
+                    <View style={styles.scoresRow}>
+                        <View style={styles.scoreChip}>
+                            <Text style={styles.scoreLabel}>{t('Communication')}</Text>
+                            <Text style={styles.scoreValue}>
+                                {scores.communication ?? '-'}
+                            </Text>
+                        </View>
+                        <View style={styles.scoreChip}>
+                            <Text style={styles.scoreLabel}>{t('Motivation')}</Text>
+                            <Text style={styles.scoreValue}>{scores.motivation ?? '-'}</Text>
+                        </View>
+                        <View style={styles.scoreChip}>
+                            <Text style={styles.scoreLabel}>{t('Skills')}</Text>
+                            <Text style={styles.scoreValue}>{scores.skills ?? '-'}</Text>
+                        </View>
+                    </View>
+                )}
+
                 <View style={styles.footer}>
-                    <View style={styles.statusTag}>
-                        <Text style={styles.statusText}>{t('View Candidates')}</Text>
+                    <View style={styles.footerLeft}>
+                        <TouchableOpacity
+                          style={styles.assessmentButton}
+                          activeOpacity={0.8}
+                          onPress={handleOpenInterviewStatus}>
+                          <Text style={styles.assessmentButtonText}>
+                            {t('View Assessment')}
+                          </Text>
+                        </TouchableOpacity>
                     </View>
                     <Text style={styles.timeAgo}>
-                        {getTimeAgo(item?.createdAt)}
+                        {getTimeAgo(interviewCompletedAt)}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -89,23 +115,23 @@ const CompletedInterviews = () => {
         <LinearContainer colors={[colors.white, colors.white]}>
             <BackHeader title={t('Completed Interviews')} containerStyle={{ paddingHorizontal: wp(20), paddingTop: hp(12) }} />
             <View style={styles.container}>
-                {isLoading && page === 1 ? (
+                {isLoading ? (
                     <View style={styles.loader}>
                         <ActivityIndicator size="large" color={colors._0B3970} />
                     </View>
                 ) : (
                     <FlatList
-                        data={jobsList}
+                        data={interviews}
                         renderItem={renderItem}
                         keyExtractor={(item, index) => item._id || index.toString()}
                         contentContainerStyle={styles.listContent}
-                        onEndReached={handleLoadMore}
-                        onEndReachedThreshold={0.5}
-                        ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator size="small" color={colors._0B3970} /> : null}
+                        refreshing={isFetching}
+                        onRefresh={refetch}
+                        ListFooterComponent={isFetching ? <ActivityIndicator size="small" color={colors._0B3970} /> : null}
                         ListEmptyComponent={
                             !isLoading ? (
                                 <View style={styles.emptyState}>
-                                    <Text style={styles.emptyText}>{t('No jobs found')}</Text>
+                                    <Text style={styles.emptyText}>{t('No completed interviews found')}</Text>
                                 </View>
                             ) : null
                         }
@@ -174,13 +200,37 @@ const styles = StyleSheet.create({
         ...commonFontStyle(600, 16, colors.black),
         marginBottom: hp(4),
     },
-    companyName: {
-        ...commonFontStyle(400, 14, colors._656464),
-        marginBottom: hp(2),
-    },
+  companyName: {
+    ...commonFontStyle(500, 14, colors._656464),
+    marginBottom: hp(2),
+  },
+  candidateName: {
+    ...commonFontStyle(400, 13, colors._656464),
+    marginBottom: hp(2),
+  },
     location: {
         ...commonFontStyle(400, 12, '#939393'),
     },
+  scoresRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: wp(8),
+    marginTop: hp(4),
+  },
+  scoreChip: {
+    paddingVertical: hp(4),
+    paddingHorizontal: wp(8),
+    borderRadius: wp(10),
+    backgroundColor: '#F5F7FB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreLabel: {
+    ...commonFontStyle(400, 10, '#6B7280'),
+  },
+  scoreValue: {
+    ...commonFontStyle(600, 12, colors._0B3970),
+  },
     footer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -199,6 +249,20 @@ const styles = StyleSheet.create({
     statusText: {
         ...commonFontStyle(500, 12, '#1E8E3E'),
     },
+  footerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(10),
+  },
+  assessmentButton: {
+    paddingVertical: hp(4),
+    paddingHorizontal: wp(12),
+    borderRadius: wp(12),
+    backgroundColor: colors._0B3970,
+  },
+  assessmentButtonText: {
+    ...commonFontStyle(500, 12, colors.white),
+  },
     timeAgo: {
         ...commonFontStyle(400, 11, colors._656464),
     },

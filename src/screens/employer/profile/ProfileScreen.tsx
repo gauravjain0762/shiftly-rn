@@ -13,7 +13,7 @@ import BottomModal from '../../../component/common/BottomModal';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
-import { getInitials, hasValidImage, navigateTo } from '../../../utils/commonFunction';
+import { getInitials, hasValidImage, navigateTo, successToast, errorToast } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -22,7 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
 import { navigationRef } from '../../../navigation/RootContainer';
-import { useGetEmployeeProfileQuery } from '../../../api/dashboardApi';
+import { useGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = () => {
@@ -41,6 +41,11 @@ const ProfileScreen = () => {
 
   const [showAllSkills, setShowAllSkills] = useState(false);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+  const [sendAssessmentLink, {isLoading: isSendingAssessment}] =
+    useSendAssessmentLinkMutation();
+
+  const assessStatus = userInfo?.assess_first?.status as string | undefined;
+  const hasAssessment = !!userInfo?.assess_first;
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
@@ -139,28 +144,36 @@ const ProfileScreen = () => {
           </TouchableOpacity> */}
 
           {!userInfo?.profile_completion && (
-            <View style={{ marginTop: hp(15) }} />
+            <View style={{marginTop: hp(15)}} />
           )}
 
-          {userInfo?.assess_first == null && (
-            <TouchableOpacity
-              style={styles.assessmentCard}
-              onPress={() => setShowAssessmentModal(true)}
-              activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Image
-                  source={IMAGES.document}
-                  style={styles.assessmentIcon}
-                />
-              </View>
-              <View style={styles.assessmentTextContainer}>
-                <BaseText style={styles.assessmentTitle}>Skill assessment</BaseText>
-                <BaseText style={styles.assessmentSubtitle}>
-                  Soft Skill Assessment is pending
-                </BaseText>
-              </View>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={styles.assessmentCard}
+            onPress={() => setShowAssessmentModal(true)}
+            activeOpacity={0.8}>
+            <View style={styles.iconCircle}>
+              <Image source={IMAGES.document} style={styles.assessmentIcon} />
+            </View>
+            <View style={styles.assessmentTextContainer}>
+              <BaseText style={styles.assessmentTitle}>
+                Skill assessment
+              </BaseText>
+              <BaseText style={styles.assessmentSubtitle}>
+                {!hasAssessment && 'Soft Skill Assessment is pending'}
+                {hasAssessment &&
+                  assessStatus === 'Invited' &&
+                  'Assessment link sent – awaiting completion'}
+                {hasAssessment &&
+                  assessStatus === 'Completed' &&
+                  'Soft Skill Assessment completed'}
+                {hasAssessment &&
+                  assessStatus &&
+                  assessStatus !== 'Invited' &&
+                  assessStatus !== 'Completed' &&
+                  `Status: ${assessStatus}`}
+              </BaseText>
+            </View>
+          </TouchableOpacity>
 
           <BottomModal
             visible={showAssessmentModal}
@@ -168,16 +181,48 @@ const ProfileScreen = () => {
             backgroundColor={colors.white}>
             <BaseText style={styles.modalHeading}>Skill Assessment</BaseText>
             <BaseText style={styles.modalDescription}>
-              Request a new link for your soft skill assessment.
+              {!hasAssessment &&
+                'Request a new link for your soft skill assessment.'}
+              {hasAssessment &&
+                assessStatus === 'Invited' &&
+                'Your soft skill assessment link has been sent. You will be notified once it is completed.'}
+              {hasAssessment &&
+                assessStatus === 'Completed' &&
+                'You have already completed your soft skill assessment.'}
             </BaseText>
-            <GradientButton
-              type="Company"
-              title="Send Link"
-              style={styles.sendLinkButton}
-              onPress={() => {
-                setShowAssessmentModal(false);
-              }}
-            />
+            {!hasAssessment && (
+              <GradientButton
+                type="Company"
+                title="Send Link"
+                style={styles.sendLinkButton}
+                disabled={isSendingAssessment}
+                onPress={async () => {
+                  if (isSendingAssessment) {
+                    return;
+                  }
+                  try {
+                    const res: any = await sendAssessmentLink().unwrap();
+                    if (res?.status) {
+                      successToast(res?.message);
+                    } else {
+                      errorToast(
+                        res?.message || 'Failed to send assessment link.',
+                      );
+                    }
+                  } catch (err: any) {
+                    console.log('sendAssessmentLink error', err);
+                    const message =
+                      err?.data?.message ||
+                      err?.error ||
+                      err?.message ||
+                      'Failed to send assessment link.';
+                    errorToast(message);
+                  } finally {
+                    setShowAssessmentModal(false);
+                  }
+                }}
+              />
+            )}
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setShowAssessmentModal(false)}>

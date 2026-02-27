@@ -36,14 +36,14 @@ const CoHome = () => {
   const metricOptions = [
     {
       key: 'job_view',
-      label: 'Total Job Views',
+      label: 'Job Views',
       subLabel: '',
       value: job_stats?.total_job_views ?? 0,
       icon: IMAGES.jobview,
     },
     {
       key: 'applied',
-      label: 'Total Applications',
+      label: 'Applications',
       subLabel: '',
       value: job_stats?.total_applications ?? 0,
       icon: IMAGES.appliedjob,
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     borderColor: colors._E0C688,
     borderWidth: 1,
     paddingHorizontal: wp(16),
-    paddingVertical: hp(20),
+    paddingVertical: hp(14),
   },
   jobSummaryTitle: {
     ...commonFontStyle(600, 16, colors.black),
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: hp(10),
     paddingVertical: hp(15),
-    marginTop: hp(18),
+    marginTop: hp(12),
   },
   jobSummaryCardContent: {
     alignItems: 'center',
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metricLabelBold: {
-    ...commonFontStyle(700, 14, colors.black),
+    ...commonFontStyle(600, 13, colors.black),
     marginBottom: hp(2),
   },
   metricLabel: {
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 20, colors.black),
   },
   metricLabelBoldWhite: {
-    ...commonFontStyle(700, 14, colors.white),
+    ...commonFontStyle(600, 12, colors.white),
     marginBottom: hp(2),
   },
   metricLabelWhite: {

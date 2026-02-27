@@ -1583,7 +1583,7 @@ PODS:
     - Yoga
   - react-native-maps (1.20.1):
     - React-Core
-  - react-native-safe-area-context (5.6.2):
+  - react-native-safe-area-context (5.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1598,8 +1598,8 @@ PODS:
     - React-hermes
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.6.2)
-    - react-native-safe-area-context/fabric (= 5.6.2)
+    - react-native-safe-area-context/common (= 5.7.0)
+    - react-native-safe-area-context/fabric (= 5.7.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1609,7 +1609,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (5.6.2):
+  - react-native-safe-area-context/common (5.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1633,7 +1633,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (5.6.2):
+  - react-native-safe-area-context/fabric (5.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3036,7 +3036,7 @@ SPEC CHECKSUMS:
   react-native-google-maps: c4f5c5b2dda17e7cb2cb2b37a81f140b039b3e7e
   react-native-keyboard-controller: 32cf3367a6ab71c5ee6d443895bd47245a52042d
   react-native-maps: 9febd31278b35cd21e4fad2cf6fa708993be5dab
-  react-native-safe-area-context: 599ee84bd389d2a4230ab7b832fb1354f8eedaec
+  react-native-safe-area-context: bd7d084270bba25cff40dc1c917883f20da5039f
   react-native-slider: 0c0125010b5299e647eb5d955b58133fb4eb34e4
   react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594
   react-native-webview: f0d598682cbc88a97d66da4121873d3467f76635

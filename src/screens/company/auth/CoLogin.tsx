@@ -46,7 +46,7 @@ const CoLogin = () => {
       const data = {
         email: email.trim(),
         password: password.trim(),
-        device_token: fcmToken ?? 'ddd',
+        device_token: fcmToken ?? '',
       };
 
       try {

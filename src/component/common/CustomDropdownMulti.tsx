@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(500, 16, colors._0B3970),
   },
   required: {
     color: 'red',
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputStyle: {
-    ...commonFontStyle(400, 10, '#F4E2B8'),
+    ...commonFontStyle(400, 14, colors._0B3970),
   },
   placeholderStyle: {
     flex: 1,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     marginVertical: hp(8),
   },
   itemText: {
-    ...commonFontStyle(400, 18, '#DADADA'),
+    ...commonFontStyle(400, 16, '#FFFFFF'),
   },
   checkIcon: {
     width: 18,

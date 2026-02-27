@@ -22,6 +22,7 @@ import {
   LocationContainer,
 } from '../../../component';
 import LinearContainer from '../../../component/common/LinearContainer';
+import CustomDropdownMulti from '../../../component/common/CustomDropdownMulti';
 import { useTranslation } from 'react-i18next';
 import {
   SCREEN_HEIGHT,
@@ -486,7 +487,10 @@ const PostJob = () => {
       experiences: [experience?.value].filter(Boolean).join(','),
       certifications: [certification?.value].filter(Boolean).join(','),
       languages: [language?.value].filter(Boolean).join(','),
-      job_requirements: Array.isArray(requirements) ? requirements.filter(Boolean).join(',') : '',
+      // Send other requirement IDs as comma-separated string (same as facilities)
+      job_requirements: Array.isArray(other_requirements)
+        ? other_requirements.filter(Boolean).join(',')
+        : '',
     };
 
     console.log('~ >>>> handleCreateJob ~ params:', params);
@@ -962,21 +966,59 @@ const PostJob = () => {
                 </View>
 
                 <View style={[styles.field, { zIndex: 100 }]}>
-                  <CustomDropdown
+                  <CustomDropdownMulti
                     label={t('Other Requirements')}
                     data={otherRequirementsData}
                     labelField="label"
                     valueField="value"
-                    value={other_requirements?.value}
-                    onChange={(e: any) => {
-                      updateJobForm({ other_requirements: e });
+                    value={other_requirements || []}
+                    onChange={(items: any[]) => {
+                      const ids =
+                        Array.isArray(items)
+                          ? items
+                              .map(it => it?.value ?? it)
+                              .filter(Boolean)
+                          : [];
+                      updateJobForm({ other_requirements: ids });
                     }}
-                    dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
                     placeholder={t('Select Requirements')}
+                    dropdownStyle={styles.dropdown}
+                    container={{}}
+                    dropdownPosition="top"
+                    hideSelectedItems
                   />
+                  {Array.isArray(other_requirements) &&
+                    other_requirements.length > 0 && (
+                      <View style={styles.selectedRequirementsContainer}>
+                        {otherRequirementsData
+                          .filter(opt =>
+                            other_requirements.includes(opt.value),
+                          )
+                          .map(opt => (
+                            <View
+                              key={opt.value}
+                              style={styles.requirementTag}>
+                              <Text style={styles.requirementText}>
+                                {opt.label}
+                              </Text>
+                              <Pressable
+                                onPress={() =>
+                                  updateJobForm({
+                                    other_requirements:
+                                      other_requirements.filter(
+                                        (id: string) => id !== opt.value,
+                                      ),
+                                  })
+                                }
+                                style={styles.requirementCloseBtn}>
+                                <Text style={styles.requirementCloseText}>
+                                  ×
+                                </Text>
+                              </Pressable>
+                            </View>
+                          ))}
+                      </View>
+                    )}
                 </View>
               </KeyboardAwareScrollView>
 
@@ -1699,6 +1741,7 @@ const PostJob = () => {
                     navigateTo(SCREENS.SuggestedEmployee, {
                       jobId: jobIdToUse,
                       jobData: jobDataToUse,
+                      fromPostJob: true,
                     });
                   } else {
                     navigationRef?.current?.goBack();
@@ -2162,6 +2205,37 @@ const styles = StyleSheet.create({
   },
   skillOptionText: {
     ...commonFontStyle(400, 15, colors.white),
+  },
+  selectedRequirementsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: wp(8),
+    marginTop: hp(10),
+  },
+  requirementTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: hp(20),
+    paddingHorizontal: wp(10),
+    paddingVertical: hp(6),
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+  },
+  requirementText: {
+    ...commonFontStyle(400, 14, colors._0B3970),
+    marginRight: wp(5),
+  },
+  requirementCloseBtn: {
+    backgroundColor: '#EFF1F7',
+    borderRadius: 50,
+    width: wp(16),
+    height: wp(16),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  requirementCloseText: {
+    ...commonFontStyle(500, 12, colors._0B3970),
   },
   placeholderText: {
     ...commonFontStyle(400, 22, colors._7B7878),

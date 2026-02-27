@@ -98,6 +98,7 @@ const JobsScreen = () => {
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
+  console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages)
   const pagination = data?.data?.pagination;
 
   const [filters, setFilters] = useState<{
