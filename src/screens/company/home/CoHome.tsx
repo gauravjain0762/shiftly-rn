@@ -200,7 +200,7 @@ const CoHome = () => {
             style={{ flex: 1 }}
             textContainerStyle={{ paddingHorizontal: wp(5) }}
           />
-          <GradientButton
+          {/* <GradientButton
             type="Company"
             title="Manage Job"
             onPress={() => navigateTo(SCREENS.CoJob)}
@@ -208,7 +208,7 @@ const CoHome = () => {
             textStyle={{ color: colors._0B3970 }}
             style={{ borderColor: colors._0B3970, borderWidth: 1.5, flex: 1 }}
             textContainerStyle={{ paddingHorizontal: wp(5) }}
-          />
+          /> */}
         </View>
 
       </ScrollView>

@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import React, { useState } from 'react';
+import { CircleUser, UserRound } from 'lucide-react-native';
 import { BackHeader, LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
@@ -50,14 +51,14 @@ const AccountScreen = () => {
       items: [
         {
           label: 'Account Info',
-          icon: IMAGES.account,
+          LucideIcon: CircleUser,
           onPress: () => {
             navigateTo(SCREENS.ViewProfileScreen);
           },
         },
         {
           label: 'Profile',
-          icon: IMAGES.Profile,
+          LucideIcon: UserRound,
           onPress: () => {
             navigateTo(SCREENS.ProfileScreen);
           },
@@ -230,7 +231,7 @@ const AccountScreen = () => {
                 style={styles.row}>
                 {item.label == 'Logout' ? (
                   <Image
-                    source={item.icon}
+                    source={(item as any).icon}
                     style={{
                       width: 18,
                       height: 18,
@@ -240,9 +241,16 @@ const AccountScreen = () => {
                       marginLeft: 5,
                     }}
                   />
+                ) : (item as any).LucideIcon ? (
+                  <View style={{ marginRight: 14 }}>
+                    {(() => {
+                      const IconComponent = (item as any).LucideIcon;
+                      return <IconComponent size={22} color={colors._0B3970} />;
+                    })()}
+                  </View>
                 ) : (
                   <Image
-                    source={item.icon}
+                    source={(item as any).icon}
                     style={{
                       width: 22,
                       height: 22,

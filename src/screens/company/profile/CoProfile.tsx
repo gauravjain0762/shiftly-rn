@@ -31,6 +31,7 @@ import { colors } from '../../../theme/colors';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import CustomImage from '../../../component/common/CustomImage';
+import { CircleUser, UserRound } from 'lucide-react-native';
 
 const CoProfile = () => {
   const { t } = useTranslation();
@@ -49,12 +50,12 @@ const CoProfile = () => {
       items: [
         {
           label: 'Account Info',
-          icon: IMAGES.account,
+          LucideIcon: CircleUser,
           onPress: () => navigateTo(SCREENS.CompanyProfile),
         },
         {
           label: 'Profile',
-          icon: IMAGES.Profile,
+          LucideIcon: UserRound,
           onPress: () => {
             navigateTo(SCREEN_NAMES.CoMyProfile);
           },
@@ -247,6 +248,18 @@ const CoProfile = () => {
                 style={styles.row}>
                 {item.label == 'Logout' ? (
                   <Image source={item.icon} style={styles.logout} />
+                ) : (item as any).LucideIcon ? (
+                  <View style={styles.iconWrapper}>
+                    {(() => {
+                      const IconComponent = (item as any).LucideIcon;
+                      return (
+                        <IconComponent
+                          size={22}
+                          color={colors._555555}
+                        />
+                      );
+                    })()}
+                  </View>
                 ) : (
                   <Image
                     source={item.icon}
@@ -359,6 +372,9 @@ const styles = StyleSheet.create({
     width: wp(12),
     height: hp(12),
     resizeMode: 'contain',
+  },
+  iconWrapper: {
+    marginRight: 14,
   },
   iconStyle: {
     width: 22,

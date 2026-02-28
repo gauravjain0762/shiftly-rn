@@ -28,10 +28,10 @@ const months = [
   'December',
 ];
 
-// Generate years from 1975 to current year (no future years)
+// Generate years from current year down to 1975 (recent years first; user can scroll for past years)
 const getYears = () => {
   const currentYear = new Date().getFullYear();
-  return Array.from({length: currentYear - 1975 + 1}, (_, i) => 1975 + i);
+  return Array.from({length: currentYear - 1975 + 1}, (_, i) => currentYear - i);
 };
 
 const years = getYears();
@@ -74,18 +74,23 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
   const flatListRef = useRef<FlatList<any>>(null);
 
   const Dropdown = ({label, value, onPress}: any) => (
-    <TouchableOpacity
-      onPress={onPress}
-      style={styles.dropdown}
-      activeOpacity={0.8}>
-      <Text style={value ? styles.inputStyle : styles.placeholderStyle}>
-        {value || label}
-      </Text>
-      <Image
-        source={IMAGES.down1}
-        style={{width: 12, height: 13, resizeMode: 'contain', tintColor: '#0B3970'}}
-      />
-    </TouchableOpacity>
+    <View
+      style={styles.dropdownWrapper}
+      onStartShouldSetResponder={() => true}
+      onTouchEnd={(e) => e.stopPropagation()}>
+      <TouchableOpacity
+        onPress={onPress}
+        style={styles.dropdown}
+        activeOpacity={0.8}>
+        <Text style={value ? styles.inputStyle : styles.placeholderStyle}>
+          {value || label}
+        </Text>
+        <Image
+          source={IMAGES.down1}
+          style={{width: 12, height: 13, resizeMode: 'contain', tintColor: '#0B3970'}}
+        />
+      </TouchableOpacity>
+    </View>
   );
 
   const handleSelect = (item: string | number) => {
@@ -216,24 +221,18 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
     return [];
   };
 
+  // Scroll modal list to selected item (Month only; Year list shows recent first so no scroll on open)
   useEffect(() => {
-    if (openPicker && flatListRef.current) {
-      const data = getData();
-      let index = -1;
-
-      if (openPicker === 'Month' && selectedMonth) {
-        index = data.indexOf(selectedMonth);
-      } else if (openPicker === 'Year' && selectedYear) {
-        index = data.indexOf(Number(selectedYear));
-      }
-
+    if (openPicker === 'Month' && flatListRef.current && selectedMonth) {
+      const data = getFilteredMonths();
+      const index = data.indexOf(selectedMonth);
       if (index >= 0) {
         setTimeout(() => {
           flatListRef.current?.scrollToIndex({index, animated: true});
-        }, 100);
+        }, 150);
       }
     }
-  }, [openPicker, selectedYear]); // Added selectedYear dependency
+  }, [openPicker, selectedMonth]);
 
   return (
     <View style={{flex: 1}}>
@@ -242,7 +241,9 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
         {required && <Text style={styles.required}>*</Text>}
       </Text>
 
-      <View style={{flexDirection: 'row', alignItems: 'center', gap: wp(16)}}>
+      <View
+        style={{flexDirection: 'row', alignItems: 'center', gap: wp(16)}}
+        onStartShouldSetResponder={() => true}>
         <Dropdown
           label={'Month'}
           value={selectedMonth}
@@ -255,8 +256,8 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
         />
       </View>
 
-      {/* Modal Picker */}
-      <Modal visible={!!openPicker} transparent animationType="slide">
+      {/* Modal Picker - fade avoids parent scroll view shifting when opening */}
+      <Modal visible={!!openPicker} transparent animationType="fade">
         <View style={styles.modalBg}>
           <View style={styles.modalContainer}>
             <FlatList
@@ -303,6 +304,9 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
 export default CustomDatePicker;
 
 const styles = StyleSheet.create({
+  dropdownWrapper: {
+    flex: 1,
+  },
   dropdown: {
     flex: 1,
     paddingHorizontal: wp(16),

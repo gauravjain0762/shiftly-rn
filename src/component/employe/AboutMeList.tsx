@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { colors } from '../../theme/colors';
@@ -8,6 +8,7 @@ import CustomDropdownMulti from '../common/CustomDropdownMulti';
 import Tooltip from '../common/Tooltip';
 import { navigateTo } from '../../utils/commonFunction';
 import { SCREENS } from '../../navigation/screenNames';
+import { useGetCompanyLanguagesQuery } from '../../api/dashboardApi';
 
 type MessageItem = {
   id: string;
@@ -18,21 +19,6 @@ type MessageItem = {
   date: string;
   unreadCount?: number;
 };
-
-const languages = [
-  'English',
-  'French',
-  'Arabic',
-  'Spanish',
-  'German',
-  'Italian',
-  'Russian',
-  'Urdu',
-  'Hindi',
-  'Turkish',
-  'Chinese',
-  'Japanese',
-];
 
 type Props = {
   aboutEdit: any;
@@ -71,6 +57,21 @@ const proficiencyLabels: { [key: string]: string } = {
 
 const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
   const [pressedDot, setPressedDot] = useState<{ langName: string; level: string } | null>(null);
+  const { data: languagesResponse } = useGetCompanyLanguagesQuery({});
+  const languageOptions = useMemo(() => {
+    const list = languagesResponse?.data?.languages ?? [];
+    const options = list
+      .map((item: any) => {
+        const title = (item?.title ?? '').trim();
+        return { label: title, value: title };
+      })
+      .filter((opt: any) => opt.value);
+    const sorted = options.slice().sort((a: any, b: any) =>
+      (a.label || '').localeCompare(b.label || '', 'en', { sensitivity: 'base' })
+    );
+    // dropdownPosition="top" renders list inverted, so reverse to show A–Z
+    return sorted.reverse();
+  }, [languagesResponse]);
 
   return (
     <View style={[styles.containerWrapper, { overflow: 'visible' }]}>
@@ -228,9 +229,11 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
         <CustomDropdownMulti
           disable={false}
           dropdownPosition="top"
-          data={languages.map(lang => ({ label: lang, value: lang }))}
+          data={languageOptions}
+          labelField="label"
+          valueField="value"
           placeholder={'Add your languages'}
-          value={aboutEdit?.selectedLanguages.map((l: any) => l.name)}
+          value={aboutEdit?.selectedLanguages?.map((l: any) => l.name) ?? []}
           container={[styles.multiDropdownContainer, { overflow: 'visible', marginBottom: hp(15) }]}
           selectedStyle={styles.selectedStyle}
           hideSelectedItems

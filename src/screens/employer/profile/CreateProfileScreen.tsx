@@ -1,7 +1,8 @@
 import { Image, StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BackHeader,
+  CustomDropdown,
   GradientButton,
   LinearContainer,
   Loader,
@@ -36,6 +37,7 @@ import { RootState } from '../../../store';
 import {
   useAddUpdateEducationMutation,
   useAddUpdateExperienceMutation,
+  useGetCompanyExperiencesQuery,
   useGetEducationsQuery,
   useGetEmployeeProfileQuery,
   useGetEmployeeSkillsQuery,
@@ -43,12 +45,14 @@ import {
   useRemoveEducationMutation,
   useRemoveExperienceMutation,
   useUpdateAboutMeMutation,
+  useEmpUpdateProfileMutation,
 } from '../../../api/dashboardApi';
 import { errorToast, goBack, successToast } from '../../../utils/commonFunction';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import BaseText from '../../../component/common/BaseText';
 import { IMAGES } from '../../../assets/Images';
 import UploadResume from '../../../component/employe/UploadResume';
+import { useTranslation } from 'react-i18next';
 
 type Resume = {
   file_name: string;
@@ -57,6 +61,7 @@ type Resume = {
 };
 
 const CreateProfileScreen = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const {
@@ -84,6 +89,13 @@ const CreateProfileScreen = () => {
         refetchOnMountOrArgChange: true,
       },
     );
+  const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
+  const experienceOptionsData = useMemo(() => {
+    return experienceDataVals?.data?.experiences?.map((item: any) => ({
+      label: item?.title,
+      value: item?._id,
+    })) || [];
+  }, [experienceDataVals]);
   const { data: getAboutmeandResumes, refetch: refetchAboutMe } =
     useGetEmployeeProfileQuery(
       {},
@@ -103,6 +115,10 @@ const CreateProfileScreen = () => {
   const [isEducationUpdate, setIsEducationUpdate] = useState(false);
   const [isExperienceUpdate, setIsExperienceUpdate] = useState(false);
   const [resumes, setResumes] = useState<Resume[]>(uploadedResumes || []);
+  const [yearsOfExperienceOption, setYearsOfExperienceOption] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
 
   const [addUpdateEducation, { isLoading: isLoadingEducation }] =
     useAddUpdateEducationMutation({});
@@ -110,6 +126,7 @@ const CreateProfileScreen = () => {
     useAddUpdateExperienceMutation({});
   const [updateAboutMe, { isLoading: isLoadingAboutme }] =
     useUpdateAboutMeMutation({});
+  const [empUpdateProfile] = useEmpUpdateProfileMutation();
   const [removeEducation] = useRemoveEducationMutation({});
   const [removeExperience] = useRemoveExperienceMutation({});
   const { data: skillsData } = useGetEmployeeSkillsQuery({});
@@ -187,6 +204,19 @@ const CreateProfileScreen = () => {
       );
     }
   }, [educationData, experienceData, aboutmeandResumes]);
+
+  useEffect(() => {
+    const saved = aboutmeandResumes?.years_of_experience;
+    if (saved != null && saved !== '' && experienceOptionsData.length > 0) {
+      const match =
+        experienceOptionsData.find(
+          (opt: any) => opt.label === saved || opt.value === saved,
+        ) || null;
+      setYearsOfExperienceOption(match);
+    } else if (saved == null || saved === '') {
+      setYearsOfExperienceOption(null);
+    }
+  }, [aboutmeandResumes?.years_of_experience, experienceOptionsData]);
 
   const handleSaveOrAddEducation = () => {
     if (educationListEdit?.isEditing) {
@@ -351,12 +381,16 @@ const CreateProfileScreen = () => {
     try {
       const list = Array.isArray(experienceList) ? experienceList : [];
       for (const exp of list) {
+        const dep = exp?.department as any;
+        const departmentId =
+          typeof dep === 'object' && dep?._id ? dep._id : (exp?.department ?? '');
         const payload = {
           experience_id: exp._id || '',
           title: exp?.title,
           preferred_position: exp?.preferred_position,
           company: exp?.company,
-          department: exp?.department,
+          department: departmentId,
+          department_id: departmentId,
           country: exp?.country,
           job_start: {
             month: exp?.jobStart_month,
@@ -410,6 +444,10 @@ const CreateProfileScreen = () => {
     }
 
     formData.append('skills', aboutEdit?.selectedSkills?.join(',') || '');
+
+    if (yearsOfExperienceOption?.label) {
+      formData.append('years_of_experience', yearsOfExperienceOption.label);
+    }
 
     if (aboutEdit?.selectedLanguages?.length) {
       aboutEdit.selectedLanguages.forEach((lang: any, index: number) => {
@@ -646,9 +684,15 @@ const CreateProfileScreen = () => {
                     type="Education"
                     onRemove={() => handleRemoveEducation(item)}
                     onEdit={() => {
+                      const deg = item?.degree as any;
+                      const degreeId =
+                        typeof deg === 'object' && deg?._id
+                          ? deg._id
+                          : (item?.degree ?? '');
                       dispatch(
                         setEducationListEdit({
                           ...item,
+                          degree: degreeId,
                           startDate_month:
                             item?.startDate_month ||
                             item?.start_date?.month ||
@@ -682,6 +726,27 @@ const CreateProfileScreen = () => {
 
           {activeStep === 2 && (
             <>
+              <View style={[styles.yearsExperienceRow, styles.experienceDropdownField]}>
+                <BaseText style={styles.experienceDropdownLabel}>
+                  {t('Years of Experience')}
+                </BaseText>
+                <CustomDropdown
+                  data={experienceOptionsData}
+                  labelField="label"
+                  valueField="value"
+                  value={yearsOfExperienceOption?.value}
+                  onChange={(e: any) => {
+                    setYearsOfExperienceOption(
+                      e?.value != null ? { label: e.label, value: e.value } : null,
+                    );
+                  }}
+                  dropdownStyle={styles.experienceDropdown}
+                  renderRightIcon={IMAGES.ic_down}
+                  RightIconStyle={styles.experienceDropdownRightIcon}
+                  selectedTextStyle={styles.experienceDropdownSelectedText}
+                  placeholder={t('Select one')}
+                />
+              </View>
               {experienceList?.length > 0 &&
                 experienceList?.map((item: ExperienceItem, index: number) => (
                   <EducationCard
@@ -716,9 +781,13 @@ const CreateProfileScreen = () => {
                       const start = parseDate(item?.job_start);
                       const end = parseDate(item?.job_end);
 
+                      const dep = item?.department as any;
+                      const departmentId =
+                        typeof dep === 'object' && dep?._id ? dep._id : (item?.department ?? '');
                       dispatch(
                         setExperienceListEdit({
                           ...item,
+                          department: departmentId,
                           jobStart_month: item?.jobStart_month || start.month,
                           jobStart_year: item?.jobStart_year || start.year,
                           jobEnd_month: item?.jobEnd_month || end.month,
@@ -853,7 +922,16 @@ const CreateProfileScreen = () => {
             type="Company"
             style={styles.btn}
             title={'Next'}
-            onPress={() => {
+            onPress={async () => {
+              if (yearsOfExperienceOption?.label) {
+                try {
+                  const fd = new FormData();
+                  fd.append('years_of_experience', yearsOfExperienceOption.label);
+                  await empUpdateProfile(fd).unwrap();
+                } catch (_) {
+                  // non-blocking; still allow moving to step 3
+                }
+              }
               dispatch(setActiveStep(3));
             }}
           />
@@ -946,6 +1024,29 @@ const styles = StyleSheet.create({
     paddingTop: hp(18),
     paddingBottom: hp(5),
     paddingHorizontal: wp(25),
+  },
+  yearsExperienceRow: {
+    marginBottom: hp(12),
+    paddingHorizontal: wp(25),
+  },
+  experienceDropdownField: {
+    gap: hp(12),
+    marginBottom: hp(14),
+    zIndex: 10,
+  },
+  experienceDropdownLabel: {
+    ...commonFontStyle(400, 18, colors._0B3970),
+  },
+  experienceDropdown: {
+    borderRadius: 10,
+  },
+  experienceDropdownRightIcon: {
+    width: wp(16),
+    height: hp(13),
+    tintColor: colors._0B3970,
+  },
+  experienceDropdownSelectedText: {
+    ...commonFontStyle(400, 16, colors._181818),
   },
   btnRow: {
     gap: hp(4),

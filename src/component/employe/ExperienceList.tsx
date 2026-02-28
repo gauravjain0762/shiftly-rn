@@ -7,7 +7,7 @@ import {
   View,
   Text,
 } from 'react-native';
-import React, {FC, useState} from 'react';
+import React, {FC, useMemo, useState} from 'react';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import CustomDropdown from '../common/CustomDropdown';
 import CustomDatePicker from '../common/CustomDatePicker';
@@ -18,6 +18,7 @@ import BaseText from '../common/BaseText';
 import {ExperienceItem} from '../../features/employeeSlice';
 import {colors} from '../../theme/colors';
 import Tooltip from '../common/Tooltip';
+import {useGetDepartmentsQuery} from '../../api/dashboardApi';
 
 const experienceOptions = [
   {label: 'Internship', value: 'internship'},
@@ -25,24 +26,6 @@ const experienceOptions = [
   {label: 'Full-time', value: 'full_time'},
   {label: 'Freelance', value: 'freelance'},
   {label: 'Contract', value: 'contract'},
-];
-
-const departmentOptions = [
-  {label: 'Front Office', value: 'Front Office'},
-  {label: 'Housekeeping', value: 'Housekeeping'},
-  {label: 'Food & Beverage', value: 'Food & Beverage'},
-  {label: 'Kitchen', value: 'Kitchen'},
-  {label: 'Reception', value: 'Reception'},
-  {label: 'Concierge', value: 'Concierge'},
-  {label: 'Guest Services', value: 'Guest Services'},
-  {label: 'Maintenance', value: 'Maintenance'},
-  {label: 'Security', value: 'Security'},
-  {label: 'Spa & Wellness', value: 'Spa & Wellness'},
-  {label: 'Events & Banquets', value: 'Events & Banquets'},
-  {label: 'Sales & Marketing', value: 'Sales & Marketing'},
-  {label: 'Human Resources', value: 'Human Resources'},
-  {label: 'Finance & Accounting', value: 'Finance & Accounting'},
-  {label: 'Other', value: 'Other'},
 ];
 
 export const isEmptyExperience = (exp: ExperienceItem) => {
@@ -64,6 +47,14 @@ const ExperienceList: FC<any> = ({
   setExperienceListEdit,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const {data: departmentsResponse} = useGetDepartmentsQuery({});
+  const departmentOptions = useMemo(() => {
+    const list = departmentsResponse?.data?.departments ?? [];
+    return list.map((item: any) => ({
+      label: item?.title ?? '',
+      value: item?._id ?? '',
+    })).filter((opt: any) => opt.value);
+  }, [departmentsResponse]);
 
   return (
     <View style={styles.wrapper}>
@@ -126,11 +117,11 @@ const ExperienceList: FC<any> = ({
         required
         placeholder={'Select Department'}
         value={experienceListEdit?.department}
-        container={{marginBottom: 15}}
+        container={{marginBottom: hp(8)}}
         onChange={(selectedItem: {label: string; value: string} | any) => {
           setExperienceListEdit({
             ...experienceListEdit,
-            department: selectedItem?.value || selectedItem?.label,
+            department: selectedItem?.value ?? '',
           });
         }}
       />
@@ -284,8 +275,8 @@ const styles = StyleSheet.create({
     ...commonFontStyle(700, wp(20), colors._0B3970),
   },
   label: {
-    marginTop: hp(20),
-    marginBottom: hp(12),
+    marginTop: hp(8),
+    marginBottom: hp(8),
     ...commonFontStyle(400, wp(18), colors._050505),
   },
   required: {

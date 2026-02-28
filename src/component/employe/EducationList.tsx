@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
@@ -11,6 +11,7 @@ import BaseText from '../common/BaseText';
 import { colors } from '../../theme/colors';
 import Tooltip from '../common/Tooltip';
 import CustomDropdown from '../common/CustomDropdown';
+import { useGetCompanyEducationsQuery } from '../../api/dashboardApi';
 
 type Props = {
   educationListEdit: EducationItem;
@@ -25,8 +26,7 @@ type Props = {
 
 export const isEmptyEducation = (edu: EducationItem) => {
   if (!edu) return true;
-  // Check if degree is empty or just "Other" without actual text
-  const isDegreeEmpty = !edu.degree || edu.degree === 'Other';
+  const isDegreeEmpty = !edu.degree;
 
   return (
     isDegreeEmpty ||
@@ -39,41 +39,20 @@ export const isEmptyEducation = (edu: EducationItem) => {
     !edu.province
   );
 };
-const degreeOptions = [
-  { label: 'High School', value: 'High School' },
-  { label: 'Diploma', value: 'Diploma' },
-  { label: 'Vocational Training', value: 'Vocational Training' },
-  { label: 'Associate Degree', value: 'Associate Degree' },
-  { label: 'Bachelor\'s Degree', value: 'Bachelor\'s Degree' },
-  { label: 'Master\'s Degree', value: 'Master\'s Degree' },
-  { label: 'Doctorate (PhD)', value: 'Doctorate (PhD)' },
-  { label: 'Professional Degree', value: 'Professional Degree' },
-  { label: 'Certificate', value: 'Certificate' },
-  { label: 'Other', value: 'Other' },
-];
 
 const EducationList: FC<Props> = ({
   educationListEdit,
   setEducationListEdit,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const [showOtherDegreeInput, setShowOtherDegreeInput] = useState<boolean>(false);
-  const [otherDegreeText, setOtherDegreeText] = useState<string>('');
-
-  // Check if "Other" is selected and set the state
-  React.useEffect(() => {
-    if (!educationListEdit) return;
-    const isOther =
-      educationListEdit?.degree === 'Other' ||
-      (!!educationListEdit?.degree &&
-        !degreeOptions.some(opt => opt.value === educationListEdit.degree));
-
-    setShowOtherDegreeInput(isOther);
-
-    if (isOther && educationListEdit?.degree !== 'Other') {
-      setOtherDegreeText(educationListEdit?.degree);
-    }
-  }, [educationListEdit?.degree]);
+  const { data: educationOptionsResponse } = useGetCompanyEducationsQuery({});
+  const degreeOptions = useMemo(() => {
+    const list = educationOptionsResponse?.data?.educations ?? [];
+    return list.map((item: any) => ({
+      label: item?.title ?? '',
+      value: item?._id ?? '',
+    })).filter((opt: any) => opt.value);
+  }, [educationOptionsResponse]);
 
   return (
     <View style={styles.wrapper}>
@@ -97,43 +76,18 @@ const EducationList: FC<Props> = ({
 
       <CustomDropdown
         data={degreeOptions}
+        labelField="label"
+        valueField="value"
         placeholder="Select Degree"
-        value={showOtherDegreeInput ? 'Other' : educationListEdit?.degree}
+        value={educationListEdit?.degree}
         container={{}}
         onChange={(selectedItem: { label: string; value: string }) => {
-          if (selectedItem?.value === 'Other') {
-            setShowOtherDegreeInput(true);
-            setEducationListEdit({
-              ...educationListEdit,
-              degree: 'Other',
-            });
-          } else {
-            setShowOtherDegreeInput(false);
-            setOtherDegreeText('');
-            setEducationListEdit({
-              ...educationListEdit,
-              degree: selectedItem?.value,
-            });
-          }
+          setEducationListEdit({
+            ...educationListEdit,
+            degree: selectedItem?.value ?? '',
+          });
         }}
       />
-
-      {showOtherDegreeInput && (
-        <CustomInput
-          placeholder="Enter your degree"
-          value={otherDegreeText}
-          onChange={(text: string) => {
-            setOtherDegreeText(text);
-            setEducationListEdit({
-              ...educationListEdit,
-              degree: text,
-            });
-          }}
-          label=""
-          inputStyle={{ color: colors._050505, marginTop: 10 }}
-          containerStyle={{ marginTop: hp(-10), marginBottom: hp(15) }}
-        />
-      )}
 
       <CustomInput
         label="University"

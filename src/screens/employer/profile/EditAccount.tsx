@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Image,
   Pressable,
@@ -9,7 +9,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import { LinearContainer } from '../../../component';
+import { CustomDropdown, LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
@@ -25,7 +25,10 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useEmpUpdateProfileMutation } from '../../../api/dashboardApi';
+import {
+  useEmpUpdateProfileMutation,
+  useGetCompanyExperiencesQuery,
+} from '../../../api/dashboardApi';
 import CharLength from '../../../component/common/CharLength';
 
 export const callingCodeToCountry = (callingCode: any) => {
@@ -37,12 +40,20 @@ export const callingCodeToCountry = (callingCode: any) => {
 
 const EditAccountScreen = () => {
   const { userInfo }: any = useSelector((state: RootState) => state.auth);
+  const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
+  const experienceOptionsData = useMemo(() => {
+    return experienceDataVals?.data?.experiences?.map((item: any) => ({
+      label: item?.title,
+      value: item?._id,
+    })) || [];
+  }, [experienceDataVals]);
   const [formData, setFormData] = useState({
     picture: '',
     name: '',
     location: '',
     nationality: '',
     about: '',
+    years_of_experience: '',
     phone: '',
     phone_code: '',
     email: '',
@@ -65,6 +76,7 @@ const EditAccountScreen = () => {
         location: userInfo?.location || '',
         nationality: userInfo?.nationality || '',
         about: userInfo?.about || '',
+        years_of_experience: userInfo?.years_of_experience || '',
         phone: (userInfo?.phone || '').replace(/\s/g, ''),
         phone_code: userInfo?.phone_code || '',
         email: userInfo?.email || '',
@@ -101,6 +113,9 @@ const EditAccountScreen = () => {
         formData.phone_code?.replace('+', '') || '',
       );
       updateData.append('about', formData.about);
+      if (formData.years_of_experience) {
+        updateData.append('years_of_experience', formData.years_of_experience);
+      }
 
       if (picture?.path) {
         updateData.append('picture', {
@@ -203,6 +218,33 @@ const EditAccountScreen = () => {
               maxLength={1000}
             />
             <CharLength chars={1000} value={formData?.about} type={'employee'} style={{ marginTop: 0 }} />
+
+            <View style={styles.experienceDropdownField}>
+              <Text style={styles.experienceDropdownLabel}>Years of Experience</Text>
+              <CustomDropdown
+                data={experienceOptionsData}
+                labelField="label"
+                valueField="value"
+                value={
+                  experienceOptionsData.find(
+                    (opt: any) =>
+                      opt.label === formData?.years_of_experience ||
+                      opt.value === formData?.years_of_experience,
+                  )?.value
+                }
+                onChange={(e: any) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    years_of_experience: e?.label ?? '',
+                  }));
+                }}
+                dropdownStyle={styles.experienceDropdown}
+                renderRightIcon={IMAGES.ic_down}
+                RightIconStyle={styles.experienceDropdownRightIcon}
+                selectedTextStyle={styles.experienceDropdownSelectedText}
+                placeholder="Select one"
+              />
+            </View>
           </View>
 
           {/* Details Section */}
@@ -447,6 +489,26 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     marginBottom: hp(15),
+  },
+  experienceDropdownField: {
+    gap: hp(12),
+    marginBottom: hp(15),
+    zIndex: 10,
+  },
+  experienceDropdownLabel: {
+    ...commonFontStyle(600, 18, colors._2F2F2F),
+    marginBottom: hp(8),
+  },
+  experienceDropdown: {
+    borderRadius: 10,
+  },
+  experienceDropdownRightIcon: {
+    width: wp(16),
+    height: hp(13),
+    tintColor: colors._0B3970,
+  },
+  experienceDropdownSelectedText: {
+    ...commonFontStyle(400, 16, colors._181818),
   },
   detailsContainer: {
     paddingHorizontal: wp(23),
