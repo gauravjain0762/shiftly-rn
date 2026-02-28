@@ -96,8 +96,6 @@ const CoHome = () => {
 
       <ScrollView showsVerticalScrollIndicator={false} bounces={true}>
         <View style={styles.jobSummaryContainer}>
-          <Text style={styles.jobSummaryTitle}>{"Job Status Summary"}</Text>
-
           <View style={styles.jobSummaryRow}>
             {
               job_summary?.map((item, index) => {
@@ -273,7 +271,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: hp(10),
     paddingVertical: hp(15),
-    marginTop: hp(12),
   },
   jobSummaryCardContent: {
     alignItems: 'center',

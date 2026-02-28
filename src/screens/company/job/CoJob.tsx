@@ -505,6 +505,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingBottom: hp(12),
   },
   countryText: {
     ...commonFontStyle(400, 18, colors._181818),

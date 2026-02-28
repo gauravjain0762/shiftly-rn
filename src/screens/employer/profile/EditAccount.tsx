@@ -200,9 +200,9 @@ const EditAccountScreen = () => {
                 },
               ]}
               multiline={true}
-              maxLength={100}
+              maxLength={1000}
             />
-            <CharLength chars={100} value={formData?.about} type={'employee'} style={{ marginTop: 0 }} />
+            <CharLength chars={1000} value={formData?.about} type={'employee'} style={{ marginTop: 0 }} />
           </View>
 
           {/* Details Section */}

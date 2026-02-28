@@ -439,7 +439,7 @@ const SignUp = () => {
         return (
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
-              <Text style={styles.title}>{t(`Hi! Let's start with your full name 🙂 Please enter your first and last name`)}</Text>
+              <Text style={styles.title}>{t(`Hi! Let's start with your full name. Please enter your first and last name`)}</Text>
               <CustomTextInput
                 label={t('Full Name')}
                 required

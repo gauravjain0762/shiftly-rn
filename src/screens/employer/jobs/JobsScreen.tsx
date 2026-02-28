@@ -15,6 +15,7 @@ import {
   GradientButton,
   JobCard,
   LinearContainer,
+  SearchBar,
 } from '../../../component';
 import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
@@ -118,6 +119,7 @@ const JobsScreen = () => {
   const [range, setRange] = useState<number[]>([0, 50000]);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [jobSearchQuery, setJobSearchQuery] = useState('');
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
   const [sortBy, setSortBy] = useState<
     'newest' | 'salary_high_low' | 'salary_low_high' | 'closest_location' | null
@@ -616,12 +618,6 @@ const JobsScreen = () => {
     return () => clearTimeout(t);
   }, [carouselImages, isAutoplayEnabled]);
 
-  const renderHeader = () => (
-    <>
-
-    </>
-  );
-
   const showInitialSkeleton =
     ((isLoading || !data) && currentPage === 1) || isRefetchingOnReturn;
 
@@ -634,18 +630,16 @@ const JobsScreen = () => {
       ) : (
         <>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>{t('Search Jobs')}</Text>
+            <View style={styles.headerSearchWrapper}>
+              <SearchBar
+                value={jobSearchQuery}
+                onChangeText={setJobSearchQuery}
+                placeholder={t('Search jobs...')}
+                type="company"
+                containerStyle={styles.headerSearchBar}
+              />
+            </View>
             <View style={styles.headerImgBar}>
-              <TouchableOpacity
-                onPress={() => {
-                  navigateTo(SCREENS.SearchJob, {
-                    data: sortedJobList.length > 0 ? sortedJobList : allJobs,
-                  });
-                }}>
-                <Image style={styles.headerIcons} source={IMAGES.search} />
-              </TouchableOpacity>
-
-              {/* Custom Sort Icon */}
               <TouchableOpacity
                 onPress={() => setIsSortModalVisible(true)}
                 style={styles.sortButtonContainer}>
@@ -656,8 +650,17 @@ const JobsScreen = () => {
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => setIsFilterModalVisible(true)}>
-                <Image style={styles.headerIcons} source={IMAGES.filter} />
+              <TouchableOpacity
+                onPress={() => {
+                  setIsFilterModalVisible(true);
+                }}
+              >
+                <Image
+                  style={[
+                    styles.headerIcons,
+                  ]}
+                  source={IMAGES.filter}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -741,7 +744,6 @@ const JobsScreen = () => {
             keyExtractor={(item, index) => item?._id || index.toString()}
             ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
             contentContainerStyle={styles.scrollContainer}
-            ListHeaderComponent={renderHeader}
             onEndReached={hasMorePages ? loadMoreJobs : undefined}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={
@@ -762,7 +764,8 @@ const JobsScreen = () => {
             }
           />
         </>
-      )}
+      )
+      }
 
       <BottomModal
         visible={isFilterModalVisible}
@@ -770,6 +773,7 @@ const JobsScreen = () => {
         onClose={() => {
           setIsFilterModalVisible(false);
           setShowAllDepartments(false);
+          setDepartmentSearch('');
         }}>
         <ScrollView
           style={styles.modalScrollView}
@@ -782,6 +786,7 @@ const JobsScreen = () => {
               onPress={() => {
                 setIsFilterModalVisible(false);
                 setShowAllDepartments(false);
+                setDepartmentSearch('');
               }}
               source={IMAGES.close}
               size={wp(18)}
@@ -799,46 +804,51 @@ const JobsScreen = () => {
             />
             <View style={styles.underline} />
           </View>
-          <View style={styles.pillRow}>
-            {(departments || [])
-              .filter((dept: any) => {
-                if (!departmentSearch.trim()) return true;
-                const title = dept?.title || '';
-                return title.toLowerCase().includes(departmentSearch.toLowerCase());
-              })
-              .map((dept: any, index: number) => {
-                const deptId = dept?._id;
-                const isSelected = filters.job_sectors.some(
-                  (d: any) => (typeof d === 'string' ? d : d?._id) === deptId,
-                );
-                return (
-                  <Pressable
-                    key={deptId || dept?.title || dept || index}
-                    style={[styles.pill, isSelected && styles.pillSelected]}
-                    onPress={() => {
-                      setFilters(prev => {
-                        const cleanSectors = prev.job_sectors.filter(
-                          (d: any) => typeof d === 'string' && d.trim() !== '',
-                        );
-                        return {
-                          ...prev,
-                          job_sectors: isSelected
-                            ? cleanSectors.filter((d: string) => d !== deptId)
-                            : [...cleanSectors, deptId],
-                        };
-                      });
-                    }}>
-                    <Text
+          {departmentSearch.trim().length > 0 && (
+            <View style={[styles.pillRow, styles.departmentPillRow]}>
+              {(departments || [])
+                .filter((dept: any) => {
+                  const title = dept?.title || '';
+                  const search = departmentSearch.trim().toLowerCase();
+                  return search === '' || title.toLowerCase().startsWith(search);
+                })
+                .map((dept: any, index: number) => {
+                  const deptId = dept?._id;
+                  const isSelected = filters.job_sectors.some(
+                    (d: any) => (typeof d === 'string' ? d : d?._id) === deptId,
+                  );
+                  return (
+                    <Pressable
+                      key={deptId || dept?.title || dept || index}
                       style={[
-                        styles.pillText,
-                        isSelected && styles.pillTextSelected,
-                      ]}>
-                      {dept?.title}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-          </View>
+                        styles.pill,
+                        isSelected && styles.pillDepartmentSelected,
+                      ]}
+                      onPress={() => {
+                        setFilters(prev => {
+                          const cleanSectors = prev.job_sectors.filter(
+                            (d: any) => typeof d === 'string' && d.trim() !== '',
+                          );
+                          return {
+                            ...prev,
+                            job_sectors: isSelected
+                              ? cleanSectors.filter((d: string) => d !== deptId)
+                              : [...cleanSectors, deptId],
+                          };
+                        });
+                      }}>
+                      <Text
+                        style={[
+                          styles.pillText,
+                          isSelected && styles.pillDepartmentTextSelected,
+                        ]}>
+                        {dept?.title}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+            </View>
+          )}
 
           <View style={styles.inputWrapper}>
             <TouchableOpacity
@@ -1051,7 +1061,7 @@ const JobsScreen = () => {
         </View>
       </BottomModal>
 
-    </LinearContainer>
+    </LinearContainer >
   );
 };
 
@@ -1068,12 +1078,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(25),
     justifyContent: 'space-between',
   },
-  headerTitle: {
-    ...commonFontStyle(600, 22, colors._0B3970),
+  headerSearchWrapper: {
+    flex: 1,
+    marginRight: wp(12),
+  },
+  headerSearchBar: {
+    minHeight: hp(44),
   },
   headerIcons: {
-    width: wp(26),
-    height: wp(26),
+    width: wp(22),
+    height: wp(22),
     tintColor: colors._0B3970,
   },
   icon: {
@@ -1104,7 +1118,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(25),
   },
   carouselWrapper: {
-    marginTop: hp(16),
     borderRadius: 12,
     overflow: 'hidden',
     height: hp(180),
@@ -1236,6 +1249,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingBottom: hp(12),
   },
   countryText: {
     ...commonFontStyle(400, 16, colors._050505),
@@ -1262,6 +1276,9 @@ const styles = StyleSheet.create({
     gap: wp(8),
     marginBottom: hp(10),
   },
+  departmentPillRow: {
+    marginTop: hp(12),
+  },
   pill: {
     paddingHorizontal: wp(14),
     paddingVertical: hp(8),
@@ -1278,6 +1295,13 @@ const styles = StyleSheet.create({
     borderColor: colors._1F1F1F,
   },
   pillTextSelected: {
+    color: colors.white,
+  },
+  pillDepartmentSelected: {
+    backgroundColor: colors.empPrimary,
+    borderColor: colors.empPrimary,
+  },
+  pillDepartmentTextSelected: {
     color: colors.white,
   },
   clearContainer: {
