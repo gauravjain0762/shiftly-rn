@@ -157,16 +157,18 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     overflow: 'hidden',
     backgroundColor: colors._EFEFEF,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
     // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
     // Shadow for Android
-    elevation: 1.5,
+    elevation: 6,
   },
   coverImageContainer: {
     height: hp(140),

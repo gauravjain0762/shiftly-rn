@@ -390,8 +390,8 @@ const styles = StyleSheet.create({
     marginRight: wp(10),
   },
   backIcon: {
-    width: wp(24),
-    height: hp(24),
+    width: wp(21),
+    height: hp(21),
     resizeMode: 'contain',
   },
   title: {

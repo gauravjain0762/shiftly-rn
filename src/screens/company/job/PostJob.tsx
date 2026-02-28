@@ -1057,6 +1057,7 @@ const PostJob = () => {
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({ item, index }) => {
+                    console.log("🔥 ~ render ~ item:", item)
                     const isChecked = selected?.some(
                       (i: any) => i?._id === item?._id,
                     );
@@ -1077,7 +1078,7 @@ const PostJob = () => {
                             />
                           )}
                         </View>
-                        <Text style={styles.Providerlabel}>{item?.title}</Text>
+                        <Text style={styles.Providerlabel}>{item?.title?.trim()}</Text>
                       </Pressable>
                     );
                   }}
@@ -1127,6 +1128,7 @@ const PostJob = () => {
                   type={'company'}
                   onBackPress={() => prevStep()}
                   title={t('Suggested Employee')}
+                  titleStyle={styles.title}
                   RightIconStyle={styles.rightIcon}
                 />
 
@@ -1789,6 +1791,7 @@ const styles = StyleSheet.create({
     marginRight: 0,
     textAlign: 'center',
     alignSelf: 'center',
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
   fieldWithMargin: {
     gap: hp(12),
@@ -1876,7 +1879,7 @@ const styles = StyleSheet.create({
     width: wp(21),
     height: wp(21),
     resizeMode: 'contain',
-    tintColor: colors.black,
+    tintColor: colors._0B3970,
   },
   Backheader: {
     marginTop: hp(20),
@@ -1897,15 +1900,14 @@ const styles = StyleSheet.create({
     marginLeft: wp(12),
   },
   inputLabel: {
-    ...commonFontStyle(500, 25, colors._0B3970),
+    ...commonFontStyle(500, 20, colors._0B3970),
   },
   inputLabelWithMargin: {
-    ...commonFontStyle(500, 25, colors._0B3970),
+    ...commonFontStyle(500, 20, colors._0B3970),
     marginTop: hp(20),
   },
   inputLabelLarge: {
-    ...commonFontStyle(500, 25, colors._0B3970),
-    fontSize: RFValue(20, SCREEN_HEIGHT),
+    ...commonFontStyle(500, 20, colors._0B3970),
   },
   input1: {
     maxHeight: hp(200),
@@ -1958,7 +1960,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(30),
   },
   Providerlabel: {
-    ...commonFontStyle(400, 22, colors?._7B7878),
+    ...commonFontStyle(400, 16, colors._181818),
   },
   checkImg: {
     width: wp(24),

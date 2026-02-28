@@ -33,20 +33,20 @@ const CustomTabBar = ({ state, navigation }: any) => {
         let iconName;
         switch (route.name) {
           case SCREENS.CoHome:
-            iconName = isFocused ? IMAGES.home_on : IMAGES.home_off;
+            iconName = isFocused ? IMAGES.home_on : IMAGES.home;
             break;
           case SCREENS.CoJob:
-            iconName = isFocused ? IMAGES.Jobs_on : IMAGES.Jobs_off;
+            iconName = isFocused ? IMAGES.business_center_on : IMAGES.business_center;
             break;
           case SCREENS.CoPost:
-            iconName = isFocused ? IMAGES.posts : IMAGES.posts;
+            iconName = isFocused ? IMAGES.posts_on : IMAGES.posts;
             break;
 
           case SCREENS.CoActivity:
-            iconName = isFocused ? IMAGES.chat2 : IMAGES.chat2;
+            iconName = isFocused ? IMAGES.chat_on : IMAGES.chat;
             break;
           case SCREENS.CoProfile:
-            iconName = isFocused ? IMAGES.user_on : IMAGES.user_off;
+            iconName = isFocused ? IMAGES.profile_on : IMAGES.profile;
             break;
           default:
             iconName = IMAGES.user;
@@ -89,12 +89,13 @@ const CustomTabBar = ({ state, navigation }: any) => {
               defaultSource={iconName}
               style={styles.image}
               resizeMode="contain"
-              tintColor={isFocused ? colors._0B3970 : '#4A4A4AA8'}
             />
             <Text
               style={[
                 styles.labelText,
-                { color: isFocused ? colors._0B3970 : '#4A4A4AA8' },
+                {
+                  fontWeight: isFocused ? '600' : '400',
+                }
               ]}>
               {labelName}
             </Text>
@@ -149,8 +150,8 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: hp(28),
-    height: hp(28),
+    width: hp(30),
+    height: hp(30),
     resizeMode: 'contain',
   },
   carImage: {
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   labelText: {
-    ...commonFontStyle(400, 13, '#727D8A'),
+    ...commonFontStyle(400, 13, colors._0B3970),
     marginTop: 10,
   },
 });

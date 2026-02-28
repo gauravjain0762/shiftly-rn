@@ -631,13 +631,20 @@ const JobsScreen = () => {
         <>
           <View style={styles.header}>
             <View style={styles.headerSearchWrapper}>
-              <SearchBar
-                value={jobSearchQuery}
-                onChangeText={setJobSearchQuery}
-                placeholder={t('Search jobs...')}
-                type="company"
-                containerStyle={styles.headerSearchBar}
-              />
+              <TouchableOpacity
+                style={styles.headerSearchTouchable}
+                activeOpacity={0.7}
+                onPress={() => navigateTo(SCREENS.SearchJob)}>
+                <View pointerEvents="none">
+                  <SearchBar
+                    value={jobSearchQuery}
+                    onChangeText={setJobSearchQuery}
+                    placeholder={t('Search jobs...')}
+                    type="company"
+                    containerStyle={styles.headerSearchBar}
+                  />
+                </View>
+              </TouchableOpacity>
             </View>
             <View style={styles.headerImgBar}>
               <TouchableOpacity
@@ -1077,10 +1084,14 @@ const styles = StyleSheet.create({
     paddingVertical: hp(24),
     paddingHorizontal: wp(25),
     justifyContent: 'space-between',
+    marginBottom: hp(16),
   },
   headerSearchWrapper: {
     flex: 1,
     marginRight: wp(12),
+  },
+  headerSearchTouchable: {
+    flex: 1,
   },
   headerSearchBar: {
     minHeight: hp(44),
@@ -1323,14 +1334,14 @@ const styles = StyleSheet.create({
     width: wp(8),
     borderRadius: hp(4),
     backgroundColor: colors._7B7878,
-    marginHorizontal: wp(3),
+    marginHorizontal: wp(1),
   },
   carouselDotActive: {
     width: wp(17),
     height: hp(8),
     borderRadius: hp(4),
     backgroundColor: colors._0B3970,
-    marginHorizontal: wp(3),
+    marginHorizontal: wp(1),
   },
   filterContainer: {
     flexDirection: 'row',

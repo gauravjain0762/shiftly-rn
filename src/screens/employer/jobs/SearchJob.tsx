@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import {
   JobCard,
@@ -10,7 +10,7 @@ import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import CustomImage from '../../../component/common/CustomImage';
 import {IMAGES} from '../../../assets/Images';
 import {errorToast, goBack, navigateTo} from '../../../utils/commonFunction';
-import {useRoute} from '@react-navigation/native';
+import {useRoute, useFocusEffect} from '@react-navigation/native';
 import {AppStyles} from '../../../theme/appStyles';
 import {SCREEN_NAMES} from '../../../navigation/screenNames';
 import BaseText from '../../../component/common/BaseText';
@@ -29,6 +29,7 @@ const SearchJob = () => {
   const {params} = useRoute<any>();
   const resumeList = params?.data?.resumes;
   const {userInfo} = useSelector((state: RootState) => state.auth);
+  const searchInputRef = useRef<any>(null);
 
   const [searchText, setSearchText] = useState('');
   const [modal, setModal] = useState<boolean>(false);
@@ -133,6 +134,15 @@ const SearchJob = () => {
     refetch();
   }, [debouncedSearch, refetch]);
 
+  useFocusEffect(
+    useCallback(() => {
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 400);
+      return () => clearTimeout(timer);
+    }, []),
+  );
+
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]} containerStyle={{}}>
       <View style={styles.headerContainer}>
@@ -148,6 +158,7 @@ const SearchJob = () => {
           onChangeText={setSearchText}
           placeholder="Search jobs..."
           type="company"
+          inputRef={searchInputRef}
         />
       </View>
 

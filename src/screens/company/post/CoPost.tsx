@@ -117,7 +117,7 @@ const CoPost = () => {
                 showMenu={true}
                 hideLike={false}
                 currentCompanyId={currentCompanyId}
-                onScrollToTop={() => handleScrollToTop(index)}
+                onScrollToTop={() => handleScrollToPost(index)}
               />
             )}
             onScrollToIndexFailed={(info) => {

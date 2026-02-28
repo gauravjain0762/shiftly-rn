@@ -43,6 +43,7 @@ import {
 import { Alert } from 'react-native';
 import { successToast } from '../../../utils/commonFunction';
 import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
+import { Earth } from 'lucide-react-native';
 
 const SuggestedEmployeeScreen = () => {
   const { t } = useTranslation();
@@ -99,15 +100,15 @@ const SuggestedEmployeeScreen = () => {
   const [suggestedPage, setSuggestedPage] = useState(1);
   const [shortlistedPage, setShortlistedPage] = useState(1);
   const [applicantsPage, setApplicantsPage] = useState(1);
-  
+
   const [extraSuggested, setExtraSuggested] = useState<any[]>([]);
   const [extraShortlisted, setExtraShortlisted] = useState<any[]>([]);
   const [extraApplicants, setExtraApplicants] = useState<any[]>([]);
-  
+
   const [suggestedHasMore, setSuggestedHasMore] = useState(true);
   const [shortlistedHasMore, setShortlistedHasMore] = useState(true);
   const [applicantsHasMore, setApplicantsHasMore] = useState(true);
-  
+
   const [fetchMoreSuggested, { isFetching: isFetchingSuggested }] = useLazyGetSuggestedEmployeesQuery();
   const [fetchMoreJobDetails, { isFetching: isFetchingJobDetails }] = useLazyGetCompanyJobDetailsQuery();
 
@@ -327,16 +328,16 @@ const SuggestedEmployeeScreen = () => {
 
   const handleLoadMoreSuggested = useCallback(async () => {
     if (!suggestedHasMore || isFetchingSuggested) return;
-    
+
     const nextPage = suggestedPage + 1;
     try {
       const result = await fetchMoreSuggested({ job_id: jobId, page: nextPage, tab: 'suggested' }).unwrap();
       const newUsers = result?.data?.users || [];
-      
+
       if (newUsers.length > 0) {
         setExtraSuggested(prev => [...prev, ...newUsers]);
         setSuggestedPage(nextPage);
-        
+
         const pagination = result?.data?.pagination;
         if (pagination) {
           setSuggestedHasMore(pagination.current_page < pagination.total_pages);
@@ -354,14 +355,14 @@ const SuggestedEmployeeScreen = () => {
 
   const handleLoadMoreShortlisted = useCallback(async () => {
     if (!shortlistedHasMore || isFetchingJobDetails) return;
-    
+
     const nextPage = shortlistedPage + 1;
     try {
       const result = await fetchMoreJobDetails(jobId).unwrap();
       const newInvited = result?.data?.invited_users || [];
       const startIndex = shortlistedPage * 10;
       const newItems = newInvited.slice(startIndex, startIndex + 10);
-      
+
       if (newItems.length > 0) {
         setExtraShortlisted(prev => [...prev, ...newItems]);
         setShortlistedPage(nextPage);
@@ -377,14 +378,14 @@ const SuggestedEmployeeScreen = () => {
 
   const handleLoadMoreApplicants = useCallback(async () => {
     if (!applicantsHasMore || isFetchingJobDetails) return;
-    
+
     const nextPage = applicantsPage + 1;
     try {
       const result = await fetchMoreJobDetails(jobId).unwrap();
       const newApplications = result?.data?.applications || [];
       const startIndex = applicantsPage * 10;
       const newItems = newApplications.slice(startIndex, startIndex + 10);
-      
+
       if (newItems.length > 0) {
         setExtraApplicants(prev => [...prev, ...newItems]);
         setApplicantsPage(nextPage);
@@ -520,12 +521,14 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const renderShortlistedEmployee = (item: any) => {
+    console.log("🔥 ~ renderShortlistedEmployee ~ item:", item)
     const user = item?.user_id || item;
 
     if (!user || (!user._id && !item.isSample)) return null;
 
     const experience = user?.experience || user?.years_of_experience || user?.total_experience || 0;
     const tracking = item?.tracking || [];
+    const languages = user?.languages?.map((l: any) => l?.name)?.filter(Boolean) || ["English", "French", "Arabic"];
 
     return (
       <View key={user._id || 'sample'} style={styles.shortlistedCard}>
@@ -558,6 +561,25 @@ const SuggestedEmployeeScreen = () => {
                 ? `${experience}y ${t('Experience')}`
                 : t('No Experience')}
             </Text>
+
+            {languages.length > 0 && (
+            <View style={styles.languageRow}>
+              <Image source={IMAGES.globe} style={styles.globeIcon} />
+              {languages.slice(0, 3).map(
+                (language: string, index: number, arr: string[]) => (
+                  <React.Fragment key={index}>
+                    <Text style={styles.shortlistedLanguage}>{language}</Text>
+                    {index !== arr.length - 1 && (
+                      <Text style={styles.shortlistedLanguageSeparator}> | </Text>
+                    )}
+                  </React.Fragment>
+                ),
+              )}
+              {languages.length > 3 && (
+                <Text style={styles.shortlistedLanguage}> ...</Text>
+              )}
+            </View>
+            )}
 
             {item?.status === 'Interview_completed' && <View style={styles.shortlistedActions}>
               <TouchableOpacity
@@ -754,367 +776,365 @@ const SuggestedEmployeeScreen = () => {
             onEndReachedThreshold={0.5}
             renderItem={() => (
               <>
-            <View style={styles.jobCard}>
-              <View style={styles.jobCardRow}>
-                <View style={styles.companyLogo}>
-                  <Text style={styles.companyLogoText}>
-                    {jobInfo?.title?.[0]?.toUpperCase() ||
-                      jobInfo?.company_name?.[0]?.toUpperCase() ||
-                      'J'}
-                  </Text>
-                </View>
-                <View style={styles.jobCardInfo}>
-                  <Text style={styles.jobTitle}>{jobInfo?.title || ''}</Text>
-                  {(jobLocation || contractTypeLabel) && (
-                    <Text style={styles.jobLocation}>
-                      {jobLocation}
-                      {contractTypeLabel ? ` - ${contractTypeLabel}` : ''}
-                    </Text>
-                  )}
-                  {renderSalaryRange()}
-                </View>
-              </View>
-
-              {isFromJobCard && jobInfo?.status !== 'Closed' && !(jobInfo?.expiry_date && new Date(jobInfo.expiry_date) < new Date()) && (
-                <View style={styles.jobActionsRow}>
-                  <TouchableOpacity
-                    style={[styles.actionBtn, styles.editBtn]}
-                    onPress={handleEditJob}>
-                    <Image
-                      source={IMAGES.edit}
-                      style={styles.actionIcon}
-                      tintColor={colors.white}
-                    />
-                    <Text style={styles.actionBtnText}>{t('Edit Job')}</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.actionBtn, styles.closeBtn]}
-                    onPress={handleCloseJob}>
-                    <Image
-                      source={IMAGES.close}
-                      style={[styles.actionIcon, styles.closeIcon]}
-                      tintColor={colors.white}
-                    />
-                    <Text style={styles.actionBtnText}>{t('Close Job')}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.analyticsCard}>
-              <View style={styles.analyticsRow}>
-                <View style={styles.analyticsIcon}>
-                  <Text style={styles.analyticsIconText}>✓</Text>
-                </View>
-                <View style={styles.analyticsTextWrapper}>
-                  <Text style={styles.analyticsPrimary}>
-                    {`${ai_data?.ai_candidates || 0} ${t('Candidates Analyzed by AI')}`}
-                  </Text>
-                  <Text style={styles.analyticsSecondary}>
-                    {t('Covers all received profiles')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.analyticsRow}>
-                <View style={styles.analyticsIcon}>
-                  <Text style={styles.analyticsIconText}>✓</Text>
-                </View>
-                <View style={styles.analyticsTextWrapper}>
-                  <Text style={styles.analyticsPrimary}>
-                    {`${ai_data?.matched_candidates || 0} ${t('Highly Matched Profiles')}`}
-                  </Text>
-                  <Text style={styles.analyticsSecondary}>
-                    {t('For profiles above 75% match score')}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Tabs - Only visible if coming from Job Card */}
-            {isFromJobCard && (
-              <ScrollView
-                ref={tabScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={[styles.tabContainer, styles.tabScroll]}
-                style={styles.tabScrollView}>
-                <View
-                  onLayout={(e) => {
-                    tabLayouts.current.suggested = e.nativeEvent.layout.x;
-                  }}
-                  collapsable={false}>
-                  <TouchableOpacity
-                    style={[
-                      styles.tabButton,
-                      activeTab === 'suggested' && styles.activeTabButton,
-                      activeTab === 'suggested' && {
-                        backgroundColor: colors._0B3970,
-                        borderColor: colors._0B3970,
-                      },
-                    ]}
-                    onPress={() => selectTab('suggested')}>
-                  <Image
-                    source={IMAGES.people}
-                    style={[
-                      styles.tabIcon,
-                      activeTab === 'suggested' && { tintColor: colors.white },
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.tabText,
-                      activeTab === 'suggested' && styles.activeTabText,
-                      activeTab === 'suggested' && { color: colors.white },
-                    ]}
-                    numberOfLines={1}>
-                    {t('Suggested List')}
-                  </Text>
-                </TouchableOpacity>
-                </View>
-
-                <View
-                  onLayout={(e) => {
-                    tabLayouts.current.shortlisted = e.nativeEvent.layout.x;
-                  }}
-                  collapsable={false}>
-                <TouchableOpacity
-                  style={[
-                    styles.tabButton,
-                    activeTab === 'shortlisted' && styles.activeTabButton,
-                    activeTab === 'shortlisted' && {
-                      backgroundColor: colors._0B3970,
-                      borderColor: colors._0B3970,
-                    },
-                  ]}
-                  onPress={() => selectTab('shortlisted')}>
-                  <View style={styles.starIconContainer}>
-                    <Image
-                      source={IMAGES.star1}
-                      style={[
-                        styles.starSmall,
-                        {
-                          tintColor:
-                            activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970',
-                        },
-                      ]}
-                    />
-                    <Image
-                      source={IMAGES.star2}
-                      style={[
-                        styles.starLarge,
-                        {
-                          tintColor:
-                            activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970',
-                        },
-                      ]}
-                    />
-                  </View>
-                  <Text
-                    style={[
-                      styles.tabText,
-                      activeTab === 'shortlisted' && { color: colors.white },
-                    ]}
-                    numberOfLines={1}>
-                    {t('AI Shortlisted')}
-                  </Text>
-                </TouchableOpacity>
-                </View>
-
-                <View
-                  onLayout={(e) => {
-                    tabLayouts.current.applicants = e.nativeEvent.layout.x;
-                  }}
-                  collapsable={false}>
-                <TouchableOpacity
-                  style={[
-                    styles.tabButton,
-                    activeTab === 'applicants' && styles.activeTabButton,
-                    activeTab === 'applicants' && {
-                      backgroundColor: colors._0B3970,
-                      borderColor: colors._0B3970,
-                    },
-                  ]}
-                  onPress={() => selectTab('applicants')}>
-                  <Image
-                    source={IMAGES.people} // Using same icon as Suggested for now
-                    style={[
-                      styles.tabIcon,
-                      activeTab === 'applicants' && { tintColor: colors.white },
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.tabText,
-                      activeTab === 'applicants' && { color: colors.white },
-                    ]}
-                    numberOfLines={1}>
-                    {t('Applicants')}
-                  </Text>
-                </TouchableOpacity>
-                </View>
-              </ScrollView>
-            )}
-
-            {activeTab === 'suggested' ? (
-              <>
-
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.inviteAllButton,
-                      inviteAllSelected && styles.inviteAllButtonSelected,
-                      allSuggestedInvited && {opacity: 0.5},
-                    ]}
-                    disabled={allSuggestedInvited}
-                    onPress={handleInviteAll}>
-                    <View
-                      style={[
-                        styles.inviteAllIcon,
-                        inviteAllSelected && styles.inviteAllIconSelected,
-                      ]}>
-                      <Text
-                        style={[
-                          styles.inviteAllIconText,
-                          inviteAllSelected && styles.inviteAllIconTextSelected,
-                        ]}>
-                        ✓
+                <View style={styles.jobCard}>
+                  <View style={styles.jobCardRow}>
+                    <View style={styles.companyLogo}>
+                      <Text style={styles.companyLogoText}>
+                        {jobInfo?.title?.[0]?.toUpperCase() ||
+                          jobInfo?.company_name?.[0]?.toUpperCase() ||
+                          'J'}
                       </Text>
                     </View>
-                    <Text
-                      style={[
-                        styles.inviteAllText,
-                        inviteAllSelected && styles.inviteAllTextSelected,
-                      ]}>
-                      {t('Invite All')}
-                    </Text>
-                  </TouchableOpacity>
+                    <View style={styles.jobCardInfo}>
+                      <Text style={styles.jobTitle}>{jobInfo?.title || ''}</Text>
+                      {(jobLocation || contractTypeLabel) && (
+                        <Text style={styles.jobLocation}>
+                          {jobLocation}
+                          {contractTypeLabel ? ` - ${contractTypeLabel}` : ''}
+                        </Text>
+                      )}
+                      {renderSalaryRange()}
+                    </View>
+                  </View>
+
+                  {isFromJobCard && jobInfo?.status !== 'Closed' && !(jobInfo?.expiry_date && new Date(jobInfo.expiry_date) < new Date()) && (
+                    <View style={styles.jobActionsRow}>
+                      <TouchableOpacity
+                        style={[styles.actionBtn, styles.editBtn]}
+                        onPress={handleEditJob}>
+                        <Image
+                          source={IMAGES.edit}
+                          style={styles.actionIcon}
+                          tintColor={colors.white}
+                        />
+                        <Text style={styles.actionBtnText}>{t('Edit Job')}</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.actionBtn, styles.closeBtn]}
+                        onPress={handleCloseJob}>
+                        <Image
+                          source={IMAGES.close}
+                          style={[styles.actionIcon, styles.closeIcon]}
+                          tintColor={colors.white}
+                        />
+                        <Text style={styles.actionBtnText}>{t('Close Job')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
 
-                {displaySuggested && displaySuggested.length > 0 ? (
-                  <>
-                    {displaySuggested.map((item: any, index: number) => renderEmployee(item))}
-                    {isFetchingSuggested && (
-                      <ActivityIndicator
-                        size="large"
-                        color={colors._0B3970}
-                        style={{marginVertical: hp(20)}}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <View style={styles.emptyState}>
-                    <Text style={styles.emptyTitle}>
-                      {t('No suggested candidates found')}
-                    </Text>
-                    <Text style={styles.emptyMessage}>
-                      {t(
-                        'Once candidates start matching your job, they will appear here.',
-                      )}
-                    </Text>
+                <View style={styles.analyticsCard}>
+                  <View style={styles.analyticsRow}>
+                    <View style={styles.analyticsIcon}>
+                      <Text style={styles.analyticsIconText}>✓</Text>
+                    </View>
+                    <View style={styles.analyticsTextWrapper}>
+                      <Text style={styles.analyticsPrimary}>
+                        {`${ai_data?.ai_candidates || 0} ${t('Candidates Analyzed by AI')}`}
+                      </Text>
+                      <Text style={styles.analyticsSecondary}>
+                        {t('Covers all received profiles')}
+                      </Text>
+                    </View>
                   </View>
-                )}
-              </>
-            ) : activeTab === 'shortlisted' ? (
-              // Shortlisted Tab Content
-              <>
-                {displayShortlisted && displayShortlisted.length > 0 ? (
-                  <>
-                    {displayShortlisted.map((item: any) => (
-                      <React.Fragment key={item.user_id?._id || item._id || 'sample'}>
-                        {renderShortlistedEmployee(item)}
-                      </React.Fragment>
-                    ))}
-                    {isFetchingJobDetails && (
-                      <ActivityIndicator
-                        size="large"
-                        color={colors._0B3970}
-                        style={{marginVertical: hp(20)}}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <View style={styles.emptyState}>
-                    <Text style={styles.emptyTitle}>
-                      {t('No shortlisted candidates yet')}
-                    </Text>
-                    <Text style={styles.emptyMessage}>
-                      {t('Invited candidates will appear here.')}
-                    </Text>
+                  <View style={styles.analyticsRow}>
+                    <View style={styles.analyticsIcon}>
+                      <Text style={styles.analyticsIconText}>✓</Text>
+                    </View>
+                    <View style={styles.analyticsTextWrapper}>
+                      <Text style={styles.analyticsPrimary}>
+                        {`${ai_data?.matched_candidates || 0} ${t('Highly Matched Profiles')}`}
+                      </Text>
+                      <Text style={styles.analyticsSecondary}>
+                        {t('For profiles above 75% match score')}
+                      </Text>
+                    </View>
                   </View>
-                )}
-              </>
-            ) : (
-              // Applicants Tab Content
-              <>
-                {displayApplicants && displayApplicants.length > 0 ? (
-                  <>
-                    {displayApplicants.map((item: any) => {
-                      const user = item?.user_id || item;
-                      const experience =
-                        user?.experience ||
-                        user?.years_of_experience ||
-                        user?.total_experience ||
-                        0;
+                </View>
 
-                      return (
-                        <Pressable
-                          key={user?._id || item?._id}
-                          onPress={() => handleNavigateToProfile(user)}
-                          style={styles.employeeCard}>
-                          <TouchableOpacity
-                            onPress={() => handleNavigateToProfile(user)}
-                            activeOpacity={0.7}>
-                            {hasValidImage(user?.picture) ? (
-                              <CustomImage
-                                uri={user?.picture}
-                                containerStyle={styles.employeeAvatar}
-                                imageStyle={styles.employeeAvatar}
-                              />
-                            ) : (
-                              <View style={[styles.employeeAvatar, styles.avatarFallback]}>
-                                <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
-                              </View>
-                            )}
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.employeeInfo}
-                            onPress={() => handleNavigateToProfile(user)}
-                            activeOpacity={0.7}>
-                            <Text style={styles.employeeName}>
-                              {user?.name || 'N/A'}
-                            </Text>
-                            <Text style={styles.employeeRole}>
-                              {user?.responsibility || user?.job_title || 'N/A'}
-                            </Text>
-                            <Text style={styles.employeeExperience}>
-                              {`${experience || 0}y ${t('Experience')}`}
-                            </Text>
-                          </TouchableOpacity>
-                        </Pressable>
-                      );
-                    })}
-                    {isFetchingJobDetails && (
-                      <ActivityIndicator
-                        size="large"
-                        color={colors._0B3970}
-                        style={{marginVertical: hp(20)}}
-                      />
+                {/* Tabs - Only visible if coming from Job Card */}
+                {isFromJobCard && (
+                  <ScrollView
+                    ref={tabScrollRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={[styles.tabContainer, styles.tabScroll]}
+                    style={styles.tabScrollView}>
+                    <View
+                      onLayout={(e) => {
+                        tabLayouts.current.suggested = e.nativeEvent.layout.x;
+                      }}
+                      collapsable={false}>
+                      <TouchableOpacity
+                        style={[
+                          styles.tabButton,
+                          activeTab === 'suggested' && styles.activeTabButton,
+                          activeTab === 'suggested' && {
+                            backgroundColor: colors._0B3970,
+                            borderColor: colors._0B3970,
+                          },
+                        ]}
+                        onPress={() => selectTab('suggested')}>
+                        <Image
+                          source={IMAGES.people}
+                          style={[
+                            styles.tabIcon,
+                            activeTab === 'suggested' && { tintColor: colors.white },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.tabText,
+                            activeTab === 'suggested' && styles.activeTabText,
+                            activeTab === 'suggested' && { color: colors.white },
+                          ]}
+                          numberOfLines={1}>
+                          {t('Suggested List')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View
+                      onLayout={(e) => {
+                        tabLayouts.current.shortlisted = e.nativeEvent.layout.x;
+                      }}
+                      collapsable={false}>
+                      <TouchableOpacity
+                        style={[
+                          styles.tabButton,
+                          activeTab === 'shortlisted' && styles.activeTabButton,
+                          activeTab === 'shortlisted' && {
+                            backgroundColor: colors._0B3970,
+                            borderColor: colors._0B3970,
+                          },
+                        ]}
+                        onPress={() => selectTab('shortlisted')}>
+                        <View style={styles.starIconContainer}>
+                          <Image
+                            source={IMAGES.star1}
+                            style={[
+                              styles.starSmall,
+                              {
+                                tintColor:
+                                  activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970',
+                              },
+                            ]}
+                          />
+                          <Image
+                            source={IMAGES.star2}
+                            style={[
+                              styles.starLarge,
+                              {
+                                tintColor:
+                                  activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970',
+                              },
+                            ]}
+                          />
+                        </View>
+                        <Text
+                          style={[
+                            styles.tabText,
+                            activeTab === 'shortlisted' && { color: colors.white },
+                          ]}
+                          numberOfLines={1}>
+                          {t('AI Shortlisted')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View
+                      onLayout={(e) => {
+                        tabLayouts.current.applicants = e.nativeEvent.layout.x;
+                      }}
+                      collapsable={false}>
+                      <TouchableOpacity
+                        style={[
+                          styles.tabButton,
+                          activeTab === 'applicants' && styles.activeTabButton,
+                          activeTab === 'applicants' && {
+                            backgroundColor: colors._0B3970,
+                            borderColor: colors._0B3970,
+                          },
+                        ]}
+                        onPress={() => selectTab('applicants')}>
+                        <Image
+                          source={IMAGES.people} // Using same icon as Suggested for now
+                          style={[
+                            styles.tabIcon,
+                            activeTab === 'applicants' && { tintColor: colors.white },
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.tabText,
+                            activeTab === 'applicants' && { color: colors.white },
+                          ]}
+                          numberOfLines={1}>
+                          {t('Applicants')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </ScrollView>
+                )}
+
+                {activeTab === 'suggested' ? (
+                  <>
+
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
+                      <TouchableOpacity
+                        style={[
+                          styles.inviteAllButton,
+                          inviteAllSelected && styles.inviteAllButtonSelected,
+                          (allSuggestedInvited || !displaySuggested?.length) && { opacity: 0.5 },
+                        ]}
+                        disabled={allSuggestedInvited || !displaySuggested?.length}
+                        onPress={handleInviteAll}>
+                        <View
+                          style={[
+                            styles.inviteAllIcon,
+                            inviteAllSelected && styles.inviteAllIconSelected,
+                          ]}>
+                          <Text
+                            style={[
+                              styles.inviteAllIconText,
+                              inviteAllSelected && styles.inviteAllIconTextSelected,
+                            ]}>
+                            ✓
+                          </Text>
+                        </View>
+                        <Text
+                          style={[
+                            styles.inviteAllText,
+                            inviteAllSelected && styles.inviteAllTextSelected,
+                          ]}>
+                          {t('Invite All')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {displaySuggested && displaySuggested.length > 0 ? (
+                      <>
+                        {displaySuggested.map((item: any, index: number) => renderEmployee(item))}
+                        {isFetchingSuggested && (
+                          <ActivityIndicator
+                            size="large"
+                            color={colors._0B3970}
+                            style={{ marginVertical: hp(20) }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <View style={styles.emptyState}>
+                        <Text style={styles.emptyTitle}>
+                          {t('No suggested candidates found')}
+                        </Text>
+                        <Text style={styles.emptyMessage}>
+                          {t(
+                            'Once candidates start matching your job, they will appear here.',
+                          )}
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                ) : activeTab === 'shortlisted' ? (
+                  <>
+                    {displayShortlisted && displayShortlisted.length > 0 ? (
+                      <>
+                        {displayShortlisted.map((item: any) => (
+                          <React.Fragment key={item.user_id?._id || item._id || ''}>
+                            {renderShortlistedEmployee(item)}
+                          </React.Fragment>
+                        ))}
+                        {isFetchingJobDetails && (
+                          <ActivityIndicator
+                            size="large"
+                            color={colors._0B3970}
+                            style={{ marginVertical: hp(20) }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <View style={styles.emptyState}>
+                        <Text style={styles.emptyTitle}>
+                          {t('No shortlisted candidates yet')}
+                        </Text>
+                        <Text style={styles.emptyMessage}>
+                          {t('Invited candidates will appear here.')}
+                        </Text>
+                      </View>
                     )}
                   </>
                 ) : (
-                  <View style={styles.emptyState}>
-                    <Text style={styles.emptyTitle}>
-                      {t('No applicants yet')}
-                    </Text>
-                    <Text style={styles.emptyMessage}>
-                      {t('Candidates who apply will appear here.')}
-                    </Text> 
-                  </View>
+                  <>
+                    {displayApplicants && displayApplicants.length > 0 ? (
+                      <>
+                        {displayApplicants.map((item: any) => {
+                          const user = item?.user_id || item;
+                          const experience =
+                            user?.experience ||
+                            user?.years_of_experience ||
+                            user?.total_experience ||
+                            0;
+
+                          return (
+                            <Pressable
+                              key={user?._id || item?._id}
+                              onPress={() => handleNavigateToProfile(user)}
+                              style={styles.employeeCard}>
+                              <TouchableOpacity
+                                onPress={() => handleNavigateToProfile(user)}
+                                activeOpacity={0.7}>
+                                {hasValidImage(user?.picture) ? (
+                                  <CustomImage
+                                    uri={user?.picture}
+                                    containerStyle={styles.employeeAvatar}
+                                    imageStyle={styles.employeeAvatar}
+                                  />
+                                ) : (
+                                  <View style={[styles.employeeAvatar, styles.avatarFallback]}>
+                                    <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
+                                  </View>
+                                )}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.employeeInfo}
+                                onPress={() => handleNavigateToProfile(user)}
+                                activeOpacity={0.7}>
+                                <Text style={styles.employeeName}>
+                                  {user?.name || 'N/A'}
+                                </Text>
+                                <Text style={styles.employeeRole}>
+                                  {user?.responsibility || user?.job_title || 'N/A'}
+                                </Text>
+                                <Text style={styles.employeeExperience}>
+                                  {`${experience || 0}y ${t('Experience')}`}
+                                </Text>
+                              </TouchableOpacity>
+                            </Pressable>
+                          );
+                        })}
+                        {isFetchingJobDetails && (
+                          <ActivityIndicator
+                            size="large"
+                            color={colors._0B3970}
+                            style={{ marginVertical: hp(20) }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <View style={styles.emptyState}>
+                        <Text style={styles.emptyTitle}>
+                          {t('No applicants yet')}
+                        </Text>
+                        <Text style={styles.emptyMessage}>
+                          {t('Candidates who apply will appear here.')}
+                        </Text>
+                      </View>
+                    )}
+                  </>
                 )}
-              </>
-            )}
               </>
             )}
           />
@@ -1124,7 +1144,7 @@ const SuggestedEmployeeScreen = () => {
                 type="Company"
                 style={styles.ctaButton}
                 onPress={handleBulkInvite}
-                disabled={allSuggestedInvited}
+                disabled={allSuggestedInvited || !displaySuggested?.length}
                 title={t('Invite for AI Interview')}
               />
             </View>
@@ -1648,5 +1668,22 @@ const styles = StyleSheet.create({
   },
   loadMoreText: {
     ...commonFontStyle(600, 14, colors._0B3970),
+  },
+  languageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(4),
+    flexWrap: 'wrap',
+  },
+  shortlistedLanguage: {
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+  },
+  shortlistedLanguageSeparator: {
+    ...commonFontStyle(400, 10, colors.black),
+  },
+  globeIcon: {
+    width: wp(20),
+    height: wp(20),
+    resizeMode: 'contain',
   },
 });

@@ -134,7 +134,7 @@ const FeedCard: FC<card> = ({
               style={[styles.actionButton, { flexDirection: 'row', gap: wp(6), alignItems: 'center' }]}
             >
               <CustomImage
-                size={wp(26)}
+                size={wp(22)}
                 resizeMode={!localLiked ? "cover" : "contain"}
                 source={localLiked ? IMAGES.like : IMAGES.hart}
               />

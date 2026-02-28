@@ -12,6 +12,8 @@ type SearchBarProps = {
   containerStyle?: ViewStyle;
   inputStyle?: ViewStyle;
   type?: 'company' | 'employe';
+  autoFocus?: boolean;
+  inputRef?: React.RefObject<TextInput | null>;
 };
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -21,6 +23,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   containerStyle,
   inputStyle,
   type = 'employe',
+  autoFocus = false,
+  inputRef,
 }) => {
   return (
     <View style={[
@@ -36,6 +40,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         ]}
       />
       <TextInput
+        ref={inputRef}
+        autoFocus={autoFocus}
         style={[
           styles.input,
           { color: type == 'company' ? colors._0B3970 : colors.white },

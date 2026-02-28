@@ -140,35 +140,37 @@ const CoHome = () => {
                 <TouchableOpacity
                   key={index}
                   activeOpacity={0.7}
-                  // onPress={() => setSelectedMetricIndex(index)}
                   style={[
                     styles.metricCard,
                     isSelected && styles.metricCardHighlighted,
                   ]}>
-                  <Image
-                    source={option.icon}
-                    resizeMode="contain"
-                    style={[
-                      styles.metricIcon,
-                      isSelected ? styles.metricIconSelected : styles.metricIconDefault
-                    ]}
-                  />
-                  <View style={styles.metricTextContainer}>
-                    <Text
-                      numberOfLines={2}
-                      style={
-                        isSelected
-                          ? styles.metricLabelBoldWhite
-                          : styles.metricLabelBold
-                      }>
-                      {option.label}
-                    </Text>
+                  <View style={styles.metricCardTop}>
+                    <Image
+                      source={option.icon}
+                      resizeMode="contain"
+                      style={[
+                        styles.metricIcon,
+                        isSelected ? styles.metricIconSelected : styles.metricIconDefault
+                      ]}
+                    />
                     <Text
                       numberOfLines={1}
-                      style={styles.metricValue}>
+                      style={[
+                        styles.metricValue,
+                        isSelected && { color: colors.white }
+                      ]}>
                       {option.value}
                     </Text>
                   </View>
+                  <Text
+                    numberOfLines={2}
+                    style={
+                      isSelected
+                        ? styles.metricLabelBoldWhite
+                        : styles.metricLabelBold
+                    }>
+                    {option.label}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -178,7 +180,7 @@ const CoHome = () => {
             type="Company"
             title="View Completed Interviews"
             onPress={() => navigateTo(SCREENS.CompletedInterviews)}
-            gradientColors={['#CDA953', '#C8B380']}
+            gradientColors={['#0B5EB7', '#0B3970']}
             style={{ borderWidth: 0, borderRadius: 0, width: '100%' }}
             textStyle={{ color: colors.white, fontSize: 16 }}
           />
@@ -257,9 +259,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(16),
     paddingVertical: hp(14),
   },
-  jobSummaryTitle: {
-    ...commonFontStyle(600, 16, colors.black),
-  },
   jobSummaryRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -288,7 +287,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   jobSummaryCardValue: {
-    ...commonFontStyle(600, 24, colors.black),
+    ...commonFontStyle(500, 22, colors.black),
     marginTop: hp(4),
   },
   aiMatchBanner: {
@@ -306,13 +305,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors._F3E1B7,
-    width: wp(25),
-    height: wp(25),
+    width: wp(23),
+    height: wp(23),
     borderRadius: wp(25),
   },
   checkIcon: {
-    width: wp(15),
-    height: hp(15),
+    width: wp(12),
+    height: hp(12),
   },
   aiMatchText: {
     ...commonFontStyle(500, 15, colors.white),
@@ -323,7 +322,7 @@ const styles = StyleSheet.create({
   },
   combinedMetricsContainer: {
     borderWidth: 1,
-    borderColor: '#CDA953',
+    borderColor: '#0B3970',
     borderRadius: wp(15),
     overflow: 'hidden',
     marginBottom: hp(20),
@@ -342,13 +341,18 @@ const styles = StyleSheet.create({
     borderRadius: wp(15),
     padding: hp(12),
     paddingVertical: hp(18),
-    alignItems: 'center',
+    alignItems: 'flex-start',
     borderWidth: 1,
-    flexDirection: 'row',
-    borderColor: '#CDA953',
-    justifyContent: 'flex-start',
-    gap: wp(8),
+    borderColor: '#B5B5B5',
+    justifyContent: 'space-between',
+    gap: hp(8),
     minHeight: hp(80),
+  },
+  metricCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
+    gap: wp(8),
   },
   metricCardHighlighted: {
     backgroundColor: colors._0B3970,
@@ -359,7 +363,7 @@ const styles = StyleSheet.create({
     height: hp(30),
   },
   metricIconDefault: {
-    tintColor: '#CDA953',
+    tintColor: '#0B3970',
   },
   metricIconSelected: {
     tintColor: colors.white,
@@ -371,20 +375,19 @@ const styles = StyleSheet.create({
   },
   metricLabelBold: {
     ...commonFontStyle(600, 13, colors.black),
-    marginBottom: hp(2),
+    marginTop: hp(4),
   },
   metricLabel: {
     ...commonFontStyle(500, 16, colors.black),
   },
   metricValue: {
-    ...commonFontStyle(600, 20, colors.black),
+    ...commonFontStyle(500, 30, colors.black),
+    flex: 1,
+    lineHeight: hp(36),
   },
   metricLabelBoldWhite: {
-    ...commonFontStyle(600, 12, colors.white),
+    ...commonFontStyle(500, 14, colors.black),
     marginBottom: hp(2),
-  },
-  metricLabelWhite: {
-    ...commonFontStyle(500, 12, colors.white),
   },
   buttonsContainer: {
     gap: hp(15),
