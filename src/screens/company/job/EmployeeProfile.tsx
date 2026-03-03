@@ -135,13 +135,11 @@ const EmployeeProfile = () => {
           </View>
         )}
 
-        {/* About me Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About me</Text>
           <BaseText style={styles.cardText}>{profileData?.about}</BaseText>
         </View>
 
-        {/* Education Card */}
         {profileData.education.length > 0 && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Education</Text>

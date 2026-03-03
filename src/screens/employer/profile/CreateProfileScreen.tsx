@@ -177,15 +177,12 @@ const CreateProfileScreen = () => {
     }
 
     if (aboutmeandResumes) {
-      // Priority: route params > API data > userInfo
       const locationValue =
         route.params?.selectedLocation ||
         aboutmeandResumes?.location ||
         userInfo?.address ||
         '';
 
-      // Preserve existing skills/languages when user has local selections (e.g. returning from EmpLocation)
-      // API data doesn't include unsaved form selections, so we avoid overwriting them
       const skillsFromApi = (aboutmeandResumes?.skills || []).map((s: any) =>
         typeof s === 'string' ? s : s._id,
       );
@@ -196,6 +193,7 @@ const CreateProfileScreen = () => {
       dispatch(
         setAboutEdit({
           open_for_jobs: aboutmeandResumes?.open_for_job || false,
+          about: aboutmeandResumes?.about || '',
           responsibilities: aboutmeandResumes?.responsibility || '',
           location: locationValue,
           selectedSkills: preserveLocalSkills ? aboutEdit.selectedSkills : skillsFromApi,
@@ -250,7 +248,6 @@ const CreateProfileScreen = () => {
       );
     }
     setIsEducationUpdate(true);
-    // Reset the editing state
     dispatch(
       setEducationListEdit({
         degree: '',
@@ -430,6 +427,7 @@ const CreateProfileScreen = () => {
     const formData = new FormData();
 
     formData.append('open_for_job', aboutEdit?.open_for_jobs ? true : false);
+    formData.append('about', aboutEdit?.about || '');
 
     // Extract city and country from the location string if available
     // Location format from EmpLocation: "Full Address"
@@ -481,6 +479,7 @@ const CreateProfileScreen = () => {
       dispatch(
         setAboutEdit({
           aboutMe: '',
+          about: '',
           checkEnd: false,
           location: '',
           open_for_jobs: false,
@@ -641,6 +640,7 @@ const CreateProfileScreen = () => {
                 dispatch(
                   setAboutEdit({
                     aboutMe: '',
+                    about: '',
                     checkEnd: false,
                     location: '',
                     open_for_jobs: false,

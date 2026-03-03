@@ -40,6 +40,7 @@ import {
   setCoPostJobSteps,
   setJobFormState,
 } from '../../../features/companySlice';
+import { mapJobToFormState } from '../../../utils/jobFormMapper';
 import { Alert } from 'react-native';
 import { successToast } from '../../../utils/commonFunction';
 import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
@@ -413,6 +414,7 @@ const SuggestedEmployeeScreen = () => {
     const initial = applications?.slice(0, 10) || [];
     return [...initial, ...extraApplicants];
   }, [applications, extraApplicants]);
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ displayApplicants:", displayApplicants)
 
   const renderSalaryRange = () => {
     const from = jobInfo?.monthly_salary_from;
@@ -464,17 +466,23 @@ const SuggestedEmployeeScreen = () => {
     const from_salary = jobInfo?.monthly_salary_from?.toString() || '';
     const to_salary = jobInfo?.monthly_salary_to?.toString() || '';
 
+    const mapped = mapJobToFormState(jobInfo);
+
     dispatch(
       setJobFormState({
         job_id: jobInfo?._id,
         title: jobInfo?.title,
         describe: jobInfo?.description,
-        job_sector: {
-          label: jobInfo?.department_id?.title,
-          value: jobInfo?.department_id?._id,
-        },
+        job_sector: jobInfo?.department_id
+          ? {
+              label: jobInfo.department_id?.title,
+              value: jobInfo.department_id?._id,
+            }
+          : (typeof jobInfo?.job_sector === 'string'
+            ? { label: jobInfo.job_sector, value: jobInfo.job_sector }
+            : jobInfo?.job_sector),
         contract_type: { label: jobInfo?.contract_type, value: jobInfo?.contract_type },
-        area: { label: jobInfo?.address, value: jobInfo?.address },
+        area: { label: jobInfo?.address || jobInfo?.area || '', value: jobInfo?.address || jobInfo?.area || '' },
         salary: {
           label: `${from_salary} - ${to_salary}`,
           value: `${from_salary} - ${to_salary}`,
@@ -484,8 +492,17 @@ const SuggestedEmployeeScreen = () => {
         duration: { label: jobInfo?.duration, value: jobInfo?.duration },
         expiry_date: jobInfo?.expiry_date,
         startDate: { label: jobInfo?.start_date, value: jobInfo?.start_date },
-        skillId: typeof jobInfo?.skills === 'string' ? jobInfo.skills.split(',') : [],
+        skillId: mapped.skillId,
+        jobSkills: mapped.jobSkills,
         selected: jobInfo?.facilities || [],
+        requirements: jobInfo?.requirements || [],
+        invite_users: jobInfo?.invited_users?.map((u: any) => u?._id) || [],
+        canApply: jobInfo?.people_anywhere,
+        education: mapped.education,
+        experience: mapped.experience,
+        certification: mapped.certification,
+        languages: mapped.languages,
+        other_requirements: mapped.other_requirements,
         editMode: true,
       }),
     );

@@ -5,6 +5,9 @@ import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import CustomDropdownMulti from '../common/CustomDropdownMulti';
+import CustomInput from '../common/CustomInput';
+import CustomSwitch from '../common/CustomSwitch';
+import CharLength from '../common/CharLength';
 import Tooltip from '../common/Tooltip';
 import { navigateTo } from '../../utils/commonFunction';
 import { SCREENS } from '../../navigation/screenNames';
@@ -24,7 +27,6 @@ type Props = {
   aboutEdit: any;
   setAboutEdit: (val: any) => void;
   skillsList: any[];
-  // Optional props for other usages
   experienceList?: any;
   item?: MessageItem[];
   onNextPress?: () => void;
@@ -75,54 +77,21 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
 
   return (
     <View style={[styles.containerWrapper, { overflow: 'visible' }]}>
-      <View style={styles.optionWrapper}>
-        <TouchableOpacity
-          style={styles.optionItem}
-          onPress={() => {
-            setAboutEdit({ ...aboutEdit, open_for_jobs: true });
-          }}>
-          <View
-            style={[
-              styles.iconContainer,
-              {
-                borderWidth:
-                  aboutEdit?.open_for_jobs === true ? hp(1.5) : 0,
-                borderColor:
-                  aboutEdit?.open_for_jobs === true
-                    ? colors._0B3970
-                    : 'transparent',
-              },
-            ]}>
-            <Image source={IMAGES.check} style={styles.checkIcon} />
-          </View>
-          <Text style={styles.iconWrapperText}>
-            Yes, I’m open to better opportunities
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.optionItem}
-          onPress={() => {
-            setAboutEdit({ ...aboutEdit, open_for_jobs: false });
-          }}>
-          <View
-            style={[
-              styles.iconContainer,
-              {
-                borderWidth:
-                  aboutEdit?.open_for_jobs === false ? hp(1.5) : 0,
-                borderColor:
-                  aboutEdit?.open_for_jobs === false
-                    ? colors._0B3970
-                    : 'transparent',
-              },
-            ]}>
-            <Image source={IMAGES.close} style={styles.closeIcon} />
-          </View>
-          <Text style={styles.iconWrapperText}>
-            No, I’m not currently looking
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.toggleRow}>
+        <Text style={styles.toggleLabel}>
+          {aboutEdit?.open_for_jobs
+            ? "Yes, I'm open to better opportunities"
+            : "No, I'm not currently looking"}
+        </Text>
+        <CustomSwitch
+          isOn={aboutEdit?.open_for_jobs ?? false}
+          setIsOn={(val) => setAboutEdit({ ...aboutEdit, open_for_jobs: val })}
+          thumbColor={colors.white}
+          activeColor={colors._0B3970}
+          inActiveColor="#ccc"
+          switchStyle={styles.toggleSwitch}
+          thumbStyle={styles.toggleThumb}
+        />
       </View>
 
       <View style={{ overflow: 'visible' }}>
@@ -162,14 +131,32 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
         </TouchableOpacity>
       </View>
 
-      {/* <CustomInput
-        label="Key Responsibilities"
-        placeholder={'Enter Key Responsibilities'}
-        value={aboutEdit.responsibilities}
-        onChange={(text: any) =>
-          setAboutEdit({ ...aboutEdit, responsibilities: text })
-        }
-      /> */}
+      <View style={styles.aboutMeSection}>
+        <Text style={[styles.headerText, { marginTop: hp(20) }]}>
+          About Me
+        </Text>
+        <CustomInput
+          placeholder="I'm a job seeker"
+          value={aboutEdit?.about ?? ''}
+          onChange={(text: string) =>
+            setAboutEdit({ ...aboutEdit, about: text })
+          }
+          inputStyle={[
+            styles.aboutMeInput,
+            {
+              height: hp(120),
+            },
+          ]}
+          multiline={true}
+          maxLength={1000}
+        />
+        <CharLength
+          chars={1000}
+          value={aboutEdit?.about ?? ''}
+          type="employee"
+          style={{ marginTop: 0 }}
+        />
+      </View>
 
       <View>
         <Text style={[styles.headerText, { marginTop: hp(20) }]}>
@@ -330,6 +317,22 @@ const styles = StyleSheet.create({
     marginTop: hp(15),
     marginBottom: hp(12),
   },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: hp(20),
+    borderBottomWidth: 1,
+    borderBottomColor: '#E6E6E6',
+  },
+  toggleLabel: {
+    flex: 1,
+    ...commonFontStyle(400, 18, colors._050505),
+  },
+  toggleSwitch: {
+    marginLeft: wp(12),
+  },
+  toggleThumb: {},
   optionWrapper: {
     gap: 11,
     borderBottomWidth: 1,
@@ -546,5 +549,11 @@ const styles = StyleSheet.create({
   required: {
     color: 'red',
     marginLeft: 2,
+  },
+  aboutMeSection: {
+    marginTop: hp(4),
+  },
+  aboutMeInput: {
+    textAlignVertical: 'top',
   },
 });

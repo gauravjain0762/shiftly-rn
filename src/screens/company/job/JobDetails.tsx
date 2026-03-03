@@ -37,7 +37,8 @@ import {
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useDispatch } from 'react-redux';
-import { setJobFormState } from '../../../features/companySlice';
+import { setCoPostJobSteps, setJobFormState } from '../../../features/companySlice';
+import { mapJobToFormState } from '../../../utils/jobFormMapper';
 import moment from 'moment';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
@@ -60,7 +61,6 @@ const CoJobDetails = () => {
   const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const [closeJob] = useCloseCompanyJobMutation();
   const jobDetail = data?.data?.job;
-  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
 
   const shareUrl = data?.data?.share_url;
 
@@ -307,6 +307,7 @@ ${salary}${shareUrlText}`;
             style={styles.button}
             title={t('Edit Job')}
             onPress={() => {
+              const mapped = mapJobToFormState(jobDetail);
               dispatch(
                 setJobFormState({
                   job_id: job_id,
@@ -324,7 +325,9 @@ ${salary}${shareUrlText}`;
                   area:
                     typeof jobDetail?.area === 'string'
                       ? { label: jobDetail?.area, value: jobDetail?.area }
-                      : jobDetail?.area,
+                      : jobDetail?.area || (jobDetail?.address
+                        ? { label: jobDetail.address, value: jobDetail.address }
+                        : { label: '', value: '' }),
                   duration:
                     typeof jobDetail?.duration === 'string'
                       ? {
@@ -341,7 +344,12 @@ ${salary}${shareUrlText}`;
                         label: jobDetail?.job_sector,
                         value: jobDetail?.job_sector,
                       }
-                      : jobDetail?.job_sector,
+                      : jobDetail?.job_sector || (jobDetail?.department_id
+                        ? {
+                          label: jobDetail.department_id?.title,
+                          value: jobDetail.department_id?._id,
+                        }
+                        : null),
                   startDate:
                     typeof jobDetail?.start_date === 'string'
                       ? {
@@ -349,13 +357,6 @@ ${salary}${shareUrlText}`;
                         value: jobDetail?.start_date,
                       }
                       : jobDetail?.start_date,
-                  contract:
-                    typeof jobDetail?.contract_type === 'string'
-                      ? {
-                        label: jobDetail?.contract_type,
-                        value: jobDetail?.contract_type,
-                      }
-                      : jobDetail?.contract_type,
                   salary: {
                     label: `${Number(
                       jobDetail?.monthly_salary_from,
@@ -374,15 +375,21 @@ ${salary}${shareUrlText}`;
                   },
                   describe: jobDetail?.description,
                   selected: jobDetail?.facilities || [],
-                  jobSkills: jobDetail?.skills?.map((s: any) => s.title) || [],
-                  skillId: jobDetail?.skills?.map((s: any) => s._id) || [],
+                  jobSkills: mapped.jobSkills,
+                  skillId: mapped.skillId,
                   requirements: jobDetail?.requirements || [],
                   invite_users:
                     jobDetail?.invited_users?.map((u: any) => u?._id) || [],
                   canApply: jobDetail?.people_anywhere,
+                  education: mapped.education,
+                  experience: mapped.experience,
+                  certification: mapped.certification,
+                  languages: mapped.languages,
+                  other_requirements: mapped.other_requirements,
                   editMode: true,
                 }),
               );
+              dispatch(setCoPostJobSteps(0));
               navigateTo(SCREENS.PostJob);
             }}
           />

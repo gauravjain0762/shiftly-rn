@@ -54,12 +54,26 @@ const styles = StyleSheet.create({
     borderRadius: 34 / 2,
     justifyContent: 'center',
     backgroundColor: '#fff',
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    // Android shadow
+    elevation: 4,
   },
   thumb: {
     left: wp(3),
     width: wp(20),
     height: hp(20),
     borderRadius: hp(13),
+    // iOS shadow for thumb
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    // Android shadow for thumb
+    elevation: 3,
   },
 });
 

@@ -262,11 +262,11 @@ const JobPreview = () => {
                         <View style={styles.jobCardInfo}>
                             <Text style={styles.jobTitle}>{title || 'Job Title'}</Text>
                             <Text style={styles.companyName}>
-                                {userInfo?.company_name || 'Company Name'}
+                                {userInfo?.company_name || 'N/A'}
                             </Text>
                             <View style={styles.jobMetaRow}>
                                 <Text style={styles.jobLocation}>
-                                    {locationDisplay()} - {contract_type?.label || contract_type?.value || 'Full Time'}
+                                    {locationDisplay()} - {contract_type?.label || contract_type?.value || 'N/A'}
                                 </Text>
                                 {formatSalary()}
                             </View>
@@ -341,7 +341,7 @@ const JobPreview = () => {
                         {selected.map((benefit: any, index: number) => (
                             <View key={index} style={styles.bulletRow}>
                                 <View style={styles.bullet} />
-                                <Text style={styles.bulletText}>{benefit?.title || benefit?.label || '-'}</Text>
+                                <Text style={styles.bulletText}>{benefit?.title?.trim() || benefit?.label?.trim() || '-'}</Text>
                             </View>
                         ))}
                     </View>

@@ -40,6 +40,7 @@ export interface ExperienceItem {
 
 export interface AboutMe {
   aboutMe?: string;
+  about?: string;
   responsibilities?: string;
   selectOne?: string[];
   isOn?: boolean;
@@ -119,6 +120,7 @@ const initialState: EmployeeState = {
   },
   aboutEdit: {
     aboutMe: '',
+    about: '',
     responsibilities: '',
     selectOne: [],
     isOn: false,

@@ -265,7 +265,6 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           </BottomModal>
 
-          {/* Section: About Me */}
           <Section title="About Me" content={userInfo?.about || 'N/A'} />
 
           {/* Section: Professional Experience */}
