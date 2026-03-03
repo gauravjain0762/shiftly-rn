@@ -1,22 +1,25 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
   Alert
 } from 'react-native';
 import { IMAGES } from '../../../assets/Images';
 import { BackHeader, GradientButton, LinearContainer } from '../../../component';
+import BottomModal from '../../../component/common/BottomModal';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 import { SCREENS } from '../../../navigation/screenNames';
 import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { navigateTo } from '../../../utils/commonFunction';
+import { navigateTo, getInitials, hasValidImage, formatLocationToCityCountry } from '../../../utils/commonFunction';
 import { useGetEmployeeProfileByIdQuery } from '../../../api/dashboardApi';
 
 const EmployeeProfile = () => {
@@ -30,11 +33,24 @@ const EmployeeProfile = () => {
   );
 
   const userData = profileResponse?.data?.user;
+  const assessFirst = userData?.assess_first || userParam?.assess_first;
+  const hasAssessFirst = !!assessFirst;
+  const assessStatus = assessFirst?.status as string | undefined;
+  const reportUrl = typeof assessFirst?.report === 'string'
+    ? assessFirst.report
+    : (assessFirst?.report as any)?.url;
 
-  // Real data from API or fallback to userParam/placeholder
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+
+  const rawLocation = userData?.location || userParam?.location || userParam?.area;
+
   const profileData = {
     name: userData?.name || userParam?.name || 'User',
-    location: userData?.location || userParam?.location || userParam?.area || 'Location not available',
+    location: formatLocationToCityCountry(
+      rawLocation,
+      userData?.city || userParam?.city,
+      userData?.country || userParam?.country
+    ),
     picture: userData?.picture || userParam?.picture || null,
     about: userData?.about || 'No about information provided.',
     education: userData?.education || [],
@@ -47,11 +63,7 @@ const EmployeeProfile = () => {
   const jobId = params?.jobId;
 
   const handleChat = () => {
-    console.log("Chat button pressed", { userId, userData, userParam, jobData, jobId });
-    if (!userId) {
-      console.log("No userId, returning");
-      return;
-    }
+    if (!userId) return;
 
     try {
       navigateTo(SCREENS.CoStack, {
@@ -97,13 +109,19 @@ const EmployeeProfile = () => {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.profileImageContainer}>
-            <CustomImage
-              uri={profileData.picture}
-              source={IMAGES.logoText}
-              imageStyle={styles.profileImage}
-              containerStyle={styles.profileImage}
-              resizeMode={profileData.picture ? "cover" : "contain"}
-            />
+            {hasValidImage(profileData.picture) ? (
+              <CustomImage
+                uri={profileData.picture}
+                source={IMAGES.logoText}
+                imageStyle={styles.profileImage}
+                containerStyle={styles.profileImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.profileImage, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarInitial}>{getInitials(profileData.name)}</Text>
+              </View>
+            )}
           </View>
           <Text style={styles.profileName}>{profileData.name}</Text>
           <View style={styles.locationContainer}>
@@ -116,7 +134,37 @@ const EmployeeProfile = () => {
           </View>
         </View>
 
-        {(userData?.profile_completion || userParam?.profile_completion) && (
+        {hasAssessFirst ? (
+          <TouchableOpacity
+            style={styles.assessmentCard}
+            onPress={assessStatus === 'Invited' ? () => setShowAssessmentModal(true) : undefined}
+            activeOpacity={assessStatus === 'Invited' ? 0.8 : 1}>
+            <View style={styles.iconCircle}>
+              <Image
+                source={assessStatus === 'Completed' ? IMAGES.check : IMAGES.document}
+                style={[styles.assessmentIcon, assessStatus === 'Completed' && { tintColor: colors._0B3970 }]}
+              />
+            </View>
+            <View style={styles.assessmentTextContainer}>
+              <BaseText style={styles.assessmentTitle}>
+                {assessStatus === 'Completed' ? 'Assessment Completed' : 'Skill Assessment'}
+              </BaseText>
+              <BaseText style={styles.assessmentSubtitle}>
+                {assessStatus === 'Invited' && 'Assessment link sent – awaiting completion'}
+                {assessStatus === 'Completed' && (reportUrl ? 'View the assessment report' : 'Soft Skill Assessment completed')}
+                {assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' && `Status: ${assessStatus}`}
+              </BaseText>
+              {assessStatus === 'Completed' && typeof reportUrl === 'string' && reportUrl.trim() !== '' && (
+                <TouchableOpacity
+                  style={styles.showReportButton}
+                  onPress={() => Linking.openURL(reportUrl).catch(() => Alert.alert('Error', 'Could not open report'))}
+                  activeOpacity={0.8}>
+                  <Text style={styles.showReportText}>Show Report</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </TouchableOpacity>
+        ) : (userData?.profile_completion || userParam?.profile_completion) ? (
           <View style={styles.assessmentCard}>
             <View style={styles.iconCircle}>
               <Image
@@ -126,13 +174,30 @@ const EmployeeProfile = () => {
             </View>
             <View style={styles.assessmentTextContainer}>
               <BaseText style={styles.assessmentTitle}>
-                {Number(userData?.profile_completion || userParam?.profile_completion) === 100 ? 'Assessment Completed' : 'Complete Assessment'}
+                {Number(userData?.profile_completion || userParam?.profile_completion) === 100 ? 'Profile Complete' : 'Profile Incomplete'}
               </BaseText>
               <BaseText style={styles.assessmentSubtitle}>
-                {profileData.name} {userData?.profile_completion || userParam?.profile_completion}% complete Assessment
+                {profileData.name}'s profile is {userData?.profile_completion || userParam?.profile_completion}% complete
               </BaseText>
             </View>
           </View>
+        ) : null}
+
+        {assessStatus === 'Invited' && (
+          <BottomModal
+            visible={showAssessmentModal}
+            onClose={() => setShowAssessmentModal(false)}
+            backgroundColor={colors.white}>
+            <Text style={styles.modalHeading}>Skill Assessment</Text>
+            <Text style={styles.modalDescription}>
+              Your soft skill assessment link has been sent. You will be notified once it is completed.
+            </Text>
+            <TouchableOpacity
+              style={styles.modalCancelButton}
+              onPress={() => setShowAssessmentModal(false)}>
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </BottomModal>
         )}
 
         <View style={styles.card}>
@@ -279,6 +344,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: wp(60),
+  },
+  avatarPlaceholder: {
+    backgroundColor: colors._0B3970,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    color: '#FFFFFF',
+    fontSize: wp(28),
+    fontWeight: '700',
   },
   profileName: {
     ...commonFontStyle(700, 24, colors._0B3970),
@@ -463,6 +538,36 @@ const styles = StyleSheet.create({
   },
   assessmentSubtitle: {
     ...commonFontStyle(400, 12, 'rgba(255, 255, 255, 0.8)'),
+  },
+  showReportButton: {
+    marginTop: hp(8),
+    alignSelf: 'flex-start',
+    paddingVertical: hp(4),
+    paddingHorizontal: wp(12),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: wp(8),
+  },
+  showReportText: {
+    ...commonFontStyle(600, 14, colors.white),
+    textDecorationLine: 'underline',
+  },
+  modalHeading: {
+    ...commonFontStyle(600, 22, colors._0B3970),
+    marginBottom: hp(12),
+    textAlign: 'center',
+  },
+  modalDescription: {
+    ...commonFontStyle(400, 16, colors._4A4A4A),
+    marginBottom: hp(24),
+    textAlign: 'center',
+    lineHeight: hp(24),
+  },
+  modalCancelButton: {
+    paddingVertical: hp(12),
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    ...commonFontStyle(500, 16, colors._4A4A4A),
   },
   loadingContainer: {
     flex: 1,

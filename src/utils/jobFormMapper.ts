@@ -35,17 +35,20 @@ const toSingleSelectFromId = (id: string | undefined, labelFallback?: string): {
 };
 
 export const mapJobToFormState = (job: any) => {
-  // Education: API may return education_id, education { _id, title }, or educations "id1,id2"
-  const educationRaw = job?.education_id ?? job?.education ?? (typeof job?.educations === 'string' ? job.educations.split(',')[0] : job?.educations?.[0]);
-  const education = toSingleSelect(educationRaw) ?? toSingleSelectFromId(typeof educationRaw === 'string' ? educationRaw : educationRaw?._id);
+  // Education: API may return educations "id1,id2", education_id, education { _id }, or array
+  const education = toIdArray(
+    job?.educations ?? job?.education_id ?? job?.education
+  );
 
-  // Experience
-  const experienceRaw = job?.experience_id ?? job?.experience ?? (typeof job?.experiences === 'string' ? job.experiences.split(',')[0] : job?.experiences?.[0]);
-  const experience = toSingleSelect(experienceRaw) ?? toSingleSelectFromId(typeof experienceRaw === 'string' ? experienceRaw : experienceRaw?._id);
+  // Experience: API may return experiences "id1,id2", experience_id, experience { _id }, or array
+  const experience = toIdArray(
+    job?.experiences ?? job?.experience_id ?? job?.experience
+  );
 
-  // Certification
-  const certificationRaw = job?.certification_id ?? job?.certification ?? (typeof job?.certifications === 'string' ? job.certifications.split(',')[0] : job?.certifications?.[0]);
-  const certification = toSingleSelect(certificationRaw) ?? toSingleSelectFromId(typeof certificationRaw === 'string' ? certificationRaw : certificationRaw?._id);
+  // Certification: API may return certifications "id1,id2", certification_id, certification { _id }, or array
+  const certification = toIdArray(
+    job?.certifications ?? job?.certification_id ?? job?.certification
+  );
 
   // Languages: now array of IDs
   const languages = toIdArray(job?.languages);

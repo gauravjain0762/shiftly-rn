@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(8),
   },
   quickRepliesContainer: {
-    paddingHorizontal: wp(22),
+    flexDirection: 'row',
     gap: wp(10),
     alignItems: 'center',
   },

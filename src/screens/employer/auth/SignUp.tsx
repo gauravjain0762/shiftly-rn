@@ -1178,27 +1178,29 @@ const SignUp = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollcontainer}
         style={styles.container}>
-        <View style={styles.rowView}>
-          <TouchableOpacity
-            onPress={() => {
-              if (isAppleAuth || isGoogleAuth) {
-                if (step === 4) {
-                  resetNavigation(SCREENS.EmployeeWelcomeScreen);
+        <View style={[styles.rowView, step === 9 && { justifyContent: 'flex-end' }]}>
+          {step <= 4 && (
+            <TouchableOpacity
+              onPress={() => {
+                if (isAppleAuth || isGoogleAuth) {
+                  if (step === 4) {
+                    resetNavigation(SCREENS.EmployeeWelcomeScreen);
+                  } else {
+                    prevStep(step);
+                  }
                 } else {
                   prevStep(step);
                 }
-              } else {
-                prevStep(step);
-              }
-            }}
-            hitSlop={8}
-            style={[styles.backBtn, { flex: 1 }]}>
-            <Image
-              resizeMode="contain"
-              source={IMAGES.leftSide}
-              style={styles.back}
-            />
-          </TouchableOpacity>
+              }}
+              hitSlop={8}
+              style={[styles.backBtn, { flex: 1 }]}>
+              <Image
+                resizeMode="contain"
+                source={IMAGES.leftSide}
+                style={styles.back}
+              />
+            </TouchableOpacity>
+          )}
           {step == 9 && (
             <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
               <Text style={styles.skipText}>Skip</Text>

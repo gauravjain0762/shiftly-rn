@@ -1,11 +1,12 @@
 import {
+  Dimensions,
   Image,
+  Keyboard,
   StyleSheet,
   Text,
   TextStyle,
-  ViewStyle,
   View,
-  Keyboard,
+  ViewStyle,
 } from 'react-native';
 import React from 'react';
 import {colors} from '../../theme/colors';
@@ -190,6 +191,8 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 0,
     zIndex: 1,
+    width: Dimensions.get('window').width - 48,
+    left: 24,
   },
   inputContainer: {
     borderWidth: 0.5,
@@ -247,14 +250,16 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: hp(1.5),
-    // marginHorizontal: wp(2),
-    // borderBottomWidth: 0.5,
-    // borderColor: '#1E5BA1',
-    marginHorizontal: wp(16),
-    marginVertical: hp(8),
+    alignItems: 'center',
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(12),
+    marginVertical: hp(4),
   },
   itemText: {
+    flex: 1,
+    flexShrink: 1,
+    marginRight: wp(8),
+    paddingRight: wp(4),
     ...commonFontStyle(400, 16, '#FFFFFF'),
   },
   checkIcon: {

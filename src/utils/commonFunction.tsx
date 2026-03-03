@@ -267,3 +267,26 @@ export const formatDateWithoutTime = (dateString: string) => {
   if (!dateString) return '';
   return moment(dateString).local().format('MMMM DD, YYYY.');
 };
+
+/** Extracts and returns only city and country from a full address string. */
+export const formatLocationToCityCountry = (
+  location: string | undefined | null,
+  city?: string,
+  country?: string
+): string => {
+  if (city && country) return `${city}, ${country}`;
+  if (city) return city;
+  if (country) return country;
+  if (!location || location === 'Location not available' || location.trim() === '')
+    return 'Location not available';
+
+  const parts = location
+    .split(/\s*[-–—]\s*|\s*,\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length >= 2) {
+    return `${parts[parts.length - 2]}, ${parts[parts.length - 1]}`;
+  }
+  return parts[0] || location;
+};

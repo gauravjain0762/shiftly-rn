@@ -159,9 +159,9 @@ const JobPreview = () => {
             facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
             currency: currency?.value,
             essential_benefits: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
-            educations: education?.value || '',
-            experiences: experience?.value || '',
-            certifications: certification?.value || '',
+            educations: Array.isArray(education) ? education.filter(Boolean).join(',') : '',
+            experiences: Array.isArray(experience) ? experience.filter(Boolean).join(',') : '',
+            certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
             languages: Array.isArray(languages) ? languages.filter(Boolean).join(',') : '',
             // Send other requirement IDs as comma-separated string (same as facilities)
             job_requirements: Array.isArray(other_requirements)

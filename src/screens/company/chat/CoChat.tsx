@@ -342,6 +342,7 @@ const CoChat = () => {
               ))}
             </ScrollView>
 
+            <View style={styles.chatInputWrapper}>
             <ChatInput
               image={logo}
               setImage={setLogo}
@@ -351,6 +352,7 @@ const CoChat = () => {
               onPressAttachment={() => setImagePickerVisible(true)}
               type={'company'}
             />
+            </View>
           </View>
         </KeyboardAvoidingView>
 
@@ -574,11 +576,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   quickRepliesWrapper: {
-    paddingVertical: hp(12),
-    paddingHorizontal: wp(22),
     backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
+  },
+  chatInputWrapper: {
+    paddingHorizontal: wp(22),
   },
   quickRepliesScrollView: {
     flexGrow: 0,
@@ -586,7 +589,8 @@ const styles = StyleSheet.create({
   quickRepliesContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: wp(22),
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(10),
   },
   quickReplyButton: {
     backgroundColor: colors._0B3970,

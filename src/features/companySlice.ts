@@ -28,9 +28,12 @@ interface JobFormState {
   job_id: string;
   invite_users: string[];
   expiry_date: any | string;
-  education: { label: string; value: string } | null;
-  experience: { label: string; value: string } | null;
-  certification: { label: string; value: string } | null;
+  /** Selected education IDs (supports multiple) */
+  education: string[];
+  /** Selected experience IDs (supports multiple) */
+  experience: string[];
+  /** Selected certification IDs (supports multiple) */
+  certification: string[];
   /** Selected language IDs (supports multiple) */
   languages: string[];
   /**
@@ -99,9 +102,9 @@ const initialState: CompanyState = {
     job_id: '',
     invite_users: [],
     expiry_date: '',
-    education: null,
-    experience: null,
-    certification: null,
+    education: [],
+    experience: [],
+    certification: [],
     languages: [],
     other_requirements: [],
   },

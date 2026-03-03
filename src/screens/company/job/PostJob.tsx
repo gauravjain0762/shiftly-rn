@@ -1,5 +1,6 @@
 import {
   Animated,
+  Dimensions,
   FlatList,
   Image,
   InteractionManager,
@@ -478,9 +479,9 @@ const PostJob = () => {
       facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
       currency: currency?.value,
       essential_benefits: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
-      educations: [education?.value].filter(Boolean).join(','),
-      experiences: [experience?.value].filter(Boolean).join(','),
-      certifications: [certification?.value].filter(Boolean).join(','),
+      educations: Array.isArray(education) ? education.filter(Boolean).join(',') : '',
+      experiences: Array.isArray(experience) ? experience.filter(Boolean).join(',') : '',
+      certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
       languages: Array.isArray(languages) ? languages.filter(Boolean).join(',') : '',
       // Send other requirement IDs as comma-separated string (same as facilities)
       job_requirements: Array.isArray(other_requirements)
@@ -884,61 +885,136 @@ const PostJob = () => {
                 contentContainerStyle={{ paddingBottom: hp(100) }}
                 showsVerticalScrollIndicator={false}>
 
-                {/* Education Dropdown */}
-                <View style={styles.field}>
-                  <Text style={styles.label}>{t('Education')}</Text>
-                  <CustomDropdown
+                {/* Education Dropdown (Multi-select) */}
+                <View style={[styles.field, { zIndex: 104 }]}>
+                  <CustomDropdownMulti
+                    label={t('Education')}
+                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}
                     data={educationData}
                     labelField="label"
                     valueField="value"
-                    value={education?.value}
-                    onChange={(e: any) => {
-                      updateJobForm({ education: { label: e.label, value: e.value } });
+                    value={education || []}
+                    onChange={(items: any[]) => {
+                      const ids =
+                        Array.isArray(items)
+                          ? items.map(it => it?.value ?? it).filter(Boolean)
+                          : [];
+                      updateJobForm({ education: ids });
                     }}
+                    placeholder={t('Select education')}
                     dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    placeholder={t('Select one')}
+                    container={{ marginTop: 10, marginBottom: 0 }}
+                    dropdownPosition="bottom"
+                    hideSelectedItems
                   />
+                  {Array.isArray(education) && education.length > 0 && (
+                    <View style={styles.selectedRequirementsContainer}>
+                      {educationData
+                        .filter((opt: any) => education.includes(opt.value))
+                        .map((opt: any) => (
+                          <View key={opt.value} style={styles.requirementTag}>
+                            <Text style={styles.requirementText}>{opt.label}</Text>
+                            <Pressable
+                              onPress={() =>
+                                updateJobForm({
+                                  education: education.filter((id: string) => id !== opt.value),
+                                })
+                              }
+                              style={styles.requirementCloseBtn}>
+                              <Text style={styles.requirementCloseText}>×</Text>
+                            </Pressable>
+                          </View>
+                        ))}
+                    </View>
+                  )}
                 </View>
 
-                {/* Work Experience Dropdown */}
-                <View style={styles.field}>
-                  <Text style={styles.label}>{t('Work Experience')}</Text>
-                  <CustomDropdown
+                {/* Work Experience Dropdown (Multi-select) */}
+                <View style={[styles.field, { zIndex: 103 }]}>
+                  <CustomDropdownMulti
+                    label={t('Work Experience')}
+                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}
                     data={experienceData}
                     labelField="label"
                     valueField="value"
-                    value={experience?.value}
-                    onChange={(e: any) => {
-                      updateJobForm({ experience: { label: e.label, value: e.value } });
+                    value={experience || []}
+                    onChange={(items: any[]) => {
+                      const ids =
+                        Array.isArray(items)
+                          ? items.map(it => it?.value ?? it).filter(Boolean)
+                          : [];
+                      updateJobForm({ experience: ids });
                     }}
+                    placeholder={t('Select experience')}
                     dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    placeholder={t('Select one')}
+                    container={{ marginTop: 10, marginBottom: 0 }}
+                    dropdownPosition="bottom"
+                    hideSelectedItems
                   />
+                  {Array.isArray(experience) && experience.length > 0 && (
+                    <View style={styles.selectedRequirementsContainer}>
+                      {experienceData
+                        .filter((opt: any) => experience.includes(opt.value))
+                        .map((opt: any) => (
+                          <View key={opt.value} style={styles.requirementTag}>
+                            <Text style={styles.requirementText}>{opt.label}</Text>
+                            <Pressable
+                              onPress={() =>
+                                updateJobForm({
+                                  experience: experience.filter((id: string) => id !== opt.value),
+                                })
+                              }
+                              style={styles.requirementCloseBtn}>
+                              <Text style={styles.requirementCloseText}>×</Text>
+                            </Pressable>
+                          </View>
+                        ))}
+                    </View>
+                  )}
                 </View>
 
-                {/* Certifications Dropdown */}
-                <View style={styles.field}>
-                  <Text style={styles.label}>{t('Certifications')}</Text>
-                  <CustomDropdown
+                {/* Certifications Dropdown (Multi-select) */}
+                <View style={[styles.field, { zIndex: 102 }]}>
+                  <CustomDropdownMulti
+                    label={t('Certifications')}
+                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}
                     data={certificationData}
                     labelField="label"
                     valueField="value"
-                    value={certification?.value}
-                    onChange={(e: any) => {
-                      updateJobForm({ certification: { label: e.label, value: e.value } });
+                    value={certification || []}
+                    onChange={(items: any[]) => {
+                      const ids =
+                        Array.isArray(items)
+                          ? items.map(it => it?.value ?? it).filter(Boolean)
+                          : [];
+                      updateJobForm({ certification: ids });
                     }}
+                    placeholder={t('Select certifications')}
                     dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    placeholder={t('Select one')}
+                    container={{ marginTop: 10, marginBottom: 0 }}
+                    dropdownPosition="bottom"
+                    hideSelectedItems
                   />
+                  {Array.isArray(certification) && certification.length > 0 && (
+                    <View style={styles.selectedRequirementsContainer}>
+                      {certificationData
+                        .filter((opt: any) => certification.includes(opt.value))
+                        .map((opt: any) => (
+                          <View key={opt.value} style={styles.requirementTag}>
+                            <Text style={styles.requirementText}>{opt.label}</Text>
+                            <Pressable
+                              onPress={() =>
+                                updateJobForm({
+                                  certification: certification.filter((id: string) => id !== opt.value),
+                                })
+                              }
+                              style={styles.requirementCloseBtn}>
+                              <Text style={styles.requirementCloseText}>×</Text>
+                            </Pressable>
+                          </View>
+                        ))}
+                    </View>
+                  )}
                 </View>
 
                 {/* Languages Dropdown (Multi-select) */}
@@ -962,7 +1038,7 @@ const PostJob = () => {
                     placeholder={t('Select languages')}
                     dropdownStyle={styles.dropdown}
                     container={{ marginTop: 10, marginBottom: 0 }}
-                    dropdownPosition="top"
+                    dropdownPosition="bottom"
                     hideSelectedItems
                   />
                   {Array.isArray(languages) &&
@@ -1016,7 +1092,7 @@ const PostJob = () => {
                     placeholder={t('Select Requirements')}
                     dropdownStyle={styles.dropdown}
                     container={{}}
-                    dropdownPosition="top"
+                    dropdownPosition="bottom"
                     hideSelectedItems
                   />
                   {Array.isArray(other_requirements) &&
@@ -2024,11 +2100,6 @@ const styles = StyleSheet.create({
     height: hp(12),
     resizeMode: 'contain',
   },
-  requirementText: {
-    width: '90%',
-    color: colors._181818,
-    fontSize: RFValue(16, SCREEN_HEIGHT),
-  },
   addRequirementButton: {
     marginTop: hp(20),
     flexDirection: 'row',
@@ -2267,28 +2338,37 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: wp(8),
     marginTop: hp(10),
+    width: '100%',
   },
   requirementTag: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    alignSelf: 'flex-start',
     backgroundColor: colors.white,
     borderRadius: hp(20),
-    paddingHorizontal: wp(10),
-    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+    paddingVertical: hp(8),
+    paddingRight: wp(8),
     borderWidth: 1,
     borderColor: '#E0D7C8',
+    maxWidth: Dimensions.get('window').width - 80,
   },
   requirementText: {
+    flex: 1,
+    flexShrink: 1,
     ...commonFontStyle(400, 14, colors._0B3970),
-    marginRight: wp(5),
+    marginRight: wp(8),
   },
   requirementCloseBtn: {
     backgroundColor: '#EFF1F7',
     borderRadius: 50,
-    width: wp(16),
-    height: wp(16),
+    width: wp(20),
+    height: wp(20),
+    minWidth: wp(20),
+    minHeight: wp(20),
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: hp(1),
   },
   requirementCloseText: {
     ...commonFontStyle(500, 12, colors._0B3970),

@@ -28,7 +28,6 @@ const MessageBubble: React.FC<{
   type: 'user' | 'company';
   chatData: any;
 }> = ({ item, recipientName, type, chatData }) => {
-  //   console.log('>>>>>>>> ~ MessageBubble ~ item:', item?.file);
   // Determine if the message belongs to the current viewer based on their role
   const isMyMessage = type === 'company' ? item.sender === 'company' : item.sender !== 'company';
 
@@ -76,16 +75,16 @@ const MessageBubble: React.FC<{
                 ...styles.timeText,
                 color: type === 'company' ? colors._0B3970 : colors._2F2F2F,
               }}>
-              {moment(item.createdAt).format('hh:mm A')}
+              {item?.createdAt ? moment(item.createdAt).format('hh:mm A') : ''}
             </Text>
           </View>
         </View>
       )}
 
       <View style={{ flex: 1 }}>
-        {isMyMessage && (
-          <Text style={{ ...styles.timeText, alignSelf: 'flex-end', color: type === 'user' ? colors._2F2F2F : colors.white }}>
-            {moment(item?.createdAt).format('hh:mm A')}
+        {isMyMessage && item?.createdAt && (
+          <Text style={{ ...styles.timeText, alignSelf: 'flex-end', color: colors._2F2F2F }}>
+            {moment(item.createdAt).format('hh:mm A')}
           </Text>
         )}
 
