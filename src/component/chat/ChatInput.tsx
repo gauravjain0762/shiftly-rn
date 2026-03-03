@@ -68,7 +68,7 @@ const ChatInput = ({
         <></>
       )}
 
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
         <TextInput
           value={message}
           style={{
@@ -78,6 +78,7 @@ const ChatInput = ({
           onChangeText={setMessage}
           placeholderTextColor={colors._A3A3A3}
           placeholder="Write your message..."
+          multiline
         />
         <TouchableOpacity onPress={onPressAttachment} style={{marginRight: 10}}>
           <ImageBackground source={IMAGES.btnBg1} style={styles.iconWrapper}>
@@ -115,9 +116,14 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    maxHeight: hp(100),
+    minHeight: 40,
     ...commonFontStyle(400, 14, colors._2F2F2F),
     marginRight: 4,
-    paddingHorizontal: wp(8)
+    paddingHorizontal: wp(8),
+    paddingTop: hp(10),
+    paddingBottom: hp(10),
+    textAlignVertical: 'top',
   },
   iconWrapper: {
     width: 39,

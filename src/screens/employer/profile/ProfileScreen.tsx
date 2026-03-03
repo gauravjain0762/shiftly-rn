@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { GradientButton, LinearContainer } from '../../../component';
 import BottomModal from '../../../component/common/BottomModal';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -22,7 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
 import { navigationRef } from '../../../navigation/RootContainer';
-import { useGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
+import { useGetCompanyEducationsQuery, useGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = () => {
@@ -68,6 +68,41 @@ const ProfileScreen = () => {
     : userInfo?.experience
       ? [userInfo?.experience]
       : [];
+
+  const { data: educationOptionsResponse } = useGetCompanyEducationsQuery({});
+
+  const degreeMap = useMemo(() => {
+    const list = educationOptionsResponse?.data?.educations ?? [];
+    const map: Record<string, string> = {};
+    list.forEach((edu: any) => {
+      if (edu?._id) {
+        map[edu._id] = edu?.title ?? '';
+      }
+    });
+    return map;
+  }, [educationOptionsResponse]);
+
+  const getDegreeLabel = (degree: any) => {
+    if (!degree) {
+      return '';
+    }
+
+    if (typeof degree === 'object') {
+      return (
+        degree?.title ??
+        degree?.name ??
+        degree?.label ??
+        degree?.value ??
+        ''
+      );
+    }
+
+    if (typeof degree === 'string') {
+      return degreeMap[degree] ?? degree;
+    }
+
+    return String(degree);
+  };
 
   const HeaderWithAdd = useCallback(
     ({ title }: any) => (
@@ -340,9 +375,9 @@ const ProfileScreen = () => {
               <View style={styles.educationContainer}>
                 {educationList?.map((edu: any, index: number) => (
                   <View key={index} style={{ marginBottom: hp(20), borderBottomWidth: index === educationList?.length - 1 ? 0 : 1, borderBottomColor: '#eee', paddingBottom: hp(10) }}>
-                    {edu?.degree && (
+                    {getDegreeLabel(edu?.degree) && (
                       <BaseText style={styles.educationDegree}>
-                        {edu?.degree}
+                        {getDegreeLabel(edu?.degree)}
                       </BaseText>
                     )}
                     {edu?.university && (

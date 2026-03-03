@@ -55,7 +55,8 @@ const JobDetail = () => {
   const { params } = useRoute<RouteProp<any, any>>() as any;
   const data = params || params?.item;
   const jobId = data?.item?._id || data?.jobId;
-  const fromCompany = !!params?.hide_apply;
+
+  const fromCompany = !!params?.fromCompany;
   const { data: employeeJobDetail, isLoading: isLoadingEmployee } = useGetEmployeeJobDetailsQuery(
     jobId,
     { skip: fromCompany },
@@ -67,7 +68,6 @@ const JobDetail = () => {
   const jobDetail = fromCompany ? companyJobDetail : employeeJobDetail;
   const isLoading = fromCompany ? isLoadingCompany : isLoadingEmployee;
   const curr_jobdetails = jobDetail?.data?.job;
-  console.log('~ JobDetail ~ curr_jobdetails:', curr_jobdetails);
   const resumeList = jobDetail?.data?.resumes;
   const job_facilities = jobDetail?.data?.job?.facilities;
   const shareUrl = jobDetail?.data?.share_url;

@@ -42,8 +42,7 @@ import {
 import { SCREENS } from '../../../navigation/screenNames';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import BottomModal from '../../../component/common/BottomModal';
-import BaseText from '../../../component/common/BaseText';
+import SoftSkillAssessmentModal from '../../../component/auth/SoftSkillAssessmentModal';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   setCreateEmployeeAccount,
@@ -109,7 +108,7 @@ const SignUp = () => {
   const [empOTPVerify] = useEmployeeOTPVerifyMutation({});
   const [employeeResendOTP] = useEmployeeResendOTPMutation({});
   const [empUpdateProfile] = useEmpUpdateProfileMutation({});
-  const [sendAssessmentLink, { isLoading: isSendingAssessment }] = useSendAssessmentLinkMutation();
+  const [sendAssessmentLink] = useSendAssessmentLinkMutation();
   const [timer, setTimer] = useState(signupData?.timer ?? 30);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
 
@@ -181,6 +180,13 @@ const SignUp = () => {
       if (interval) clearInterval(interval);
     };
   }, [timer]);
+
+  // Show Soft Skill Assessment modal when user lands on step 10
+  useEffect(() => {
+    if (step === 10) {
+      setShowAssessmentModal(true);
+    }
+  }, [step]);
 
   const handleRegister = async (isCheck?: boolean) => {
     try {
@@ -315,7 +321,14 @@ const SignUp = () => {
         } catch (profileError) {
         }
 
-        setShowAssessmentModal(true);
+        // Send assessment link so user receives email from AssessFirst
+        try {
+          await sendAssessmentLink().unwrap();
+        } catch {
+          // Silently continue - user can request link later from profile
+        }
+
+        nextStep();
       } else {
         errorToast(res?.message);
       }
@@ -1207,49 +1220,10 @@ const SignUp = () => {
         setActionSheet={() => updateSignupData({ imageModal: false })}
         onUpdate={(image: any) => updateSignupData({ picture: image })}
       />
-      <BottomModal
+      <SoftSkillAssessmentModal
         visible={showAssessmentModal}
-        onClose={() => {
-          setShowAssessmentModal(false);
-          nextStep();
-        }}
-        backgroundColor={colors.white}>
-        <BaseText style={styles.assessmentModalHeading}>{t('Skill Assessment')}</BaseText>
-        <BaseText style={styles.assessmentModalDescription}>
-          {t('Request a link for your soft skill assessment. You can also do this later from your profile.')}
-        </BaseText>
-        <GradientButton
-          type="Company"
-          title={t('Send invitation link')}
-          style={styles.assessmentSendBtn}
-          disabled={isSendingAssessment}
-          onPress={async () => {
-            if (isSendingAssessment) return;
-            try {
-              const res: any = await sendAssessmentLink().unwrap();
-              if (res?.status) {
-                successToast(res?.message);
-              } else {
-                errorToast(res?.message || t('Failed to send assessment link.'));
-              }
-            } catch (err: any) {
-              const msg = err?.data?.message || err?.error || err?.message || t('Failed to send assessment link.');
-              errorToast(msg);
-            } finally {
-              setShowAssessmentModal(false);
-              nextStep();
-            }
-          }}
-        />
-        <TouchableOpacity
-          style={styles.assessmentCancelBtn}
-          onPress={() => {
-            setShowAssessmentModal(false);
-            nextStep();
-          }}>
-          <Text style={styles.assessmentCancelBtnText}>{t('Cancel')}</Text>
-        </TouchableOpacity>
-      </BottomModal>
+        onContinue={() => setShowAssessmentModal(false)}
+      />
     </LinearContainer>
   );
 };
@@ -1354,27 +1328,6 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginHorizontal: wp(13),
-  },
-  assessmentModalHeading: {
-    ...commonFontStyle(600, 22, colors._0B3970),
-    marginBottom: hp(12),
-    textAlign: 'center',
-  },
-  assessmentModalDescription: {
-    ...commonFontStyle(400, 16, colors._4A4A4A),
-    marginBottom: hp(24),
-    textAlign: 'center',
-    lineHeight: hp(24),
-  },
-  assessmentSendBtn: {
-    marginBottom: hp(12),
-  },
-  assessmentCancelBtn: {
-    paddingVertical: hp(12),
-    alignItems: 'center',
-  },
-  assessmentCancelBtnText: {
-    ...commonFontStyle(500, 16, colors._4A4A4A),
   },
   btn1: {
     marginBottom: hp(38),

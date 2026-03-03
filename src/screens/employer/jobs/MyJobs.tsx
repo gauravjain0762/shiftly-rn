@@ -79,6 +79,7 @@ const MyJobs = () => {
     useEffect(() => {
         const res = matchedJobsQuery.data;
         if (res == null) return;
+        console.log('MyJobs ~ Matched jobs API response:', JSON.stringify(res, null, 2));
         const raw = res?.data;
         const newList = Array.isArray(raw?.jobs)
             ? raw.jobs

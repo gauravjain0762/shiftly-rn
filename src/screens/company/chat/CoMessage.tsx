@@ -81,6 +81,7 @@ const CoMessage = () => {
     const userName = item?.user_id?.name || 'Unknown';
     const userAvatar = item?.user_id?.picture;
     const lastMessage = item?.last_message || '';
+    console.log("🔥 ~ renderChatCard ~ lastMessage:", lastMessage)
     const jobCode = item?.job_id?.job_code || '';
     const updatedAt = item?.updatedAt || item?.createdAt;
     const timeLabel = updatedAt

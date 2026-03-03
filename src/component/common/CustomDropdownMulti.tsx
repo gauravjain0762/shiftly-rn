@@ -2,6 +2,7 @@ import {
   Image,
   StyleSheet,
   Text,
+  TextStyle,
   ViewStyle,
   View,
   Keyboard,
@@ -42,6 +43,7 @@ type Props = {
   selectedStyle?: any;
   dropdownPosition?: 'top' | 'bottom' | 'auto';
   hideSelectedItems?: boolean;
+  labelStyle?: TextStyle;
 };
 
 const CustomDropdownMulti = ({
@@ -74,12 +76,13 @@ const CustomDropdownMulti = ({
   placeholderStyle,
   dropdownPosition,
   hideSelectedItems = false,
+  labelStyle,
 }: Props) => {
   return (
     <>
       <View style={container}>
         {label && (
-          <Text style={styles.label}>
+          <Text style={[styles.label, labelStyle]}>
             {label}
             {required && <Text style={styles.required}>*</Text>}
           </Text>

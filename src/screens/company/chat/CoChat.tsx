@@ -272,6 +272,7 @@ const CoChat = () => {
                       typeof jobdetail_chatData?.job_id === 'object'
                         ? jobdetail_chatData?.job_id?._id
                         : jobdetail_chatData?.job_id,
+                    fromCompany: true,
                     hide_apply: true,
                   });
                 }

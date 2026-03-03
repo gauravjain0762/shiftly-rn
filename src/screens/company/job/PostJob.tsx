@@ -183,7 +183,7 @@ const PostJob = () => {
     education,
     experience,
     certification,
-    language,
+    languages,
     other_requirements,
   } = useAppSelector((state: any) => selectJobForm(state));
 
@@ -452,24 +452,19 @@ const PostJob = () => {
     const finalLat = userAddress?.lat || location?.latitude || userInfo?.lat;
     const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
 
-    if (!finalLat || !finalLng) {
-      errorToast(t('Please select a job location on the map'));
-      return;
-    }
-
     const [from, to] = salary?.value?.split('-') || [];
 
     const params = {
       title: title,
       contract_type:
         contract_type?.label || contract_type?.value || '',
-      area: area?.value,
+      area: area?.value ?? '',
       description: describe,
       address: userAddress?.address || userInfo?.address || '',
       city: userAddress?.state || userInfo?.state || '',
       country: userAddress?.country || userInfo?.country || '',
-      lat: userAddress?.lat || location?.latitude || userInfo?.lat,
-      lng: userAddress?.lng || location?.longitude || userInfo?.lng,
+      lat: finalLat ?? null,
+      lng: finalLng ?? null,
       people_anywhere: canApply,
       duration: duration?.value,
       department_id: job_sector?.value,
@@ -486,7 +481,7 @@ const PostJob = () => {
       educations: [education?.value].filter(Boolean).join(','),
       experiences: [experience?.value].filter(Boolean).join(','),
       certifications: [certification?.value].filter(Boolean).join(','),
-      languages: [language?.value].filter(Boolean).join(','),
+      languages: Array.isArray(languages) ? languages.filter(Boolean).join(',') : '',
       // Send other requirement IDs as comma-separated string (same as facilities)
       job_requirements: Array.isArray(other_requirements)
         ? other_requirements.filter(Boolean).join(',')
@@ -946,28 +941,65 @@ const PostJob = () => {
                   />
                 </View>
 
-                {/* Languages Dropdown */}
-                <View style={styles.field}>
-                  <Text style={styles.label}>{t('Languages')}</Text>
-                  <CustomDropdown
+                {/* Languages Dropdown (Multi-select) */}
+                <View style={[styles.field, styles.languagesFieldCompact, { zIndex: 101 }]}>
+                  <CustomDropdownMulti
+                    label={t('Languages')}
+                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}
                     data={languageData}
                     labelField="label"
                     valueField="value"
-                    value={language?.value}
-                    onChange={(e: any) => {
-                      updateJobForm({ language: { label: e.label, value: e.value } });
+                    value={languages || []}
+                    onChange={(items: any[]) => {
+                      const ids =
+                        Array.isArray(items)
+                          ? items
+                              .map(it => it?.value ?? it)
+                              .filter(Boolean)
+                          : [];
+                      updateJobForm({ languages: ids });
                     }}
+                    placeholder={t('Select languages')}
                     dropdownStyle={styles.dropdown}
-                    renderRightIcon={IMAGES.ic_down}
-                    RightIconStyle={styles.rightIcon}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    placeholder={t('Select one')}
+                    container={{ marginTop: 10, marginBottom: 0 }}
+                    dropdownPosition="top"
+                    hideSelectedItems
                   />
+                  {Array.isArray(languages) &&
+                    languages.length > 0 && (
+                      <View style={styles.selectedRequirementsContainer}>
+                        {languageData
+                          .filter((opt: any) => languages.includes(opt.value))
+                          .map((opt: any) => (
+                            <View
+                              key={opt.value}
+                              style={styles.requirementTag}>
+                              <Text style={styles.requirementText}>
+                                {opt.label}
+                              </Text>
+                              <Pressable
+                                onPress={() =>
+                                  updateJobForm({
+                                    languages: languages.filter(
+                                      (id: string) => id !== opt.value,
+                                    ),
+                                  })
+                                }
+                                style={styles.requirementCloseBtn}>
+                                <Text style={styles.requirementCloseText}>
+                                  ×
+                                </Text>
+                              </Pressable>
+                            </View>
+                          ))}
+                      </View>
+                    )}
                 </View>
 
                 <View style={[styles.field, { zIndex: 100 }]}>
                   <CustomDropdownMulti
                     label={t('Other Requirements')}
+                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970) }}
                     data={otherRequirementsData}
                     labelField="label"
                     valueField="value"
@@ -1101,12 +1133,6 @@ const PostJob = () => {
                 }
                 if (!job_sector || !job_sector.value) {
                   errorToast(t('Please select a job department'));
-                  return;
-                }
-                const finalLat = userAddress?.lat || location?.latitude || userInfo?.lat;
-                const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
-                if (!finalLat || !finalLng) {
-                  errorToast(t('Please select a job location on the map'));
                   return;
                 }
                 // Navigate to JobPreview with necessary data
@@ -2291,6 +2317,11 @@ const styles = StyleSheet.create({
     gap: hp(12),
     marginBottom: hp(14),
     zIndex: 1,
+  },
+  languagesFieldCompact: {
+    marginTop: -hp(6),
+    marginBottom: hp(8),
+    gap: hp(6),
   },
 
   textAreaInput: {

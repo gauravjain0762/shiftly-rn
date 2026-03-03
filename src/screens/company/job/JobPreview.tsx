@@ -68,7 +68,7 @@ const JobPreview = () => {
         education,
         experience,
         certification,
-        language,
+        languages,
         other_requirements,
     } = useAppSelector((state: any) => selectJobForm(state));
 
@@ -139,13 +139,13 @@ const JobPreview = () => {
         const params = {
             title: title,
             contract_type: contract_type?.label || contract_type?.value || '',
-            area: area?.value,
+            area: area?.value ?? '',
             description: describe,
             address: userAddress?.address || userInfo?.address || '',
             city: userAddress?.state || userInfo?.state || '',
             country: userAddress?.country || userInfo?.country || '',
-            lat: finalLat,
-            lng: finalLng,
+            lat: finalLat ?? null,
+            lng: finalLng ?? null,
             people_anywhere: true,
             duration: duration?.value,
             department_id: job_sector?.value,
@@ -162,7 +162,7 @@ const JobPreview = () => {
             educations: education?.value || '',
             experiences: experience?.value || '',
             certifications: certification?.value || '',
-            languages: language?.value || '',
+            languages: Array.isArray(languages) ? languages.filter(Boolean).join(',') : '',
             // Send other requirement IDs as comma-separated string (same as facilities)
             job_requirements: Array.isArray(other_requirements)
                 ? other_requirements.filter(Boolean).join(',')
@@ -385,7 +385,7 @@ const JobPreview = () => {
                     type="Company"
                     style={styles.modalButton}
                     onPress={handleViewSuggestedEmployees}
-                    textStyle={{ textAlign: 'center', alignSelf: 'center' }}
+                    textStyle={{ textAlign: 'center' }}
                     title={t(editMode ? 'View Job Detail' : 'View Suggested Employees')}
                 />
 
@@ -583,6 +583,7 @@ const styles = StyleSheet.create({
     modalButton: {
         marginTop: hp(20),
         borderRadius: wp(25),
+        alignSelf: 'stretch',
     },
     modalHomeText: {
         marginTop: hp(15),

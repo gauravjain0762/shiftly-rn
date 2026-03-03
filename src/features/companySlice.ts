@@ -31,7 +31,8 @@ interface JobFormState {
   education: { label: string; value: string } | null;
   experience: { label: string; value: string } | null;
   certification: { label: string; value: string } | null;
-  language: { label: string; value: string } | null;
+  /** Selected language IDs (supports multiple) */
+  languages: string[];
   /**
    * Selected "Other Requirements" IDs
    */
@@ -101,7 +102,7 @@ const initialState: CompanyState = {
     education: null,
     experience: null,
     certification: null,
-    language: null,
+    languages: [],
     other_requirements: [],
   },
   postForm: {

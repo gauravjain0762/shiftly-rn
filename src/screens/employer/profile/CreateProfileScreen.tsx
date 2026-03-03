@@ -1078,6 +1078,5 @@ const styles = StyleSheet.create({
   },
   buttonStyle: {
     paddingHorizontal: wp(25),
-    paddingBottom: hp(10),
   },
 });

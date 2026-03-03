@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Image,
@@ -11,6 +11,7 @@ import {colors} from '../../theme/colors';
 import BaseText from '../common/BaseText';
 import {IMAGES} from '../../assets/Images';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import { useGetCompanyEducationsQuery } from '../../api/dashboardApi';
 
 type Props = {
   item: any;
@@ -22,11 +23,54 @@ type Props = {
 const EducationCard = ({item, onRemove, onEdit, type}: Props) => {
   const isEducation = type === 'Education';
 
+  const { data: educationOptionsResponse } = useGetCompanyEducationsQuery({});
+
+  const degreeMap = useMemo(() => {
+    const list = educationOptionsResponse?.data?.educations ?? [];
+    const map: Record<string, string> = {};
+    list.forEach((edu: any) => {
+      if (edu?._id) {
+        map[edu._id] = edu?.title ?? '';
+      }
+    });
+    return map;
+  }, [educationOptionsResponse]);
+
+  const getDegreeLabel = () => {
+    if (!isEducation) {
+      return item?.title;
+    }
+
+    const degree = item?.degree;
+    if (!degree) {
+      return '';
+    }
+
+    if (typeof degree === 'object') {
+      return (
+        degree?.title ??
+        degree?.name ??
+        degree?.label ??
+        degree?.value ??
+        ''
+      );
+    }
+
+    if (typeof degree === 'string') {
+      return degreeMap[degree] ?? degree;
+    }
+
+    return String(degree);
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.rowSpaceBetween}>
-        <BaseText style={styles.degree}>
-          {isEducation ? item?.degree : item?.title}
+        <BaseText
+          style={styles.degree}
+          numberOfLines={1}
+          ellipsizeMode="tail">
+          {getDegreeLabel()}
         </BaseText>
         {isEducation ? (
           <BaseText style={styles.duration}>
@@ -115,6 +159,8 @@ const styles = StyleSheet.create({
   },
   degree: {
     ...commonFontStyle(700, 18, colors._0B3970),
+    flexShrink: 1,
+    maxWidth: '70%',
   },
   duration: {
     ...commonFontStyle(400, 18, colors._4A4A4A),

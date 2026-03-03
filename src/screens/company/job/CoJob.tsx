@@ -64,7 +64,6 @@ const CoJob = () => {
 
   const [page, setPage] = useState<number>(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
-  console.log("🔥 ~ CoJob ~ allJobs:", allJobs)
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
   const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
 

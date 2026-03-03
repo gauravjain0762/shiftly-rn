@@ -11,6 +11,7 @@ import {
   TextStyle,
   TextInputProps,
 } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import CountryPicker from 'react-native-country-picker-modal';
 import { commonFontStyle, hp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
@@ -65,16 +66,17 @@ const PhoneInput: FC<picker> = ({
   // }, []);
 
   const handlePhoneChange = (text: string) => {
-    // Determine expected length based on country code
-    // const expectedLength = currentCallingCode === '971' ? 9 : 10;
+    const digits = text.replace(/\D/g, '');
+    if (digits.length > 12) {
+      ReactNativeHapticFeedback.trigger('impactMedium', { enableVibrateFallback: true });
+    }
     const formatted = formatPhoneNumber(text, 12);
-
     onPhoneChange?.(formatted);
 
     // Check if we have the expected number of digits
-    const digits = formatted.replace(/\D/g, '');
-    const isValidLength = digits.length >= 5 && digits.length <= 12;
-    setValid(isValidLength && new RegExp(`^\\d{5,12}$`).test(digits));
+    const formattedDigits = formatted.replace(/\D/g, '');
+    const isValidLength = formattedDigits.length >= 5 && formattedDigits.length <= 12;
+    setValid(isValidLength && new RegExp(`^\\d{5,12}$`).test(formattedDigits));
   };
 
   const formatPhoneNumber = (value: string, maxDigits: number = 12) => {
