@@ -54,6 +54,7 @@ import FavoriteJobList from '../screens/employer/jobs/FavoriteJobList';
 import CreateQuestion from '../screens/company/job/CreateQuestion';
 import JobPreview from '../screens/company/job/JobPreview';
 import PreviewPost from '../screens/company/post/PreviewPost';
+import ShowPost from '../screens/company/post/ShowPost';
 import EmpLocation from '../component/employe/EmpLocation';
 import JobInvitationScreen from '../screens/employer/jobs/JobInvitationScreen';
 import EmployeeProfile from '../screens/company/job/EmployeeProfile';
@@ -332,6 +333,11 @@ const CoStack = () => {
         options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.PreviewPost}
         component={PreviewPost}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ShowPost}
+        component={ShowPost}
       />
       <CmpStack.Screen
         options={({ navigation }) => ({ headerShown: false })}

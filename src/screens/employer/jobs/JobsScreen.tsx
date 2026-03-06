@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   CustomTextInput,
   GradientButton,
@@ -152,6 +152,17 @@ const JobsScreen = () => {
   const [isRefetchingOnReturn, setIsRefetchingOnReturn] = useState(false);
   const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState('');
+
+  const selectedDepartmentLabel = useMemo(() => {
+    if (!filters.job_sectors?.length || !departments?.length) return '';
+    const names = filters.job_sectors
+      .map((id: string) => {
+        const dept = (departments as any[]).find((d: any) => d?._id === id);
+        return dept?.title || '';
+      })
+      .filter(Boolean);
+    return names.join(', ');
+  }, [filters.job_sectors, departments]);
 
   useEffect(() => {
     const fetchUserLocation = async () => {
@@ -650,7 +661,7 @@ const JobsScreen = () => {
                 onPress={() => navigateTo(SCREENS.SearchJob)}>
                 <View pointerEvents="none">
                   <SearchBar
-                    value={jobSearchQuery}
+                    value={selectedDepartmentLabel || jobSearchQuery}
                     onChangeText={setJobSearchQuery}
                     placeholder={t('Search jobs...')}
                     type="company"
@@ -814,61 +825,84 @@ const JobsScreen = () => {
           </View>
 
           <Text style={styles.sectionLabel}>{t('Department')}</Text>
+          {/* Selected departments shown as removable chips */}
+          {filters.job_sectors?.length > 0 && departments?.length > 0 && (
+            <View style={styles.selectedChipsRow}>
+              {filters.job_sectors.map((id: string) => {
+                const dept = (departments as any[]).find((d: any) => d?._id === id);
+                const title = dept?.title || id;
+                return (
+                  <View key={id} style={styles.selectedChip}>
+                    <Text style={styles.selectedChipText} numberOfLines={1}>{title}</Text>
+                    <TouchableOpacity
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      onPress={() => {
+                        setFilters(prev => ({
+                          ...prev,
+                          job_sectors: prev.job_sectors.filter((d: string) => d !== id),
+                        }));
+                      }}
+                      style={styles.selectedChipRemove}>
+                      <Text style={styles.selectedChipRemoveText}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </View>
+          )}
           <View style={styles.inputWrapper}>
             <CustomTextInput
               value={departmentSearch}
               onChangeText={txt => setDepartmentSearch(txt)}
-              placeholder={t('Search Department')}
+              placeholder={t('Search department...')}
               placeholderTextColor={colors._7B7878}
               inputStyle={styles.deptSearchInput}
             />
             <View style={styles.underline} />
           </View>
-          {departmentSearch.trim().length > 0 && (
-            <View style={[styles.pillRow, styles.departmentPillRow]}>
-              {(departments || [])
-                .filter((dept: any) => {
-                  const title = dept?.title || '';
-                  const search = departmentSearch.trim().toLowerCase();
-                  return search === '' || title.toLowerCase().startsWith(search);
-                })
-                .map((dept: any, index: number) => {
-                  const deptId = dept?._id;
-                  const isSelected = filters.job_sectors.some(
-                    (d: any) => (typeof d === 'string' ? d : d?._id) === deptId,
-                  );
-                  return (
-                    <Pressable
-                      key={deptId || dept?.title || dept || index}
+          <View style={[styles.pillRow, styles.departmentPillRow]}>
+            {(departments || [])
+              .filter((dept: any) => {
+                const title = (dept?.title || '').toLowerCase();
+                const search = departmentSearch.trim().toLowerCase();
+                return search === '' || title.includes(search);
+              })
+              .map((dept: any, index: number) => {
+                const deptId = dept?._id;
+                const isSelected = filters.job_sectors.some(
+                  (d: any) => (typeof d === 'string' ? d : d?._id) === deptId,
+                );
+                return (
+                  <Pressable
+                    key={deptId || dept?.title || dept || index}
+                    style={[
+                      styles.pill,
+                      isSelected && styles.pillDepartmentSelected,
+                    ]}
+                    onPress={() => {
+                      setFilters(prev => {
+                        const cleanSectors = prev.job_sectors.filter(
+                          (d: any) => typeof d === 'string' && d.trim() !== '',
+                        );
+                        return {
+                          ...prev,
+                          job_sectors: isSelected
+                            ? cleanSectors.filter((d: string) => d !== deptId)
+                            : [...cleanSectors, deptId],
+                        };
+                      });
+                    }}>
+                    <Text
                       style={[
-                        styles.pill,
-                        isSelected && styles.pillDepartmentSelected,
-                      ]}
-                      onPress={() => {
-                        setFilters(prev => {
-                          const cleanSectors = prev.job_sectors.filter(
-                            (d: any) => typeof d === 'string' && d.trim() !== '',
-                          );
-                          return {
-                            ...prev,
-                            job_sectors: isSelected
-                              ? cleanSectors.filter((d: string) => d !== deptId)
-                              : [...cleanSectors, deptId],
-                          };
-                        });
-                      }}>
-                      <Text
-                        style={[
-                          styles.pillText,
-                          isSelected && styles.pillDepartmentTextSelected,
-                        ]}>
-                        {dept?.title}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-            </View>
-          )}
+                        styles.pillText,
+                        isSelected && styles.pillDepartmentTextSelected,
+                      ]}>
+                      {dept?.title}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+          </View>
 
           <View style={styles.inputWrapper}>
             <TouchableOpacity
@@ -1290,6 +1324,34 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 16, colors.black),
     marginTop: hp(36),
     marginBottom: hp(8),
+  },
+  selectedChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: wp(8),
+    marginBottom: hp(12),
+  },
+  selectedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.empPrimary,
+    paddingVertical: hp(6),
+    paddingLeft: wp(12),
+    paddingRight: wp(4),
+    borderRadius: wp(20),
+    maxWidth: '100%',
+  },
+  selectedChipText: {
+    ...commonFontStyle(500, 14, colors.white),
+    maxWidth: wp(160),
+  },
+  selectedChipRemove: {
+    paddingHorizontal: wp(6),
+    paddingVertical: hp(2),
+  },
+  selectedChipRemoveText: {
+    ...commonFontStyle(600, 18, colors.white),
+    lineHeight: 20,
   },
   deptSearchInput: {
     ...commonFontStyle(400, 16, colors._050505),

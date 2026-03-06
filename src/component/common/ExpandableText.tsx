@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   LayoutChangeEvent,
+  Pressable,
   StyleProp,
   StyleSheet,
   Text,
@@ -12,9 +13,9 @@ import { commonFontStyle } from '../../theme/fonts';
 import BaseText from './BaseText';
 import { colors } from '../../theme/colors';
 
-const MORE_SUFFIX = '...more';
-// Average character width as fraction of fontSize (proportional font heuristic).
-// 0.5 = more chars per line so truncated text fills the last line; "...more" stays inline.
+const MORE_SUFFIX = ' more';
+const SHOW_LESS_LABEL = 'Show less';
+// Reserve space so " more" fits on the last line.
 const CHAR_WIDTH_RATIO = 0.5;
 
 interface Props {
@@ -71,7 +72,7 @@ const ExpandableText: React.FC<Props> = ({
   };
 
   const truncateLength = useMemo(() => {
-    if (containerWidth <= 0) return maxLines * 42 - 5; // fallback until measured
+    if (containerWidth <= 0) return maxLines * 42 - 8; // fallback until measured
     const charWidth = fontSize * CHAR_WIDTH_RATIO;
     const charsPerLine = Math.floor(containerWidth / charWidth);
     return Math.max(1, maxLines * charsPerLine - MORE_SUFFIX.length);
@@ -92,7 +93,7 @@ const ExpandableText: React.FC<Props> = ({
   })();
 
   return (
-    <View onLayout={onContainerLayout}>
+    <View onLayout={onContainerLayout} collapsable={false} style={styles.container}>
       <BaseText
         style={[descriptionStyle, { position: 'absolute', opacity: 0, height: 0 }]}
         onTextLayout={onTextLayout}>
@@ -104,23 +105,27 @@ const ExpandableText: React.FC<Props> = ({
           {truncatedText}
           <Text
             onPress={toggleShowMore}
-            style={[styles.inlineMoreText, showStyle]}
-            suppressHighlighting={true}>
+            suppressHighlighting
+            style={[styles.inlineMore, showStyle]}
+          >
             {MORE_SUFFIX}
           </Text>
         </BaseText>
       ) : (
-        <BaseText style={descriptionStyle} numberOfLines={showMore ? undefined : maxLines}>
-          {description}
+        <View style={styles.block}>
+          <BaseText style={descriptionStyle} numberOfLines={showMore ? undefined : maxLines}>
+            {description}
+          </BaseText>
           {shouldShowButton && showMore && (
-            <Text
+            <Pressable
               onPress={toggleShowMore}
-              style={[styles.inlineLessText, showStyle]}
-              suppressHighlighting={true}>
-              {' '}Show Less
-            </Text>
+              hitSlop={{ top: 14, bottom: 14, left: 12, right: 12 }}
+              style={({ pressed }) => [styles.linkTouchable, pressed && styles.pressedOpacity]}
+            >
+              <Text style={[styles.lessLink, showStyle]}>{SHOW_LESS_LABEL}</Text>
+            </Pressable>
           )}
-        </BaseText>
+        </View>
       )}
     </View>
   );
@@ -129,10 +134,26 @@ const ExpandableText: React.FC<Props> = ({
 export default ExpandableText;
 
 const styles = StyleSheet.create({
-  inlineMoreText: {
-    ...commonFontStyle(500, 16, colors.empPrimary),
+  container: {
+    overflow: 'hidden',
   },
-  inlineLessText: {
-    ...commonFontStyle(500, 16, colors.empPrimary),
+  block: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  inlineMore: {
+    ...commonFontStyle(600, 16, colors._0B3970),
+  },
+  linkTouchable: {
+    marginTop: 4,
+    paddingVertical: 2,
+    paddingRight: 4,
+  },
+  lessLink: {
+    ...commonFontStyle(600, 15, colors._0B3970),
+    marginTop: 4,
+  },
+  pressedOpacity: {
+    opacity: 0.7,
   },
 });

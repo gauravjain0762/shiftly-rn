@@ -180,16 +180,20 @@ export const dashboardApi = createApi({
       },
     }),
     createCompanyPost: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.createCompanyPost,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-        headers: {
+      query: credentials => {
+        const isFormData = typeof FormData !== 'undefined' && credentials instanceof FormData;
+        const headers: Record<string, string> = {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Content-Type': 'multipart/form-data',
-        },
-      }),
+        };
+        if (!isFormData) headers['Content-Type'] = 'multipart/form-data';
+        return {
+          url: API.createCompanyPost,
+          method: HTTP_METHOD.POST,
+          data: credentials,
+          skipLoader: false,
+          headers,
+        };
+      },
       invalidatesTags: ['CreatePost', 'GetPost'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
@@ -205,16 +209,20 @@ export const dashboardApi = createApi({
       },
     }),
     editCompanyPost: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.editCompanyPost,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: false,
-        headers: {
+      query: credentials => {
+        const isFormData = typeof FormData !== 'undefined' && credentials instanceof FormData;
+        const headers: Record<string, string> = {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Content-Type': 'multipart/form-data',
-        },
-      }),
+        };
+        if (!isFormData) headers['Content-Type'] = 'multipart/form-data';
+        return {
+          url: API.editCompanyPost,
+          method: HTTP_METHOD.POST,
+          data: credentials,
+          skipLoader: false,
+          headers,
+        };
+      },
       invalidatesTags: ['CreatePost', 'GetPost'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
@@ -1001,6 +1009,7 @@ export const dashboardApi = createApi({
           const {data} = await queryFulfilled;
           console.log('🔥 ~ getAppData:', data);
           if (data?.status && data?.data) {
+            console.log('🔥 ~ getAppData map_key:', data.data?.map_key ?? '(not provided)');
             dispatch(setGetAppData(data.data));
           }
         } catch (error) {

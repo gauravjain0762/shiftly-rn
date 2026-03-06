@@ -118,6 +118,7 @@ const CoPost = () => {
                 hideLike={false}
                 currentCompanyId={currentCompanyId}
                 onScrollToTop={() => handleScrollToPost(index)}
+                onPressCard={() => navigateTo(SCREENS.ShowPost, { post: item })}
               />
             )}
             onScrollToIndexFailed={(info) => {

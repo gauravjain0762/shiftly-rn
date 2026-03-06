@@ -61,6 +61,7 @@ export const SCREENS = {
   CreateQuestion: 'CreateQuestion',
   JobPreview: 'JobPreview',
   PreviewPost: 'PreviewPost',
+  ShowPost: 'ShowPost',
   EmpChangePassword: 'EmpChangePassword',
   EmpProfile: 'EmpProfile',
   EmpForgotPassword: 'EmpForgotPassword',

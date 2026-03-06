@@ -123,7 +123,7 @@ export const API = {
   getAppData: '/getAppData',
 
   // google Map API (deprecated - use map_key from getAppData)
-  GOOGLE_MAP_API_KEY: 'AIzaSyD_m-MjRQqW5h1k8GIaIg8meHEXASMytAA',
+  GOOGLE_MAP_API_KEY: 'AIzaSyAYbNFq_5Ydz63BbVwFh7NXpqRmb6F_zDU',
 };
 
 export const API_ERROR_CODE = {

@@ -78,21 +78,26 @@ const PreviewPost = () => {
             const formData = new FormData();
             formData.append('title', title.trim());
             formData.append('description', description.trim());
-
-            // For edit mode, add post_id
+            
             if (postEditMode && postId) {
                 formData.append('post_id', postId);
             }
-
-            // Only append image if it's a new image (not an existing URL)
+            
             const imageData = uploadedImages[0];
+            console.log("🔥 ~ handlePublishPost ~ imageData:", imageData)
             if (imageData && !imageData.isExisting) {
-                formData.append('images', {
-                    uri: imageData.uri,
-                    type: imageData.type || 'image/jpeg',
-                    name: imageData.name,
-                });
+                let fileUri = imageData.uri;
+                if (typeof fileUri === 'string' && !fileUri.startsWith('http') && !fileUri.startsWith('content://')) {
+                    fileUri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
+                }
+                const uri = imageData.path || imageData.uri;
+                formData.append(`images`, {
+                    uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+                    type: imageData.mime || imageData.type || imageData.type || 'image/jpeg',
+                    name: imageData.filename || imageData.name || `image_${Date.now()}.jpg`,
+                } as any);
             }
+            console.log("🔥 ~ handlePublishPost ~ formData:", JSON.stringify(formData))
 
             let response;
             if (postEditMode && postId) {
@@ -109,7 +114,11 @@ const PreviewPost = () => {
             }
         } catch (e: any) {
             console.error('handlePublishPost error', e);
-            errorToast(e?.data?.message || 'Something went wrong');
+            const status = e?.status ?? e?.response?.status;
+            const msg = status === 502
+                ? t('Server is temporarily unavailable. Please try again.')
+                : (e?.data?.message || 'Something went wrong');
+            errorToast(msg);
         } finally {
             updatePostForm({ isPostUploading: false });
         }
