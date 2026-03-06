@@ -30,7 +30,7 @@ import {
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
-import { useEditCompanyJobMutation } from '../../../api/dashboardApi';
+import { useEditCompanyJobMutation, useGetCompanyLanguagesQuery } from '../../../api/dashboardApi';
 import { useCreateJobMutation } from '../../../api/authApi';
 import { useAppSelector } from '../../../redux/hooks';
 import { resetJobFormState, selectJobForm, setCoPostJobSteps } from '../../../features/companySlice';
@@ -46,6 +46,11 @@ const JobPreview = () => {
     const { updateJobForm } = useJobFormUpdater();
     const [createJob] = useCreateJobMutation();
     const [editJob] = useEditCompanyJobMutation();
+    const { data: languageDataVals } = useGetCompanyLanguagesQuery({});
+    const languageData = React.useMemo(
+        () => languageDataVals?.data?.languages?.map((item: any) => ({ label: item?.title, value: item?._id })) || [],
+        [languageDataVals]
+    );
 
     const {
         title,
@@ -58,7 +63,7 @@ const JobPreview = () => {
         currency,
         position,
         describe,
-        selected,
+        essential_benefits,
         jobSkills,
         requirements,
         editMode,
@@ -71,6 +76,7 @@ const JobPreview = () => {
         languages,
         other_requirements,
     } = useAppSelector((state: any) => selectJobForm(state));
+        console.log("🔥 ~ JobPreview ~ essential_benefits:", essential_benefits)
 
     const { userInfo } = useAppSelector((state: any) => state.auth);
 
@@ -156,9 +162,10 @@ const JobPreview = () => {
             monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
             no_positions: position?.value,
             skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
-            facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
             currency: currency?.value,
-            essential_benefits: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
+            essential_benefits: Array.isArray(essential_benefits)
+                ? essential_benefits.map((item: any) => item?._id).filter(Boolean).join(',')
+                : '',
             educations: Array.isArray(education) ? education.filter(Boolean).join(',') : '',
             experiences: Array.isArray(experience) ? experience.filter(Boolean).join(',') : '',
             certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
@@ -168,10 +175,10 @@ const JobPreview = () => {
                     .map((l: any) => {
                         const id = typeof l === 'object' ? l.id : l;
                         const level = typeof l === 'object' ? l.level || '' : '';
-                        return level ? { id, level } : { id, level: '' };
+                        const name = languageData.find((opt: any) => opt.value === id)?.label ?? '';
+                        return { name, level };
                     })
                 : [],
-            // Send other requirement IDs as comma-separated string (same as facilities)
             job_requirements: Array.isArray(other_requirements)
                 ? other_requirements.filter(Boolean).join(',')
                 : '',
@@ -343,24 +350,38 @@ const JobPreview = () => {
                 )}
 
                 {/* Key Job Benefits */}
-                {selected && selected.length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{t('Key Job Benefits')}</Text>
-                        {selected.map((benefit: any, index: number) => (
-                            <View key={index} style={styles.bulletRow}>
-                                <View style={styles.bullet} />
-                                <Text style={styles.bulletText}>{benefit?.title?.trim() || benefit?.label?.trim() || '-'}</Text>
-                            </View>
-                        ))}
-                    </View>
-                )}
+                {(() => {
+                    // Prefer canonical essential_benefits from API (createdJobData)
+                    // and fall back to local form state while editing.
+                    const apiBenefits = (createdJobData as any)?.essential_benefits;
+                    const source =
+                        Array.isArray(apiBenefits) && apiBenefits.length > 0
+                            ? apiBenefits
+                            : essential_benefits || [];
+
+                    if (!Array.isArray(source) || source.length === 0) return null;
+
+                    return (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>{t('Key Job Benefits')}</Text>
+                            {source.map((benefit: any, index: number) => (
+                                <View key={index} style={styles.bulletRow}>
+                                    <View style={styles.bullet} />
+                                    <Text style={styles.bulletText}>
+                                        {(benefit?.title || benefit?.label || '').trim() || '-'}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    );
+                })()}
             </ScrollView>
 
-            {/* Post Job Button */}
+            {/* Post / Update Job Button */}
             <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
                 <GradientButton
                     type="Company"
-                    title={t('Post Job')}
+                    title={t(editMode ? 'Update Job' : 'Post Job')}
                     style={styles.postButton}
                     onPress={handlePostJob}
                     disabled={isLoading}
@@ -383,9 +404,15 @@ const JobPreview = () => {
                 </View>
 
                 <View>
-                    <Text style={styles.modalTitle}>{t('Job Posted Successfully')}</Text>
+                    <Text style={styles.modalTitle}>
+                        {t(editMode ? 'Job Updated Successfully' : 'Job Posted Successfully')}
+                    </Text>
                     <Text style={styles.modalSubtitle}>
-                        {t("We're excited to post your job. get ready to start receiving profiles.")}
+                        {t(
+                            editMode
+                                ? "Your changes have been saved. The updated job is now live for candidates."
+                                : "We're excited to post your job. get ready to start receiving profiles.",
+                        )}
                     </Text>
                 </View>
 

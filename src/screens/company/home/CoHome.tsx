@@ -31,8 +31,6 @@ const CoHome = () => {
 
   const { userInfo }: any = useSelector((state: RootState) => state.auth);
 
-  const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(3);
-
   const metricOptions = [
     {
       key: 'job_view',

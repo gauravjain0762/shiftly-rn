@@ -78,6 +78,8 @@ export const mapJobToFormState = (job: any) => {
   const skillId = skillsArray.map((s: any) => (typeof s === 'object' && s?._id ? s._id : String(s)));
   const jobSkills = skillsArray.map((s: any) => (typeof s === 'object' && s?.title ? s.title : String(s)));
 
+  const essential_benefits = Array.isArray(job?.essential_benefits) ? job.essential_benefits : [];
+
   return {
     education,
     experience,
@@ -86,5 +88,6 @@ export const mapJobToFormState = (job: any) => {
     other_requirements,
     skillId,
     jobSkills,
+    essential_benefits,
   };
 };

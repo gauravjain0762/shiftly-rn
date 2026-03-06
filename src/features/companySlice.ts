@@ -14,7 +14,8 @@ interface JobFormState {
   currency: { label: string; value: string };
   position: { label: string; value: string };
   describe: string;
-  selected: any[];
+  /** Selected "You will provide" benefits */
+  essential_benefits: any[];
   jobSkills: string[];
   skillId: string[];
   requirements: string[];
@@ -88,7 +89,7 @@ const initialState: CompanyState = {
     currency: { label: 'AED', value: 'AED' },
     position: { label: '1', value: '1' },
     describe: __DEV__ ? 'Testing Testing' : '',
-    selected: [],
+    essential_benefits: [],
     jobSkills: [],
     skillId: [],
     requirements: [],

@@ -64,12 +64,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 30,
     paddingHorizontal: wp(24),
-    paddingVertical: isAndroid ? hp(7) : hp(14),
+    // Base vertical padding for employee search
+    paddingVertical: isAndroid ? hp(7) : hp(10),
     gap: wp(12),
   },
   companyContainer: {
     backgroundColor: colors.white,
     borderColor: colors._0B3970,
+    // For company header search, fix height and remove extra
+    // vertical padding so placeholder is perfectly centered
+    paddingVertical: 0,
+    height: hp(44),
   },
   icon: {
     marginRight: 8,
@@ -77,6 +82,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...commonFontStyle(400, 15, colors.white),
+    paddingVertical: 0,
   },
   img: {
     width: wp(22),

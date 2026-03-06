@@ -495,7 +495,7 @@ const SuggestedEmployeeScreen = () => {
         startDate: { label: jobInfo?.start_date, value: jobInfo?.start_date },
         skillId: mapped.skillId,
         jobSkills: mapped.jobSkills,
-        selected: jobInfo?.facilities || [],
+        essential_benefits: mapped.essential_benefits,
         requirements: jobInfo?.requirements || [],
         invite_users: jobInfo?.invited_users?.map((u: any) => u?._id) || [],
         canApply: jobInfo?.people_anywhere,

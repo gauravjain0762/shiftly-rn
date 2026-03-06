@@ -374,7 +374,7 @@ ${salary}${shareUrlText}`;
                     value: String(jobDetail?.no_positions),
                   },
                   describe: jobDetail?.description,
-                  selected: jobDetail?.facilities || [],
+                  essential_benefits: mapped.essential_benefits,
                   jobSkills: mapped.jobSkills,
                   skillId: mapped.skillId,
                   requirements: jobDetail?.requirements || [],

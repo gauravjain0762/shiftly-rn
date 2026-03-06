@@ -6,7 +6,6 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
-    Linking,
 } from 'react-native';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +19,16 @@ import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import CustomImage from '../../../component/common/CustomImage';
 import { IMAGES } from '../../../assets/Images';
 import InterviewScoresModal from '../../../component/common/InterviewScoresModal';
+
+const getInitials = (name: string): string => {
+    if (!name || name === 'N/A') return '?';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    if (parts[0].length >= 2) return parts[0].slice(0, 2).toUpperCase();
+    return parts[0][0].toUpperCase();
+};
 
 const InterviewStatus = () => {
     const { t } = useTranslation();
@@ -119,14 +128,17 @@ const InterviewStatus = () => {
                 {/* Candidate Card */}
                 <View style={[styles.card, { backgroundColor: '#BEDEFF3B' }]}>
                     <View style={[styles.row, { alignItems: 'center' }]}>
-                        <CustomImage
-                            uri={
-                                candidateImg ||
-                                ''
-                            }
-                            containerStyle={styles.avatar}
-                            imageStyle={styles.avatar}
-                        />
+                        {candidateImg ? (
+                            <CustomImage
+                                uri={candidateImg}
+                                containerStyle={styles.avatar}
+                                imageStyle={styles.avatar}
+                            />
+                        ) : (
+                            <View style={styles.avatarInitials}>
+                                <Text style={styles.avatarInitialsText}>{getInitials(candidateName)}</Text>
+                            </View>
+                        )}
                         <View style={styles.candidateInfo}>
                             <Text style={styles.candidateName}>{candidateName}</Text>
                             <Text style={styles.candidateRole}>{candidateRole}</Text>
@@ -315,6 +327,17 @@ const styles = StyleSheet.create({
         width: wp(50),
         height: wp(50),
         borderRadius: wp(8),
+    },
+    avatarInitials: {
+        width: wp(50),
+        height: wp(50),
+        borderRadius: wp(25),
+        backgroundColor: colors._0B3970,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    avatarInitialsText: {
+        ...commonFontStyle(600, 18, colors.white),
     },
     candidateInfo: {
         flex: 1,

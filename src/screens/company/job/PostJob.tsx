@@ -186,7 +186,7 @@ const PostJob = () => {
     currency,
     position,
     describe,
-    selected,
+    essential_benefits,
     jobSkills,
     skillId,
     requirements,
@@ -492,9 +492,10 @@ const PostJob = () => {
       monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
       no_positions: position?.value,
       skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
-      facilities: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
       currency: currency?.value,
-      essential_benefits: Array.isArray(selected) ? selected.map((item: any) => item?._id).filter(Boolean).join(',') : '',
+      essential_benefits: Array.isArray(essential_benefits)
+        ? essential_benefits.map((item: any) => item?._id).filter(Boolean).join(',')
+        : '',
       educations: Array.isArray(education) ? education.filter(Boolean).join(',') : '',
       experiences: Array.isArray(experience) ? experience.filter(Boolean).join(',') : '',
       certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
@@ -507,7 +508,6 @@ const PostJob = () => {
               return level ? { id, level } : { id, level: '' };
             })
         : [],
-      // Send other requirement IDs as comma-separated string (same as facilities)
       job_requirements: Array.isArray(other_requirements)
         ? other_requirements.filter(Boolean).join(',')
         : '',
@@ -558,12 +558,12 @@ const PostJob = () => {
   };
 
   const toggleItem = (item: any) => {
-    const isAlreadySelected = selected?.some((i: any) => i?._id === item?._id);
+    const isAlreadySelected = essential_benefits?.some((i: any) => i?._id === item?._id);
     const updatedList = isAlreadySelected
-      ? selected.filter((i: any) => i?._id !== item?._id)
-      : [...(selected || []), item];
+      ? essential_benefits.filter((i: any) => i?._id !== item?._id)
+      : [...(essential_benefits || []), item];
 
-    updateJobForm({ selected: updatedList });
+    updateJobForm({ essential_benefits: updatedList });
   };
 
   const nextStep = () => {
@@ -1234,7 +1234,7 @@ const PostJob = () => {
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({ item, index }) => {
                     console.log("🔥 ~ render ~ item:", item)
-                    const isChecked = selected?.some(
+                    const isChecked = essential_benefits?.some(
                       (i: any) => i?._id === item?._id,
                     );
                     return (
@@ -1266,7 +1266,6 @@ const PostJob = () => {
               type="Company"
               title={t('Review your job resume')}
               onPress={() => {
-                // Validate required fields before navigating
                 if (!title || title.trim() === '') {
                   errorToast(t('Please enter a job title'));
                   return;
@@ -1279,7 +1278,6 @@ const PostJob = () => {
                   errorToast(t('Please select a job department'));
                   return;
                 }
-                // Navigate to JobPreview with necessary data
                 navigateTo(SCREENS.JobPreview, {
                   userAddress,
                   skillId,
@@ -1953,7 +1951,7 @@ const styles = StyleSheet.create({
     elevation: 9999,
   },
   header: {
-    paddingHorizontal: wp(35),
+    paddingHorizontal: wp(25),
     paddingTop: hp(26),
   },
   title: {
