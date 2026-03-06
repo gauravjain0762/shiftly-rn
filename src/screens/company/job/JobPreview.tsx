@@ -162,7 +162,15 @@ const JobPreview = () => {
             educations: Array.isArray(education) ? education.filter(Boolean).join(',') : '',
             experiences: Array.isArray(experience) ? experience.filter(Boolean).join(',') : '',
             certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
-            languages: Array.isArray(languages) ? languages.filter(Boolean).join(',') : '',
+            languages: Array.isArray(languages)
+                ? languages
+                    .filter((l: any) => l && (typeof l === 'object' ? l.id : l))
+                    .map((l: any) => {
+                        const id = typeof l === 'object' ? l.id : l;
+                        const level = typeof l === 'object' ? l.level || '' : '';
+                        return level ? { id, level } : { id, level: '' };
+                    })
+                : [],
             // Send other requirement IDs as comma-separated string (same as facilities)
             job_requirements: Array.isArray(other_requirements)
                 ? other_requirements.filter(Boolean).join(',')

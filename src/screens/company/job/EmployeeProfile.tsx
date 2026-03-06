@@ -134,71 +134,70 @@ const EmployeeProfile = () => {
           </View>
         </View>
 
-        {hasAssessFirst ? (
-          <TouchableOpacity
-            style={styles.assessmentCard}
-            onPress={assessStatus === 'Invited' ? () => setShowAssessmentModal(true) : undefined}
-            activeOpacity={assessStatus === 'Invited' ? 0.8 : 1}>
-            <View style={styles.iconCircle}>
-              <Image
-                source={assessStatus === 'Completed' ? IMAGES.check : IMAGES.document}
-                style={[styles.assessmentIcon, assessStatus === 'Completed' && { tintColor: colors._0B3970 }]}
-              />
-            </View>
-            <View style={styles.assessmentTextContainer}>
-              <BaseText style={styles.assessmentTitle}>
-                {assessStatus === 'Completed' ? 'Assessment Completed' : 'Skill Assessment'}
-              </BaseText>
-              <BaseText style={styles.assessmentSubtitle}>
-                {assessStatus === 'Invited' && 'Assessment link sent – awaiting completion'}
-                {assessStatus === 'Completed' && (reportUrl ? 'View the assessment report' : 'Soft Skill Assessment completed')}
-                {assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' && `Status: ${assessStatus}`}
-              </BaseText>
-              {assessStatus === 'Completed' && typeof reportUrl === 'string' && reportUrl.trim() !== '' && (
-                <TouchableOpacity
-                  style={styles.showReportButton}
-                  onPress={() => Linking.openURL(reportUrl).catch(() => Alert.alert('Error', 'Could not open report'))}
-                  activeOpacity={0.8}>
-                  <Text style={styles.showReportText}>Show Report</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </TouchableOpacity>
-        ) : (userData?.profile_completion || userParam?.profile_completion) ? (
-          <View style={styles.assessmentCard}>
-            <View style={styles.iconCircle}>
-              <Image
-                source={Number(userData?.profile_completion || userParam?.profile_completion) === 100 ? IMAGES.check : IMAGES.document}
-                style={[styles.assessmentIcon, Number(userData?.profile_completion || userParam?.profile_completion) === 100 && { tintColor: colors._0B3970 }]}
-              />
-            </View>
-            <View style={styles.assessmentTextContainer}>
-              <BaseText style={styles.assessmentTitle}>
-                {Number(userData?.profile_completion || userParam?.profile_completion) === 100 ? 'Profile Complete' : 'Profile Incomplete'}
-              </BaseText>
-              <BaseText style={styles.assessmentSubtitle}>
-                {profileData.name}'s profile is {userData?.profile_completion || userParam?.profile_completion}% complete
-              </BaseText>
-            </View>
+        <TouchableOpacity
+          style={styles.assessmentCard}
+          onPress={() => setShowAssessmentModal(true)}
+          activeOpacity={0.8}>
+          <View style={styles.iconCircle}>
+            <Image
+              source={assessStatus === 'Completed' ? IMAGES.check : IMAGES.document}
+              style={[styles.assessmentIcon, assessStatus === 'Completed' && { tintColor: colors._0B3970 }]}
+            />
           </View>
-        ) : null}
+          <View style={styles.assessmentTextContainer}>
+            <BaseText style={styles.assessmentTitle}>
+              {assessStatus === 'Completed' ? 'Assessment Completed' : 'Skill Assessment'}
+            </BaseText>
+            <BaseText style={styles.assessmentSubtitle}>
+              {!hasAssessFirst && 'Soft Skill Assessment is pending'}
+              {hasAssessFirst && assessStatus === 'Invited' && 'Assessment link sent – awaiting completion'}
+              {hasAssessFirst && assessStatus === 'Completed' && (reportUrl ? 'View the assessment report' : 'Soft Skill Assessment completed')}
+              {hasAssessFirst && assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' && `Status: ${assessStatus}`}
+            </BaseText>
+            {assessStatus === 'Completed' && typeof reportUrl === 'string' && reportUrl.trim() !== '' && (
+              <TouchableOpacity
+                style={styles.showReportButton}
+                onPress={() => Linking.openURL(reportUrl).catch(() => Alert.alert('Error', 'Could not open report'))}
+                activeOpacity={0.8}>
+                <Text style={styles.showReportText}>Show Report</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </TouchableOpacity>
 
-        {assessStatus === 'Invited' && (
-          <BottomModal
-            visible={showAssessmentModal}
-            onClose={() => setShowAssessmentModal(false)}
-            backgroundColor={colors.white}>
-            <Text style={styles.modalHeading}>Skill Assessment</Text>
-            <Text style={styles.modalDescription}>
-              Your soft skill assessment link has been sent. You will be notified once it is completed.
-            </Text>
+        <BottomModal
+          visible={showAssessmentModal}
+          onClose={() => setShowAssessmentModal(false)}
+          backgroundColor={colors.white}>
+          <Text style={styles.modalHeading}>Skill Assessment</Text>
+          <BaseText style={styles.modalDescription}>
+            {!hasAssessFirst &&
+              'Soft Skill Assessment has not been requested for this employee yet.'}
+            {hasAssessFirst && assessStatus === 'Invited' &&
+              'The assessment link has been sent to this employee. You will be notified once it is completed.'}
+            {hasAssessFirst && assessStatus === 'Completed' &&
+              'This employee has completed the soft skill assessment.'}
+            {hasAssessFirst && assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' &&
+              `Status: ${assessStatus}`}
+            {hasAssessFirst && !assessStatus && 'Assessment status is pending.'}
+          </BaseText>
+          {assessStatus === 'Completed' && typeof reportUrl === 'string' && reportUrl.trim() !== '' && (
             <TouchableOpacity
-              style={styles.modalCancelButton}
-              onPress={() => setShowAssessmentModal(false)}>
-              <Text style={styles.modalCancelText}>Cancel</Text>
+              style={styles.modalShowReportButton}
+              onPress={() => {
+                Linking.openURL(reportUrl).catch(() => Alert.alert('Error', 'Could not open report'));
+                setShowAssessmentModal(false);
+              }}
+              activeOpacity={0.8}>
+              <Text style={styles.modalShowReportText}>Show Report</Text>
             </TouchableOpacity>
-          </BottomModal>
-        )}
+          )}
+          <TouchableOpacity
+            style={styles.modalCancelButton}
+            onPress={() => setShowAssessmentModal(false)}>
+            <Text style={styles.modalCancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </BottomModal>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About me</Text>
@@ -561,6 +560,17 @@ const styles = StyleSheet.create({
     marginBottom: hp(24),
     textAlign: 'center',
     lineHeight: hp(24),
+  },
+  modalShowReportButton: {
+    alignSelf: 'center',
+    paddingVertical: hp(10),
+    paddingHorizontal: wp(24),
+    backgroundColor: colors._0B3970,
+    borderRadius: wp(8),
+    marginBottom: hp(12),
+  },
+  modalShowReportText: {
+    ...commonFontStyle(600, 14, colors.white),
   },
   modalCancelButton: {
     paddingVertical: hp(12),

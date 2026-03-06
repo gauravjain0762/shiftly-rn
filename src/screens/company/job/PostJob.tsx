@@ -126,6 +126,22 @@ const currencyData = [
   { label: 'INR', value: 'INR' },
 ];
 
+const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+const getLanguageProficiencyColor = (level: string) => {
+  switch (level) {
+    case 'Native':
+      return colors._0B3970;
+    case 'Fluent':
+      return colors._4A4A4A;
+    case 'Conversational':
+      return colors._7B7878;
+    case 'Basic':
+      return colors._D9D9D9;
+    default:
+      return '#999';
+  }
+};
 
 
 
@@ -482,7 +498,15 @@ const PostJob = () => {
       educations: Array.isArray(education) ? education.filter(Boolean).join(',') : '',
       experiences: Array.isArray(experience) ? experience.filter(Boolean).join(',') : '',
       certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
-      languages: Array.isArray(languages) ? languages.filter(Boolean).join(',') : '',
+      languages: Array.isArray(languages)
+        ? languages
+            .filter((l: any) => l && (typeof l === 'object' ? l.id : l))
+            .map((l: any) => {
+              const id = typeof l === 'object' ? l.id : l;
+              const level = typeof l === 'object' ? l.level || '' : '';
+              return level ? { id, level } : { id, level: '' };
+            })
+        : [],
       // Send other requirement IDs as comma-separated string (same as facilities)
       job_requirements: Array.isArray(other_requirements)
         ? other_requirements.filter(Boolean).join(',')
@@ -882,7 +906,7 @@ const PostJob = () => {
             <View style={styles.requirementsContainer}>
               <KeyboardAwareScrollView
                 style={{ flex: 1 }}
-                contentContainerStyle={{ paddingBottom: hp(100) }}
+                contentContainerStyle={{ paddingBottom: hp(24), flexGrow: 0 }}
                 showsVerticalScrollIndicator={false}>
 
                 {/* Education Dropdown (Multi-select) */}
@@ -1017,59 +1041,103 @@ const PostJob = () => {
                   )}
                 </View>
 
-                {/* Languages Dropdown (Multi-select) */}
+                {/* Languages Dropdown (Multi-select) with proficiency */}
                 <View style={[styles.field, styles.languagesFieldCompact, { zIndex: 101 }]}>
+                  <View style={styles.languageLabelRow}>
+                    <Text style={[commonFontStyle(400, 18, colors._0B3970), { marginTop: 0, marginBottom: hp(8) }]}>
+                      {t('Languages')}
+                    </Text>
+                    <Tooltip
+                      message={t('Choose required languages and minimum proficiency level (Basic / Conversational / Fluent / Native).')}
+                      position="bottom"
+                      containerStyle={styles.tooltipIcon}
+                      tooltipBoxStyle={{ left: wp(-110), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+                    />
+                  </View>
                   <CustomDropdownMulti
-                    label={t('Languages')}
-                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}
                     data={languageData}
                     labelField="label"
                     valueField="value"
-                    value={languages || []}
+                    value={(languages || []).map((l: any) => (typeof l === 'object' ? l?.id : l) ?? '').filter(Boolean)}
                     onChange={(items: any[]) => {
-                      const ids =
+                      const selectedIds =
                         Array.isArray(items)
-                          ? items
-                              .map(it => it?.value ?? it)
-                              .filter(Boolean)
+                          ? items.map(it => it?.value ?? it).filter(Boolean)
                           : [];
-                      updateJobForm({ languages: ids });
+                      const currentLangs = Array.isArray(languages) ? languages : [];
+                      const updatedLanguages = selectedIds.map((id: string) => {
+                        const existing = currentLangs.find((l: any) => (typeof l === 'object' ? l?.id : l) === id);
+                        return existing ? { id, level: existing.level || '' } : { id, level: '' };
+                      });
+                      updateJobForm({ languages: updatedLanguages });
                     }}
                     placeholder={t('Select languages')}
                     dropdownStyle={styles.dropdown}
-                    container={{ marginTop: 10, marginBottom: 0 }}
+                    container={{ marginTop: 0, marginBottom: 0 }}
                     dropdownPosition="bottom"
                     hideSelectedItems
                   />
-                  {Array.isArray(languages) &&
-                    languages.length > 0 && (
-                      <View style={styles.selectedRequirementsContainer}>
-                        {languageData
-                          .filter((opt: any) => languages.includes(opt.value))
-                          .map((opt: any) => (
-                            <View
-                              key={opt.value}
-                              style={styles.requirementTag}>
-                              <Text style={styles.requirementText}>
-                                {opt.label}
-                              </Text>
+                  {Array.isArray(languages) && languages.length > 0 && (
+                    <View style={styles.languageProficiencyList}>
+                      {languages.map((lang: any, index: number) => {
+                        const langId = typeof lang === 'object' ? lang?.id : lang;
+                        const opt = languageData.find((o: any) => o.value === langId);
+                        const label = opt?.label ?? langId;
+                        const level = typeof lang === 'object' ? lang?.level : '';
+                        return (
+                          <View key={langId} style={styles.languageProficiencyChip}>
+                            <View style={styles.languageProficiencyRow}>
+                              <Text style={styles.requirementText}>{label}</Text>
                               <Pressable
                                 onPress={() =>
                                   updateJobForm({
                                     languages: languages.filter(
-                                      (id: string) => id !== opt.value,
+                                      (l: any) => (typeof l === 'object' ? l?.id : l) !== langId,
                                     ),
                                   })
                                 }
                                 style={styles.requirementCloseBtn}>
-                                <Text style={styles.requirementCloseText}>
-                                  ×
-                                </Text>
+                                <Text style={styles.requirementCloseText}>×</Text>
                               </Pressable>
                             </View>
-                          ))}
-                      </View>
-                    )}
+                            <View style={styles.proficiencyDotsRow}>
+                              {proficiencyLevels.map(profLevel => {
+                                const isSelected = level === profLevel;
+                                return (
+                                  <TouchableOpacity
+                                    key={profLevel}
+                                    onPress={() => {
+                                      const updated = [...languages];
+                                      updated[index] = { id: langId, level: profLevel };
+                                      updateJobForm({ languages: updated });
+                                    }}
+                                    style={[
+                                      styles.proficiencyDotWrapper,
+                                      isSelected && {
+                                        borderWidth: 2,
+                                        borderColor: getLanguageProficiencyColor(profLevel),
+                                        borderRadius: 16,
+                                        width: 32,
+                                        height: 32,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                      },
+                                    ]}>
+                                    <View
+                                      style={[
+                                        styles.proficiencyDot,
+                                        { backgroundColor: getLanguageProficiencyColor(profLevel) },
+                                      ]}
+                                    />
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  )}
                 </View>
 
                 <View style={[styles.field, { zIndex: 100 }]}>
@@ -1092,17 +1160,17 @@ const PostJob = () => {
                     placeholder={t('Select Requirements')}
                     dropdownStyle={styles.dropdown}
                     container={{}}
-                    dropdownPosition="bottom"
+                    dropdownPosition="top"
                     hideSelectedItems
                   />
                   {Array.isArray(other_requirements) &&
                     other_requirements.length > 0 && (
                       <View style={styles.selectedRequirementsContainer}>
                         {otherRequirementsData
-                          .filter(opt =>
+                          .filter((opt: any) =>
                             other_requirements.includes(opt.value),
                           )
-                          .map(opt => (
+                          .map((opt: any) => (
                             <View
                               key={opt.value}
                               style={styles.requirementTag}>
@@ -2427,9 +2495,53 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   languagesFieldCompact: {
-    marginTop: -hp(6),
-    marginBottom: hp(8),
-    gap: hp(6),
+    // Small top margin so there's a little space
+    // between Certifications dropdown and Languages label
+    marginTop: hp(4),
+    gap: 0,
+  },
+  languageLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  languageProficiencyList: {
+    marginTop: hp(10),
+    gap: hp(10),
+  },
+  languageProficiencyChip: {
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    paddingVertical: hp(10),
+    paddingHorizontal: wp(12),
+    flexDirection: 'column',
+    gap: hp(8),
+  },
+  languageProficiencyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  proficiencyDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(12),
+  },
+  proficiencyDotWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 24,
+    height: 24,
+  },
+  proficiencyDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 16,
+  },
+  tooltipIcon: {
+    marginTop: hp(0),
   },
 
   textAreaInput: {

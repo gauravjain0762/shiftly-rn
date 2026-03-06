@@ -27,6 +27,7 @@
     "Lets get your job!": "Lets get your job!",
     "Invalid OTP": "Invalid OTP",
     "Which best describes you?": "Which best describes you?",
+    "This will be shown to employers on your profile. You can personalize it later in Profile Settings.": "This will be shown to employers on your profile. You can personalize it later in Profile Settings.",
     "I’m a job seeker": "I’m a job seeker",
     "What is your date of birth?": "What is your date of birth?",
     "What is your gender?": "What is your gender?",
@@ -127,6 +128,10 @@
     "Edit Post": "Edit Post",
     "Walk-in Interview": "Walk-in Interview",
     "Create Post": "Create Post",
-    "Enter role description": "Enter role description"
+    "Enter role description": "Enter role description",
+    "Select languages": "Select languages",
+    "Languages": "Languages",
+    "Create Requirements": "Create Requirements",
+    "Choose required languages and minimum proficiency level (Basic / Conversational / Fluent / Native).": "Choose required languages and minimum proficiency level (Basic / Conversational / Fluent / Native)."
   }
 }

@@ -333,6 +333,7 @@ const SuggestedEmployeeScreen = () => {
     const nextPage = suggestedPage + 1;
     try {
       const result = await fetchMoreSuggested({ job_id: jobId, page: nextPage, tab: 'suggested' }).unwrap();
+      console.log("🔥 ~ SuggestedEmployeeScreen ~ result:", result)
       const newUsers = result?.data?.users || [];
 
       if (newUsers.length > 0) {

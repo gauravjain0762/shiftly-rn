@@ -50,8 +50,21 @@ export const mapJobToFormState = (job: any) => {
     job?.certifications ?? job?.certification_id ?? job?.certification
   );
 
-  // Languages: now array of IDs
-  const languages = toIdArray(job?.languages);
+  // Languages: array of { id, level } (proficiency: Basic/Conversational/Fluent/Native)
+  const rawLangs = job?.languages;
+  let languages: { id: string; level: string }[] = [];
+  if (Array.isArray(rawLangs)) {
+    languages = rawLangs
+      .map((v: any) => {
+        const id = typeof v === 'object' ? (v?._id ?? v?.id) : String(v);
+        const level = typeof v === 'object' ? (v?.level ?? '') : '';
+        return id ? { id: String(id), level: level || '' } : null;
+      })
+      .filter(Boolean) as { id: string; level: string }[];
+  } else if (rawLangs) {
+    const ids = toIdArray(rawLangs);
+    languages = ids.map(id => ({ id, level: '' }));
+  }
 
   // Other requirements (job_requirements)
   const other_requirements = toIdArray(job?.job_requirements);

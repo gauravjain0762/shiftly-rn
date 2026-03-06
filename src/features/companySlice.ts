@@ -34,8 +34,8 @@ interface JobFormState {
   experience: string[];
   /** Selected certification IDs (supports multiple) */
   certification: string[];
-  /** Selected language IDs (supports multiple) */
-  languages: string[];
+  /** Selected languages with proficiency (id + level: Basic/Conversational/Fluent/Native) */
+  languages: { id: string; level: string }[];
   /**
    * Selected "Other Requirements" IDs
    */

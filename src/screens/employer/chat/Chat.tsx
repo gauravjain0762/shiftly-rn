@@ -75,7 +75,6 @@ const Chat = () => {
   const chatData = chats?.data?.chat;
   const [chatList, setChatList] = useState<Message[]>([]);
   const [showDownIcon, setShowDownIcon] = useState(false);
-  const [showJobCard, setShowJobCard] = useState<boolean>(true);
 
   const handleChatScrollDown = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });

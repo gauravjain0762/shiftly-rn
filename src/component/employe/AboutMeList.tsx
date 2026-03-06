@@ -132,11 +132,26 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
       </View>
 
       <View style={styles.aboutMeSection}>
-        <Text style={[styles.headerText, { marginTop: hp(20) }]}>
-          About Me
+        <View style={[styles.fieldHeader, { marginTop: hp(20), overflow: 'visible' }]}>
+          <Text style={styles.headerText}>About Me</Text>
+          <Tooltip
+            message="Employers see this when viewing your profile. Describe your experience, strengths, and career goals to stand out."
+            position="bottom"
+            containerStyle={styles.tooltipIcon}
+            tooltipBoxStyle={{
+              left: wp(-29),
+              top: hp(28),
+              width: wp(280),
+              maxWidth: wp(280),
+              zIndex: 1000
+            }}
+          />
+        </View>
+        <Text style={styles.aboutMeHint}>
+          This will be shown to employers. Personalize it to make a strong impression.
         </Text>
         <CustomInput
-          placeholder="I'm a job seeker"
+          placeholder="e.g. Experienced hospitality professional with 5+ years in F&B. Passionate about guest experience."
           value={aboutEdit?.about ?? ''}
           onChange={(text: string) =>
             setAboutEdit({ ...aboutEdit, about: text })
@@ -552,6 +567,12 @@ const styles = StyleSheet.create({
   },
   aboutMeSection: {
     marginTop: hp(4),
+  },
+  aboutMeHint: {
+    ...commonFontStyle(400, 13, colors._7B7878),
+    marginTop: hp(6),
+    marginBottom: hp(8),
+    lineHeight: hp(18),
   },
   aboutMeInput: {
     textAlignVertical: 'top',

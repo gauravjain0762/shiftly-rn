@@ -774,6 +774,9 @@ const SignUp = () => {
           <Animated.View style={[styles.innerConrainer, animatedStyle]}>
             <View>
               <Text style={styles.title}>{t('Which best describes you?')}</Text>
+              <Text style={styles.describeHint}>
+                {t('This will be shown to employers on your profile. You can personalize it later in Profile Settings.')}
+              </Text>
               <CustomTextInput
                 placeholder={t(`Select which describe you`)}
                 placeholderTextColor={colors._7B7878}
@@ -1287,6 +1290,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingTop: hp(30),
     ...commonFontStyle(500, 25, colors._0B3970),
+  },
+  describeHint: {
+    ...commonFontStyle(400, 13, colors._7B7878),
+    marginTop: hp(8),
+    marginBottom: hp(12),
+    lineHeight: hp(18),
   },
   fieldLabel: {
     marginTop: hp(30),

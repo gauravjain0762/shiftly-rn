@@ -2,6 +2,7 @@
 import {
   FlatList,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -60,8 +61,21 @@ const contractTypes: object[] = [
 const BannerItem = ({ item }: { item: any }) => {
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleBannerPress = () => {
+    const link = item?.link_id;
+    if (!link || typeof link !== 'string') return;
+    if (link.startsWith('http://') || link.startsWith('https://')) {
+      Linking.openURL(link).catch(() => {});
+    } else {
+      navigateTo(link as never);
+    }
+  };
+
   return (
-    <View style={styles.carouselItemContainer}>
+    <Pressable
+      style={styles.carouselItemContainer}
+      onPress={handleBannerPress}
+      disabled={!item?.link_id}>
       <Image
         resizeMode="cover"
         style={styles.carouselImage}
@@ -79,7 +93,7 @@ const BannerItem = ({ item }: { item: any }) => {
           </SkeletonPlaceholder>
         </View>
       )}
-    </View>
+    </Pressable>
   );
 };
 
@@ -99,7 +113,6 @@ const JobsScreen = () => {
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
-  console.log("🔥 ~ JobsScreen ~ carouselImages:", carouselImages)
   const pagination = data?.data?.pagination;
 
   const [filters, setFilters] = useState<{

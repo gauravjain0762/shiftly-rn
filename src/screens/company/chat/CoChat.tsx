@@ -224,7 +224,6 @@ const CoChat = () => {
   return (
     <LinearContainer colors={['#EFEEF3', '#FFFFFF']}>
       <View style={{ flex: 1 }}>
-        {/* HEADER */}
         <View style={styles.container}>
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigationRef.goBack()}>
@@ -236,57 +235,14 @@ const CoChat = () => {
                   jobdetail_chatData?.user_id?.name}
               </Text>
             </View>
-            {/* <CustomImage
-              onPress={() => {
-                setShowJobCard(prev => !prev);
-              }}
-              size={wp(24)}
-              tintColor={colors.black}
-              source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
-            /> */}
           </View>
         </View>
 
-        {/* {showJobCard && (
-          <View style={styles.card}>
-            <Text style={styles.dateText}>
-              {chats?.data?.chat?.user_id?.name ||
-                jobdetail_chatData?.user_id?.name ||
-                'Candidate'}{' '}
-              applied to this position on{' '}
-              {formatDateWithoutTime(jobdetail_chatData?.createdAt)}
-            </Text>
-            <Text style={styles.jobTitle}>
-              {`${mainjob_data?.title ||
-                jobdetail_chatData?.job_id?.title ||
-                'N/A'
-                }`}
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                if (isFromJobDetail) {
-                  goBack();
-                } else {
-                  navigateTo(SCREENS.JobDetail, {
-                    jobId:
-                      typeof jobdetail_chatData?.job_id === 'object'
-                        ? jobdetail_chatData?.job_id?._id
-                        : jobdetail_chatData?.job_id,
-                    fromCompany: true,
-                    hide_apply: true,
-                  });
-                }
-              }}
-              style={styles.button}>
-              <Text style={styles.buttonText}>View Job</Text>
-            </TouchableOpacity>
-          </View>
-        )} */}
+      
 
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          {/* BODY */}
           <FlatList
             ref={flatListRef}
             data={chatList}
@@ -324,8 +280,7 @@ const CoChat = () => {
             </Pressable>
           )}
 
-          {/* Quick Replies + Input */}
-          <View style={[styles.quickRepliesWrapper, { paddingBottom: Math.max(insets.bottom, hp(12)) }]}>
+          <View style={[styles.quickRepliesWrapper, { paddingBottom: Math.max(insets.bottom + 35, hp(12)) }]}>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -439,7 +394,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(22),
   },
   messageContainer: {
-    // flexDirection: 'row',
     marginBottom: hp(2),
     marginTop: 20,
   },
