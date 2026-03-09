@@ -201,24 +201,6 @@ const EditAccountScreen = () => {
               containerStyle={styles.inputContainer}
             />
 
-            <CustomInput
-              label="About Me"
-              placeholder="Tell us about yourself"
-              value={formData?.about}
-              onChange={(text: any) =>
-                setFormData(prev => ({ ...prev, about: text }))
-              }
-              inputStyle={[
-                styles.inputContainer,
-                {
-                  height: hp(120),
-                },
-              ]}
-              multiline={true}
-              maxLength={1000}
-            />
-            <CharLength chars={1000} value={formData?.about} type={'employee'} style={{ marginTop: 0 }} />
-
             <View style={styles.experienceDropdownField}>
               <Text style={styles.experienceDropdownLabel}>Years of Experience</Text>
               <CustomDropdown
@@ -313,7 +295,6 @@ const EditAccountScreen = () => {
                   placeholderTextColor="#969595"
                   value={formData?.phone}
                   onChangeText={text => {
-                    // Remove all spaces from the phone number
                     const phoneWithoutSpaces = text.replace(/\s/g, '');
                     setFormData(prev => ({ ...prev, phone: phoneWithoutSpaces }));
                   }}
@@ -328,12 +309,14 @@ const EditAccountScreen = () => {
             title="Save Changes"
             onPress={handleSave}
             style={styles.saveButton}
+            type="Company"
           />
         </KeyboardAwareScrollView>
 
         {countryPickerReady && (
           <CountryPicker
             visible={showCountryPicker}
+            countryCode={callingCodeToCountry(countryCode) as any}
             withFilter
             withFlag
             withEmoji={true}
@@ -363,6 +346,7 @@ const EditAccountScreen = () => {
             withFilter
             withEmoji={false}
             visible={showNationalityPicker}
+            countryCode={callingCodeToCountry(countryCode) as any}
             modalProps={{
               animationType: 'slide',
               transparent: true,

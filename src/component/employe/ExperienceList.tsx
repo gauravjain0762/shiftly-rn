@@ -45,6 +45,8 @@ export const isEmptyExperience = (exp: ExperienceItem) => {
 const ExperienceList: FC<any> = ({
   experienceListEdit,
   setExperienceListEdit,
+  desiredJobTitle,
+  disableDesiredJob,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {data: departmentsResponse} = useGetDepartmentsQuery({});
@@ -71,13 +73,17 @@ const ExperienceList: FC<any> = ({
       </View>
       <CustomInput
         placeholder={'Enter Desired Job Title'}
-        value={experienceListEdit.preferred_position}
-        onChange={(text: any) =>
+        value={desiredJobTitle ?? experienceListEdit.preferred_position}
+        editable={!disableDesiredJob}
+        onChange={(text: any) => {
+          if (disableDesiredJob) {
+            return;
+          }
           setExperienceListEdit({
             ...experienceListEdit,
             preferred_position: text,
-          })
-        }
+          });
+        }}
         label=""
       />
 

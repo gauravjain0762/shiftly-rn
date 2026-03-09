@@ -11,7 +11,7 @@ import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Stepper from '../../../component/employe/Stepper';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import EducationList, {
   isEmptyEducation,
 } from '../../../component/employe/EducationList';
@@ -91,10 +91,12 @@ const CreateProfileScreen = () => {
     );
   const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
   const experienceOptionsData = useMemo(() => {
-    return experienceDataVals?.data?.experiences?.map((item: any) => ({
-      label: item?.title,
-      value: item?._id,
-    })) || [];
+    return (
+      experienceDataVals?.data?.experiences?.map((item: any) => ({
+        label: item?.title,
+        value: item?._id,
+      })) || []
+    );
   }, [experienceDataVals]);
   const { data: getAboutmeandResumes, refetch: refetchAboutMe } =
     useGetEmployeeProfileQuery(
@@ -105,7 +107,7 @@ const CreateProfileScreen = () => {
       },
     );
   const route = useRoute<any>();
-  const scrollRef = React.useRef<KeyboardAwareScrollView>(null);
+  const scrollRef = React.useRef<any>(null);
 
   const educationData = getEducation?.data?.educations;
   const experienceData = getExperiences?.data?.experiences;
@@ -119,6 +121,39 @@ const CreateProfileScreen = () => {
     label: string;
     value: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (educationData) {
+      console.log(
+        '🔥 [CreateProfileScreen] useGetEducationsQuery educationData:',
+        JSON.stringify(educationData, null, 2),
+      );
+    }
+  }, [educationData]);
+
+  useEffect(() => {
+    if (experienceData) {
+      console.log(
+        '🔥 [CreateProfileScreen] useGetExperiencesQuery experienceData:',
+        JSON.stringify(experienceData, null, 2),
+      );
+    }
+  }, [experienceData]);
+
+  const globalDesiredJobTitle = useMemo(() => {
+    const fromList =
+      Array.isArray(experienceList) &&
+      experienceList.find(
+        (exp: any) => typeof exp?.preferred_position === 'string' && exp.preferred_position.trim().length > 0,
+      );
+    return (
+      (fromList?.preferred_position as any)?.trim() ||
+      experienceListEdit?.preferred_position ||
+      ''
+    );
+  }, [experienceList, experienceListEdit?.preferred_position]);
+
+  const hasDesiredJobTitle = !!globalDesiredJobTitle;
 
   const [addUpdateEducation, { isLoading: isLoadingEducation }] =
     useAddUpdateEducationMutation({});
@@ -261,6 +296,9 @@ const CreateProfileScreen = () => {
         isEditing: false,
       }),
     );
+
+    // After adding/saving, scroll to top so user sees the updated list
+    scrollRef.current?.scrollToPosition(0, 0, true);
   };
 
   const handleSaveOrAddExperience = () => {
@@ -296,6 +334,7 @@ const CreateProfileScreen = () => {
           ...experienceList,
           {
             ...experienceListEdit,
+            preferred_position: globalDesiredJobTitle || experienceListEdit.preferred_position,
             experience_id: Date.now().toString(),
             isEditing: false,
             isLocal: true,
@@ -308,7 +347,7 @@ const CreateProfileScreen = () => {
 
     dispatch(
       setExperienceListEdit({
-        preferred_position: '',
+        preferred_position: globalDesiredJobTitle,
         title: '',
         company: '',
         department: '',
@@ -322,14 +361,16 @@ const CreateProfileScreen = () => {
         isEditing: false,
         job_start: {
           month: '',
-          year: ''
+          year: '',
         },
         job_end: {
           month: '',
-          year: ''
-        }
+          year: '',
+        },
       }),
     );
+
+    scrollRef.current?.scrollToPosition(0, 0, true);
   };
 
   const handleAddEducation = async () => {
@@ -406,8 +447,6 @@ const CreateProfileScreen = () => {
         console.log('✅ ~ Experience Payload:', JSON.stringify(payload, null, 2));
         const response = await addUpdateExperience(payload).unwrap();
         console.log('✅ ~ Experience Response:', JSON.stringify(response, null, 2));
-
-
 
         if (response?.status) {
           // successToast(response?.message);
@@ -668,9 +707,6 @@ const CreateProfileScreen = () => {
         <KeyboardAwareScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
-          enableOnAndroid={true}
-          enableAutomaticScroll={true}
-          automaticallyAdjustContentInsets
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: hp(30) }}
           keyboardShouldPersistTaps="handled">
@@ -804,6 +840,8 @@ const CreateProfileScreen = () => {
                 setExperienceListEdit={(val: any) =>
                   dispatch(setExperienceListEdit(val))
                 }
+                desiredJobTitle={globalDesiredJobTitle}
+                disableDesiredJob={hasDesiredJobTitle}
                 onExperienceTypePress={() => {
                   scrollRef.current?.scrollToPosition(0, hp(180), true);
                 }}

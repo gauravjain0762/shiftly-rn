@@ -40,6 +40,7 @@ const ViewProfileScreen = () => {
     refetch,
   } = useGetEmployeeProfileQuery({});
   const userInfo = getProfile?.data?.user;
+  console.log("🔥 ~ ViewProfileScreen ~ userInfo:", userInfo)
   const [updateAboutMe, { isLoading: isUpdating }] = useUpdateAboutMeMutation();
   const [isOpenForWork, setIsOpenForWork] = useState(userInfo?.open_for_job || false);
 
@@ -171,7 +172,6 @@ const ViewProfileScreen = () => {
           <View style={styles.detailsContainer}>
             <FlatList
               data={[
-                { label: 'About me', value: userInfo?.about },
                 {
                   label: 'Nationality',
                   value: userInfo?.nationality,

@@ -84,7 +84,6 @@ const PreviewPost = () => {
             }
             
             const imageData = uploadedImages[0];
-            console.log("🔥 ~ handlePublishPost ~ imageData:", imageData)
             if (imageData && !imageData.isExisting) {
                 let fileUri = imageData.uri;
                 if (typeof fileUri === 'string' && !fileUri.startsWith('http') && !fileUri.startsWith('content://')) {
@@ -97,7 +96,6 @@ const PreviewPost = () => {
                     name: imageData.filename || imageData.name || `image_${Date.now()}.jpg`,
                 } as any);
             }
-            console.log("🔥 ~ handlePublishPost ~ formData:", JSON.stringify(formData))
 
             let response;
             if (postEditMode && postId) {
@@ -107,7 +105,6 @@ const PreviewPost = () => {
             }
 
             if (response?.status) {
-                // successToast(response?.message);
                 updatePostForm({ isPostModalVisible: true });
             } else {
                 errorToast(response?.message || (postEditMode ? 'Failed to update post' : 'Failed to create post'));
@@ -128,7 +125,6 @@ const PreviewPost = () => {
         dispatch(setCoPostSteps(0));
         dispatch(resetPostFormState());
 
-        // Reset navigation to CoPost tab screen
         if (navigationRef.current?.isReady()) {
             navigationRef.current.reset({
                 index: 0,

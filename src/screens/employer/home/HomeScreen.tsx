@@ -24,7 +24,8 @@ import RecentJobCard from '../../../component/employe/RecentJobCard';
 const HomeScreen = () => {
   const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const { userInfo }: any = useSelector((state: RootState) => state.auth);
+  const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
+  console.log('🔥 HomeScreen ~ fcmToken:', fcmToken);
   const { data: profileData } = useGetEmployeeProfileQuery({});
 
   const {

@@ -28,10 +28,12 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAuthData } from '../../../features/companySlice';
+import { requestNotificationUserPermission } from '../../../hooks/notificationHandler';
 
 const CoLogin = () => {
   const { t } = useTranslation();
-  const { fcmToken, } = useSelector((state: RootState) => state.auth);
+  const { fcmToken } = useSelector((state: RootState) => state.auth);
+  console.log('🔥 CoLogin ~ fcmToken:', fcmToken);
   const dispatch = useDispatch();
   const [companyLogin] = useCompanyLoginMutation();
   const { auth } = useSelector((state: RootState) => state.company);
@@ -54,6 +56,10 @@ const CoLogin = () => {
 
         if (response?.status) {
           console.log('✅ Login success:', response);
+          // Ensure we have a fresh FCM token after login if it's missing
+          if (!fcmToken) {
+            requestNotificationUserPermission(dispatch);
+          }
           dispatch(setAuthData({ email: '', password: '' }));
         } else {
           errorToast(t(response?.message));

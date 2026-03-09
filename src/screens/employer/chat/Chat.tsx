@@ -26,7 +26,7 @@ import {
   isAndroid,
   navigateTo,
 } from '../../../utils/commonFunction';
-import { onChatMessage } from '../../../hooks/socketManager';
+import { onChatMessage, offChatMessage } from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import MessageBubble from '../../../component/chat/MessageBubble';
 import ChatInput from '../../../component/chat/ChatInput';
@@ -109,10 +109,16 @@ const Chat = () => {
 
   // ----- Socket listener -----
   useEffect(() => {
-    onChatMessage((newMessage: any) => {
+    const handleNewMessage = (newMessage: any) => {
       console.log('📩 New chat message:', newMessage);
       setChatList(prev => [newMessage, ...prev]);
-    });
+    };
+
+    onChatMessage(handleNewMessage);
+
+    return () => {
+      offChatMessage(handleNewMessage);
+    };
   }, []);
 
   // ----- Send chat -----

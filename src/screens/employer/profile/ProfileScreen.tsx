@@ -267,7 +267,6 @@ const ProfileScreen = () => {
 
           <Section title="About Me" content={userInfo?.about || 'N/A'} />
 
-          {/* Section: Professional Experience */}
           {experienceList?.length > 0 && (
             <View style={styles.card}>
               <HeaderWithAdd title="Professional Experience" />

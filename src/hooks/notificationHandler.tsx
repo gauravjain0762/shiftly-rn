@@ -47,6 +47,7 @@ async function onDisplayNotification(message: any) {
 //
 export async function requestNotificationUserPermission(dispatch: any) {
   try {
+    console.log('🔔 [FCM] requestNotificationUserPermission called');
     if (Platform.OS === 'android') {
       await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
@@ -54,16 +55,19 @@ export async function requestNotificationUserPermission(dispatch: any) {
     }
 
     const authStatus = await messaging().requestPermission();
+    console.log('🔔 [FCM] messaging().requestPermission status:', authStatus);
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (!enabled) {
       errorToast('Please allow notifications permission');
+      console.log('🔔 [FCM] Notifications permission NOT enabled, skipping token fetch');
       return;
     }
 
     await messaging().registerDeviceForRemoteMessages();
+    console.log('🔔 [FCM] Device registered for remote messages');
     await getFirebaseToken(dispatch);
   } catch (e) {
     console.log('Permission error:', e);
@@ -76,9 +80,10 @@ export async function requestNotificationUserPermission(dispatch: any) {
 //
 const getFirebaseToken = async (dispatch: any) => {
   try {
+    console.log('🔔 [FCM] getFirebaseToken called');
     const fcmToken = await messaging().getToken();
     if (fcmToken) {
-      console.log('---fcmToken---\n', fcmToken);
+      console.log('🔔 [FCM] Token received:', fcmToken);
       dispatch(setFcmToken(fcmToken));
       resetBadgeCount();
     } else {

@@ -30,9 +30,8 @@ import {useEmployeeLoginMutation} from '../../../api/authApi';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setAuthData} from '../../../features/employeeSlice';
-import {
-  clearEmployeeAccount,
-} from '../../../features/authSlice';
+import {clearEmployeeAccount} from '../../../features/authSlice';
+import {requestNotificationUserPermission} from '../../../hooks/notificationHandler';
 
 const LoginScreen = () => {
   const {t} = useTranslation();
@@ -63,6 +62,10 @@ const LoginScreen = () => {
 
         const response: any = await employeeLogin(data).unwrap();
         if (response && response.status) {
+          // Ensure FCM token is set after login if missing
+          if (!fcmToken) {
+            requestNotificationUserPermission(dispatch);
+          }
           dispatch(setAuthData({email: '', password: ''}));
           console.log(response, 'response----');
         }

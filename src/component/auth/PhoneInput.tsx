@@ -67,19 +67,19 @@ const PhoneInput: FC<picker> = ({
 
   const handlePhoneChange = (text: string) => {
     const digits = text.replace(/\D/g, '');
-    if (digits.length > 12) {
+    if (digits.length > 13) {
       ReactNativeHapticFeedback.trigger('impactMedium', { enableVibrateFallback: true });
     }
-    const formatted = formatPhoneNumber(text, 12);
+    const formatted = formatPhoneNumber(text, 13);
     onPhoneChange?.(formatted);
 
     // Check if we have the expected number of digits
     const formattedDigits = formatted.replace(/\D/g, '');
-    const isValidLength = formattedDigits.length >= 5 && formattedDigits.length <= 12;
-    setValid(isValidLength && new RegExp(`^\\d{5,12}$`).test(formattedDigits));
+    const isValidLength = formattedDigits.length >= 5 && formattedDigits.length <= 13;
+    setValid(isValidLength && new RegExp(`^\\d{5,13}$`).test(formattedDigits));
   };
 
-  const formatPhoneNumber = (value: string, maxDigits: number = 12) => {
+  const formatPhoneNumber = (value: string, maxDigits: number = 13) => {
     const digits = value.replace(/\D/g, '').slice(0, maxDigits);
 
     if (currentCallingCode === '971') {
@@ -111,7 +111,7 @@ const PhoneInput: FC<picker> = ({
   const currentCountryCode = countryCode || detectedCountry;
   const currentCallingCode = callingCode || detectedCallingCode;
   // const expectedDigits = currentCallingCode === '971' ? 9 : 10;
-  const maxInputLength = 16; // Allow enough space for 12 digits + spaces
+  const maxInputLength = 18; // Allow enough space for 13 digits + spaces
 
   return (
     <View style={styles.container}>
@@ -164,7 +164,7 @@ const PhoneInput: FC<picker> = ({
           maxLength={maxInputLength}
           {...TextInputProps}
         />
-        {valid && phone && phone.replace(/\D/g, '').length >= 5 && phone.replace(/\D/g, '').length <= 12 && (
+        {valid && phone && phone.replace(/\D/g, '').length >= 5 && phone.replace(/\D/g, '').length <= 13 && (
           <Image
             source={IMAGES.right}
             tintColor={colors.green}

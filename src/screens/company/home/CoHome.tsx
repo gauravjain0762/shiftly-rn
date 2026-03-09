@@ -29,7 +29,8 @@ const CoHome = () => {
   const { data: dashboardData } = useGetDashboardQuery({});
   const job_stats = dashboardData?.data?.stats;
 
-  const { userInfo }: any = useSelector((state: RootState) => state.auth);
+  const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
+  console.log('🔥 CoHome ~ fcmToken:', fcmToken);
 
   const metricOptions = [
     {

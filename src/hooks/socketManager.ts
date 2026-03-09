@@ -48,6 +48,21 @@ export const onChatMessage = (callback: (message: any) => void) => {
 };
 
 /**
+ * Remove chat message listener
+ */
+export const offChatMessage = (callback?: (message: any) => void) => {
+  if (!socket) {
+    return;
+  }
+
+  if (callback) {
+    socket.off('chat_message', callback);
+  } else {
+    socket.off('chat_message');
+  }
+};
+
+/**
  * Disconnect socket
  */
 export const disconnectSocket = (): void => {

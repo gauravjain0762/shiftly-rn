@@ -43,9 +43,10 @@ const EmployeeProfile = () => {
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
 
   const rawLocation = userData?.location || userParam?.location || userParam?.area;
+  console.log("🔥 ~ EmployeeProfile ~ userData:", JSON.stringify(userData, null, 2))
 
   const profileData = {
-    name: userData?.name || userParam?.name || 'User',
+    name: userData?.name || userParam?.name || 'N/A',
     location: formatLocationToCityCountry(
       rawLocation,
       userData?.city || userParam?.city,
@@ -106,7 +107,6 @@ const EmployeeProfile = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.profileImageContainer}>
             {hasValidImage(profileData.picture) ? (

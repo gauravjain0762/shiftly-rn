@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 import { BackHeader, LinearContainer, SearchBar } from '../../../component';
 import { useTranslation } from 'react-i18next';
@@ -14,64 +15,47 @@ import { navigateTo, getInitials, hasValidImage } from '../../../utils/commonFun
 import { SCREENS } from '../../../navigation/screenNames';
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
 import { colors } from '../../../theme/colors';
-import {
-  useGetCompanyChatsQuery,
-  useLazyGetCompanyChatsQuery,
-} from '../../../api/dashboardApi';
+import { useGetCompanyChatsQuery } from '../../../api/dashboardApi';
 import NoDataText from '../../../component/common/NoDataText';
 import FastImage from 'react-native-fast-image';
+import { onChatMessage, offChatMessage } from '../../../hooks/socketManager';
 
 const CoMessage = () => {
   const { t } = useTranslation();
   const [value, setValue] = useState<string>('');
   const { data: chats, isLoading, refetch } = useGetCompanyChatsQuery({ page: 1 });
   const chatList = chats?.data?.chats || [];
-
-  const [fetchMoreChats, { isFetching }] = useLazyGetCompanyChatsQuery();
-  const [extraChats, setExtraChats] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (chats?.data) {
-      const pagination = chats?.data?.pagination;
-      if (pagination) {
-        setHasMore(pagination.current_page < pagination.total_pages);
-      } else {
-        setHasMore((chatList?.length || 0) >= 10);
-      }
+    if (chats) {
+      console.log('🔥 [CoMessage] getCompanyChats response:', JSON.stringify(chats, null, 2));
     }
-  }, [chats, chatList]);
+  }, [chats]);
 
-  const handleLoadMore = useCallback(async () => {
-    if (!hasMore || isFetching) return;
-    
-    const nextPage = currentPage + 1;
-    try {
-      const result = await fetchMoreChats({ page: nextPage }).unwrap();
-      const newChats = result?.data?.chats || [];
-      
-      if (newChats.length > 0) {
-        setExtraChats(prev => [...prev, ...newChats]);
-        setCurrentPage(nextPage);
-        
-        const pagination = result?.data?.pagination;
-        if (pagination) {
-          setHasMore(pagination.current_page < pagination.total_pages);
-        } else {
-          setHasMore(newChats.length >= 10);
-        }
-      } else {
-        setHasMore(false);
-      }
-    } catch (error) {
-      console.log('Error loading more company chats:', error);
-      setHasMore(false);
+  useEffect(() => {
+    if (isFocused) {
+      refetch();
     }
-  }, [hasMore, isFetching, currentPage, fetchMoreChats]);
+  }, [isFocused, refetch]);
 
-  const displayChats = [...chatList, ...extraChats];
-  console.log("🔥 ~ CoMessage ~ displayChats:", displayChats)
+  // ----- Live updates via socket -----
+  useEffect(() => {
+    const handleNewMessage = (newMessage: any) => {
+      console.log('📩 [CoMessage] chat_message event:', newMessage);
+      if (isFocused) {
+        refetch();
+      }
+    };
+
+    onChatMessage(handleNewMessage);
+
+    return () => {
+      offChatMessage(handleNewMessage);
+    };
+  }, [isFocused, refetch]);
+
+  const displayChats = chatList;
 
   const filteredChatList = displayChats.filter((item: any) =>
     item?.user_id?.name?.toLowerCase().includes(value.toLowerCase()),
@@ -82,7 +66,8 @@ const CoMessage = () => {
     const userAvatar = item?.user_id?.picture;
     const lastMessage = item?.last_message || '';
     console.log("🔥 ~ renderChatCard ~ lastMessage:", lastMessage)
-    const jobCode = item?.job_id?.job_code || '';
+    const rawJobCode = item?.job_id?.job_code || '';
+    const jobCode = rawJobCode.replace(/^JOB-/, '');
     const updatedAt = item?.updatedAt || item?.createdAt;
     const timeLabel = updatedAt
       ? new Date(updatedAt).toLocaleTimeString([], {
@@ -137,13 +122,13 @@ const CoMessage = () => {
             </View>
           </View>
 
-          {/* {unreadCount > 0 && (
+          {unreadCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Text>
             </View>
-          )} */}
+          )}
         </TouchableOpacity>
       </View>
     );
@@ -175,21 +160,13 @@ const CoMessage = () => {
           keyExtractor={(item, index) => item?._id || index.toString()}
           renderItem={renderChatCard}
           ListEmptyComponent={() => (
-            <NoDataText style={{paddingHorizontal: wp(22)}} text="You don't have any activity yet. Once you post jobs or content, updates will appear here." />
+            <NoDataText
+              style={{ paddingHorizontal: wp(22) }}
+              text="You don't have any activity yet. Once you post jobs or content, updates will appear here."
+            />
           )}
           onRefresh={refetch}
           refreshing={isLoading}
-          ListFooterComponent={
-            isFetching && !value ? (
-              <ActivityIndicator
-                size="large"
-                color={colors._0B3970}
-                style={{ marginVertical: hp(20) }}
-              />
-            ) : null
-          }
-          onEndReached={!value ? handleLoadMore : undefined}
-          onEndReachedThreshold={0.5}
         />
       )}
     </LinearContainer>

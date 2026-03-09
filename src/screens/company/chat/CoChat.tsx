@@ -30,7 +30,7 @@ import {
   useSendCompanyMessageMutation,
   useGetCompanyChatsQuery,
 } from '../../../api/dashboardApi';
-import { onChatMessage } from '../../../hooks/socketManager';
+import { onChatMessage, offChatMessage } from '../../../hooks/socketManager';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import ChatInput from '../../../component/chat/ChatInput';
 import { SCREENS } from '../../../navigation/screenNames';
@@ -144,9 +144,15 @@ const CoChat = () => {
 
   // ----- Socket listener -----
   useEffect(() => {
-    onChatMessage((newMessage: any) => {
+    const handleNewMessage = (newMessage: any) => {
       setChatList(prev => [newMessage, ...prev]);
-    });
+    };
+
+    onChatMessage(handleNewMessage);
+
+    return () => {
+      offChatMessage(handleNewMessage);
+    };
   }, []);
 
   // ----- Send chat -----

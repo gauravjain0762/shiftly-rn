@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
 import { useEmployeeGetChatsQuery, useLazyEmployeeGetChatsQuery } from '../../../api/dashboardApi';
@@ -15,18 +16,44 @@ import NoDataText from '../../../component/common/NoDataText';
 import { colors } from '../../../theme/colors';
 import { getInitials, hasValidImage, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
-import { IMAGES } from '../../../assets/Images';
 import FastImage from 'react-native-fast-image';
+import { onChatMessage, offChatMessage } from '../../../hooks/socketManager';
 
 const Messages = () => {
   const [value, setValue] = useState('');
   const { data: chatsData, isLoading, refetch } = useEmployeeGetChatsQuery({ page: 1 });
   const chats: any[] = chatsData?.data?.chats || chatsData?.data || [];
+  const isFocused = useIsFocused();
 
   const [fetchMoreChats, { isFetching }] = useLazyEmployeeGetChatsQuery();
   const [extraChats, setExtraChats] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (isFocused) {
+      refetch();
+      setCurrentPage(1);
+      setExtraChats([]);
+      setHasMore(true);
+    }
+  }, [isFocused, refetch]);
+
+  // ----- Live updates via socket -----
+  useEffect(() => {
+    const handleNewMessage = (newMessage: any) => {
+      console.log('📩 [Messages] chat_message event:', newMessage);
+      if (isFocused) {
+        refetch();
+      }
+    };
+
+    onChatMessage(handleNewMessage);
+
+    return () => {
+      offChatMessage(handleNewMessage);
+    };
+  }, [isFocused, refetch]);
 
   useEffect(() => {
     if (chatsData?.data) {
@@ -48,7 +75,26 @@ const Messages = () => {
       const newChats = result?.data?.chats || result?.data || [];
       
       if (newChats.length > 0) {
-        setExtraChats(prev => [...prev, ...newChats]);
+        // Avoid duplicating chats when API returns already-loaded items (e.g. page 2 same as page 1)
+        const existingIds = new Set(
+          [...chats, ...extraChats].map(
+            (c: any) => c?._id || c?.chat_id,
+          ),
+        );
+        const filteredNewChats = newChats.filter((c: any) => {
+          const id = c?._id || c?.chat_id;
+          if (!id) return true;
+          if (existingIds.has(id)) return false;
+          existingIds.add(id);
+          return true;
+        });
+
+        if (filteredNewChats.length === 0) {
+          setHasMore(false);
+          return;
+        }
+
+        setExtraChats(prev => [...prev, ...filteredNewChats]);
         setCurrentPage(nextPage);
         
         const pagination = result?.data?.pagination;
@@ -84,6 +130,7 @@ const Messages = () => {
     const timeLabel = updatedAt
       ? new Date(updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       : '';
+    const unreadCount = item?.unread_counter || 0;
 
     return (
       <TouchableOpacity
@@ -130,6 +177,14 @@ const Messages = () => {
             {lastMessage || 'No messages yet'}
           </Text>
         </View>
+
+        {unreadCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Text>
+          </View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -285,5 +340,18 @@ const styles = StyleSheet.create({
   },
   lastMessage: {
     ...commonFontStyle(400, 13, '#999'),
+  },
+  badge: {
+    minWidth: wp(20),
+    paddingHorizontal: wp(6),
+    paddingVertical: hp(2),
+    borderRadius: wp(10),
+    backgroundColor: colors._0B3970,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: wp(8),
+  },
+  badgeText: {
+    ...commonFontStyle(600, 11, colors.white),
   },
 });
