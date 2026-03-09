@@ -1424,10 +1424,10 @@ const CreateAccount = () => {
                   multiline
                   containerStyle={styles.Inputcontainer}
                   textAlignVertical="top"
-                  maxLength={500}
+                  maxLength={1000}
                 />
                 <Text style={styles.characterlanght}>{`${companyProfileData?.about.length || 0
-                  }/500 Characters`}</Text>
+                  }/1000 Characters`}</Text>
                 <TouchableOpacity
                   onPress={() => setShowTooltip(!showTooltip)}
                   style={{ position: 'absolute', right: wp(5), bottom: hp(70) }}>

@@ -46,6 +46,8 @@ import {
 import { SCREENS } from '../../../navigation/screenNames';
 import { RFValue } from 'react-native-responsive-fontsize';
 import BottomModal from '../../../component/common/BottomModal';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../../assets/animation';
 
 import EmplyoeeCard from '../../../component/employe/EmplyoeeCard';
 import { useCreateJobMutation } from '../../../api/authApi';
@@ -204,6 +206,13 @@ const PostJob = () => {
     other_requirements,
   } = useAppSelector((state: any) => selectJobForm(state));
 
+  const salaryRangeDataWithCurrent = useMemo(() => {
+    if (salary?.value && !salaryRangeData.some((d: any) => d.value === salary.value)) {
+      return [{ label: salary.label || salary.value, value: salary.value }, ...salaryRangeData];
+    }
+    return salaryRangeData;
+  }, [salary?.value, salary?.label]);
+
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { updateJobForm } = useJobFormUpdater();
@@ -237,6 +246,10 @@ const PostJob = () => {
   const scrollViewRef = useRef<any>(null);
   const jobDepartmentFieldRef = useRef<View>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [pressedLangDot, setPressedLangDot] = useState<{
+    langId: string;
+    level: string;
+  } | null>(null);
 
   const handleJobDepartmentFocus = useCallback(() => {
     setIsDropdownOpen(true);
@@ -557,10 +570,13 @@ const PostJob = () => {
     }
   };
 
+  const benefitId = (b: any) => b?._id ?? b?.id ?? (typeof b === 'string' ? b : '');
+
   const toggleItem = (item: any) => {
-    const isAlreadySelected = essential_benefits?.some((i: any) => i?._id === item?._id);
+    const itemId = benefitId(item);
+    const isAlreadySelected = essential_benefits?.some((i: any) => benefitId(i) === itemId);
     const updatedList = isAlreadySelected
-      ? essential_benefits.filter((i: any) => i?._id !== item?._id)
+      ? (essential_benefits || []).filter((i: any) => benefitId(i) !== itemId)
       : [...(essential_benefits || []), item];
 
     updateJobForm({ essential_benefits: updatedList });
@@ -842,7 +858,6 @@ const PostJob = () => {
                 <View style={styles.bottomUnderline} />
               </ScrollView>
 
-              {/* Scrollable skills list */}
               <ScrollView
                 style={styles.skillsScrollView}
                 contentContainerStyle={{ flexGrow: 0 }}
@@ -872,8 +887,7 @@ const PostJob = () => {
                 </View>
               </ScrollView>
 
-              {/* Fixed Continue button */}
-              <View style={{ paddingHorizontal: wp(30) }}>
+              <View style={{  }}>
                 <GradientButton
                   style={styles.btn}
                   type="Company"
@@ -1074,64 +1088,66 @@ const PostJob = () => {
                     placeholder={t('Select languages')}
                     dropdownStyle={styles.dropdown}
                     container={{ marginTop: 0, marginBottom: 0 }}
-                    dropdownPosition="bottom"
+                    dropdownPosition="top"
+                    selectedStyle={styles.hiddenSelectedStyle}
                     hideSelectedItems
                   />
                   {Array.isArray(languages) && languages.length > 0 && (
-                    <View style={styles.languageProficiencyList}>
+                    <View style={styles.languageListContainer}>
                       {languages.map((lang: any, index: number) => {
                         const langId = typeof lang === 'object' ? lang?.id : lang;
                         const opt = languageData.find((o: any) => o.value === langId);
                         const label = opt?.label ?? langId;
                         const level = typeof lang === 'object' ? lang?.level : '';
                         return (
-                          <View key={langId} style={styles.languageProficiencyChip}>
-                            <View style={styles.languageProficiencyRow}>
-                              <Text style={styles.requirementText}>{label}</Text>
-                              <Pressable
-                                onPress={() =>
-                                  updateJobForm({
-                                    languages: languages.filter(
-                                      (l: any) => (typeof l === 'object' ? l?.id : l) !== langId,
-                                    ),
-                                  })
-                                }
-                                style={styles.requirementCloseBtn}>
-                                <Text style={styles.requirementCloseText}>×</Text>
-                              </Pressable>
-                            </View>
-                            <View style={styles.proficiencyDotsRow}>
-                              {proficiencyLevels.map(profLevel => {
-                                const isSelected = level === profLevel;
-                                return (
-                                  <TouchableOpacity
-                                    key={profLevel}
-                                    onPress={() => {
-                                      const updated = [...languages];
-                                      updated[index] = { id: langId, level: profLevel };
-                                      updateJobForm({ languages: updated });
-                                    }}
-                                    style={[
-                                      styles.proficiencyDotWrapper,
-                                      isSelected && {
-                                        borderWidth: 2,
-                                        borderColor: getLanguageProficiencyColor(profLevel),
-                                        borderRadius: 16,
-                                        width: 32,
-                                        height: 32,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                      },
-                                    ]}>
-                                    <View
+                          <View key={`${langId}-${index}`} style={styles.languageChipWithDots}>
+                            <View style={styles.languageRow}>
+                              <Text style={styles.languageName} numberOfLines={1}>
+                                {label}
+                              </Text>
+                              <View style={styles.dotsContainer}>
+                                {proficiencyLevels.map(profLevel => {
+                                  const isSelected = level === profLevel;
+                                  return (
+                                    <TouchableOpacity
+                                      key={profLevel}
+                                      onPress={() => {
+                                        const updated = [...languages];
+                                        updated[index] = { id: langId, level: profLevel };
+                                        updateJobForm({ languages: updated });
+                                        setPressedLangDot({ langId, level: profLevel });
+                                        setTimeout(() => setPressedLangDot(null), 2000);
+                                      }}
                                       style={[
-                                        styles.proficiencyDot,
-                                        { backgroundColor: getLanguageProficiencyColor(profLevel) },
-                                      ]}
-                                    />
-                                  </TouchableOpacity>
-                                );
-                              })}
+                                        styles.proficiencyDotWrapper,
+                                        isSelected && {
+                                          borderWidth: 2,
+                                          borderColor: getLanguageProficiencyColor(profLevel),
+                                          borderRadius: 16,
+                                          width: 32,
+                                          height: 32,
+                                          justifyContent: 'center',
+                                          alignItems: 'center',
+                                        },
+                                      ]}>
+                                      <View
+                                        style={[
+                                          styles.proficiencyDot,
+                                          { backgroundColor: getLanguageProficiencyColor(profLevel) },
+                                        ]}
+                                      />
+                                      {pressedLangDot?.langId === langId &&
+                                        pressedLangDot?.level === profLevel && (
+                                          <View style={styles.dotLabelContainer}>
+                                            <Text style={styles.dotLabel} numberOfLines={1}>
+                                              {profLevel}
+                                            </Text>
+                                          </View>
+                                        )}
+                                    </TouchableOpacity>
+                                  );
+                                })}
+                              </View>
                             </View>
                           </View>
                         );
@@ -1233,9 +1249,9 @@ const PostJob = () => {
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.providerContainer}
                   renderItem={({ item, index }) => {
-                    console.log("🔥 ~ render ~ item:", item)
+                    const itemId = item?._id ?? item?.id;
                     const isChecked = essential_benefits?.some(
-                      (i: any) => i?._id === item?._id,
+                      (i: any) => (i?._id ?? i?.id ?? (typeof i === 'string' ? i : '')) === itemId,
                     );
                     return (
                       <Pressable
@@ -1537,12 +1553,6 @@ const PostJob = () => {
                       enablePoweredByContainer={false}
                       keepResultsAfterBlur={true}
                       listViewDisplayed={isAutocompleteOpen}
-                      onFocus={() => {
-                        setIsAutocompleteOpen(true);
-                      }}
-                      onBlur={() => {
-                        setTimeout(() => setIsAutocompleteOpen(false), 300);
-                      }}
                       onFail={error => {
                         console.error('GooglePlacesAutocomplete error:', error);
                       }}
@@ -1624,6 +1634,9 @@ const PostJob = () => {
                         ellipsizeMode: 'tail',
                         onFocus: () => {
                           setIsAutocompleteOpen(true);
+                        },
+                        onBlur: () => {
+                          setTimeout(() => setIsAutocompleteOpen(false), 300);
                         },
                         onChangeText: text => {
                           setSearchText(text);
@@ -1779,7 +1792,7 @@ const PostJob = () => {
                   <Text style={styles.label}>{t('Monthly Salary Offer')}</Text>
                   <View style={styles.salaryrow}>
                     <CustomDropdown
-                      data={salaryRangeData}
+                      data={salaryRangeDataWithCurrent}
                       labelField="label"
                       valueField="value"
                       value={salary?.value}
@@ -1863,10 +1876,12 @@ const PostJob = () => {
             updateJobForm({ isSuccessModalVisible: false });
           }}>
           <View style={styles.modalIconWrapper}>
-            <Image
-              source={IMAGES.check}
-              tintColor={colors._FAEED2}
+            <LottieView
+              source={animation.success_check}
+              autoPlay
+              loop={false}
               style={styles.modalCheckIcon}
+              resizeMode="cover"
             />
           </View>
 
@@ -2316,9 +2331,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors._0B3970,
   },
   modalCheckIcon: {
-    width: wp(30),
-    height: hp(30),
-    borderRadius: wp(30),
+    width: wp(90),
+    height: wp(90),
   },
   modalTitle: {
     textAlign: 'center',
@@ -2537,6 +2551,67 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 16,
+  },
+  hiddenSelectedStyle: {
+    height: 0,
+    opacity: 0,
+    padding: 0,
+    margin: 0,
+  },
+  languageListContainer: {
+    gap: wp(4),
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    marginTop: hp(10),
+    marginBottom: 0,
+  },
+  languageChipWithDots: {
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(12),
+    marginRight: wp(6),
+    marginBottom: hp(6),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  languageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  languageName: {
+    ...commonFontStyle(400, 16, colors._050505),
+    flex: 1,
+    marginRight: wp(8),
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  dotLabelContainer: {
+    position: 'absolute',
+    bottom: hp(32),
+    backgroundColor: colors._0B3970,
+    paddingVertical: hp(4),
+    borderRadius: hp(6),
+    zIndex: 1000,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: wp(100),
+    maxWidth: wp(150),
+    marginLeft: wp(-33),
+    width: '100%',
+  },
+  dotLabel: {
+    ...commonFontStyle(500, 12, colors.white),
+    textAlign: 'center',
+    flexShrink: 0,
   },
   tooltipIcon: {
     marginTop: hp(0),

@@ -43,6 +43,7 @@ const CoProfileLocationScreen = () => {
   const dispatch = useDispatch();
   const { userInfo, getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
+  console.log("🔥 ~ CoProfileLocationScreen ~ mapKey:", mapKey)
 
   const [search, setSearch] = useState(userInfo?.address || '');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
@@ -74,7 +75,6 @@ const CoProfileLocationScreen = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const ref = useRef<any | null>(null);
 
-  // Refs for debouncing
   const addressFetchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {

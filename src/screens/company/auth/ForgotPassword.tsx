@@ -31,8 +31,9 @@ import { RootState } from '../../../store';
 import { useSelector } from 'react-redux';
 import {
   useCompanyForgotPasswordMutation,
-  useCompanyResetPasswordMutation,
+  useCompanyOTPVerifyMutation,
   useCompanyResendOTPMutation,
+  useCompanyChangePasswordMutation,
 } from '../../../api/authApi';
 import { setForgotPasswordSteps, setUserInfo } from '../../../features/authSlice';
 import { SCREENS } from '../../../navigation/screenNames';
@@ -44,9 +45,8 @@ const ForgotPassword = () => {
   const { fcmToken, userInfo, forgotPasswordSteps } = useSelector(
     (state: RootState) => state.auth,
   );
-  // const [OtpVerify] = useCompanyOTPVerifyMutation();
-  // const [companyChangePassword] = useCompanyChangePasswordMutation();
-  const [companyResetPassword] = useCompanyResetPasswordMutation();
+  const [OtpVerify] = useCompanyOTPVerifyMutation();
+  const [companyChangePassword] = useCompanyChangePasswordMutation();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const inputRefsOtp = useRef<any>([]);
@@ -101,7 +101,7 @@ const ForgotPassword = () => {
     try {
       const res = await companyForgotPassword({ email: auth?.email?.toLocaleLowerCase() }).unwrap() as any;
       if (res?.status) {
-        successToast(res?.message || 'OTP sent successfully');
+        successToast(res?.message);
         dispatch(setUserInfo(res.data?.user));
         setTimer(30);
         if (forgotPasswordSteps === 1) {
@@ -116,19 +116,17 @@ const ForgotPassword = () => {
   };
 
   const verifyOTP = async () => {
-    // For verifying OTP, we call the same resetPassword API but with verify_otp=true
     let data = {
       otp: otp.join(''),
       company_id: userInfo?._id,
-      verify_otp: true,
-      // password: '',
-      // confirm_password: '',
+      device_token: fcmToken ?? '',
+      device_type: Platform.OS,
     };
     console.log(data, 'verifyOTP data');
 
     try {
-      const response = await companyResetPassword(data).unwrap() as any;
-      console.log(response, 'response----');
+      const response = await OtpVerify(data).unwrap() as any;
+      console.log(response, 'response companyOTPVerify>>>>>>>>>>');
       if (response?.status) {
         successToast(response?.message || 'OTP verified successfully');
         nextStep();
@@ -152,12 +150,12 @@ const ForgotPassword = () => {
       otp: otp.join(''),
       password: newPassword,
       confirm_password: confirmPassword,
-      // verify_otp is not passed here (or passed as false implicitly by omission)
+      verify_otp: false,
     };
     console.log(data, 'handleChangePassword data >>>>>>>>>>>>>');
 
     try {
-      const response = await companyResetPassword(data).unwrap() as any;
+      const response = await companyChangePassword(data).unwrap() as any;
       console.log(response, 'companyChangePassword response----');
       if (response?.status) {
         successToast(response?.message);

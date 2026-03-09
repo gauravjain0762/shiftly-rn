@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Modal from 'react-native-modal';
-import LinearGradient from 'react-native-linear-gradient';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../assets/animation';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
-import { IMAGES } from '../../assets/Images';
 
 type modal = {
   visible?: boolean;
@@ -32,7 +32,13 @@ const ApplicationSuccessModal: FC<modal> = ({
       useNativeDriver={true}>
       <View style={styles.modalContainer}>
         <View style={styles.iconCircle}>
-          <Image style={styles.checkmark} source={IMAGES.check} />
+          <LottieView
+            source={animation.success_check}
+            autoPlay
+            loop={false}
+            style={styles.checkmark}
+            resizeMode="cover"
+          />
         </View>
 
         <Text style={styles.title}>
@@ -94,12 +100,11 @@ const styles = StyleSheet.create({
     marginBottom: hp(20),
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   checkmark: {
-    width: wp(40),
-    height: wp(40),
-    tintColor: colors.white,
-    resizeMode: 'contain',
+    width: wp(90),
+    height: wp(90),
   },
   title: {
     ...commonFontStyle(600, 20, colors._050505),

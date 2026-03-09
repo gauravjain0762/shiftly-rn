@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { AppStyles } from '../../../theme/appStyles';
 import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
@@ -117,8 +117,6 @@ const CreatePost = () => {
       </View>
 
       <KeyboardAwareScrollView
-        enableAutomaticScroll
-        automaticallyAdjustContentInsets
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContent}

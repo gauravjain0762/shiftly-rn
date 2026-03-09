@@ -181,17 +181,15 @@ export const dashboardApi = createApi({
     }),
     createCompanyPost: builder.mutation<any, any>({
       query: credentials => {
-        const isFormData = typeof FormData !== 'undefined' && credentials instanceof FormData;
-        const headers: Record<string, string> = {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        };
-        if (!isFormData) headers['Content-Type'] = 'multipart/form-data';
         return {
           url: API.createCompanyPost,
           method: HTTP_METHOD.POST,
           data: credentials,
           skipLoader: false,
-          headers,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Content-Type': 'multipart/form-data',
+          },
         };
       },
       invalidatesTags: ['CreatePost', 'GetPost'],
@@ -210,17 +208,15 @@ export const dashboardApi = createApi({
     }),
     editCompanyPost: builder.mutation<any, any>({
       query: credentials => {
-        const isFormData = typeof FormData !== 'undefined' && credentials instanceof FormData;
-        const headers: Record<string, string> = {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        };
-        if (!isFormData) headers['Content-Type'] = 'multipart/form-data';
         return {
           url: API.editCompanyPost,
           method: HTTP_METHOD.POST,
           data: credentials,
           skipLoader: false,
-          headers,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Content-Type': 'multipart/form-data',
+          },
         };
       },
       invalidatesTags: ['CreatePost', 'GetPost'],

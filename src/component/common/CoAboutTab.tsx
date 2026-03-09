@@ -14,7 +14,7 @@ type Props = {
 
 const CoAboutTab = ({ companyProfileData }: Props) => {
 
-  const openInMaps = (lat, lng, address) => {
+  const openInMaps = (lat: any, lng: any, address: any) => {
     if (!lat || !lng) return;
 
     const encodedAddress = encodeURIComponent(address || '');
@@ -54,7 +54,7 @@ const CoAboutTab = ({ companyProfileData }: Props) => {
       </View>
 
       <View style={[styles.infoSection]}>
-        <Text style={styles.infoTitle}>Type</Text>
+        <Text style={styles.infoTitle}>Business Type</Text>
         <Text style={styles.infoValue}>
           {companyProfileData?.business_type_id?.title || 'N/A'}
         </Text>

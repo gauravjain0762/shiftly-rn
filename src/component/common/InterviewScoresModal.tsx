@@ -143,6 +143,7 @@ const InterviewScoresModal = ({
         <BottomModal
             visible={visible}
             onClose={onClose}
+            closeOnBackButtonPress
             style={styles.modalContent}
         >
             <View style={styles.header}>

@@ -357,17 +357,20 @@ ${salary}${shareUrlText}`;
                         value: jobDetail?.start_date,
                       }
                       : jobDetail?.start_date,
-                  salary: {
-                    label: `${Number(
-                      jobDetail?.monthly_salary_from,
-                    ).toLocaleString()} - ${Number(
-                      jobDetail?.monthly_salary_to,
-                    ).toLocaleString()}`,
-                    value: `${Number(
-                      jobDetail?.monthly_salary_from,
-                    ).toLocaleString()} - ${Number(
-                      jobDetail?.monthly_salary_to,
-                    ).toLocaleString()}`,
+                  salary: (() => {
+                    const from = jobDetail?.monthly_salary_from;
+                    const to = jobDetail?.monthly_salary_to;
+                    const fromNum = from != null && from !== '' ? Number(from) : NaN;
+                    const toNum = to != null && to !== '' ? Number(to) : NaN;
+                    if (Number.isFinite(fromNum) && Number.isFinite(toNum)) {
+                      const label = `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`;
+                      return { label, value: label };
+                    }
+                    return { label: '2,000 - 5,000', value: '2,000 - 5,000' };
+                  })(),
+                  currency: {
+                    label: jobDetail?.currency ?? 'AED',
+                    value: jobDetail?.currency ?? 'AED',
                   },
                   position: {
                     label: String(jobDetail?.no_positions),

@@ -593,9 +593,6 @@ const SuggestedEmployeeScreen = () => {
                   </React.Fragment>
                 ),
               )}
-              {languages.length > 3 && (
-                <Text style={styles.shortlistedLanguage}> ...</Text>
-              )}
             </View>
             )}
 

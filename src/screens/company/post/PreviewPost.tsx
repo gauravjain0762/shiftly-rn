@@ -8,6 +8,8 @@ import {
     Platform,
     ActivityIndicator,
 } from 'react-native';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../../assets/animation';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
     BackHeader,
@@ -17,13 +19,11 @@ import {
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../../theme/colors';
-import { IMAGES } from '../../../assets/Images';
 import {
     errorToast,
     goBack,
     navigateTo,
     resetNavigation,
-    successToast,
 } from '../../../utils/commonFunction';
 import { navigationRef } from '../../../navigation/RootContainer';
 import { SCREENS } from '../../../navigation/screenNames';
@@ -226,16 +226,17 @@ const PreviewPost = () => {
                 />
             </View>
 
-            {/* Success Modal */}
             <BottomModal
                 visible={isPostModalVisible}
                 backgroundColor={colors._FAEED2}
                 onClose={() => { }}>
                 <View style={styles.modalIconWrapper}>
-                    <Image
-                        source={IMAGES.check}
-                        tintColor={colors._FAEED2}
+                    <LottieView
+                        source={animation.success_check}
+                        autoPlay
+                        loop={false}
                         style={styles.modalCheckIcon}
+                        resizeMode="cover"
                     />
                 </View>
 
@@ -336,17 +337,17 @@ const styles = StyleSheet.create({
     },
     modalIconWrapper: {
         width: wp(90),
-        height: hp(90),
+        height: wp(90),
         alignSelf: 'center',
-        borderRadius: wp(90),
+        borderRadius: wp(45),
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: colors._0B3970,
+        overflow: 'hidden',
     },
     modalCheckIcon: {
-        width: wp(30),
-        height: hp(30),
-        borderRadius: wp(30),
+        width: wp(90),
+        height: wp(90),
     },
     modalTitle: {
         textAlign: 'center',

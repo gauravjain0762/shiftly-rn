@@ -19,6 +19,7 @@ type BottomModalProps = {
   onClose: () => void;
   children: React.ReactNode;
   backgroundColor?: string;
+  closeOnBackButtonPress?: boolean;
 };
 
 const BottomModal = ({
@@ -27,11 +28,13 @@ const BottomModal = ({
   children,
   style,
   backgroundColor = '#fff',
+  closeOnBackButtonPress = false,
 }: BottomModalProps) => {
   return (
     <Modal
       style={styles.modal}
       onBackdropPress={onClose}
+      onBackButtonPress={closeOnBackButtonPress ? onClose : undefined}
       avoidKeyboard
       isVisible={visible}
       animationIn="slideInUp"

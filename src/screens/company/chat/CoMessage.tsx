@@ -175,7 +175,7 @@ const CoMessage = () => {
           keyExtractor={(item, index) => item?._id || index.toString()}
           renderItem={renderChatCard}
           ListEmptyComponent={() => (
-            <NoDataText text="You don't have any activity yet. Once you post jobs or content, updates will appear here." />
+            <NoDataText style={{paddingHorizontal: wp(22)}} text="You don't have any activity yet. Once you post jobs or content, updates will appear here." />
           )}
           onRefresh={refetch}
           refreshing={isLoading}
