@@ -465,48 +465,60 @@ const CreateProfileScreen = () => {
   const handleAddAboutMe = async () => {
     const formData = new FormData();
 
-    formData.append('open_for_job', aboutEdit?.open_for_jobs ? true : false);
-    formData.append('about', aboutEdit?.about || '');
-
-    // Extract city and country from the location string if available
-    // Location format from EmpLocation: "Full Address"
-    // We need to pass it as "city, country" format
+    // Build debug payload for logging (FormData can't be stringified directly)
     const locationData = route.params?.locationData;
-    if (locationData?.city && locationData?.country) {
-      formData.append('location', `${locationData.city}, ${locationData.country}`);
-    } else if (aboutEdit?.location) {
-      formData.append('location', aboutEdit?.location || '');
-    } else {
-      formData.append('location', '');
-    }
+    const locationValue = locationData?.city && locationData?.country
+      ? `${locationData.city}, ${locationData.country}`
+      : aboutEdit?.location || '';
 
-    formData.append('skills', aboutEdit?.selectedSkills?.join(',') || '');
-
-    if (yearsOfExperienceOption?.label) {
-      formData.append('years_of_experience', yearsOfExperienceOption.label);
-    }
-
-    if (aboutEdit?.selectedLanguages?.length) {
-      aboutEdit.selectedLanguages.forEach((lang: any, index: number) => {
-        formData.append(`languages[${index}][name]`, lang.name);
-        formData.append(`languages[${index}][level]`, lang.level);
-      });
-    }
-
-    if (resumes?.length > 0) {
-      resumes
+    const debugPayload: any = {
+      open_for_job: !!aboutEdit?.open_for_jobs,
+      about: aboutEdit?.about || '',
+      location: locationValue,
+      skills: aboutEdit?.selectedSkills || [],
+      years_of_experience: yearsOfExperienceOption?.label || null,
+      languages: (aboutEdit?.selectedLanguages || []).map((l: any) => ({
+        name: l?.name,
+        level: l?.level,
+      })),
+      resumes: (resumes || [])
         .filter((resume: any) => !resume._id)
-        .forEach((resume: any, index: number) => {
-          formData.append('resumes', {
-            uri: resume.file,
-            type: resume.type,
-            name: resume.file_name || `resume_${index}.pdf`,
-          } as any);
-        });
+        .map((resume: any, index: number) => ({
+          uri: resume.file,
+          type: resume.type,
+          name: resume.file_name || `resume_${index}.pdf`,
+        })),
+    };
+
+    console.log(
+      '🔥 [CreateProfileScreen] /updateAboutMe payload:',
+      JSON.stringify(debugPayload, null, 2),
+    );
+
+    formData.append('open_for_job', debugPayload.open_for_job);
+    formData.append('about', debugPayload.about);
+    formData.append('location', debugPayload.location);
+    formData.append('skills', (aboutEdit?.selectedSkills || []).join(','));
+
+    if (debugPayload.years_of_experience) {
+      formData.append('years_of_experience', debugPayload.years_of_experience);
     }
+
+    debugPayload.languages.forEach((lang: any, index: number) => {
+      formData.append(`languages[${index}][name]`, lang.name);
+      formData.append(`languages[${index}][level]`, lang.level);
+    });
+
+    debugPayload.resumes.forEach((resume: any) => {
+      formData.append('resumes', resume as any);
+    });
 
     try {
       const res = await updateAboutMe(formData).unwrap();
+      console.log(
+        '🔥 [CreateProfileScreen] /updateAboutMe response:',
+        JSON.stringify(res, null, 2),
+      );
       const updatedData = res?.data?.user;
 
       if (res?.status) {

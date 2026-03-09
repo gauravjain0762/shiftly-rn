@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -40,6 +41,9 @@ const ProfileScreen = () => {
   );
 
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+  const [aboutHasMore, setAboutHasMore] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [sendAssessmentLink, {isLoading: isSendingAssessment}] =
     useSendAssessmentLinkMutation();
@@ -138,12 +142,22 @@ const ProfileScreen = () => {
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
           {hasValidImage(userInfo?.picture) ? (
-            <CustomImage
-              source={{ uri: userInfo?.picture }}
-              imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
-              containerStyle={styles.avatar}
-              resizeMode="cover"
-            />
+            <View style={styles.avatar}>
+              <CustomImage
+                uri={userInfo?.picture}
+                imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
+                containerStyle={{ flex: 1 }}
+                resizeMode="cover"
+                showDefaultSource={false}
+                onLoadStart={() => setAvatarLoading(true)}
+                onLoad={() => setAvatarLoading(false)}
+              />
+              {avatarLoading && (
+                <View style={styles.avatarLoaderOverlay}>
+                  <ActivityIndicator size="small" color={colors._0B3970} />
+                </View>
+              )}
+            </View>
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
               <Text style={styles.avatarText}>{getInitials(userInfo?.name)}</Text>
@@ -265,7 +279,28 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           </BottomModal>
 
-          <Section title="About Me" content={userInfo?.about || 'N/A'} />
+          <View style={styles.card}>
+            <HeaderWithAdd title="About Me" />
+            <BaseText
+              style={styles.content}
+              numberOfLines={isAboutExpanded ? undefined : 3}
+              onTextLayout={e => {
+                if (!aboutHasMore && e.nativeEvent.lines.length > 3) {
+                  setAboutHasMore(true);
+                }
+              }}>
+              {userInfo?.about || 'N/A'}
+            </BaseText>
+            {aboutHasMore && (
+              <TouchableOpacity
+                onPress={() => setIsAboutExpanded(prev => !prev)}
+                style={styles.showMoreButton}>
+                <BaseText style={styles.showMoreText}>
+                  {isAboutExpanded ? 'Show less' : 'more'}
+                </BaseText>
+              </TouchableOpacity>
+            )}
+          </View>
 
           {experienceList?.length > 0 && (
             <View style={styles.card}>
@@ -459,6 +494,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+  },
+  avatarLoaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   name: {
     ...commonFontStyle(600, 25, colors._0B3970),

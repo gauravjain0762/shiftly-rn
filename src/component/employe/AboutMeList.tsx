@@ -71,7 +71,6 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
     const sorted = options.slice().sort((a: any, b: any) =>
       (a.label || '').localeCompare(b.label || '', 'en', { sensitivity: 'base' })
     );
-    // dropdownPosition="top" renders list inverted, so reverse to show A–Z
     return sorted.reverse();
   }, [languagesResponse]);
 
@@ -395,7 +394,6 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   headerText: {
-    marginBottom: 8,
     ...commonFontStyle(600, 18, colors._050505),
   },
   skillsText: {
