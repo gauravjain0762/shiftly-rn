@@ -32,11 +32,10 @@ import { ensureFcmToken } from '../../../hooks/notificationHandler';
 
 const CoLogin = () => {
   const { t } = useTranslation();
-  const { fcmToken } = useSelector((state: RootState) => state.auth);
-  console.log('🔥 CoLogin ~ fcmToken:', fcmToken);
   const dispatch = useDispatch();
-  const [companyLogin] = useCompanyLoginMutation();
+  const { fcmToken } = useSelector((state: RootState) => state.auth);
   const { auth } = useSelector((state: RootState) => state.company);
+  const [companyLogin] = useCompanyLoginMutation();
   const { email, password } = auth;
 
   const handleLogin = async () => {

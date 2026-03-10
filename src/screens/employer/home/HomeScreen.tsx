@@ -26,7 +26,7 @@ const HomeScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
   console.log('🔥 HomeScreen ~ fcmToken:', fcmToken);
-  const { data: profileData } = useGetEmployeeProfileQuery({});
+  const { data: profileData, refetch: refetchProfile } = useGetEmployeeProfileQuery({});
 
   const {
     data: getJobs,
@@ -70,6 +70,7 @@ const HomeScreen = () => {
     }
     refetchJobs();
     refetchDashboard();
+    refetchProfile();
   };
 
   const renderHeader = () => {
@@ -80,6 +81,7 @@ const HomeScreen = () => {
             companyProfile={userInfo}
             onPressAvatar={() => navigateTo(SCREENS.ProfileScreen)}
             onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
+            unreadCount={profileData?.data?.user?.unread_notifications ?? 0}
           />
         </View>
 

@@ -42,6 +42,7 @@ import {
   useGetEmployeeProfileQuery,
   useGetEmployeeSkillsQuery,
   useGetExperiencesQuery,
+  useGetDropdownDataQuery,
   useRemoveEducationMutation,
   useRemoveExperienceMutation,
   useUpdateAboutMeMutation,
@@ -90,14 +91,7 @@ const CreateProfileScreen = () => {
       },
     );
   const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
-  const experienceOptionsData = useMemo(() => {
-    return (
-      experienceDataVals?.data?.experiences?.map((item: any) => ({
-        label: item?.title,
-        value: item?._id,
-      })) || []
-    );
-  }, [experienceDataVals]);
+  const { data: dropdownData } = useGetDropdownDataQuery();
   const { data: getAboutmeandResumes, refetch: refetchAboutMe } =
     useGetEmployeeProfileQuery(
       {},
@@ -111,8 +105,21 @@ const CreateProfileScreen = () => {
 
   const educationData = getEducation?.data?.educations;
   const experienceData = getExperiences?.data?.experiences;
+  const experienceUser = getExperiences?.data?.user;
+  console.log('🔥 ~ CreateProfileScreen ~ getExperiences full:', JSON.stringify(getExperiences, null, 2));
   const aboutmeandResumes = getAboutmeandResumes?.data?.user;
   const uploadedResumes = aboutmeandResumes?.resumes;
+  const experienceOptionsData = useMemo(() => {
+    const apiExperiences =
+      dropdownData?.data?.experiences ||
+      experienceDataVals?.data?.experiences ||
+      [];
+
+    return apiExperiences.map((item: any) => ({
+      label: item?.title,
+      value: item?._id,
+    }));
+  }, [dropdownData, experienceDataVals]);
 
   const [isEducationUpdate, setIsEducationUpdate] = useState(false);
   const [isExperienceUpdate, setIsExperienceUpdate] = useState(false);
@@ -147,13 +154,12 @@ const CreateProfileScreen = () => {
         (exp: any) => typeof exp?.preferred_position === 'string' && exp.preferred_position.trim().length > 0,
       );
     return (
-      (fromList?.preferred_position as any)?.trim() ||
+      (fromList && (fromList as any)?.preferred_position?.trim()) ||
       experienceListEdit?.preferred_position ||
+      userInfo?.desired_job_title ||
       ''
     );
-  }, [experienceList, experienceListEdit?.preferred_position]);
-
-  const hasDesiredJobTitle = !!globalDesiredJobTitle;
+  }, [experienceList, experienceListEdit?.preferred_position, userInfo?.desired_job_title]);
 
   const [addUpdateEducation, { isLoading: isLoadingEducation }] =
     useAddUpdateEducationMutation({});
@@ -239,17 +245,26 @@ const CreateProfileScreen = () => {
   }, [educationData, experienceData, aboutmeandResumes]);
 
   useEffect(() => {
-    const saved = aboutmeandResumes?.years_of_experience;
-    if (saved != null && saved !== '' && experienceOptionsData.length > 0) {
+    const savedLabel =
+      experienceUser?.years_of_experience ||
+      aboutmeandResumes?.years_of_experience ||
+      userInfo?.years_of_experience;
+
+    if (savedLabel && experienceOptionsData.length > 0) {
       const match =
         experienceOptionsData.find(
-          (opt: any) => opt.label === saved || opt.value === saved,
+          (opt: any) => opt.label === savedLabel,
         ) || null;
       setYearsOfExperienceOption(match);
-    } else if (saved == null || saved === '') {
+    } else if (!savedLabel) {
       setYearsOfExperienceOption(null);
     }
-  }, [aboutmeandResumes?.years_of_experience, experienceOptionsData]);
+  }, [
+    experienceUser?.years_of_experience,
+    aboutmeandResumes?.years_of_experience,
+    userInfo?.years_of_experience,
+    experienceOptionsData,
+  ]);
 
   const handleSaveOrAddEducation = () => {
     if (educationListEdit?.isEditing) {
@@ -298,7 +313,11 @@ const CreateProfileScreen = () => {
     );
 
     // After adding/saving, scroll to top so user sees the updated list
-    scrollRef.current?.scrollToPosition(0, 0, true);
+    if (scrollRef.current) {
+      if (typeof scrollRef.current.scrollTo === 'function') {
+        scrollRef.current.scrollTo({x: 0, y: 0, animated: true});
+      }
+    }
   };
 
   const handleSaveOrAddExperience = () => {
@@ -370,7 +389,11 @@ const CreateProfileScreen = () => {
       }),
     );
 
-    scrollRef.current?.scrollToPosition(0, 0, true);
+    if (scrollRef.current) {
+      if (typeof scrollRef.current.scrollTo === 'function') {
+        scrollRef.current.scrollTo({x: 0, y: 0, animated: true});
+      }
+    }
   };
 
   const handleAddEducation = async () => {
@@ -441,6 +464,12 @@ const CreateProfileScreen = () => {
               month: exp?.jobEnd_month,
               year: exp?.jobEnd_year,
             },
+          }),
+          ...(yearsOfExperienceOption?.value && {
+            years_of_experience: yearsOfExperienceOption.value,
+          }),
+          ...(exp?.preferred_position && {
+            desired_job_title: exp.preferred_position,
           }),
         };
 
@@ -549,16 +578,34 @@ const CreateProfileScreen = () => {
   const handleUpdateProfile = async () => {
     try {
       if (isEducationUpdate) {
-        console.log("isEducationUpdate called >>>>>>>>>>>.")
+        console.log('isEducationUpdate called >>>>>>>>>>>.');
         await handleAddEducation();
       }
 
-      if (isExperienceUpdate) {
-        console.log("isExperienceUpdate called >>>>>>>>>>>.")
+      const serverDesiredJobTitle =
+        experienceUser?.desired_job_title || userInfo?.desired_job_title || '';
+      const currentDesiredJobTitle = (globalDesiredJobTitle || '').trim();
+
+      const serverYearsLabel =
+        experienceUser?.years_of_experience ||
+        aboutmeandResumes?.years_of_experience ||
+        userInfo?.years_of_experience ||
+        '';
+      const currentYearsLabel = yearsOfExperienceOption?.label || '';
+
+      const hasDesiredChanged =
+        currentDesiredJobTitle.length > 0 &&
+        currentDesiredJobTitle !== serverDesiredJobTitle;
+      const hasYearsChanged =
+        !!currentYearsLabel && currentYearsLabel !== serverYearsLabel;
+
+      if (isExperienceUpdate || hasDesiredChanged || hasYearsChanged) {
+        console.log('isExperienceUpdate/changed called >>>>>>>>>>>.');
         await handleAddUExperience();
       }
+
       await handleAddAboutMe();
-      console.log("handleAddAboutMe called >>>>>>>>>>>.")
+      console.log('handleAddAboutMe called >>>>>>>>>>>.');
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {
@@ -776,27 +823,6 @@ const CreateProfileScreen = () => {
 
           {activeStep === 2 && (
             <>
-              <View style={[styles.yearsExperienceRow, styles.experienceDropdownField]}>
-                <BaseText style={styles.experienceDropdownLabel}>
-                  {t('Years of Experience')}
-                </BaseText>
-                <CustomDropdown
-                  data={experienceOptionsData}
-                  labelField="label"
-                  valueField="value"
-                  value={yearsOfExperienceOption?.value}
-                  onChange={(e: any) => {
-                    setYearsOfExperienceOption(
-                      e?.value != null ? { label: e.label, value: e.value } : null,
-                    );
-                  }}
-                  dropdownStyle={styles.experienceDropdown}
-                  renderRightIcon={IMAGES.ic_down}
-                  RightIconStyle={styles.experienceDropdownRightIcon}
-                  selectedTextStyle={styles.experienceDropdownSelectedText}
-                  placeholder={t('Select one')}
-                />
-              </View>
               {experienceList?.length > 0 &&
                 experienceList?.map((item: ExperienceItem, index: number) => (
                   <EducationCard
@@ -855,10 +881,37 @@ const CreateProfileScreen = () => {
                   dispatch(setExperienceListEdit(val))
                 }
                 desiredJobTitle={globalDesiredJobTitle}
-                disableDesiredJob={hasDesiredJobTitle}
+                disableDesiredJob={false}
                 onExperienceTypePress={() => {
-                  scrollRef.current?.scrollToPosition(0, hp(180), true);
+                  if (scrollRef.current) {
+                    if (typeof scrollRef.current.scrollTo === 'function') {
+                      scrollRef.current.scrollTo({x: 0, y: hp(180), animated: true});
+                    }
+                  }
                 }}
+                yearsOfExperienceNode={
+                  <View style={[styles.yearsExperienceRow, styles.experienceDropdownField]}>
+                    <BaseText style={styles.experienceDropdownLabel}>
+                      {t('Years of Experience')}
+                    </BaseText>
+                    <CustomDropdown
+                      data={experienceOptionsData}
+                      labelField="label"
+                      valueField="value"
+                      value={yearsOfExperienceOption?.value}
+                      onChange={(e: any) => {
+                        setYearsOfExperienceOption(
+                          e?.value != null ? { label: e.label, value: e.value } : null,
+                        );
+                      }}
+                      dropdownStyle={styles.experienceDropdown}
+                      renderRightIcon={IMAGES.ic_down}
+                      RightIconStyle={styles.experienceDropdownRightIcon}
+                      selectedTextStyle={styles.experienceDropdownSelectedText}
+                      placeholder={t('Select one')}
+                    />
+                  </View>
+                }
               />
             </>
           )}
@@ -1077,16 +1130,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(25),
   },
   yearsExperienceRow: {
-    marginBottom: hp(12),
-    paddingHorizontal: wp(25),
+    marginTop: hp(20),
+    marginBottom: hp(4),
   },
   experienceDropdownField: {
     gap: hp(12),
-    marginBottom: hp(14),
+    marginBottom: hp(4),
     zIndex: 10,
   },
   experienceDropdownLabel: {
-    ...commonFontStyle(400, 18, colors._0B3970),
+    ...commonFontStyle(600, 18, colors._050505),
+    marginBottom: hp(4),
   },
   experienceDropdown: {
     borderRadius: 10,

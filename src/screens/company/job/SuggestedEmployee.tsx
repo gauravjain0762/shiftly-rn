@@ -51,9 +51,9 @@ const SuggestedEmployeeScreen = () => {
   const route = useRoute<any>();
   const { jobId, jobData, isFromJobCard, fromPostJob } = route.params || {};
 
-  // When coming from job post, show suggested tab; when from job card, default to shortlisted
+  // Default to Suggested List tab for all entry points
   const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>(
-    isFromJobCard ? 'shortlisted' : 'suggested'
+    'suggested'
   );
 
   const {
@@ -720,11 +720,11 @@ const SuggestedEmployeeScreen = () => {
           <Text style={styles.employeeName}>
             {item?.name || 'N/A'}
           </Text>
-          <Text style={styles.employeeRole}>
+          {/* <Text style={styles.employeeRole}>
             {item?.responsibility || item?.job_title || 'N/A'}
-          </Text>
+          </Text> */}
           <Text style={styles.employeeExperience}>
-            {`${experience || 0}y ${t('Experience')}`}
+            {`${experience || 0}`}
           </Text>
         </TouchableOpacity>
 
@@ -1124,7 +1124,7 @@ const SuggestedEmployeeScreen = () => {
                                   {user?.responsibility || user?.job_title || 'N/A'}
                                 </Text>
                                 <Text style={styles.employeeExperience}>
-                                  {`${experience || 0}y ${t('Experience')}`}
+                                  {`${experience || 0}`}
                                 </Text>
                               </TouchableOpacity>
                             </Pressable>
@@ -1490,7 +1490,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: hp(12),
+    // Fix height so all three tabs match visually
+    height: hp(40),
+    paddingVertical: 0,
     paddingHorizontal: wp(16),
     backgroundColor: '#F2F2F2',
     borderRadius: wp(50),
@@ -1655,16 +1657,16 @@ const styles = StyleSheet.create({
     height: wp(24),
   },
   starSmall: {
-    width: wp(14),
-    height: wp(14),
+    width: wp(11),
+    height: wp(11),
     resizeMode: 'contain',
     position: 'absolute',
     top: 0,
     left: 0,
   },
   starLarge: {
-    width: wp(18),
-    height: wp(18),
+    width: wp(15),
+    height: wp(15),
     resizeMode: 'contain',
     position: 'absolute',
     bottom: 0,

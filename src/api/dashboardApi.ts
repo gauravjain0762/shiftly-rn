@@ -928,6 +928,13 @@ export const dashboardApi = createApi({
       }),
       providesTags: ['AddUpdateExperience'],
     }),
+    getDropdownData: builder.query<any, void>({
+      query: () => ({
+        url: API.getDropdownData,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+    }),
     getEmployeeNotifications: builder.query<any, any>({
       query: params => {
         return {
@@ -937,6 +944,26 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
+    }),
+    markReadNotifications: builder.mutation<any, void>({
+      query: () => {
+        const formData = new FormData();
+        formData.append('notification_id', 'all');
+        return {
+          url: API.markReadNotifications,
+          method: HTTP_METHOD.POST,
+          data: formData,
+          skipLoader: true,
+          headers: { 'Content-Type': 'multipart/form-data' },
+        };
+      },
+    }),
+    clearAllNotifications: builder.mutation<any, void>({
+      query: () => ({
+        url: API.clearAllNotifications,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+      }),
     }),
     removeEducation: builder.mutation<any, any>({
       query: params => {
@@ -1106,10 +1133,13 @@ export const {
   useGetEssentialBenefitsQuery,
   useGetEducationsQuery,
   useGetExperiencesQuery,
+  useGetDropdownDataQuery,
   useGetAppliedJobsQuery,
   useGetInterviewsQuery,
   useTogglePostLikeMutation,
   useGetEmployeeProfileByIdQuery,
   useGetCompletedInterviewsQuery,
   useSendAssessmentLinkMutation,
+  useMarkReadNotificationsMutation,
+  useClearAllNotificationsMutation,
 } = dashboardApi;

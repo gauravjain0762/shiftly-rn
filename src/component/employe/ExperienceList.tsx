@@ -47,6 +47,7 @@ const ExperienceList: FC<any> = ({
   setExperienceListEdit,
   desiredJobTitle,
   disableDesiredJob,
+  yearsOfExperienceNode,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {data: departmentsResponse} = useGetDepartmentsQuery({});
@@ -86,6 +87,8 @@ const ExperienceList: FC<any> = ({
         }}
         label=""
       />
+
+      {yearsOfExperienceNode}
 
       <BaseText style={styles.headerText}>Past Job Experience</BaseText>
       <View style={[styles.fieldHeader, {overflow: 'visible'}]}>

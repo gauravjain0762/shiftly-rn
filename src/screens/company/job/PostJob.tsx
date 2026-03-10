@@ -791,14 +791,14 @@ const PostJob = () => {
                 <CustomTextInput
                   multiline
                   value={describe}
-                  maxLength={1000}
+                  maxLength={4000}
                   inputStyle={styles.input1}
                   placeholderTextColor={colors._7B7878}
                   containerStyle={styles.inputContainer}
                   placeholder={t('Enter role description')}
                   onChangeText={e => updateJobForm({ describe: e })}
                 />
-                <CharLength value={describe} chars={1000} />
+                <CharLength value={describe} chars={4000} />
               </KeyboardAwareScrollView>
               <View style={{ paddingHorizontal: wp(30) }}>
                 <GradientButton

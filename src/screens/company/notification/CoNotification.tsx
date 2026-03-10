@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -13,7 +14,8 @@ import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
-import { useGetCompanyNotificationQuery } from '../../../api/dashboardApi';
+import { useClearAllNotificationsMutation, useGetCompanyNotificationQuery, useMarkReadNotificationsMutation } from '../../../api/dashboardApi';
+import { useFocusEffect } from '@react-navigation/native';
 import { formatted } from '../../../utils/commonFunction';
 import { useAppDispatch } from '../../../redux/hooks';
 import { setHasUnreadNotification } from '../../../features/authSlice';
@@ -27,9 +29,15 @@ const CoNotification = () => {
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
 
-  useEffect(() => {
-    dispatch(setHasUnreadNotification(false));
-  }, []);
+  const [markReadNotifications] = useMarkReadNotificationsMutation();
+  const [clearAllNotifications, {isLoading: isClearing}] = useClearAllNotificationsMutation();
+
+  useFocusEffect(
+    useCallback(() => {
+      markReadNotifications();
+      dispatch(setHasUnreadNotification(false));
+    }, []),
+  );
 
   const {
     data: notificationsData,
@@ -49,6 +57,15 @@ const CoNotification = () => {
       setOnEndReachedCalled(false);
     }
   }, [notificationsData]);
+
+  const handleClearAll = async () => {
+    try {
+      await clearAllNotifications().unwrap();
+      setAllNotifications([]);
+    } catch (error) {
+      console.log('clearAllNotifications error:', error);
+    }
+  };
 
   const onReached = () => {
     if (
@@ -84,7 +101,20 @@ const CoNotification = () => {
         isRight={true}
         title={t('Notifications')}
         containerStyle={styles.header}
-        RightIcon={<View style={{ width: 20 }} />}
+        RightIcon={
+          allNotifications.length > 0 ? (
+            <TouchableOpacity
+              onPress={handleClearAll}
+              disabled={isClearing}
+              hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+              <BaseText style={styles.clearAllText}>
+                {isClearing ? 'clearing...' : 'clear all'}
+              </BaseText>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: wp(60) }} />
+          )
+        }
       />
 
       {isLoading ? (
@@ -169,6 +199,9 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     ...commonFontStyle(400, 18, colors._0B3970),
+  },
+  clearAllText: {
+    ...commonFontStyle(500, 15, colors._0B3970),
   },
   iconWrapper: {
     backgroundColor: '#0D468C',

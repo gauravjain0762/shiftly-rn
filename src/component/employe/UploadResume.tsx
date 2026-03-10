@@ -170,7 +170,7 @@ const UploadResume = ({resumes, setResumes}: ResumeProps) => {
               <TouchableOpacity
                 onPress={clearAllSelections}
                 style={styles.clearButton}>
-                <BaseText style={styles.clearButtonText}>Clear All</BaseText>
+                <BaseText style={styles.clearButtonText}>clear all</BaseText>
               </TouchableOpacity>
             )}
           </View>

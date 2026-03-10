@@ -11,6 +11,7 @@ type props = {
   type?: 'company' | 'employe';
   onPressAvatar?: () => void;
   companyProfile?: any;
+  unreadCount?: number;
 };
 
 const getInitials = (name?: string) => {
@@ -33,8 +34,11 @@ const HomeHeader: FC<props> = ({
   type = 'employe',
   onPressAvatar,
   companyProfile,
+  unreadCount = 0,
 }) => {
   const { hasUnreadNotification } = useSelector((state: RootState) => state.auth);
+  const showBadge = unreadCount > 0 || hasUnreadNotification;
+  const badgeCount = unreadCount > 0 ? unreadCount : null;
 
   const imageUri =
     type === 'company'
@@ -101,7 +105,15 @@ const HomeHeader: FC<props> = ({
             source={IMAGES.notification}
             style={styles.bell}
           />
-          {hasUnreadNotification && <View style={styles.redDot} />}
+          {showBadge && (
+            <View style={styles.badge}>
+              {badgeCount !== null && (
+                <Text style={styles.badgeText}>
+                  {badgeCount > 99 ? '99+' : badgeCount}
+                </Text>
+              )}
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     </View>
@@ -142,16 +154,26 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: colors._0B3970,
   },
-  redDot: {
+  badge: {
     position: 'absolute',
-    top: hp(1),
-    right: wp(2),
-    width: wp(10),
-    height: wp(10),
-    borderRadius: wp(5),
-    backgroundColor: 'red',
-    borderWidth: 1,
+    top: -hp(5),
+    right: -wp(6),
+    backgroundColor: '#E53935',
+    borderRadius: wp(20),
+    borderWidth: 1.5,
     borderColor: 'white',
+    minWidth: wp(17),
+    height: wp(17),
+    paddingHorizontal: wp(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: wp(10),
+    fontWeight: '700',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   row: {
     flexDirection: 'row',

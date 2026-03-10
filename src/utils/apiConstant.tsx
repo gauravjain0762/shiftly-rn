@@ -59,6 +59,8 @@ export const API = {
 
   //Notifications
   getCompanyNotifications: '/company/getNotifications',
+  markReadNotifications: '/markReadNotifications',
+  clearAllNotifications: '/clearAllNotifications',
 
   // Notifications
   sendInterviewInvites: '/company/sendInterviewInvites',
@@ -105,6 +107,7 @@ export const API = {
   updateAboutMe: '/updateAboutMe',
   getEducations: '/getEducations',
   getExperiences: '/getExperiences',
+  getDropdownData: '/getDropdownData',
   getCertifications: '/company/getCertifications',
   getLanguages: '/company/getLanguages',
   removeEducation: '/removeEducation',

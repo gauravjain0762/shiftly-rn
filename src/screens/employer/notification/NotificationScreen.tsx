@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
 
 import {colors} from '../../../theme/colors';
 import {AppStyles} from '../../../theme/appStyles';
@@ -8,13 +8,25 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {commonFontStyle, hp, wp} from '../../../theme/fonts';
 import {BackHeader, LinearContainer} from '../../../component';
 import NotificationCard from '../../../component/employe/NotificationCard';
-import {useGetEmployeeNotificationsQuery} from '../../../api/dashboardApi';
+import {useClearAllNotificationsMutation, useGetEmployeeNotificationsQuery, useMarkReadNotificationsMutation} from '../../../api/dashboardApi';
+import {useFocusEffect} from '@react-navigation/native';
+import {useAppDispatch} from '../../../redux/hooks';
+import {setHasUnreadNotification} from '../../../features/authSlice';
 
 const NotificationScreen = () => {
+  const dispatch = useAppDispatch();
   const [page, setPage] = useState<number>(1);
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
-  console.log("🔥 ~ NotificationScreen ~ allNotifications:", allNotifications)
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
+  const [markReadNotifications] = useMarkReadNotificationsMutation();
+  const [clearAllNotifications, {isLoading: isClearing}] = useClearAllNotificationsMutation();
+
+  useFocusEffect(
+    useCallback(() => {
+      markReadNotifications();
+      dispatch(setHasUnreadNotification(false));
+    }, []),
+  );
 
   const {
     isLoading,
@@ -60,6 +72,15 @@ const NotificationScreen = () => {
     refetch();
   };
 
+  const handleClearAll = async () => {
+    try {
+      await clearAllNotifications().unwrap();
+      setAllNotifications([]);
+    } catch (error) {
+      console.log('clearAllNotifications error:', error);
+    }
+  };
+
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
       <SafeAreaView style={{flex: 1}} edges={['bottom']}>
@@ -69,7 +90,20 @@ const NotificationScreen = () => {
             isRight={true}
             title={'Notifications'}
             containerStyle={styles.header}
-            RightIcon={<View style={{width: 20}} />}
+            RightIcon={
+              allNotifications.length > 0 ? (
+                <TouchableOpacity
+                  onPress={handleClearAll}
+                  disabled={isClearing}
+                  hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                  <BaseText style={styles.clearAllText}>
+                    {isClearing ? 'clearing...' : 'clear all'}
+                  </BaseText>
+                </TouchableOpacity>
+              ) : (
+                <View style={{width: wp(60)}} />
+              )
+            }
           />
         </View>
         {isLoading && page === 1 ? (
@@ -151,5 +185,8 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     ...commonFontStyle(400, 18, colors._0B3970),
+  },
+  clearAllText: {
+    ...commonFontStyle(500, 15, colors._0B3970),
   },
 });
