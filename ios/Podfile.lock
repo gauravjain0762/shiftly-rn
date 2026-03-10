@@ -1709,7 +1709,7 @@ PODS:
     - Yoga
   - react-native-splash-screen (3.3.0):
     - React-Core
-  - react-native-webview (13.16.0):
+  - react-native-webview (13.16.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2280,7 +2280,7 @@ PODS:
     - RNNotifee/NotifeeCore (= 9.1.8)
   - RNNotifee/NotifeeCore (9.1.8):
     - React-Core
-  - RNPermissions (5.4.4):
+  - RNPermissions (5.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -3039,7 +3039,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: bd7d084270bba25cff40dc1c917883f20da5039f
   react-native-slider: 0c0125010b5299e647eb5d955b58133fb4eb34e4
   react-native-splash-screen: 95994222cc95c236bd3cdc59fe45ed5f27969594
-  react-native-webview: f0d598682cbc88a97d66da4121873d3467f76635
+  react-native-webview: 3fa25e595ae48899139dc2ccfcf975b1dab9f743
   React-NativeModulesApple: 579cac2962d42ffee0d8aae48752f30c4e498bb9
   React-oscompat: f26aa2a4adc84c34212ab12c07988fe19e9cf16a
   React-perflogger: e15a0d43d1928e1c82f4f0b7fc05f7e9bccfede8
@@ -3086,7 +3086,7 @@ SPEC CHECKSUMS:
   RNGoogleSignin: db4aa231a90bdc4cea8b749ec68b168c8f747ec2
   RNImageCropPicker: b0afedeefd8655254a15c34103718455fde6ce59
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
-  RNPermissions: fd7a2c0410230c9b2fe6bd6bdd3de782346425e4
+  RNPermissions: 42121410f780a38991a06ba52311bbf38522e1e8
   RNReactNativeHapticFeedback: 1597ab4e15cabb38f0f0c62faa17a5e295430170
   RNReanimated: 34f5a65606f038eb85448fc4444590ec300407af
   RNScreens: a25b818417609cbd805474dffd2d28b229704cfc

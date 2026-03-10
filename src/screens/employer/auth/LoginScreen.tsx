@@ -31,7 +31,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setAuthData} from '../../../features/employeeSlice';
 import {clearEmployeeAccount} from '../../../features/authSlice';
-import {requestNotificationUserPermission} from '../../../hooks/notificationHandler';
+import {ensureFcmToken} from '../../../hooks/notificationHandler';
 
 const LoginScreen = () => {
   const {t} = useTranslation();
@@ -51,21 +51,16 @@ const LoginScreen = () => {
       } else if (password === '') {
         errorToast(t('Please enter password'));
       } else {
+        const token = await ensureFcmToken(dispatch, fcmToken);
         let data = {
           email: email.trim().toLowerCase(),
           password: password.trim(),
           language: language,
-          device_token: fcmToken ?? '',
+          deviceToken: token,
           deviceType: Platform.OS,
         };
-        console.log(">>>>>>>>>>>>> ~ handleLogin ~ data:", data)
-
         const response: any = await employeeLogin(data).unwrap();
         if (response && response.status) {
-          // Ensure FCM token is set after login if missing
-          if (!fcmToken) {
-            requestNotificationUserPermission(dispatch);
-          }
           dispatch(setAuthData({email: '', password: ''}));
           console.log(response, 'response----');
         }

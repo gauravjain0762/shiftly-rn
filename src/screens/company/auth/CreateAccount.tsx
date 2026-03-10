@@ -434,7 +434,7 @@ const CreateAccount = () => {
     formData.append('phone_code', companyRegisterData?.phone_code);
     formData.append('phone', companyRegisterData?.phone || '');
     formData.append('language', language || 'en');
-    formData.append('device_token', fcmToken ?? '');
+    formData.append('deviceToken', fcmToken ?? '');
     formData.append('deviceType', Platform.OS);
 
     if (companyProfileData?.logo?.uri) {
@@ -525,7 +525,7 @@ const CreateAccount = () => {
       otp: otp.join(''),
       company_id: userInfo?._id,
       language: language,
-      device_token: fcmToken ?? '',
+      deviceToken: fcmToken ?? '',
       deviceType: Platform.OS,
     };
 

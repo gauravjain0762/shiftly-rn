@@ -465,7 +465,6 @@ const CreateProfileScreen = () => {
   const handleAddAboutMe = async () => {
     const formData = new FormData();
 
-    // Build debug payload for logging (FormData can't be stringified directly)
     const locationData = route.params?.locationData;
     const locationValue = locationData?.city && locationData?.country
       ? `${locationData.city}, ${locationData.country}`
@@ -495,7 +494,7 @@ const CreateProfileScreen = () => {
       JSON.stringify(debugPayload, null, 2),
     );
 
-    formData.append('open_for_job', debugPayload.open_for_job);
+    formData.append('open_for_job', debugPayload.open_for_job ? '1' : '0');
     formData.append('about', debugPayload.about);
     formData.append('location', debugPayload.location);
     formData.append('skills', (aboutEdit?.selectedSkills || []).join(','));
@@ -550,13 +549,16 @@ const CreateProfileScreen = () => {
   const handleUpdateProfile = async () => {
     try {
       if (isEducationUpdate) {
+        console.log("isEducationUpdate called >>>>>>>>>>>.")
         await handleAddEducation();
       }
 
       if (isExperienceUpdate) {
+        console.log("isExperienceUpdate called >>>>>>>>>>>.")
         await handleAddUExperience();
       }
       await handleAddAboutMe();
+      console.log("handleAddAboutMe called >>>>>>>>>>>.")
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {
@@ -1060,7 +1062,6 @@ const CreateProfileScreen = () => {
               handleUpdateProfile();
             }
           }}
-        // disabled={resumes?.length === 0}
         />
       )}
       {(isLoadingEducation || isLoadingAboutme) && <Loader />}

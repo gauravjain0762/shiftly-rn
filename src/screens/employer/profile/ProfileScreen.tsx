@@ -22,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
+import ReadMoreText from '../../../component/common/ReadMoreText';
 import { navigationRef } from '../../../navigation/RootContainer';
 import { useGetCompanyEducationsQuery, useGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
@@ -41,8 +42,6 @@ const ProfileScreen = () => {
   );
 
   const [showAllSkills, setShowAllSkills] = useState(false);
-  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
-  const [aboutHasMore, setAboutHasMore] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [sendAssessmentLink, {isLoading: isSendingAssessment}] =
@@ -50,6 +49,8 @@ const ProfileScreen = () => {
 
   const assessStatus = userInfo?.assess_first?.status as string | undefined;
   const hasAssessment = !!userInfo?.assess_first;
+
+  const aboutText = userInfo?.about || '';
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
@@ -281,25 +282,11 @@ const ProfileScreen = () => {
 
           <View style={styles.card}>
             <HeaderWithAdd title="About Me" />
-            <BaseText
+            <ReadMoreText
+              text={aboutText || 'N/A'}
+              numberOfLines={3}
               style={styles.content}
-              numberOfLines={isAboutExpanded ? undefined : 3}
-              onTextLayout={e => {
-                if (!aboutHasMore && e.nativeEvent.lines.length > 3) {
-                  setAboutHasMore(true);
-                }
-              }}>
-              {userInfo?.about || 'N/A'}
-            </BaseText>
-            {aboutHasMore && (
-              <TouchableOpacity
-                onPress={() => setIsAboutExpanded(prev => !prev)}
-                style={styles.showMoreButton}>
-                <BaseText style={styles.showMoreText}>
-                  {isAboutExpanded ? 'Show less' : 'more'}
-                </BaseText>
-              </TouchableOpacity>
-            )}
+            />
           </View>
 
           {experienceList?.length > 0 && (

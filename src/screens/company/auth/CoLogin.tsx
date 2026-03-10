@@ -28,7 +28,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAuthData } from '../../../features/companySlice';
-import { requestNotificationUserPermission } from '../../../hooks/notificationHandler';
+import { ensureFcmToken } from '../../../hooks/notificationHandler';
 
 const CoLogin = () => {
   const { t } = useTranslation();
@@ -45,21 +45,18 @@ const CoLogin = () => {
     } else if (!password) {
       errorToast(t('Please enter password'));
     } else {
-      const data = {
-        email: email.trim(),
-        password: password.trim(),
-        device_token: fcmToken ?? '',
-      };
-
       try {
+        const token = await ensureFcmToken(dispatch, fcmToken);
+        const data = {
+          email: email.trim(),
+          password: password.trim(),
+          deviceToken: token,
+        };
+
         const response = await companyLogin(data).unwrap() as any;
 
         if (response?.status) {
           console.log('✅ Login success:', response);
-          // Ensure we have a fresh FCM token after login if it's missing
-          if (!fcmToken) {
-            requestNotificationUserPermission(dispatch);
-          }
           dispatch(setAuthData({ email: '', password: '' }));
         } else {
           errorToast(t(response?.message));

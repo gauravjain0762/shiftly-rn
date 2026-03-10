@@ -71,6 +71,16 @@ const ExpandableText: React.FC<Props> = ({
     }
   };
 
+  // Fallback: if text is long enough, always show "more" button
+  // ~40 chars per line is a reasonable estimate for most screens
+  React.useEffect(() => {
+    const estimatedCharsPerLine = 40;
+    const estimatedMaxChars = maxLines * estimatedCharsPerLine;
+    if (description && description.length > estimatedMaxChars) {
+      setShouldShowButton(true);
+    }
+  }, [description, maxLines]);
+
   const truncateLength = useMemo(() => {
     if (containerWidth <= 0) return maxLines * 42 - 8; // fallback until measured
     const charWidth = fontSize * CHAR_WIDTH_RATIO;
@@ -116,13 +126,15 @@ const ExpandableText: React.FC<Props> = ({
           <BaseText style={descriptionStyle} numberOfLines={showMore ? undefined : maxLines}>
             {description}
           </BaseText>
-          {shouldShowButton && showMore && (
+          {shouldShowButton && (
             <Pressable
               onPress={toggleShowMore}
               hitSlop={{ top: 14, bottom: 14, left: 12, right: 12 }}
               style={({ pressed }) => [styles.linkTouchable, pressed && styles.pressedOpacity]}
             >
-              <Text style={[styles.lessLink, showStyle]}>{SHOW_LESS_LABEL}</Text>
+              <Text style={[styles.lessLink, showStyle]}>
+                {showMore ? SHOW_LESS_LABEL : 'more'}
+              </Text>
             </Pressable>
           )}
         </View>

@@ -5,7 +5,7 @@ import { commonFontStyle, hp, wp, SCREEN_WIDTH } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { colors } from '../../theme/colors';
 import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
-import ExpandableText from '../common/ExpandableText';
+import ReadMoreText from '../common/ReadMoreText';
 import CustomImage from '../common/CustomImage';
 import { SCREENS } from '../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
@@ -186,15 +186,10 @@ const FeedCard: FC<card> = ({
         )}
       </TouchableOpacity>
 
-      <ExpandableText
-        maxLines={3}
-        descriptionStyle={styles.description}
-        description={item?.description || 'N/A'}
-        onShowLess={() => {
-          if (onScrollToTop) {
-            onScrollToTop();
-          }
-        }}
+      <ReadMoreText
+        text={item?.description || 'N/A'}
+        numberOfLines={3}
+        containerStyle={styles.descriptionContainer}
       />
 
       <Modal
@@ -230,11 +225,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     overflow: 'hidden',
   },
-  description: {
-    // lineHeight: hp(20),
+  descriptionContainer: {
     paddingVertical: hp(15),
     paddingHorizontal: wp(14),
-    ...commonFontStyle(400, 16, colors._6A6A6A),
   },
   card: {
     backgroundColor: '#F4F3F3',

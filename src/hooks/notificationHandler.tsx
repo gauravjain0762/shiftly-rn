@@ -95,6 +95,30 @@ const getFirebaseToken = async (dispatch: any) => {
   }
 };
 
+//
+// 🎫 Ensure FCM Token - fetches token directly if missing, dispatches to Redux and returns it
+//
+export const ensureFcmToken = async (dispatch: any, existingToken?: string | null): Promise<string> => {
+  if (existingToken) return existingToken;
+  try {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    if (enabled) {
+      await messaging().registerDeviceForRemoteMessages();
+      const token = await messaging().getToken();
+      if (token) {
+        dispatch(setFcmToken(token));
+        return token;
+      }
+    }
+  } catch (e) {
+    console.log('🔔 [FCM] ensureFcmToken error:', e);
+  }
+  return '';
+};
+
 // 📩 Foreground Messages
 export const onMessage = () =>
   messaging().onMessage(async (remoteMessage: any) => {

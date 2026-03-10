@@ -98,21 +98,38 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
     let newYear = selectedYear;
     const currentYear = new Date().getFullYear();
 
+    const currentMonthIndex = new Date().getMonth();
+
     if (openPicker === 'Month') {
       newMonth = item as string;
+
+      // Block future months for both Start Date and End Date when year is current year
+      if (
+        newYear &&
+        Number(newYear) === currentYear &&
+        months.indexOf(newMonth) > currentMonthIndex
+      ) {
+        errorToast(`${label} cannot be ahead of current month`);
+        return;
+      }
+
       setSelectedMonth(newMonth);
     } else if (openPicker === 'Year') {
       newYear = item.toString();
       setSelectedYear(newYear);
 
-      // ✅ Validation: Prevent selecting future years
-      if (Number(newYear) > currentYear) {
-        errorToast('Cannot select future years');
-        return;
+      // If switching to current year and existing month is in the future, clear the month
+      if (
+        Number(newYear) === currentYear &&
+        selectedMonth &&
+        months.indexOf(selectedMonth) > currentMonthIndex
+      ) {
+        setSelectedMonth('');
+        newMonth = '';
       }
     }
 
-    // ✅ Validation for End Date
+    // ✅ Validation for End Date: cannot be earlier than Start Date
     if (type === 'Experience' || type === 'Education') {
       if (label === 'End Date') {
         const startMonth =
@@ -124,26 +141,20 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
             ? dateValue?.jobStart_year
             : dateValue?.startDate_year;
 
-        if (startYear && newYear) {
+        if (startYear && newYear && newMonth) {
           const start = new Date(
             Number(startYear),
             months.indexOf(startMonth || 'January'),
           );
           const end = new Date(
             Number(newYear),
-            months.indexOf(newMonth || 'January'),
+            months.indexOf(newMonth),
           );
 
           if (end < start) {
             errorToast('End Date cannot be earlier than Start Date');
             return;
           }
-        }
-      } else if (label === 'Start Date') {
-        // ✅ Validation: Prevent selecting future years for Start Date
-        if (newYear && Number(newYear) > currentYear) {
-          errorToast('Cannot select future years');
-          return;
         }
       }
     }
@@ -183,30 +194,43 @@ const CustomDatePicker = ({label, onChange, dateValue, type, required}: DateProp
     return filteredYears;
   };
 
-  // ✅ Filter months for End Date in the same year as start date
+  // ✅ Filter months: never allow future months; for End Date also respect start month if same year
   const getFilteredMonths = () => {
-    if (
-      label === 'End Date' &&
-      (type === 'Education' || type === 'Experience')
-    ) {
-      const startMonth =
-        type === 'Experience'
-          ? dateValue?.jobStart_month
-          : dateValue?.startDate_month;
-      const startYear =
-        type === 'Experience'
-          ? dateValue?.jobStart_year
-          : dateValue?.startDate_year;
+    const currentYear = new Date().getFullYear();
+    const currentMonthIndex = new Date().getMonth(); // 0-based (Jan=0, Mar=2)
 
-      // If end year is same as start year, filter months
-      if (
-        startYear &&
-        selectedYear &&
-        Number(selectedYear) === Number(startYear) &&
-        startMonth
-      ) {
-        const startMonthIndex = months.indexOf(startMonth);
-        return months.slice(startMonthIndex);
+    if (type === 'Education' || type === 'Experience') {
+      // Cap upper bound at current month when selected year is the current year
+      const endIndex =
+        selectedYear && Number(selectedYear) === currentYear
+          ? currentMonthIndex
+          : 11;
+
+      if (label === 'Start Date') {
+        return months.slice(0, endIndex + 1);
+      }
+
+      if (label === 'End Date') {
+        const startMonth =
+          type === 'Experience'
+            ? dateValue?.jobStart_month
+            : dateValue?.startDate_month;
+        const startYear =
+          type === 'Experience'
+            ? dateValue?.jobStart_year
+            : dateValue?.startDate_year;
+
+        // Lower bound: if end year equals start year AND start month is within valid range,
+        // start from start month; otherwise start from January
+        let startIndex = 0;
+        if (startYear && selectedYear && Number(selectedYear) === Number(startYear) && startMonth) {
+          const sIdx = months.indexOf(startMonth);
+          if (sIdx <= endIndex) {
+            startIndex = sIdx;
+          }
+        }
+
+        return months.slice(startIndex, endIndex + 1);
       }
     }
     return months;
