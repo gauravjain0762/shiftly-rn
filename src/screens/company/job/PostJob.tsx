@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -62,6 +63,7 @@ import {
   useGetCompanyOtherRequirementsQuery,
   useGetDepartmentsQuery,
   useGetEssentialBenefitsQuery,
+  useGetJobDropdownDataQuery,
   useGetSkillsQuery,
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
@@ -105,7 +107,7 @@ const startDateData = [
   { label: 'Next Month', value: 'Next Month' },
 ];
 
-const numberOfPositionsData = [
+const DEFAULT_POSITIONS = [
   { label: '1', value: '1' },
   { label: '2', value: '2' },
   { label: '3', value: '3' },
@@ -113,7 +115,7 @@ const numberOfPositionsData = [
   { label: '5+', value: '5+' },
 ];
 
-const salaryRangeData = [
+const DEFAULT_SALARY_RANGE = [
   { label: '2,000 - 5,000', value: '2,000 - 5,000' },
   { label: '5,000 - 10,000', value: '5,000 - 10,000' },
   { label: '10,000 - 15,000', value: '10,000 - 15,000' },
@@ -121,7 +123,7 @@ const salaryRangeData = [
   { label: '20,000+', value: '20,000+' },
 ];
 
-const currencyData = [
+const DEFAULT_CURRENCIES = [
   { label: 'AED', value: 'AED' },
   { label: 'USD', value: 'USD' },
   { label: 'EUR', value: 'EUR' },
@@ -151,6 +153,7 @@ const PostJob = () => {
   const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
 
+  const { data: jobDropdownData } = useGetJobDropdownDataQuery();
   const { data: educationDataVals } = useGetCompanyEducationsQuery({});
   const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
   const { data: certificationDataVals } = useGetCompanyCertificationsQuery({});
@@ -176,6 +179,40 @@ const PostJob = () => {
   const otherRequirementsData = useMemo(() => {
     return otherRequirementsDataVals?.data?.otherRequirements?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
   }, [otherRequirementsDataVals]);
+
+  const numberOfPositionsData = useMemo(() => {
+    const list = jobDropdownData?.data?.no_positions;
+    if (Array.isArray(list) && list.length > 0) {
+      return list.map((n: number) => ({ label: String(n), value: String(n) }));
+    }
+    return DEFAULT_POSITIONS;
+  }, [jobDropdownData?.data?.no_positions]);
+
+  const currencyData = useMemo(() => {
+    const list = jobDropdownData?.data?.currencies;
+    if (Array.isArray(list) && list.length > 0) {
+      return list.map((c: string) => ({ label: c, value: c }));
+    }
+    return DEFAULT_CURRENCIES;
+  }, [jobDropdownData?.data?.currencies]);
+
+  const salaryRangeData = useMemo(() => {
+    const range = jobDropdownData?.data?.salary_range;
+    if (range && typeof range.from === 'number' && typeof range.to === 'number') {
+      const from = range.from;
+      const to = range.to;
+      const step = Math.max(1, Math.floor((to - from) / 10)) || 1000;
+      const options: { label: string; value: string }[] = [];
+      for (let low = from; low < to; low += step) {
+        const high = Math.min(low + step, to);
+        const labelStr = `${low.toLocaleString()} - ${high.toLocaleString()}`;
+        options.push({ label: labelStr, value: `${low} - ${high}` });
+      }
+      options.push({ label: `${to.toLocaleString()}+`, value: `${to}+` });
+      return options;
+    }
+    return DEFAULT_SALARY_RANGE;
+  }, [jobDropdownData?.data?.salary_range]);
 
   const {
     title,
@@ -222,6 +259,17 @@ const PostJob = () => {
   const facilities = facilitiesData?.data?.benefits;
   const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
+  const [skillSearch, setSkillSearch] = useState('');
+  const filteredSkills = useMemo(() => {
+    const q = skillSearch.trim().toLowerCase();
+    const list = Array.isArray(skills) ? skills : [];
+    if (!q) return list;
+    return list.filter((s: any) =>
+      String(s?.title ?? '')
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [skills, skillSearch]);
   const { data: departmentsData } = useGetDepartmentsQuery({});
   const departments = departmentsData?.data?.departments as any[];
   const steps = useAppSelector((state: any) => state.company.coPostJobSteps);
@@ -832,7 +880,29 @@ const PostJob = () => {
                 {t('Add Job Skills')}
               </Text>
 
-              {/* Selected skills - scrollable if needed */}
+              {/* Search at fixed position under label */}
+              <View style={styles.skillSearchContainer}>
+                <TextInput
+                  value={skillSearch}
+                  onChangeText={setSkillSearch}
+                  placeholder={t('Search skills')}
+                  placeholderTextColor={colors._7B7878}
+                  style={styles.skillSearchInput}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  returnKeyType="search"
+                />
+                {!!skillSearch && (
+                  <Pressable
+                    onPress={() => setSkillSearch('')}
+                    hitSlop={10}
+                    style={styles.skillSearchClear}>
+                    <Text style={styles.skillSearchClearText}>×</Text>
+                  </Pressable>
+                )}
+              </View>
+
+              {/* Selected skills - scrollable if needed (below search so it never pushes search bar) */}
               <ScrollView
                 style={styles.selectedSkillsScrollContainer}
                 showsVerticalScrollIndicator={false}
@@ -864,7 +934,8 @@ const PostJob = () => {
                 showsVerticalScrollIndicator={true}
                 nestedScrollEnabled={true}>
                 <View style={styles.skillsWrapper}>
-                  {skills?.map((item, index) => {
+                  {filteredSkills.map((item, index) => {
+                    const selected = jobSkills.includes(item.title);
                     return (
                       <Pressable
                         key={index}
@@ -874,11 +945,13 @@ const PostJob = () => {
                         }}
                         style={[
                           styles.skillOption,
-                          jobSkills.includes(item.title) && {
-                            backgroundColor: colors._0B3970,
-                          },
+                          selected && styles.skillOptionSelected,
                         ]}>
-                        <Text style={styles.skillOptionText}>
+                        <Text
+                          style={[
+                            styles.skillOptionText,
+                            selected && styles.skillOptionTextSelected,
+                          ]}>
                           {item.title}
                         </Text>
                       </Pressable>
@@ -2117,7 +2190,7 @@ const styles = StyleSheet.create({
   },
   // NEW: Scrollable selected skills container
   selectedSkillsScrollContainer: {
-    marginTop: hp(20),
+    marginTop: hp(10),
   },
   checkbox: {
     height: wp(24),
@@ -2393,25 +2466,22 @@ const styles = StyleSheet.create({
     ...commonFontStyle(500, 12, colors._061F3D),
   },
   skillOption: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors._061F3D,
-    borderRadius: hp(20),
-    padding: hp(10),
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: wp(8),
-    marginBottom: hp(8),
-    paddingHorizontal: wp(15),
-    maxWidth: wp(280),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
+    paddingHorizontal: wp(14),
+    paddingVertical: hp(8),
+    borderWidth: 1,
+    borderRadius: 20,
+    borderColor: colors._1F1F1F,
+    backgroundColor: colors._F7F7F7,
   },
   skillOptionText: {
-    ...commonFontStyle(400, 15, colors.white),
-    textAlign: 'center',
+    ...commonFontStyle(400, 14, colors.black),
+  },
+  skillOptionSelected: {
+    backgroundColor: colors._1F1F1F,
+    borderColor: colors._1F1F1F,
+  },
+  skillOptionTextSelected: {
+    color: colors.white,
   },
   selectedRequirementsContainer: {
     flexDirection: 'row',
@@ -2458,17 +2528,48 @@ const styles = StyleSheet.create({
   },
   bottomUnderline: {
     width: '100%',
-    height: hp(1.5),
+    height: hp(1),
     backgroundColor: colors._7B7878,
-    marginTop: hp(10),
+    marginTop: hp(6),
   },
   skillsScrollView: {
-    marginTop: hp(25),
-    marginBottom: hp(10),
+    marginTop: hp(12),
+    marginBottom: hp(4),
+  },
+  skillSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: hp(46),
+    borderWidth: 1.5,
+    borderRadius: hp(18),
+    borderColor: '#225797',
+    paddingHorizontal: wp(14),
+    marginTop: hp(14),
+    backgroundColor: colors.white,
+  },
+  skillSearchInput: {
+    flex: 1,
+    height: '100%',
+    ...commonFontStyle(400, 16, colors._050505),
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+  },
+  skillSearchClear: {
+    width: wp(28),
+    height: wp(28),
+    borderRadius: wp(14),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EEF2F7',
+  },
+  skillSearchClearText: {
+    ...commonFontStyle(600, 18, colors._0B3970),
+    marginTop: -2,
   },
   skillsWrapper: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: wp(8),
   },
   autocompleteContainer: {
     position: 'relative',

@@ -569,8 +569,17 @@ const SuggestedEmployeeScreen = () => {
                 </View>
               )}
               <View style={styles.shortlistedInfo}>
-                <Text style={styles.shortlistedEmployeeName}>{user?.name || 'N/A'}</Text>
-                <Text style={styles.shortlistedEmployeeRole}>{user?.responsibility || user?.job_title || 'N/A'}</Text>
+                <Text style={styles.shortlistedEmployeeName}>
+                  {user?.name || 'N/A'}
+                </Text>
+                {!!user?.desired_job_title && (
+                  <Text style={styles.shortlistedEmployeeRole}>
+                    {user.desired_job_title}
+                  </Text>
+                )}
+                <Text style={styles.shortlistedEmployeeRole}>
+                  {user?.responsibility || user?.job_title || (!user?.desired_job_title ? 'N/A' : '')}
+                </Text>
               </View>
             </TouchableOpacity>
 
@@ -720,9 +729,14 @@ const SuggestedEmployeeScreen = () => {
           <Text style={styles.employeeName}>
             {item?.name || 'N/A'}
           </Text>
-          {/* <Text style={styles.employeeRole}>
-            {item?.responsibility || item?.job_title || 'N/A'}
-          </Text> */}
+          {!!item?.desired_job_title && (
+            <Text style={styles.employeeRole}>
+              {item.desired_job_title}
+            </Text>
+          )}
+          <Text style={styles.employeeRole}>
+            {item?.responsibility || item?.job_title || (!item?.desired_job_title ? 'N/A' : '')}
+          </Text>
           <Text style={styles.employeeExperience}>
             {`${experience || 0}`}
           </Text>
@@ -1120,8 +1134,13 @@ const SuggestedEmployeeScreen = () => {
                                 <Text style={styles.employeeName}>
                                   {user?.name || 'N/A'}
                                 </Text>
+                                {!!user?.desired_job_title && (
+                                  <Text style={styles.employeeRole}>
+                                    {user.desired_job_title}
+                                  </Text>
+                                )}
                                 <Text style={styles.employeeRole}>
-                                  {user?.responsibility || user?.job_title || 'N/A'}
+                                  {user?.responsibility || user?.job_title || (!user?.desired_job_title ? 'N/A' : '')}
                                 </Text>
                                 <Text style={styles.employeeExperience}>
                                   {`${experience || 0}`}

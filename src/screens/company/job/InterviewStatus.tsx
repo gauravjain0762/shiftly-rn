@@ -69,7 +69,11 @@ const InterviewStatus = () => {
     };
 
     const candidateName = candidateData?.name || inviteData?.user_id?.name || 'N/A';
-    const candidateRole = candidateData?.responsibility || inviteData?.user_id?.responsibility || 'N/A';
+    const desiredJobTitle = candidateData?.desired_job_title || inviteData?.user_id?.desired_job_title || '';
+    const candidateRole =
+        candidateData?.responsibility ||
+        inviteData?.user_id?.responsibility ||
+        (!desiredJobTitle ? 'N/A' : '');
     const candidateImg = candidateData?.picture || inviteData?.user_id?.picture;
 
     const rawStatus = inviteData?.status || 'Pending';
@@ -141,6 +145,9 @@ const InterviewStatus = () => {
                         )}
                         <View style={styles.candidateInfo}>
                             <Text style={styles.candidateName}>{candidateName}</Text>
+                            {!!desiredJobTitle && (
+                                <Text style={styles.candidateDesiredTitle}>{desiredJobTitle}</Text>
+                            )}
                             <Text style={styles.candidateRole}>{candidateRole}</Text>
                         </View>
                         <View style={styles.statusCol}>
@@ -346,6 +353,10 @@ const styles = StyleSheet.create({
     },
     candidateName: {
         ...commonFontStyle(600, 16, colors._0B3970),
+    },
+    candidateDesiredTitle: {
+        ...commonFontStyle(500, 14, colors._4A4A4A),
+        marginTop: hp(2),
     },
     candidateRole: {
         ...commonFontStyle(400, 14, colors.black),

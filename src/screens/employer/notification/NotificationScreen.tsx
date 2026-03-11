@@ -92,14 +92,16 @@ const NotificationScreen = () => {
             containerStyle={styles.header}
             RightIcon={
               allNotifications.length > 0 ? (
-                <TouchableOpacity
-                  onPress={handleClearAll}
-                  disabled={isClearing}
-                  hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                  <BaseText style={styles.clearAllText}>
-                    {isClearing ? 'clearing...' : 'clear all'}
-                  </BaseText>
-                </TouchableOpacity>
+                <View style={{width: wp(60)}}>
+                  <TouchableOpacity
+                    onPress={handleClearAll}
+                    disabled={isClearing}
+                    hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                    <BaseText style={styles.clearAllText} >
+                      {isClearing ? 'clearing...' : 'clear all'}
+                    </BaseText>
+                  </TouchableOpacity>
+                </View>
               ) : (
                 <View style={{width: wp(60)}} />
               )
@@ -188,5 +190,6 @@ const styles = StyleSheet.create({
   },
   clearAllText: {
     ...commonFontStyle(500, 15, colors._0B3970),
+    flexShrink: 0,
   },
 });

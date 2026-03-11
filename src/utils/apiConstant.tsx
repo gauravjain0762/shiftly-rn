@@ -38,6 +38,7 @@ export const API = {
   editCompanyJob: '/company/editJob',
   closeCompanyJob: '/company/closeJob',
   getEssentialBenefits: '/company/getEssentialBenefits',
+  getJobDropdownData: '/company/getJobDropdownData',
 
   // UserDetails
   getCompanyProfile: '/company/getProfile',

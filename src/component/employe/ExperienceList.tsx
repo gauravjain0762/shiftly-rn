@@ -32,7 +32,6 @@ export const isEmptyExperience = (exp: ExperienceItem) => {
   return (
     !exp?.company ||
     !exp?.title ||
-    !exp?.preferred_position ||
     !exp?.country ||
     !exp?.department ||
     !exp?.jobStart_month ||
@@ -202,7 +201,6 @@ const ExperienceList: FC<any> = ({
           label={'End Date'}
           required={!experienceListEdit?.still_working}
           dateValue={experienceListEdit}
-          disabled={experienceListEdit?.still_working}
           onChange={(date: any) => {
             if (!experienceListEdit?.still_working) {
               setExperienceListEdit({

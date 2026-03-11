@@ -1061,6 +1061,13 @@ export const dashboardApi = createApi({
       }),
       providesTags: ['GetEssentialBenefits'],
     }),
+    getJobDropdownData: builder.query<any, void>({
+      query: () => ({
+        url: API.getJobDropdownData,
+        method: HTTP_METHOD.GET,
+        skipLoader: true,
+      }),
+    }),
   }),
 });
 
@@ -1131,6 +1138,7 @@ export const {
   useLazyGetCompanyChatsQuery,
   useCloseCompanyJobMutation,
   useGetEssentialBenefitsQuery,
+  useGetJobDropdownDataQuery,
   useGetEducationsQuery,
   useGetExperiencesQuery,
   useGetDropdownDataQuery,

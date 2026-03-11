@@ -70,6 +70,14 @@ const EditAccountScreen = () => {
 
   useEffect(() => {
     if (userInfo) {
+      const rawCode = userInfo?.phone_code;
+      const codeStr =
+        rawCode != null && rawCode !== '' ? String(rawCode).trim() : '';
+      const normalizedPhoneCode = codeStr
+        ? codeStr.startsWith('+')
+          ? codeStr
+          : `+${codeStr}`
+        : '';
       setFormData({
         picture: userInfo?.picture || '',
         name: userInfo?.name || '',
@@ -78,7 +86,7 @@ const EditAccountScreen = () => {
         about: userInfo?.about || '',
         years_of_experience: userInfo?.years_of_experience || '',
         phone: (userInfo?.phone || '').replace(/\s/g, ''),
-        phone_code: userInfo?.phone_code || '',
+        phone_code: normalizedPhoneCode,
         email: userInfo?.email || '',
       });
     }
@@ -150,7 +158,6 @@ const EditAccountScreen = () => {
           enableOnAndroid
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}>
-          {/* Header */}
           <View style={styles.header}>
             <Pressable onPress={() => goBack()}>
               <Image source={IMAGES.backArrow} style={styles.backIcon} />
@@ -159,7 +166,6 @@ const EditAccountScreen = () => {
             <View style={{ width: wp(24) }} />
           </View>
 
-          {/* Profile Section */}
           <View style={styles.container}>
             <View style={styles.avatarWrapper}>
               <TouchableOpacity
@@ -201,35 +207,8 @@ const EditAccountScreen = () => {
               containerStyle={styles.inputContainer}
             />
 
-            <View style={styles.experienceDropdownField}>
-              <Text style={styles.experienceDropdownLabel}>Years of Experience</Text>
-              <CustomDropdown
-                data={experienceOptionsData}
-                labelField="label"
-                valueField="value"
-                value={
-                  experienceOptionsData.find(
-                    (opt: any) =>
-                      opt.label === formData?.years_of_experience ||
-                      opt.value === formData?.years_of_experience,
-                  )?.value
-                }
-                onChange={(e: any) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    years_of_experience: e?.label ?? '',
-                  }));
-                }}
-                dropdownStyle={styles.experienceDropdown}
-                renderRightIcon={IMAGES.ic_down}
-                RightIconStyle={styles.experienceDropdownRightIcon}
-                selectedTextStyle={styles.experienceDropdownSelectedText}
-                placeholder="Select one"
-              />
-            </View>
           </View>
 
-          {/* Details Section */}
           <View style={styles.detailsContainer}>
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Nationality</Text>
@@ -260,7 +239,6 @@ const EditAccountScreen = () => {
               </View>
             </View>
 
-            {/* Phone - FIXED STYLING */}
             <View style={styles.fieldContainer}>
               <Text style={styles.fieldLabel}>Phone</Text>
               <View style={styles.phoneContainer}>
