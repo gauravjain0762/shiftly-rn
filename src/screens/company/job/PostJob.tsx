@@ -873,41 +873,51 @@ const PostJob = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Fixed container with flex layout */}
+            {/* Fixed container with scrollable content + bottom button */}
             <View style={styles.skillsStepContainer}>
-              {/* Label */}
-              <Text style={styles.inputLabelWithMargin}>
-                {t('Add Job Skills')}
-              </Text>
-
-              {/* Search at fixed position under label */}
-              <View style={styles.skillSearchContainer}>
-                <TextInput
-                  value={skillSearch}
-                  onChangeText={setSkillSearch}
-                  placeholder={t('Search skills')}
-                  placeholderTextColor={colors._7B7878}
-                  style={styles.skillSearchInput}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  returnKeyType="search"
-                />
-                {!!skillSearch && (
-                  <Pressable
-                    onPress={() => setSkillSearch('')}
-                    hitSlop={10}
-                    style={styles.skillSearchClear}>
-                    <Text style={styles.skillSearchClearText}>×</Text>
-                  </Pressable>
-                )}
-              </View>
-
-              {/* Selected skills - scrollable if needed (below search so it never pushes search bar) */}
               <ScrollView
-                style={styles.selectedSkillsScrollContainer}
-                showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}>
-                <View style={styles.selectedSkillsContainer}>
+                style={styles.skillsContentScroll}
+                contentContainerStyle={styles.skillsContentScrollContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}>
+                {/* Label */}
+                <Text style={styles.inputLabelWithMargin}>
+                  {t('Add Job Skills')}
+                </Text>
+
+                {/* Search at fixed position under label */}
+                <View style={styles.skillSearchContainer}>
+                  <TextInput
+                    value={skillSearch}
+                    onChangeText={setSkillSearch}
+                    placeholder={t('Search skills')}
+                    placeholderTextColor={colors._7B7878}
+                    style={styles.skillSearchInput}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    returnKeyType="search"
+                  />
+                  {!!skillSearch && (
+                    <Pressable
+                      onPress={() => setSkillSearch('')}
+                      hitSlop={10}
+                      style={styles.skillSearchClear}>
+                      <Text style={styles.skillSearchClearText}>×</Text>
+                    </Pressable>
+                  )}
+                </View>
+
+              {/* Selected skills (fixed height only when there are chips) */}
+              <View
+                style={[
+                  styles.selectedSkillsContainer,
+                  jobSkills.length > 0 && styles.selectedSkillsContainerFixed,
+                ]}>
+                <ScrollView
+                  style={styles.selectedSkillsScroll}
+                  contentContainerStyle={styles.selectedSkillsScrollContent}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}>
                   {jobSkills.length === 0 ? (
                     <Text style={styles.placeholderText}>
                       {t('Select job skills')}
@@ -924,43 +934,40 @@ const PostJob = () => {
                       </View>
                     ))
                   )}
-                </View>
-                <View style={styles.bottomUnderline} />
-              </ScrollView>
+                </ScrollView>
+              </View>
 
-              <ScrollView
-                style={styles.skillsScrollView}
-                contentContainerStyle={{ flexGrow: 0 }}
-                showsVerticalScrollIndicator={true}
-                nestedScrollEnabled={true}>
-                <View style={styles.skillsWrapper}>
-                  {filteredSkills.map((item, index) => {
-                    const selected = jobSkills.includes(item.title);
-                    return (
-                      <Pressable
-                        key={index}
-                        onPress={() => {
-                          toggleSkillId(item._id);
-                          handleSkillSelection(item.title);
-                        }}
-                        style={[
-                          styles.skillOption,
-                          selected && styles.skillOptionSelected,
-                        ]}>
-                        <Text
+                {/* All skills list */}
+                <View style={styles.skillsScrollView}>
+                  <View style={styles.skillsWrapper}>
+                    {filteredSkills.map((item, index) => {
+                      const selected = jobSkills.includes(item.title);
+                      return (
+                        <Pressable
+                          key={index}
+                          onPress={() => {
+                            toggleSkillId(item._id);
+                            handleSkillSelection(item.title);
+                          }}
                           style={[
-                            styles.skillOptionText,
-                            selected && styles.skillOptionTextSelected,
+                            styles.skillOption,
+                            selected && styles.skillOptionSelected,
                           ]}>
-                          {item.title}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
+                          <Text
+                            style={[
+                              styles.skillOptionText,
+                              selected && styles.skillOptionTextSelected,
+                            ]}>
+                            {item.title}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
                 </View>
               </ScrollView>
 
-              <View style={{  }}>
+              <View>
                 <GradientButton
                   style={styles.btn}
                   type="Company"
@@ -996,7 +1003,6 @@ const PostJob = () => {
                 contentContainerStyle={{ paddingBottom: hp(24), flexGrow: 0 }}
                 showsVerticalScrollIndicator={false}>
 
-                {/* Education Dropdown (Multi-select) */}
                 <View style={[styles.field, { zIndex: 104 }]}>
                   <CustomDropdownMulti
                     label={t('Education')}
@@ -1128,7 +1134,6 @@ const PostJob = () => {
                   )}
                 </View>
 
-                {/* Languages Dropdown (Multi-select) with proficiency */}
                 <View style={[styles.field, styles.languagesFieldCompact, { zIndex: 101 }]}>
                   <View style={styles.languageLabelRow}>
                     <Text style={[commonFontStyle(400, 18, colors._0B3970), { marginTop: 0, marginBottom: hp(8) }]}>
@@ -2183,14 +2188,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  // NEW: Container for step 2 with flex layout
   skillsStepContainer: {
     flex: 1,
     paddingHorizontal: wp(30),
+    paddingTop: hp(8),
   },
-  // NEW: Scrollable selected skills container
-  selectedSkillsScrollContainer: {
-    marginTop: hp(10),
+  skillsContentScroll: {
+    flex: 1,
+  },
+  skillsContentScrollContent: {
+    paddingBottom: hp(20),
   },
   checkbox: {
     height: wp(24),
@@ -2422,10 +2429,19 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 19, colors._050505),
   },
   selectedSkillsContainer: {
+    marginTop: hp(6),
+  },
+  selectedSkillsContainerFixed: {
+    height: hp(140),
+  },
+  selectedSkillsScroll: {
+    flex: 1,
+  },
+  selectedSkillsScrollContent: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: wp(8),
-    paddingBottom: hp(10),
+    paddingBottom: hp(4),
   },
   skillTag: {
     flexDirection: 'row',
@@ -2526,15 +2542,8 @@ const styles = StyleSheet.create({
   placeholderText: {
     ...commonFontStyle(400, 22, colors._7B7878),
   },
-  bottomUnderline: {
-    width: '100%',
-    height: hp(1),
-    backgroundColor: colors._7B7878,
-    marginTop: hp(6),
-  },
   skillsScrollView: {
-    marginTop: hp(12),
-    marginBottom: hp(4),
+    marginTop: hp(10),
   },
   skillSearchContainer: {
     flexDirection: 'row',
@@ -2608,39 +2617,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   languagesFieldCompact: {
-    // Small top margin so there's a little space
-    // between Certifications dropdown and Languages label
     marginTop: hp(4),
     gap: 0,
   },
   languageLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: wp(8),
   },
   languageProficiencyList: {
     marginTop: hp(10),
     gap: hp(10),
-  },
-  languageProficiencyChip: {
-    borderWidth: 1,
-    borderColor: '#E0D7C8',
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    paddingVertical: hp(10),
-    paddingHorizontal: wp(12),
-    flexDirection: 'column',
-    gap: hp(8),
-  },
-  languageProficiencyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  proficiencyDotsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp(12),
   },
   proficiencyDotWrapper: {
     justifyContent: 'center',
@@ -2716,8 +2702,8 @@ const styles = StyleSheet.create({
   },
   tooltipIcon: {
     marginTop: hp(0),
+    marginBottom: hp(8) 
   },
-
   textAreaInput: {
     flex: 1,
     textAlignVertical: 'top',

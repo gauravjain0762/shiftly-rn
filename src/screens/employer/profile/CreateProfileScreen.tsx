@@ -397,10 +397,23 @@ const CreateProfileScreen = () => {
 
   const handleAddEducation = async () => {
     try {
+      const degreeMap: Record<string, string> =
+        Array.isArray(educationData)
+          ? educationData.reduce((acc: any, item: any) => {
+              if (item?._id) {
+                acc[item._id] = item.title || '';
+              }
+              return acc;
+            }, {})
+          : {};
+
       for (const edu of educationList) {
         const payload = {
           education_id: edu._id || '',
-          degree: edu.degree,
+          degree:
+            typeof edu.degree === 'string'
+              ? degreeMap[edu.degree] || edu.degree
+              : edu.degree,
           university: edu.university,
           country: edu.country,
           province: edu.province,

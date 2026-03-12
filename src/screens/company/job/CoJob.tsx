@@ -408,10 +408,11 @@ const styles = StyleSheet.create({
   },
   postJobButton: {
     gap: wp(10),
-    padding: hp(14),
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: wp(18),
+    paddingVertical: hp(10),
+    borderRadius: hp(100),
   },
   plusIconContainer: {
     width: wp(18),

@@ -42,6 +42,7 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import BaseText from '../../../component/common/BaseText';
+import ReadMoreText from '../../../component/common/ReadMoreText';
 import CustomImage from '../../../component/common/CustomImage';
 import Carousel from 'react-native-reanimated-carousel';
 import { navigationRef } from '../../../navigation/RootContainer';
@@ -68,6 +69,7 @@ const JobDetail = () => {
   const jobDetail = fromCompany ? companyJobDetail : employeeJobDetail;
   const isLoading = fromCompany ? isLoadingCompany : isLoadingEmployee;
   const curr_jobdetails = jobDetail?.data?.job;
+  console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;
   const shareUrl = jobDetail?.data?.share_url;
   const { userInfo } = useSelector((state: RootState) => state.auth);
@@ -455,12 +457,16 @@ ${salary}${shareUrlText}`;
 
             {/* Description */}
             <Text style={styles.sectionTitle}>Responsibilities</Text>
-            <Text style={styles.description}>
-              {curr_jobdetails?.description || 'N|A'}
-            </Text>
+            <ReadMoreText
+              text={curr_jobdetails?.description || 'N/A'}
+              numberOfLines={5}
+              fontSize={14}
+              textColor={colors._4A4A4A}
+              style={styles.description}
+            />
 
             {/* Requirements */}
-            <Text style={styles.sectionTitle}>Requirements</Text>
+            <Text style={[styles.sectionTitle, { marginTop: hp(16) }]}>Requirements</Text>
             <View style={styles.bulletList}>
               {(() => {
                 const requirementItems: string[] = [];
@@ -521,13 +527,12 @@ ${salary}${shareUrlText}`;
               })()}
             </View>
 
-            {/* Offer */}
             <Text style={styles.sectionTitle}>What we offer</Text>
             <View style={styles.bulletList}>
               {curr_jobdetails?.essential_benefits?.length > 0 ? (
                 curr_jobdetails?.essential_benefits?.map((item: any, index: number) => (
                   <View key={index}>
-                    <BaseText style={styles.description}>{`• ${item?.title}`}</BaseText>
+                    <BaseText style={styles.description}>{`• ${item?.title.trim()}`}</BaseText>
                   </View>
                 ))
               ) : (
@@ -535,6 +540,72 @@ ${salary}${shareUrlText}`;
               )}
             </View>
 
+            {curr_jobdetails?.educations?.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Education</Text>
+                <View style={styles.bulletList}>
+                  {curr_jobdetails.educations.map((edu: any, index: number) => (
+                    <View key={index}>
+                      <BaseText style={styles.description}>{`• ${edu?.title}`}</BaseText>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {curr_jobdetails?.experiences?.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Experience</Text>
+                <View style={styles.bulletList}>
+                  {curr_jobdetails.experiences.map((exp: any, index: number) => (
+                    <View key={index}>
+                      <BaseText style={styles.description}>{`• ${exp?.title}`}</BaseText>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {curr_jobdetails?.certifications?.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Certifications</Text>
+                <View style={styles.bulletList}>
+                  {curr_jobdetails.certifications.map((cert: any, index: number) => (
+                    <View key={index}>
+                      <BaseText style={styles.description}>{`• ${cert?.title}`}</BaseText>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {curr_jobdetails?.skills?.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Skills</Text>
+                <View style={styles.bulletList}>
+                  {curr_jobdetails.skills.map((skill: any, index: number) => (
+                    <View key={index}>
+                      <BaseText style={styles.description}>{`• ${skill?.title}`}</BaseText>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {curr_jobdetails?.languages?.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Languages</Text>
+                <View style={styles.bulletList}>
+                  {curr_jobdetails.languages.map((lang: any, index: number) => (
+                    <View key={index}>
+                      <BaseText style={styles.description}>
+                        {`• ${lang?.name || 'N/A'}${lang?.level ? ` - ${lang.level}` : ''}`}
+                      </BaseText>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
 
             <View style={styles.jobDetailsContainer}>
               <Text style={styles.sectionTitle}>{t('Job Details')}</Text>

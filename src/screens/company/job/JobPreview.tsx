@@ -30,7 +30,14 @@ import {
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
-import { useEditCompanyJobMutation, useGetCompanyLanguagesQuery } from '../../../api/dashboardApi';
+import {
+    useEditCompanyJobMutation,
+    useGetCompanyLanguagesQuery,
+    useGetCompanyEducationsQuery,
+    useGetCompanyExperiencesQuery,
+    useGetCompanyCertificationsQuery,
+    useGetCompanyOtherRequirementsQuery,
+} from '../../../api/dashboardApi';
 import { useCreateJobMutation } from '../../../api/authApi';
 import { useAppSelector } from '../../../redux/hooks';
 import { resetJobFormState, selectJobForm, setCoPostJobSteps } from '../../../features/companySlice';
@@ -46,11 +53,52 @@ const JobPreview = () => {
     const { updateJobForm } = useJobFormUpdater();
     const [createJob] = useCreateJobMutation();
     const [editJob] = useEditCompanyJobMutation();
+
     const { data: languageDataVals } = useGetCompanyLanguagesQuery({});
     const languageData = React.useMemo(
-        () => languageDataVals?.data?.languages?.map((item: any) => ({ label: item?.title, value: item?._id })) || [],
-        [languageDataVals]
+        () =>
+            languageDataVals?.data?.languages?.map((item: any) => ({
+                label: item?.title,
+                value: item?._id,
+            })) || [],
+        [languageDataVals],
     );
+
+    const { data: educationDataVals } = useGetCompanyEducationsQuery({});
+    const educationMap = React.useMemo(() => {
+        const map: Record<string, string> = {};
+        educationDataVals?.data?.educations?.forEach((item: any) => {
+            if (item?._id) map[item._id] = item.title || '';
+        });
+        return map;
+    }, [educationDataVals]);
+
+    const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
+    const experienceMap = React.useMemo(() => {
+        const map: Record<string, string> = {};
+        experienceDataVals?.data?.experiences?.forEach((item: any) => {
+            if (item?._id) map[item._id] = item.title || '';
+        });
+        return map;
+    }, [experienceDataVals]);
+
+    const { data: certificationDataVals } = useGetCompanyCertificationsQuery({});
+    const certificationMap = React.useMemo(() => {
+        const map: Record<string, string> = {};
+        certificationDataVals?.data?.certifications?.forEach((item: any) => {
+            if (item?._id) map[item._id] = item.title || '';
+        });
+        return map;
+    }, [certificationDataVals]);
+
+    const { data: otherRequirementsDataVals } = useGetCompanyOtherRequirementsQuery({});
+    const otherReqMap = React.useMemo(() => {
+        const map: Record<string, string> = {};
+        otherRequirementsDataVals?.data?.otherRequirements?.forEach((item: any) => {
+            if (item?._id) map[item._id] = item.title || '';
+        });
+        return map;
+    }, [otherRequirementsDataVals]);
 
     const {
         title,
@@ -91,6 +139,21 @@ const JobPreview = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showHiringAnimation, setShowHiringAnimation] = useState(false);
 
+    const previewLanguages = React.useMemo(
+        () =>
+            Array.isArray(languages)
+                ? languages
+                    .filter((l: any) => l && (typeof l === 'object' ? l.id : l))
+                    .map((l: any) => {
+                        const id = typeof l === 'object' ? l.id : l;
+                        const level = typeof l === 'object' ? l.level || '' : '';
+                        const name = languageData.find((opt: any) => opt.value === id)?.label ?? '';
+                        return { name, level };
+                    })
+                : [],
+        [languages, languageData],
+    );
+
     const formatSalary = () => {
         if (!salary?.value) return null;
         const [from, to] = salary.value.split('-').map((s: string) => s.trim());
@@ -112,26 +175,24 @@ const JobPreview = () => {
         return null;
     };
 
-    // Animation finish handler - called after 3.5 seconds
+    // Animation finish handler - called after a short delay (~1–1.5s)
     const handleAnimationFinish = () => {
-        setTimeout(() => {
-            const jobIdToUse = createdJobId || job_id;
-            const jobDataToUse = createdJobData;
+        const jobIdToUse = createdJobId || job_id;
+        const jobDataToUse = createdJobData;
 
-            setShowHiringAnimation(false);
-            dispatch(resetJobFormState());
-            dispatch(setCoPostJobSteps(1));
+        setShowHiringAnimation(false);
+        dispatch(resetJobFormState());
+        dispatch(setCoPostJobSteps(1));
 
-            if (jobIdToUse) {
-              navigateTo(SCREENS.SuggestedEmployee, {
-                jobId: jobIdToUse,
-                jobData: jobDataToUse,
-                fromPostJob: true,
-              });
-            } else {
-              navigationRef?.current?.goBack();
-            }
-        }, 3500);
+        if (jobIdToUse) {
+          navigateTo(SCREENS.SuggestedEmployee, {
+            jobId: jobIdToUse,
+            jobData: jobDataToUse,
+            fromPostJob: true,
+          });
+        } else {
+          navigationRef?.current?.goBack();
+        }
     };
 
     const handlePostJob = async () => {
@@ -228,7 +289,8 @@ const JobPreview = () => {
         updateJobForm({ isSuccessModalVisible: false });
         console.log('[DEBUG] Set animation true');
         setShowHiringAnimation(true);
-        // Navigation will be handled by onAnimationFinish callback
+        // Navigate after a short animation delay (~1.2s)
+        setTimeout(handleAnimationFinish, 1200);
     };
 
     const handleGoHome = () => {
@@ -349,6 +411,102 @@ const JobPreview = () => {
                     </View>
                 )}
 
+                {/* Education */}
+                {education && education.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{t('Education')}</Text>
+                        {education
+                            .filter((item: any) => item)
+                            .map((item: any, index: number) => (
+                                <View key={index} style={styles.bulletRow}>
+                                    <View style={styles.bullet} />
+                                    <Text style={styles.bulletText}>
+                                        {item?.title ||
+                                            item?.label ||
+                                            educationMap[item?._id] ||
+                                            (typeof item === 'string' ? educationMap[item] || item : '')}
+                                    </Text>
+                                </View>
+                            ))}
+                    </View>
+                )}
+
+                {/* Experience */}
+                {experience && experience.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{t('Experience')}</Text>
+                        {experience
+                            .filter((item: any) => item)
+                            .map((item: any, index: number) => (
+                                <View key={index} style={styles.bulletRow}>
+                                    <View style={styles.bullet} />
+                                    <Text style={styles.bulletText}>
+                                        {item?.title ||
+                                            item?.label ||
+                                            experienceMap[item?._id] ||
+                                            (typeof item === 'string' ? experienceMap[item] || item : '')}
+                                    </Text>
+                                </View>
+                            ))}
+                    </View>
+                )}
+
+                {/* Certifications */}
+                {certification && certification.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{t('Certifications')}</Text>
+                        {certification
+                            .filter((item: any) => item)
+                            .map((item: any, index: number) => (
+                                <View key={index} style={styles.bulletRow}>
+                                    <View style={styles.bullet} />
+                                    <Text style={styles.bulletText}>
+                                        {item?.title ||
+                                            item?.label ||
+                                            certificationMap[item?._id] ||
+                                            (typeof item === 'string' ? certificationMap[item] || item : '')}
+                                    </Text>
+                                </View>
+                            ))}
+                    </View>
+                )}
+
+                {/* Languages */}
+                {previewLanguages.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{t('Languages')}</Text>
+                        {previewLanguages.map((lang: any, index: number) => (
+                            <View key={index} style={styles.bulletRow}>
+                                <View style={styles.bullet} />
+                                <Text style={styles.bulletText}>
+                                    {lang?.name || '-'}
+                                    {lang?.level ? ` - ${lang.level}` : ''}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* Other Requirements */}
+                {other_requirements && other_requirements.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{t('Other Requirements')}</Text>
+                        {other_requirements
+                            .filter((req: any) => req && String(req).trim())
+                            .map((req: any, index: number) => (
+                                <View key={index} style={styles.bulletRow}>
+                                    <View style={styles.bullet} />
+                                    <Text style={styles.bulletText}>
+                                        {req?.title ||
+                                            req?.label ||
+                                            otherReqMap[req?._id] ||
+                                            (typeof req === 'string' ? otherReqMap[req] || req : '')}
+                                    </Text>
+                                </View>
+                            ))}
+                    </View>
+                )}
+
                 {/* Key Job Benefits */}
                 {(() => {
                     // Prefer canonical essential_benefits from API (createdJobData)
@@ -433,11 +591,10 @@ const JobPreview = () => {
                 <View style={[styles.animationContainer, StyleSheet.absoluteFillObject]}>
                     <LottieView
                         source={animation.hiring}
-                        autoPlay={true}
+                        autoPlay
                         loop={false}
                         style={styles.lottie}
                         resizeMode="contain"
-                        onAnimationFinish={handleAnimationFinish}
                     />
                 </View>
             )}

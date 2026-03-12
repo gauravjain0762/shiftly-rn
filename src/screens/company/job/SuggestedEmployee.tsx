@@ -476,9 +476,9 @@ const SuggestedEmployeeScreen = () => {
         describe: jobInfo?.description,
         job_sector: jobInfo?.department_id
           ? {
-              label: jobInfo.department_id?.title,
-              value: jobInfo.department_id?._id,
-            }
+            label: jobInfo.department_id?.title,
+            value: jobInfo.department_id?._id,
+          }
           : (typeof jobInfo?.job_sector === 'string'
             ? { label: jobInfo.job_sector, value: jobInfo.job_sector }
             : jobInfo?.job_sector),
@@ -539,14 +539,13 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const renderShortlistedEmployee = (item: any) => {
-    console.log("🔥 ~ renderShortlistedEmployee ~ item:", item)
     const user = item?.user_id || item;
-
     if (!user || (!user._id && !item.isSample)) return null;
 
-    const experience = user?.experience || user?.years_of_experience || user?.total_experience || 0;
+    const experience = user?.years_of_experience || 0;
+    console.log("🔥 ~ renderShortlistedEmployee ~ experience:", experience)
     const tracking = item?.tracking || [];
-    const languages = user?.languages?.map((l: any) => l?.name)?.filter(Boolean) || ["English", "French", "Arabic"];
+    const languages = user?.languages?.map((l: any) => l?.name)?.filter(Boolean);
 
     return (
       <View key={user._id || 'sample'} style={styles.shortlistedCard}>
@@ -590,19 +589,19 @@ const SuggestedEmployeeScreen = () => {
             </Text>
 
             {languages.length > 0 && (
-            <View style={styles.languageRow}>
-              <Image source={IMAGES.globe} style={styles.globeIcon} />
-              {languages.slice(0, 3).map(
-                (language: string, index: number, arr: string[]) => (
-                  <React.Fragment key={index}>
-                    <Text style={styles.shortlistedLanguage}>{language}</Text>
-                    {index !== arr.length - 1 && (
-                      <Text style={styles.shortlistedLanguageSeparator}> | </Text>
-                    )}
-                  </React.Fragment>
-                ),
-              )}
-            </View>
+              <View style={styles.languageRow}>
+                <Image source={IMAGES.globe} style={styles.globeIcon} />
+                {languages.slice(0, 3).map(
+                  (language: string, index: number, arr: string[]) => (
+                    <React.Fragment key={index}>
+                      <Text style={styles.shortlistedLanguage}>{language}</Text>
+                      {index !== arr.length - 1 && (
+                        <Text style={styles.shortlistedLanguageSeparator}> | </Text>
+                      )}
+                    </React.Fragment>
+                  ),
+                )}
+              </View>
             )}
 
             {item?.status === 'Interview_completed' && <View style={styles.shortlistedActions}>
@@ -882,8 +881,7 @@ const SuggestedEmployeeScreen = () => {
                   </View>
                 </View>
 
-                {/* Tabs - Only visible if coming from Job Card */}
-                {isFromJobCard && (
+                {/* Tabs */}
                   <ScrollView
                     ref={tabScrollRef}
                     horizontal
@@ -1005,7 +1003,6 @@ const SuggestedEmployeeScreen = () => {
                       </TouchableOpacity>
                     </View>
                   </ScrollView>
-                )}
 
                 {activeTab === 'suggested' ? (
                   <>

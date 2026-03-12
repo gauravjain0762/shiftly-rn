@@ -35,28 +35,28 @@ const toSingleSelectFromId = (id: string | undefined, labelFallback?: string): {
 };
 
 export const mapJobToFormState = (job: any) => {
-  // Education: API may return educations "id1,id2", education_id, education { _id }, or array
   const education = toIdArray(
     job?.educations ?? job?.education_id ?? job?.education
   );
 
-  // Experience: API may return experiences "id1,id2", experience_id, experience { _id }, or array
   const experience = toIdArray(
     job?.experiences ?? job?.experience_id ?? job?.experience
   );
 
-  // Certification: API may return certifications "id1,id2", certification_id, certification { _id }, or array
   const certification = toIdArray(
     job?.certifications ?? job?.certification_id ?? job?.certification
   );
 
-  // Languages: array of { id, level } (proficiency: Basic/Conversational/Fluent/Native)
   const rawLangs = job?.languages;
+  console.log("🔥 ~ mapJobToFormState ~ rawLangs:", rawLangs)
   let languages: { id: string; level: string }[] = [];
   if (Array.isArray(rawLangs)) {
     languages = rawLangs
       .map((v: any) => {
-        const id = typeof v === 'object' ? (v?._id ?? v?.id) : String(v);
+        const id =
+          typeof v === 'object'
+            ? (v?._id ?? v?.id ?? v?.value ?? v?.name)
+            : String(v);
         const level = typeof v === 'object' ? (v?.level ?? '') : '';
         return id ? { id: String(id), level: level || '' } : null;
       })

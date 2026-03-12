@@ -36,6 +36,7 @@ import {
   useEmployeeResetPasswordMutation,
 } from '../../../api/authApi';
 import { setForgotPasswordSteps, setUserInfo } from '../../../features/authSlice';
+import { ensureFcmToken } from '../../../hooks/notificationHandler';
 import { SCREENS } from '../../../navigation/screenNames';
 import { passwordStyles } from './EmpChangePassword';
 
@@ -121,11 +122,13 @@ const EmpForgotPassword = () => {
 
   // Update the verifyOTP function:
   const verifyOTP = async () => {
+    const resolvedFcmToken = await ensureFcmToken(dispatch as any, fcmToken);
+    const deviceTokenToSend = resolvedFcmToken || fcmToken || '';
     let data = {
       otp: otp.join(''),
       user_id: userInfo?._id,
-      deviceToken: fcmToken ?? '',
-      device_type: Platform.OS,
+      deviceToken: deviceTokenToSend,
+      deviceType: Platform.OS,
     };
     console.log(data, 'verifyOTP data');
 

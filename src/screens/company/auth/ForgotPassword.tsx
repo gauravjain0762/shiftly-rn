@@ -120,7 +120,7 @@ const ForgotPassword = () => {
       otp: otp.join(''),
       company_id: userInfo?._id,
       deviceToken: fcmToken ?? '',
-      device_type: Platform.OS,
+      deviceType: Platform.OS,
     };
     console.log(data, 'verifyOTP data');
 

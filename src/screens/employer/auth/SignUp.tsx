@@ -59,6 +59,7 @@ import CustomImage from '../../../component/common/CustomImage';
 import CountryPicker, { Country, Flag } from 'react-native-country-picker-modal';
 import CharLength from '../../../component/common/CharLength';
 import { useEmpUpdateProfileMutation, useLazyGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
+import { ensureFcmToken } from '../../../hooks/notificationHandler';
 import { useRoute } from '@react-navigation/native';
 import Tooltip from '../../../component/common/Tooltip';
 import { setProfileCompletion } from '../../../features/employeeSlice';
@@ -239,11 +240,14 @@ const SignUp = () => {
   };
 
   const handleOTPVerify = async () => {
+    const resolvedFcmToken = await ensureFcmToken(dispatch, fcmToken);
+    const deviceTokenToSend = resolvedFcmToken || fcmToken || '';
+    console.log("🔥 ~ handleOTPVerify ~ deviceTokenToSend:", deviceTokenToSend)
     const verifyData = {
       otp: otp.join(''),
       user_id: userInfo?._id,
-      deviceToken: fcmToken ?? '',
-      device_type: Platform.OS,
+      deviceToken: deviceTokenToSend,
+      deviceType: Platform.OS,
     };
     console.log(' ~ handleOTPVerify ~ verifyData:', verifyData);
     try {
@@ -259,11 +263,9 @@ const SignUp = () => {
         }, 200);
       } else {
         errorToast(response?.message);
-        // Don't reset timer on error - keep the current timer running
       }
     } catch (error) {
       console.error('Error registering user:', error);
-      // Don't reset timer on error - keep the current timer running
     }
   };
 

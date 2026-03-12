@@ -37,6 +37,7 @@ import { setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice'
 import { RootState } from '../../store';
 import CustomImage from '../../component/common/CustomImage';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ensureFcmToken } from '../../hooks/notificationHandler';
 
 const EmployeeOnboardingData = [
   {
@@ -136,15 +137,26 @@ const EmployeeWelcomeScreen = () => {
       const userInfo = await GoogleSignin.signIn();
       const { data }: any = userInfo;
       const { idToken } = data;
-      
+
+      const resolvedFcmToken = await ensureFcmToken(dispatch, fcmToken);
+      console.log(
+        '🔔 [Social Google Sign-In] fcmToken from store:',
+        fcmToken,
+        'resolved token:',
+        resolvedFcmToken,
+      );
+      const deviceTokenToSend = resolvedFcmToken || fcmToken || '';
+
       if (idToken) {
         let socialObj: any = {
           name: data.user.name,
           email: data.user.email,
-          device_type: Platform.OS,
+          deviceType: Platform.OS,
           googleId: idToken,
-          deviceToken: fcmToken ?? '',
+          deviceToken: deviceTokenToSend,
         };
+
+        console.log('🔔 [Social Google Sign-In] API params:', socialObj);
 
         updateSignupData({
           step: 4,
@@ -191,14 +203,23 @@ const EmployeeWelcomeScreen = () => {
       if (identityToken) {
         const decoded: any = jwtDecode(identityToken);
 
+        const resolvedFcmToken = await ensureFcmToken(dispatch, fcmToken);
+        console.log(
+          '🔔 [Social Apple Sign-In] fcmToken from store:',
+          fcmToken,
+          'resolved token:',
+          resolvedFcmToken,
+        );
+        const deviceTokenToSend = resolvedFcmToken || fcmToken || '';
+
         var str = decoded?.email || '';
         str = str.split('@');
         let socialObj = {
           name: fullName?.givenName || str[0],
           email: email || decoded?.email,
           appleId: appleAuthRequestResponse.user,
-          device_type: Platform.OS,
-          deviceToken: fcmToken ?? '',
+          deviceType: Platform.OS,
+          deviceToken: deviceTokenToSend,
         };
 
         updateSignupData({
