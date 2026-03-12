@@ -494,14 +494,32 @@ const CreateProfileScreen = () => {
     const formData = new FormData();
 
     const locationData = route.params?.locationData;
-    const locationValue = locationData?.city && locationData?.country
-      ? `${locationData.city}, ${locationData.country}`
-      : aboutEdit?.location || '';
+    const city =
+      locationData?.city ??
+      aboutmeandResumes?.city ??
+      userInfo?.city ??
+      (() => {
+        const loc = aboutEdit?.location || '';
+        if (!loc) return '';
+        const parts = loc.split(/\s*[,-]\s*/).map((p: string) => p.trim()).filter(Boolean);
+        return parts[0] ?? '';
+      })();
+    const country =
+      locationData?.country ??
+      aboutmeandResumes?.country ??
+      userInfo?.country ??
+      (() => {
+        const loc = aboutEdit?.location || '';
+        if (!loc) return '';
+        const parts = loc.split(/\s*[,-]\s*/).map((p: string) => p.trim()).filter(Boolean);
+        return parts.length >= 2 ? parts.slice(1).join(', ') : '';
+      })();
 
     const debugPayload: any = {
       open_for_job: !!aboutEdit?.open_for_jobs,
       about: aboutEdit?.about || '',
-      location: locationValue,
+      city,
+      country,
       skills: aboutEdit?.selectedSkills || [],
       years_of_experience: yearsOfExperienceOption?.label || null,
       languages: (aboutEdit?.selectedLanguages || []).map((l: any) => ({
@@ -524,7 +542,8 @@ const CreateProfileScreen = () => {
 
     formData.append('open_for_job', debugPayload.open_for_job ? '1' : '0');
     formData.append('about', debugPayload.about);
-    formData.append('location', debugPayload.location);
+    if (city) formData.append('city', city);
+    if (country) formData.append('country', country);
     formData.append('skills', (aboutEdit?.selectedSkills || []).join(','));
 
     if (debugPayload.years_of_experience) {

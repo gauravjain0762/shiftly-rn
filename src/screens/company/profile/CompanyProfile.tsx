@@ -99,16 +99,14 @@ const CompanyProfile = () => {
 
   const [companyInfo, setCompanyInfo] = useState<any>(null);
 
-  // ── Own company: fetch posts / jobs when the relevant tab becomes active ──
+  // ── Own company: fetch posts / jobs when the relevant tab becomes active (don't clear first so we don't flash "No Data Found") ──
   useEffect(() => {
     if (companyId) return;
     if (selectedTabIndex === 1) {
-      setOwnPosts([]);
       setOwnExtraPosts([]);
       setOwnPostsPage(1);
       fetchOwnPosts({ page: 1 });
     } else if (selectedTabIndex === 2) {
-      setOwnJobs([]);
       setOwnExtraJobs([]);
       setOwnJobsPage(1);
       fetchOwnJobs({ page: 1 });
@@ -191,7 +189,6 @@ const CompanyProfile = () => {
     if (companyData?.status && companyId) {
       const tabData = companyData?.data?.tab_data;
       const pagination = companyData?.data?.pagination;
-      // Legacy: info-tab response may include posts/jobs arrays directly
       const postsArr = Array.isArray(tabData) && selectedTabIndex === 1
         ? tabData
         : (companyData?.data?.posts ?? []);
@@ -199,7 +196,8 @@ const CompanyProfile = () => {
         ? tabData
         : (companyData?.data?.jobs ?? []);
 
-      if (postsArr.length > 0 || selectedTabIndex === 1) {
+      // Only update when we have data or current list is empty (avoid overwriting with stale tab data when switching back)
+      if (selectedTabIndex === 1 && (postsArr.length > 0 || viewedCompanyPosts.length === 0)) {
         setViewedCompanyPosts(postsArr);
         setViewedExtraPosts([]);
         setViewedPostsHasMore(
@@ -207,7 +205,7 @@ const CompanyProfile = () => {
         );
         setPostsFetched(true);
       }
-      if (jobsArr.length > 0 || selectedTabIndex === 2) {
+      if (selectedTabIndex === 2 && (jobsArr.length > 0 || viewedCompanyJobs.length === 0)) {
         setViewedCompanyJobs(jobsArr);
         setViewedExtraJobs([]);
         setViewedJobsHasMore(
@@ -216,7 +214,7 @@ const CompanyProfile = () => {
         setJobsFetched(true);
       }
     }
-  }, [companyData, companyId, selectedTabIndex]);
+  }, [companyData, companyId, selectedTabIndex, viewedCompanyPosts.length, viewedCompanyJobs.length]);
 
   useEffect(() => {
     if (companyData?.data?.company && !companyInfo) {
@@ -598,8 +596,12 @@ const CompanyProfile = () => {
 
             {selectedTabIndex === 1 && (
               <View style={{ marginTop: hp(10) }}>
-                {(isCompanyLoading || isFetchingOwnPosts) && !postsFetched && displayPosts.length === 0 ? (
-                  <ActivityIndicator size="small" color={colors._0B3970} style={{ marginTop: hp(20) }} />
+                {(isCompanyLoading || isFetchingPosts) && displayPosts.length === 0 ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={colors._0B3970}
+                    style={{ marginTop: hp(20) }}
+                  />
                 ) : displayPosts && displayPosts.length > 0 ? (
                   <>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
@@ -618,11 +620,23 @@ const CompanyProfile = () => {
                     )}
                   </>
                 ) : (
-                  <View style={styles.emptyContainer}>
-                    <Text style={[commonFontStyle(500, 16, colors._0B3970), { textAlign: 'center' }]}>
-                      No Posts Found
-                    </Text>
-                  </View>
+                  postsFetched ? (
+                    <View style={styles.emptyContainer}>
+                      <Text
+                        style={[
+                          commonFontStyle(500, 16, colors._0B3970),
+                          { textAlign: 'center' },
+                        ]}>
+                        No Posts Found
+                      </Text>
+                    </View>
+                  ) : (
+                    <ActivityIndicator
+                      size="small"
+                      color={colors._0B3970}
+                      style={{ marginTop: hp(20) }}
+                    />
+                  )
                 )}
               </View>
             )}

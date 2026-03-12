@@ -30,6 +30,13 @@ const getInitials = (name: string): string => {
     return parts[0][0].toUpperCase();
 };
 
+const stripPlusCodeFromAddress = (address: string | undefined): string => {
+    if (!address || typeof address !== 'string') return '';
+    const trimmed = address.trim();
+    const withoutPlusCode = trimmed.replace(/^\s*[A-Za-z0-9+]+\s+/i, '').trim();
+    return withoutPlusCode || trimmed;
+};
+
 const InterviewStatus = () => {
     const { t } = useTranslation();
     const route = useRoute<any>();
@@ -39,10 +46,9 @@ const InterviewStatus = () => {
 
     const jobTitle = jobData?.title || 'N/A';
     const companyName = jobData?.company_id?.company_name || 'N/A';
-    const location = jobData?.address ||
-        (jobData?.city || jobData?.country
-            ? `${jobData?.city ? jobData?.city + ', ' : ''}${jobData?.country || ''}`
-            : 'N/A');
+    const location = (jobData?.city || jobData?.country)
+        ? `${jobData?.city ? jobData.city + ' - ' : ''}${jobData?.country || ''}`.trim()
+        : stripPlusCodeFromAddress(jobData?.address || jobData?.area) || 'N/A';
     const contract = jobData?.contract_type || 'N/A';
     const renderSalary = () => {
         const from = jobData?.monthly_salary_from;

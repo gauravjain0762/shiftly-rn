@@ -105,26 +105,30 @@ const ViewCompanyProfile = () => {
         const pagination = companyData?.data?.pagination;
         if (Array.isArray(tabData)) {
             if (selectedTabIndex === 1) {
-                setCompanyPosts(tabData);
-                setExtraPosts([]);
-                const hasMore = pagination
-                    ? pagination.current_page < pagination.total_pages
-                    : tabData.length >= 10;
-                setPostsHasMore(hasMore);
-                setPostsPage(1);
-                setPostsFetched(true);
+                if (tabData.length > 0 || companyPosts.length === 0) {
+                    setCompanyPosts(tabData);
+                    setExtraPosts([]);
+                    const hasMore = pagination
+                        ? pagination.current_page < pagination.total_pages
+                        : tabData.length >= 10;
+                    setPostsHasMore(hasMore);
+                    setPostsPage(1);
+                    setPostsFetched(true);
+                }
             } else if (selectedTabIndex === 2) {
-                setCompanyJobs(tabData);
-                setExtraJobs([]);
-                const hasMore = pagination
-                    ? pagination.current_page < pagination.total_pages
-                    : tabData.length >= 10;
-                setJobsHasMore(hasMore);
-                setJobsPage(1);
-                setJobsFetched(true);
+                if (tabData.length > 0 || companyJobs.length === 0) {
+                    setCompanyJobs(tabData);
+                    setExtraJobs([]);
+                    const hasMore = pagination
+                        ? pagination.current_page < pagination.total_pages
+                        : tabData.length >= 10;
+                    setJobsHasMore(hasMore);
+                    setJobsPage(1);
+                    setJobsFetched(true);
+                }
             }
         }
-    }, [companyData, companyInfo, selectedTabIndex, dispatch]);
+    }, [companyData, companyInfo, selectedTabIndex, dispatch, companyPosts.length, companyJobs.length]);
 
     const handleLoadMorePosts = useCallback(async () => {
         if (!postsHasMore || isFetchingMore) return;
@@ -551,7 +555,7 @@ const ViewCompanyProfile = () => {
 
                         {selectedTabIndex === 1 && (
                             <View style={{ marginTop: hp(10) }}>
-                                {isCompanyLoading && !postsFetched ? (
+                                {(isCompanyLoading || isFetchingMore) && displayPosts.length === 0 ? (
                                     <PostGridSkeleton />
                                 ) : displayPosts && displayPosts.length > 0 ? (
                                     <>
@@ -581,15 +585,20 @@ const ViewCompanyProfile = () => {
                                         )}
                                     </>
                                 ) : (
-                                    <View style={styles.emptyContainer}>
-                                        <Text
-                                            style={[
-                                                commonFontStyle(500, 16, colors._0B3970),
-                                                { textAlign: 'center' },
-                                            ]}>
-                                            No Posts Found
-                                        </Text>
-                                    </View>
+                                    // Show "No Posts Found" only after initial fetch completes
+                                    postsFetched ? (
+                                        <View style={styles.emptyContainer}>
+                                            <Text
+                                                style={[
+                                                    commonFontStyle(500, 16, colors._0B3970),
+                                                    { textAlign: 'center' },
+                                                ]}>
+                                                No Posts Found
+                                            </Text>
+                                        </View>
+                                    ) : (
+                                        <PostGridSkeleton />
+                                    )
                                 )}
                             </View>
                         )}
