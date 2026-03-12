@@ -25,6 +25,7 @@ const HomeScreen = () => {
   const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
+  console.log("🔥 ~ HomeScreen ~ userInfo:", userInfo)
   console.log('🔥 HomeScreen ~ fcmToken:', fcmToken);
   const { data: profileData, refetch: refetchProfile } = useGetEmployeeProfileQuery({});
 

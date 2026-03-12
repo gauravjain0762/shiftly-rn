@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View, TouchableOpacity } from 'react-native';
 
 import BaseText from '../common/BaseText';
 import { colors } from '../../theme/colors';
@@ -7,28 +7,51 @@ import { IMAGES } from '../../assets/Images';
 import { SCREENS } from '../../navigation/screenNames';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { formatted, navigateTo } from '../../utils/commonFunction';
-import { useGetEmployeeJobDetailsQuery } from '../../api/dashboardApi';
+import { useGetEmployeeJobDetailsQuery, useMarkReadNotificationsMutation } from '../../api/dashboardApi';
 
 type props = {
   onPress: () => void;
   item?: any;
 };
 
-const NotificationCard: FC<props> = ({
-  item,
-}: any) => {
+const NotificationCard: FC<props> = ({ item }: any) => {
+  const notifType = item?.data?.type || item?.type;
+  const isRead = !!item?.isRead;
+  const showUnreadDot = !isRead;
+
   const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
-    item?.data?.id,
+    notifType === 'interview' ? item?.data?.id : undefined,
   );
-  console.log("🔥 ~ NotificationCard ~ jobDetail:", jobDetail)
+
+  const [markReadNotifications] = useMarkReadNotificationsMutation();
+
+  const handlePress = async () => {
+    if (notifType === 'interview') {
+      const notificationId = item?._id;
+      try {
+        if (notificationId) {
+          await markReadNotifications({ notification_id: notificationId }).unwrap();
+        }
+      } catch (e) {
+        console.log('markReadNotifications error:', e);
+      }
+    }
+    if (notifType === 'interview') {
+      navigateTo(SCREENS.JobInvitationScreen, {
+        link: item?.data?.interview_link,
+        jobDetail: jobDetail?.data,
+      });
+    }
+  };
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={handlePress}>
       <View style={[styles.iconWrapper, styles.starIcon]}>
         <Image
           source={IMAGES.bell}
           style={{ width: wp(16), height: hp(16), resizeMode: 'contain', tintColor: colors._0B3970 }}
         />
+        {showUnreadDot && <View style={styles.readDot} />}
       </View>
       <View style={{ flex: 1, gap: hp(5) }}>
         {/* <BaseText style={styles.notificationTitle}>{index + 1}</BaseText> */}
@@ -37,22 +60,23 @@ const NotificationCard: FC<props> = ({
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
-          <Pressable
-            onPress={() => {
-              navigateTo(SCREENS.JobInvitationScreen, {
-                link: item?.data?.interview_link,
-                jobDetail: jobDetail?.data,
-              });
-            }}
-            style={{
-              backgroundColor: colors._0B3970, paddingHorizontal: wp(10), paddingVertical: hp(8),
-              borderRadius: hp(20)
-            }}>
-            <BaseText style={{ ...commonFontStyle(500, 13, colors.white) }}>{'View Invitation'}</BaseText>
-          </Pressable>
+          {notifType === 'interview' && (
+            <Pressable
+              onPress={handlePress}
+              style={{
+                backgroundColor: colors._0B3970,
+                paddingHorizontal: wp(10),
+                paddingVertical: hp(8),
+                borderRadius: hp(20),
+              }}>
+              <BaseText style={{ ...commonFontStyle(500, 13, colors.white) }}>
+                {'View Invitation'}
+              </BaseText>
+            </Pressable>
+          )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -83,7 +107,6 @@ const styles = StyleSheet.create({
 
   iconWrapper: {
     backgroundColor: '#EEF2F7',
-    // padding: 6,
     borderRadius: 20,
     marginRight: 12,
     width: 39,
@@ -105,5 +128,14 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 16, colors._4A4A4A),
     marginBottom: 8,
     lineHeight: 25,
+  },
+  readDot: {
+    position: 'absolute',
+    top: 10,
+    right: 11,
+    width: wp(8),
+    height: wp(8),
+    borderRadius: wp(4),
+    backgroundColor: '#E53935',
   },
 });

@@ -106,7 +106,6 @@ const CreateProfileScreen = () => {
   const educationData = getEducation?.data?.educations;
   const experienceData = getExperiences?.data?.experiences;
   const experienceUser = getExperiences?.data?.user;
-  console.log('🔥 ~ CreateProfileScreen ~ getExperiences full:', JSON.stringify(getExperiences, null, 2));
   const aboutmeandResumes = getAboutmeandResumes?.data?.user;
   const uploadedResumes = aboutmeandResumes?.resumes;
   const experienceOptionsData = useMemo(() => {
@@ -920,6 +919,7 @@ const CreateProfileScreen = () => {
             <AboutMeList
               aboutEdit={aboutEdit}
               skillsList={skillsList}
+              isEdit={route.params?.isEdit}
               onNextPress={() => {
                 dispatch(setActiveStep(4));
               }}

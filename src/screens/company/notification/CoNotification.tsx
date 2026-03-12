@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -16,10 +17,11 @@ import { colors } from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
 import { useClearAllNotificationsMutation, useGetCompanyNotificationQuery, useMarkReadNotificationsMutation } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
-import { formatted } from '../../../utils/commonFunction';
+import { formatted, navigateTo } from '../../../utils/commonFunction';
 import { useAppDispatch } from '../../../redux/hooks';
 import { setHasUnreadNotification } from '../../../features/authSlice';
 import { AppStyles } from '../../../theme/appStyles';
+import { SCREENS } from '../../../navigation/screenNames';
 
 const CoNotification = () => {
   const { t } = useTranslation();
@@ -34,7 +36,7 @@ const CoNotification = () => {
 
   useFocusEffect(
     useCallback(() => {
-      markReadNotifications();
+      markReadNotifications({notification_id: 'all'});
       dispatch(setHasUnreadNotification(false));
     }, []),
   );
@@ -60,8 +62,10 @@ const CoNotification = () => {
 
   const handleClearAll = async () => {
     try {
+      await markReadNotifications({notification_id: 'all'}).unwrap();
       await clearAllNotifications().unwrap();
       setAllNotifications([]);
+      dispatch(setHasUnreadNotification(false));
     } catch (error) {
       console.log('clearAllNotifications error:', error);
     }
@@ -79,45 +83,84 @@ const CoNotification = () => {
     }
   };
 
-  const renderItem = ({ item, index }: any) => (
-    <View key={index} style={styles.card}>
-      <View style={styles.cardContent}>
-        <View style={[styles.iconWrapper]}>
-          <Image source={IMAGES.bell} style={styles.bell} />
+  const handleNotificationPress = async (item: any) => {
+    const notifType = item?.data?.type || item?.type;
+    if (notifType === 'interview') {
+      const notificationId = item?._id;
+      try {
+        if (notificationId) {
+          await markReadNotifications({ notification_id: notificationId }).unwrap();
+        }
+      } catch (e) {
+        console.log('markReadNotifications error:', e);
+      }
+    }
+    if (notifType === 'chat') {
+      navigateTo(SCREENS.CoChat, { data: { chat_id: item?.data?.id } });
+    } else if (notifType === 'interview') {
+      const jobId = item?.data?.job_id || item?.data?.id;
+      if (jobId) {
+        navigateTo(SCREENS.SuggestedEmployee, { jobId });
+      }
+    }
+  };
+
+  const renderItem = ({ item, index }: any) => {
+    const notifType = item?.data?.type || item?.type;
+    const isRead = !!item?.isRead;
+    const showUnreadDot = !isRead;
+    return (
+      <TouchableOpacity
+        key={index}
+        style={styles.card}
+        activeOpacity={0.9}
+        onPress={() => handleNotificationPress(item)}>
+        <View style={styles.cardContent}>
+          <View style={[styles.iconWrapper]}>
+            <Image source={IMAGES.bell} style={styles.bell} />
+            {showUnreadDot && <View style={styles.readDot} />}
+          </View>
+          <View style={{ flex: 1, gap: hp(5) }}>
+            <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
+            <BaseText style={styles.time}>{item?.message}</BaseText>
+            <View style={styles.rowBetween}>
+              <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
+              {notifType === 'interview' && (
+                <Pressable
+                  onPress={() => handleNotificationPress(item)}
+                  style={styles.viewInvitationBtn}>
+                  <BaseText style={styles.viewInvitationText}>
+                    {t('View Invitation')}
+                  </BaseText>
+                </Pressable>
+              )}
+            </View>
+          </View>
         </View>
-        <View style={{ flex: 1, gap: hp(5) }}>
-          <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
-          <BaseText style={styles.time}>{item?.message}</BaseText>
-          <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
-        </View>
-      </View>
-    </View>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <BackHeader
         type="company"
-        isRight={true}
+        isRight={false}
         title={t('Notifications')}
         containerStyle={styles.header}
-        RightIcon={
-            allNotifications.length > 0 ? (
-            <View style={{flexShrink: 0}}>
-              <TouchableOpacity
-                onPress={handleClearAll}
-                disabled={isClearing}
-                hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                <BaseText style={styles.clearAllText} numberOfLines={1}>
-                  {isClearing ? 'clearing...' : 'clear all'}
-                </BaseText>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={{ width: wp(60) }} />
-          )
-        }
       />
+
+      {allNotifications.length > 0 && (
+        <TouchableOpacity
+          onPress={handleClearAll}
+          disabled={isClearing}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.clearAllButton}>
+          <BaseText style={styles.clearAllText}>
+            {isClearing ? 'clearing...' : 'clear all'}
+          </BaseText>
+        </TouchableOpacity>
+      )}
 
       {isLoading ? (
         <View style={AppStyles.centeredContainer}>
@@ -204,22 +247,51 @@ const styles = StyleSheet.create({
   },
   clearAllText: {
     ...commonFontStyle(500, 15, colors._0B3970),
-    flexShrink: 0,
+  },
+  clearAllButton: {
+    alignSelf: 'flex-end',
+    marginTop: hp(8),
+    marginRight: wp(26),
   },
   iconWrapper: {
     backgroundColor: '#0D468C',
-    // padding: 6,
     borderRadius: 20,
     marginRight: 12,
     width: 39,
     height: 39,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'visible',
   },
   bell: {
     width: wp(16),
     height: hp(16),
     resizeMode: 'contain',
     tintColor: colors.white,
+  },
+  readDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: wp(8),
+    height: wp(8),
+    borderRadius: wp(4),
+    backgroundColor: '#E53935',
+    borderWidth: 1.5,
+    borderColor: colors.white,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  viewInvitationBtn: {
+    backgroundColor: colors._0B3970,
+    paddingHorizontal: wp(10),
+    paddingVertical: hp(8),
+    borderRadius: hp(20),
+  },
+  viewInvitationText: {
+    ...commonFontStyle(500, 13, colors.white),
   },
 });

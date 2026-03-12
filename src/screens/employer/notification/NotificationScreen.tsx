@@ -23,7 +23,7 @@ const NotificationScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      markReadNotifications();
+      markReadNotifications({notification_id: 'all'});
       dispatch(setHasUnreadNotification(false));
     }, []),
   );
@@ -74,8 +74,10 @@ const NotificationScreen = () => {
 
   const handleClearAll = async () => {
     try {
+      await markReadNotifications({notification_id: 'all'}).unwrap();
       await clearAllNotifications().unwrap();
       setAllNotifications([]);
+      dispatch(setHasUnreadNotification(false));
     } catch (error) {
       console.log('clearAllNotifications error:', error);
     }
@@ -87,26 +89,21 @@ const NotificationScreen = () => {
         <View style={styles.topConrainer}>
           <BackHeader
             type="employe"
-            isRight={true}
+            isRight={false}
             title={'Notifications'}
             containerStyle={styles.header}
-            RightIcon={
-              allNotifications.length > 0 ? (
-                <View style={{width: wp(60)}}>
-                  <TouchableOpacity
-                    onPress={handleClearAll}
-                    disabled={isClearing}
-                    hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                    <BaseText style={styles.clearAllText} >
-                      {isClearing ? 'clearing...' : 'clear all'}
-                    </BaseText>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={{width: wp(60)}} />
-              )
-            }
           />
+          {allNotifications.length > 0 && (
+            <TouchableOpacity
+              onPress={handleClearAll}
+              disabled={isClearing}
+              hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
+              style={styles.clearAllButton}>
+              <BaseText style={styles.clearAllText}>
+                {isClearing ? 'clearing...' : 'clear all'}
+              </BaseText>
+            </TouchableOpacity>
+          )}
         </View>
         {isLoading && page === 1 ? (
           <View style={AppStyles.centeredContainer}>
@@ -173,7 +170,10 @@ const styles = StyleSheet.create({
     // paddingLeft: wp(13),
     marginBottom: hp(1),
   },
-
+  clearAllButton: {
+    alignSelf: 'flex-end',
+    marginTop: hp(8),
+  },
   scrollContainer: {
     flexGrow: 1,
     // paddingVertical: hp(22),

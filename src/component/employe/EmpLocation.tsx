@@ -25,7 +25,7 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { API } from '../../utils/apiConstant';
 import { navigationRef } from '../../navigation/RootContainer';
 import { navigateTo } from '../../utils/commonFunction';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { IMAGES } from '../../assets/Images';
 import { getAsyncUserLocation, setAsyncLocation } from '../../utils/asyncStorage';
 import { setUserInfo } from '../../features/authSlice';
@@ -38,6 +38,7 @@ import { isAndroid } from '../../utils/commonFunction';
 
 const EmpLocation = () => {
   const { t } = useTranslation();
+  const route = useRoute<any>();
   const mapRef = useRef<any | null>(null);
 
   const { userInfo, getAppData } = useSelector((state: RootState) => state.auth);
@@ -455,6 +456,7 @@ const EmpLocation = () => {
             city: selectedAddress.state,
             country: selectedAddress.country,
           },
+          isEdit: route.params?.isEdit,
         });
       } catch (error) {
         console.error('Failed to save location:', error);

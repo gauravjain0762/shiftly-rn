@@ -39,6 +39,8 @@ export const dashboardApi = createApi({
     'GetFavouriteJob',
     'GetEssentialBenefits',
     'GetCompanyChats',
+    'GetEmployeeNotifications',
+    'GetCompanyNotifications',
   ],
   endpoints: builder => ({
     //  -------   Company    --------
@@ -440,6 +442,7 @@ export const dashboardApi = createApi({
         skipLoader: true,
         params: params,
       }),
+      providesTags: ['GetCompanyNotifications'],
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
@@ -944,11 +947,16 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
+      providesTags: ['GetEmployeeNotifications'],
     }),
-    markReadNotifications: builder.mutation<any, void>({
-      query: () => {
+    markReadNotifications: builder.mutation<any, {notification_id?: string} | void>({
+      query: (body) => {
         const formData = new FormData();
-        formData.append('notification_id', 'all');
+        const notificationId =
+          (body as any)?.notification_id && (body as any).notification_id !== ''
+            ? (body as any).notification_id
+            : 'all';
+        formData.append('notification_id', notificationId);
         return {
           url: API.markReadNotifications,
           method: HTTP_METHOD.POST,
@@ -957,6 +965,7 @@ export const dashboardApi = createApi({
           headers: { 'Content-Type': 'multipart/form-data' },
         };
       },
+      invalidatesTags: ['GetEmployeeNotifications', 'GetCompanyNotifications'],
     }),
     clearAllNotifications: builder.mutation<any, void>({
       query: () => ({

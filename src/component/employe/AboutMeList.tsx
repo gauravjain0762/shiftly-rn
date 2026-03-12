@@ -31,6 +31,7 @@ type Props = {
   item?: MessageItem[];
   onNextPress?: () => void;
   onPressMessage?: (item: MessageItem) => void;
+  isEdit?: boolean;
 };
 
 const getDotColor = (level: string) => {
@@ -57,7 +58,7 @@ const proficiencyLabels: { [key: string]: string } = {
   'Native': 'Native',
 };
 
-const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
+const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit }) => {
   const [pressedDot, setPressedDot] = useState<{ langName: string; level: string } | null>(null);
   const { data: languagesResponse } = useGetCompanyLanguagesQuery({});
   const languageOptions = useMemo(() => {
@@ -113,7 +114,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList }) => {
         <TouchableOpacity
           onPress={() => {
             console.log('📍 Navigating to location screen');
-            navigateTo(SCREENS.EmpLocation);
+            navigateTo(SCREENS.EmpLocation, { isEdit: !!isEdit });
           }}
           style={styles.locationInputContainer}
           activeOpacity={0.7}>

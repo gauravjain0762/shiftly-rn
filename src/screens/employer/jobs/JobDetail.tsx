@@ -462,15 +462,63 @@ ${salary}${shareUrlText}`;
             {/* Requirements */}
             <Text style={styles.sectionTitle}>Requirements</Text>
             <View style={styles.bulletList}>
-              {curr_jobdetails?.job_requirements?.length > 0 ? (
-                curr_jobdetails?.job_requirements?.map((item: any, index: number) => (
+              {(() => {
+                const requirementItems: string[] = [];
+
+                if (curr_jobdetails?.job_requirements?.length > 0) {
+                  curr_jobdetails.job_requirements.forEach((item: any) => {
+                    if (item?.title) {
+                      requirementItems.push(item.title);
+                    }
+                  });
+                }
+
+                const experienceTitles =
+                  curr_jobdetails?.experiences
+                    ?.map((exp: any) => exp?.title)
+                    .filter(Boolean)
+                    .join(', ');
+                if (experienceTitles) {
+                  requirementItems.push(`Experience: ${experienceTitles}`);
+                }
+
+                const educationTitles =
+                  curr_jobdetails?.educations
+                    ?.map((edu: any) => edu?.title)
+                    .filter(Boolean)
+                    .join(', ');
+                if (educationTitles) {
+                  requirementItems.push(`Education: ${educationTitles}`);
+                }
+
+                const certificationTitles =
+                  curr_jobdetails?.certifications
+                    ?.map((cert: any) => cert?.title)
+                    .filter(Boolean)
+                    .join(', ');
+                if (certificationTitles) {
+                  requirementItems.push(`Certifications: ${certificationTitles}`);
+                }
+
+                const skillTitles =
+                  curr_jobdetails?.skills
+                    ?.map((skill: any) => skill?.title)
+                    .filter(Boolean)
+                    .join(', ');
+                if (skillTitles) {
+                  requirementItems.push(`Skills: ${skillTitles}`);
+                }
+
+                if (requirementItems.length === 0) {
+                  return <Text style={styles.description}>N/A</Text>;
+                }
+
+                return requirementItems.map((text, index) => (
                   <View key={index}>
-                    <BaseText style={styles.description}>{`• ${item?.title}`}</BaseText>
+                    <BaseText style={styles.description}>{`• ${text}`}</BaseText>
                   </View>
-                ))
-              ) : (
-                <Text style={styles.description}>N/A</Text>
-              )}
+                ));
+              })()}
             </View>
 
             {/* Offer */}
