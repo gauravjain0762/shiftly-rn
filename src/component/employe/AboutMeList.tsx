@@ -113,8 +113,12 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
 
         <TouchableOpacity
           onPress={() => {
-            console.log('📍 Navigating to location screen');
-            navigateTo(SCREENS.EmpLocation, { isEdit: !!isEdit });
+            navigateTo(SCREENS.EmpLocation, {
+              isEdit: !!isEdit,
+              address: aboutEdit?.location,
+              locationLat: aboutEdit?.locationLat,
+              locationLng: aboutEdit?.locationLng,
+            });
           }}
           style={styles.locationInputContainer}
           activeOpacity={0.7}>

@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -40,9 +39,11 @@ const CoProfile = () => {
   const [deletepopupVisible, setdeletePopupVisible] = useState(false);
   const [companyLogout] = useCompanyLogoutMutation({});
   const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
-  const [isLanguageModalVisible, setLanguageModalVisible] =
-    useState<boolean>(false);
   const { userInfo } = useSelector((state: RootState) => state.auth);
+
+  const [headerLogo] = useState<string | undefined>(
+    userInfo?.logo || undefined,
+  );
 
   const settingsData = [
     {
@@ -161,28 +162,18 @@ const CoProfile = () => {
       console.log("🔥 ~ onLogout ~ response:", response);
 
       if (response?.status) {
-        // Clear async storage first
         await clearAsync();
-
-        // Dispatch logout action to clear Redux state
         dispatch(logouts());
-
-        // Reset store and purge persistor (async)
         await resetStore();
-
-        // Sign out from Firebase/Google if logged in (async but no need to await)
         signOutIfLoggedIn().catch(err => {
           console.log('Error signing out from Firebase:', err);
         });
-
-        // Navigate after all cleanup is complete
         resetNavigation(SCREEN_NAMES.SelectRollScreen);
       } else {
         errorToast(response?.message || 'Logout failed');
       }
     } catch (error: any) {
       console.error('Logout error:', error);
-      // Even if API call fails, still perform logout locally
       try {
         await clearAsync();
         dispatch(logouts());
@@ -222,8 +213,8 @@ const CoProfile = () => {
           <Text style={styles.headerTitle}>{t('Account')}</Text>
           <View style={styles.rightWrapper}>
             <CustomImage
-              uri={userInfo?.logo || undefined}
-              source={!userInfo?.logo ? IMAGES.logoText : undefined}
+              uri={headerLogo}
+              source={!headerLogo ? IMAGES.logoText : undefined}
               imageStyle={{ height: '100%', width: '100%' }}
               containerStyle={{
                 height: hp(51),
@@ -247,7 +238,7 @@ const CoProfile = () => {
                 }}
                 style={styles.row}>
                 {item.label == 'Logout' ? (
-                  <Image source={item.icon} style={styles.logout} />
+                  <Image source={(item as any).icon} style={styles.logout} />
                 ) : (item as any).LucideIcon ? (
                   <View style={styles.iconWrapper}>
                     {(() => {
@@ -262,7 +253,7 @@ const CoProfile = () => {
                   </View>
                 ) : (
                   <Image
-                    source={item.icon}
+                    source={(item as any).icon}
                     style={styles.iconStyle}
                     tintColor={colors._555555}
                   />
@@ -292,7 +283,6 @@ const CoProfile = () => {
           leftButton={'Cancel'}
           rightButton={'Log Out'}
           onPressRight={() => {
-            // navigationRef.navigate(SCREENS.WelcomeScreen);
             onLogout();
             setPopupVisible(false);
           }}

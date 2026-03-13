@@ -51,6 +51,7 @@ export const API = {
   // create
   createCompanyPost: '/company/createPost',
   editCompanyPost: '/company/editPost',
+  deleteCompanyPost: '/company/deletePost',
   createCompanyJob: '/company/createJob',
 
   //Chats

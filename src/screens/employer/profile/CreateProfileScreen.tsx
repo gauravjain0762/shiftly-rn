@@ -223,6 +223,9 @@ const CreateProfileScreen = () => {
         userInfo?.address ||
         '';
 
+      const locationLat = aboutmeandResumes?.lat ?? userInfo?.lat ?? null;
+      const locationLng = aboutmeandResumes?.lng ?? userInfo?.lng ?? null;
+
       const skillsFromApi = (aboutmeandResumes?.skills || []).map((s: any) =>
         typeof s === 'string' ? s : s._id,
       );
@@ -236,6 +239,8 @@ const CreateProfileScreen = () => {
           about: aboutmeandResumes?.about || '',
           responsibilities: aboutmeandResumes?.responsibility || '',
           location: locationValue,
+          locationLat,
+          locationLng,
           selectedSkills: preserveLocalSkills ? aboutEdit.selectedSkills : skillsFromApi,
           selectedLanguages: preserveLocalLanguages ? aboutEdit.selectedLanguages : languagesFromApi,
         }),

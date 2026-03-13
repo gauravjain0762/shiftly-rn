@@ -1,15 +1,15 @@
 import React, { FC, useEffect, useState, useRef } from 'react';
-import { ActivityIndicator, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { commonFontStyle, hp, wp, SCREEN_WIDTH } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { colors } from '../../theme/colors';
-import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
+import { errorToast, getTimeAgo, navigateTo, successToast } from '../../utils/commonFunction';
 import ReadMoreText from '../common/ReadMoreText';
 import CustomImage from '../common/CustomImage';
 import { SCREENS } from '../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
-import { useTogglePostLikeMutation } from '../../api/dashboardApi';
+import { useTogglePostLikeMutation, useDeleteCompanyPostMutation } from '../../api/dashboardApi';
 
 type card = {
   onPressCard?: () => void;
@@ -22,19 +22,18 @@ type card = {
   onScrollToTop?: () => void;
   itemIndex?: number;
   currentCompanyId?: string;
+  onDeletePost?: () => void;
 };
 
 const FeedCard: FC<card> = ({
   onPressCard = () => { },
   onPressLike = () => { },
   onPressLogo = () => { },
-  isLiked = false,
   item,
   showMenu = false,
   hideLike = false,
-  onScrollToTop,
-  itemIndex,
   currentCompanyId,
+  onDeletePost,
 }) => {
   const { t } = useTranslation();
   const hasImage = item?.images?.length > 0;
@@ -45,6 +44,7 @@ const FeedCard: FC<card> = ({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const menuButtonRef = useRef<View>(null);
   const [togglePostLike] = useTogglePostLikeMutation();
+  const [deleteCompanyPost] = useDeleteCompanyPostMutation();
 
   useEffect(() => {
     setLocalLiked(item?.is_liked || false);
@@ -86,6 +86,34 @@ const FeedCard: FC<card> = ({
         images: item?.images || [],
       },
     });
+  };
+
+  const handleDelete = () => {
+    setMenuVisible(false);
+    Alert.alert(
+      t('Delete Post'),
+      t('Are you sure you want to delete this post?'),
+      [
+        { text: t('Cancel'), style: 'cancel' },
+        {
+          text: t('Delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const formData = new FormData();
+              formData.append('post_id', item?._id);
+              const result = await deleteCompanyPost(formData).unwrap();
+              if (result?.status) {
+                successToast(t('Post deleted successfully'));
+                onDeletePost?.();
+              }
+            } catch (err: any) {
+              errorToast(err?.message || t('Failed to delete post'));
+            }
+          },
+        },
+      ]
+    );
   };
 
   const updateMenuPosition = () => {
@@ -206,10 +234,20 @@ const FeedCard: FC<card> = ({
               onPress={handleEdit}>
               <Image
                 source={IMAGES.edit_icon}
-                style={styles.menuIcon}
+                style={styles.menuIconPrimary}
                 resizeMode="contain"
               />
               <Text style={styles.menuText}>{t('Edit Post')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemDestructive]}
+              onPress={handleDelete}>
+              <Image
+                source={IMAGES.delete}
+                style={styles.menuIconDestructive}
+                resizeMode="contain"
+              />
+              <Text style={styles.menuTextDestructive}>{t('Delete Post')}</Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -363,10 +401,23 @@ const styles = StyleSheet.create({
   menuIcon: {
     width: wp(18),
     height: wp(18),
+  },
+  menuIconPrimary: {
+    width: wp(18),
+    height: wp(18),
     tintColor: colors._0B3970,
+  },
+  menuIconDestructive: {
+    width: wp(18),
+    height: wp(18),
+    tintColor: '#D32F2F',
   },
   menuText: {
     ...commonFontStyle(500, 15, colors._1F1F1F),
+  },
+  menuItemDestructive: {},
+  menuTextDestructive: {
+    ...commonFontStyle(500, 15, '#D32F2F'),
   },
   likesCountText: {
     ...commonFontStyle(600, 16, colors._2F2F2F),

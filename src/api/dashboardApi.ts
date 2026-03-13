@@ -234,6 +234,29 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    deleteCompanyPost: builder.mutation<any, any>({
+      query: credentials => ({
+        url: API.deleteCompanyPost,
+        method: HTTP_METHOD.DELETE,
+        data: credentials,
+        skipLoader: false,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+      invalidatesTags: ['GetPost'],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          if (!data?.status) {
+            errorToast(data?.message ?? 'Failed to delete post');
+          }
+        } catch (error) {
+          console.log('Delete Post Error', error);
+        }
+      },
+    }),
     createCompanyProfile: builder.mutation<any, any>({
       query: credentials => ({
         url: API.updateCompanyProfile,
@@ -1085,6 +1108,7 @@ export const {
   useGetCompanyPostsQuery,
   useCreateCompanyPostMutation,
   useEditCompanyPostMutation,
+  useDeleteCompanyPostMutation,
   useGetEmployeeProfileQuery,
   useGetServicesQuery,
   useCreateCompanyProfileMutation,

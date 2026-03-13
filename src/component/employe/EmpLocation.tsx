@@ -44,27 +44,42 @@ const EmpLocation = () => {
   const { userInfo, getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
-  const [search, setSearch] = useState(userInfo?.address || '');
+  const routeAddress = route.params?.address as string | undefined;
+  const routeLat = route.params?.locationLat as number | undefined;
+  const routeLng = route.params?.locationLng as number | undefined;
+
+  const initialLat = routeLat ?? userInfo?.lat;
+  const initialLng = routeLng ?? userInfo?.lng;
+
+  const [search, setSearch] = useState(routeAddress || userInfo?.address || '');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<{
     latitude: number;
     longitude: number;
   } | null>(
-    userInfo?.lat && userInfo?.lng
+    initialLat && initialLng
       ? {
-        latitude: userInfo.lat,
-        longitude: userInfo.lng,
+        latitude: initialLat,
+        longitude: initialLng,
       }
       : null,
   );
   const [position, setPosition] = useState({
-    latitude: userInfo?.lat || 25.2048,
-    longitude: userInfo?.lng || 55.2708,
+    latitude: initialLat || 25.2048,
+    longitude: initialLng || 55.2708,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
   const [selectedAddress, setSelectedAddress] = useState<any>(
-    userInfo?.address
+    (routeAddress && routeLat && routeLng)
+      ? {
+        address: routeAddress,
+        lat: routeLat,
+        lng: routeLng,
+        state: userInfo?.state,
+        country: userInfo?.country,
+      }
+      : userInfo?.address
       ? {
         address: userInfo.address,
         lat: userInfo.lat,
@@ -84,6 +99,19 @@ const EmpLocation = () => {
   const addressFetchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    if (routeAddress && routeLat && routeLng) {
+      setSearch(routeAddress);
+      ref.current?.setAddressText(routeAddress);
+      setSelectedAddress(prev => ({
+        address: routeAddress,
+        lat: routeLat,
+        lng: routeLng,
+        state: prev?.state ?? userInfo?.state,
+        country: prev?.country ?? userInfo?.country,
+      }));
+      return;
+    }
+
     if (userInfo?.address) {
       setSearch(userInfo.address);
       ref.current?.setAddressText(userInfo.address);
@@ -95,7 +123,7 @@ const EmpLocation = () => {
         country: userInfo.country,
       });
     }
-  }, [userInfo?.address]);
+  }, [routeAddress, routeLat, routeLng, userInfo?.address]);
 
   const getUserLocation = async () => {
     try {

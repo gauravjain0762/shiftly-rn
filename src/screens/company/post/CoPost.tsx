@@ -119,6 +119,7 @@ const CoPost = () => {
                 currentCompanyId={currentCompanyId}
                 onScrollToTop={() => handleScrollToPost(index)}
                 onPressCard={() => navigateTo(SCREENS.ShowPost, { post: item })}
+                onDeletePost={handleRefresh}
               />
             )}
             onScrollToIndexFailed={(info) => {
