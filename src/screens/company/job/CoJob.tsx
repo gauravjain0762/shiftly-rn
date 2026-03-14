@@ -80,11 +80,8 @@ const CoJob = () => {
     ...filters,
     page: page,
   };
-  console.log('🔥 [CO FILTER] queryParams sent to API:', queryParams);
-
   const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(queryParams);
   const jobList = data?.data?.jobs || [];
-  console.log("🔥 ~ CoJob ~ jobList:", jobList)
   const pagination = data?.data?.pagination;
 
   const hasMountedRef = useRef(false);
@@ -100,13 +97,6 @@ const CoJob = () => {
 
   useEffect(() => {
     if (data) {
-      console.log('🔥 [CO FILTER] API Response:', {
-        status: data?.status,
-        message: data?.message,
-        jobsCount: jobList?.length,
-        pagination: pagination,
-        filters: filters,
-      });
       const newData = jobList;
       setAllJobs(prev =>
         pagination?.current_page === 1 ? newData : [...prev, ...newData],

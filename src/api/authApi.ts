@@ -579,7 +579,6 @@ export const authApi = createApi({
           const { data } = await queryFulfilled;
           if (data?.status) {
             if (data?.data?.auth_token) {
-              console.log('🔥🔥🔥 ~ onQueryStarted ~ data:', data);
               await setAsyncToken(data?.data?.auth_token);
               dispatch(setAuthToken(data.data?.auth_token));
               dispatch(setUserInfo(data.data?.user));

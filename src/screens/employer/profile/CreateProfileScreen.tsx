@@ -482,8 +482,8 @@ const CreateProfileScreen = () => {
               year: exp?.jobEnd_year,
             },
           }),
-          ...(yearsOfExperienceOption?.value && {
-            years_of_experience: yearsOfExperienceOption.value,
+          ...(yearsOfExperienceOption?.label && {
+            years_of_experience: yearsOfExperienceOption.label,
           }),
           ...(exp?.preferred_position && {
             desired_job_title: exp.preferred_position,

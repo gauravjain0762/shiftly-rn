@@ -37,6 +37,7 @@ import {
     useGetCompanyExperiencesQuery,
     useGetCompanyCertificationsQuery,
     useGetCompanyOtherRequirementsQuery,
+    useGetEssentialBenefitsQuery,
 } from '../../../api/dashboardApi';
 import { useCreateJobMutation } from '../../../api/authApi';
 import { useAppSelector } from '../../../redux/hooks';
@@ -100,6 +101,16 @@ const JobPreview = () => {
         return map;
     }, [otherRequirementsDataVals]);
 
+    const { data: essentialBenefitsDataVals } = useGetEssentialBenefitsQuery();
+    const essentialBenefitMap = React.useMemo(() => {
+        const map: Record<string, string> = {};
+        essentialBenefitsDataVals?.data?.benefits?.forEach((item: any) => {
+            const id = item?._id ?? item?.id;
+            if (id) map[id] = item.title || '';
+        });
+        return map;
+    }, [essentialBenefitsDataVals]);
+
     const {
         title,
         contract_type,
@@ -124,7 +135,6 @@ const JobPreview = () => {
         languages,
         other_requirements,
     } = useAppSelector((state: any) => selectJobForm(state));
-        console.log("🔥 ~ JobPreview ~ essential_benefits:", essential_benefits)
 
     const { userInfo } = useAppSelector((state: any) => state.auth);
 
@@ -143,11 +153,20 @@ const JobPreview = () => {
         () =>
             Array.isArray(languages)
                 ? languages
-                    .filter((l: any) => l && (typeof l === 'object' ? l.id : l))
+                    .filter((l: any) => l)
                     .map((l: any) => {
-                        const id = typeof l === 'object' ? l.id : l;
+                        const id =
+                            typeof l === 'object'
+                                ? l.id ?? l.value ?? l._id ?? ''
+                                : l;
                         const level = typeof l === 'object' ? l.level || '' : '';
-                        const name = languageData.find((opt: any) => opt.value === id)?.label ?? '';
+                        const fromMap =
+                            languageData.find((opt: any) => opt.value === id)?.label ?? '';
+                        const fallbackName =
+                            typeof l === 'object'
+                                ? l.name ?? id
+                                : l;
+                        const name = (fromMap || fallbackName || '').toString();
                         return { name, level };
                     })
                 : [],
@@ -200,6 +219,11 @@ const JobPreview = () => {
 
         const finalLat = userAddress?.lat || location?.latitude || userInfo?.lat;
         const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
+
+        console.log(
+          '🔥 [JobPreview] using lat/lng:',
+          { finalLat, finalLng, userAddress, fallbackLocation: location, userInfoLat: userInfo?.lat, userInfoLng: userInfo?.lng },
+        );
 
         const [from, to] = salary?.value?.split('-') || [];
 
@@ -522,14 +546,26 @@ const JobPreview = () => {
                     return (
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>{t('Key Job Benefits')}</Text>
-                            {source.map((benefit: any, index: number) => (
-                                <View key={index} style={styles.bulletRow}>
-                                    <View style={styles.bullet} />
-                                    <Text style={styles.bulletText}>
-                                        {(benefit?.title || benefit?.label || '').trim() || '-'}
-                                    </Text>
-                                </View>
-                            ))}
+                            {source.map((benefit: any, index: number) => {
+                                const id =
+                                    benefit?._id ??
+                                    benefit?.id ??
+                                    (typeof benefit === 'string' ? benefit : '');
+                                const mappedTitle = id ? essentialBenefitMap[id] : '';
+                                const rawTitle =
+                                    benefit?.title ||
+                                    benefit?.label ||
+                                    mappedTitle ||
+                                    (typeof benefit === 'string' ? benefit : '');
+                                return (
+                                    <View key={index} style={styles.bulletRow}>
+                                        <View style={styles.bullet} />
+                                        <Text style={styles.bulletText}>
+                                            {String(rawTitle).trim() || '-'}
+                                        </Text>
+                                    </View>
+                                );
+                            })}
                         </View>
                     );
                 })()}

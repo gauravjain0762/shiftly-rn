@@ -47,15 +47,15 @@ export const mapJobToFormState = (job: any) => {
     job?.certifications ?? job?.certification_id ?? job?.certification
   );
 
-  const rawLangs = job?.languages;
-  console.log("🔥 ~ mapJobToFormState ~ rawLangs:", rawLangs)
+  const rawLangs = job?.languages ?? job?.language_ids;
   let languages: { id: string; level: string }[] = [];
   if (Array.isArray(rawLangs)) {
     languages = rawLangs
       .map((v: any) => {
+        if (v == null) return null;
         const id =
           typeof v === 'object'
-            ? (v?._id ?? v?.id ?? v?.value ?? v?.name)
+            ? (v?.language_id?._id ?? v?.language_id ?? v?._id ?? v?.id ?? v?.value ?? v?.name ?? (typeof v?.language_id === 'string' ? v.language_id : null))
             : String(v);
         const level = typeof v === 'object' ? (v?.level ?? '') : '';
         return id ? { id: String(id), level: level || '' } : null;

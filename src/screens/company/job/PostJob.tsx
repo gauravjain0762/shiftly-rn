@@ -68,7 +68,7 @@ import {
   useGetSuggestedEmployeesQuery,
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused, useRoute } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../../redux/hooks';
 import {
@@ -154,6 +154,7 @@ const PostJob = () => {
   const dispatch = useDispatch<any>();
 
   const { data: jobDropdownData } = useGetJobDropdownDataQuery();
+  console.log("🔥 ~ PostJob ~ jobDropdownData:", jobDropdownData)
   const { data: educationDataVals } = useGetCompanyEducationsQuery({});
   const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
   const { data: certificationDataVals } = useGetCompanyCertificationsQuery({});
@@ -197,22 +198,12 @@ const PostJob = () => {
   }, [jobDropdownData?.data?.currencies]);
 
   const salaryRangeData = useMemo(() => {
-    const range = jobDropdownData?.data?.salary_range;
-    if (range && typeof range.from === 'number' && typeof range.to === 'number') {
-      const from = range.from;
-      const to = range.to;
-      const step = Math.max(1, Math.floor((to - from) / 10)) || 1000;
-      const options: { label: string; value: string }[] = [];
-      for (let low = from; low < to; low += step) {
-        const high = Math.min(low + step, to);
-        const labelStr = `${low.toLocaleString()} - ${high.toLocaleString()}`;
-        options.push({ label: labelStr, value: `${low} - ${high}` });
-      }
-      options.push({ label: `${to.toLocaleString()}+`, value: `${to}+` });
-      return options;
+    const ranges = jobDropdownData?.data?.salary_ranges;
+    if (Array.isArray(ranges) && ranges.length > 0) {
+      return ranges.map((r: string) => ({ label: r, value: r }));
     }
     return DEFAULT_SALARY_RANGE;
-  }, [jobDropdownData?.data?.salary_range]);
+  }, [jobDropdownData?.data?.salary_ranges]);
 
   const {
     title,
@@ -248,10 +239,12 @@ const PostJob = () => {
       return [{ label: salary.label || salary.value, value: salary.value }, ...salaryRangeData];
     }
     return salaryRangeData;
-  }, [salary?.value, salary?.label]);
+  }, [salary?.value, salary?.label, salaryRangeData]);
 
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
+  const route = useRoute<any>();
+  const initialUserAddressFromRoute = route.params?.userAddress;
   const { updateJobForm } = useJobFormUpdater();
   const [createJob] = useCreateJobMutation();
   const [editJob] = useEditCompanyJobMutation();
@@ -286,26 +279,20 @@ const PostJob = () => {
   const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] =
     useState(false);
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [jobAreaText, setJobAreaText] = useState(area?.value || '');
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   const scrollViewRef = useRef<any>(null);
-  const jobDepartmentFieldRef = useRef<View>(null);
+  const selectedSkillsScrollRef = useRef<ScrollView>(null);
+  const jobAreaRef = useRef<any | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [pressedLangDot, setPressedLangDot] = useState<{
     langId: string;
     level: string;
   } | null>(null);
-
-  const handleJobDepartmentFocus = useCallback(() => {
-    setIsDropdownOpen(true);
-  }, []);
-
-  const handleJobDepartmentBlur = useCallback(() => {
-    setIsDropdownOpen(false);
-  }, []);
+  const hasInitializedAreaFromEditRef = useRef<boolean>(false);
 
   const dropdownDepartmentsOptions =
     departments?.map(item => ({
@@ -323,17 +310,37 @@ const PostJob = () => {
       country: string;
     }
     | undefined
-  >();
+  >(initialUserAddressFromRoute);
+
+  useEffect(() => {
+    if (area?.value) {
+      setJobAreaText(area.value);
+      jobAreaRef.current?.setAddressText?.(area.value);
+      return;
+    }
+
+    if (initialUserAddressFromRoute?.address) {
+      setJobAreaText(initialUserAddressFromRoute.address);
+      jobAreaRef.current?.setAddressText?.(initialUserAddressFromRoute.address);
+    }
+  }, [area?.value, initialUserAddressFromRoute?.address]);
 
   useFocusEffect(
     useCallback(() => {
       const task = InteractionManager.runAfterInteractions(async () => {
         try {
+          // For Edit Job: on first mount, keep the area coming from job details.
+          if (editMode && area?.value && !hasInitializedAreaFromEditRef.current) {
+            hasInitializedAreaFromEditRef.current = true;
+            return;
+          }
+
           const locationString = await AsyncStorage.getItem('user_location');
           if (locationString !== null) {
             const location = JSON.parse(locationString);
             if (location.address && location.lat && location.lng) {
               setUserAddress(location);
+              setJobAreaText(location.address);
               updateJobForm({
                 area: {
                   label: location.address,
@@ -353,6 +360,7 @@ const PostJob = () => {
               state: userInfo.state || '',
               country: userInfo.country || '',
             });
+            setJobAreaText(userInfo.address);
             updateJobForm({
               area: {
                 label: userInfo.address,
@@ -375,6 +383,7 @@ const PostJob = () => {
                       state: '',
                       country: '',
                     });
+                    setJobAreaText(address);
                     // Also update the Job Area field with fetched address
                     updateJobForm({
                       area: {
@@ -395,7 +404,7 @@ const PostJob = () => {
       });
 
       return () => task.cancel();
-    }, [userInfo]),
+    }, [editMode, userInfo, area?.value]),
   );
 
   useEffect(() => {
@@ -529,6 +538,11 @@ const PostJob = () => {
 
     const finalLat = userAddress?.lat || location?.latitude || userInfo?.lat;
     const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
+
+    console.log(
+      '🔥 [CreateJob] using lat/lng:',
+      { finalLat, finalLng, userAddress, fallbackLocation: location, userInfoLat: userInfo?.lat, userInfoLng: userInfo?.lng },
+    );
 
     const [from, to] = salary?.value?.split('-') || [];
 
@@ -914,6 +928,7 @@ const PostJob = () => {
                   jobSkills.length > 0 && styles.selectedSkillsContainerFixed,
                 ]}>
                 <ScrollView
+                  ref={selectedSkillsScrollRef}
                   style={styles.selectedSkillsScroll}
                   contentContainerStyle={styles.selectedSkillsScrollContent}
                   nestedScrollEnabled
@@ -946,8 +961,14 @@ const PostJob = () => {
                         <Pressable
                           key={index}
                           onPress={() => {
+                            const isAdding = !jobSkills.includes(item.title);
                             toggleSkillId(item._id);
                             handleSkillSelection(item.title);
+                            if (isAdding) {
+                              setTimeout(() => {
+                                selectedSkillsScrollRef.current?.scrollToEnd?.({ animated: true });
+                              }, 150);
+                            }
                           }}
                           style={[
                             styles.skillOption,
@@ -1487,7 +1508,7 @@ const PostJob = () => {
             type="company"
             isRight={false}
             titleStyle={styles.title}
-            title={t('Post your job')}
+            title={t(editMode ? 'Edit your job' : 'Post your job')}
             containerStyle={styles.header}
             onBackPress={() => {
               dispatch(resetJobFormState());
@@ -1557,7 +1578,18 @@ const PostJob = () => {
                       isAutocompleteOpen && styles.autocompleteWrapperOpen,
                     ]}>
                     <GooglePlacesAutocomplete
+                      ref={jobAreaRef}
                       placeholder={'Search your job area'}
+                      textInputProps={{
+                        value: jobAreaText,
+                        onChangeText: text => {
+                          setJobAreaText(text);
+                          setIsAutocompleteOpen(true);
+                        },
+                        placeholderTextColor: colors._7B7878,
+                      }}
+                      onFocus={() => setIsAutocompleteOpen(true)}
+                      onBlur={() => setIsAutocompleteOpen(false)}
                       onPress={(data, details = null) => {
                         console.log('Selected:', data.description);
 
@@ -1600,6 +1632,8 @@ const PostJob = () => {
 
                         const lat = details?.geometry?.location?.lat;
                         const lng = details?.geometry?.location?.lng;
+
+                        setJobAreaText(displayAddress);
 
                         updateJobForm({
                           area: {
@@ -1784,11 +1818,21 @@ const PostJob = () => {
                     <CustomDropdown
                       data={
                         expiry_date
-                          ? [{ label: expiry_date, value: expiry_date }]
+                          ? (() => {
+                              const dateOnly =
+                                typeof expiry_date === 'string' && expiry_date.includes('T')
+                                  ? expiry_date.split('T')[0]
+                                  : expiry_date;
+                              return [{ label: dateOnly, value: dateOnly }];
+                            })()
                           : []
                       }
                       disable={true}
-                      value={expiry_date}
+                      value={
+                        typeof expiry_date === 'string' && expiry_date.includes('T')
+                          ? expiry_date.split('T')[0]
+                          : expiry_date
+                      }
                       placeholder="Select Date"
                       labelField="label"
                       valueField="value"
@@ -2430,6 +2474,13 @@ const styles = StyleSheet.create({
   },
   selectedSkillsContainer: {
     marginTop: hp(6),
+    borderWidth: 1.5,
+    borderColor: '#225797',
+    borderRadius: hp(12),
+    backgroundColor: '#F7F9FC',
+    paddingHorizontal: wp(12),
+    paddingVertical: hp(10),
+    minHeight: hp(56),
   },
   selectedSkillsContainerFixed: {
     height: hp(140),

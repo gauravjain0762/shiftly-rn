@@ -38,22 +38,29 @@ const LocationContainer: FC<map> = ({
   const { getAppData } = useSelector((state: RootState) => state.auth);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
 
-  useEffect(() => {
-    getLocation();
-  }, []);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
-  }>({
-    latitude: 0,
-    longitude: 0,
-  });
-  const getLocation = async () => {
-    const res = await getAsyncUserLocation();
-    if (res) {
-      setLocation(res);
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      setLocation({ latitude: lat, longitude: lng });
+      return;
     }
-  };
+
+    const loadLocation = async () => {
+      const res = await getAsyncUserLocation();
+      if (res) {
+        setLocation({
+          latitude: res.latitude,
+          longitude: res.longitude,
+        });
+      }
+    };
+
+    loadLocation();
+  }, [lat, lng]);
   return (
     <View style={[styles.map, containerStyle]}>
       {showAddressCard && (
@@ -72,12 +79,12 @@ const LocationContainer: FC<map> = ({
         </View>
       )}
       <Pressable onPress={onPressMap}>
-        {location?.latitude ? <>
+        {location ? (
           <MapView
-            key={`${lat}_${lng}`}
+            key={`${location.latitude}_${location.longitude}`}
             region={{
-              latitude: lat || location?.latitude,
-              longitude: lng || location?.longitude,
+              latitude: location.latitude,
+              longitude: location.longitude,
               latitudeDelta: 0.02,
               longitudeDelta: 0.02,
             }}
@@ -85,18 +92,16 @@ const LocationContainer: FC<map> = ({
             scrollEnabled={false}
             provider={Platform.OS === 'android' ? 'google' : undefined}
             style={styles.mapImage}>
-            <Marker
-              coordinate={{
-                latitude: lat || location?.latitude,
-                longitude: lng || location?.longitude,
-              }}>
+            <Marker coordinate={location}>
               <Image
                 source={IMAGES.location_marker}
                 style={styles.location_marker}
               />
             </Marker>
           </MapView>
-        </> : <View />}
+        ) : (
+          <View />
+        )}
       </Pressable>
     </View>
   );

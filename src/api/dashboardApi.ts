@@ -996,6 +996,7 @@ export const dashboardApi = createApi({
         method: HTTP_METHOD.POST,
         skipLoader: true,
       }),
+      invalidatesTags: ['GetCompanyNotifications'],
     }),
     removeEducation: builder.mutation<any, any>({
       query: params => {

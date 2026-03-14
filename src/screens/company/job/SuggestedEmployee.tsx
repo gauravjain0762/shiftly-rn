@@ -415,7 +415,6 @@ const SuggestedEmployeeScreen = () => {
     const initial = applications?.slice(0, 10) || [];
     return [...initial, ...extraApplicants];
   }, [applications, extraApplicants]);
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ displayApplicants:", displayApplicants)
 
   const renderSalaryRange = () => {
     const from = jobInfo?.monthly_salary_from;
@@ -583,8 +582,8 @@ const SuggestedEmployeeScreen = () => {
             </TouchableOpacity>
 
             <Text style={styles.shortlistedExp}>
-              {experience > 0
-                ? `${experience}y ${t('Experience')}`
+              {experience !== ""
+                ? `${experience}`
                 : t('No Experience')}
             </Text>
 

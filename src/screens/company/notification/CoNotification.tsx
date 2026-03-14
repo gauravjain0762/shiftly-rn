@@ -52,6 +52,10 @@ const CoNotification = () => {
 
   useEffect(() => {
     if (notificationsData) {
+      console.log(
+        '🔥 [Company] getCompanyNotifications list response:',
+        JSON.stringify(notificationsData, null, 2),
+      );
       const newData = notificationList;
       setAllNotifications(prev =>
         pagination?.current_page === 1 ? newData : [...prev, ...newData],
@@ -63,11 +67,16 @@ const CoNotification = () => {
   const handleClearAll = async () => {
     try {
       await markReadNotifications({notification_id: 'all'}).unwrap();
-      await clearAllNotifications().unwrap();
+      const clearResponse = await clearAllNotifications().unwrap();
+      console.log(
+        '🔥 [Company] clearAllNotifications API response:',
+        JSON.stringify(clearResponse, null, 2),
+      );
       setAllNotifications([]);
+      setPage(1);
       dispatch(setHasUnreadNotification(false));
     } catch (error) {
-      console.log('clearAllNotifications error:', error);
+      console.log('🔥 [Company] clearAllNotifications error:', error);
     }
   };
 

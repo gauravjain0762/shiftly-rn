@@ -307,7 +307,17 @@ ${salary}${shareUrlText}`;
             style={styles.button}
             title={t('Edit Job')}
             onPress={() => {
+              console.log(
+                '🔥 [Edit Job] raw jobDetail from API:',
+                JSON.stringify(jobDetail, null, 2),
+              );
+
               const mapped = mapJobToFormState(jobDetail);
+
+              console.log(
+                '🔥 [Edit Job] mapped job data for form:',
+                JSON.stringify(mapped, null, 2),
+              );
               dispatch(
                 setJobFormState({
                   job_id: job_id,
@@ -335,9 +345,13 @@ ${salary}${shareUrlText}`;
                         value: jobDetail?.duration,
                       }
                       : jobDetail?.duration,
-                  expiry_date: moment(jobDetail?.expiry_date).format(
-                    'YYYY-MM-DD',
-                  ),
+                  expiry_date: (() => {
+                    const raw = jobDetail?.expiry_date;
+                    if (!raw) return '';
+                    if (typeof raw === 'string' && raw.includes('T')) return raw.split('T')[0];
+                    const formatted = moment(raw).format('YYYY-MM-DD');
+                    return formatted === 'Invalid date' ? '' : formatted;
+                  })(),
                   job_sector:
                     typeof jobDetail?.job_sector === 'string'
                       ? {
@@ -393,7 +407,15 @@ ${salary}${shareUrlText}`;
                 }),
               );
               dispatch(setCoPostJobSteps(0));
-              navigateTo(SCREENS.PostJob);
+              navigateTo(SCREENS.PostJob, {
+                userAddress: {
+                  address: jobDetail?.area || jobDetail?.address || '',
+                  lat: jobDetail?.lat,
+                  lng: jobDetail?.lng,
+                  state: jobDetail?.city || '',
+                  country: jobDetail?.country || '',
+                },
+              });
             }}
           />
 
