@@ -278,16 +278,16 @@ const ApplyJob = () => {
         onClose={() => setCompleteProfileModal(false)}
         backgroundColor={colors.white}>
         <BaseText style={styles.completeProfileModalHeading}>
-          {t('Please first complete your profile')}
+          {t('Complete Your Profile')}
         </BaseText>
         <BaseText style={styles.completeProfileModalDescription}>
           {t(
-            "You're almost there! Your profile is 70% complete. Add your experience & skills to start applying for the best opportunities.",
+            'You need to complete your profile before applying for this job. Please add the required details to continue.',
           )}
         </BaseText>
         <GradientButton
           type="Company"
-          title={t('Complete My Profile')}
+          title={t('Complete Profile')}
           style={styles.completeProfileModalButton}
           onPress={() => {
             setCompleteProfileModal(false);
@@ -489,10 +489,12 @@ const styles = StyleSheet.create({
   completeProfileModalHeading: {
     ...commonFontStyle(600, 22, colors._0B3970),
     marginBottom: hp(12),
+    textAlign: 'center',
   },
   completeProfileModalDescription: {
     ...commonFontStyle(400, 16, colors._4A4A4A),
     marginBottom: hp(24),
+    textAlign: 'center',
   },
   completeProfileModalButton: {
     marginBottom: hp(12),

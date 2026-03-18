@@ -32,32 +32,32 @@ const DASH_COLOR = '#D9D9D9';
 const DASH_PATTERN = '4 4';
 
 // ─── Vertical dashed line ────────────────────────────────────────────────────
-// Fills the full remaining height of the rail so it always reaches the
-// horizontal separator below. For the last item a short fixed tail is drawn.
-const VerticalDashedLine = ({ isLast = false }: { isLast?: boolean }) => {
+// Fills the rail height and extends into the gap below so the line touches
+// the next item's dot (no space).
+const LINE_EXTENSION_TOUCH_NEXT_DOT = hp(10);
+
+const VerticalDashedLine = () => {
   const [height, setHeight] = useState(0);
-  const shortTailHeight = hp(20);
 
   return (
     <View
-      style={[styles.dashedLineContainer, isLast && styles.dashedLineShortTail]}
+      style={styles.dashedLineContainer}
       onLayout={(e) => {
-        if (isLast) return;
         const h = e.nativeEvent.layout.height;
         if (h > 0 && Math.abs(h - height) > 1) setHeight(h);
       }}
     >
-      {(height > 0 || isLast) && (
+      {height > 0 && (
         <Svg
           width={2}
-          height={isLast ? shortTailHeight : height}
-          style={{ position: 'absolute' }}
+          height={height + LINE_EXTENSION_TOUCH_NEXT_DOT}
+          style={styles.verticalLineSvg}
         >
           <Line
             x1={1}
             y1={0}
             x2={1}
-            y2={isLast ? shortTailHeight : height}
+            y2={height + LINE_EXTENSION_TOUCH_NEXT_DOT}
             stroke={DASH_COLOR}
             strokeWidth={1}
             strokeDasharray={DASH_PATTERN}
@@ -316,16 +316,17 @@ const ProfileScreen = () => {
 
                   return (
                     <React.Fragment key={exp?._id || `${title}-${index}`}>
-                      {/* ── Timeline row ── */}
+                      {/* ── Timeline row (content + horizontal separator when not last) ── */}
                       <View style={styles.timelineRow}>
                         {/* Left rail: dot + vertical dashed line */}
                         <View style={styles.timelineRail}>
                           <View style={styles.timelineDot} />
-                          <VerticalDashedLine isLast={isLast} />
+                          <VerticalDashedLine />
                         </View>
 
-                        {/* Content */}
-                        <View style={styles.timelineContent}>
+                        {/* Content + horizontal separator */}
+                        <View style={styles.timelineContentWrapper}>
+                          <View style={styles.timelineContent}>
                           {!!title && (
                             <BaseText style={styles.sectionItemTitle}>{title}</BaseText>
                           )}
@@ -368,14 +369,13 @@ const ProfileScreen = () => {
                             </View>
                           )}
                         </View>
-                      </View>
-
-                      {/* ── Full-width horizontal separator between items ── */}
-                      {!isLast && (
-                        <View style={styles.horizontalLineRow}>
-                          <HorizontalDashedLine />
+                        {!isLast && (
+                          <View style={styles.horizontalLineRow}>
+                            <HorizontalDashedLine />
+                          </View>
+                        )}
                         </View>
-                      )}
+                      </View>
                     </React.Fragment>
                   );
                 })}
@@ -419,16 +419,17 @@ const ProfileScreen = () => {
 
                   return (
                     <React.Fragment key={edu?._id || `${degree}-${index}`}>
-                      {/* ── Timeline row ── */}
+                      {/* ── Timeline row (content + horizontal separator when not last) ── */}
                       <View style={styles.timelineRow}>
                         {/* Left rail: dot + vertical dashed line */}
                         <View style={styles.timelineRail}>
                           <View style={styles.timelineDot} />
-                          <VerticalDashedLine isLast={isLast} />
+                          <VerticalDashedLine />
                         </View>
 
-                        {/* Content */}
-                        <View style={styles.timelineContent}>
+                        {/* Content + horizontal separator */}
+                        <View style={styles.timelineContentWrapper}>
+                          <View style={styles.timelineContent}>
                           {!!degree && (
                             <BaseText style={styles.sectionItemTitle}>{degree}</BaseText>
                           )}
@@ -451,14 +452,13 @@ const ProfileScreen = () => {
                             </View>
                           )}
                         </View>
-                      </View>
-
-                      {/* ── Full-width horizontal separator between items ── */}
-                      {!isLast && (
-                        <View style={styles.horizontalLineRow}>
-                          <HorizontalDashedLine />
+                        {!isLast && (
+                          <View style={styles.horizontalLineRow}>
+                            <HorizontalDashedLine />
+                          </View>
+                        )}
                         </View>
-                      )}
+                      </View>
                     </React.Fragment>
                   );
                 })}
@@ -660,21 +660,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 4,
     marginTop: hp(4),
+    overflow: 'visible',
   },
-  dashedLineShortTail: {
-    flex: 0,
-    height: hp(20),
+  verticalLineSvg: {
+    position: 'absolute',
+    overflow: 'visible',
   },
 
   // ── Horizontal separator ─────────────────────────────────────────────────
   // KEY FIX: no left spacer — the line spans the full card width so it
   // matches the Figma design where the separator goes edge-to-edge.
+  timelineContentWrapper: {
+    flex: 1,
+    flexDirection: 'column',
+  },
   horizontalLineRow: {
-    paddingVertical: hp(15)
+    paddingVertical: hp(15),
   },
   horizontalLineWrapper: {
     width: '90%',
-    paddingHorizontal: wp(30),
+    paddingHorizontal: wp(10),
   },
 
   timelineContent: {
