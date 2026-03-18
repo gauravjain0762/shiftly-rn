@@ -9,6 +9,7 @@ import JobListCard from '../../../component/common/JobListCard';
 import { useGetAppliedJobsQuery, useGetEmployeeJobsQuery, useGetInterviewsQuery } from '../../../api/dashboardApi';
 import { navigateTo } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { normalizeUrl } from '../../../utils/shareUtils';
 import Share from 'react-native-share';
 import { SCREENS } from '../../../navigation/screenNames';
 
@@ -145,7 +146,7 @@ const MyJobs = () => {
                     ? `Salary: ${getCurrencySymbol(job?.currency || 'USD')}${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`
                     : '';
 
-            const shareUrl = job?.share_url || '';
+            const shareUrl = normalizeUrl(job?.share_url);
             const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
             const message = `${title}\n\n${description}\n\n${salary}${shareUrlText}`;

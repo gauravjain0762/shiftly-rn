@@ -45,12 +45,15 @@ export interface AboutMe {
   selectOne?: string[];
   isOn?: boolean;
   location?: string;
+  locationLat?: number | null;
+  locationLng?: number | null;
   selectedLanguages?: string[];
   languages?: {name: string; level: string}[];
   proficiency?: string;
   checkEnd?: boolean;
   open_for_jobs?: boolean;
   selectedSkills?: string[];
+  years_of_experience?: string;
 }
 
 interface AuthState {
@@ -141,8 +144,8 @@ const initialState: EmployeeState = {
   isBannerLoaded: false,
   isSuccessModalVisible: false,
   auth: {
-    email: __DEV__ ? 'test111@yopmail.com' : '',
-    password: __DEV__ ? 'Test@123' : '',
+    email: __DEV__ ? 'amircs22222@gmail.com' : '',
+    password: __DEV__ ? 'Amir1234@' : '',
   },
   profile_completion: 0,
   viewCompanyProfileTabIndex: 0,

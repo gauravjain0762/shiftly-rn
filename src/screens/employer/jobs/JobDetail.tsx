@@ -46,6 +46,7 @@ import ReadMoreText from '../../../component/common/ReadMoreText';
 import CustomImage from '../../../component/common/CustomImage';
 import Carousel from 'react-native-reanimated-carousel';
 import { navigationRef } from '../../../navigation/RootContainer';
+import { normalizeUrl } from '../../../utils/shareUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -71,7 +72,7 @@ const JobDetail = () => {
   const curr_jobdetails = jobDetail?.data?.job;
   console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;
-  const shareUrl = jobDetail?.data?.share_url;
+  const shareUrl = normalizeUrl(jobDetail?.data?.share_url);
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});

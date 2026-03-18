@@ -4,15 +4,15 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import { IMAGES } from '../../assets/Images';
 import { commonFontStyle } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 import { useTranslation } from 'react-i18next';
 import { navigateTo, resetNavigation } from '../../utils/commonFunction';
 import { SCREENS } from '../../navigation/screenNames';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../assets/animation';
 
 const SuccessffullyModal = ({ visible, name = 'William', onClose }) => {
   const { t, i18n } = useTranslation();
@@ -27,12 +27,25 @@ const SuccessffullyModal = ({ visible, name = 'William', onClose }) => {
       style={styles.modal}
       useNativeDriver>
       <View style={styles.modalContent}>
-        <Image
+        {/* <Image
           source={IMAGES.welcome_icon}
           style={{
             width: 90,
             height: 90,
             resizeMode: 'contain',
+            alignSelf: 'center',
+          }}
+        /> */}
+
+        <LottieView
+          source={animation.success_check}
+          autoPlay
+          loop={false}
+          style={{
+            width: 90,
+            height: 90,
+            borderRadius: 90,
+            overflow: 'hidden',
             alignSelf: 'center',
           }}
         />

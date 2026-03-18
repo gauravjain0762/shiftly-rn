@@ -18,15 +18,15 @@ import BaseText from '../common/BaseText';
 import {ExperienceItem} from '../../features/employeeSlice';
 import {colors} from '../../theme/colors';
 import Tooltip from '../common/Tooltip';
-import {useGetDepartmentsQuery} from '../../api/dashboardApi';
+import {useGetDepartmentsQuery, useGetDropdownDataQuery} from '../../api/dashboardApi';
 
-const experienceOptions = [
-  {label: 'Internship', value: 'internship'},
-  {label: 'Part-time', value: 'part_time'},
-  {label: 'Full-time', value: 'full_time'},
-  {label: 'Freelance', value: 'freelance'},
-  {label: 'Contract', value: 'contract'},
-];
+const toJobTypeSlug = (title?: string) => {
+  return (title ?? '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+};
 
 export const isEmptyExperience = (exp: ExperienceItem) => {
   return (
@@ -50,6 +50,7 @@ const ExperienceList: FC<any> = ({
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {data: departmentsResponse} = useGetDepartmentsQuery({});
+  const {data: dropdownData} = useGetDropdownDataQuery();
   const departmentOptions = useMemo(() => {
     const list = departmentsResponse?.data?.departments ?? [];
     return list.map((item: any) => ({
@@ -57,6 +58,17 @@ const ExperienceList: FC<any> = ({
       value: item?._id ?? '',
     })).filter((opt: any) => opt.value);
   }, [departmentsResponse]);
+
+  const jobTypeOptions = useMemo(() => {
+    const list = dropdownData?.data?.job_types ?? [];
+    return list
+      .map((item: any) => {
+        const title = item?.title ?? '';
+        const value = toJobTypeSlug(title);
+        return {label: title, value};
+      })
+      .filter((opt: any) => opt.label && opt.value);
+  }, [dropdownData]);
 
   return (
     <View style={styles.wrapper}>
@@ -252,7 +264,7 @@ const ExperienceList: FC<any> = ({
       </Pressable>
 
       <CustomDropdown
-        data={experienceOptions}
+        data={jobTypeOptions}
         dropdownPosition="top"
         label="What type of experience"
         required

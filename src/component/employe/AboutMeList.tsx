@@ -316,8 +316,6 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
           ))}
         </View>
       )}
-
-      {/* <CustomSwitch isOn={aboutEdit?.open_for_jobs} setIsOn={setAboutEdit}  /> */}
     </View>
   );
 };

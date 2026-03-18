@@ -111,7 +111,7 @@ const EducationList: FC<Props> = ({
             setEducationListEdit({
               ...educationListEdit,
               startDate_month: date?.month?.toString(),
-              startDate_year: date?.year,
+              startDate_year: date?.year?.toString(),
             });
           }}
         />

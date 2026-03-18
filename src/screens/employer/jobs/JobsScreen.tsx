@@ -34,12 +34,14 @@ import {
   useAddRemoveFavouriteMutation,
   useGetFavouritesJobQuery,
   useGetFilterDataQuery,
+  useGetDropdownDataQuery,
   useLazyGetEmployeeJobsQuery,
 } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
 import RangeSlider from '../../../component/common/RangeSlider';
 import { SLIDER_WIDTH } from '../../company/job/CoJob';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
+import JobCardsSkeleton from '../../../component/skeletons/JobCardsSkeleton';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import BaseText from '../../../component/common/BaseText';
@@ -50,12 +52,12 @@ import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import CountryPicker from 'react-native-country-picker-modal';
 
-const contractTypes: object[] = [
-  { type: 'Full Time', value: 'Full Time' },
-  { type: 'Part Time', value: 'Part Time' },
-  { type: 'Temporary', value: 'Temporary' },
-  { type: 'Internship', value: 'Internship' },
-  { type: 'Freelance', value: 'Freelance' },
+const fallbackContractTypes: { _id: string; title: string }[] = [
+  { _id: 'full_time', title: 'Full Time' },
+  { _id: 'part_time', title: 'Part Time' },
+  { _id: 'temporary', title: 'Temporary' },
+  { _id: 'internship', title: 'Internship' },
+  { _id: 'freelance', title: 'Freelance' },
 ];
 
 const BannerItem = ({ item }: { item: any }) => {
@@ -99,6 +101,7 @@ const BannerItem = ({ item }: { item: any }) => {
 
 const JobsScreen = () => {
   const { t } = useTranslation();
+  const FILTER_SKELETON_MIN_MS = 900;
   const [activeIndex, setActiveIndex] = useState(0);
   const carouselRef = useRef<any>(null);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
@@ -106,10 +109,16 @@ const JobsScreen = () => {
 
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
   const { data: getDepartmentData } = useGetFilterDataQuery({});
+  const { data: dropdownData } = useGetDropdownDataQuery();
   const departments = getDepartmentData?.data?.job_sectors;
   const favJobList = getFavoriteJobs?.data?.jobs;
+  const jobTypes = useMemo(() => {
+    const list = dropdownData?.data?.job_types;
+    if (Array.isArray(list) && list.length > 0) return list;
+    return fallbackContractTypes;
+  }, [dropdownData]);
 
-  const [trigger, { data, isLoading }] = useLazyGetEmployeeJobsQuery();
+  const [trigger, { data, isLoading, isFetching }] = useLazyGetEmployeeJobsQuery();
   const jobList = data?.data?.jobs;
   const resumeList = data?.data?.resumes;
   const carouselImages = data?.data?.banners;
@@ -149,6 +158,9 @@ const JobsScreen = () => {
   const lastLoadedPageRef = useRef(0);
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const isFilterAppliedRef = useRef(false);
+  const [isApplyingFilter, setIsApplyingFilter] = useState(false);
+  const filterSkeletonStartMsRef = useRef<number>(0);
+  const filterSkeletonTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isRefetchingOnReturn, setIsRefetchingOnReturn] = useState(false);
   const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState('');
@@ -245,6 +257,20 @@ const JobsScreen = () => {
         lastLoadedPageRef.current = 1;
         setCurrentPage(1);
         setIsRefetchingOnReturn(false);
+        if (filterSkeletonTimeoutRef.current) {
+          clearTimeout(filterSkeletonTimeoutRef.current);
+          filterSkeletonTimeoutRef.current = null;
+        }
+        const elapsed = Date.now() - (filterSkeletonStartMsRef.current || 0);
+        const remaining = FILTER_SKELETON_MIN_MS - elapsed;
+        if (remaining > 0) {
+          filterSkeletonTimeoutRef.current = setTimeout(() => {
+            setIsApplyingFilter(false);
+            filterSkeletonTimeoutRef.current = null;
+          }, remaining);
+        } else {
+          setIsApplyingFilter(false);
+        }
         // Update hasMorePages based on pagination
         if (pagination.total_pages <= 1) {
           setHasMorePages(false);
@@ -372,6 +398,12 @@ const JobsScreen = () => {
     };
     setFilters(newFilters);
     setIsFilterModalVisible(false);
+    setIsApplyingFilter(true);
+    filterSkeletonStartMsRef.current = Date.now();
+    if (filterSkeletonTimeoutRef.current) {
+      clearTimeout(filterSkeletonTimeoutRef.current);
+      filterSkeletonTimeoutRef.current = null;
+    }
 
     setCurrentPage(1);
     setAllJobs([]);
@@ -429,6 +461,20 @@ const JobsScreen = () => {
       })
       .catch((error: any) => {
         console.log('🔥 ~ handleApplyFilter ~ API Error:', error);
+        if (filterSkeletonTimeoutRef.current) {
+          clearTimeout(filterSkeletonTimeoutRef.current);
+          filterSkeletonTimeoutRef.current = null;
+        }
+        const elapsed = Date.now() - (filterSkeletonStartMsRef.current || 0);
+        const remaining = FILTER_SKELETON_MIN_MS - elapsed;
+        if (remaining > 0) {
+          filterSkeletonTimeoutRef.current = setTimeout(() => {
+            setIsApplyingFilter(false);
+            filterSkeletonTimeoutRef.current = null;
+          }, remaining);
+        } else {
+          setIsApplyingFilter(false);
+        }
       });
   };
 
@@ -643,7 +689,14 @@ const JobsScreen = () => {
   }, [carouselImages, isAutoplayEnabled]);
 
   const showInitialSkeleton =
-    ((isLoading || !data) && currentPage === 1) || isRefetchingOnReturn;
+    isRefetchingOnReturn ||
+    ((currentPage === 1 && (isLoading || !data)) ||
+      (isApplyingFilter && currentPage === 1 && isLoading && allJobs.length === 0));
+  const showJobsListSkeleton =
+    !showInitialSkeleton &&
+    (isApplyingFilter ||
+      // Use isFetching for subsequent calls (filters/pagination) - prevents empty state flash
+      (currentPage === 1 && isFetching && (allJobs?.length ?? 0) === 0));
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
@@ -751,7 +804,11 @@ const JobsScreen = () => {
             />
           </View>
           <FlatList
-            data={sortedJobList.length > 0 ? sortedJobList : allJobs}
+            data={
+              showJobsListSkeleton
+                ? []
+                : (sortedJobList.length > 0 ? sortedJobList : allJobs)
+            }
             style={AppStyles.flex}
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }: any) => {
@@ -775,14 +832,20 @@ const JobsScreen = () => {
             keyExtractor={(item, index) => item?._id || index.toString()}
             ItemSeparatorComponent={() => <View style={{ height: hp(28) }} />}
             contentContainerStyle={styles.scrollContainer}
-            onEndReached={hasMorePages ? loadMoreJobs : undefined}
+            onEndReached={
+              showJobsListSkeleton ? undefined : (hasMorePages ? loadMoreJobs : undefined)
+            }
             onEndReachedThreshold={0.5}
             ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <BaseText style={styles.emptyText}>
-                  We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
-                </BaseText>
-              </View>
+              showJobsListSkeleton ? (
+                <JobCardsSkeleton />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <BaseText style={styles.emptyText}>
+                    We couldn't find a perfect match right now. Try updating your profile or check back soon for new opportunities.
+                  </BaseText>
+                </View>
+              )
             }
             ListFooterComponent={
               isLoadingMore ? (
@@ -950,18 +1013,21 @@ const JobsScreen = () => {
 
           <Text style={styles.sectionLabel}>{t('Job Type')}</Text>
           <View style={styles.pillRow}>
-            {contractTypes.map((job: any) => {
-              const isSelected = filters.contract_types.includes(job.type);
+            {jobTypes.map((job: any) => {
+              const jobId = (job?._id ?? '').toString();
+              const jobTitle = job?.title ?? job?.value ?? '';
+              const isSelected = !!jobId && filters.contract_types.includes(jobId);
               return (
                 <Pressable
-                  key={job.type}
+                  key={jobId || jobTitle}
                   style={[styles.pill, isSelected && styles.pillSelected]}
                   onPress={() => {
+                    if (!jobId) return;
                     setFilters(prev => ({
                       ...prev,
                       contract_types: isSelected
-                        ? prev.contract_types.filter(j => j !== job.type)
-                        : [...prev.contract_types, job.type],
+                        ? prev.contract_types.filter(j => j !== jobId)
+                        : [...prev.contract_types, jobId],
                     }));
                   }}>
                   <Text
@@ -969,7 +1035,7 @@ const JobsScreen = () => {
                       styles.pillText,
                       isSelected && styles.pillTextSelected,
                     ]}>
-                    {job.value}
+                    {jobTitle}
                   </Text>
                 </Pressable>
               );

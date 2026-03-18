@@ -3,6 +3,14 @@ import RNFS from 'react-native-fs';
 import {getCurrencySymbol} from './currencySymbols';
 import {IMAGES} from '../assets/Images';
 
+export const normalizeUrl = (raw?: string) => {
+  const url = (raw ?? '').trim();
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  // Some backends send "www.domain.com/..." or "domain.com/..."
+  return `https://${url.replace(/^\/+/, '')}`;
+};
+
 const downloadImage = async (url: string) => {
   const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
 
@@ -26,7 +34,7 @@ export const shareJob = async (item: any) => {
           )}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
         : '';
 
-    const shareUrl = item?.share_url || 'https://shiftly.ae/'; // Fallback if needed, or leave empty
+    const shareUrl = normalizeUrl(item?.share_url) || 'https://shiftly.ae/';
     const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
     const message = `${title}

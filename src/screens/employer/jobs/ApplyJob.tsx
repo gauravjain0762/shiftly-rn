@@ -126,7 +126,7 @@ const ApplyJob = () => {
             <View style={{ flex: 1 }}>
               <Text style={styles.jobTitle}>{data?.title}</Text>
               <Text style={{ ...commonFontStyle(400, 15, colors._050505) }}>{data?.company_id?.company_name || "N/A"}</Text>
-              <Text style={styles.location}>{`${data?.city || "N/A"}, ${data?.country || "N/A"}`}</Text>
+              <Text style={styles.location}>{data?.country || 'N/A'}</Text>
               <View
                 style={{
                   gap: wp(10),

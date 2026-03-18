@@ -8,6 +8,7 @@ import { getCurrencySymbol } from '../../utils/currencySymbols';
 import Share from 'react-native-share';
 import { Eye } from 'lucide-react-native';
 import { SCREENS } from '../../navigation/screenNames';
+import { normalizeUrl } from '../../utils/shareUtils';
 
 type Props = {
     item: any;
@@ -27,7 +28,7 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                     ? `Salary: ${getCurrencySymbol(item?.currency || 'USD')}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
                     : '';
 
-            const shareUrl = item?.share_url || '';
+            const shareUrl = normalizeUrl(item?.share_url);
             const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
             const message = `${title}\n\n${description}\n\n${salary}${shareUrlText}`;

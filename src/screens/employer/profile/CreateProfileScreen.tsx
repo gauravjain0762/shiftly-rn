@@ -462,6 +462,41 @@ const CreateProfileScreen = () => {
         const dep = exp?.department as any;
         const departmentId =
           typeof dep === 'object' && dep?._id ? dep._id : (exp?.department ?? '');
+        const isLikelyCompleteExperience =
+          !!exp?.title &&
+          !!exp?.company &&
+          !!exp?.country &&
+          !!exp?.jobStart_month &&
+          !!exp?.jobStart_year &&
+          !!exp?.experience_type &&
+          (!!exp?.still_working || (!!exp?.jobEnd_month && !!exp?.jobEnd_year));
+
+        console.log(
+          '🧩 [Experience submit check]',
+          JSON.stringify(
+            {
+              experience_id: exp?.experience_id,
+              _id: exp?._id,
+              title: exp?.title,
+              company: exp?.company,
+              country: exp?.country,
+              department_raw: exp?.department,
+              department_object_id: typeof dep === 'object' ? dep?._id : undefined,
+              departmentId_computed: departmentId,
+              isLikelyCompleteExperience,
+            },
+            null,
+            2,
+          ),
+        );
+
+        if (!departmentId || String(departmentId).trim().length === 0) {
+          // Only block/toast when the row is otherwise ready to submit.
+          if (isLikelyCompleteExperience) {
+            errorToast('Please select a department for all experiences');
+          }
+          continue;
+        }
         const payload = {
           experience_id: exp._id || '',
           title: exp?.title,
@@ -534,7 +569,6 @@ const CreateProfileScreen = () => {
       })();
 
     const debugPayload: any = {
-      open_for_job: !!aboutEdit?.open_for_jobs,
       about: aboutEdit?.about || '',
       city,
       country,
@@ -558,7 +592,6 @@ const CreateProfileScreen = () => {
       JSON.stringify(debugPayload, null, 2),
     );
 
-    formData.append('open_for_job', debugPayload.open_for_job ? '1' : '0');
     formData.append('about', debugPayload.about);
     if (city) formData.append('city', city);
     if (country) formData.append('country', country);
@@ -817,27 +850,50 @@ const CreateProfileScreen = () => {
                     type="Education"
                     onRemove={() => handleRemoveEducation(item)}
                     onEdit={() => {
+                      const parseEduDate = (
+                        val?: string | {month?: string; year?: string} | null,
+                      ) => {
+                        if (!val) return {month: '', year: ''};
+                        if (typeof val === 'object') {
+                          return {
+                            month: val.month || '',
+                            year: val.year || '',
+                          };
+                        }
+                        if (typeof val === 'string') {
+                          const parts = val.trim().split(/\s+/);
+                          return {
+                            month: parts[0] || '',
+                            year: parts[1] || '',
+                          };
+                        }
+                        return {month: '', year: ''};
+                      };
+
                       const deg = item?.degree as any;
                       const degreeId =
                         typeof deg === 'object' && deg?._id
                           ? deg._id
                           : (item?.degree ?? '');
+
+                      const start = parseEduDate(
+                        (item as any)?.startDate || (item as any)?.start_date,
+                      );
+                      const end = parseEduDate(
+                        (item as any)?.endDate || (item as any)?.end_date,
+                      );
                       dispatch(
                         setEducationListEdit({
                           ...item,
                           degree: degreeId,
                           startDate_month:
-                            item?.startDate_month ||
-                            item?.start_date?.month ||
-                            '',
+                            item?.startDate_month || start.month || '',
                           startDate_year:
-                            item?.startDate_year ||
-                            item?.start_date?.year ||
-                            '',
+                            (item?.startDate_year || start.year || '').toString(),
                           endDate_month:
-                            item?.endDate_month || item?.end_date?.month || '',
+                            item?.endDate_month || end.month || '',
                           endDate_year:
-                            item?.endDate_year || item?.end_date?.year || '',
+                            (item?.endDate_year || end.year || '').toString(),
                           isEditing: true,
                         }),
                       );

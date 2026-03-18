@@ -19,28 +19,57 @@ const NotificationCard: FC<props> = ({ item }: any) => {
   const isRead = !!item?.isRead;
   const showUnreadDot = !isRead;
 
-  const { data: jobDetail } = useGetEmployeeJobDetailsQuery(
-    notifType === 'interview' ? item?.data?.id : undefined,
-  );
+  const interviewJobId = notifType === 'interview' ? item?.data?.id : undefined;
+  const { data: jobDetail } = useGetEmployeeJobDetailsQuery(interviewJobId, {
+    skip: notifType !== 'interview' || !interviewJobId,
+  } as any);
 
   const [markReadNotifications] = useMarkReadNotificationsMutation();
 
   const handlePress = async () => {
-    if (notifType === 'interview') {
-      const notificationId = item?._id;
-      try {
-        if (notificationId) {
-          await markReadNotifications({ notification_id: notificationId }).unwrap();
-        }
-      } catch (e) {
-        console.log('markReadNotifications error:', e);
+    const notificationId = item?._id;
+    try {
+      if (notificationId) {
+        await markReadNotifications({notification_id: notificationId}).unwrap();
       }
+    } catch (e) {
+      console.log('markReadNotifications error:', e);
     }
-    if (notifType === 'interview') {
+
+    const type = (notifType ?? '').toString().toLowerCase();
+
+    if (type === 'interview') {
       navigateTo(SCREENS.JobInvitationScreen, {
         link: item?.data?.interview_link,
         jobDetail: jobDetail?.data,
       });
+      return;
+    }
+
+    if (type === 'chat' || type === 'message') {
+      const chatId =
+        item?.data?.chat_id ||
+        item?.data?.chatId ||
+        item?.data?.chat?._id ||
+        item?.data?.chat?.chat_id ||
+        item?.data?.id;
+
+      if (chatId) {
+        navigateTo(SCREENS.Chat, {
+          data: {
+            ...(typeof item?.data?.chat === 'object' ? item.data.chat : {}),
+            chat_id: chatId,
+            company_name:
+              item?.data?.company_name ||
+              item?.data?.company?.company_name ||
+              item?.data?.chat?.company_name ||
+              item?.data?.chat?.company_id?.company_name,
+            job_id: item?.data?.job_id || item?.data?.chat?.job_id,
+            job_title: item?.data?.job_title || item?.data?.chat?.job_title,
+            created_at: item?.data?.created_at || item?.createdAt,
+          },
+        });
+      }
     }
   };
 
