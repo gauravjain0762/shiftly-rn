@@ -19,9 +19,13 @@ import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import { useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEmployeeApplyJobMutation } from '../../../api/dashboardApi';
+import {
+  useEmployeeApplyJobMutation,
+  useGetEmployeeProfileQuery,
+} from '../../../api/dashboardApi';
 import {
   errorToast,
+  navigateTo,
   resetNavigation,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
@@ -32,6 +36,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsSuccessModalVisible } from '../../../features/employeeSlice';
 import Tooltip from '../../../component/common/Tooltip';
 import RNFS from 'react-native-fs';
+import BottomModal from '../../../component/common/BottomModal';
+import BaseText from '../../../component/common/BaseText';
+
+const isProfileComplete = (user: any) => {
+  const education = Array.isArray(user?.education)
+    ? user?.education
+    : user?.education
+      ? [user?.education]
+      : [];
+  const experience = Array.isArray(user?.experience)
+    ? user?.experience
+    : user?.experience
+      ? [user?.experience]
+      : [];
+  return education?.length > 0 && experience?.length > 0;
+};
 
 const ApplyJob = () => {
   const { t } = useTranslation();
@@ -45,6 +65,8 @@ const ApplyJob = () => {
   const { bottom } = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
+  const [completeProfileModal, setCompleteProfileModal] = useState(false);
+  const { data: employeeProfile } = useGetEmployeeProfileQuery({});
   const { isSuccessModalVisible } = useSelector(
     (state: RootState) => state.employee,
   );
@@ -62,6 +84,12 @@ const ApplyJob = () => {
   };
 
   const handleApplyJob = async () => {
+    const user = employeeProfile?.data?.user;
+    if (!isProfileComplete(user)) {
+      setCompleteProfileModal(true);
+      return;
+    }
+
     if (!selectedDoc || (!selectedDoc?._id && !selectedDoc?.file)) {
       errorToast(t('Please select or upload a resume'));
       return;
@@ -245,6 +273,36 @@ const ApplyJob = () => {
         visible={isSuccessModalVisible}
       />
 
+      <BottomModal
+        visible={completeProfileModal}
+        onClose={() => setCompleteProfileModal(false)}
+        backgroundColor={colors.white}>
+        <BaseText style={styles.completeProfileModalHeading}>
+          {t('Please first complete your profile')}
+        </BaseText>
+        <BaseText style={styles.completeProfileModalDescription}>
+          {t(
+            "You're almost there! Your profile is 70% complete. Add your experience & skills to start applying for the best opportunities.",
+          )}
+        </BaseText>
+        <GradientButton
+          type="Company"
+          title={t('Complete My Profile')}
+          style={styles.completeProfileModalButton}
+          onPress={() => {
+            setCompleteProfileModal(false);
+            navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
+          }}
+        />
+        <TouchableOpacity
+          style={styles.completeProfileModalCancel}
+          onPress={() => setCompleteProfileModal(false)}>
+          <Text style={styles.completeProfileModalCancelText}>
+            {t('Cancel')}
+          </Text>
+        </TouchableOpacity>
+      </BottomModal>
+
       <ImagePickerModal
         actionSheet={imageModal}
         setActionSheet={setImageModal}
@@ -427,5 +485,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderColor: colors._0B3970,
     backgroundColor: colors.white,
+  },
+  completeProfileModalHeading: {
+    ...commonFontStyle(600, 22, colors._0B3970),
+    marginBottom: hp(12),
+  },
+  completeProfileModalDescription: {
+    ...commonFontStyle(400, 16, colors._4A4A4A),
+    marginBottom: hp(24),
+  },
+  completeProfileModalButton: {
+    marginBottom: hp(12),
+  },
+  completeProfileModalCancel: {
+    paddingVertical: hp(12),
+    alignItems: 'center',
+  },
+  completeProfileModalCancelText: {
+    ...commonFontStyle(500, 16, colors._4A4A4A),
   },
 });
