@@ -290,9 +290,8 @@ ${salary}${shareUrlText}`;
 
   const handleLearnMore = () => {
     if (curr_jobdetails?.company_id?._id) {
-      (navigationRef.navigate as any)(SCREENS.CompanyProfile, {
+      navigateTo(SCREENS.ViewCompanyProfile, {
         companyId: curr_jobdetails?.company_id?._id,
-        fromJobDetail: true,
       });
     }
   };
