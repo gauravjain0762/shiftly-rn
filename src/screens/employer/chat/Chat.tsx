@@ -187,7 +187,11 @@ const Chat = () => {
       <View style={{ flex: 1, paddingBottom: isAndroid ? 0 : hp(25), paddingTop: insets.top, backgroundColor: Colors.white}}>
         <View style={styles.container}>
           <BackHeader
-            title={jobdetail_chatData?.company_name || 'Unknown'}
+            title={
+              jobdetail_chatData?.company_name ||
+              chats?.data?.chat?.company_id?.company_name ||
+              'Unknown'
+            }
             // RightIcon={
             //   <CustomImage
             //     onPress={() => {
