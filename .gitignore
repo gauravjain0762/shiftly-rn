@@ -39,6 +39,7 @@ local.properties
 .kotlin/
 *.aab
 *.apk
+android/app/release/baselineProfiles/
 
 # node.js
 #
