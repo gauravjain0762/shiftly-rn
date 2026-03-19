@@ -229,6 +229,9 @@ const SignUp = () => {
                 : response?.data?.user,
             ),
           );
+          // Start 30s countdown when OTP is first sent (first time on Verify OTP screen)
+          updateSignupData({ timer: 30 });
+          setTimer(30);
         }
         nextStep();
       } else {
@@ -279,6 +282,7 @@ const SignUp = () => {
       if (response?.status) {
         successToast(response?.message);
         dispatch(setUserInfo(response?.data));
+        setTimer(30);
         updateSignupData({ timer: 30 });
         // dispatch(clearEmployeeAccount());
       } else {

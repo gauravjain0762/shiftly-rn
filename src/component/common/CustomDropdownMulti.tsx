@@ -45,6 +45,9 @@ type Props = {
   dropdownPosition?: 'top' | 'bottom' | 'auto';
   hideSelectedItems?: boolean;
   labelStyle?: TextStyle;
+  searchPlaceholder?: string;
+  /** Light theme for dropdown overlay - white bg, dark text (for screens like About Me) */
+  lightTheme?: boolean;
 };
 
 const CustomDropdownMulti = ({
@@ -78,7 +81,13 @@ const CustomDropdownMulti = ({
   dropdownPosition,
   hideSelectedItems = false,
   labelStyle,
+  searchPlaceholder,
+  lightTheme = false,
 }: Props) => {
+  const dropdownContainerStyle = lightTheme
+    ? [styles.containerStyle, styles.containerStyleLight]
+    : styles.containerStyle;
+
   return (
     <>
       <View style={container}>
@@ -94,7 +103,6 @@ const CustomDropdownMulti = ({
           }}
           data={data}
           value={value}
-          // onChange={item => onChange(item)}
           onChange={items => onChange?.(items)}
           disable={disable}
           dropdownPosition={dropdownPosition ||'bottom'}
@@ -103,13 +111,14 @@ const CustomDropdownMulti = ({
           labelField={labelField === undefined ? 'label' : labelField}
           valueField={valueField === undefined ? 'value' : valueField}
           placeholder={placeholder}
-          placeholderStyle={[styles.placeholderStyle,placeholderStyle]}
-          // itemContainerStyle={styles.containerStyle}
-          containerStyle={styles.containerStyle}
+          placeholderStyle={[styles.placeholderStyle, placeholderStyle]}
+          containerStyle={dropdownContainerStyle}
           selectedTextStyle={styles.inputStyle}
           selectedStyle={[{borderRadius: 20}, selectedStyle]}
           search={isSearch || false}
-          maxHeight={200}
+          searchPlaceholder={searchPlaceholder}
+          inputSearchStyle={lightTheme ? styles.searchInputLight : undefined}
+          maxHeight={300}
           minHeight={30}
           keyboardAvoiding={true}
           activeColor={'transparent'}
@@ -133,21 +142,20 @@ const CustomDropdownMulti = ({
           }}
           renderItem={(item: any) => {
             const isSelected = value?.includes(item?.[valueField || 'value']);
+            const textColor = lightTheme
+              ? (isSelected ? colors._0B3970 : '#333')
+              : (isSelected ? '#F4E2B8' : '#DADADA');
             return (
               <View style={styles.item}>
                 <Text
-                  style={[
-                    styles.itemText,
-                    {color: isSelected ? '#F4E2B8' : '#DADADA'},
-                  ]}>
+                  style={[styles.itemText, {color: textColor}]}>
                   {item?.[labelField || 'label']}
                 </Text>
                 {isSelected && (
                   <Image
-                    source={
-                      IMAGES.check_circle // ✔ filled icon
-                    }
-                    style={styles.checkIcon}
+                    source={IMAGES.check_circle}
+                    style={[styles.checkIcon, lightTheme && {tintColor: colors._0B3970}]}
+                    resizeMode="contain"
                   />
                 )}
               </View>
@@ -193,6 +201,29 @@ const styles = StyleSheet.create({
     zIndex: 1,
     width: Dimensions.get('window').width - 48,
     left: 24,
+  },
+  containerStyleLight: {
+    backgroundColor: colors.white,
+    borderColor: '#E0E0E0',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 9999,
+  },
+  searchInputLight: {
+    backgroundColor: '#F5F5F5',
+    color: '#333',
+    borderRadius: 12,
+    marginHorizontal: wp(12),
+    marginBottom: hp(8),
+    marginTop: hp(4),
+    paddingVertical: hp(10),
+    paddingHorizontal: wp(14),
+    fontSize: 16,
+    minHeight: 44,
   },
   inputContainer: {
     borderWidth: 0.5,

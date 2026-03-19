@@ -217,8 +217,22 @@ const CreateProfileScreen = () => {
     }
 
     if (aboutmeandResumes) {
+      const isReturningFromLocation = !!route.params?.selectedLocation;
+      if (isReturningFromLocation) {
+        const locationLat = aboutmeandResumes?.lat ?? userInfo?.lat ?? null;
+        const locationLng = aboutmeandResumes?.lng ?? userInfo?.lng ?? null;
+        dispatch(
+          setAboutEdit({
+            ...aboutEdit,
+            location: route.params!.selectedLocation!,
+            locationLat,
+            locationLng,
+          }),
+        );
+        return;
+      }
+
       const locationValue =
-        route.params?.selectedLocation ||
         aboutmeandResumes?.location ||
         userInfo?.address ||
         '';
@@ -229,20 +243,20 @@ const CreateProfileScreen = () => {
       const skillsFromApi = (aboutmeandResumes?.skills || []).map((s: any) =>
         typeof s === 'string' ? s : s._id,
       );
-      const languagesFromApi = aboutmeandResumes?.languages || [];
       const preserveLocalSkills = (aboutEdit?.selectedSkills?.length ?? 0) > 0;
       const preserveLocalLanguages = (aboutEdit?.selectedLanguages?.length ?? 0) > 0;
+      const hasLocalAboutText = (aboutEdit?.about?.trim?.()?.length ?? 0) > 0;
 
       dispatch(
         setAboutEdit({
           open_for_jobs: aboutmeandResumes?.open_for_job || false,
-          about: aboutmeandResumes?.about || '',
+          about: hasLocalAboutText ? (aboutEdit?.about ?? '') : (aboutmeandResumes?.about || ''),
           responsibilities: aboutmeandResumes?.responsibility || '',
           location: locationValue,
           locationLat,
           locationLng,
-          selectedSkills: preserveLocalSkills ? aboutEdit.selectedSkills : skillsFromApi,
-          selectedLanguages: preserveLocalLanguages ? aboutEdit.selectedLanguages : languagesFromApi,
+          selectedSkills: preserveLocalSkills ? aboutEdit!.selectedSkills! : skillsFromApi,
+          selectedLanguages: preserveLocalLanguages ? aboutEdit!.selectedLanguages! : (aboutmeandResumes?.languages || []),
         }),
       );
     }
@@ -949,9 +963,14 @@ const CreateProfileScreen = () => {
                       const start = parseDate(item?.job_start);
                       const end = parseDate(item?.job_end);
 
-                      const dep = item?.department as any;
+                      // Extract department ID - API may return department or department_id as object or string
+                      const dep = item?.department ?? item?.department_id;
                       const departmentId =
-                        typeof dep === 'object' && dep?._id ? dep._id : (item?.department ?? '');
+                        typeof dep === 'object' && dep?._id
+                          ? dep._id
+                          : typeof dep === 'string'
+                            ? dep
+                            : '';
                       dispatch(
                         setExperienceListEdit({
                           ...item,

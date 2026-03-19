@@ -93,19 +93,22 @@ const CoNotification = () => {
   };
 
   const handleNotificationPress = async (item: any) => {
-    const notifType = item?.data?.type || item?.type;
-    if (notifType === 'interview') {
-      const notificationId = item?._id;
-      try {
-        if (notificationId) {
-          await markReadNotifications({ notification_id: notificationId }).unwrap();
-        }
-      } catch (e) {
-        console.log('markReadNotifications error:', e);
+    const notifType = (item?.data?.type || item?.type || '').toString().toLowerCase();
+    const notificationId = item?._id;
+
+    try {
+      if (notificationId) {
+        await markReadNotifications({ notification_id: notificationId }).unwrap();
       }
+    } catch (e) {
+      console.log('markReadNotifications error:', e);
     }
-    if (notifType === 'chat') {
-      navigateTo(SCREENS.CoChat, { data: { chat_id: item?.data?.id } });
+
+    if (notifType === 'chat' || notifType === 'message') {
+      const chatId = item?.data?.id || item?.data?.chat_id || item?.data?.chatId;
+      if (chatId) {
+        navigateTo(SCREENS.CoChat, { data: { chat_id: chatId } });
+      }
     } else if (notifType === 'interview') {
       const jobId = item?.data?.job_id || item?.data?.id;
       if (jobId) {

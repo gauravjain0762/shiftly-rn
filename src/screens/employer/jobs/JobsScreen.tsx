@@ -4,6 +4,7 @@ import {
   Image,
   Linking,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -164,6 +165,7 @@ const JobsScreen = () => {
   const [isRefetchingOnReturn, setIsRefetchingOnReturn] = useState(false);
   const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   const selectedDepartmentLabel = useMemo(() => {
     if (!filters.job_sectors?.length || !departments?.length) return '';
@@ -346,10 +348,12 @@ const JobsScreen = () => {
           new Date(a.createdAt || 0).getTime(),
       );
     } else if (sortBy === 'salary_high_low') {
-      sorted.sort(
-        (a, b) =>
-          (b.monthly_salary_to || 0) - (a.monthly_salary_to || 0),
-      );
+      sorted.sort((a, b) => {
+        const diff = (b.monthly_salary_to || 0) - (a.monthly_salary_to || 0);
+        // When max salary is equal, use min salary as tiebreaker (higher min = better)
+        if (diff !== 0) return diff;
+        return (b.monthly_salary_from || 0) - (a.monthly_salary_from || 0);
+      });
     } else if (sortBy === 'salary_low_high') {
       sorted.sort(
         (a, b) =>
@@ -651,6 +655,25 @@ const JobsScreen = () => {
 
   const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(false);
 
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    lastLoadedPageRef.current = 0;
+    const defaultSalaryFrom = 0;
+    const defaultSalaryTo = 50000;
+    const queryParams: any = {
+      page: 1,
+      salary_from: filters.salary_from ?? defaultSalaryFrom,
+    };
+    if (filters.location?.trim()) queryParams.location = filters.location;
+    if (filters.contract_types?.length) queryParams.contract_types = filters.contract_types.join(',');
+    if (filters.salary_to && filters.salary_to !== defaultSalaryTo) queryParams.salary_to = filters.salary_to;
+    const departmentIds = filters.job_sectors
+      ?.filter((id: any) => typeof id === 'string' && id.trim() !== '')
+      .join(',');
+    if (departmentIds) queryParams.departments = departmentIds;
+    trigger(queryParams).finally(() => setRefreshing(false));
+  }, [trigger, filters]);
+
   useEffect(() => {
     if (carouselImages?.length) {
       const images = carouselImages.map((item: any) => item?.image).filter(Boolean);
@@ -811,6 +834,14 @@ const JobsScreen = () => {
             }
             style={AppStyles.flex}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                colors={[colors.empPrimary]}
+                tintColor={colors.empPrimary}
+              />
+            }
             renderItem={({ item, index }: any) => {
               const isFavorite = localFavorites.includes(item?._id);
               return (

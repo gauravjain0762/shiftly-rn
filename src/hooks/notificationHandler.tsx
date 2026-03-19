@@ -1,10 +1,13 @@
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setFcmToken, setHasUnreadNotification } from '../features/authSlice';
 import { PermissionsAndroid, Platform, Linking } from 'react-native';
 import { errorToast, navigateTo } from '../utils/commonFunction';
 import { SCREENS } from '../navigation/screenNames';
 import { store } from '../store';
+
+const ROLE_STORAGE_KEY = 'userRole';
 
 //
 // 🔔 Display Notification + Badge Update
@@ -223,7 +226,6 @@ export const navigateToOrderDetails = async (remoteMessage: any) => {
       const supported = await Linking.canOpenURL(data.interview_link);
 
       if (supported) {
-        // await Linking.openURL(data.interview_link);
         navigateTo(SCREENS.JobInvitationScreen, {
           link: data.interview_link,
           jobDetail: data.job_detail,
@@ -232,12 +234,31 @@ export const navigateToOrderDetails = async (remoteMessage: any) => {
         console.error('Cannot open URL:', data.interview_link);
         errorToast('Unable to open interview link');
       }
-    } else {
-      // Handle other notification types here
-      console.log('Other notification type:', data.type);
-      // Add your navigation logic for other types
-      // Example: navigateTo(SCREENS.SomeScreen, { id: data.id });
+      return;
     }
+
+    // Check if notification type is "chat" or "message"
+    if ((data.type === 'chat' || data.type === 'message') && data.id) {
+      const chatId = data.id;
+      const role = await AsyncStorage.getItem(ROLE_STORAGE_KEY);
+
+      if (role === 'company') {
+        navigateTo(SCREENS.CoChat, { data: { chat_id: chatId } });
+      } else {
+        navigateTo(SCREENS.Chat, {
+          data: {
+            chat_id: chatId,
+            company_name: data.company_name,
+            job_id: data.job_id,
+            job_title: data.job_title,
+            created_at: data.created_at,
+          },
+        });
+      }
+      return;
+    }
+
+    console.log('Other notification type:', data.type);
   } catch (error) {
     console.error('Error navigating from notification:', error);
     errorToast('Failed to open notification');

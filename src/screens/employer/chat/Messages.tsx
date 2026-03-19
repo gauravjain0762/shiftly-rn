@@ -66,6 +66,10 @@ const Messages = () => {
     }
   }, [chatsData, chats]);
 
+  useEffect(() => {
+    setExtraChats([]);
+  }, [chatsData]);
+
   const handleLoadMore = useCallback(async () => {
     if (!hasMore || isFetching) return;
     
@@ -112,7 +116,16 @@ const Messages = () => {
     }
   }, [hasMore, isFetching, currentPage, fetchMoreChats]);
 
-  const displayChats = [...chats, ...extraChats];
+  // Deduplicate by _id so we never show the same chat twice (e.g. when stale extraChats +
+  // fresh chats from refetch get merged). Prefer first occurrence (from chats).
+  const seenIds = new Set<string>();
+  const displayChats = [...chats, ...extraChats].filter((c: any) => {
+    const id = c?._id || c?.chat_id;
+    if (!id) return true;
+    if (seenIds.has(id)) return false;
+    seenIds.add(id);
+    return true;
+  });
 
   const filteredChats = displayChats.filter((item: any) => {
     const companyName = item?.company_id?.company_name || item?.company_name || '';

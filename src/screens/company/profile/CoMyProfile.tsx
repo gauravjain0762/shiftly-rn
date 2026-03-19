@@ -19,6 +19,7 @@ import {RootState} from '../../../store';
 import {Flag} from 'react-native-country-picker-modal';
 import {callingCodeToCountry} from '../../employer/profile/ViewProfileScreen';
 import CustomImage from '../../../component/common/CustomImage';
+import ReadMoreText from '../../../component/common/ReadMoreText';
 
 const CoMyProfile = () => {
   const {t} = useTranslation();
@@ -64,7 +65,11 @@ const CoMyProfile = () => {
           {/* About / Description */}
           <View style={{marginVertical: hp(18)}}>
             <Text style={styles.labelText}>{t('Description')}</Text>
-            <Text style={styles.descText}>{userInfo?.about || 'N/A'}</Text>
+            <ReadMoreText
+              text={userInfo?.about || 'N/A'}
+              numberOfLines={5}
+              style={styles.descText}
+            />
           </View>
 
           {/* Info Section */}

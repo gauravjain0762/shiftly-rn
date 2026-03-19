@@ -27,15 +27,6 @@ const SuccessffullyModal = ({ visible, name = 'William', onClose }) => {
       style={styles.modal}
       useNativeDriver>
       <View style={styles.modalContent}>
-        {/* <Image
-          source={IMAGES.welcome_icon}
-          style={{
-            width: 90,
-            height: 90,
-            resizeMode: 'contain',
-            alignSelf: 'center',
-          }}
-        /> */}
 
         <LottieView
           source={animation.success_check}
@@ -47,6 +38,7 @@ const SuccessffullyModal = ({ visible, name = 'William', onClose }) => {
             borderRadius: 90,
             overflow: 'hidden',
             alignSelf: 'center',
+            backgroundColor: colors.white,
           }}
         />
 
@@ -81,7 +73,7 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   modalContent: {
-    backgroundColor: colors._F7F7F7,
+    backgroundColor: colors.white,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     padding: 24,
