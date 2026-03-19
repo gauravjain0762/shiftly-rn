@@ -46,16 +46,15 @@ export const dashboardApi = createApi({
     //  -------   Company    --------
     // Get Explore challenges
     togglePostLike: builder.mutation<any, any>({
-      query: credentials => ({
-        url: API.togglePostLike,
-        method: HTTP_METHOD.POST,
-        data: credentials,
-        skipLoader: true,
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Content-Type': 'multipart/form-data',
-        },
-      }),
+      query: body => {
+        console.log('togglePostLike params:', body);
+        return {
+          url: API.togglePostLike,
+          method: HTTP_METHOD.POST,
+          data: body,
+          skipLoader: true,
+        };
+      },
       // invalidatesTags: [
       //   'GetPost',
       //   'GetEmployeePost',
@@ -491,6 +490,23 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    companyClearAllNotifications: builder.mutation<any, void>({
+      query: () => ({
+        url: API.companyClearAllNotifications,
+        method: HTTP_METHOD.POST,
+        skipLoader: true,
+      }),
+      invalidatesTags: ['GetCompanyNotifications'],
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'companyClearAllNotifications response');
+        } catch (error) {
+          console.log('companyClearAllNotifications error:', error);
+        }
+      },
+    }),
+
 
     //  -------   Employee   --------
     // getEmployeeDashboard
@@ -974,21 +990,28 @@ export const dashboardApi = createApi({
     }),
     markReadNotifications: builder.mutation<any, {notification_id?: string} | void>({
       query: (body) => {
-        const formData = new FormData();
         const notificationId =
           (body as any)?.notification_id && (body as any).notification_id !== ''
             ? (body as any).notification_id
             : 'all';
-        formData.append('notification_id', notificationId);
+        const params = { notification_id: notificationId };
+        console.log('markReadNotifications params:', params);
         return {
           url: API.markReadNotifications,
           method: HTTP_METHOD.POST,
-          data: formData,
+          data: params,
           skipLoader: true,
-          headers: { 'Content-Type': 'multipart/form-data' },
         };
       },
       invalidatesTags: ['GetEmployeeNotifications', 'GetCompanyNotifications'],
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log('markReadNotifications response:', data);
+        } catch (error) {
+          console.log('markReadNotifications error:', error);
+        }
+      },
     }),
     clearAllNotifications: builder.mutation<any, void>({
       query: () => ({
@@ -1184,4 +1207,5 @@ export const {
   useSendAssessmentLinkMutation,
   useMarkReadNotificationsMutation,
   useClearAllNotificationsMutation,
+  useCompanyClearAllNotificationsMutation,
 } = dashboardApi;

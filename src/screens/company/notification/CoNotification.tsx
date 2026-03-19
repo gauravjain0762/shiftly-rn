@@ -15,7 +15,7 @@ import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
-import { useClearAllNotificationsMutation, useGetCompanyNotificationQuery, useMarkReadNotificationsMutation } from '../../../api/dashboardApi';
+import { useCompanyClearAllNotificationsMutation, useGetCompanyNotificationQuery, useMarkReadNotificationsMutation } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
 import { formatted, navigateTo } from '../../../utils/commonFunction';
 import { useAppDispatch } from '../../../redux/hooks';
@@ -32,10 +32,11 @@ const CoNotification = () => {
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
 
   const [markReadNotifications] = useMarkReadNotificationsMutation();
-  const [clearAllNotifications, {isLoading: isClearing}] = useClearAllNotificationsMutation();
+  const [companyClearAllNotifications, {isLoading: isClearing}] = useCompanyClearAllNotificationsMutation();
 
   useFocusEffect(
     useCallback(() => {
+      console.log('[Company] markReadNotifications - params:', { notification_id: 'all' });
       markReadNotifications({notification_id: 'all'});
       dispatch(setHasUnreadNotification(false));
     }, []),
@@ -66,8 +67,7 @@ const CoNotification = () => {
 
   const handleClearAll = async () => {
     try {
-      await markReadNotifications({notification_id: 'all'}).unwrap();
-      const clearResponse = await clearAllNotifications().unwrap();
+      const clearResponse = await companyClearAllNotifications().unwrap();
       console.log(
         '🔥 [Company] clearAllNotifications API response:',
         JSON.stringify(clearResponse, null, 2),
@@ -98,19 +98,43 @@ const CoNotification = () => {
 
     try {
       if (notificationId) {
-        await markReadNotifications({ notification_id: notificationId }).unwrap();
+        console.log('[Company] markReadNotifications - params:', { notification_id: notificationId });
+        const result = await markReadNotifications({ notification_id: notificationId }).unwrap();
+        console.log('[Company] markReadNotifications - response:', result);
+        setAllNotifications(prev =>
+          prev.map(n => (n._id === notificationId ? { ...n, isRead: true } : n)),
+        );
       }
     } catch (e) {
-      console.log('markReadNotifications error:', e);
+      console.log('[Company] markReadNotifications error:', e);
     }
 
-    if (notifType === 'chat' || notifType === 'message') {
-      const chatId = item?.data?.id || item?.data?.chat_id || item?.data?.chatId;
+    // Navigate based on notification type - "New Chat Message!" should go to chat
+    const titleLower = (item?.title || '').toString().toLowerCase();
+    const isChatNotification =
+      titleLower.includes('chat') ||
+      titleLower.includes('message') ||
+      notifType === 'chat' ||
+      notifType === 'message' ||
+      notifType === 'chat_message' ||
+      notifType.includes('chat');
+
+    const chatId =
+      item?.data?.chat_id ||
+      item?.data?.chatId ||
+      item?.data?.id ||
+      item?.data?._id ||
+      item?.chat_id;
+
+    const jobId = item?.data?.job_id || (notifType.includes('interview') ? item?.data?.id : null);
+
+    if (isChatNotification) {
       if (chatId) {
         navigateTo(SCREENS.CoChat, { data: { chat_id: chatId } });
+      } else {
+        navigateTo(SCREENS.CoMessage);
       }
-    } else if (notifType === 'interview') {
-      const jobId = item?.data?.job_id || item?.data?.id;
+    } else if (jobId || notifType === 'interview' || notifType.includes('interview')) {
       if (jobId) {
         navigateTo(SCREENS.SuggestedEmployee, { jobId });
       }

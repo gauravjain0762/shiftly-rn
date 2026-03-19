@@ -1,35 +1,18 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import Share from 'react-native-share';
-import RNFS from 'react-native-fs';
 
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { getPostedTime, getExpiryDays } from '../../utils/commonFunction';
+import { shareJob } from '../../utils/shareUtils';
+import { getCurrencySymbol } from '../../utils/currencySymbols';
 
 type JobCardProps = {
   item?: any;
   onPressCard?: () => void;
   onPressShare?: () => void;
 };
-
-import { shareJob } from '../../utils/shareUtils';
-
-/*
-const downloadImage = async (url: string) => {
-  const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
-
-  await RNFS.downloadFile({
-    fromUrl: url,
-    toFile: filePath,
-  }).promise;
-
-  return `file://${filePath}`;
-};
-*/
-
-import { getCurrencySymbol } from '../../utils/currencySymbols';
 
 const MyJobCard = (props: JobCardProps) => {
   const { onPressCard, item } = props;
@@ -94,13 +77,20 @@ const MyJobCard = (props: JobCardProps) => {
                 styles.applicantsText
               }>{`${item?.applicants?.length}  Applicants`}</Text>
           )}
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{`${item?.contract_type || 'N/A'
-              }`}</Text>
+          <View style={styles.badgeRow}>
+            {String(item?.status || '').toLowerCase() === 'closed' && (
+              <View style={styles.closedBadge}>
+                <Text style={styles.closedBadgeText}>Closed</Text>
+              </View>
+            )}
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{`${item?.contract_type || 'N/A'
+                }`}</Text>
+            </View>
           </View>
 
           <View style={{ alignItems: 'flex-end' }}>
-            {item?.expiry_date && (
+            {item?.expiry_date && String(item?.status || '').toLowerCase() !== 'closed' && (
               <Text style={styles.expiryText}>
                 {getExpiryDays(item.expiry_date)}
               </Text>
@@ -168,6 +158,20 @@ const styles = StyleSheet.create({
   },
   applicantsText: {
     color: 'grey',
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  closedBadge: {
+    borderRadius: hp(20),
+    paddingVertical: hp(7),
+    paddingHorizontal: wp(10),
+    backgroundColor: colors._7B7878,
+  },
+  closedBadgeText: {
+    ...commonFontStyle(500, 10, colors.white),
   },
   badge: {
     alignSelf: 'flex-end',

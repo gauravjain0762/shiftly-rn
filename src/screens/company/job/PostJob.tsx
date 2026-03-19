@@ -62,6 +62,7 @@ import {
   useGetCompanyLanguagesQuery,
   useGetCompanyOtherRequirementsQuery,
   useGetDepartmentsQuery,
+  useGetDropdownDataQuery,
   useGetEssentialBenefitsQuery,
   useGetJobDropdownDataQuery,
   useGetSkillsQuery,
@@ -84,12 +85,11 @@ import Tooltip from '../../../component/common/Tooltip';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { API } from '../../../utils/apiConstant';
 
-const contractTypeData = [
-  { label: 'Full Time', value: 'Full Time' },
-  { label: 'Part Time', value: 'Part Time' },
-  { label: 'Freelance', value: 'Freelance' },
+const CONTRACT_TYPE_FALLBACK = [
+  { label: 'Full-time', value: 'Full-time' },
+  { label: 'Part-time', value: 'Part-time' },
   { label: 'Internship', value: 'Internship' },
-  { label: 'Temporary', value: 'Temporary' },
+  { label: 'Seasonal', value: 'Seasonal' },
 ];
 
 const durationData = [
@@ -100,7 +100,7 @@ const durationData = [
   { label: 'Until Filled', value: 'Until Filled' },
 ];
 
-const startDateData = [
+const START_DATE_FALLBACK = [
   { label: 'Immediately', value: 'Immediately' },
   { label: 'Within 3 Days', value: 'Within 3 Days' },
   { label: 'Within a Week', value: 'Within a Week' },
@@ -115,14 +115,6 @@ const DEFAULT_POSITIONS = [
   { label: '5+', value: '5+' },
 ];
 
-const DEFAULT_SALARY_RANGE = [
-  { label: '2,000 - 5,000', value: '2,000 - 5,000' },
-  { label: '5,000 - 10,000', value: '5,000 - 10,000' },
-  { label: '10,000 - 15,000', value: '10,000 - 15,000' },
-  { label: '15,000 - 20,000', value: '15,000 - 20,000' },
-  { label: '20,000+', value: '20,000+' },
-];
-
 const DEFAULT_CURRENCIES = [
   { label: 'AED', value: 'AED' },
   { label: 'USD', value: 'USD' },
@@ -130,7 +122,36 @@ const DEFAULT_CURRENCIES = [
   { label: 'INR', value: 'INR' },
 ];
 
+const DEFAULT_SALARY_RANGE = [
+  { label: '0 - 1,000', value: '0-1000' },
+  { label: '1,000 - 2,000', value: '1000-2000' },
+  { label: '2,000 - 3,000', value: '2000-3000' },
+  { label: '3,000 - 5,000', value: '3000-5000' },
+  { label: '5,000 - 10,000', value: '5000-10000' },
+  { label: '10,000+', value: '10000+' },
+];
+
 const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+const formatSalaryRangeLabel = (range: string): string => {
+  if (!range || typeof range !== 'string') return range || '';
+  const trimmed = range.trim();
+  if (trimmed.endsWith('+')) {
+    const num = parseInt(trimmed.replace(/[^\d]/g, ''), 10);
+    return Number.isNaN(num) ? trimmed : `${num.toLocaleString()}+`;
+  }
+  const parts = trimmed.split(/[-–—]/);
+  if (parts.length >= 2) {
+    const from = parseInt(parts[0].replace(/[^\d]/g, ''), 10);
+    const to = parseInt(parts[1].replace(/[^\d]/g, ''), 10);
+    if (!Number.isNaN(from) && !Number.isNaN(to)) {
+      return `${from.toLocaleString()} - ${to.toLocaleString()}`;
+    }
+    if (!Number.isNaN(from)) return `${from.toLocaleString()} - ${parts[1].trim()}`;
+    if (!Number.isNaN(to)) return `${parts[0].trim()} - ${to.toLocaleString()}`;
+  }
+  return trimmed;
+};
 
 const getLanguageProficiencyColor = (level: string) => {
   switch (level) {
@@ -154,7 +175,7 @@ const PostJob = () => {
   const dispatch = useDispatch<any>();
 
   const { data: jobDropdownData } = useGetJobDropdownDataQuery();
-  console.log("🔥 ~ PostJob ~ jobDropdownData:", jobDropdownData)
+  const { data: dropdownData } = useGetDropdownDataQuery();
   const { data: educationDataVals } = useGetCompanyEducationsQuery({});
   const { data: experienceDataVals } = useGetCompanyExperiencesQuery({});
   const { data: certificationDataVals } = useGetCompanyCertificationsQuery({});
@@ -200,10 +221,35 @@ const PostJob = () => {
   const salaryRangeData = useMemo(() => {
     const ranges = jobDropdownData?.data?.salary_ranges;
     if (Array.isArray(ranges) && ranges.length > 0) {
-      return ranges.map((r: string) => ({ label: r, value: r }));
+      return ranges.map((r: string) => ({
+        label: formatSalaryRangeLabel(r),
+        value: r,
+      }));
     }
     return DEFAULT_SALARY_RANGE;
   }, [jobDropdownData?.data?.salary_ranges]);
+
+  const startDateData = useMemo(() => {
+    const list = jobDropdownData?.data?.job_start_dates;
+    if (Array.isArray(list) && list.length > 0) {
+      return list.map((s: string) => ({ label: s, value: s }));
+    }
+    return START_DATE_FALLBACK;
+  }, [jobDropdownData?.data?.job_start_dates]);
+
+  const contractTypeData = useMemo(() => {
+    const list =
+      dropdownData?.data?.job_types || jobDropdownData?.data?.job_types;
+    if (Array.isArray(list) && list.length > 0) {
+      return list
+        .map((item: any) => ({
+          label: item?.title || '',
+          value: item?.title || item?._id || '',
+        }))
+        .filter((item: any) => item.label && item.value);
+    }
+    return CONTRACT_TYPE_FALLBACK;
+  }, [dropdownData?.data?.job_types, jobDropdownData?.data?.job_types]);
 
   const {
     title,
@@ -235,11 +281,20 @@ const PostJob = () => {
   } = useAppSelector((state: any) => selectJobForm(state));
 
   const salaryRangeDataWithCurrent = useMemo(() => {
-    if (salary?.value && !salaryRangeData.some((d: any) => d.value === salary.value)) {
-      return [{ label: salary.label || salary.value, value: salary.value }, ...salaryRangeData];
+    const base = salaryRangeData ?? DEFAULT_SALARY_RANGE;
+    if (salary?.value && base.length > 0 && !base.some((d: any) => d.value === salary.value)) {
+      return [{ label: salary.label || salary.value, value: salary.value }, ...base];
     }
-    return salaryRangeData;
+    return base;
   }, [salary?.value, salary?.label, salaryRangeData]);
+
+  const startDateDataWithCurrent = useMemo(() => {
+    const base = startDateData ?? START_DATE_FALLBACK;
+    if (startDate?.value && base.length > 0 && !base.some((d: any) => d.value === startDate.value)) {
+      return [{ label: startDate.label || startDate.value, value: startDate.value }, ...base];
+    }
+    return base;
+  }, [startDate?.value, startDate?.label, startDateData]);
 
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
@@ -442,10 +497,13 @@ const PostJob = () => {
       contractTypeData?.length > 0 &&
       (!contract_type || !contract_type?.label || !contract_type?.value)
     ) {
-      updateJobForm({ contract_type: contractTypeData[0] });
+      const fullTime = contractTypeData.find(
+        (t: any) => String(t?.value || '').toLowerCase().includes('full')
+      );
+      updateJobForm({ contract_type: fullTime || contractTypeData[0] });
       hasInitializedContractTypeRef.current = true;
     }
-  }, [editMode, contract_type, updateJobForm]);
+  }, [editMode, contract_type, updateJobForm, contractTypeData]);
 
   useEffect(() => {
     if (
@@ -1895,7 +1953,7 @@ const PostJob = () => {
                 <View style={styles.field}>
                   <Text style={styles.label}>{t('Start date?')}</Text>
                   <CustomDropdown
-                    data={startDateData}
+                    data={startDateDataWithCurrent ?? startDateData}
                     labelField="label"
                     valueField="value"
                     value={startDate?.value}
@@ -1914,7 +1972,7 @@ const PostJob = () => {
                   <Text style={styles.label}>{t('Monthly Salary Offer')}</Text>
                   <View style={styles.salaryrow}>
                     <CustomDropdown
-                      data={salaryRangeDataWithCurrent}
+                      data={salaryRangeDataWithCurrent ?? salaryRangeData}
                       labelField="label"
                       valueField="value"
                       value={salary?.value}
@@ -2035,7 +2093,14 @@ const PostJob = () => {
                 }
 
                 const jobIdToUse = createdJobId || job_id;
-                const jobDataToUse = createdJobData;
+                const rawJobData = createdJobData;
+                const jobDataToUse = rawJobData?.data?.job
+                  ? rawJobData
+                  : rawJobData?.job
+                    ? { data: { job: rawJobData.job } }
+                    : rawJobData
+                      ? { data: { job: rawJobData } }
+                      : null;
 
                 dispatch(resetJobFormState());
                 dispatch(setCoPostJobSteps(1));

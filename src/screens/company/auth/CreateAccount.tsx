@@ -274,8 +274,8 @@ const CreateAccount = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-
-    if (timer > 0) {
+    // Only run countdown when on OTP step (7) so timer shows 30s on first load
+    if (companyRegistrationStep === 7 && timer > 0) {
       interval = setInterval(() => {
         setTimer(prev => prev - 1);
       }, 1000);
@@ -284,7 +284,7 @@ const CreateAccount = () => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [timer]);
+  }, [timer, companyRegistrationStep]);
 
   const handleEmailChange = (email: string) => {
     dispatch(setCompanyRegisterData({ email }));
@@ -468,6 +468,7 @@ const CreateAccount = () => {
     if (response?.status) {
       successToast(response?.message);
       setStart((prev: boolean) => !prev);
+      setTimer(30); // Start 30s countdown when OTP is sent
       nextStep();
       // dispatch(
       //   setCompanyRegisterData({

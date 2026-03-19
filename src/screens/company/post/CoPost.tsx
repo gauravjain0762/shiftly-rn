@@ -135,20 +135,21 @@ const CoPost = () => {
             ListEmptyComponent={() => {
               return (
                 <View style={styles.emptyContainer}>
-                  <BaseText
-                    style={{
-                      textAlign: 'center',
-                      ...commonFontStyle(400, 18, colors._0B3970),
-                    }}>
-                    {t('No posts yet. Start sharing by creating your first post!')}
-                  </BaseText>
+                  <View style={styles.emptyTextWrapper}>
+                    <BaseText
+                      style={styles.emptyTextLine}>
+                      {t('No posts yet.')}
+                    </BaseText>
+                    <BaseText
+                      style={styles.emptyTextLine}>
+                      {t('Start sharing by creating your first post.')}
+                    </BaseText>
+                  </View>
                   <GradientButton
                     type="Company"
                     title={t('Create Post')}
                     onPress={handleCreatePost}
-                    // textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
-                    // gradientColors={[colors._2D5486, colors._0B3970, colors._051C38]}
-                    style={{ marginTop: hp(20), width: '80%' }}
+                    style={styles.emptyCreateButton}
                   />
                 </View>
               );
@@ -238,5 +239,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: hp(50),
     gap: hp(20),
+  },
+  emptyTextWrapper: {
+    alignItems: 'center',
+  },
+  emptyTextLine: {
+    textAlign: 'center',
+    ...commonFontStyle(500, 18, colors._0B3970),
+  },
+  emptyCreateButton: {
+    marginTop: hp(10),
+    alignSelf: 'center',
+    paddingHorizontal: wp(22),
+    paddingVertical: hp(3),
   },
 });

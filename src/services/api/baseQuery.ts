@@ -5,12 +5,16 @@ import {
   incrementPendingRequests,
   decrementPendingRequests,
 } from '../../features/loaderSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {resetNavigation} from '../../utils/commonFunction';
 import {clearAsync} from '../../utils/asyncStorage';
 import {logouts} from '../../features/authSlice';
 import {persistor} from '../../store';
 
 import {SCREENS} from '../../navigation/screenNames';
+import {shouldHandle401, scheduleGuardReset} from '../../utils/redirect401Guard';
+
+const ROLE_STORAGE_KEY = 'userRole';
 
 export interface BaseQueryArgs {
   url: string;
@@ -61,16 +65,25 @@ export const axiosBaseQuery: BaseQueryFn<
     const error = rawError as AxiosError;
     console.log('error', rawError);
     if (error.response?.status === 401) {
-      console.log('401 Unauthorized error detected. Redirecting to login...');
-
-      setTimeout(() => {
-        clearAsync();
-
-        dispatch({type: 'RESET_STORE'});
-        dispatch(logouts());
-        persistor.purge();
-        resetNavigation(SCREENS.LoginScreen);
-      }, 0);
+      if (shouldHandle401()) {
+        console.log('401 Unauthorized error detected. Redirecting to login...');
+        setTimeout(async () => {
+          try {
+            const role = await AsyncStorage.getItem(ROLE_STORAGE_KEY);
+            clearAsync();
+            dispatch({type: 'RESET_STORE'});
+            dispatch(logouts());
+            persistor.purge();
+            if (role === 'company') {
+              resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);
+            } else {
+              resetNavigation(SCREENS.EmployeeStack, SCREENS.LoginScreen);
+            }
+          } finally {
+            scheduleGuardReset();
+          }
+        }, 0);
+      }
 
       return {
         error: {

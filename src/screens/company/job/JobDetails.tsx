@@ -364,23 +364,33 @@ ${salary}${shareUrlText}`;
                           value: jobDetail.department_id?._id,
                         }
                         : null),
-                  startDate:
-                    typeof jobDetail?.start_date === 'string'
-                      ? {
-                        label: jobDetail?.start_date,
-                        value: jobDetail?.start_date,
-                      }
-                      : jobDetail?.start_date,
+                  startDate: (() => {
+                    const sd = jobDetail?.start_date;
+                    if (!sd) return null;
+                    const str = typeof sd === 'string' ? sd : (sd?.value ?? sd?.label ?? '');
+                    if (!str) return null;
+                    // Normalize common variations to match API (e.g. "Immediately" -> "Immedately", "Within 3 Days" -> "Within 3 Day")
+                    const normalized = str.replace(/Immediately/i, 'Immedately').replace(/Within 3 Days?/i, 'Within 3 Day');
+                    return { label: str, value: normalized };
+                  })(),
                   salary: (() => {
                     const from = jobDetail?.monthly_salary_from;
                     const to = jobDetail?.monthly_salary_to;
                     const fromNum = from != null && from !== '' ? Number(from) : NaN;
                     const toNum = to != null && to !== '' ? Number(to) : NaN;
                     if (Number.isFinite(fromNum) && Number.isFinite(toNum)) {
+                      // Use API format "from-to" for dropdown matching (e.g. "3000-5000")
+                      const value = `${fromNum}-${toNum}`;
                       const label = `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`;
-                      return { label, value: label };
+                      return { label, value };
                     }
-                    return { label: '2,000 - 5,000', value: '2,000 - 5,000' };
+                    if (Number.isFinite(fromNum) && (to === null || to === undefined || to === '')) {
+                      // Handle "10000+" style - from exists, no upper bound
+                      const value = `${fromNum}+`;
+                      const label = `${fromNum.toLocaleString()}+`;
+                      return { label, value };
+                    }
+                    return { label: '0 - 1,000', value: '0-1000' };
                   })(),
                   currency: {
                     label: jobDetail?.currency ?? 'AED',
@@ -401,7 +411,7 @@ ${salary}${shareUrlText}`;
                   education: mapped.education,
                   experience: mapped.experience,
                   certification: mapped.certification,
-                  languages: mapped.languages,
+                  languages: Array.isArray(mapped.languages) ? mapped.languages : [],
                   other_requirements: mapped.other_requirements,
                   editMode: true,
                 }),

@@ -89,7 +89,11 @@ const SuggestedEmployeeScreen = () => {
     return () => clearTimeout(timer);
   }, [jobId, suggestedResponse?.data?.users?.length, refetchSuggested]);
 
-  const jobInfo = jobData?.data?.job || jobDetailsResponse?.data?.job || {};
+  const jobInfo =
+    jobData?.data?.job ||
+    jobData?.job ||
+    jobDetailsResponse?.data?.job ||
+    {};
 
   const employees = suggestedResponse?.data?.users || [];
   const ai_data = suggestedResponse?.data || {};
@@ -169,11 +173,13 @@ const SuggestedEmployeeScreen = () => {
   }, [isFromJobCard]);
 
   const showSkeleton = useMemo(() => {
+    // Show content immediately when from post job or job list - don't block on loading
+    if (jobId && (fromPostJob || isFromJobCard)) return false;
     if (hasDataLoaded.current || (employees && employees.length > 0) || (jobInfo && Object.keys(jobInfo).length > 0)) {
       return false;
     }
     return isScreenLoading;
-  }, [isScreenLoading, employees, jobInfo]);
+  }, [jobId, fromPostJob, isFromJobCard, isScreenLoading, employees, jobInfo]);
 
   useEffect(() => {
     if (!isScreenLoading && (employees?.length > 0 || (jobInfo && Object.keys(jobInfo).length > 0))) {
@@ -824,7 +830,7 @@ const SuggestedEmployeeScreen = () => {
                     </View>
                   </View>
 
-                  {isFromJobCard && jobInfo?.status !== 'Closed' && !(jobInfo?.expiry_date && new Date(jobInfo.expiry_date) < new Date()) && (
+                  {!!jobId && (fromPostJob || isFromJobCard || String(jobInfo?.status ?? '').toLowerCase() !== 'closed') && (
                     <View style={styles.jobActionsRow}>
                       <TouchableOpacity
                         style={[styles.actionBtn, styles.editBtn]}

@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { GradientButton, HomeHeader, LinearContainer } from '../../../component';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { navigateTo } from '../../../utils/commonFunction';
@@ -23,11 +31,22 @@ import { IMAGES } from '../../../assets/Images';
 
 const CoHome = () => {
   const dispatch = useAppDispatch();
-  const { data: profileData } = useGetProfileQuery();
+  const [refreshing, setRefreshing] = useState(false);
+  const { data: profileData, refetch: refetchProfile } = useGetProfileQuery();
   const userdata = profileData?.data?.comnpany;
 
-  const { data: dashboardData } = useGetDashboardQuery({});
+  const { data: dashboardData, refetch: refetchDashboard } =
+    useGetDashboardQuery({});
   const job_stats = dashboardData?.data?.stats;
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchDashboard(), refetchProfile()]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
   console.log('🔥 CoHome ~ fcmToken:', fcmToken);
@@ -93,7 +112,12 @@ const CoHome = () => {
         />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} bounces={true}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }>
         <View style={styles.jobSummaryContainer}>
           <View style={styles.jobSummaryRow}>
             {

@@ -91,8 +91,14 @@ const HomeHeader: FC<props> = ({
             />
             <Text style={styles.location}>
               {type === 'company'
-                ? `${companyProfile?.city}, ${companyProfile?.country}` || 'N/A'
-                : companyProfile?.country || 'N/A'}
+                ? (() => {
+                    const city = companyProfile?.city?.trim?.() || '';
+                    const country = companyProfile?.country?.trim?.() || '';
+                    return !city && !country
+                      ? 'N/A'
+                      : `${city || 'N/A'}, ${country || 'N/A'}`;
+                  })()
+                : (companyProfile?.country?.trim?.() || 'N/A')}
             </Text>
           </View>
         </View>

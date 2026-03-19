@@ -47,14 +47,17 @@ const CompanyProfile = () => {
   const { params } = useRoute<any>();
   const fromOnboarding = params?.fromOnboarding || false;
   const companyId = params?.companyId;
-  console.log("🔥 ~ CompanyProfile ~ companyId:", companyId)
 
   const { companyProfileData, companyProfileAllData, userInfo, selectedTabIndex } = useSelector(
     (state: RootState) => state.auth,
   );
 
   const dispatch = useAppDispatch();
-  const { data, isLoading, isFetching } = useGetProfileQuery(undefined, { skip: !!companyId });
+  const { data, isLoading, isFetching } = useGetProfileQuery(undefined, {
+    skip: !!companyId,
+    refetchOnFocus: false,
+    refetchOnMountOrArgChange: true,
+  });
 
   const [isLogoLoading, setIsLogoLoading] = useState(false);
   const [logoLoadError, setLogoLoadError] = useState(false);
@@ -98,8 +101,29 @@ const CompanyProfile = () => {
     useLazyGetCompanyProfileByIdQuery();
 
   const [companyInfo, setCompanyInfo] = useState<any>(null);
+  const [loadTimeout, setLoadTimeout] = useState(false);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ── Own company: fetch posts / jobs when the relevant tab becomes active (don't clear first so we don't flash "No Data Found") ──
+  // Fallback: stop showing skeleton after 12s to prevent infinite loading and crash
+  useEffect(() => {
+    if (loadTimeoutRef.current) {
+      clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = null;
+    }
+    const loading = isLoading || isCompanyLoading;
+    if (loading && !loadTimeout) {
+      loadTimeoutRef.current = setTimeout(() => {
+        setLoadTimeout(true);
+        loadTimeoutRef.current = null;
+      }, 12000);
+    } else if (!loading) {
+      setLoadTimeout(false);
+    }
+    return () => {
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+  }, [isLoading, isCompanyLoading, loadTimeout]);
+
   useEffect(() => {
     if (companyId) return;
     if (selectedTabIndex === 1) {
@@ -214,7 +238,7 @@ const CompanyProfile = () => {
         setJobsFetched(true);
       }
     }
-  }, [companyData, companyId, selectedTabIndex, viewedCompanyPosts.length, viewedCompanyJobs.length]);
+  }, [companyData, companyId, selectedTabIndex]);
 
   useEffect(() => {
     if (companyData?.data?.company && !companyInfo) {
@@ -488,7 +512,9 @@ const CompanyProfile = () => {
 
 
 
-  if (isLoading || isCompanyLoading) {
+  // Show skeleton only when loading AND we have no cached profile data. Stop after 12s (loadTimeout) to prevent infinite skeleton and crash.
+  const showSkeleton = (isLoading || isCompanyLoading) && !displayProfile && !loadTimeout;
+  if (showSkeleton) {
     return <CompanyProfileSkeleton />;
   }
 
@@ -507,9 +533,9 @@ const CompanyProfile = () => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
           if (isCloseToBottom) {
-            if (selectedTabIndex === 0 && postsHasMore && !isFetchingPosts) {
+            if (selectedTabIndex === 1 && postsHasMore && !isFetchingPosts) {
               handleLoadMorePosts();
-            } else if (selectedTabIndex === 1 && jobsHasMore && !isFetchingJobs) {
+            } else if (selectedTabIndex === 2 && jobsHasMore && !isFetchingJobs) {
               handleLoadMoreJobs();
             }
           }

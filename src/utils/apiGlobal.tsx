@@ -6,6 +6,7 @@ import { IS_LOADING } from "../redux/actionTypes";
 import { SCREENS } from "../navigation/screenNames";
 import { API } from "./apiConstant";
 import { navigationRef } from "../navigation/RootContainer";
+import { shouldHandle401, scheduleGuardReset } from "./redirect401Guard";
 
 interface makeAPIRequestProps {
   method?: any;
@@ -103,12 +104,14 @@ export const handleErrorRes = (
 ) => {
   if (err?.response?.status == 401) {
     dispatchAction(dispatch, IS_LOADING, false);
-    // removeAuthorization();
-    navigationRef.reset({
-      index: 0,
-      routes: [{ name: SCREENS.LoginScreen }],
-    });
-    errorToast("Please login again");
+    if (shouldHandle401()) {
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name: SCREENS.LoginScreen }],
+      });
+      errorToast("Please login again");
+      scheduleGuardReset();
+    }
   } else {
     dispatchAction(dispatch, IS_LOADING, false);
     if (err?.response?.data?.errors) {

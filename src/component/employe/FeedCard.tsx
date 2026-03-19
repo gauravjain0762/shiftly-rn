@@ -58,9 +58,7 @@ const FeedCard: FC<card> = ({
     onPressLike();
 
     try {
-      const formData = new FormData();
-      formData.append('post_id', item?._id);
-      await togglePostLike(formData).unwrap();
+      await togglePostLike({ post_id: item?._id }).unwrap();
     } catch (error) {
       console.log('Error toggling like:', error);
       setLocalLiked(localLiked);

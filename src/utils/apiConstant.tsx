@@ -63,10 +63,11 @@ export const API = {
   getCompanyNotifications: '/company/getNotifications',
   markReadNotifications: '/markReadNotifications',
   clearAllNotifications: '/clearAllNotifications',
+  companyClearAllNotifications: '/company/clearAllNotifications',
 
   // Notifications
   sendInterviewInvites: '/company/sendInterviewInvites',
-  togglePostLike: 'togglePostLike',
+  togglePostLike: '/company/togglePostLike',
 
   // CompanyLogin: '',
 

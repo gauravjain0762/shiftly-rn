@@ -187,7 +187,7 @@ const CreatePost = () => {
           <Text style={styles.sectionLabel}>{t('Description')}</Text>
           <CustomTextInput
             multiline
-            maxLength={1000}
+            maxLength={4000}
             value={description}
             inputStyle={[styles.input, styles.descriptionInput]}
             placeholderTextColor={colors._7B7878}
@@ -195,7 +195,7 @@ const CreatePost = () => {
             onChangeText={(e: any) => updatePostForm({ description: e })}
             containerStyle={styles.inputContainer}
           />
-          <CharLength chars={1000} value={description} style={styles.charLength} />
+          <CharLength chars={4000} value={description} style={styles.charLength} />
         </View>
       </KeyboardAwareScrollView>
 

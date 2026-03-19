@@ -197,7 +197,14 @@ const JobPreview = () => {
     // Animation finish handler - called after a short delay (~1–1.5s)
     const handleAnimationFinish = () => {
         const jobIdToUse = createdJobId || job_id;
-        const jobDataToUse = createdJobData;
+        const rawJobData = createdJobData;
+        const jobDataToUse = rawJobData?.data?.job
+          ? rawJobData
+          : rawJobData?.job
+            ? { data: { job: rawJobData.job } }
+            : rawJobData
+              ? { data: { job: rawJobData } }
+              : null;
 
         setShowHiringAnimation(false);
         dispatch(resetJobFormState());
