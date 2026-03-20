@@ -33,6 +33,21 @@ import { selectJobForm } from '../../../features/companySlice';
 import useJobFormUpdater from '../../../hooks/useJobFormUpdater';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+/**
+ * Android multipart debugging: sends the exact body shape that works in Postman.
+ * For testing: set to `__DEV__ && true`, then tap "Proceed to AI Interview".
+ * Turn off when done. Production builds never use this (__DEV__ is false).
+ */
+const DEBUG_INTERVIEW_INVITE_POSTMAN_STATIC = __DEV__ && false;
+
+/** Same values as your working Postman request (no Bearer token here — app uses Redux auth). */
+const POSTMAN_STATIC_INTERVIEW_BODY = {
+  job_id: '69bbda86481eadb7bd9b7512',
+  invite_to: 'specific' as const,
+  user_ids: '6960f398477c73d1824dd72d,6960f398477c73d1824dd72d',
+  question0: "What's your name",
+};
+
 const CreateQuestion = () => {
   const { t } = useTranslation();
   const route = useRoute<any>();
@@ -58,6 +73,32 @@ const CreateQuestion = () => {
   };
 
   const handleSubmit = async () => {
+    if (DEBUG_INTERVIEW_INVITE_POSTMAN_STATIC) {
+      const formData = new FormData();
+      formData.append('job_id', POSTMAN_STATIC_INTERVIEW_BODY.job_id);
+      formData.append('invite_to', POSTMAN_STATIC_INTERVIEW_BODY.invite_to);
+      formData.append('user_ids', POSTMAN_STATIC_INTERVIEW_BODY.user_ids);
+      formData.append('questions[0]', POSTMAN_STATIC_INTERVIEW_BODY.question0);
+      console.log('🔥 [DEBUG] sendInterviewInvites static Postman body');
+      try {
+        const response = await sendInvites(formData).unwrap();
+        if (response?.status) {
+          successToast(response?.message || t('Invites sent successfully'));
+          updateJobForm({ isSuccessModalVisible: true });
+        } else {
+          errorToast(response?.message || t('Failed to send invites'));
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error?.data?.message ||
+          error?.data?.error ||
+          error?.message ||
+          t('Something went wrong. Please try again.');
+        errorToast(errorMessage);
+      }
+      return;
+    }
+
     if (!jobId || !invitePayload) {
       errorToast(t('Missing invite information. Please try again.'));
       return;
