@@ -76,18 +76,34 @@ const SuggestedEmployeeScreen = () => {
     }, [jobId])
   );
 
+  const employees = useMemo(() => {
+    return (
+      jobDetailsResponse?.data?.suggested_employees ||
+      suggestedResponse?.data?.suggested_employees ||
+      suggestedResponse?.data?.users ||
+      []
+    );
+  }, [jobDetailsResponse, suggestedResponse]);
+
   // Delayed refetch when suggested list is empty - backend AI matching may take time after job post
   const hasDelayedRefetched = useRef(false);
   useEffect(() => {
     hasDelayedRefetched.current = false;
   }, [jobId]);
   useEffect(() => {
-    const users = suggestedResponse?.data?.users || [];
-    if (!jobId || users.length > 0 || hasDelayedRefetched.current) return;
+    if (!jobId || employees.length > 0 || hasDelayedRefetched.current) return;
     hasDelayedRefetched.current = true;
-    const timer = setTimeout(() => refetchSuggested(), 4000);
+    const timer = setTimeout(() => {
+      refetchSuggested();
+      refetchJobDetails();
+    }, 4000);
     return () => clearTimeout(timer);
-  }, [jobId, suggestedResponse?.data?.users?.length, refetchSuggested]);
+  }, [
+    jobId,
+    employees.length,
+    refetchSuggested,
+    refetchJobDetails,
+  ]);
 
   const jobInfo =
     jobData?.data?.job ||
@@ -95,8 +111,7 @@ const SuggestedEmployeeScreen = () => {
     jobDetailsResponse?.data?.job ||
     {};
 
-  const employees = suggestedResponse?.data?.users || [];
-  const ai_data = suggestedResponse?.data || {};
+  const ai_data = jobDetailsResponse?.data || suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const dispatch = useDispatch<any>();
   const [closeJob] = useCloseCompanyJobMutation();
@@ -119,6 +134,7 @@ const SuggestedEmployeeScreen = () => {
 
   const invitedEmployees = useMemo(() => {
     const list =
+      suggestedResponse?.data?.invited_users ||
       jobDetailsResponse?.data?.invited_users ||
       jobData?.data?.invited_users ||
       jobInfo?.invited_users ||
@@ -128,15 +144,16 @@ const SuggestedEmployeeScreen = () => {
       return [];
     }
     return list;
-  }, [jobInfo, jobData, jobDetailsResponse]);
+  }, [suggestedResponse, jobInfo, jobData, jobDetailsResponse]);
 
   const applications = useMemo(() => {
     return (
+      suggestedResponse?.data?.applications ||
       jobDetailsResponse?.data?.applications ||
       jobData?.data?.applications ||
       []
     );
-  }, [jobData, jobDetailsResponse]);
+  }, [suggestedResponse, jobData, jobDetailsResponse]);
 
   const [inviteAllSelected, setInviteAllSelected] = useState(false);
   const isScreenLoading = isJobLoading || isLoading || isFetching;
@@ -340,7 +357,10 @@ const SuggestedEmployeeScreen = () => {
     try {
       const result = await fetchMoreSuggested({ job_id: jobId, page: nextPage, tab: 'suggested' }).unwrap();
       console.log("🔥 ~ SuggestedEmployeeScreen ~ result:", result)
-      const newUsers = result?.data?.users || [];
+      const newUsers =
+        result?.data?.suggested_employees ||
+        result?.data?.users ||
+        [];
 
       if (newUsers.length > 0) {
         setExtraSuggested(prev => [...prev, ...newUsers]);
@@ -566,6 +586,7 @@ const SuggestedEmployeeScreen = () => {
                   uri={user?.picture || ''}
                   containerStyle={styles.shortlistedAvatar}
                   imageStyle={styles.shortlistedAvatar}
+                  resizeMode="cover"
                 />
               ) : (
                 <View style={[styles.shortlistedAvatar, styles.avatarFallback]}>
@@ -718,6 +739,7 @@ const SuggestedEmployeeScreen = () => {
               uri={item?.picture}
               containerStyle={styles.employeeAvatar}
               imageStyle={styles.employeeAvatar}
+              resizeMode="cover"
             />
           ) : (
             <View style={[styles.employeeAvatar, styles.avatarFallback]}>
@@ -1122,6 +1144,7 @@ const SuggestedEmployeeScreen = () => {
                                     uri={user?.picture}
                                     containerStyle={styles.employeeAvatar}
                                     imageStyle={styles.employeeAvatar}
+                                    resizeMode="cover"
                                   />
                                 ) : (
                                   <View style={[styles.employeeAvatar, styles.avatarFallback]}>
@@ -1419,7 +1442,8 @@ const styles = StyleSheet.create({
   employeeAvatar: {
     width: wp(60),
     height: wp(60),
-    borderRadius: wp(12),
+    borderRadius: wp(60) / 2,
+    overflow: 'hidden',
   },
   employeeInfo: {
     flex: 1,
@@ -1565,10 +1589,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   shortlistedAvatar: {
-    width: wp(65), // Slightly smaller to help with spacing
+    width: wp(65),
     height: wp(65),
-    borderRadius: wp(14),
-    marginRight: wp(10), // Reduced spacing
+    borderRadius: wp(65) / 2,
+    overflow: 'hidden',
+    marginRight: wp(10),
   },
   avatarFallback: {
     backgroundColor: colors._0B3970,

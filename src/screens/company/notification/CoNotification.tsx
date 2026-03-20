@@ -15,7 +15,12 @@ import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
-import { useCompanyClearAllNotificationsMutation, useGetCompanyNotificationQuery, useMarkReadNotificationsMutation } from '../../../api/dashboardApi';
+import {
+  useCompanyClearAllNotificationsMutation,
+  useGetCompanyNotificationQuery,
+  useLazyGetCompanyChatsQuery,
+  useCompanyMarkReadNotificationsMutation,
+} from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
 import { formatted, navigateTo } from '../../../utils/commonFunction';
 import { useAppDispatch } from '../../../redux/hooks';
@@ -27,29 +32,26 @@ const CoNotification = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
-  const [page, setPage] = useState<number>(1);
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
-  const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [markReadNotifications] = useMarkReadNotificationsMutation();
+  const [companyMarkReadNotifications] = useCompanyMarkReadNotificationsMutation();
+  const [getCompanyChats] = useLazyGetCompanyChatsQuery();
   const [companyClearAllNotifications, {isLoading: isClearing}] = useCompanyClearAllNotificationsMutation();
 
   useFocusEffect(
     useCallback(() => {
-      console.log('[Company] markReadNotifications - params:', { notification_id: 'all' });
-      markReadNotifications({notification_id: 'all'});
       dispatch(setHasUnreadNotification(false));
-    }, []),
+    }, [dispatch]),
   );
 
   const {
     data: notificationsData,
-    isFetching,
     isLoading,
-  } = useGetCompanyNotificationQuery({ page }, { refetchOnMountOrArgChange: true });
+    refetch,
+  } = useGetCompanyNotificationQuery({}, { refetchOnMountOrArgChange: true });
 
   const notificationList = notificationsData?.data?.notifications || [];
-  const pagination = notificationsData?.data?.pagination;
 
   useEffect(() => {
     if (notificationsData) {
@@ -57,13 +59,12 @@ const CoNotification = () => {
         '🔥 [Company] getCompanyNotifications list response:',
         JSON.stringify(notificationsData, null, 2),
       );
-      const newData = notificationList;
-      setAllNotifications(prev =>
-        pagination?.current_page === 1 ? newData : [...prev, ...newData],
-      );
-      setOnEndReachedCalled(false);
+      setAllNotifications(notificationList);
+      if (isRefreshing) {
+        setIsRefreshing(false);
+      }
     }
-  }, [notificationsData]);
+  }, [notificationsData, isRefreshing]);
 
   const handleClearAll = async () => {
     try {
@@ -73,22 +74,20 @@ const CoNotification = () => {
         JSON.stringify(clearResponse, null, 2),
       );
       setAllNotifications([]);
-      setPage(1);
       dispatch(setHasUnreadNotification(false));
     } catch (error) {
       console.log('🔥 [Company] clearAllNotifications error:', error);
     }
   };
 
-  const onReached = () => {
-    if (
-      pagination?.current_page < pagination?.total_pages &&
-      !onEndReachedCalled &&
-      !isFetching
-    ) {
-      const nextPage = page + 1;
-      setOnEndReachedCalled(true);
-      setPage(nextPage);
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      await refetch();
+    } catch (error) {
+      console.log('🔥 [Company] notifications refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -98,11 +97,15 @@ const CoNotification = () => {
 
     try {
       if (notificationId) {
-        console.log('[Company] markReadNotifications - params:', { notification_id: notificationId });
-        const result = await markReadNotifications({ notification_id: notificationId }).unwrap();
-        console.log('[Company] markReadNotifications - response:', result);
+        console.log('[Company] companyMarkReadNotifications - params:', { notification_id: notificationId });
+        const result = await companyMarkReadNotifications({ notification_id: notificationId }).unwrap();
+        console.log('[Company] companyMarkReadNotifications - response:', result);
         setAllNotifications(prev =>
-          prev.map(n => (n._id === notificationId ? { ...n, isRead: true } : n)),
+          prev.map(n =>
+            n._id === notificationId
+              ? { ...n, is_read: true }
+              : n,
+          ),
         );
       }
     } catch (e) {
@@ -119,20 +122,52 @@ const CoNotification = () => {
       notifType === 'chat_message' ||
       notifType.includes('chat');
 
+    // API shape: data: [{ type: 'chat', id: 'chatId' }]
+    let dataList: any[] = [];
+    if (Array.isArray(item?.data)) {
+      dataList = item.data;
+    } else if (typeof item?.data === 'string') {
+      try {
+        const parsed = JSON.parse(item.data);
+        dataList = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        dataList = [];
+      }
+    }
+    const firstData = dataList[0] || {};
     const chatId =
-      item?.data?.chat_id ||
-      item?.data?.chatId ||
-      item?.data?.id ||
-      item?.data?._id ||
-      item?.chat_id;
+      firstData?.id ||
+      firstData?._id ||
+      firstData?.chat_id ||
+      firstData?.chatId ||
+      item?.chat_id ||
+      item?.chatId ||
+      null;
 
-    const jobId = item?.data?.job_id || (notifType.includes('interview') ? item?.data?.id : null);
+    const employeeData = firstData?.user_id || firstData?.employee_id || null;
+    const employeeId =
+      firstData?.user_id?._id ||
+      firstData?.user_id ||
+      firstData?.employee_id?._id ||
+      firstData?.employee_id ||
+      null;
 
-    if (isChatNotification) {
+    const dataType = (firstData?.type || '').toString().toLowerCase();
+    const isChatFromData = dataType === 'chat';
+    const jobId = null;
+
+    if (isChatNotification || isChatFromData) {
       if (chatId) {
-        navigateTo(SCREENS.CoChat, { data: { chat_id: chatId } });
+        navigateTo(SCREENS.CoChat, {
+          data: {
+            chat_id: chatId,
+            _id: chatId,
+            user_id: employeeData || (employeeId ? { _id: employeeId } : undefined),
+          },
+          isFromJobDetail: false,
+        });
       } else {
-        navigateTo(SCREENS.CoMessage);
+        navigateTo(SCREENS.CoChat);
       }
     } else if (jobId || notifType === 'interview' || notifType.includes('interview')) {
       if (jobId) {
@@ -143,7 +178,7 @@ const CoNotification = () => {
 
   const renderItem = ({ item, index }: any) => {
     const notifType = item?.data?.type || item?.type;
-    const isRead = !!item?.isRead;
+    const isRead = Boolean(item?.is_read);
     const showUnreadDot = !isRead;
     return (
       <TouchableOpacity
@@ -208,6 +243,8 @@ const CoNotification = () => {
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
+          onRefresh={handleRefresh}
+          refreshing={isRefreshing}
           contentContainerStyle={styles.scrollContainer}
           ListEmptyComponent={() => {
             return (
@@ -218,13 +255,6 @@ const CoNotification = () => {
               </View>
             );
           }}
-          onEndReached={onReached}
-          onEndReachedThreshold={0.2}
-          ListFooterComponent={() =>
-            isFetching && pagination?.current_page < pagination?.total_pages ? (
-              <ActivityIndicator color={colors._D5D5D5} style={{ marginVertical: 10 }} />
-            ) : null
-          }
         />
       )}
     </LinearContainer>

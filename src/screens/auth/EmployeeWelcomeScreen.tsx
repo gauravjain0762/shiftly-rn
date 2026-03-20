@@ -33,7 +33,8 @@ import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { jwtDecode } from 'jwt-decode';
 import auth from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice';
+import { setAuthToken, setCreateEmployeeAccount, setUserInfo } from '../../features/authSlice';
+import { setAsyncToken, setAsyncUserInfo } from '../../utils/asyncStorage';
 import { RootState } from '../../store';
 import CustomImage from '../../component/common/CustomImage';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -164,15 +165,25 @@ const EmployeeWelcomeScreen = () => {
         });
 
         const response = await employeeGoogleSignIn(socialObj).unwrap() as any;
+        const hasAuthToken = Boolean(response?.data?.auth_token);
+        const isPhoneVerified = Boolean(response?.data?.user?.phone_verified_at);
 
-        if (response?.data?.user?.phone_verified_at !== null) {
+        // Set auth state immediately before navigation to avoid race with
+        // dashboard requests firing without token and forcing redirect to login.
+        if (hasAuthToken) {
+          dispatch(setAuthToken(response.data.auth_token));
+          dispatch(setUserInfo(response?.data?.user));
+          await setAsyncToken(response.data.auth_token);
+          await setAsyncUserInfo(response?.data?.user);
+        }
+
+        if (hasAuthToken && isPhoneVerified) {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
         } else {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.SignUp, {
             isGoogleAuth: true,
           });
         }
-        dispatch(setUserInfo(response?.data?.user));
       }
     } catch (error: any) {
       console.error('Google Sign-In failed:', error);
@@ -228,14 +239,21 @@ const EmployeeWelcomeScreen = () => {
         });
 
         const response = await employeeAppleSignIn(socialObj).unwrap() as any;
-        if (response?.data?.user?.phone_verified_at !== null) {
+        const hasAuthToken = Boolean(response?.data?.auth_token);
+        const isPhoneVerified = Boolean(response?.data?.user?.phone_verified_at);
+        if (hasAuthToken) {
+          dispatch(setAuthToken(response.data.auth_token));
+          dispatch(setUserInfo(response?.data?.user));
+          await setAsyncToken(response.data.auth_token);
+          await setAsyncUserInfo(response?.data?.user);
+        }
+        if (hasAuthToken && isPhoneVerified) {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.TabNavigator);
         } else {
           resetNavigation(SCREENS.EmployeeStack, SCREENS.SignUp, {
             isAppleAuth: true,
           });
         }
-        dispatch(setUserInfo(response?.data?.user));
       }
     } catch (error: any) {
       console.log('onAppleButtonPress => error => ', error);

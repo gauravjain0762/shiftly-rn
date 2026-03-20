@@ -70,31 +70,46 @@ const CreateQuestion = () => {
 
     console.log("🔥 ~ handleSubmit ~ jobId:", jobId);
 
-    // Format as FormData to match API requirements
+    // Backend expects multipart form-data for this endpoint.
     const formData = new FormData();
+    const inviteTo = invitePayload.invite_to === 'all' ? 'all' : 'specific';
     formData.append('job_id', jobId);
-    formData.append('invite_to', invitePayload.invite_to || 'specific');
+    formData.append('invite_to', inviteTo);
 
     // Add user_ids based on invite_to type
-    if (invitePayload.invite_to === 'specific' && Array.isArray(invitePayload.user_ids)) {
+    if (inviteTo === 'specific' && Array.isArray(invitePayload.user_ids)) {
       const filteredIds = invitePayload.user_ids.filter((id: string | null) => !!id);
       if (!filteredIds.length) {
         errorToast(t('Please select at least one employee'));
         return;
       }
+      // API expects comma-separated IDs in single user_ids field.
       formData.append('user_ids', filteredIds.join(','));
-    } else if (invitePayload.user_ids) {
-      const userIds = Array.isArray(invitePayload.user_ids)
-        ? invitePayload.user_ids.join(',')
-        : invitePayload.user_ids;
-      formData.append('user_ids', userIds);
+    } else if (inviteTo === 'specific' && invitePayload.user_ids) {
+      const ids = Array.isArray(invitePayload.user_ids)
+        ? invitePayload.user_ids.filter((id: string | null) => !!id)
+        : [invitePayload.user_ids];
+      if (!ids.length) {
+        errorToast(t('Please select at least one employee'));
+        return;
+      }
+      formData.append('user_ids', ids.join(','));
     }
 
+    // questions[0], questions[1], ...
     addedQuestions.forEach((question, index) => {
       formData.append(`questions[${index}]`, question);
     });
 
-    console.log("🔥 ~ handleSubmit ~ formData:", formData);
+    console.log('🔥 ~ handleSubmit ~ invite payload:', {
+      job_id: jobId,
+      invite_to: inviteTo,
+      user_ids:
+        inviteTo === 'specific' && Array.isArray(invitePayload.user_ids)
+          ? invitePayload.user_ids.filter((id: string | null) => !!id).join(',')
+          : undefined,
+      questions: addedQuestions,
+    });
 
     try {
       const response = await sendInvites(formData).unwrap();

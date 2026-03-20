@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Image,
     StyleSheet,
@@ -56,9 +56,18 @@ const PreviewPost = () => {
     } = useAppSelector(state => selectPostForm(state as any));
     const { updatePostForm } = usePostFormUpdater();
     const [imageLoading, setImageLoading] = useState(false);
+    const previewImageUri = useMemo(() => {
+        const image = uploadedImages?.[0];
+        const rawUri = image?.uri || image?.path || image?.sourceURL || '';
+        if (!rawUri) return '';
+        if (rawUri.startsWith('http') || rawUri.startsWith('file://') || rawUri.startsWith('content://') || rawUri.startsWith('ph://')) {
+            return rawUri;
+        }
+        return `file://${rawUri}`;
+    }, [uploadedImages]);
 
     const hasValidImage = () => {
-        return uploadedImages.length > 0 && uploadedImages[0]?.uri;
+        return !!previewImageUri;
     };
 
     const handlePublishPost = async () => {
@@ -181,13 +190,13 @@ const PreviewPost = () => {
                             )}
                             <Image
                                 source={{
-                                    uri: (Platform.OS === 'ios' && uploadedImages[0]?.uri && !uploadedImages[0]?.uri.startsWith('file://') && !uploadedImages[0]?.uri.startsWith('http') && !uploadedImages[0]?.uri.startsWith('ph://'))
-                                        ? `file://${uploadedImages[0]?.uri}`
-                                        : uploadedImages[0]?.uri
+                                    uri: previewImageUri,
                                 }}
                                 style={styles.postImage}
                                 onLoadStart={() => setImageLoading(true)}
+                                onLoad={() => setImageLoading(false)}
                                 onLoadEnd={() => setImageLoading(false)}
+                                onError={() => setImageLoading(false)}
                             />
                         </View>
                     )}

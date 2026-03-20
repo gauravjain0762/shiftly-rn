@@ -404,85 +404,56 @@ const CreateAccount = () => {
   };
 
   const handleSignup = async () => {
-    const formData = new FormData();
+    try {
+      const normalizedPhone = (companyRegisterData?.phone || '').replace(/\D/g, '');
+      const normalizedPhoneCode = (companyRegisterData?.phone_code || '').replace(/\D/g, '');
+      const payload: any = {
+        website: companyProfileData?.website || '',
+        company_size: companyProfileData?.company_size || '',
+        address: userInfo?.address || '',
+        lat: userInfo?.lat?.toString() || '0',
+        lng: userInfo?.lng?.toString() || '0',
+        about: companyProfileData?.about || '',
+        mission: companyProfileData?.mission || '',
+        values: companyProfileData?.values || '',
+        services: companyProfileData?.services?.join(',') || '',
+        business_type_id: companyRegisterData?.business_type_id || '',
+        company_name: companyRegisterData?.company_name || '',
+        name: companyRegisterData?.name || '',
+        email: companyRegisterData?.email || '',
+        password: companyRegisterData?.password || '',
+        phone_code: normalizedPhoneCode,
+        phone: normalizedPhone,
+        language: language || 'en',
+        deviceToken: fcmToken ?? '',
+        deviceType: Platform.OS,
+      };
 
-    console.log(
-      'companyProfileData?.website>>>>>. ',
-      companyProfileData?.website,
-    );
-    console.log(
-      'companyProfileData?.company_size>>>>>. ',
-      companyProfileData?.company_size,
-    );
-    formData.append('website', companyProfileData?.website || '');
-    formData.append('company_size', companyProfileData?.company_size || '');
-    formData.append('address', userInfo?.address || '');
-    formData.append('lat', userInfo?.lat?.toString() || '0');
-    formData.append('lng', userInfo?.lng?.toString() || '0');
-    formData.append('about', companyProfileData?.about || '');
-    formData.append('mission', companyProfileData?.mission || '');
-    formData.append('values', companyProfileData?.values || '');
-    formData.append('services', companyProfileData?.services?.join(',') || '');
-    formData.append(
-      'business_type_id',
-      companyRegisterData?.business_type_id || '',
-    );
-    formData.append('company_name', companyRegisterData?.company_name || '');
-    formData.append('name', companyRegisterData?.name || '');
-    formData.append('email', companyRegisterData?.email || '');
-    formData.append('password', companyRegisterData?.password || '');
-    formData.append('phone_code', companyRegisterData?.phone_code);
-    formData.append('phone', companyRegisterData?.phone || '');
-    formData.append('language', language || 'en');
-    formData.append('deviceToken', fcmToken ?? '');
-    formData.append('deviceType', Platform.OS);
-
-    if (companyProfileData?.logo?.uri) {
-      formData.append('logo', {
-        uri: companyProfileData.logo.uri,
-        type: companyProfileData.logo.type || 'image/jpeg',
-        name: companyProfileData.logo.name || 'logo.jpg',
-      });
-    }
-
-    if (
-      companyProfileData?.cover_images &&
-      companyProfileData.cover_images.length > 0
-    ) {
-      companyProfileData.cover_images.forEach((image: any, index: number) => {
-        if (image?.uri) {
-          const imageData = {
-            uri: image.uri,
-            type: image.type || 'image/jpeg',
-            name: image.name || `cover_${index}.jpg`,
-          };
-
-          formData.append('cover_images', imageData);
-        }
-      });
-    }
-
-    const response: any = await companySignUp(formData).unwrap();
-    // console.log(response, response?.status, 'response----handleSignup');
-    dispatch(setCompanyProfileAllData(response?.data?.company));
-    if (response?.status) {
-      successToast(response?.message);
-      setStart((prev: boolean) => !prev);
-      setTimer(30); // Start 30s countdown when OTP is sent
-      nextStep();
-      // dispatch(
-      //   setCompanyRegisterData({
-      //     business_type_id: '',
-      //     company_name: '',
-      //     name: '',
-      //     email: '',
-      //     password: '',
-      //     phone_code: '971',
-      //     phone: '',
-      //   }),
-      // );
-    } else {
-      errorToast(response?.message);
+      console.log(
+        'companyProfileData?.website>>>>>. ',
+        companyProfileData?.website,
+      );
+      console.log(
+        'companyProfileData?.company_size>>>>>. ',
+        companyProfileData?.company_size,
+      );
+      const response: any = await companySignUp(payload).unwrap();
+      dispatch(setCompanyProfileAllData(response?.data?.company));
+      if (response?.status) {
+        successToast(response?.message);
+        setStart((prev: boolean) => !prev);
+        setTimer(30); // Start 30s countdown when OTP is sent
+        nextStep();
+      } else {
+        errorToast(response?.message);
+      }
+    } catch (error: any) {
+      const message =
+        error?.data?.message ||
+        error?.message ||
+        'Unable to continue signup. Please try again.';
+      errorToast(message);
+      console.log('company signup Error', error);
     }
   };
   // const emailCheck = async () => {

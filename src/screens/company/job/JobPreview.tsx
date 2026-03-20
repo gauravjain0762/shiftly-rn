@@ -161,7 +161,7 @@ const JobPreview = () => {
                                 : l;
                         const level = typeof l === 'object' ? l.level || '' : '';
                         const fromMap =
-                            languageData.find((opt: any) => opt.value === id)?.label ?? '';
+                            languageData.find((opt: any) => String(opt?.value) === String(id))?.label ?? '';
                         const fallbackName =
                             typeof l === 'object'
                                 ? l.name ?? id
@@ -267,8 +267,13 @@ const JobPreview = () => {
                     .map((l: any) => {
                         const id = typeof l === 'object' ? l.id : l;
                         const level = typeof l === 'object' ? l.level || '' : '';
-                        const name = languageData.find((opt: any) => opt.value === id)?.label ?? '';
-                        return { name, level };
+                        // Resolve name: form state > languageData lookup > id as fallback (NEVER send empty - backend clears languages)
+                        const resolvedName =
+                            (typeof l === 'object' && l?.name && String(l.name).trim()) ||
+                            languageData.find((opt: any) => String(opt?.value) === String(id))?.label ||
+                            '';
+                        const name = resolvedName || (id ? String(id) : '');
+                        return { id, name, language_id: id, level: level || '' };
                     })
                 : [],
             job_requirements: Array.isArray(other_requirements)

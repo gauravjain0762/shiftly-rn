@@ -191,12 +191,16 @@ const SignUp = () => {
 
   const handleRegister = async (isCheck?: boolean) => {
     try {
+      const normalizedEmail = (email || '').trim().toLowerCase();
+      const normalizedPhone = (phone || '').replace(/\D/g, '');
+      const normalizedPhoneCode = (phone_code || '').replace(/\D/g, '');
+
       let obj = {
         name: name,
-        email: email || email.trim().toLowerCase(),
+        email: normalizedEmail,
         password: full_password,
-        phone_code: phone_code,
-        phone: phone,
+        phone_code: normalizedPhoneCode,
+        phone: normalizedPhone,
         validate_email: Boolean(isCheck),
         // validate_phone: Boolean(!isCheck),
       };
@@ -209,8 +213,8 @@ const SignUp = () => {
 
       let socialObj: any = {
         user_id: userInfo?._id,
-        phone_code: phone_code,
-        phone: phone,
+        phone_code: normalizedPhoneCode,
+        phone: normalizedPhone,
       };
 
       if (isGoogleAuth || isAppleAuth) {
@@ -237,7 +241,12 @@ const SignUp = () => {
       } else {
         errorToast(response?.message);
       }
-    } catch (error) {
+    } catch (error: any) {
+      const message =
+        error?.data?.message ||
+        error?.message ||
+        'Unable to continue signup. Please try again.';
+      errorToast(message);
       console.error('Error registering user:', error);
     }
   };

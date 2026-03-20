@@ -39,7 +39,9 @@ import { AppStyles } from '../../../theme/appStyles';
 import { navigationRef } from '../../../navigation/RootContainer';
 import {
   errorToast,
+  goBack,
   IMAGE_URL,
+  isCompanyProfileComplete,
   navigateTo,
   resetNavigation,
   successToast,
@@ -70,8 +72,9 @@ import {
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useIsFocused, useRoute } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useAppSelector } from '../../../redux/hooks';
+import { RootState } from '../../../store';
 import {
   resetJobFormState,
   selectJobForm,
@@ -330,6 +333,7 @@ const PostJob = () => {
   const [createdJobId, setCreatedJobId] = useState<string>('');
   const [createdJobData, setCreatedJobData] = useState<any>(null);
   const { userInfo, getAppData } = useAppSelector((state: any) => state.auth);
+  const [completeProfileModal, setCompleteProfileModal] = useState(false);
   const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
   const [isExpiryDateManuallyChanged, setIsExpiryDateManuallyChanged] =
     useState(false);
@@ -348,6 +352,14 @@ const PostJob = () => {
     level: string;
   } | null>(null);
   const hasInitializedAreaFromEditRef = useRef<boolean>(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!editMode && userInfo && !isCompanyProfileComplete(userInfo)) {
+        setCompleteProfileModal(true);
+      }
+    }, [editMode, userInfo]),
+  );
 
   const dropdownDepartmentsOptions =
     departments?.map(item => ({
@@ -638,7 +650,14 @@ const PostJob = () => {
             .map((l: any) => {
               const id = typeof l === 'object' ? l.id : l;
               const level = typeof l === 'object' ? l.level || '' : '';
-              return level ? { id, level } : { id, level: '' };
+              // Use String comparison for reliable match (ObjectId vs string)
+              const name =
+                languageData.find((o: any) => String(o?.value) === String(id))?.label ??
+                (typeof l === 'object' && l?.name ? l.name : '') ??
+                '';
+              // Fallback: always send a name - use id when languageData lookup fails (backend can resolve by id)
+              const finalName = name || (id ? String(id) : '');
+              return { id, name: finalName, level: level || '' };
             })
         : [],
       job_requirements: Array.isArray(other_requirements)
@@ -1237,8 +1256,15 @@ const PostJob = () => {
                           : [];
                       const currentLangs = Array.isArray(languages) ? languages : [];
                       const updatedLanguages = selectedIds.map((id: string) => {
-                        const existing = currentLangs.find((l: any) => (typeof l === 'object' ? l?.id : l) === id);
-                        return existing ? { id, level: existing.level || '' } : { id, level: '' };
+                        const existing = currentLangs.find((l: any) => String((typeof l === 'object' ? l?.id : l)) === String(id));
+                        const name =
+                          (typeof existing === 'object' && existing?.name) ||
+                          languageData.find((o: any) => String(o?.value) === String(id))?.label ||
+                          '';
+                        const finalName = name || (id ? String(id) : '');
+                        return existing
+                          ? { id, level: existing.level || '', name: finalName }
+                          : { id, level: '', name: finalName };
                       });
                       updateJobForm({ languages: updatedLanguages });
                     }}
@@ -1253,8 +1279,8 @@ const PostJob = () => {
                     <View style={styles.languageListContainer}>
                       {languages.map((lang: any, index: number) => {
                         const langId = typeof lang === 'object' ? lang?.id : lang;
-                        const opt = languageData.find((o: any) => o.value === langId);
-                        const label = opt?.label ?? langId;
+                        const opt = languageData.find((o: any) => String(o?.value) === String(langId));
+                        const label = opt?.label ?? (typeof lang === 'object' ? lang?.name : undefined) ?? langId;
                         const level = typeof lang === 'object' ? lang?.level : '';
                         return (
                           <View key={`${langId}-${index}`} style={styles.languageChipWithDots}>
@@ -1270,7 +1296,9 @@ const PostJob = () => {
                                       key={profLevel}
                                       onPress={() => {
                                         const updated = [...languages];
-                                        updated[index] = { id: langId, level: profLevel };
+                                        const name = (typeof lang === 'object' && lang?.name) || languageData.find((o: any) => String(o?.value) === String(langId))?.label || '';
+                                        const finalName = name || (langId ? String(langId) : '');
+                                        updated[index] = { id: langId, level: profLevel, name: finalName };
                                         updateJobForm({ languages: updated });
                                         setPressedLangDot({ langId, level: profLevel });
                                         setTimeout(() => setPressedLangDot(null), 2000);
@@ -1809,7 +1837,7 @@ const PostJob = () => {
                           setTimeout(() => setIsAutocompleteOpen(false), 300);
                         },
                         onChangeText: text => {
-                          setSearchText(text);
+                          setJobAreaText(text);
                           setIsAutocompleteOpen(true);
                         },
                         clearButtonMode: 'while-editing',
@@ -2048,6 +2076,74 @@ const PostJob = () => {
             {steps !== 0 && render()}
           </View>
         )}
+
+        <BottomModal
+          visible={completeProfileModal}
+          onClose={() => {
+            setCompleteProfileModal(false);
+            goBack();
+          }}
+          backgroundColor={colors.white}>
+          <BaseText style={styles.completeProfileModalHeading}>
+            {t('Complete Your Profile')}
+          </BaseText>
+          <BaseText style={styles.completeProfileModalDescription}>
+            {t('You need to complete your company profile before posting jobs or creating posts. Please add the required details to continue.')}
+          </BaseText>
+          <GradientButton
+            type="Company"
+            title={t('Complete Profile')}
+            style={styles.completeProfileModalButton}
+            onPress={() => {
+              setCompleteProfileModal(false);
+              navigateTo(SCREENS.CompanyProfile);
+            }}
+          />
+          <TouchableOpacity
+            style={styles.completeProfileModalCancel}
+            onPress={() => {
+              setCompleteProfileModal(false);
+              goBack();
+            }}>
+            <Text style={styles.completeProfileModalCancelText}>
+              {t('Cancel')}
+            </Text>
+          </TouchableOpacity>
+        </BottomModal>
+
+        <BottomModal
+          visible={completeProfileModal}
+          onClose={() => {
+            setCompleteProfileModal(false);
+            goBack();
+          }}
+          backgroundColor={colors.white}>
+          <BaseText style={styles.completeProfileModalHeading}>
+            {t('Complete Your Profile')}
+          </BaseText>
+          <BaseText style={styles.completeProfileModalDescription}>
+            {t('You need to complete your company profile before posting jobs or creating posts. Please add the required details to continue.')}
+          </BaseText>
+          <GradientButton
+            type="Company"
+            title={t('Complete Profile')}
+            style={styles.completeProfileModalButton}
+            onPress={() => {
+              setCompleteProfileModal(false);
+              navigateTo(SCREENS.CompanyProfile);
+            }}
+          />
+          <TouchableOpacity
+            style={styles.completeProfileModalCancel}
+            onPress={() => {
+              setCompleteProfileModal(false);
+              goBack();
+            }}>
+            <Text style={styles.completeProfileModalCancelText}>
+              {t('Cancel')}
+            </Text>
+          </TouchableOpacity>
+        </BottomModal>
 
         <BottomModal
           visible={isSuccessModalVisible && isFocused}

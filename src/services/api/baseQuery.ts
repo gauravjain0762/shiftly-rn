@@ -32,6 +32,20 @@ export const axiosBaseQuery: BaseQueryFn<
 > = async (args, api) => {
   const {dispatch, getState} = api;
   const {url, method, data, params, headers, skipLoader} = args;
+  const baseUrl = (axiosInstance.defaults.baseURL || '').replace(/\/+$/, '');
+  const requestPath = (url || '').startsWith('/') ? url : `/${url || ''}`;
+  const fullUrl = `${baseUrl}${requestPath}`;
+
+  const formatPayloadForLog = (payload: any) => {
+    if (payload instanceof FormData) {
+      // RN FormData exposes internals via _parts. This is useful for debugging multipart payloads.
+      return {
+        type: 'FormData',
+        parts: (payload as any)?._parts ?? 'unavailable',
+      };
+    }
+    return payload;
+  };
 
   if (!skipLoader) {
     dispatch(incrementPendingRequests());
@@ -42,10 +56,13 @@ export const axiosBaseQuery: BaseQueryFn<
     : null;
   const authHeaders = token ? {Authorization: `Bearer ${token}`} : {};
 
-  if (params) {
-    console.log('params--', params);
-  }
-  console.log('url--', url);
+  console.log('API REQUEST', {
+    method,
+    url: fullUrl,
+    path: url,
+    params: params ?? null,
+    data: formatPayloadForLog(data),
+  });
 
   try {
     const result = await axiosInstance.request({
@@ -60,10 +77,25 @@ export const axiosBaseQuery: BaseQueryFn<
       },
     } as AxiosRequestConfig);
 
+    console.log('API RESPONSE', {
+      method,
+      url: fullUrl,
+      status: result?.status,
+      data: result?.data,
+    });
+
     return {data: result.data};
   } catch (rawError) {
     const error = rawError as AxiosError;
-    console.log('error', rawError);
+    console.log('API ERROR', {
+      method,
+      url: fullUrl,
+      status: error?.response?.status ?? 'NO_STATUS',
+      message: error?.message,
+      responseData: error?.response?.data ?? null,
+      requestData: formatPayloadForLog(data),
+      requestParams: params ?? null,
+    });
     if (error.response?.status === 401) {
       if (shouldHandle401()) {
         console.log('401 Unauthorized error detected. Redirecting to login...');

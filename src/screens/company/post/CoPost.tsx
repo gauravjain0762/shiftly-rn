@@ -7,8 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { colors } from '../../../theme/colors';
 import { IMAGES } from '../../../assets/Images';
 import { AppStyles } from '../../../theme/appStyles';
-import { navigateTo } from '../../../utils/commonFunction';
+import { navigateTo, isCompanyProfileComplete } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import BottomModal from '../../../component/common/BottomModal';
 import { useGetCompanyPostsQuery, useGetProfileQuery } from '../../../api/dashboardApi';
 import { useAppDispatch } from '../../../redux/hooks';
 import { setCoPostSteps } from '../../../features/companySlice';
@@ -19,10 +22,12 @@ import BaseText from '../../../component/common/BaseText';
 const CoPost = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const { userInfo }: any = useSelector((state: RootState) => state.auth);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [completeProfileModal, setCompleteProfileModal] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const handleScrollToPost = (index: number) => {
@@ -71,6 +76,10 @@ const CoPost = () => {
   };
 
   const handleCreatePost = () => {
+    if (!isCompanyProfileComplete(userInfo)) {
+      setCompleteProfileModal(true);
+      return;
+    }
     dispatch(setCoPostSteps(1));
     navigateTo(SCREENS.CreatePost);
   };
@@ -166,6 +175,34 @@ const CoPost = () => {
           />
         )}
       </View>
+
+      <BottomModal
+        visible={completeProfileModal}
+        onClose={() => setCompleteProfileModal(false)}
+        backgroundColor={colors.white}>
+        <BaseText style={styles.completeProfileModalHeading}>
+          {t('Complete Your Profile')}
+        </BaseText>
+        <BaseText style={styles.completeProfileModalDescription}>
+          {t('You need to complete your company profile before posting jobs or creating posts. Please add the required details to continue.')}
+        </BaseText>
+        <GradientButton
+          type="Company"
+          title={t('Complete Profile')}
+          style={styles.completeProfileModalButton}
+          onPress={() => {
+            setCompleteProfileModal(false);
+            navigateTo(SCREENS.CompanyProfile);
+          }}
+        />
+        <TouchableOpacity
+          style={styles.completeProfileModalCancel}
+          onPress={() => setCompleteProfileModal(false)}>
+          <Text style={styles.completeProfileModalCancelText}>
+            {t('Cancel')}
+          </Text>
+        </TouchableOpacity>
+      </BottomModal>
     </LinearContainer>
   );
 };
@@ -252,5 +289,26 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: wp(22),
     paddingVertical: hp(3),
+  },
+  completeProfileModalHeading: {
+    ...commonFontStyle(600, 18, colors._0B3970),
+    marginBottom: hp(12),
+    textAlign: 'center',
+  },
+  completeProfileModalDescription: {
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+    marginBottom: hp(20),
+    textAlign: 'center',
+    lineHeight: hp(22),
+  },
+  completeProfileModalButton: {
+    marginBottom: hp(12),
+  },
+  completeProfileModalCancel: {
+    alignItems: 'center',
+    paddingVertical: hp(8),
+  },
+  completeProfileModalCancelText: {
+    ...commonFontStyle(500, 14, colors._0B3970),
   },
 });

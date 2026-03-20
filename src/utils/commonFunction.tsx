@@ -91,6 +91,21 @@ export const mobileNumberCheck = (mobileNo: string) => {
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Check if company profile is complete (required for job posting and post creation) */
+export const isCompanyProfileComplete = (company: any): boolean => {
+  if (!company) return false;
+  const name = (company?.company_name || company?.business_name || '').toString().trim();
+  const about = (company?.about || '').toString().trim();
+  const address = (company?.address || '').toString().trim();
+  const city = (company?.city || '').toString().trim();
+  const country = (company?.country || '').toString().trim();
+  const website = (company?.website || '').toString().trim();
+  const companySize = (company?.company_size || '').toString().trim();
+  const hasAddress = address.length > 0 || (city.length > 0 && country.length > 0);
+  const hasWebsite = website.length > 0 && website !== 'https://';
+  return name.length > 0 && about.length > 0 && hasAddress && hasWebsite && companySize.length > 0;
+};
+
 // export const resetNavigation = (name: string, params?: any | undefined) => {
 //   navigationRef.dispatch(
 //     CommonActions.reset({

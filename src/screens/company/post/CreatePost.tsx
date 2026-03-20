@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -20,14 +20,18 @@ import { IMAGES } from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { AppStyles } from '../../../theme/appStyles';
-import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
+import { errorToast, goBack, isCompanyProfileComplete, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPostForm } from '../../../features/companySlice';
 import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
 import CharLength from '../../../component/common/CharLength';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import BottomModal from '../../../component/common/BottomModal';
+import BaseText from '../../../component/common/BaseText';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 const CreatePost = () => {
   const { t } = useTranslation();

@@ -55,10 +55,6 @@ export const authApi = createApi({
         method: HTTP_METHOD.POST,
         data: credentials,
         skipLoader: false,
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Content-Type': 'multipart/form-data',
-        },
       }),
       invalidatesTags: ['Auth'],
       async onQueryStarted(_: any, { dispatch, queryFulfilled }: any) {
@@ -342,11 +338,17 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
-          if (data?.status) {
-            dispatch(setAuthToken(data.data?.auth_token));
+          if (data?.status && data?.data?.auth_token) {
+            await setAsyncToken(data?.data?.auth_token);
+            if (data?.data?.user) {
+              await setAsyncUserInfo(data?.data?.user);
+            }
+            dispatch(setAuthToken(data.data.auth_token));
             dispatch(setUserInfo(data.data?.user));
             dispatch(setGuestLogin(false));
           } else {
+            // For incomplete social accounts (no auth token yet), avoid poisoning auth state.
+            if (!data?.data?.auth_token && data?.status) return;
             errorToast(data?.message);
           }
         } catch (error) {
@@ -393,11 +395,17 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           console.log(data, 'datadatadatadatadata');
-          if (data?.data?.user?.status) {
-            dispatch(setAuthToken(data.data?.auth_token));
+          if (data?.status && data?.data?.auth_token) {
+            await setAsyncToken(data?.data?.auth_token);
+            if (data?.data?.user) {
+              await setAsyncUserInfo(data?.data?.user);
+            }
+            dispatch(setAuthToken(data.data.auth_token));
             dispatch(setUserInfo(data.data?.user));
             dispatch(setGuestLogin(false));
           } else {
+            // For incomplete social accounts (no auth token yet), avoid poisoning auth state.
+            if (!data?.data?.auth_token && data?.status) return;
             errorToast(data?.message);
           }
         } catch (error) {

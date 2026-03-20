@@ -21,7 +21,7 @@ import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import MyJobCard from '../../../component/common/MyJobCard';
-import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
+import { errorToast, goBack, isCompanyProfileComplete, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -51,6 +51,8 @@ const CoJob = () => {
   const { t } = useTranslation<any>();
   const dispatch = useDispatch<any>();
   const filters = useSelector((state: any) => state.company.filters);
+  const { userInfo }: any = useSelector((state: any) => state.auth);
+  const [completeProfileModal, setCompleteProfileModal] = useState(false);
 
   const [isFilterModalVisible, setIsFilterModalVisible] =
     useState<boolean>(false);
@@ -157,6 +159,10 @@ const CoJob = () => {
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
+          if (!isCompanyProfileComplete(userInfo)) {
+            setCompleteProfileModal(true);
+            return;
+          }
           dispatch(resetJobFormState());
           dispatch(setCoPostJobSteps(0));
           navigateTo(SCREENS.PostJob);

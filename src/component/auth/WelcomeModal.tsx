@@ -29,18 +29,15 @@ const WelcomeModal = ({
       animationIn={'slideInUp'}
       isVisible={visible}>
       <View style={styles.modalContent}>
-        <LottieView
-          source={animation.success_check}
-          autoPlay
-          loop={false}
-          style={{
-            width: 90,
-            height: 90,
-            borderRadius: 90,
-            overflow: 'hidden',
-            alignSelf: 'center',
-          }}
-        />
+        <View style={styles.modalIconWrapper}>
+          <LottieView
+            source={animation.success_check}
+            autoPlay
+            loop={false}
+            style={styles.modalCheckIcon}
+            resizeMode="cover"
+          />
+        </View>
 
         <Text style={styles.welcomeText}>
           {t('Welcome')}, {name} 👋
@@ -83,6 +80,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+  },
+  modalIconWrapper: {
+    width: wp(90),
+    height: wp(90),
+    alignSelf: 'center',
+    borderRadius: wp(45),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors._0B3970,
+    overflow: 'hidden',
+  },
+  modalCheckIcon: {
+    width: wp(90),
+    height: wp(90),
   },
   welcomeText: {
     ...commonFontStyle(500, 25, colors._050505),

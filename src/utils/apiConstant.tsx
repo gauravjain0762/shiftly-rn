@@ -62,6 +62,7 @@ export const API = {
   //Notifications
   getCompanyNotifications: '/company/getNotifications',
   markReadNotifications: '/markReadNotifications',
+  companyMarkReadNotifications: '/company/markReadNotifications',
   clearAllNotifications: '/clearAllNotifications',
   companyClearAllNotifications: '/company/clearAllNotifications',
 

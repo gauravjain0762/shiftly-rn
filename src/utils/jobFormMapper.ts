@@ -48,7 +48,7 @@ export const mapJobToFormState = (job: any) => {
   );
 
   const rawLangs = job?.languages ?? job?.language_ids;
-  let languages: { id: string; level: string }[] = [];
+  let languages: { id: string; level: string; name?: string }[] = [];
   if (Array.isArray(rawLangs) && rawLangs.length > 0) {
     languages = rawLangs
       .map((v: any) => {
@@ -58,10 +58,11 @@ export const mapJobToFormState = (job: any) => {
             ? (v?.language_id?._id ?? v?.language_id ?? v?._id ?? v?.id ?? v?.value ?? v?.name ?? (typeof v?.language_id === 'string' ? v.language_id : null))
             : String(v);
         const level = typeof v === 'object' ? (v?.level ?? '') : '';
+        const name = typeof v === 'object' ? (v?.name ?? v?.language_id?.title ?? v?.language_id?.name ?? '') : '';
         if (!id || String(id).trim() === '') return null;
-        return { id: String(id).trim(), level: level || '' };
+        return { id: String(id).trim(), level: level || '', ...(name ? { name: String(name).trim() } : {}) };
       })
-      .filter(Boolean) as { id: string; level: string }[];
+      .filter(Boolean) as { id: string; level: string; name?: string }[];
   } else if (rawLangs) {
     const ids = toIdArray(rawLangs);
     languages = ids.filter(id => id && String(id).trim()).map(id => ({ id: String(id).trim(), level: '' }));

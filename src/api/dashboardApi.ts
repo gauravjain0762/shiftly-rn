@@ -1003,13 +1003,34 @@ export const dashboardApi = createApi({
           skipLoader: true,
         };
       },
-      invalidatesTags: ['GetEmployeeNotifications', 'GetCompanyNotifications'],
+      invalidatesTags: ['GetEmployeeNotifications'],
       async onQueryStarted(_, {queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
           console.log('markReadNotifications response:', data);
         } catch (error) {
           console.log('markReadNotifications error:', error);
+        }
+      },
+    }),
+    companyMarkReadNotifications: builder.mutation<any, {notification_id: string}>({
+      query: body => {
+        const params = {notification_id: body.notification_id};
+        console.log('companyMarkReadNotifications params:', params);
+        return {
+          url: API.companyMarkReadNotifications,
+          method: HTTP_METHOD.POST,
+          data: params,
+          skipLoader: true,
+        };
+      },
+      invalidatesTags: ['GetCompanyNotifications'],
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log('companyMarkReadNotifications response:', data);
+        } catch (error) {
+          console.log('companyMarkReadNotifications error:', error);
         }
       },
     }),
@@ -1206,6 +1227,7 @@ export const {
   useGetCompletedInterviewsQuery,
   useSendAssessmentLinkMutation,
   useMarkReadNotificationsMutation,
+  useCompanyMarkReadNotificationsMutation,
   useClearAllNotificationsMutation,
   useCompanyClearAllNotificationsMutation,
 } = dashboardApi;
