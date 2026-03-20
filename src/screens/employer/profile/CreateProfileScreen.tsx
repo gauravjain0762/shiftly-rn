@@ -232,9 +232,21 @@ const CreateProfileScreen = () => {
         return;
       }
 
+      const trimLoc = (v: unknown) =>
+        typeof v === 'string' ? v.trim() : v != null ? String(v).trim() : '';
+      const cityFromProfile =
+        trimLoc(aboutmeandResumes?.city) || trimLoc(userInfo?.city);
+      const countryFromProfile =
+        trimLoc(aboutmeandResumes?.country) || trimLoc(userInfo?.country);
+      const cityCountryLabel =
+        cityFromProfile && countryFromProfile
+          ? `${cityFromProfile} - ${countryFromProfile}`
+          : cityFromProfile || countryFromProfile || '';
+
       const locationValue =
-        aboutmeandResumes?.location ||
-        userInfo?.address ||
+        trimLoc(aboutmeandResumes?.location) ||
+        trimLoc(userInfo?.address) ||
+        cityCountryLabel ||
         '';
 
       const locationLat = aboutmeandResumes?.lat ?? userInfo?.lat ?? null;

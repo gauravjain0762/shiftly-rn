@@ -384,6 +384,21 @@ const CoPostJobLocationScreen = () => {
   }, []);
 
   const handlePlaceSelect = async (data: any, details: any) => {
+    try {
+      console.log(
+        '[GooglePlaces] location selection (data):',
+        JSON.stringify(data, null, 2),
+      );
+      console.log(
+        '[GooglePlaces] location selection (details):',
+        details
+          ? JSON.stringify(details, null, 2)
+          : 'null (fetchDetails may be off or request failed)',
+      );
+    } catch {
+      console.log('[GooglePlaces] location selection (raw):', data, details);
+    }
+
     if (!details) return;
 
     Keyboard.dismiss();

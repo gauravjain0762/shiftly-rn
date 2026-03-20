@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CustomTextInput,
   GradientButton,
@@ -21,12 +20,20 @@ import { IMAGES } from '../../../assets/Images';
 import { colors } from '../../../theme/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import MyJobCard from '../../../component/common/MyJobCard';
-import { errorToast, goBack, isCompanyProfileComplete, navigateTo } from '../../../utils/commonFunction';
+import {
+  errorToast,
+  goBack,
+  isCompanyProfileComplete,
+  navigateTo,
+} from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
 import { Dropdown } from 'react-native-element-dropdown';
 import CountryPicker from 'react-native-country-picker-modal';
-import { useGetCompanyJobsQuery } from '../../../api/dashboardApi';
+import {
+  useGetCompanyJobsQuery,
+  useGetJobDropdownDataQuery,
+} from '../../../api/dashboardApi';
 import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import { useDispatch, useSelector } from 'react-redux';
@@ -38,14 +45,9 @@ import {
 } from '../../../features/companySlice';
 import { useFocusEffect } from '@react-navigation/native';
 
-const contractTypes = [
-  { label: 'Full Time', value: 'Full Time' },
-  { label: 'Part Time', value: 'Part Time' },
-  { label: 'Freelance', value: 'Freelance' },
-  { label: 'Internship', value: 'Internship' },
-  { label: 'Temporary', value: 'Temporary' },
-];
 export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
+const DEFAULT_SALARY_FROM = 1000;
+const DEFAULT_SALARY_TO = 50000;
 
 const CoJob = () => {
   const { t } = useTranslation<any>();
@@ -53,60 +55,130 @@ const CoJob = () => {
   const filters = useSelector((state: any) => state.company.filters);
   const { userInfo }: any = useSelector((state: any) => state.auth);
   const [completeProfileModal, setCompleteProfileModal] = useState(false);
-
-  const [isFilterModalVisible, setIsFilterModalVisible] =
-    useState<boolean>(false);
-
-  const [range, setRange] = useState<number[]>([
-    filters.salary_from,
-    filters.salary_to,
-  ]);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
+  const [range, setRange] = useState<number[]>([filters.salary_from, filters.salary_to]);
   const [value, setValue] = useState<any>(filters.contract_types || []);
   const [location, setLocation] = useState<string>(filters.location || '');
-
   const [page, setPage] = useState<number>(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
   const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
+  const { data: jobDropdownData } = useGetJobDropdownDataQuery();
+  const contractTypeData = useMemo(() => {
+    const list = jobDropdownData?.data?.job_types;
+    if (Array.isArray(list) && list.length > 0) {
+      return list
+        .map((item: any) => ({
+          label: item?.title || '',
+          value: item?.title || item?._id || '',
+        }))
+        .filter((item: any) => item.label && item.value);
+    }
+    return [];
+  }, [jobDropdownData?.data?.job_types]);
 
+  // ─── Refs: always-fresh values accessible in callbacks ────────────────────
+  const pageRef = useRef<number>(1);
+  const refetchRef = useRef<(() => void) | null>(null);
+
+  const syncPageRef = (p: number) => {
+    pageRef.current = p;
+  };
+
+  // ─── Build query params ───────────────────────────────────────────────────
+  const hasContractFilter =
+    Array.isArray(filters?.contract_types) && filters.contract_types.length > 0;
+  const hasLocationFilter = !!String(filters?.location || '').trim();
+  const hasSalaryFilter =
+    filters?.salary_from !== DEFAULT_SALARY_FROM ||
+    filters?.salary_to !== DEFAULT_SALARY_TO;
+
+  const queryParams: Record<string, any> = { page };
+  if (hasContractFilter) queryParams.contract_types = filters.contract_types;
+  if (hasLocationFilter) queryParams.location = filters.location;
+  if (hasSalaryFilter) {
+    queryParams.salary_from = filters.salary_from;
+    queryParams.salary_to = filters.salary_to;
+  }
+
+  const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(
+    queryParams,
+    { refetchOnMountOrArgChange: true },
+  );
+
+  // Keep refetchRef pointing to the latest refetch function
+  useEffect(() => {
+    refetchRef.current = refetch;
+  }, [refetch]);
+
+  const jobList = data?.data?.jobs || [];
+  const pagination = data?.data?.pagination;
+
+  // ─── Sync filter UI when Redux filters change ─────────────────────────────
   useEffect(() => {
     setRange([filters.salary_from, filters.salary_to]);
     setValue(filters.contract_types || []);
     setLocation(filters.location || '');
+    syncPageRef(1);
     setPage(1);
-    setAllJobs([]);
     setOnEndReachedCalled(false);
+    // allJobs will be replaced once the new query settles (see data effect below)
   }, [filters]);
 
-  const queryParams = {
-    ...filters,
-    page: page,
-  };
-  const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(queryParams);
-  const jobList = data?.data?.jobs || [];
-  const pagination = data?.data?.pagination;
+  // ─── Core list population effect ──────────────────────────────────────────
+  //
+  // WHY `isFetching` is in the deps:
+  //   RTK Query uses structural sharing — if the server returns the same payload,
+  //   it reuses the previous `data` object reference, so `useEffect([data])`
+  //   would NOT re-run.  Adding `isFetching` means this effect fires the moment
+  //   any fetch settles (isFetching true→false), guaranteeing the list is
+  //   repopulated even when the data reference hasn't changed.
+  //
+  // WHY we do NOT call setAllJobs([]) in useFocusEffect:
+  //   Eagerly clearing + RTK Query reusing the same reference = permanent empty
+  //   list on every return to the screen.  Instead we show stale data while
+  //   fetching (good UX) and replace it here once settled.
+  useEffect(() => {
+    if (isFetching || !data) return; // wait for the fetch to fully complete
 
-  const hasMountedRef = useRef(false);
+    const newData = data?.data?.jobs || [];
+    const currentPage = data?.data?.pagination?.current_page ?? 1;
+
+    if (currentPage === 1) {
+      // Initial load, refresh, focus-return, or filter change → replace list
+      setAllJobs(newData);
+    } else {
+      // Next page → append, dedup by _id
+      setAllJobs(prev => {
+        const existingIds = new Set(prev.map((j: any) => j?._id).filter(Boolean));
+        const uniqueNew = newData.filter(
+          (j: any) => j?._id && !existingIds.has(j._id),
+        );
+        return uniqueNew.length ? [...prev, ...uniqueNew] : prev;
+      });
+    }
+
+    setOnEndReachedCalled(false);
+  }, [data, isFetching]); // <── isFetching is the key fix
+
+  // ─── Focus effect: trigger a page-1 reload each time screen gains focus ───
   useFocusEffect(
     useCallback(() => {
-      if (hasMountedRef.current) {
-        dispatch(resetFilters());
+      setOnEndReachedCalled(false);
+
+      if (pageRef.current !== 1) {
+        // Changing the arg triggers RTK Query auto-refetch
+        syncPageRef(1);
+        setPage(1);
       } else {
-        hasMountedRef.current = true;
+        // Args are already page=1 → RTK Query won't auto-refetch → call manually
+        // The data effect above will repopulate allJobs once isFetching settles
+        refetchRef.current?.();
       }
-    }, [dispatch]),
+    }, []), // empty deps: refs keep values fresh without re-registering
   );
 
-  useEffect(() => {
-    if (data) {
-      const newData = jobList;
-      setAllJobs(prev =>
-        pagination?.current_page === 1 ? newData : [...prev, ...newData],
-      );
-      setOnEndReachedCalled(false);
-    }
-  }, [data]);
-
+  // ─── Load next page ───────────────────────────────────────────────────────
   const handleLoadMore = () => {
     if (
       pagination?.current_page < pagination?.total_pages &&
@@ -114,32 +186,40 @@ const CoJob = () => {
       !isFetching &&
       !isLoading
     ) {
-      const nextPage = page + 1;
       setOnEndReachedCalled(true);
-      setPage(nextPage);
+      setPage(prev => {
+        const next = prev + 1;
+        syncPageRef(next);
+        return next;
+      });
     }
   };
 
+  // ─── Pull-to-refresh ──────────────────────────────────────────────────────
   const handleRefresh = () => {
-    if (page !== 1) {
-      setPage(1);
-    }
     setOnEndReachedCalled(false);
-    refetch();
+
+    if (pageRef.current !== 1) {
+      syncPageRef(1);
+      setPage(1); // arg change → RTK Query auto-refetches
+    } else {
+      refetch(); // same args → manual refetch; data effect handles repopulation
+    }
   };
 
+  // ─── Apply / reset filter ─────────────────────────────────────────────────
   const handleApplyFilter = async () => {
     try {
-      const filterPayload = {
-        location: location,
-        contract_types: value,
-        salary_from: range[0],
-        salary_to: range[1],
-      };
-      console.log('🔥 [CO FILTER] handleApplyFilter dispatch:', filterPayload);
-      dispatch(setFilters(filterPayload));
+      dispatch(
+        setFilters({
+          location,
+          contract_types: value,
+          salary_from: range[0],
+          salary_to: range[1],
+        }),
+      );
       setIsFilterModalVisible(false);
-    } catch (error) {
+    } catch {
       errorToast('Failed to apply filter');
     }
   };
@@ -148,14 +228,13 @@ const CoJob = () => {
     dispatch(resetFilters());
     setLocation('');
     setValue(null);
-    setRange([1000, 50000]);
+    setRange([DEFAULT_SALARY_FROM, DEFAULT_SALARY_TO]);
     setIsFilterModalVisible(false);
   };
 
-  const renderPostJobButton = () => {
-    return <LinearGradient
-      colors={['#024AA1', '#041428']}
-      style={styles.gradient}>
+  // ─── Post Job button ──────────────────────────────────────────────────────
+  const renderPostJobButton = () => (
+    <LinearGradient colors={['#024AA1', '#041428']} style={styles.gradient}>
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
@@ -174,10 +253,18 @@ const CoJob = () => {
         <Text style={styles.postJobText}>{t('Post Job')}</Text>
       </TouchableOpacity>
     </LinearGradient>
-  }
+  );
 
+  const isFilteredEmpty =
+    filters?.location ||
+    filters?.contract_types?.length ||
+    filters?.salary_from !== DEFAULT_SALARY_FROM ||
+    filters?.salary_to !== DEFAULT_SALARY_TO;
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <LinearContainer colors={[colors.coPrimary, colors.white]}>
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.leftSection}>
           <TouchableOpacity
@@ -194,10 +281,7 @@ const CoJob = () => {
         </View>
 
         <View style={styles.rightSection}>
-          {
-            jobList.length > 0 &&
-            renderPostJobButton()
-          }
+          {jobList.length > 0 && renderPostJobButton()}
 
           {data && (
             <Pressable
@@ -205,8 +289,8 @@ const CoJob = () => {
                 setValue(filters.contract_types || []);
                 setLocation(filters.location || '');
                 setRange([
-                  filters.salary_from || 1000,
-                  filters.salary_to || 50000,
+                  filters.salary_from || DEFAULT_SALARY_FROM,
+                  filters.salary_to || DEFAULT_SALARY_TO,
                 ]);
                 setIsFilterModalVisible(true);
               }}>
@@ -216,16 +300,20 @@ const CoJob = () => {
         </View>
       </View>
 
+      {/* Skeleton shown only on very first load */}
       {isLoading && !data && <MyJobsSkeleton />}
 
+      {/* List */}
       {(!isLoading || data) && (
         <View style={styles.outerContainer}>
           <FlatList
             data={allJobs}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
-            keyExtractor={(item, index) => item?._id || item?.id || index.toString()}
-            renderItem={({ item, index }) => (
+            keyExtractor={(item, index) =>
+              item?._id || item?.id || index.toString()
+            }
+            renderItem={({ item }) => (
               <View style={{ marginBottom: hp(10) }}>
                 <MyJobCard
                   item={item}
@@ -245,14 +333,7 @@ const CoJob = () => {
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}
             ListEmptyComponent={() => {
-              if (isLoading && !data) {
-                return null;
-              }
-              const isFilteredEmpty =
-                filters?.location ||
-                filters?.contract_types?.length ||
-                filters?.salary_from !== 1000 ||
-                filters?.salary_to !== 50000;
+              if (isLoading && !data) return null;
               return (
                 <View style={styles.emptyContainer}>
                   {!isFilteredEmpty && renderPostJobButton()}
@@ -266,7 +347,7 @@ const CoJob = () => {
             }}
             ListFooterComponent={
               isFetching &&
-                pagination?.current_page < pagination?.total_pages ? (
+              pagination?.current_page < pagination?.total_pages ? (
                 <ActivityIndicator
                   color={colors._0B3970}
                   style={{ marginVertical: hp(16) }}
@@ -277,6 +358,7 @@ const CoJob = () => {
         </View>
       )}
 
+      {/* Filter bottom modal */}
       {isFilterModalVisible && (
         <BottomModal
           visible={isFilterModalVisible}
@@ -288,16 +370,13 @@ const CoJob = () => {
                 <Image source={IMAGES.close} style={styles.closeIcon} />
               </Pressable>
             </View>
+
             <View style={styles.inputWrapper}>
               <TouchableOpacity
                 onPress={() => setIsCountryPickerVisible(true)}
                 style={styles.countrySelector}>
                 <Text
-                  style={
-                    location
-                      ? styles.countryText
-                      : styles.countryPlaceholder
-                  }
+                  style={location ? styles.countryText : styles.countryPlaceholder}
                   numberOfLines={1}>
                   {location || t('Select Country')}
                 </Text>
@@ -305,6 +384,7 @@ const CoJob = () => {
               </TouchableOpacity>
               <View style={styles.underline} />
             </View>
+
             {isCountryPickerVisible && (
               <CountryPicker
                 visible={isCountryPickerVisible}
@@ -330,12 +410,14 @@ const CoJob = () => {
                 onClose={() => setIsCountryPickerVisible(false)}
               />
             )}
+
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
               <RangeSlider range={range} setRange={setRange} />
             </View>
+
             <Dropdown
-              data={contractTypes}
+              data={contractTypeData}
               labelField="label"
               valueField="value"
               placeholder="Job Type"
@@ -349,12 +431,14 @@ const CoJob = () => {
                 <Image source={IMAGES.dropdown} style={styles.dropdownIcon} />
               )}
             />
+
             <GradientButton
               style={styles.btn}
               type="Company"
               title={t('Apply')}
               onPress={handleApplyFilter}
             />
+
             <Pressable style={styles.resetButton} onPress={handleResetFilters}>
               <Text style={{ ...commonFontStyle(600, 18, colors._4D4D4D) }}>
                 {'Reset Filters'}
@@ -448,9 +532,6 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     marginTop: hp(30),
-  },
-  locationInput: {
-    ...commonFontStyle(400, 18, colors._181818),
   },
   underline: {
     height: hp(1.5),

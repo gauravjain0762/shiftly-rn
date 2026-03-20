@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     borderRadius: hp(20),
     paddingVertical: hp(7),
     paddingHorizontal: wp(10),
-    backgroundColor: colors._7B7878,
+    backgroundColor: colors._EE4444,
   },
   closedBadgeText: {
     ...commonFontStyle(500, 10, colors.white),

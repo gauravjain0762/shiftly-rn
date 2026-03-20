@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
 import JobListCard from '../../../component/common/JobListCard';
 import { colors } from '../../../theme/colors';
@@ -34,16 +35,28 @@ const JobSummary = () => {
     { page: pageLive, type: 'active' },
     { skip: activeTab !== 'Live Jobs' }
   );
+  console.log("🔥 ~ JobSummary ~ liveJobsQuery:", liveJobsQuery)
   const closedJobsQuery = useGetCompanyJobsQuery(
     { page: pageClosed, type: 'expired' },
     { skip: activeTab !== 'Closed Jobs' }
   );
+  console.log("🔥 ~ JobSummary ~ closedJobsQuery:", closedJobsQuery)
 
   const getActiveQuery = () => {
     return activeTab === 'Live Jobs' ? liveJobsQuery : closedJobsQuery;
   };
 
   const { isLoading, isFetching } = getActiveQuery();
+
+  useFocusEffect(
+    useCallback(() => {
+      // Reset pagination on every screen focus so newest jobs are loaded first.
+      setPageLive(1);
+      setPageClosed(1);
+      setListLive([]);
+      setListClosed([]);
+    }, [])
+  );
 
   useEffect(() => {
     if (liveJobsQuery.data?.status) {
@@ -133,7 +146,18 @@ const JobSummary = () => {
     <TouchableOpacity
       key={tab}
       style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-      onPress={() => setActiveTab(tab as any)}
+      onPress={() => {
+        const targetTab = tab as 'Live Jobs' | 'Closed Jobs';
+        setActiveTab(targetTab);
+        // Ensure each tab always restarts from page 1 when re-opened.
+        if (targetTab === 'Live Jobs') {
+          setPageLive(1);
+          setListLive([]);
+        } else {
+          setPageClosed(1);
+          setListClosed([]);
+        }
+      }}
     >
       <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
     </TouchableOpacity>

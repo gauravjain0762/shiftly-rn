@@ -110,6 +110,7 @@ const SuggestedEmployeeScreen = () => {
     jobData?.job ||
     jobDetailsResponse?.data?.job ||
     {};
+  const isClosedJob = String(jobInfo?.status ?? '').toLowerCase() === 'closed';
 
   const ai_data = jobDetailsResponse?.data || suggestedResponse?.data || {};
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -724,7 +725,7 @@ const SuggestedEmployeeScreen = () => {
     return (
       <Pressable
         key={item._id}
-        onPress={() => !isInvited && toggleUserSelection(item?._id)}
+        onPress={() => !isClosedJob && !isInvited && toggleUserSelection(item?._id)}
         style={[
           styles.employeeCard,
           isSelected && styles.selectedEmployeeCard,
@@ -776,17 +777,20 @@ const SuggestedEmployeeScreen = () => {
           <Pressable
             onPress={event => {
               event.stopPropagation();
+              if (isClosedJob) return;
               setInviteAllSelected(false);
               toggleUserSelection(item?._id);
             }}
             style={[
               styles.inviteButton,
               isSelected && styles.inviteButtonSelected,
+              isClosedJob && styles.disabledInviteButton,
             ]}>
             <Text
               style={[
                 styles.inviteButtonText,
                 isSelected && styles.inviteButtonTextSelected,
+                isClosedJob && styles.disabledInviteButtonText,
               ]}>
               {t('Invite')}
             </Text>
@@ -851,8 +855,13 @@ const SuggestedEmployeeScreen = () => {
                       {renderSalaryRange()}
                     </View>
                   </View>
+                  {isClosedJob && (
+                    <View style={styles.closedBadge}>
+                      <Text style={styles.closedBadgeText}>{t('Closed')}</Text>
+                    </View>
+                  )}
 
-                  {!!jobId && (fromPostJob || isFromJobCard || String(jobInfo?.status ?? '').toLowerCase() !== 'closed') && (
+                  {!!jobId && !isClosedJob && (
                     <View style={styles.jobActionsRow}>
                       <TouchableOpacity
                         style={[styles.actionBtn, styles.editBtn]}
@@ -1040,9 +1049,9 @@ const SuggestedEmployeeScreen = () => {
                         style={[
                           styles.inviteAllButton,
                           inviteAllSelected && styles.inviteAllButtonSelected,
-                          (allSuggestedInvited || !displaySuggested?.length) && { opacity: 0.5 },
+                          (isClosedJob || allSuggestedInvited || !displaySuggested?.length) && { opacity: 0.5 },
                         ]}
-                        disabled={allSuggestedInvited || !displaySuggested?.length}
+                        disabled={isClosedJob || allSuggestedInvited || !displaySuggested?.length}
                         onPress={handleInviteAll}>
                         <View
                           style={[
@@ -1203,7 +1212,7 @@ const SuggestedEmployeeScreen = () => {
                 type="Company"
                 style={styles.ctaButton}
                 onPress={handleBulkInvite}
-                disabled={allSuggestedInvited || !displaySuggested?.length}
+                disabled={isClosedJob || allSuggestedInvited || !displaySuggested?.length}
                 title={t('Invite for AI Interview')}
               />
             </View>
@@ -1308,6 +1317,17 @@ const styles = StyleSheet.create({
   },
   closeBtnText: {
     ...commonFontStyle(600, 13, '#DC2626'),
+  },
+  closedBadge: {
+    alignSelf: 'flex-start',
+    marginTop: hp(12),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+    borderRadius: wp(20),
+    backgroundColor: '#ED494E',
+  },
+  closedBadgeText: {
+    ...commonFontStyle(600, 12, colors.white),
   },
   salaryRow: {
     flexDirection: 'row',
@@ -1476,6 +1496,12 @@ const styles = StyleSheet.create({
   },
   inviteButtonTextSelected: {
     color: colors._0B3970,
+  },
+  disabledInviteButton: {
+    backgroundColor: '#D3D3D3',
+  },
+  disabledInviteButtonText: {
+    color: colors.white,
   },
   emptyState: {
     alignItems: 'center',

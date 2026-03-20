@@ -382,6 +382,15 @@ export const getPlaceDetails = async (placeId: string, mapKey?: string) => {
     const response = await fetch(url);
     const result = await response.json();
 
+    try {
+      console.log(
+        '[Google Place Details API] full response:',
+        JSON.stringify(result, null, 2),
+      );
+    } catch {
+      console.log('[Google Place Details API] full response (raw):', result);
+    }
+
     if (result?.result?.geometry?.location) {
       const { lat, lng } = result.result.geometry.location;
       const addressComponents = result.result.address_components;
