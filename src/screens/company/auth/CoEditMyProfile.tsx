@@ -41,6 +41,7 @@ import { Flag } from 'react-native-country-picker-modal';
 import CustomImage from '../../../component/common/CustomImage';
 import { companySize } from './CreateAccount';
 import CharLength from '../../../component/common/CharLength';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 const CoEditMyProfile = () => {
   const { t } = useTranslation();
@@ -186,7 +187,12 @@ const CoEditMyProfile = () => {
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
       <SafeAreaView edges={['bottom']}>
-        <ScrollView style={styles.main}>
+        <KeyboardAwareScrollView 
+        enabled={true}
+        automaticallyAdjustContentInsets
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        style={styles.main}>
           <BackHeader
             type="company"
             isRight={false}
@@ -278,13 +284,13 @@ const CoEditMyProfile = () => {
             <TextInput
               multiline
               value={about}
-              maxLength={500}
+              maxLength={4000}
               onChangeText={setAbout}
               style={styles.inputAbout}
               placeholder={t('About Company')}
               placeholderTextColor={colors._7B7878}
             />
-            <CharLength value={about} chars={500} style={{}} />
+            <CharLength value={about} chars={4000} style={{}} />
           </View>
 
           {/* Fields */}
@@ -415,7 +421,7 @@ const CoEditMyProfile = () => {
             onPress={handleUpdateProfile}
             disabled={!hasChanges}
           />
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         <ImagePickerModal
           actionSheet={imageModal}

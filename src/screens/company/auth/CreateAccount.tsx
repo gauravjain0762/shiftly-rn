@@ -107,7 +107,6 @@ const CreateAccount = () => {
     registerSuccessModal,
     companyProfileData,
   } = useSelector((state: RootState) => state.auth);
-  console.log("🔥 ~ CreateAccount ~ companyRegistrationStep:", companyRegistrationStep)
   const {
     logo,
     cover_images,
@@ -414,8 +413,6 @@ const CreateAccount = () => {
         lat: userInfo?.lat?.toString() || '0',
         lng: userInfo?.lng?.toString() || '0',
         about: companyProfileData?.about || '',
-        mission: companyProfileData?.mission || '',
-        values: companyProfileData?.values || '',
         services: companyProfileData?.services?.join(',') || '',
         business_type_id: companyRegisterData?.business_type_id || '',
         company_name: companyRegisterData?.company_name || '',
@@ -527,8 +524,6 @@ const CreateAccount = () => {
     formData.append('lat', userInfo?.lat?.toString() || '0');
     formData.append('lng', userInfo?.lng?.toString() || '0');
     formData.append('about', companyProfileData?.about || '');
-    formData.append('mission', companyProfileData?.mission || '');
-    formData.append('values', companyProfileData?.values || '');
     formData.append('services', companyProfileData?.services?.join(',') || '');
     formData.append('company_name', companyRegisterData?.company_name || '');
     formData.append('city', companyProfileData?.city || '');
@@ -1396,10 +1391,10 @@ const CreateAccount = () => {
                   multiline
                   containerStyle={styles.Inputcontainer}
                   textAlignVertical="top"
-                  maxLength={1000}
+                  maxLength={4000}
                 />
                 <Text style={styles.characterlanght}>{`${companyProfileData?.about.length || 0
-                  }/1000 Characters`}</Text>
+                  }/4000 Characters`}</Text>
                 <TouchableOpacity
                   onPress={() => setShowTooltip(!showTooltip)}
                   style={{ position: 'absolute', right: wp(5), bottom: hp(70) }}>
@@ -1413,48 +1408,6 @@ const CreateAccount = () => {
                   </View>
                 )}
               </View>
-              {/* <View>
-                <Text style={styles.title}>{t('Mission')}</Text>
-                <CustomTextInput
-                  placeholderTextColor={colors._7B7878}
-                  onChangeText={(mission: string) => {
-                    dispatch(
-                      setCompanyProfileData({
-                        mission,
-                      }),
-                    );
-                  }}
-                  value={companyProfileData?.mission}
-                  inputStyle={[styles.coIntroInput, { height: hp(80) }]}
-                  multiline
-                  containerStyle={styles.Inputcontainer}
-                  textAlignVertical="top"
-                  maxLength={100}
-                />
-                <Text style={styles.characterlanght}>{`${companyProfileData?.mission.length || 0
-                  }/100 Characters`}</Text>
-              </View>
-              <View>
-                <Text style={styles.title}>{t('Values')}</Text>
-                <CustomTextInput
-                  placeholderTextColor={colors._7B7878}
-                  onChangeText={(values: string) => {
-                    dispatch(
-                      setCompanyProfileData({
-                        values,
-                      }),
-                    );
-                  }}
-                  value={companyProfileData?.values}
-                  inputStyle={[styles.coIntroInput]}
-                  multiline
-                  containerStyle={styles.Inputcontainer}
-                  textAlignVertical="top"
-                  maxLength={100}
-                />
-                <Text style={styles.characterlanght}>{`${companyProfileData?.values.length || 0
-                  }/100 Characters`}</Text>
-              </View> */}
             </View>
             <GradientButton
               style={styles.btn}
@@ -1650,7 +1603,10 @@ const CreateAccount = () => {
                     style={styles.logoConatiner}>
                     <Image
                       source={
-                        Object.keys(logo)?.length && logo?.uri
+                        logo &&
+                        typeof logo === 'object' &&
+                        Object.keys(logo).length > 0 &&
+                        logo?.uri
                           ? { uri: logo?.uri }
                           : IMAGES.logoImg
                       }
@@ -1659,7 +1615,7 @@ const CreateAccount = () => {
                   </TouchableOpacity>
                 </View>
 
-                {Object.keys(logo)?.length && (
+                {logo && typeof logo === 'object' && Object.keys(logo).length > 0 && (
                   <Pressable
                     onPress={() => {
                       dispatch(setCompanyProfileData({ logo: {} }));

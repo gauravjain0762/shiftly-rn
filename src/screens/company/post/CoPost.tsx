@@ -192,7 +192,7 @@ const CoPost = () => {
           style={styles.completeProfileModalButton}
           onPress={() => {
             setCompleteProfileModal(false);
-            navigateTo(SCREENS.CompanyProfile);
+            navigateTo(SCREENS.CoEditMyProfile);
           }}
         />
         <TouchableOpacity

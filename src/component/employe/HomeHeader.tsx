@@ -36,6 +36,7 @@ const HomeHeader: FC<props> = ({
   companyProfile,
   unreadCount = 0,
 }) => {
+  console.log("🔥 ~ HomeHeader ~ companyProfile:", companyProfile?.city, companyProfile?.country)
   const { hasUnreadNotification } = useSelector((state: RootState) => state.auth);
   const showBadge = unreadCount > 0 || hasUnreadNotification;
   const badgeCount = unreadCount > 0 ? unreadCount : null;
@@ -83,7 +84,7 @@ const HomeHeader: FC<props> = ({
             {companyProfile?.company_name || companyProfile?.name || 'N/A'}
           </Text>
 
-          <View style={styles.locationRow}>
+          {companyProfile?.country !== null && companyProfile?.city !== null && <View style={styles.locationRow}>
             <CustomImage
               size={wp(18)}
               source={IMAGES.marker}
@@ -92,15 +93,15 @@ const HomeHeader: FC<props> = ({
             <Text style={styles.location}>
               {type === 'company'
                 ? (() => {
-                    const city = companyProfile?.city?.trim?.() || '';
-                    const country = companyProfile?.country?.trim?.() || '';
-                    return !city && !country
-                      ? 'N/A'
-                      : `${city || 'N/A'}, ${country || 'N/A'}`;
-                  })()
+                  const city = companyProfile?.city?.trim?.() || '';
+                  const country = companyProfile?.country?.trim?.() || '';
+                  return !city && !country
+                    ? 'N/A'
+                    : `${city || 'N/A'}, ${country || 'N/A'}`;
+                })()
                 : (companyProfile?.country?.trim?.() || 'N/A')}
             </Text>
-          </View>
+          </View>}
         </View>
       </View>
       <TouchableOpacity

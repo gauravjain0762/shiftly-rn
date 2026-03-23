@@ -36,6 +36,7 @@ const ProfileTabs = ['About', 'Posts', 'Jobs'];
 const ViewCompanyProfile = () => {
     const { params } = useRoute<any>();
     const companyId = params?.companyId;
+    console.log("🔥 ~ ViewCompanyProfile ~ companyId:", companyId)
     const navigation = useNavigation();
 
     const dispatch = useDispatch();

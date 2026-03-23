@@ -47,6 +47,7 @@ const CompanyProfile = () => {
   const { params } = useRoute<any>();
   const fromOnboarding = params?.fromOnboarding || false;
   const companyId = params?.companyId;
+  console.log("🔥 ~ CompanyProfile ~ companyId:", companyId)
 
   const { companyProfileData, companyProfileAllData, userInfo, selectedTabIndex } = useSelector(
     (state: RootState) => state.auth,
@@ -124,30 +125,50 @@ const CompanyProfile = () => {
     };
   }, [isLoading, isCompanyLoading, loadTimeout]);
 
+  const ownCompanyId = useMemo(() => {
+    const profileAllId = (companyProfileAllData as any)?._id;
+    const profileId = (companyProfileData as any)?._id;
+    const fetchedId = (data as any)?.data?.company?._id;
+    const authId = (userInfo as any)?._id;
+    return profileAllId || profileId || fetchedId || authId;
+  }, [companyProfileAllData, companyProfileData, data, userInfo]);
+
+  const getPostCompanyId = useCallback((post: any) => {
+    const rawCompany = post?.company_id;
+    if (!rawCompany) return '';
+    if (typeof rawCompany === 'string') return rawCompany;
+    return rawCompany?._id || '';
+  }, []);
+
   useEffect(() => {
     if (companyId) return;
     if (selectedTabIndex === 1) {
+      setPostsFetched(false);
       setOwnExtraPosts([]);
       setOwnPostsPage(1);
-      fetchOwnPosts({ page: 1 });
+      fetchOwnPosts({ page: 1, company_id: ownCompanyId });
     } else if (selectedTabIndex === 2) {
       setOwnExtraJobs([]);
       setOwnJobsPage(1);
       fetchOwnJobs({ page: 1 });
     }
-  }, [selectedTabIndex, companyId]);
+  }, [selectedTabIndex, companyId, fetchOwnPosts, fetchOwnJobs, ownCompanyId]);
 
   // Own company: handle posts response
   useEffect(() => {
     if (!ownPostsData) return;
     const posts = ownPostsData?.data?.posts ?? [];
+    const filteredPosts = ownCompanyId
+      ? posts.filter((post: any) => getPostCompanyId(post) === ownCompanyId)
+      : posts;
     const pagination = ownPostsData?.data?.pagination;
-    setOwnPosts(posts);
+    setOwnPosts(filteredPosts);
     setOwnExtraPosts([]);
     setOwnPostsHasMore(
-      pagination ? pagination.current_page < pagination.total_pages : posts.length >= 10,
+      pagination ? pagination.current_page < pagination.total_pages : filteredPosts.length >= 10,
     );
-  }, [ownPostsData]);
+    setPostsFetched(true);
+  }, [ownPostsData, ownCompanyId, getPostCompanyId]);
 
   // Own company: handle jobs response
   useEffect(() => {
@@ -166,16 +187,19 @@ const CompanyProfile = () => {
     if (!ownPostsHasMore || isFetchingOwnPosts) return;
     const nextPage = ownPostsPage + 1;
     try {
-      const result = await fetchOwnPosts({ page: nextPage }).unwrap();
+      const result = await fetchOwnPosts({ page: nextPage, company_id: ownCompanyId }).unwrap();
       const newPosts = result?.data?.posts ?? [];
-      setOwnExtraPosts(prev => [...prev, ...newPosts]);
+      const filteredNewPosts = ownCompanyId
+        ? newPosts.filter((post: any) => getPostCompanyId(post) === ownCompanyId)
+        : newPosts;
+      setOwnExtraPosts(prev => [...prev, ...filteredNewPosts]);
       const pagination = result?.data?.pagination;
       setOwnPostsHasMore(
-        pagination ? pagination.current_page < pagination.total_pages : newPosts.length >= 10,
+        pagination ? pagination.current_page < pagination.total_pages : filteredNewPosts.length >= 10,
       );
       setOwnPostsPage(nextPage);
     } catch (_) {}
-  }, [ownPostsHasMore, isFetchingOwnPosts, ownPostsPage, fetchOwnPosts]);
+  }, [ownPostsHasMore, isFetchingOwnPosts, ownPostsPage, fetchOwnPosts, ownCompanyId, getPostCompanyId]);
 
   // Own company: load more jobs
   const handleLoadMoreOwnJobs = useCallback(async () => {

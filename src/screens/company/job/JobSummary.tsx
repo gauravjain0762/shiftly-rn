@@ -9,7 +9,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
 import JobListCard from '../../../component/common/JobListCard';
 import { colors } from '../../../theme/colors';
@@ -32,15 +31,13 @@ const JobSummary = () => {
   const [listClosed, setListClosed] = useState<any[]>([]);
 
   const liveJobsQuery = useGetCompanyJobsQuery(
-    { page: pageLive, type: 'active' },
-    { skip: activeTab !== 'Live Jobs' }
+    { page: pageLive, status: 'active' },
+    { skip: activeTab !== 'Live Jobs', refetchOnMountOrArgChange: true }
   );
-  console.log("🔥 ~ JobSummary ~ liveJobsQuery:", liveJobsQuery)
   const closedJobsQuery = useGetCompanyJobsQuery(
-    { page: pageClosed, type: 'expired' },
-    { skip: activeTab !== 'Closed Jobs' }
+    { page: pageClosed, status: 'expired' },
+    { skip: activeTab !== 'Closed Jobs', refetchOnMountOrArgChange: true }
   );
-  console.log("🔥 ~ JobSummary ~ closedJobsQuery:", closedJobsQuery)
 
   const getActiveQuery = () => {
     return activeTab === 'Live Jobs' ? liveJobsQuery : closedJobsQuery;
@@ -48,18 +45,8 @@ const JobSummary = () => {
 
   const { isLoading, isFetching } = getActiveQuery();
 
-  useFocusEffect(
-    useCallback(() => {
-      // Reset pagination on every screen focus so newest jobs are loaded first.
-      setPageLive(1);
-      setPageClosed(1);
-      setListLive([]);
-      setListClosed([]);
-    }, [])
-  );
-
   useEffect(() => {
-    if (liveJobsQuery.data?.status) {
+    if (!liveJobsQuery.isFetching && liveJobsQuery.data?.status) {
       const newList = liveJobsQuery.data?.data?.jobs || [];
       setListLive(pageLive === 1 ? newList : prev => {
         const existingIds = new Set(prev.map(item => item._id));
@@ -67,10 +54,10 @@ const JobSummary = () => {
         return unique.length ? [...prev, ...unique] : prev;
       });
     }
-  }, [liveJobsQuery.data, pageLive]);
+  }, [liveJobsQuery.data, liveJobsQuery.isFetching, pageLive]);
 
   useEffect(() => {
-    if (closedJobsQuery.data?.status) {
+    if (!closedJobsQuery.isFetching && closedJobsQuery.data?.status) {
       const newList = closedJobsQuery.data?.data?.jobs || [];
       setListClosed(pageClosed === 1 ? newList : prev => {
         const existingIds = new Set(prev.map(item => item._id));
@@ -78,7 +65,7 @@ const JobSummary = () => {
         return unique.length ? [...prev, ...unique] : prev;
       });
     }
-  }, [closedJobsQuery.data, pageClosed]);
+  }, [closedJobsQuery.data, closedJobsQuery.isFetching, pageClosed]);
 
   const jobsList = activeTab === 'Live Jobs' ? listLive : listClosed;
 
@@ -150,12 +137,11 @@ const JobSummary = () => {
         const targetTab = tab as 'Live Jobs' | 'Closed Jobs';
         setActiveTab(targetTab);
         // Ensure each tab always restarts from page 1 when re-opened.
+        // Do not clear list here; keep previous data visible until fetch settles.
         if (targetTab === 'Live Jobs') {
           setPageLive(1);
-          setListLive([]);
         } else {
           setPageClosed(1);
-          setListClosed([]);
         }
       }}
     >

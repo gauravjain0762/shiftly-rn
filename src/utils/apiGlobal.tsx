@@ -23,17 +23,28 @@ export const makeAPIRequest = ({
   params,
   headers,
 }: makeAPIRequestProps) =>
-  new Promise((resolve, reject) => {
+  new Promise(async (resolve, reject) => {
+    const token = await getAsyncToken();
+    const mergedHeaders: any = {
+      Accept: "application/json",
+      ...headers,
+    };
+
+    if (!mergedHeaders.Authorization && token) {
+      mergedHeaders.Authorization = `Bearer ${token}`;
+    }
+
+    // Let axios/RN set multipart boundary for FormData automatically.
+    if (!(data instanceof FormData) && !mergedHeaders["Content-Type"]) {
+      mergedHeaders["Content-Type"] = "application/json";
+    }
+
     const option = {
       method,
       baseURL: API.BASE_URL,
       url,
       data: data,
-      headers: {
-        Accept: "application/json",
-        ...headers,
-        "Content-Type": "application/json",
-      },
+      headers: mergedHeaders,
       params: params,
     };
     axios(option)
