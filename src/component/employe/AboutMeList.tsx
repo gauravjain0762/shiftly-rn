@@ -167,10 +167,10 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
             },
           ]}
           multiline={true}
-          maxLength={1000}
+          maxLength={4000}
         />
         <CharLength
-          chars={1000}
+          chars={4000}
           value={aboutEdit?.about ?? ''}
           type="employee"
           style={{ marginTop: 0 }}

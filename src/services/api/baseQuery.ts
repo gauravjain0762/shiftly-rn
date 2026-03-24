@@ -38,7 +38,6 @@ export const axiosBaseQuery: BaseQueryFn<
 
   const formatPayloadForLog = (payload: any) => {
     if (payload instanceof FormData) {
-      // RN FormData exposes internals via _parts. This is useful for debugging multipart payloads.
       return {
         type: 'FormData',
         parts: (payload as any)?._parts ?? 'unavailable',

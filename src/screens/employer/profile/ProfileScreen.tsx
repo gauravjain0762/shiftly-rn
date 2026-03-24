@@ -116,10 +116,11 @@ const ProfileScreen = () => {
   const aboutText = userInfo?.about || '';
 
   const desiredJobTitle: string = userInfo?.desired_job_title || userInfo?.desiredJobTitle || '';
-  console.log("🔥 ~ ProfileScreen ~ userInfo:", userInfo)
-  const yearsOfExperience: string | number =
-    userInfo?.years_of_experience
-    '';
+  const yearsOfExperience: string | number = userInfo?.years_of_experience ?? '';
+
+  const hasJobInfo =
+    !!desiredJobTitle ||
+    (yearsOfExperience !== '' && yearsOfExperience !== null && yearsOfExperience !== undefined);
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
@@ -225,25 +226,42 @@ const ProfileScreen = () => {
 
           <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
 
-          {/* ── Desired Job Title ──────────────────────────────────────── */}
-          {!!desiredJobTitle && (
-            <View style={styles.jobTitleRow}>
-              <Briefcase size={20} color={colors._0B3970} />
-              <BaseText style={styles.jobTitleText}>{desiredJobTitle}</BaseText>
-            </View>
-          )}
-
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
             <BaseText style={styles.location}>{userInfo?.country || 'N/A'}</BaseText>
           </View>
 
-          {yearsOfExperience !== '' && yearsOfExperience !== null && yearsOfExperience !== undefined && (
-            <View style={styles.experiencePill}>
-             <Clock size={20} color={colors._0B3970} />
-              <BaseText style={styles.experienceText}>
-                {yearsOfExperience}
-              </BaseText>
+          {/* ── Desired Job Title + Years of Experience — single row ───── */}
+          {hasJobInfo && (
+            <View style={styles.jobInfoRow}>
+              {!!desiredJobTitle && (
+                <View style={styles.pill}>
+                  <Briefcase size={14} color={colors._0B3970} />
+                  <BaseText style={styles.pillText} numberOfLines={1}>
+                    {desiredJobTitle}
+                  </BaseText>
+                </View>
+              )}
+
+              {/* Vertical divider — only when both values exist */}
+              {!!desiredJobTitle &&
+                yearsOfExperience !== '' &&
+                yearsOfExperience !== null &&
+                yearsOfExperience !== undefined && (
+                  <View style={styles.pillDivider} />
+                )}
+
+              {yearsOfExperience !== '' &&
+                yearsOfExperience !== null &&
+                yearsOfExperience !== undefined && (
+                  <View style={styles.pill}>
+                    <Clock size={14} color={colors._0B3970} />
+                    <BaseText style={styles.pillText}>
+                      {yearsOfExperience}{' '}
+                      {Number(yearsOfExperience) === 1 ? 'yr' : 'yrs'} exp
+                    </BaseText>
+                  </View>
+                )}
             </View>
           )}
 
@@ -537,23 +555,6 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 25, colors._0B3970),
     marginTop: 8,
   },
-
-  // ── Desired job title ────────────────────────────────────────────────────
-  jobTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: hp(6),
-    gap: wp(6),
-  },
-  jobTitleIcon: {
-    width: wp(16),
-    height: wp(16),
-    resizeMode: 'contain',
-  },
-  jobTitleText: {
-    ...commonFontStyle(500, 16, colors._0B3970),
-  },
-
   locationRow: {
     gap: wp(6),
     width: '90%',
@@ -574,28 +575,35 @@ const styles = StyleSheet.create({
     tintColor: colors._0B3970,
   },
 
-  // ── Years of experience pill ─────────────────────────────────────────────
-  experiencePill: {
+  // ── Job info row ─────────────────────────────────────────────────────────
+  jobInfoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: hp(10),
-    backgroundColor: colors._0B3970 + '12', // 7% opacity tint
-    borderRadius: wp(20),
-    paddingVertical: hp(6),
-    paddingHorizontal: wp(14),
-    gap: wp(6),
+    justifyContent: 'center',
+    marginTop: hp(12),
+    paddingHorizontal: wp(20),
+    backgroundColor: colors._0B3970 + '12',
+    borderRadius: wp(25),
+    alignSelf: 'center',
+    paddingVertical: hp(7),
   },
-  experienceIcon: {
-    width: wp(14),
-    height: wp(14),
-    resizeMode: 'contain',
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(5),
   },
-  experienceText: {
+  pillText: {
     ...commonFontStyle(500, 14, colors._0B3970),
+  },
+  pillDivider: {
+    width: 1,
+    height: hp(16),
+    backgroundColor: colors._0B3970 + '40',
+    marginHorizontal: wp(10),
   },
 
   editButton: {
-    marginTop: hp(25),
+    marginTop: hp(20),
     paddingVertical: hp(10),
     paddingHorizontal: wp(30),
     borderWidth: 1,
