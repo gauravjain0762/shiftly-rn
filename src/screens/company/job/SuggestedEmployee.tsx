@@ -551,7 +551,10 @@ const SuggestedEmployeeScreen = () => {
               const res = await closeJob({ job_id: jobId }).unwrap();
               if (res?.status) {
                 successToast(res?.message || t('Job closed successfully'));
-                goBack();
+                navigateTo(SCREENS.CoJobSummary, {
+                  initialTab: 'Closed Jobs',
+                  fromSuggestedEmployee: true,
+                });
               } else {
                 errorToast(res?.message || t('Failed to close job'));
               }

@@ -71,14 +71,35 @@ export const mapJobToFormState = (job: any) => {
   // Other requirements (job_requirements)
   const other_requirements = toIdArray(job?.job_requirements);
 
-  // Skills: array of { _id, title } or comma-separated string
+  // Skills: supports multiple API shapes, always normalize to readable labels for UI.
   const skillsArray = Array.isArray(job?.skills)
     ? job.skills
     : typeof job?.skills === 'string'
       ? job.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
       : [];
-  const skillId = skillsArray.map((s: any) => (typeof s === 'object' && s?._id ? s._id : String(s)));
-  const jobSkills = skillsArray.map((s: any) => (typeof s === 'object' && s?.title ? s.title : String(s)));
+  const skillId = skillsArray.map((s: any) => {
+    if (typeof s === 'object' && s) {
+      return String(s?._id ?? s?.id ?? s?.skill_id?._id ?? s?.skill_id ?? '');
+    }
+    return String(s);
+  }).filter(Boolean);
+  const jobSkills = skillsArray.map((s: any) => {
+    if (typeof s === 'object' && s) {
+      const nestedSkill = typeof s?.skill_id === 'object' ? s.skill_id : null;
+      return String(
+        s?.title ??
+        s?.name ??
+        s?.label ??
+        nestedSkill?.title ??
+        nestedSkill?.name ??
+        s?._id ??
+        s?.id ??
+        s?.skill_id ??
+        '',
+      );
+    }
+    return String(s);
+  }).filter(Boolean);
 
   const rawBenefits = job?.essential_benefits;
   const essential_benefits = Array.isArray(rawBenefits)

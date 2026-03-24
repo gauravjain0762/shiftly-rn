@@ -14,7 +14,7 @@ import JobListCard from '../../../component/common/JobListCard';
 import { colors } from '../../../theme/colors';
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
 import { useGetCompanyJobsQuery } from '../../../api/dashboardApi';
-import { navigateTo } from '../../../utils/commonFunction';
+import { goBack, navigateTo, resetNavigation } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import Share from 'react-native-share';
 
@@ -23,6 +23,7 @@ const tabs = ['Live Jobs', 'Closed Jobs'];
 const JobSummary = () => {
   const route = useRoute<any>();
   const initialTab = route.params?.initialTab || 'Live Jobs';
+  const fromSuggestedEmployee = route.params?.fromSuggestedEmployee === true;
   const [activeTab, setActiveTab] = useState<'Live Jobs' | 'Closed Jobs'>(initialTab);
   const [refreshing, setRefreshing] = useState(false);
   const [pageLive, setPageLive] = useState(1);
@@ -173,7 +174,15 @@ const JobSummary = () => {
 
   return (
     <LinearContainer colors={[colors.white, colors.white]}>
-      <BackHeader title="Jobs" containerStyle={{ paddingHorizontal: wp(20), paddingTop: hp(12) }} />
+      <BackHeader
+        title="Jobs"
+        containerStyle={{ paddingHorizontal: wp(20), paddingTop: hp(12) }}
+        onBackPress={() =>
+          fromSuggestedEmployee
+            ? resetNavigation(SCREENS.CoTabNavigator, SCREENS.CoHome)
+            : goBack()
+        }
+      />
 
       <View style={styles.tabsContainer}>
         {tabs.map(renderTab)}

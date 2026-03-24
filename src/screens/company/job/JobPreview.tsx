@@ -38,6 +38,7 @@ import {
     useGetCompanyCertificationsQuery,
     useGetCompanyOtherRequirementsQuery,
     useGetEssentialBenefitsQuery,
+    useGetSkillsQuery,
 } from '../../../api/dashboardApi';
 import { useCreateJobMutation } from '../../../api/authApi';
 import { useAppSelector } from '../../../redux/hooks';
@@ -149,6 +150,18 @@ const JobPreview = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showHiringAnimation, setShowHiringAnimation] = useState(false);
 
+    const { data: skillsData } = useGetSkillsQuery({});
+    const skillMap = React.useMemo(() => {
+        const map: Record<string, string> = {};
+        const list = skillsData?.data?.skills;
+        if (Array.isArray(list)) {
+            list.forEach((item: any) => {
+                if (item?._id) map[item._id] = item.title || '';
+            });
+        }
+        return map;
+    }, [skillsData]);
+
     const previewLanguages = React.useMemo(
         () =>
             Array.isArray(languages)
@@ -199,25 +212,25 @@ const JobPreview = () => {
         const jobIdToUse = createdJobId || job_id;
         const rawJobData = createdJobData;
         const jobDataToUse = rawJobData?.data?.job
-          ? rawJobData
-          : rawJobData?.job
-            ? { data: { job: rawJobData.job } }
-            : rawJobData
-              ? { data: { job: rawJobData } }
-              : null;
+            ? rawJobData
+            : rawJobData?.job
+                ? { data: { job: rawJobData.job } }
+                : rawJobData
+                    ? { data: { job: rawJobData } }
+                    : null;
 
         setShowHiringAnimation(false);
         dispatch(resetJobFormState());
         dispatch(setCoPostJobSteps(1));
 
         if (jobIdToUse) {
-          navigateTo(SCREENS.SuggestedEmployee, {
-            jobId: jobIdToUse,
-            jobData: jobDataToUse,
-            fromPostJob: true,
-          });
+            navigateTo(SCREENS.SuggestedEmployee, {
+                jobId: jobIdToUse,
+                jobData: jobDataToUse,
+                fromPostJob: true,
+            });
         } else {
-          navigationRef?.current?.goBack();
+            navigationRef?.current?.goBack();
         }
     };
 
@@ -228,8 +241,8 @@ const JobPreview = () => {
         const finalLng = userAddress?.lng || location?.longitude || userInfo?.lng;
 
         console.log(
-          '🔥 [JobPreview] using lat/lng:',
-          { finalLat, finalLng, userAddress, fallbackLocation: location, userInfoLat: userInfo?.lat, userInfoLng: userInfo?.lng },
+            '🔥 [JobPreview] using lat/lng:',
+            { finalLat, finalLng, userAddress, fallbackLocation: location, userInfoLat: userInfo?.lat, userInfoLng: userInfo?.lng },
         );
 
         const [from, to] = salary?.value?.split('-') || [];
@@ -426,11 +439,18 @@ const JobPreview = () => {
                 {jobSkills && jobSkills.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Job Required Skills')}</Text>
-                        {jobSkills.map((skill: any, index: number) => (
-                            <Text key={index} style={styles.bulletItem}>
-                                {skill?.title || skill?.label || skill}
-                            </Text>
-                        ))}
+                        {jobSkills.map((skill: any, index: number) => {
+                            const raw = skill?.title || skill?.label || skill || '';
+                            // If raw looks like a MongoDB ObjectId, resolve via skillMap
+                            const display = /^[a-f\d]{24}$/i.test(String(raw).trim())
+                                ? skillMap[String(raw).trim()] || raw
+                                : raw;
+                            return (
+                                <Text key={index} style={styles.bulletItem}>
+                                    {display}
+                                </Text>
+                            );
+                        })}
                     </View>
                 )}
 

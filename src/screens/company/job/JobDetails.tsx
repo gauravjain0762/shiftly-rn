@@ -32,7 +32,6 @@ import {
   navigateTo,
   successToast,
   getExpiryDays,
-  goBack,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
@@ -154,7 +153,7 @@ ${salary}${shareUrlText}`;
       const res = await closeJob({ job_id: job_id }).unwrap();
       if (res?.status) {
         successToast(res?.message || 'Job closed successfully');
-        goBack();
+        navigateTo(SCREENS.CoJobSummary, {initialTab: 'Closed Jobs'});
       } else {
         errorToast(res?.message || 'Failed to close job');
       }
