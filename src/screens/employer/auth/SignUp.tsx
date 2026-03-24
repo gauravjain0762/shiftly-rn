@@ -1196,8 +1196,8 @@ const SignUp = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollcontainer}
         style={styles.container}>
-        <View style={[styles.rowView, step === 9 && { justifyContent: 'flex-end' }]}>
-          {step <= 4 && (
+        <View style={styles.rowView}>
+          {step <= 9 && (
             <TouchableOpacity
               onPress={() => {
                 if (isAppleAuth || isGoogleAuth) {

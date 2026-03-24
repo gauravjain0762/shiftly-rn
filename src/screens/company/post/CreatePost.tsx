@@ -44,7 +44,36 @@ const CreatePost = () => {
   );
   const { updatePostForm } = usePostFormUpdater();
 
-  // Handle edit mode from navigation params
+  useEffect(() => {
+    const params = route.params;
+    if (params?.editMode && params?.postData) {
+      setImageLoading(false);
+    }
+  }, [route.params]);
+
+  // Add this ref at the top of the component
+  const imageLoadTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Replace your image onLoadStart/onLoadEnd handlers:
+  const handleImageLoadStart = () => {
+    setImageLoading(true);
+    // Force-clear loader after 5 seconds no matter what
+    imageLoadTimerRef.current = setTimeout(() => {
+      setImageLoading(false);
+    }, 5000);
+  };
+
+  const handleImageLoadEnd = () => {
+    if (imageLoadTimerRef.current) clearTimeout(imageLoadTimerRef.current);
+    setImageLoading(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imageLoadTimerRef.current) clearTimeout(imageLoadTimerRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     const params = route.params;
     if (params?.editMode && params?.postData) {
@@ -71,11 +100,21 @@ const CreatePost = () => {
   }, [route.params]);
 
   const addImage = (newImage: any) => {
+    setImageLoading(false); // ← Reset stale loading state first
+
+    const resolvedUri =
+      newImage?.path ||
+      newImage?.uri ||
+      newImage?.sourceURL ||
+      '';
+
     const imageObject = {
-      uri: newImage?.sourceURL || newImage?.path || newImage?.uri,
+      uri: resolvedUri,
+      path: newImage?.path || '',
+      sourceURL: newImage?.sourceURL || '',
       type: newImage?.mime || newImage?.type || 'image/jpeg',
       name:
-        (newImage?.sourceURL || newImage?.path || newImage?.uri)
+        (resolvedUri || newImage?.sourceURL || newImage?.path || newImage?.uri)
           ?.split('/')
           .pop() || `image_${Date.now()}.jpg`,
       isExisting: false,
@@ -136,11 +175,13 @@ const CreatePost = () => {
                   <ActivityIndicator size="large" color={colors._0B3970} />
                 </View>
               )}
+             // Update the Image component:
               <Image
                 source={{ uri: uploadedImages[0]?.uri }}
                 style={styles.uploadedImage}
-                onLoadStart={() => setImageLoading(true)}
-                onLoadEnd={() => setImageLoading(false)}
+                onLoadStart={handleImageLoadStart}
+                onLoadEnd={handleImageLoadEnd}
+                onError={handleImageLoadEnd}  // ← same handler clears loader on error
               />
               <View style={styles.imageActions}>
                 <TouchableOpacity

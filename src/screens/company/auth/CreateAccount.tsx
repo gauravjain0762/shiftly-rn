@@ -1255,11 +1255,6 @@ const CreateAccount = () => {
                   textAlignVertical="top"
                   containerStyle={styles.Inputcontainer}
                 />
-                <Image
-                  source={IMAGES.edit}
-                  resizeMode="contain"
-                  style={styles.edit}
-                />
               </View>
 
               {suggestions.length > 0 && (

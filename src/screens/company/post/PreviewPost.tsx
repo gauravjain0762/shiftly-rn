@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Image,
     StyleSheet,
@@ -55,16 +55,49 @@ const PreviewPost = () => {
         postId,
     } = useAppSelector(state => selectPostForm(state as any));
     const { updatePostForm } = usePostFormUpdater();
-    const [imageLoading, setImageLoading] = useState(false);
+
     const previewImageUri = useMemo(() => {
         const image = uploadedImages?.[0];
         const rawUri = image?.uri || image?.path || image?.sourceURL || '';
         if (!rawUri) return '';
-        if (rawUri.startsWith('http') || rawUri.startsWith('file://') || rawUri.startsWith('content://') || rawUri.startsWith('ph://')) {
+        if (
+            rawUri.startsWith('http') ||
+            rawUri.startsWith('file://') ||
+            rawUri.startsWith('content://') ||
+            rawUri.startsWith('ph://')
+        ) {
             return rawUri;
         }
         return `file://${rawUri}`;
     }, [uploadedImages]);
+
+    // Only show loader for remote (http) images — local picks never need it
+    const isRemoteImage = previewImageUri.startsWith('http');
+    const [imageLoading, setImageLoading] = useState(isRemoteImage);
+    const imageTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        // Local image (just picked) — never show loader
+        if (!isRemoteImage) {
+            setImageLoading(false);
+            return;
+        }
+
+        // Remote image — show loader but cap at 3 seconds max
+        setImageLoading(true);
+        imageTimerRef.current = setTimeout(() => {
+            setImageLoading(false);
+        }, 3000);
+
+        return () => {
+            if (imageTimerRef.current) clearTimeout(imageTimerRef.current);
+        };
+    }, [previewImageUri]);
+
+    const handleImageLoaded = () => {
+        if (imageTimerRef.current) clearTimeout(imageTimerRef.current);
+        setImageLoading(false);
+    };
 
     const hasValidImage = () => {
         return !!previewImageUri;
@@ -87,21 +120,25 @@ const PreviewPost = () => {
             const formData = new FormData();
             formData.append('title', title.trim());
             formData.append('description', description.trim());
-            
+
             if (postEditMode && postId) {
                 formData.append('post_id', postId);
             }
-            
+
             const imageData = uploadedImages[0];
             if (imageData && !imageData.isExisting) {
                 let fileUri = imageData.uri;
-                if (typeof fileUri === 'string' && !fileUri.startsWith('http') && !fileUri.startsWith('content://')) {
+                if (
+                    typeof fileUri === 'string' &&
+                    !fileUri.startsWith('http') &&
+                    !fileUri.startsWith('content://')
+                ) {
                     fileUri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
                 }
                 const uri = imageData.path || imageData.uri;
                 formData.append(`images`, {
                     uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
-                    type: imageData.mime || imageData.type || imageData.type || 'image/jpeg',
+                    type: imageData.mime || imageData.type || 'image/jpeg',
                     name: imageData.filename || imageData.name || `image_${Date.now()}.jpg`,
                 } as any);
             }
@@ -116,14 +153,18 @@ const PreviewPost = () => {
             if (response?.status) {
                 updatePostForm({ isPostModalVisible: true });
             } else {
-                errorToast(response?.message || (postEditMode ? 'Failed to update post' : 'Failed to create post'));
+                errorToast(
+                    response?.message ||
+                    (postEditMode ? 'Failed to update post' : 'Failed to create post'),
+                );
             }
         } catch (e: any) {
             console.error('handlePublishPost error', e);
             const status = e?.status ?? e?.response?.status;
-            const msg = status === 502
-                ? t('Server is temporarily unavailable. Please try again.')
-                : (e?.data?.message || 'Something went wrong');
+            const msg =
+                status === 502
+                    ? t('Server is temporarily unavailable. Please try again.')
+                    : e?.data?.message || 'Something went wrong';
             errorToast(msg);
         } finally {
             updatePostForm({ isPostUploading: false });
@@ -183,20 +224,19 @@ const PreviewPost = () => {
                 <View style={styles.previewCard}>
                     {hasValidImage() && (
                         <View style={styles.imageContainer}>
+                            {/* Only shown for remote images while fetching */}
                             {imageLoading && (
                                 <View style={styles.imageLoaderContainer}>
                                     <ActivityIndicator size="large" color={colors._0B3970} />
                                 </View>
                             )}
                             <Image
-                                source={{
-                                    uri: previewImageUri,
-                                }}
+                                source={{ uri: previewImageUri }}
                                 style={styles.postImage}
-                                onLoadStart={() => setImageLoading(true)}
-                                onLoad={() => setImageLoading(false)}
-                                onLoadEnd={() => setImageLoading(false)}
-                                onError={() => setImageLoading(false)}
+                                // No onLoadStart — avoids the stuck-spinner trap on ph:// and local URIs
+                                onLoad={handleImageLoaded}
+                                onLoadEnd={handleImageLoaded}
+                                onError={handleImageLoaded}
                             />
                         </View>
                     )}
@@ -214,7 +254,7 @@ const PreviewPost = () => {
                 </View>
             </ScrollView>
 
-            {/* Publish Post Button */}
+            {/* Publish / Update Post Button */}
             <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
                 <GradientButton
                     style={styles.publishBtn}
@@ -234,7 +274,7 @@ const PreviewPost = () => {
             <BottomModal
                 visible={isPostModalVisible}
                 backgroundColor={colors._FAEED2}
-                onClose={() => { }}>
+                onClose={() => {}}>
                 <View style={styles.modalIconWrapper}>
                     <LottieView
                         source={animation.success_check}
@@ -247,7 +287,9 @@ const PreviewPost = () => {
 
                 <View>
                     <Text style={styles.modalTitle}>
-                        {postEditMode ? t('Post Updated Successfully') : t('Post Created Successfully')}
+                        {postEditMode
+                            ? t('Post Updated Successfully')
+                            : t('Post Created Successfully')}
                     </Text>
                     <Text style={styles.modalSubtitle}>
                         {t('Your post has been published. View it now or return to the home screen.')}

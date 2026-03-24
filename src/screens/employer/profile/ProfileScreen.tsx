@@ -27,13 +27,11 @@ import ReadMoreText from '../../../component/common/ReadMoreText';
 import { navigationRef } from '../../../navigation/RootContainer';
 import { useGetCompanyEducationsQuery, useGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
+import { Briefcase, Clock } from 'lucide-react-native';
 
 const DASH_COLOR = '#D9D9D9';
 const DASH_PATTERN = '4 4';
 
-// ─── Vertical dashed line ────────────────────────────────────────────────────
-// Fills the rail height and extends into the gap below so the line touches
-// the next item's dot (no space).
 const LINE_EXTENSION_TOUCH_NEXT_DOT = hp(10);
 
 const VerticalDashedLine = () => {
@@ -68,10 +66,6 @@ const VerticalDashedLine = () => {
   );
 };
 
-// ─── Horizontal dashed separator ─────────────────────────────────────────────
-// Spans the FULL width of its container (no left offset / spacer).
-// This matches the Figma design where the separator starts from the left edge
-// of the card (same x as the dot) all the way to the right edge.
 const HorizontalDashedLine = () => {
   const [width, setWidth] = useState(0);
   return (
@@ -120,6 +114,12 @@ const ProfileScreen = () => {
   const hasAssessment = !!userInfo?.assess_first;
 
   const aboutText = userInfo?.about || '';
+
+  const desiredJobTitle: string = userInfo?.desired_job_title || userInfo?.desiredJobTitle || '';
+  console.log("🔥 ~ ProfileScreen ~ userInfo:", userInfo)
+  const yearsOfExperience: string | number =
+    userInfo?.years_of_experience
+    '';
 
   const handleEditProfile = async () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
@@ -222,11 +222,30 @@ const ProfileScreen = () => {
               <Text style={styles.avatarText}>{getInitials(userInfo?.name)}</Text>
             </View>
           )}
+
           <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
+
+          {/* ── Desired Job Title ──────────────────────────────────────── */}
+          {!!desiredJobTitle && (
+            <View style={styles.jobTitleRow}>
+              <Briefcase size={20} color={colors._0B3970} />
+              <BaseText style={styles.jobTitleText}>{desiredJobTitle}</BaseText>
+            </View>
+          )}
+
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
             <BaseText style={styles.location}>{userInfo?.country || 'N/A'}</BaseText>
           </View>
+
+          {yearsOfExperience !== '' && yearsOfExperience !== null && yearsOfExperience !== undefined && (
+            <View style={styles.experiencePill}>
+             <Clock size={20} color={colors._0B3970} />
+              <BaseText style={styles.experienceText}>
+                {yearsOfExperience}
+              </BaseText>
+            </View>
+          )}
 
           <TouchableOpacity onPress={handleEditProfile} style={styles.editButton}>
             <BaseText style={styles.editButtonText}>Edit Profile</BaseText>
@@ -316,64 +335,60 @@ const ProfileScreen = () => {
 
                   return (
                     <React.Fragment key={exp?._id || `${title}-${index}`}>
-                      {/* ── Timeline row (content + horizontal separator when not last) ── */}
                       <View style={styles.timelineRow}>
-                        {/* Left rail: dot + vertical dashed line */}
                         <View style={styles.timelineRail}>
                           <View style={styles.timelineDot} />
                           <VerticalDashedLine />
                         </View>
-
-                        {/* Content + horizontal separator */}
                         <View style={styles.timelineContentWrapper}>
                           <View style={styles.timelineContent}>
-                          {!!title && (
-                            <BaseText style={styles.sectionItemTitle}>{title}</BaseText>
-                          )}
-                          {exp?.company && (
+                            {!!title && (
+                              <BaseText style={styles.sectionItemTitle}>{title}</BaseText>
+                            )}
+                            {exp?.company && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Company:</BaseText>
+                                <BaseText style={styles.kvValue}>{exp?.company}</BaseText>
+                              </View>
+                            )}
+                            {(exp?.preferred_position || exp?.position) && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Position:</BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {exp?.preferred_position || exp?.position}
+                                </BaseText>
+                              </View>
+                            )}
+                            {!!location && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Location:</BaseText>
+                                <BaseText style={styles.kvValue}>{location}</BaseText>
+                              </View>
+                            )}
+                            {!!startDate && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Start Date:</BaseText>
+                                <BaseText style={styles.kvValue}>{startDate}</BaseText>
+                              </View>
+                            )}
                             <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Company:</BaseText>
-                              <BaseText style={styles.kvValue}>{exp?.company}</BaseText>
-                            </View>
-                          )}
-                          {(exp?.preferred_position || exp?.position) && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Position:</BaseText>
-                              <BaseText style={styles.kvValue}>
-                                {exp?.preferred_position || exp?.position}
+                              <BaseText style={styles.kvLabel}>Status:</BaseText>
+                              <BaseText style={[styles.kvValue, exp?.still_working && styles.currentStatus]}>
+                                {exp?.still_working ? 'Currently Working' : 'Completed'}
                               </BaseText>
                             </View>
-                          )}
-                          {!!location && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Location:</BaseText>
-                              <BaseText style={styles.kvValue}>{location}</BaseText>
-                            </View>
-                          )}
-                          {!!startDate && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Start Date:</BaseText>
-                              <BaseText style={styles.kvValue}>{startDate}</BaseText>
-                            </View>
-                          )}
-                          <View style={styles.kvRow}>
-                            <BaseText style={styles.kvLabel}>Status:</BaseText>
-                            <BaseText style={[styles.kvValue, exp?.still_working && styles.currentStatus]}>
-                              {exp?.still_working ? 'Currently Working' : 'Completed'}
-                            </BaseText>
+                            {!!typeLabel && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Type:</BaseText>
+                                <BaseText style={styles.kvValue}>{typeLabel}</BaseText>
+                              </View>
+                            )}
                           </View>
-                          {!!typeLabel && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Type:</BaseText>
-                              <BaseText style={styles.kvValue}>{typeLabel}</BaseText>
+                          {!isLast && (
+                            <View style={styles.horizontalLineRow}>
+                              <HorizontalDashedLine />
                             </View>
                           )}
-                        </View>
-                        {!isLast && (
-                          <View style={styles.horizontalLineRow}>
-                            <HorizontalDashedLine />
-                          </View>
-                        )}
                         </View>
                       </View>
                     </React.Fragment>
@@ -419,44 +434,40 @@ const ProfileScreen = () => {
 
                   return (
                     <React.Fragment key={edu?._id || `${degree}-${index}`}>
-                      {/* ── Timeline row (content + horizontal separator when not last) ── */}
                       <View style={styles.timelineRow}>
-                        {/* Left rail: dot + vertical dashed line */}
                         <View style={styles.timelineRail}>
                           <View style={styles.timelineDot} />
                           <VerticalDashedLine />
                         </View>
-
-                        {/* Content + horizontal separator */}
                         <View style={styles.timelineContentWrapper}>
                           <View style={styles.timelineContent}>
-                          {!!degree && (
-                            <BaseText style={styles.sectionItemTitle}>{degree}</BaseText>
-                          )}
-                          {edu?.university && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>University:</BaseText>
-                              <BaseText style={styles.kvValue}>{edu?.university}</BaseText>
-                            </View>
-                          )}
-                          {!!location && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Location:</BaseText>
-                              <BaseText style={styles.kvValue}>{location}</BaseText>
-                            </View>
-                          )}
-                          {!!duration && (
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Duration:</BaseText>
-                              <BaseText style={styles.kvValue}>{duration}</BaseText>
-                            </View>
-                          )}
-                        </View>
-                        {!isLast && (
-                          <View style={styles.horizontalLineRow}>
-                            <HorizontalDashedLine />
+                            {!!degree && (
+                              <BaseText style={styles.sectionItemTitle}>{degree}</BaseText>
+                            )}
+                            {edu?.university && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>University:</BaseText>
+                                <BaseText style={styles.kvValue}>{edu?.university}</BaseText>
+                              </View>
+                            )}
+                            {!!location && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Location:</BaseText>
+                                <BaseText style={styles.kvValue}>{location}</BaseText>
+                              </View>
+                            )}
+                            {!!duration && (
+                              <View style={styles.kvRow}>
+                                <BaseText style={styles.kvLabel}>Duration:</BaseText>
+                                <BaseText style={styles.kvValue}>{duration}</BaseText>
+                              </View>
+                            )}
                           </View>
-                        )}
+                          {!isLast && (
+                            <View style={styles.horizontalLineRow}>
+                              <HorizontalDashedLine />
+                            </View>
+                          )}
                         </View>
                       </View>
                     </React.Fragment>
@@ -526,10 +537,27 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 25, colors._0B3970),
     marginTop: 8,
   },
+
+  // ── Desired job title ────────────────────────────────────────────────────
+  jobTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(6),
+    gap: wp(6),
+  },
+  jobTitleIcon: {
+    width: wp(16),
+    height: wp(16),
+    resizeMode: 'contain',
+  },
+  jobTitleText: {
+    ...commonFontStyle(500, 16, colors._0B3970),
+  },
+
   locationRow: {
     gap: wp(6),
     width: '90%',
-    marginTop: hp(8),
+    marginTop: hp(6),
     alignSelf: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -545,6 +573,27 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: colors._0B3970,
   },
+
+  // ── Years of experience pill ─────────────────────────────────────────────
+  experiencePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(10),
+    backgroundColor: colors._0B3970 + '12', // 7% opacity tint
+    borderRadius: wp(20),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(14),
+    gap: wp(6),
+  },
+  experienceIcon: {
+    width: wp(14),
+    height: wp(14),
+    resizeMode: 'contain',
+  },
+  experienceText: {
+    ...commonFontStyle(500, 14, colors._0B3970),
+  },
+
   editButton: {
     marginTop: hp(25),
     paddingVertical: hp(10),
@@ -577,7 +626,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(10),
   },
   title: {
-    ...commonFontStyle(700, 22, colors._0B3970),
+    ...commonFontStyle(600, 20, colors._0B3970),
   },
   content: {
     ...commonFontStyle(400, 16, colors._4A4A4A),
@@ -636,7 +685,6 @@ const styles = StyleSheet.create({
   timelineRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    // No paddingBottom — vertical line fills its own flex height
   },
   timelineRail: {
     width: wp(18),
@@ -666,10 +714,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     overflow: 'visible',
   },
-
-  // ── Horizontal separator ─────────────────────────────────────────────────
-  // KEY FIX: no left spacer — the line spans the full card width so it
-  // matches the Figma design where the separator goes edge-to-edge.
   timelineContentWrapper: {
     flex: 1,
     flexDirection: 'column',
@@ -681,7 +725,6 @@ const styles = StyleSheet.create({
     width: '90%',
     paddingHorizontal: wp(10),
   },
-
   timelineContent: {
     flex: 1,
     paddingLeft: wp(10),
