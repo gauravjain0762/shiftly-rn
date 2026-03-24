@@ -6,6 +6,7 @@ import { PermissionsAndroid, Platform, Linking } from 'react-native';
 import { errorToast, navigateTo } from '../utils/commonFunction';
 import { SCREENS } from '../navigation/screenNames';
 import { store } from '../store';
+import { getAsyncFcmToken, setAsyncFcmToken } from '../utils/asyncStorage';
 
 const ROLE_STORAGE_KEY = 'userRole';
 
@@ -88,6 +89,7 @@ const getFirebaseToken = async (dispatch: any) => {
     if (fcmToken) {
       console.log('🔔 [FCM] Token received:', fcmToken);
       dispatch(setFcmToken(fcmToken));
+      await setAsyncFcmToken(fcmToken);
       resetBadgeCount();
     } else {
       errorToast('[FCMService] User does not have a device token');
@@ -104,6 +106,12 @@ const getFirebaseToken = async (dispatch: any) => {
 export const ensureFcmToken = async (dispatch: any, existingToken?: string | null): Promise<string> => {
   if (existingToken) return existingToken;
   try {
+    const persistedToken = await getAsyncFcmToken();
+    if (persistedToken) {
+      dispatch(setFcmToken(persistedToken));
+      return persistedToken;
+    }
+
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -113,6 +121,7 @@ export const ensureFcmToken = async (dispatch: any, existingToken?: string | nul
       const token = await messaging().getToken();
       if (token) {
         dispatch(setFcmToken(token));
+        await setAsyncFcmToken(token);
         return token;
       }
     }

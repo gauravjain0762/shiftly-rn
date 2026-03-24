@@ -61,6 +61,7 @@ export const axiosBaseQuery: BaseQueryFn<
     path: url,
     params: params ?? null,
     data: formatPayloadForLog(data),
+    authHeaders: authHeaders,
   });
 
   try {

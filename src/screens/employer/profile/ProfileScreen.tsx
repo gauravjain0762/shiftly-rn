@@ -243,7 +243,6 @@ const ProfileScreen = () => {
                 </View>
               )}
 
-              {/* Vertical divider — only when both values exist */}
               {!!desiredJobTitle &&
                 yearsOfExperience !== '' &&
                 yearsOfExperience !== null &&
@@ -257,8 +256,7 @@ const ProfileScreen = () => {
                   <View style={styles.pill}>
                     <Clock size={14} color={colors._0B3970} />
                     <BaseText style={styles.pillText}>
-                      {yearsOfExperience}{' '}
-                      {Number(yearsOfExperience) === 1 ? 'yr' : 'yrs'} exp
+                      {yearsOfExperience}
                     </BaseText>
                   </View>
                 )}
@@ -586,6 +584,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(25),
     alignSelf: 'center',
     paddingVertical: hp(7),
+    width: '90%',
   },
   pill: {
     flexDirection: 'row',

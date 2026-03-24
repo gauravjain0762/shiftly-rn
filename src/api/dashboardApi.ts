@@ -1107,9 +1107,7 @@ export const dashboardApi = createApi({
       async onQueryStarted(_, {dispatch, queryFulfilled}) {
         try {
           const {data} = await queryFulfilled;
-          console.log('🔥 ~ getAppData:', data);
           if (data?.status && data?.data) {
-            console.log('🔥 ~ getAppData map_key:', data.data?.map_key ?? '(not provided)');
             dispatch(setGetAppData(data.data));
           }
         } catch (error) {

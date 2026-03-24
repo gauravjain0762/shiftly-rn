@@ -4,6 +4,7 @@ export const asyncKeys = {
   // clear in logout time
   token: '@token',
   user_info: '@user_info',
+  fcm_token: '@fcm_token',
   location: '@location',
   language: '@language',
 };
@@ -14,6 +15,19 @@ export const clearAsync = async () => {
 
 export const setAsyncToken = async (token: string) => {
   await AsyncStorage.setItem(asyncKeys.token, JSON.stringify(token));
+};
+
+export const setAsyncFcmToken = async (token: string) => {
+  await AsyncStorage.setItem(asyncKeys.fcm_token, JSON.stringify(token));
+};
+
+export const getAsyncFcmToken = async () => {
+  const token = await AsyncStorage.getItem(asyncKeys.fcm_token);
+  if (token) {
+    return JSON.parse(token);
+  } else {
+    return null;
+  }
 };
 
 export const setAsyncLanguage = async (value: any) => {

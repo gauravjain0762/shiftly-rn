@@ -50,6 +50,7 @@ import {
 } from '../../../api/authApi';
 import {
   clearCompanyRegisterData,
+  setAuthToken,
   setCompanyProfileAllData,
   setCompanyProfileData,
   setCompanyRegisterData,
@@ -107,6 +108,7 @@ const CreateAccount = () => {
     registerSuccessModal,
     companyProfileData,
   } = useSelector((state: RootState) => state.auth);
+    console.log("🔥 ~ CreateAccount ~ fcmToken:", fcmToken)
   const {
     logo,
     cover_images,
@@ -160,6 +162,12 @@ const CreateAccount = () => {
     });
     return unsubscribe;
   }, [navigation, dispatch]);
+
+  useEffect(() => {
+    if (companyRegistrationStep === 1) {
+      dispatch(setAuthToken(null));
+    }
+  }, []);
 
   useEffect(() => {
     if (!companyProfileData?.website || companyProfileData?.website === '') {
@@ -406,6 +414,7 @@ const CreateAccount = () => {
     try {
       const normalizedPhone = (companyRegisterData?.phone || '').replace(/\D/g, '');
       const normalizedPhoneCode = (companyRegisterData?.phone_code || '').replace(/\D/g, '');
+      console.log("🔥 ~ handleSignup ~ fcmToken:", fcmToken)
       const payload: any = {
         website: companyProfileData?.website || '',
         company_size: companyProfileData?.company_size || '',
@@ -435,11 +444,15 @@ const CreateAccount = () => {
         companyProfileData?.company_size,
       );
       const response: any = await companySignUp(payload).unwrap();
+
+      if (response?.data?.token) {
+        dispatch(setAuthToken(response.data.token));
+      }
       dispatch(setCompanyProfileAllData(response?.data?.company));
       if (response?.status) {
         successToast(response?.message);
         setStart((prev: boolean) => !prev);
-        setTimer(30); // Start 30s countdown when OTP is sent
+        setTimer(30);
         nextStep();
       } else {
         errorToast(response?.message);
@@ -497,14 +510,18 @@ const CreateAccount = () => {
       deviceToken: fcmToken ?? '',
       deviceType: Platform.OS,
     };
+    console.log("🔥 ~ verifyOTP ~ data:", data)
 
     const response: any = await OtpVerify(data).unwrap();
-    // console.log(response, 'response----');
     if (response?.status) {
-      // First show the modal without changing step
+      if (response?.data?.token) {
+        dispatch(setAuthToken(response.data.token));
+      }
+      if (response?.data?.company) {
+        dispatch(setCompanyProfileAllData(response.data.company));
+      }
       dispatch(setRegisterSuccessModal(true));
       successToast(response?.message);
-      // Don't call nextStep() here - let the modal handle it
     } else {
       errorToast(response?.message);
     }
@@ -1599,9 +1616,9 @@ const CreateAccount = () => {
                     <Image
                       source={
                         logo &&
-                        typeof logo === 'object' &&
-                        Object.keys(logo).length > 0 &&
-                        logo?.uri
+                          typeof logo === 'object' &&
+                          Object.keys(logo).length > 0 &&
+                          logo?.uri
                           ? { uri: logo?.uri }
                           : IMAGES.logoImg
                       }
