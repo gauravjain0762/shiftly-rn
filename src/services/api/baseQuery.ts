@@ -125,52 +125,6 @@ export const axiosBaseQuery: BaseQueryFn<
         } as ApiError,
       };
     }
-    // if (
-    //   error.response?.status === HTTP_STATUS.UNAUTHORIZED &&
-    //   !url.includes(API_ENDPOINTS.AUTH.LOGIN) &&
-    //   !url.includes(API_ENDPOINTS.AUTH.REFRESH_TOKEN)
-    // ) {
-    //   try {
-    //     const refreshToken = (getState() as any).auth.refreshToken;
-
-    //     if (!refreshToken) {
-    //       throw new Error('No refresh token available');
-    //     }
-
-    //     // Use the singleton manager to refresh the token
-    //     await tokenRefreshManager.refreshToken(refreshToken);
-
-    //     // After token is refreshed, retry the original request
-    //     const newToken = (getState() as any).auth.accessToken;
-    //     if (!newToken) {
-    //       throw new Error('No access token after refresh');
-    //     }
-
-    //     console.log('Retrying original request with new token');
-    //     const retryResult = await axiosInstance.request({
-    //       url,
-    //       method,
-    //       data,
-    //       params,
-    //       headers: {
-    //         ...headers,
-    //         Authorization: `Bearer ${newToken}`,
-    //       },
-    //     } as AxiosRequestConfig);
-
-    //     return {data: retryResult.data};
-    //   } catch (refreshError) {
-    //     //console.error('Token refresh or retry failed:', refreshError);
-    //     dispatch(clearToken());
-    //     return {
-    //       error: {
-    //         status: 401,
-    //         data: null,
-    //         message: 'Authentication failed. Please log in again.',
-    //       } as ApiError,
-    //     };
-    //   }
-    // }
 
     return {
       error: {

@@ -1332,11 +1332,11 @@ const styles = StyleSheet.create({
   salaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: hp(4),
+    marginTop: hp(8),
   },
   currencyImage: {
-    width: wp(14),
-    height: hp(11),
+    width: wp(18),
+    height: hp(18),
     resizeMode: 'contain',
     marginRight: wp(4),
     tintColor: colors._0B3970,
@@ -1354,7 +1354,6 @@ const styles = StyleSheet.create({
   },
   jobSalary: {
     ...commonFontStyle(700, 16, colors._0B3970),
-    marginTop: hp(6),
   },
   analyticsCard: {
     backgroundColor: '#072F61',

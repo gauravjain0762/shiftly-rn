@@ -1017,8 +1017,8 @@ const styles = StyleSheet.create({
     marginTop: hp(4),
   },
   currencyImage: {
-    width: wp(14),
-    height: hp(11),
+    width: wp(18),
+    height: hp(18),
     resizeMode: 'contain',
     tintColor: colors.black,
   },

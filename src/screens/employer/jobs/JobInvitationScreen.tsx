@@ -171,8 +171,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     currencyImage: {
-        width: wp(14),
-        height: hp(11),
+        width: wp(18),
+        height: hp(18),
         resizeMode: 'contain',
         marginHorizontal: wp(2),
         tintColor: colors._0D468C,

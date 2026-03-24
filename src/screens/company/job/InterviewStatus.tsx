@@ -326,8 +326,8 @@ const styles = StyleSheet.create({
         marginTop: hp(6),
     },
     currencyImage: {
-        width: wp(14),
-        height: hp(11),
+        width: wp(18),
+        height: hp(18),
         resizeMode: 'contain',
         marginRight: wp(4),
         tintColor: colors._0B3970,

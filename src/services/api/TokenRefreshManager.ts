@@ -1,4 +1,4 @@
-import {setToken} from '../../features/authSlice';
+import {setAuthToken} from '../../features/authSlice';
 import {AppDispatch} from '../../store';
 import {axiosInstance} from './client';
 
@@ -45,7 +45,7 @@ class TokenRefreshManager {
         };
 
         if (this.dispatch) {
-          this.dispatch(setToken(tokenData));
+          this.dispatch(setAuthToken(responseData.access.token));
         }
 
         resolve(tokenData);

@@ -646,19 +646,19 @@ const PostJob = () => {
       certifications: Array.isArray(certification) ? certification.filter(Boolean).join(',') : '',
       languages: Array.isArray(languages)
         ? languages
-            .filter((l: any) => l && (typeof l === 'object' ? l.id : l))
-            .map((l: any) => {
-              const id = typeof l === 'object' ? l.id : l;
-              const level = typeof l === 'object' ? l.level || '' : '';
-              // Use String comparison for reliable match (ObjectId vs string)
-              const name =
-                languageData.find((o: any) => String(o?.value) === String(id))?.label ??
-                (typeof l === 'object' && l?.name ? l.name : '') ??
-                '';
-              // Fallback: always send a name - use id when languageData lookup fails (backend can resolve by id)
-              const finalName = name || (id ? String(id) : '');
-              return { id, name: finalName, level: level || '' };
-            })
+          .filter((l: any) => l && (typeof l === 'object' ? l.id : l))
+          .map((l: any) => {
+            const id = typeof l === 'object' ? l.id : l;
+            const level = typeof l === 'object' ? l.level || '' : '';
+            // Use String comparison for reliable match (ObjectId vs string)
+            const name =
+              languageData.find((o: any) => String(o?.value) === String(id))?.label ??
+              (typeof l === 'object' && l?.name ? l.name : '') ??
+              '';
+            // Fallback: always send a name - use id when languageData lookup fails (backend can resolve by id)
+            const finalName = name || (id ? String(id) : '');
+            return { id, name: finalName, level: level || '' };
+          })
         : [],
       job_requirements: Array.isArray(other_requirements)
         ? other_requirements.filter(Boolean).join(',')
@@ -998,36 +998,36 @@ const PostJob = () => {
                   )}
                 </View>
 
-              {/* Selected skills (fixed height only when there are chips) */}
-              <View
-                style={[
-                  styles.selectedSkillsContainer,
-                  jobSkills.length > 0 && styles.selectedSkillsContainerFixed,
-                ]}>
-                <ScrollView
-                  ref={selectedSkillsScrollRef}
-                  style={styles.selectedSkillsScroll}
-                  contentContainerStyle={styles.selectedSkillsScrollContent}
-                  nestedScrollEnabled
-                  showsVerticalScrollIndicator={false}>
-                  {jobSkills.length === 0 ? (
-                    <Text style={styles.placeholderText}>
-                      {t('Select job skills')}
-                    </Text>
-                  ) : (
-                    jobSkills.map((skill: string, index: number) => (
-                      <View key={index} style={styles.skillTag}>
-                        <Text style={styles.skillText}>{skill}</Text>
-                        <Pressable
-                          onPress={() => removeSkill(skill)}
-                          style={styles.closeBtn}>
-                          <Text style={styles.closeText}>×</Text>
-                        </Pressable>
-                      </View>
-                    ))
-                  )}
-                </ScrollView>
-              </View>
+                {/* Selected skills (fixed height only when there are chips) */}
+                <View
+                  style={[
+                    styles.selectedSkillsContainer,
+                    jobSkills.length > 0 && styles.selectedSkillsContainerFixed,
+                  ]}>
+                  <ScrollView
+                    ref={selectedSkillsScrollRef}
+                    style={styles.selectedSkillsScroll}
+                    contentContainerStyle={styles.selectedSkillsScrollContent}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}>
+                    {jobSkills.length === 0 ? (
+                      <Text style={styles.placeholderText}>
+                        {t('Select job skills')}
+                      </Text>
+                    ) : (
+                      jobSkills.map((skill: string, index: number) => (
+                        <View key={index} style={styles.skillTag}>
+                          <Text style={styles.skillText}>{skill}</Text>
+                          <Pressable
+                            onPress={() => removeSkill(skill)}
+                            style={styles.closeBtn}>
+                            <Text style={styles.closeText}>×</Text>
+                          </Pressable>
+                        </View>
+                      ))
+                    )}
+                  </ScrollView>
+                </View>
 
                 {/* All skills list */}
                 <View style={styles.skillsScrollView}>
@@ -1144,27 +1144,24 @@ const PostJob = () => {
                   )}
                 </View>
 
-                {/* Work Experience Dropdown (Multi-select) */}
                 <View style={[styles.field, { zIndex: 103 }]}>
-                  <CustomDropdownMulti
-                    label={t('Work Experience')}
-                    labelStyle={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}
+                  <Text style={{ ...commonFontStyle(400, 18, colors._0B3970), marginTop: 0, marginBottom: hp(8) }}>
+                    {t('Work Experience')}
+                  </Text>
+                  <CustomDropdown
                     data={experienceData}
                     labelField="label"
                     valueField="value"
-                    value={experience || []}
-                    onChange={(items: any[]) => {
-                      const ids =
-                        Array.isArray(items)
-                          ? items.map(it => it?.value ?? it).filter(Boolean)
-                          : [];
-                      updateJobForm({ experience: ids });
+                    value={Array.isArray(experience) ? experience[0] ?? null : experience ?? null}
+                    onChange={(item: any) => {
+                      const id = item?.value ?? item;
+                      updateJobForm({ experience: id ? [id] : [] });
                     }}
                     placeholder={t('Select experience')}
                     dropdownStyle={styles.dropdown}
-                    container={{ marginTop: 10, marginBottom: 0 }}
-                    dropdownPosition="bottom"
-                    hideSelectedItems
+                    renderRightIcon={IMAGES.ic_down}
+                    RightIconStyle={styles.rightIcon}
+                    selectedTextStyle={styles.selectedTextStyle}
                   />
                   {Array.isArray(experience) && experience.length > 0 && (
                     <View style={styles.selectedRequirementsContainer}>
@@ -1174,11 +1171,7 @@ const PostJob = () => {
                           <View key={opt.value} style={styles.requirementTag}>
                             <Text style={styles.requirementText}>{opt.label}</Text>
                             <Pressable
-                              onPress={() =>
-                                updateJobForm({
-                                  experience: experience.filter((id: string) => id !== opt.value),
-                                })
-                              }
+                              onPress={() => updateJobForm({ experience: [] })}
                               style={styles.requirementCloseBtn}>
                               <Text style={styles.requirementCloseText}>×</Text>
                             </Pressable>
@@ -1353,8 +1346,8 @@ const PostJob = () => {
                       const ids =
                         Array.isArray(items)
                           ? items
-                              .map(it => it?.value ?? it)
-                              .filter(Boolean)
+                            .map(it => it?.value ?? it)
+                            .filter(Boolean)
                           : [];
                       updateJobForm({ other_requirements: ids });
                     }}
@@ -1922,12 +1915,12 @@ const PostJob = () => {
                       data={
                         expiry_date
                           ? (() => {
-                              const dateOnly =
-                                typeof expiry_date === 'string' && expiry_date.includes('T')
-                                  ? expiry_date.split('T')[0]
-                                  : expiry_date;
-                              return [{ label: dateOnly, value: dateOnly }];
-                            })()
+                            const dateOnly =
+                              typeof expiry_date === 'string' && expiry_date.includes('T')
+                                ? expiry_date.split('T')[0]
+                                : expiry_date;
+                            return [{ label: dateOnly, value: dateOnly }];
+                          })()
                           : []
                       }
                       disable={true}
@@ -2931,7 +2924,7 @@ const styles = StyleSheet.create({
   },
   tooltipIcon: {
     marginTop: hp(0),
-    marginBottom: hp(8) 
+    marginBottom: hp(8)
   },
   textAreaInput: {
     flex: 1,
