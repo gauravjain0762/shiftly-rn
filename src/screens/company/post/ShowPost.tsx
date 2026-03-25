@@ -6,6 +6,7 @@ import {
     View,
     ScrollView,
     ActivityIndicator,
+    Linking,
 } from 'react-native';
 import {
     BackHeader,
@@ -102,6 +103,12 @@ const ShowPost = () => {
                             />
                         </View>
                     )}
+
+                    {/* External Link */}
+                    <View style={{marginTop: hp(5)}}>
+                        <Text style={styles.postExternalLinkText}>{t('External Link')}:</Text>
+                        <Text onPress={() => Linking.openURL(post?.external_link)} style={styles.postExternalLink}>{post?.external_link}</Text>
+                    </View>
 
                     {/* Description */}
                     <Text style={styles.postDescription}>
@@ -201,5 +208,14 @@ const styles = StyleSheet.create({
         paddingTop: hp(16),
         paddingBottom: hp(24),
         lineHeight: hp(22),
+    },
+    postExternalLink: {
+        ...commonFontStyle(400, 15, colors._0B3970),
+        paddingHorizontal: wp(16),
+    },
+    postExternalLinkText: {
+        ...commonFontStyle(400, 15, colors._4A4A4A),
+        paddingHorizontal: wp(16),
+        paddingBottom: hp(10),
     },
 });

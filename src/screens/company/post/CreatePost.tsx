@@ -39,10 +39,17 @@ const CreatePost = () => {
   const insets = useSafeAreaInsets();
   const [imageModal, setImageModal] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
-  const { title, description, uploadedImages, postEditMode, postId } = useAppSelector(state =>
+  const { title, description, uploadedImages, postEditMode, postId, externalLink } = useAppSelector(state =>
     selectPostForm(state as any),
   );
   const { updatePostForm } = usePostFormUpdater();
+
+
+  useEffect(() => {
+    if (!externalLink || externalLink === null) {
+      updatePostForm({externalLink: 'https://'});
+    }
+  }, [externalLink]);
 
   useEffect(() => {
     const params = route.params;
@@ -242,6 +249,20 @@ const CreatePost = () => {
           />
           <CharLength chars={4000} value={description} style={styles.charLength} />
         </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>{t('External Link')}</Text>
+          <CustomTextInput
+            value={externalLink}
+            maxLength={100}
+            inputStyle={styles.input}
+            placeholderTextColor={colors._7B7878}
+            placeholder={t('Enter the external link')}
+            onChangeText={(e: any) => updatePostForm({externalLink: e})}
+            containerStyle={styles.inputContainer}
+          />
+          <CharLength chars={100} value={externalLink} style={styles.charLength} />
+        </View>
       </KeyboardAwareScrollView>
 
       {/* Review Post Button */}
@@ -273,7 +294,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: wp(25),
-    paddingBottom: hp(120),
+    paddingBottom: hp(130),
   },
   section: {
     marginTop: hp(24),

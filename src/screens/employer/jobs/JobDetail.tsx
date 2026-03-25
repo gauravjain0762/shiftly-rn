@@ -107,7 +107,7 @@ const JobDetail = () => {
     'Job Type': curr_jobdetails?.contract_type,
     Department: curr_jobdetails?.department_id?.title,
     'Start Date': curr_jobdetails?.start_date,
-    Duration: curr_jobdetails?.duration,
+    // Duration: curr_jobdetails?.duration,
     Vacancy: curr_jobdetails?.no_positions,
   };
   const keyValueArray = Object.entries(JobDetailsArr);

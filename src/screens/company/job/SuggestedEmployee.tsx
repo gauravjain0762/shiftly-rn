@@ -51,10 +51,14 @@ const SuggestedEmployeeScreen = () => {
   const route = useRoute<any>();
   const { jobId, jobData, isFromJobCard, fromPostJob } = route.params || {};
 
-  // Default to Suggested List tab for all entry points
-  const [activeTab, setActiveTab] = useState<'suggested' | 'shortlisted' | 'applicants'>(
-    'suggested'
-  );
+  const shouldDefaultToShortlisted =
+    route.params?.fromPendingInterview === true ||
+    route.params?.fromPendingInterviews === true;
+
+  // Default tab depends on the entry point.
+  const [activeTab, setActiveTab] = useState<
+    'suggested' | 'shortlisted' | 'applicants'
+  >(() => (shouldDefaultToShortlisted ? 'shortlisted' : 'suggested'));
 
   const {
     data: suggestedResponse,
@@ -132,6 +136,18 @@ const SuggestedEmployeeScreen = () => {
 
   const [fetchMoreSuggested, { isFetching: isFetchingSuggested }] = useLazyGetSuggestedEmployeesQuery();
   const [fetchMoreJobDetails, { isFetching: isFetchingJobDetails }] = useLazyGetCompanyJobDetailsQuery();
+
+  const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+  const getLanguageDotColor = (level: string) => {
+    switch (level) {
+      case 'Native': return colors._0B3970;
+      case 'Fluent': return colors._4A4A4A;
+      case 'Conversational': return colors._7B7878;
+      case 'Basic': return colors._D9D9D9;
+      default: return '#999';
+    }
+  };
 
   const invitedEmployees = useMemo(() => {
     const list =
@@ -569,15 +585,14 @@ const SuggestedEmployeeScreen = () => {
 
   const renderShortlistedEmployee = (item: any) => {
     const user = item?.user_id || item;
-    if (!user || (!user._id && !item.isSample)) return null;
+    if (!user || !user?._id) return null;
 
     const experience = user?.years_of_experience || 0;
-    console.log("🔥 ~ renderShortlistedEmployee ~ experience:", experience)
     const tracking = item?.tracking || [];
     const languages = user?.languages?.map((l: any) => l?.name)?.filter(Boolean);
 
     return (
-      <View key={user._id || 'sample'} style={styles.shortlistedCard}>
+      <View key={user?._id} style={styles.shortlistedCard}>
         <View style={styles.shortlistedContent}>
           <View style={styles.shortlistedLeft}>
             <TouchableOpacity
@@ -707,16 +722,14 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const renderEmployee = (item: any) => {
-    if (!item || !item._id) {
-      return null;
-    }
+    if (!item || !item._id) return null;
+
     const experience =
       item?.experience ||
       item?.years_of_experience ||
       item?.total_experience ||
       0;
 
-    // Check if user is already invited
     const isInvited = invitedEmployees?.some((invited: any) =>
       (invited?.user_id?._id === item?._id) ||
       (invited?.user_id === item?._id) ||
@@ -724,6 +737,7 @@ const SuggestedEmployeeScreen = () => {
     );
 
     const isSelected = selectedUserIds.includes(item?._id);
+    const languages = item?.languages || [];
 
     return (
       <Pressable
@@ -732,72 +746,75 @@ const SuggestedEmployeeScreen = () => {
         style={[
           styles.employeeCard,
           isSelected && styles.selectedEmployeeCard,
-          isInvited && styles.invitedCard
+          isInvited && styles.invitedCard,
         ]}>
-        <TouchableOpacity
-          onPress={() => handleNavigateToProfile(item)}
-          activeOpacity={0.7}
-        >
-          {hasValidImage(item?.picture) ? (
-            <CustomImage
-              uri={item?.picture}
-              containerStyle={styles.employeeAvatar}
-              imageStyle={styles.employeeAvatar}
-              resizeMode="cover"
-            />
-          ) : (
-            <View style={[styles.employeeAvatar, styles.avatarFallback]}>
-              <Text style={styles.avatarInitial}>{getInitials(item?.name)}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.employeeInfo}
-          onPress={() => handleNavigateToProfile(item)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.employeeName}>
-            {item?.name || 'N/A'}
-          </Text>
-          {!!item?.desired_job_title && (
-            <Text style={styles.employeeRole}>
-              {item.desired_job_title}
-            </Text>
-          )}
-          <Text style={styles.employeeRole}>
-            {item?.responsibility || item?.job_title || (!item?.desired_job_title ? 'N/A' : '')}
-          </Text>
-          <Text style={styles.employeeExperience}>
-            {`${experience || 0}`}
-          </Text>
-        </TouchableOpacity>
 
-        {isInvited || isSelected ? (
-          <View style={styles.invitedIconContainer}>
-            <Image source={IMAGES.checked} style={styles.invitedIcon} />
-          </View>
-        ) : (
-          <Pressable
-            onPress={event => {
-              event.stopPropagation();
-              if (isClosedJob) return;
-              setInviteAllSelected(false);
-              toggleUserSelection(item?._id);
-            }}
-            style={[
-              styles.inviteButton,
-              isSelected && styles.inviteButtonSelected,
-              isClosedJob && styles.disabledInviteButton,
-            ]}>
-            <Text
+        {/* ── Top row: avatar + info + invite button ── */}
+        <View style={styles.employeeTopRow}>
+          <TouchableOpacity onPress={() => handleNavigateToProfile(item)} activeOpacity={0.7}>
+            {hasValidImage(item?.picture) ? (
+              <CustomImage
+                uri={item?.picture}
+                containerStyle={styles.employeeAvatar}
+                imageStyle={styles.employeeAvatar}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.employeeAvatar, styles.avatarFallback]}>
+                <Text style={styles.avatarInitial}>{getInitials(item?.name)}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.employeeInfo}
+            onPress={() => handleNavigateToProfile(item)}
+            activeOpacity={0.7}>
+            <Text style={styles.employeeName}>{item?.name || 'N/A'}</Text>
+            <Text style={styles.employeeRole}>{item?.department_id?.title || 'N/A'}</Text>
+            <Text style={styles.employeeExperience}>{`${experience || 0}`}</Text>
+          </TouchableOpacity>
+
+          {isInvited || isSelected ? (
+            <View style={styles.invitedIconContainer}>
+              <Image source={IMAGES.checked} style={styles.invitedIcon} />
+            </View>
+          ) : (
+            <Pressable
+              onPress={event => {
+                event.stopPropagation();
+                if (isClosedJob) return;
+                setInviteAllSelected(false);
+                toggleUserSelection(item?._id);
+              }}
               style={[
-                styles.inviteButtonText,
-                isSelected && styles.inviteButtonTextSelected,
-                isClosedJob && styles.disabledInviteButtonText,
+                styles.inviteButton,
+                isSelected && styles.inviteButtonSelected,
+                isClosedJob && styles.disabledInviteButton,
               ]}>
-              {t('Invite')}
-            </Text>
-          </Pressable>
+              <Text
+                style={[
+                  styles.inviteButtonText,
+                  isSelected && styles.inviteButtonTextSelected,
+                  isClosedJob && styles.disabledInviteButtonText,
+                ]}>
+                {t('Invite')}
+              </Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* ── Languages row — full width below ── */}
+        {languages.length > 0 && (
+          <View style={styles.suggestedLanguageContainer}>
+            <View style={styles.suggestedLanguageRow}>
+              {languages.slice(0, 3).map((lang: any, index: number) => (
+                <View key={index} style={styles.suggestedLanguageChip}>
+                  <Text style={styles.suggestedLanguageName}>{lang?.name}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
         )}
       </Pressable>
     );
@@ -914,134 +931,134 @@ const SuggestedEmployeeScreen = () => {
                         {`${ai_data?.matched_candidates || 0} ${t('Highly Matched Profiles')}`}
                       </Text>
                       <Text style={styles.analyticsSecondary}>
-                        {t('For profiles above 75% match score')}
+                        {`${t('For profiles above')} ${ai_data?.match_threshold || 0}% ${t('match score')}`}
                       </Text>
                     </View>
                   </View>
                 </View>
 
                 {/* Tabs */}
-                  <ScrollView
-                    ref={tabScrollRef}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={[styles.tabContainer, styles.tabScroll]}
-                    style={styles.tabScrollView}>
-                    <View
-                      onLayout={(e) => {
-                        tabLayouts.current.suggested = e.nativeEvent.layout.x;
-                      }}
-                      collapsable={false}>
-                      <TouchableOpacity
+                <ScrollView
+                  ref={tabScrollRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={[styles.tabContainer, styles.tabScroll]}
+                  style={styles.tabScrollView}>
+                  <View
+                    onLayout={(e) => {
+                      tabLayouts.current.suggested = e.nativeEvent.layout.x;
+                    }}
+                    collapsable={false}>
+                    <TouchableOpacity
+                      style={[
+                        styles.tabButton,
+                        activeTab === 'suggested' && styles.activeTabButton,
+                        activeTab === 'suggested' && {
+                          backgroundColor: colors._0B3970,
+                          borderColor: colors._0B3970,
+                        },
+                      ]}
+                      onPress={() => selectTab('suggested')}>
+                      <Image
+                        source={IMAGES.people}
                         style={[
-                          styles.tabButton,
-                          activeTab === 'suggested' && styles.activeTabButton,
-                          activeTab === 'suggested' && {
-                            backgroundColor: colors._0B3970,
-                            borderColor: colors._0B3970,
-                          },
+                          styles.tabIcon,
+                          activeTab === 'suggested' && { tintColor: colors.white },
                         ]}
-                        onPress={() => selectTab('suggested')}>
+                      />
+                      <Text
+                        style={[
+                          styles.tabText,
+                          activeTab === 'suggested' && styles.activeTabText,
+                          activeTab === 'suggested' && { color: colors.white },
+                        ]}
+                        numberOfLines={1}>
+                        {t('Suggested List')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    onLayout={(e) => {
+                      tabLayouts.current.shortlisted = e.nativeEvent.layout.x;
+                    }}
+                    collapsable={false}>
+                    <TouchableOpacity
+                      style={[
+                        styles.tabButton,
+                        activeTab === 'shortlisted' && styles.activeTabButton,
+                        activeTab === 'shortlisted' && {
+                          backgroundColor: colors._0B3970,
+                          borderColor: colors._0B3970,
+                        },
+                      ]}
+                      onPress={() => selectTab('shortlisted')}>
+                      <View style={styles.starIconContainer}>
                         <Image
-                          source={IMAGES.people}
+                          source={IMAGES.star1}
                           style={[
-                            styles.tabIcon,
-                            activeTab === 'suggested' && { tintColor: colors.white },
+                            styles.starSmall,
+                            {
+                              tintColor:
+                                activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970',
+                            },
                           ]}
                         />
-                        <Text
-                          style={[
-                            styles.tabText,
-                            activeTab === 'suggested' && styles.activeTabText,
-                            activeTab === 'suggested' && { color: colors.white },
-                          ]}
-                          numberOfLines={1}>
-                          {t('Suggested List')}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View
-                      onLayout={(e) => {
-                        tabLayouts.current.shortlisted = e.nativeEvent.layout.x;
-                      }}
-                      collapsable={false}>
-                      <TouchableOpacity
-                        style={[
-                          styles.tabButton,
-                          activeTab === 'shortlisted' && styles.activeTabButton,
-                          activeTab === 'shortlisted' && {
-                            backgroundColor: colors._0B3970,
-                            borderColor: colors._0B3970,
-                          },
-                        ]}
-                        onPress={() => selectTab('shortlisted')}>
-                        <View style={styles.starIconContainer}>
-                          <Image
-                            source={IMAGES.star1}
-                            style={[
-                              styles.starSmall,
-                              {
-                                tintColor:
-                                  activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970',
-                              },
-                            ]}
-                          />
-                          <Image
-                            source={IMAGES.star2}
-                            style={[
-                              styles.starLarge,
-                              {
-                                tintColor:
-                                  activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970',
-                              },
-                            ]}
-                          />
-                        </View>
-                        <Text
-                          style={[
-                            styles.tabText,
-                            activeTab === 'shortlisted' && { color: colors.white },
-                          ]}
-                          numberOfLines={1}>
-                          {t('AI Shortlisted')}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View
-                      onLayout={(e) => {
-                        tabLayouts.current.applicants = e.nativeEvent.layout.x;
-                      }}
-                      collapsable={false}>
-                      <TouchableOpacity
-                        style={[
-                          styles.tabButton,
-                          activeTab === 'applicants' && styles.activeTabButton,
-                          activeTab === 'applicants' && {
-                            backgroundColor: colors._0B3970,
-                            borderColor: colors._0B3970,
-                          },
-                        ]}
-                        onPress={() => selectTab('applicants')}>
                         <Image
-                          source={IMAGES.people} // Using same icon as Suggested for now
+                          source={IMAGES.star2}
                           style={[
-                            styles.tabIcon,
-                            activeTab === 'applicants' && { tintColor: colors.white },
+                            styles.starLarge,
+                            {
+                              tintColor:
+                                activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970',
+                            },
                           ]}
                         />
-                        <Text
-                          style={[
-                            styles.tabText,
-                            activeTab === 'applicants' && { color: colors.white },
-                          ]}
-                          numberOfLines={1}>
-                          {t('Applicants')}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </ScrollView>
+                      </View>
+                      <Text
+                        style={[
+                          styles.tabText,
+                          activeTab === 'shortlisted' && { color: colors.white },
+                        ]}
+                        numberOfLines={1}>
+                        {t('AI Shortlisted')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    onLayout={(e) => {
+                      tabLayouts.current.applicants = e.nativeEvent.layout.x;
+                    }}
+                    collapsable={false}>
+                    <TouchableOpacity
+                      style={[
+                        styles.tabButton,
+                        activeTab === 'applicants' && styles.activeTabButton,
+                        activeTab === 'applicants' && {
+                          backgroundColor: colors._0B3970,
+                          borderColor: colors._0B3970,
+                        },
+                      ]}
+                      onPress={() => selectTab('applicants')}>
+                      <Image
+                        source={IMAGES.people} // Using same icon as Suggested for now
+                        style={[
+                          styles.tabIcon,
+                          activeTab === 'applicants' && { tintColor: colors.white },
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.tabText,
+                          activeTab === 'applicants' && { color: colors.white },
+                        ]}
+                        numberOfLines={1}>
+                        {t('Applicants')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
 
                 {activeTab === 'suggested' ? (
                   <>
@@ -1443,8 +1460,7 @@ const styles = StyleSheet.create({
     color: colors._0B3970,
   },
   employeeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',        // ← changed from 'row' to 'column'
     borderWidth: 1,
     borderColor: '#E0D7C8',
     borderRadius: wp(18),
@@ -1456,6 +1472,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
     marginBottom: hp(12),
+  },
+  employeeTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   selectedEmployeeCard: {
     borderColor: colors._0B3970,
@@ -1776,5 +1796,48 @@ const styles = StyleSheet.create({
     width: wp(20),
     height: wp(20),
     resizeMode: 'contain',
+  },
+  suggestedDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(6),
+  },
+  suggestedDotWrapper: {
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  suggestedDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+  },
+  suggestedDotLabel: {
+    position: 'absolute',
+    top: 28,
+    ...commonFontStyle(500, 9, colors._0B3970),
+    textAlign: 'center',
+    width: 70,
+    alignSelf: 'center',
+  },
+  suggestedLanguageContainer: {
+    marginTop: hp(8),
+  },
+  suggestedLanguageRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: wp(6),
+  },
+  suggestedLanguageChip: {
+    paddingHorizontal: wp(12),
+    paddingVertical: hp(5),
+    borderRadius: wp(20),
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+  },
+  suggestedLanguageName: {
+    ...commonFontStyle(400, 13, colors._0B3970),
   },
 });

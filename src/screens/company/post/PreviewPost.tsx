@@ -7,6 +7,7 @@ import {
     ScrollView,
     Platform,
     ActivityIndicator,
+    Linking,
 } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { animation } from '../../../assets/animation';
@@ -53,6 +54,7 @@ const PreviewPost = () => {
         isPostUploading,
         postEditMode,
         postId,
+        externalLink,
     } = useAppSelector(state => selectPostForm(state as any));
     const { updatePostForm } = usePostFormUpdater();
 
@@ -120,6 +122,7 @@ const PreviewPost = () => {
             const formData = new FormData();
             formData.append('title', title.trim());
             formData.append('description', description.trim());
+            formData.append('external_link', externalLink.trim());
 
             if (postEditMode && postId) {
                 formData.append('post_id', postId);
@@ -251,6 +254,17 @@ const PreviewPost = () => {
                         maxLines={6}
                         showStyle={styles.showMoreBtn}
                     />
+
+                    {/* External Link */}
+                    <View>
+                        <Text style={styles.postExternalLink}>{t('External Link')}:</Text>
+                        <Text
+                            onPress={() => Linking.openURL(externalLink)}
+                            style={styles.postExternalLinkText}
+                        >
+                            {externalLink}
+                        </Text>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -274,7 +288,7 @@ const PreviewPost = () => {
             <BottomModal
                 visible={isPostModalVisible}
                 backgroundColor={colors._FAEED2}
-                onClose={() => {}}>
+                onClose={() => { }}>
                 <View style={styles.modalIconWrapper}>
                     <LottieView
                         source={animation.success_check}
@@ -408,5 +422,16 @@ const styles = StyleSheet.create({
     modalBtn: {
         marginTop: hp(20),
         borderRadius: wp(25),
+    },
+    postExternalLink: {
+        ...commonFontStyle(400, 15, colors._4A4A4A),
+        paddingHorizontal: wp(16),
+        paddingTop: hp(10),
+        lineHeight: hp(22),
+    },
+    postExternalLinkText: {
+        ...commonFontStyle(400, 15, colors._0B3970),
+        paddingHorizontal: wp(16),
+        paddingBottom: hp(16),
     },
 });

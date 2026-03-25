@@ -51,6 +51,7 @@ interface PostFormState {
   isPostUploading: false;
   postEditMode: boolean;
   postId: string;
+  externalLink: string;
 }
 
 interface AuthState {
@@ -117,6 +118,7 @@ const initialState: CompanyState = {
     isPostUploading: false,
     postEditMode: false,
     postId: '',
+    externalLink: '',
   },
   filters: {
     contract_types: [],

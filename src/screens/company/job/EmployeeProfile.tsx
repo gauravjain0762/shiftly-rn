@@ -57,7 +57,19 @@ const EmployeeProfile = () => {
     education: userData?.education || [],
     experience: userData?.experience || [],
     skills: userData?.skills?.map((s: any) => s.title) || [],
-    languages: userData?.languages?.map((l: any) => l.name) || [],
+    languages: userData?.languages || userParam?.languages || [],
+  };
+
+  const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+  const getLanguageDotColor = (level: string) => {
+    switch (level) {
+      case 'Native': return colors._0B3970;
+      case 'Fluent': return colors._4A4A4A;
+      case 'Conversational': return colors._7B7878;
+      case 'Basic': return colors._D9D9D9;
+      default: return '#999';
+    }
   };
 
   const jobData = params?.jobData;
@@ -269,14 +281,51 @@ const EmployeeProfile = () => {
           </View>
         )}
 
-        {/* Languages Card */}
         {profileData.languages.length > 0 && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Languages</Text>
-            <View style={styles.pillsContainer}>
-              {profileData.languages.map((language: string, index: number) => (
-                <View key={index} style={styles.pill}>
-                  <Text style={styles.pillText}>{language}</Text>
+            <View style={styles.languageContainer}>
+              {profileData.languages.map((lang: any, index: number) => (
+                <View key={index} style={styles.languageChipWithDots}>
+                  <Text style={styles.languageChipName}>{lang?.name}</Text>
+                  <View style={styles.languageDotsRow}>
+                    {proficiencyLevels.map(level => {
+                      const isActive = lang?.level === level;
+                      return (
+                        <View
+                          key={level}
+                          style={[
+                            styles.langDotWrapper,
+                            isActive && {
+                              borderWidth: 2,
+                              borderColor: getLanguageDotColor(level),
+                              borderRadius: 16,
+                              width: 32,
+                              height: 32,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            },
+                          ]}>
+                          <View
+                            style={[
+                              styles.langDot,
+                              { backgroundColor: getLanguageDotColor(level) },
+                            ]}
+                          />
+                          {isActive && (
+                            <Text
+                              numberOfLines={1}
+                              style={[
+                                styles.langDotLabel,
+                                { color: getLanguageDotColor(level) },
+                              ]}>
+                              {level}
+                            </Text>
+                          )}
+                        </View>
+                      );
+                    })}
+                  </View>
                 </View>
               ))}
             </View>
@@ -583,6 +632,51 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  languageContainer: {
+    gap: hp(8),
+    flexDirection: 'column',
+  },
+  languageChipWithDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    backgroundColor: '#F5F5F5',
+    borderRadius: wp(12),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+    paddingBottom: hp(20),   // space for the absolute label
+  },
+  languageChipName: {
+    ...commonFontStyle(400, 16, colors._0B3970),
+    flex: 1,
+    marginRight: wp(8),
+  },
+  languageDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  langDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  langDotWrapper: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  langDotLabel: {
+    position: 'absolute',
+    top: 32,
+    ...commonFontStyle(500, 10, colors._0B3970),
+    textAlign: 'center',
+    width: 80,
+    alignSelf: 'center',
   },
 });
 
