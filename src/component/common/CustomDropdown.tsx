@@ -18,7 +18,10 @@ import { Dropdown as DropdownElement } from 'react-native-element-dropdown';
 import { IMAGES } from '../../assets/Images';
 import { DropdownProps } from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model';
 
-interface Props extends DropdownProps<any> {
+type Props = Omit<
+  DropdownProps<any>,
+  'data' | 'onChange' | 'labelField' | 'valueField'
+> & {
   title?: string;
   extraStyle?: ViewStyle;
   onPress?: () => void;
@@ -55,7 +58,7 @@ interface Props extends DropdownProps<any> {
   renderEmptyComponent?: any;
   itemTextStyle?: any;
   labelStyle?: TextStyle;
-}
+};
 
 export interface CustomDropdownRef {
   close: () => void;
@@ -102,6 +105,10 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
   const valueRef = useRef(value);
   valueRef.current = value;
 
+  // Avoid rendering "undefined"/"null" as the selected text
+  const normalizedValue =
+    value === null || value === undefined ? '' : String(value);
+
   useImperativeHandle(ref, () => ({
     close: () => {
       dropdownRef.current?.close?.();
@@ -146,7 +153,7 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
             onDropdownOpen?.();
           }}
           data={data}
-          value={String(value)}
+          value={normalizedValue}
           onChange={handleChange}
           disable={disable}
           dropdownPosition={dropdownPosition || 'bottom'}

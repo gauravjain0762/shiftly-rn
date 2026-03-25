@@ -146,16 +146,23 @@ const CreateProfileScreen = () => {
   } | null>(null);
 
   useEffect(() => {
-    const savedDeptId =
-      experienceUser?.department_id ||
-      userInfo?.department_id ||
-      '';
+    // API may return `department_id` as an object: { _id, title, ... }
+    // UI dropdown expects the department id string.
+    const savedDeptIdRaw: any =
+      experienceUser?.department_id ?? userInfo?.department_id ?? '';
+
+    const savedDeptId: string =
+      typeof savedDeptIdRaw === 'string'
+        ? savedDeptIdRaw
+        : savedDeptIdRaw?._id ?? savedDeptIdRaw?.id ?? '';
 
     if (savedDeptId && departmentOptions.length > 0) {
       const match =
         departmentOptions.find((opt: any) => opt.value === savedDeptId) || null;
 
       setUserDepartmentOption(match);
+    } else {
+      setUserDepartmentOption(null);
     }
   }, [
     experienceUser?.department_id,
@@ -164,13 +171,6 @@ const CreateProfileScreen = () => {
   ]);
 
   useEffect(() => {
-    if (educationData) {
-      console.log(
-        '🔥 [CreateProfileScreen] useGetEducationsQuery educationData:',
-        JSON.stringify(educationData, null, 2),
-      );
-    }
-
     if (Array.isArray(educationData) && educationData.length > 0) {
       const hasNonEmpty = educationData.some((edu: any) => !isEmptyEducation(edu));
       setIsEducationSavedToApi(hasNonEmpty);
@@ -558,13 +558,18 @@ const CreateProfileScreen = () => {
     }
   };
 
-  const handleAddUExperience = async () => {
+  const handleAddUExperience = async (listOverride?: ExperienceItem[]) => {
     try {
-      const list = Array.isArray(experienceList) ? experienceList : [];
+      const list = Array.isArray(listOverride)
+        ? listOverride
+        : Array.isArray(experienceList)
+          ? experienceList
+          : [];
       for (const exp of list) {
-        const dep = exp?.department as any;
+        // API may return `department_id` while the UI/form state uses `department`.
+        const dep = (exp as any)?.department ?? (exp as any)?.department_id as any;
         const departmentId =
-          typeof dep === 'object' && dep?._id ? dep._id : (exp?.department ?? '');
+          typeof dep === 'object' && dep?._id ? dep._id : (dep ?? '');
         const isLikelyCompleteExperience =
           !!exp?.title &&
           !!exp?.company &&
@@ -600,12 +605,13 @@ const CreateProfileScreen = () => {
           continue;
         }
         const payload = {
-          experience_id: exp._id || '',
+          experience_id: exp?._id || (exp as any)?.experience_id || '',
           title: exp?.title,
           preferred_position: exp?.preferred_position,
           company: exp?.company,
           country: exp?.country,
           department: departmentId,
+          department_id: departmentId,
           job_start: {
             month: exp?.jobStart_month,
             year: exp?.jobStart_year,
@@ -771,9 +777,121 @@ const CreateProfileScreen = () => {
       const hasYearsChanged =
         !!currentYearsLabel && currentYearsLabel !== serverYearsLabel;
 
-      if (isExperienceUpdate || hasDesiredChanged || hasYearsChanged) {
+      const hasExperienceDraft = !isEmptyExperience(experienceListEdit);
+
+      const serverDesiredDepartmentIdRaw: any =
+        experienceUser?.department_id ?? userInfo?.department_id ?? '';
+      const serverDesiredDepartmentId: string =
+        typeof serverDesiredDepartmentIdRaw === 'string'
+          ? serverDesiredDepartmentIdRaw
+          : serverDesiredDepartmentIdRaw?._id ??
+              serverDesiredDepartmentIdRaw?.id ??
+              '';
+      const currentDesiredDepartmentId = userDepartmentOption?.value ?? '';
+
+      const hasDepartmentChanged =
+        Boolean(currentDesiredDepartmentId) &&
+        String(currentDesiredDepartmentId) !== String(serverDesiredDepartmentId);
+
+      const shouldSubmitExperienceMeta =
+        hasDesiredChanged || hasYearsChanged || hasDepartmentChanged;
+
+      const experienceSubmitList = (() => {
+        // 1) If user filled experience row fields, use draft logic and merge meta fields.
+        if (hasExperienceDraft) {
+          let base = experienceList as any[];
+
+          if (experienceListEdit?.isEditing) {
+            const draftId =
+              experienceListEdit?._id ?? experienceListEdit?.experience_id;
+            if (!draftId) return experienceList;
+
+            base = (Array.isArray(experienceList) ? experienceList : []).map(exp => {
+              const expId =
+                (exp as any)?._id ?? (exp as any)?.experience_id;
+              if (expId && String(expId) === String(draftId)) {
+                return {
+                  ...exp,
+                  ...experienceListEdit,
+                  isEditing: false,
+                };
+              }
+              return exp;
+            });
+          } else if (
+            !Array.isArray(experienceList) ||
+            experienceList.length === 0
+          ) {
+            base = [
+              {
+                ...(experienceListEdit as any),
+                experience_id:
+                  experienceListEdit?.experience_id ||
+                  Date.now().toString(),
+                isLocal: true,
+                isEditing: false,
+              },
+            ];
+          }
+
+          if (Array.isArray(base) && base.length > 0) {
+            return base.map((exp: any) => ({
+              ...exp,
+              preferred_position:
+                currentDesiredJobTitle || exp.preferred_position,
+              department:
+                currentDesiredDepartmentId ||
+                exp.department ||
+                exp.department_id ||
+                '',
+              department_id:
+                currentDesiredDepartmentId ||
+                exp.department_id ||
+                exp.department ||
+                '',
+              isEditing: false,
+            }));
+          }
+
+          return base;
+        }
+
+        // 2) Meta-only update: merge desired job title + department into existing experiences.
+        if (
+          shouldSubmitExperienceMeta &&
+          Array.isArray(experienceList) &&
+          experienceList.length > 0
+        ) {
+          return experienceList.map((exp: any) => ({
+            ...exp,
+            preferred_position:
+              currentDesiredJobTitle || exp.preferred_position,
+            department:
+              currentDesiredDepartmentId ||
+              exp.department ||
+              exp.department_id ||
+              '',
+            department_id:
+              currentDesiredDepartmentId ||
+              exp.department_id ||
+              exp.department ||
+              '',
+            isEditing: false,
+          }));
+        }
+
+        return experienceList;
+      })();
+
+      if (
+        isExperienceUpdate ||
+        hasDesiredChanged ||
+        hasYearsChanged ||
+        hasExperienceDraft ||
+        hasDepartmentChanged
+      ) {
         console.log('isExperienceUpdate/changed called >>>>>>>>>>>.');
-        await handleAddUExperience();
+        await handleAddUExperience(experienceSubmitList);
       }
 
       await handleAddAboutMe();
@@ -1221,7 +1339,7 @@ const CreateProfileScreen = () => {
                   ? { opacity: 0.5 }
                   : undefined,
               ]}
-              title="Update Profile"
+              title={educationListEdit?.isEditing ? 'Update Education' : 'Update Profile'}
               disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
               onPress={handleUpdateProfile}
             />

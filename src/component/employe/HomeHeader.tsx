@@ -36,7 +36,6 @@ const HomeHeader: FC<props> = ({
   companyProfile,
   unreadCount = 0,
 }) => {
-  console.log("🔥 ~ HomeHeader ~ companyProfile:", companyProfile?.city, companyProfile?.country)
   const { hasUnreadNotification } = useSelector((state: RootState) => state.auth);
   const showBadge = unreadCount > 0 || hasUnreadNotification;
   const badgeCount = unreadCount > 0 ? unreadCount : null;

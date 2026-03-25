@@ -728,13 +728,20 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
       invalidatesTags: ['AddUpdateExperience', 'GetProfile'],
-      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+      async onQueryStarted(credentials, {dispatch, queryFulfilled}) {
         try {
+          console.log(
+            '[API] addUpdateExperience - request payload:',
+            credentials,
+          );
           const {data} = await queryFulfilled;
           dispatch(setUserInfo(data?.data?.user));
-          console.log(data, 'datadata');
+          console.log('[API] addUpdateExperience - response:', data);
         } catch (error) {
-          console.log('AddUpdateExperience Error', error);
+          console.log('AddUpdateExperience Error', {
+            error,
+            requestPayload: credentials,
+          });
         }
       },
     }),
