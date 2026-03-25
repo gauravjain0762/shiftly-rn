@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 20,
     marginBottom: 12,
-    ...commonFontStyle(500, 18, colors._050505),
+    ...commonFontStyle(700, 18, colors._050505),
   },
   required: {
     color: 'red',

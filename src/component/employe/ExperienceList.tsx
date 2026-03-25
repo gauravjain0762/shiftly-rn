@@ -144,6 +144,7 @@ const ExperienceList: FC<any> = ({
             department: selectedItem?.value ?? '',
           });
         }}
+        labelStyle={{...commonFontStyle(700, wp(18), colors._050505)}}
       />
 
       <View style={styles.countryWrapper}>
@@ -277,6 +278,7 @@ const ExperienceList: FC<any> = ({
             experience_type: selectedItem?.value,
           });
         }}
+        labelStyle={{...commonFontStyle(700, wp(18), colors._050505)}}
       />
     </View>
   );
@@ -296,7 +298,7 @@ const styles = StyleSheet.create({
   label: {
     marginTop: hp(8),
     marginBottom: hp(8),
-    ...commonFontStyle(400, wp(18), colors._050505),
+    ...commonFontStyle(700, wp(18), colors._050505),
   },
   required: {
     color: 'red',
@@ -304,6 +306,7 @@ const styles = StyleSheet.create({
   },
   countryWrapper: {
     flex: 1,
+    marginTop: hp(12)
   },
   country: {
     paddingHorizontal: wp(16),

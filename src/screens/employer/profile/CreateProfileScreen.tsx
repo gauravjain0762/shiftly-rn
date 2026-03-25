@@ -54,6 +54,7 @@ import BaseText from '../../../component/common/BaseText';
 import { IMAGES } from '../../../assets/Images';
 import UploadResume from '../../../component/employe/UploadResume';
 import { useTranslation } from 'react-i18next';
+import { useGetDepartmentsQuery } from '../../../api/dashboardApi';
 
 type Resume = {
   file_name: string;
@@ -104,8 +105,10 @@ const CreateProfileScreen = () => {
   const scrollRef = React.useRef<any>(null);
 
   const educationData = getEducation?.data?.educations;
+  const [isEducationSavedToApi, setIsEducationSavedToApi] = useState<boolean>(false);
   const experienceData = getExperiences?.data?.experiences;
   const experienceUser = getExperiences?.data?.user;
+  console.log("🔥 ~ CreateProfileScreen ~ experienceUser:", experienceUser)
   const aboutmeandResumes = getAboutmeandResumes?.data?.user;
   const uploadedResumes = aboutmeandResumes?.resumes;
   const experienceOptionsData = useMemo(() => {
@@ -128,12 +131,51 @@ const CreateProfileScreen = () => {
     value: string;
   } | null>(null);
 
+  const { data: departmentsData } = useGetDepartmentsQuery({});
+  const departmentOptions = useMemo(() => {
+    const list = departmentsData?.data?.departments ?? [];
+    return list.map((item: any) => ({
+      label: item?.title ?? '',
+      value: item?._id ?? '',
+    })).filter((opt: any) => opt.value);
+  }, [departmentsData]);
+
+  const [userDepartmentOption, setUserDepartmentOption] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const savedDeptId =
+      experienceUser?.department_id ||
+      userInfo?.department_id ||
+      '';
+
+    if (savedDeptId && departmentOptions.length > 0) {
+      const match =
+        departmentOptions.find((opt: any) => opt.value === savedDeptId) || null;
+
+      setUserDepartmentOption(match);
+    }
+  }, [
+    experienceUser?.department_id,
+    userInfo?.department_id,
+    departmentOptions,
+  ]);
+
   useEffect(() => {
     if (educationData) {
       console.log(
         '🔥 [CreateProfileScreen] useGetEducationsQuery educationData:',
         JSON.stringify(educationData, null, 2),
       );
+    }
+
+    if (Array.isArray(educationData) && educationData.length > 0) {
+      const hasNonEmpty = educationData.some((edu: any) => !isEmptyEducation(edu));
+      setIsEducationSavedToApi(hasNonEmpty);
+    } else {
+      setIsEducationSavedToApi(false);
     }
   }, [educationData]);
 
@@ -296,6 +338,28 @@ const CreateProfileScreen = () => {
     experienceOptionsData,
   ]);
 
+  // Pre-fill "Desired Department" dropdown from API.
+  // UI reads/writes this value from `experienceListEdit.department`.
+  useEffect(() => {
+    const desiredDepartmentId =
+      experienceUser?.department_id ||
+      (Array.isArray(experienceData) && experienceData.length > 0
+        ? (experienceData[0] as any)?.department_id
+        : null);
+
+    if (
+      desiredDepartmentId &&
+      !experienceListEdit?.department
+    ) {
+      dispatch(
+        setExperienceListEdit({
+          ...experienceListEdit,
+          department: desiredDepartmentId,
+        }),
+      );
+    }
+  }, [experienceUser?.department_id, experienceData, dispatch]);
+
   const handleSaveOrAddEducation = () => {
     if (educationListEdit?.isEditing) {
       dispatch(
@@ -345,7 +409,7 @@ const CreateProfileScreen = () => {
     // After adding/saving, scroll to top so user sees the updated list
     if (scrollRef.current) {
       if (typeof scrollRef.current.scrollTo === 'function') {
-        scrollRef.current.scrollTo({x: 0, y: 0, animated: true});
+        scrollRef.current.scrollTo({ x: 0, y: 0, animated: true });
       }
     }
   };
@@ -421,21 +485,23 @@ const CreateProfileScreen = () => {
 
     if (scrollRef.current) {
       if (typeof scrollRef.current.scrollTo === 'function') {
-        scrollRef.current.scrollTo({x: 0, y: 0, animated: true});
+        scrollRef.current.scrollTo({ x: 0, y: 0, animated: true });
       }
     }
   };
 
   const handleAddEducation = async () => {
     try {
+      // Reset until we confirm at least one valid education exists in API.
+      setIsEducationSavedToApi(false);
       const degreeMap: Record<string, string> =
         Array.isArray(educationData)
           ? educationData.reduce((acc: any, item: any) => {
-              if (item?._id) {
-                acc[item._id] = item.title || '';
-              }
-              return acc;
-            }, {})
+            if (item?._id) {
+              acc[item._id] = item.title || '';
+            }
+            return acc;
+          }, {})
           : {};
 
       for (const edu of educationList) {
@@ -475,7 +541,18 @@ const CreateProfileScreen = () => {
         }
       }
 
-      refetchEducation();
+      const refreshed = await refetchEducation();
+      const refreshedEducations =
+        Array.isArray(refreshed?.data?.educations)
+          ? refreshed?.data?.educations
+          : Array.isArray(refreshed?.data)
+            ? refreshed?.data
+            : [];
+
+      const hasNonEmpty = Array.isArray(refreshedEducations)
+        ? refreshedEducations.some((edu: any) => !isEmptyEducation(edu))
+        : false;
+      setIsEducationSavedToApi(hasNonEmpty);
     } catch (error) {
       console.error('Error adding education:', error);
     }
@@ -517,7 +594,6 @@ const CreateProfileScreen = () => {
         );
 
         if (!departmentId || String(departmentId).trim().length === 0) {
-          // Only block/toast when the row is otherwise ready to submit.
           if (isLikelyCompleteExperience) {
             errorToast('Please select a department for all experiences');
           }
@@ -528,9 +604,8 @@ const CreateProfileScreen = () => {
           title: exp?.title,
           preferred_position: exp?.preferred_position,
           company: exp?.company,
-          department: departmentId,
-          department_id: departmentId,
           country: exp?.country,
+          department: departmentId,
           job_start: {
             month: exp?.jobStart_month,
             year: exp?.jobStart_year,
@@ -549,8 +624,10 @@ const CreateProfileScreen = () => {
           ...(exp?.preferred_position && {
             desired_job_title: exp.preferred_position,
           }),
+          ...(userDepartmentOption?.value && {
+            user_department_id: userDepartmentOption.value,
+          }),
         };
-
         console.log('✅ ~ Experience Payload:', JSON.stringify(payload, null, 2));
         const response = await addUpdateExperience(payload).unwrap();
         console.log('✅ ~ Experience Response:', JSON.stringify(response, null, 2));
@@ -781,6 +858,9 @@ const CreateProfileScreen = () => {
     );
   };
 
+  const educationCount = educationList?.length ?? 0;
+  const experienceCount = experienceList?.length ?? 0;
+
   return (
     <SafeAreaView
       edges={['bottom']}
@@ -877,9 +957,9 @@ const CreateProfileScreen = () => {
                     onRemove={() => handleRemoveEducation(item)}
                     onEdit={() => {
                       const parseEduDate = (
-                        val?: string | {month?: string; year?: string} | null,
+                        val?: string | { month?: string; year?: string } | null,
                       ) => {
-                        if (!val) return {month: '', year: ''};
+                        if (!val) return { month: '', year: '' };
                         if (typeof val === 'object') {
                           return {
                             month: val.month || '',
@@ -893,7 +973,7 @@ const CreateProfileScreen = () => {
                             year: parts[1] || '',
                           };
                         }
-                        return {month: '', year: ''};
+                        return { month: '', year: '' };
                       };
 
                       const deg = item?.degree as any;
@@ -933,8 +1013,8 @@ const CreateProfileScreen = () => {
                 setEducationListEdit={val =>
                   dispatch(setEducationListEdit(val))
                 }
-                addNewEducation={() => {}}
-                onNextPress={() => {}}
+                addNewEducation={() => { }}
+                onNextPress={() => { }}
               />
             </>
           )}
@@ -975,7 +1055,6 @@ const CreateProfileScreen = () => {
                       const start = parseDate(item?.job_start);
                       const end = parseDate(item?.job_end);
 
-                      // Extract department ID - API may return department or department_id as object or string
                       const dep = item?.department ?? item?.department_id;
                       const departmentId =
                         typeof dep === 'object' && dep?._id
@@ -1008,31 +1087,56 @@ const CreateProfileScreen = () => {
                 onExperienceTypePress={() => {
                   if (scrollRef.current) {
                     if (typeof scrollRef.current.scrollTo === 'function') {
-                      scrollRef.current.scrollTo({x: 0, y: hp(180), animated: true});
+                      scrollRef.current.scrollTo({ x: 0, y: hp(180), animated: true });
                     }
                   }
                 }}
                 yearsOfExperienceNode={
-                  <View style={[styles.yearsExperienceRow, styles.experienceDropdownField]}>
-                    <BaseText style={styles.experienceDropdownLabel}>
-                      {t('Years of Experience')}
-                    </BaseText>
-                    <CustomDropdown
-                      data={experienceOptionsData}
-                      labelField="label"
-                      valueField="value"
-                      value={yearsOfExperienceOption?.value}
-                      onChange={(e: any) => {
-                        setYearsOfExperienceOption(
-                          e?.value != null ? { label: e.label, value: e.value } : null,
-                        );
-                      }}
-                      dropdownStyle={styles.experienceDropdown}
-                      renderRightIcon={IMAGES.ic_down}
-                      RightIconStyle={styles.experienceDropdownRightIcon}
-                      selectedTextStyle={styles.experienceDropdownSelectedText}
-                      placeholder={t('Select one')}
-                    />
+                  <View>
+                    {/* Department — profile level, not per-experience */}
+                    <View style={[styles.yearsExperienceRow, styles.experienceDropdownField]}>
+                      <BaseText style={styles.experienceDropdownLabel}>
+                        {t('Desired Department')}
+                      </BaseText>
+                      <CustomDropdown
+                        data={departmentOptions}
+                        labelField="label"
+                        valueField="value"
+                        value={userDepartmentOption?.value}
+                        onChange={(e: any) => {
+                          setUserDepartmentOption(
+                            e?.value != null ? { label: e.label, value: e.value } : null,
+                          );
+                        }}
+                        dropdownStyle={styles.experienceDropdown}
+                        renderRightIcon={IMAGES.ic_down}
+                        RightIconStyle={styles.experienceDropdownRightIcon}
+                        selectedTextStyle={styles.experienceDropdownSelectedText}
+                        placeholder={t('Select department')}
+                      />
+                    </View>
+
+                    <View style={[styles.yearsExperienceRow, styles.experienceDropdownField]}>
+                      <BaseText style={styles.experienceDropdownLabel}>
+                        {t('Years of Experience')}
+                      </BaseText>
+                      <CustomDropdown
+                        data={experienceOptionsData}
+                        labelField="label"
+                        valueField="value"
+                        value={yearsOfExperienceOption?.value}
+                        onChange={(e: any) => {
+                          setYearsOfExperienceOption(
+                            e?.value != null ? { label: e.label, value: e.value } : null,
+                          );
+                        }}
+                        dropdownStyle={styles.experienceDropdown}
+                        renderRightIcon={IMAGES.ic_down}
+                        RightIconStyle={styles.experienceDropdownRightIcon}
+                        selectedTextStyle={styles.experienceDropdownSelectedText}
+                        placeholder={t('Select one')}
+                      />
+                    </View>
                   </View>
                 }
               />
@@ -1050,7 +1154,7 @@ const CreateProfileScreen = () => {
               experienceList={experienceList}
               setAboutEdit={(val: any) => dispatch(setAboutEdit(val))}
               item={[]}
-              onPressMessage={() => {}}
+              onPressMessage={() => { }}
             />
           )}
 
@@ -1070,50 +1174,56 @@ const CreateProfileScreen = () => {
 
       {activeStep === 1 && (
         <View style={styles.buttonStyle}>
-          <TouchableOpacity
-            onPress={handleSaveOrAddEducation}
-            disabled={
-              !educationListEdit?.isEditing &&
-              isEmptyEducation(educationListEdit)
-            }
-            style={[
-              styles.btnRow,
-              !educationListEdit?.isEditing &&
-              isEmptyEducation(educationListEdit) && {
-                opacity: 0.5,
-              },
-            ]}>
-            <Image
-              style={styles.closeIcon}
-              source={
-                educationListEdit?.isEditing ? IMAGES.check : IMAGES.close1
-              }
-            />
-            <BaseText style={styles.addEduText}>
-              {educationListEdit?.isEditing || educationList.length === 0
-                ? 'Save Education'
-                : 'Add Education'}
-            </BaseText>
-          </TouchableOpacity>
+          {educationList.length > 0 && !isEmptyEducation(educationListEdit) && (
+            <TouchableOpacity
+              onPress={handleSaveOrAddEducation}
+              style={styles.btnRow}>
+              <BaseText style={styles.addEduText}>
+                {'+ Add Education'}
+              </BaseText>
+            </TouchableOpacity>
+          )}
 
           <GradientButton
             type="Company"
-            style={styles.btn}
+            style={[
+              styles.btn,
+              educationList.length > 0 && !isEmptyEducation(educationListEdit)
+                ? { opacity: 0.5 }
+                : undefined,
+            ]}
             title="Next"
+            disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
             onPress={async () => {
+              if (isEmptyEducation(educationListEdit)) {
+                dispatch(setActiveStep(2));
+                return;
+              }
+
+              const shouldAutoSaveFirstEducation =
+                educationList.length === 0 && !isEmptyEducation(educationListEdit);
+
+              if (shouldAutoSaveFirstEducation) {
+                handleSaveOrAddEducation();
+              }
+
               await handleAddEducation();
               dispatch(setActiveStep(2));
             }}
-          // disabled={educationList?.length === 0}
           />
+
           {route.params?.isEdit && (
             <GradientButton
               type="Company"
-              style={styles.btn}
+              style={[
+                styles.btn,
+                educationList.length > 0 && !isEmptyEducation(educationListEdit)
+                  ? { opacity: 0.5 }
+                  : undefined,
+              ]}
               title="Update Profile"
-              onPress={() => {
-                handleUpdateProfile();
-              }}
+              disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
+              onPress={handleUpdateProfile}
             />
           )}
         </View>
@@ -1121,57 +1231,63 @@ const CreateProfileScreen = () => {
 
       {activeStep === 2 && (
         <View style={styles.buttonStyle}>
-          <TouchableOpacity
-            onPress={handleSaveOrAddExperience}
-            disabled={
-              !experienceListEdit?.isEditing &&
-              isEmptyExperience(experienceListEdit)
-            }
-            style={[
-              styles.btnRow,
-              !experienceListEdit?.isEditing &&
-              isEmptyExperience(experienceListEdit) && {
-                opacity: 0.5,
-              },
-            ]}>
-            <Image
-              style={styles.closeIcon}
-              source={
-                experienceListEdit?.isEditing ? IMAGES.check : IMAGES.close1
-              }
-            />
-            <BaseText style={styles.addEduText}>
-              {experienceListEdit?.isEditing
-                ? 'Save Exeprience'
-                : 'Add Experience'}
-            </BaseText>
-          </TouchableOpacity>
+          {experienceList.length > 0 && !isEmptyExperience(experienceListEdit) && (
+            <TouchableOpacity
+              onPress={handleSaveOrAddExperience}
+              style={styles.btnRow}>
+              <BaseText style={styles.addEduText}>
+                {'+ Add Experience'}
+              </BaseText>
+            </TouchableOpacity>
+          )}
 
           <GradientButton
             type="Company"
-            style={styles.btn}
+            style={[
+              styles.btn,
+              experienceList.length > 0 && !isEmptyExperience(experienceListEdit)
+                ? { opacity: 0.5 }
+                : undefined,
+            ]}
             title={'Next'}
+            disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
             onPress={async () => {
+              if (isEmptyExperience(experienceListEdit)) {
+                dispatch(setActiveStep(3));
+                return;
+              }
+
+              const shouldAutoSaveFirstExperience =
+                experienceList.length === 0 && !isEmptyExperience(experienceListEdit);
+
+              if (shouldAutoSaveFirstExperience) {
+                handleSaveOrAddExperience();
+              }
+
               if (yearsOfExperienceOption?.label) {
                 try {
                   const fd = new FormData();
                   fd.append('years_of_experience', yearsOfExperienceOption.label);
                   await empUpdateProfile(fd).unwrap();
                 } catch (_) {
-                  // non-blocking; still allow moving to step 3
                 }
               }
               dispatch(setActiveStep(3));
             }}
           />
+
           {route.params?.isEdit && (
             <GradientButton
               type="Company"
-              style={styles.btn}
+              style={[
+                styles.btn,
+                experienceList.length > 0 && !isEmptyExperience(experienceListEdit)
+                  ? { opacity: 0.5 }
+                  : undefined,
+              ]}
               title={'Update Profile'}
-              onPress={() => {
-                handleUpdateProfile();
-              }}
+              disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
+              onPress={handleUpdateProfile}
             />
           )}
         </View>
@@ -1188,7 +1304,7 @@ const CreateProfileScreen = () => {
               },
             ]}
             title={'Next'}
-            disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
+            // disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
             onPress={() => {
               if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
                 errorToast('Please select at least one skill');

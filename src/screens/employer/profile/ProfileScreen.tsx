@@ -126,6 +126,18 @@ const ProfileScreen = () => {
     navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
   };
 
+  const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+  const getLanguageDotColor = (level: string) => {
+    switch (level) {
+      case 'Native': return colors._0B3970;
+      case 'Fluent': return colors._4A4A4A;
+      case 'Conversational': return colors._7B7878;
+      case 'Basic': return colors._D9D9D9;
+      default: return '#999';
+    }
+  };
+
   const skills = userInfo?.skills || [];
   const hasMoreThan8Skills = skills.length > 8;
   const displayedSkills = hasMoreThan8Skills && !showAllSkills
@@ -345,8 +357,8 @@ const ProfileScreen = () => {
                   const startDate = [startMonth, startYear].filter(Boolean).join(' ');
                   const typeLabel = exp?.experience_type
                     ? exp.experience_type
-                        .replace(/_/g, ' ')
-                        .replace(/\b\w/g, (l: string) => l.toUpperCase())
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, (l: string) => l.toUpperCase())
                     : '';
 
                   return (
@@ -419,9 +431,47 @@ const ProfileScreen = () => {
             <HeaderWithAdd title="My Languages" />
             <View style={styles.languageContainer}>
               {userInfo?.languages?.length ? (
-                userInfo?.languages?.map((item: any, index: number) => (
-                  <View key={index} style={styles.skillBadge}>
-                    <BaseText style={styles.skillText}>{item?.name}</BaseText>
+                userInfo.languages.map((item: any, index: number) => (
+                  <View key={index} style={styles.languageChipWithDots}>
+                    <BaseText style={styles.languageChipName}>{item?.name}</BaseText>
+                    <View style={styles.languageDotsRow}>
+                      {proficiencyLevels.map(level => {
+                        const isSelected = item?.level === level;
+                        return (
+                          <View
+                            key={level}
+                            style={[
+                              styles.langDotWrapper,
+                              isSelected && {
+                                borderWidth: 2,
+                                borderColor: getLanguageDotColor(level),
+                                borderRadius: 16,
+                                width: 32,
+                                height: 32,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              },
+                            ]}>
+                            <View
+                              style={[
+                                styles.langDot,
+                                { backgroundColor: getLanguageDotColor(level) },
+                              ]}
+                            />
+                            {isSelected && (
+                              <BaseText
+                                numberOfLines={1}
+                                style={[
+                                  styles.langDotLabel,
+                                  { color: getLanguageDotColor(level) },
+                                ]}>
+                                {level}
+                              </BaseText>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
                   </View>
                 ))
               ) : (
@@ -642,8 +692,7 @@ const styles = StyleSheet.create({
   },
   languageContainer: {
     gap: wp(8),
-    flexWrap: 'wrap',
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
   },
   skillContainer: {
@@ -823,5 +872,52 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     ...commonFontStyle(500, 16, colors._4A4A4A),
+  },
+  languageChipWithDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(12),
+    paddingBottom: hp(20),   // ← space for the absolute label
+    marginBottom: hp(8),
+    width: '100%',
+  },
+  languageChipName: {
+    ...commonFontStyle(400, 16, colors._0B3970),
+    flex: 1,
+    marginRight: wp(8),
+  },
+  languageDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  langDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  langDotAndLabel: {
+    alignItems: 'center',
+    gap: hp(4),
+  },
+  langDotWrapper: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  langDotLabel: {
+    position: 'absolute',
+    top: 32,
+    ...commonFontStyle(500, 10, colors._0B3970),
+    textAlign: 'center',
+    width: 80,
+    alignSelf: 'center',
   },
 });

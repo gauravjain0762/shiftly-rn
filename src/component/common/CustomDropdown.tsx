@@ -9,6 +9,7 @@ import {
   Keyboard,
   ImageURISource,
   ImageStyle,
+  TextStyle,
 } from 'react-native';
 import React, { ReactNode, useState, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { colors } from '../../theme/colors';
@@ -53,6 +54,7 @@ interface Props extends DropdownProps<any> {
   icon?: any;
   renderEmptyComponent?: any;
   itemTextStyle?: any;
+  labelStyle?: TextStyle;
 }
 
 export interface CustomDropdownRef {
@@ -92,6 +94,7 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
   onDropdownClose,
   dropdownPosition,
   forceClose,
+  labelStyle,
   ...props
 }, ref) => {
   const dropdownRef = useRef<any>(null);
@@ -131,7 +134,7 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
     <>
       <View style={container}>
         {label && (
-          <Text style={styles.label}>
+          <Text style={[styles.label, labelStyle]}>
             {label}
             {required && <Text style={styles.required}>*</Text>}
           </Text>
