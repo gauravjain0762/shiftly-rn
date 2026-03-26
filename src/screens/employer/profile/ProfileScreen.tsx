@@ -236,11 +236,15 @@ const ProfileScreen = () => {
             </View>
           )}
 
-          <BaseText style={styles.name}>{userInfo?.name || 'N/A'}</BaseText>
+          <BaseText style={styles.name}>
+            {userInfo?.name || 'No data available'}
+          </BaseText>
 
           <View style={styles.locationRow}>
             <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
-            <BaseText style={styles.location}>{userInfo?.country || 'N/A'}</BaseText>
+            <BaseText style={styles.location}>
+              {userInfo?.country || 'No data available'}
+            </BaseText>
           </View>
 
           {/* ── Desired Job Title + Years of Experience — single row ───── */}
@@ -340,7 +344,11 @@ const ProfileScreen = () => {
 
           <View style={styles.card}>
             <HeaderWithAdd title="About Me" />
-            <ReadMoreText text={aboutText || 'N/A'} numberOfLines={3} style={styles.content} />
+            <ReadMoreText
+              text={aboutText || 'No data available'}
+              numberOfLines={3}
+              style={aboutText ? styles.content : styles.noDataContent}
+            />
           </View>
 
           {/* ── Professional Experience ───────────────────────────────────── */}
@@ -475,7 +483,7 @@ const ProfileScreen = () => {
                   </View>
                 ))
               ) : (
-                <BaseText style={styles.skillText}>N/A</BaseText>
+                <BaseText style={styles.noDataText}>No data available</BaseText>
               )}
             </View>
           </View>
@@ -556,7 +564,7 @@ const ProfileScreen = () => {
                   ))}
                 </>
               ) : (
-                <BaseText style={styles.skillText}>N/A</BaseText>
+                <BaseText style={styles.noDataText}>No data available</BaseText>
               )}
             </View>
             {hasMoreThan8Skills && (
@@ -690,6 +698,13 @@ const styles = StyleSheet.create({
     lineHeight: hp(25),
     marginTop: hp(6),
   },
+  noDataContent: {
+    ...commonFontStyle(400, 16, colors._4A4A4A),
+    lineHeight: hp(25),
+    marginTop: hp(6),
+    textAlign: 'center',
+    width: '100%',
+  },
   languageContainer: {
     gap: wp(8),
     flexDirection: 'column',
@@ -713,6 +728,12 @@ const styles = StyleSheet.create({
   },
   skillText: {
     ...commonFontStyle(400, 16, colors._0B3970),
+  },
+  noDataText: {
+    ...commonFontStyle(400, 16, colors._0B3970),
+    textAlign: 'center',
+    width: '100%',
+    alignSelf: 'center',
   },
   showMoreButton: {
     marginTop: hp(12),

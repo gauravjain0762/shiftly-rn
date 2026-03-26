@@ -612,8 +612,14 @@ const CreateProfileScreen = () => {
           }
           continue;
         }
-        const payload = {
-          experience_id: exp?._id || (exp as any)?.experience_id || '',
+        const candidateExperienceId =
+          exp?._id || (exp as any)?.experience_id || '';
+        const isValidObjectId =
+          typeof candidateExperienceId === 'string' &&
+          /^[a-fA-F0-9]{24}$/.test(candidateExperienceId);
+
+        const payload: any = {
+          ...(isValidObjectId ? { experience_id: candidateExperienceId } : {}),
           title: exp?.title,
           preferred_position: exp?.preferred_position,
           company: exp?.company,
@@ -833,9 +839,6 @@ const CreateProfileScreen = () => {
             base = [
               {
                 ...(experienceListEdit as any),
-                experience_id:
-                  experienceListEdit?.experience_id ||
-                  Date.now().toString(),
                 isLocal: true,
                 isEditing: false,
               },
@@ -1339,7 +1342,7 @@ const CreateProfileScreen = () => {
                   educationList.length === 0 &&
                   !isEmptyEducation(educationListEdit)
                 ) {
-                  errorToast('You need to first Save the Education or Experience.');
+                  errorToast('You need to first Save the Education.');
                   return;
                 }
 
@@ -1412,7 +1415,7 @@ const CreateProfileScreen = () => {
                   experienceList.length === 0 &&
                   !isEmptyExperience(experienceListEdit)
                 ) {
-                  errorToast('You need to first Save the Education or Experience.');
+                  errorToast('You need to first Save the Experience.');
                   return;
                 }
 

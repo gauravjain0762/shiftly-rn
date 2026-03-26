@@ -95,6 +95,7 @@ const CoHome = () => {
     }
   }, [dispatch, userdata]);
 
+  console.log("🔥 ~ CoHome ~ userInfo:", userInfo)
   useEffect(() => {
     if (userInfo?._id) {
       connectSocket(userInfo?._id, 'company');
@@ -112,6 +113,7 @@ const CoHome = () => {
         <HomeHeader
           type="company"
           companyProfile={userInfo}
+          unreadCount={userInfo?.unread_notifications ?? 0}
           onPressAvatar={() => navigateTo(SCREENS.CoMyProfile)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />

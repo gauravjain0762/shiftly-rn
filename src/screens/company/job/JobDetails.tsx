@@ -56,6 +56,17 @@ const CoJobDetails = () => {
   const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
   const [closeJob] = useCloseCompanyJobMutation();
   const jobDetail = data?.data?.job;
+
+  const getInitialsFromName = (name?: string) => {
+    const safe = (name || '').trim();
+    if (!safe) return '?';
+    const parts = safe.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0][0]?.toUpperCase() || '?';
+    return `${parts[0][0] ?? ''}${parts[parts.length - 1][0] ?? ''}`.toUpperCase();
+  };
+
+  const isValidImage = (uri?: string) =>
+    typeof uri === 'string' && uri.trim().length > 0 && !uri.includes('blank');
   console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
 
   const shareUrl = data?.data?.share_url;
@@ -227,11 +238,22 @@ ${salary}${shareUrlText}`;
               {/* Candidate Card (Using first applicant/invited user or placeholder) */}
               <View style={[styles.card, { backgroundColor: '#BEDEFF3B', marginTop: hp(20) }]}>
                 <View style={[styles.row, { alignItems: 'center' }]}>
-                  <CustomImage
-                    uri={jobDetail?.applicants?.[0]?.user_id?.picture || 'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=300&q=80'}
-                    containerStyle={styles.avatar}
-                    imageStyle={styles.avatar}
-                  />
+                  {isValidImage(jobDetail?.applicants?.[0]?.user_id?.picture) ? (
+                    <CustomImage
+                      uri={jobDetail?.applicants?.[0]?.user_id?.picture}
+                      containerStyle={styles.avatar}
+                      imageStyle={styles.avatar}
+                    />
+                  ) : (
+                    <View style={styles.avatarFallback}>
+                      <Text style={styles.avatarInitials}>
+                        {getInitialsFromName(
+                          jobDetail?.applicants?.[0]?.user_id?.name ||
+                            'Tafnol Theresa',
+                        )}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.candidateInfo}>
                     <Text style={styles.candidateName}>{jobDetail?.applicants?.[0]?.user_id?.name || 'Tafnol Theresa'}</Text>
                     <Text style={styles.candidateRole}>{jobDetail?.applicants?.[0]?.user_id?.responsibility || 'Hotel Management'}</Text>
@@ -737,6 +759,7 @@ const styles = StyleSheet.create({
     width: wp(48),
     height: wp(48),
     borderRadius: wp(48),
+    overflow: 'hidden',
     backgroundColor: '#F2F4F7',
     alignItems: 'center',
     justifyContent: 'center',
@@ -744,6 +767,7 @@ const styles = StyleSheet.create({
   logoImage: {
     width: '100%',
     height: '100%',
+    borderRadius: wp(48),
     resizeMode: 'contain',
   },
   logoText: {
@@ -787,7 +811,19 @@ const styles = StyleSheet.create({
   avatar: {
     width: wp(48),
     height: wp(48),
-    borderRadius: wp(24),
+    borderRadius: wp(48),
+    resizeMode: 'contain',
+  },
+  avatarFallback: {
+    backgroundColor: colors._0B3970,
+    width: wp(48),
+    height: wp(48),
+    borderRadius: wp(48),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitials: {
+    ...commonFontStyle(700, 16, colors.white),
   },
   candidateInfo: {
     flex: 1,

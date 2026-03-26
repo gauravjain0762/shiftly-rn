@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,6 +16,7 @@ import { BackHeader, GradientButton, LinearContainer } from '../../../component'
 import BottomModal from '../../../component/common/BottomModal';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
+import ReadMoreText from '../../../component/common/ReadMoreText';
 import { SCREENS } from '../../../navigation/screenNames';
 import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -45,18 +46,57 @@ const EmployeeProfile = () => {
   const rawLocation = userData?.location || userParam?.location || userParam?.area;
   console.log("🔥 ~ EmployeeProfile ~ userData:", JSON.stringify(userData, null, 2))
 
+  const toArray = (value: any) => (Array.isArray(value) ? value : value ? [value] : []);
+  const formatMonthYear = (dateObj: any) => {
+    if (!dateObj) return '';
+    if (typeof dateObj === 'string') return dateObj;
+    const month = dateObj?.month || '';
+    const year = dateObj?.year || '';
+    return [month, year].filter(Boolean).join(' ');
+  };
+
+  const educationRaw = toArray(userData?.education || userParam?.education);
+  const experienceRaw = toArray(userData?.experience || userParam?.experience);
+
   const profileData = {
-    name: userData?.name || userParam?.name || 'N/A',
+    name: userData?.name || userParam?.name || 'No data available',
     location: formatLocationToCityCountry(
       rawLocation,
       userData?.city || userParam?.city,
       userData?.country || userParam?.country
-    ),
+    ) || userData?.country || userParam?.country || 'No data available',
     picture: userData?.picture || userParam?.picture || null,
     about: userData?.about || 'No about information provided.',
-    education: userData?.education || [],
-    experience: userData?.experience || [],
-    skills: userData?.skills?.map((s: any) => s.title) || [],
+    education: educationRaw.map((edu: any) => {
+      const degree = typeof edu?.degree === 'object'
+        ? edu?.degree?.title || edu?.degree?.name || edu?.degree?.label || ''
+        : edu?.degree || '';
+      const start = formatMonthYear(edu?.start_date || edu?.startDate);
+      const end = formatMonthYear(edu?.end_date || edu?.endDate);
+      const years = [start, end].filter(Boolean).join(' - ');
+      return {
+        degree: degree || 'No data available',
+        years: years || '',
+        institution: edu?.university || edu?.institution || 'No data available',
+        location:
+          [edu?.province, edu?.country].filter(Boolean).join(', ') ||
+          'No data available',
+      };
+    }),
+    experience: experienceRaw.map((exp: any) => {
+      const start = formatMonthYear(exp?.job_start);
+      const end = exp?.still_working ? 'Present' : formatMonthYear(exp?.job_end);
+      return {
+        title: exp?.title || 'No data available',
+        years: [start, end].filter(Boolean).join(' - '),
+        company: exp?.company || 'No data available',
+        location:
+          [exp?.province, exp?.country].filter(Boolean).join(', ') ||
+          exp?.country ||
+          'No data available',
+      };
+    }),
+    skills: (userData?.skills || userParam?.skills || []).map((s: any) => s?.title).filter(Boolean),
     languages: userData?.languages || userParam?.languages || [],
   };
 
@@ -213,7 +253,7 @@ const EmployeeProfile = () => {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About me</Text>
-          <BaseText style={styles.cardText}>{profileData?.about}</BaseText>
+          <ReadMoreText text={profileData?.about} numberOfLines={8} style={styles.cardText} />
         </View>
 
         {profileData.education.length > 0 && (

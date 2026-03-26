@@ -138,6 +138,12 @@ export const IMAGES = {
   profile_on: require('./image/profile_on.png'),
   home_on: require('./image/home_on.png'),
   business_center_on: require('./image/business_center_on.png'),
+  brand_awareness: require('./image/brand_awareness.png'),
+  frame_person_mic: require('./image/frame_person_mic.png'),
+  mic: require('./image/mic.png'),
+  priority_high: require('./image/priority_high.png'),
+  record_voice_over: require('./image/record_voice_over.png'),
+  video_cam: require('./image/videocam.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),
