@@ -1156,6 +1156,31 @@ export const dashboardApi = createApi({
         skipLoader: true,
       }),
     }),
+    empTogglePostLike: builder.mutation<any, any>({
+      query: body => {
+        console.log('empTogglePostLike params:', body);
+        return {
+          url: API.empTogglePostLike,
+          method: HTTP_METHOD.POST,
+          data: body,
+          skipLoader: true,
+        };
+      },
+      // invalidatesTags: [
+      //   'GetPost',
+      //   'GetEmployeePost',
+      //   'GetCompanyProfile',
+      //   'GetProfile',
+      // ],
+      async onQueryStarted(_, {dispatch, queryFulfilled}) {
+        try {
+          const {data} = await queryFulfilled;
+          console.log(data, 'empTogglePostLike response');
+        } catch (error) {
+          console.log('empTogglePostLike Error', error);
+        }
+      },
+    }),
   }),
 });
 
@@ -1241,4 +1266,5 @@ export const {
   useCompanyMarkReadNotificationsMutation,
   useClearAllNotificationsMutation,
   useCompanyClearAllNotificationsMutation,
+  useEmpTogglePostLikeMutation,
 } = dashboardApi;

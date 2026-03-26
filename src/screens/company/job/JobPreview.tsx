@@ -32,6 +32,7 @@ import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { SCREENS } from '../../../navigation/screenNames';
 import {
     useEditCompanyJobMutation,
+    useGetCompanyJobDetailsQuery,
     useGetCompanyLanguagesQuery,
     useGetCompanyEducationsQuery,
     useGetCompanyExperiencesQuery,
@@ -143,14 +144,20 @@ const JobPreview = () => {
         userAddress,
         skillId,
         location,
+        jobId: routeJobId,
     } = route.params || {};
+    const isReadOnlyPreview = Boolean(routeJobId) && !editMode;
 
     const [createdJobId, setCreatedJobId] = useState<string>('');
     const [createdJobData, setCreatedJobData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [showHiringAnimation, setShowHiringAnimation] = useState(false);
+    const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 
     const { data: skillsData } = useGetSkillsQuery({});
+    const { data: jobDetailsById } = useGetCompanyJobDetailsQuery(routeJobId, {
+        skip: !routeJobId,
+    });
     const skillMap = React.useMemo(() => {
         const map: Record<string, string> = {};
         const list = skillsData?.data?.skills;
@@ -162,35 +169,126 @@ const JobPreview = () => {
         return map;
     }, [skillsData]);
 
-    const previewLanguages = React.useMemo(
-        () =>
-            Array.isArray(languages)
-                ? languages
-                    .filter((l: any) => l)
-                    .map((l: any) => {
-                        const id =
-                            typeof l === 'object'
-                                ? l.id ?? l.value ?? l._id ?? ''
-                                : l;
-                        const level = typeof l === 'object' ? l.level || '' : '';
-                        const fromMap =
-                            languageData.find((opt: any) => String(opt?.value) === String(id))?.label ?? '';
-                        const fallbackName =
-                            typeof l === 'object'
-                                ? l.name ?? id
-                                : l;
-                        const name = (fromMap || fallbackName || '').toString();
-                        return { name, level };
-                    })
-                : [],
-        [languages, languageData],
+    const getLanguageDotColor = (level: string) => {
+        switch (level) {
+            case 'Native':
+                return colors._0B3970;
+            case 'Fluent':
+                return colors._4A4A4A;
+            case 'Conversational':
+                return colors._7B7878;
+            case 'Basic':
+                return colors._D9D9D9;
+            default:
+                return '#999999';
+        }
+    };
+
+    const apiJob = React.useMemo(
+        () => jobDetailsById?.data?.job || null,
+        [jobDetailsById],
     );
+    const displayCompany = apiJob?.company_id || userInfo;
+    const displayTitle = apiJob?.title || title || 'Job Title';
+    const displayDescription = apiJob?.description || describe || 'No description provided';
+    const displayContractType = apiJob?.contract_type || contract_type?.label || contract_type?.value || '-';
+    const displayDuration = apiJob?.duration || duration?.label || duration?.value || '-';
+    const displayStartDate = apiJob?.start_date || startDate?.label || startDate?.value || '-';
+    const displayPositions = apiJob?.no_positions || position?.value || '';
+    const displaySector =
+        apiJob?.job_sector ||
+        apiJob?.department_id?.title ||
+        job_sector?.label ||
+        (job_sector as any)?.title ||
+        '-';
+
+    const displaySkills = React.useMemo(() => {
+        if (Array.isArray(apiJob?.skills) && apiJob.skills.length > 0) {
+            return apiJob.skills;
+        }
+        return Array.isArray(jobSkills) ? jobSkills : [];
+    }, [apiJob, jobSkills]);
+
+    const displayRequirements = React.useMemo(() => {
+        if (Array.isArray(apiJob?.job_requirements) && apiJob.job_requirements.length > 0) {
+            return apiJob.job_requirements;
+        }
+        return Array.isArray(requirements) ? requirements : [];
+    }, [apiJob, requirements]);
+
+    const displayEducation = React.useMemo(() => {
+        if (Array.isArray(apiJob?.educations) && apiJob.educations.length > 0) {
+            return apiJob.educations;
+        }
+        return Array.isArray(education) ? education : [];
+    }, [apiJob, education]);
+
+    const displayExperience = React.useMemo(() => {
+        if (Array.isArray(apiJob?.experiences) && apiJob.experiences.length > 0) {
+            return apiJob.experiences;
+        }
+        return Array.isArray(experience) ? experience : [];
+    }, [apiJob, experience]);
+
+    const displayCertifications = React.useMemo(() => {
+        if (Array.isArray(apiJob?.certifications) && apiJob.certifications.length > 0) {
+            return apiJob.certifications;
+        }
+        return Array.isArray(certification) ? certification : [];
+    }, [apiJob, certification]);
+
+    const displayOtherRequirements = React.useMemo(() => {
+        if (Array.isArray(apiJob?.job_requirements) && apiJob.job_requirements.length > 0) {
+            return apiJob.job_requirements;
+        }
+        return Array.isArray(other_requirements) ? other_requirements : [];
+    }, [apiJob, other_requirements]);
+
+    const displayBenefits = React.useMemo(() => {
+        if (Array.isArray(apiJob?.essential_benefits) && apiJob.essential_benefits.length > 0) {
+            return apiJob.essential_benefits;
+        }
+        const createdBenefits = (createdJobData as any)?.essential_benefits;
+        if (Array.isArray(createdBenefits) && createdBenefits.length > 0) {
+            return createdBenefits;
+        }
+        return Array.isArray(essential_benefits) ? essential_benefits : [];
+    }, [apiJob, createdJobData, essential_benefits]);
+
+    const previewLanguages = React.useMemo(() => {
+        const source = Array.isArray(apiJob?.languages) && apiJob.languages.length > 0
+            ? apiJob.languages
+            : Array.isArray(languages)
+                ? languages
+                : [];
+
+        return source
+            .filter((l: any) => l)
+            .map((l: any) => {
+                const id =
+                    typeof l === 'object'
+                        ? l.id ?? l.value ?? l._id ?? l.language_id ?? ''
+                        : l;
+                const level = typeof l === 'object' ? l.level || '' : '';
+                const fromMap =
+                    languageData.find((opt: any) => String(opt?.value) === String(id))?.label ?? '';
+                const fallbackName =
+                    typeof l === 'object'
+                        ? l.name ?? l.title ?? id
+                        : l;
+                const name = (fromMap || fallbackName || '').toString();
+                return { name, level };
+            });
+    }, [apiJob, languages, languageData]);
 
     const formatSalary = () => {
-        if (!salary?.value) return null;
-        const [from, to] = salary.value.split('-').map((s: string) => s.trim());
-        if (from && to) {
-            const currencyCode = currency?.value || 'AED';
+        const currencyCode = apiJob?.currency || currency?.value || 'AED';
+        const fromValue = apiJob?.monthly_salary_from;
+        const toValue = apiJob?.monthly_salary_to;
+
+        if (typeof fromValue === 'number' || typeof toValue === 'number') {
+            const fromText = typeof fromValue === 'number' ? fromValue.toLocaleString() : '0';
+            const toText = typeof toValue === 'number' ? toValue.toLocaleString() : '0';
             return (
                 <View style={styles.salaryContainer}>
                     {currencyCode === 'AED' ? (
@@ -199,12 +297,27 @@ const JobPreview = () => {
                         <Text style={styles.currencySymbol}>{getCurrencySymbol(currencyCode)}</Text>
                     )}
                     <Text style={styles.jobSalary}>
-                        {`${Number(from.replace(/,/g, '')).toLocaleString()} - ${Number(to.replace(/,/g, '')).toLocaleString()}`}
+                        {`${fromText} - ${toText}`}
                     </Text>
                 </View>
             );
         }
-        return null;
+
+        if (!salary?.value) return null;
+        const [from, to] = salary.value.split('-').map((s: string) => s.trim());
+        if (!from || !to) return null;
+        return (
+            <View style={styles.salaryContainer}>
+                {currencyCode === 'AED' ? (
+                    <Image source={IMAGES.currency} style={styles.currencyImage} />
+                ) : (
+                    <Text style={styles.currencySymbol}>{getCurrencySymbol(currencyCode)}</Text>
+                )}
+                <Text style={styles.jobSalary}>
+                    {`${Number(from.replace(/,/g, '')).toLocaleString()} - ${Number(to.replace(/,/g, '')).toLocaleString()}`}
+                </Text>
+            </View>
+        );
     };
 
     // Animation finish handler - called after a short delay (~1–1.5s)
@@ -350,6 +463,13 @@ const JobPreview = () => {
     };
 
     const locationDisplay = () => {
+        if (apiJob) {
+            const city = apiJob?.city || '';
+            const country = apiJob?.country || '';
+            const areaValue = apiJob?.area || '';
+            if (city && country) return `${city}, ${country}`;
+            return city || country || areaValue || '';
+        }
         const city = userAddress?.state || userInfo?.state || '';
         const country = userAddress?.country || userInfo?.country || '';
         if (city && country) return `${city}, ${country}`;
@@ -377,22 +497,22 @@ const JobPreview = () => {
                 <View style={styles.jobCard}>
                     <View style={styles.jobCardRow}>
                         <View style={styles.companyLogo}>
-                            {userInfo?.logo ? (
-                                <Image source={{ uri: userInfo.logo }} style={styles.logoImage} />
+                            {displayCompany?.logo ? (
+                                <Image source={{ uri: displayCompany.logo }} style={styles.logoImage} />
                             ) : (
                                 <Text style={styles.companyLogoText}>
-                                    {userInfo?.company_name?.[0]?.toUpperCase() || 'C'}
+                                    {displayCompany?.company_name?.[0]?.toUpperCase() || 'C'}
                                 </Text>
                             )}
                         </View>
                         <View style={styles.jobCardInfo}>
-                            <Text style={styles.jobTitle}>{title || 'Job Title'}</Text>
+                            <Text style={styles.jobTitle}>{displayTitle}</Text>
                             <Text style={styles.companyName}>
-                                {userInfo?.company_name || 'N/A'}
+                                {displayCompany?.company_name || 'N/A'}
                             </Text>
                             <View style={styles.jobMetaRow}>
                                 <Text style={styles.jobLocation}>
-                                    {locationDisplay()} - {contract_type?.label || contract_type?.value || 'N/A'}
+                                    {locationDisplay()} - {displayContractType}
                                 </Text>
                                 {formatSalary()}
                             </View>
@@ -404,9 +524,9 @@ const JobPreview = () => {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t('Job Description')}</Text>
                     <Text style={styles.sectionText} numberOfLines={4}>
-                        {describe || 'No description provided'}
+                        {displayDescription}
                     </Text>
-                    {describe && describe.length > 150 && (
+                    {displayDescription && displayDescription.length > 150 && (
                         <Text style={styles.readMore}>{t('Read More...')}</Text>
                     )}
                 </View>
@@ -415,11 +535,11 @@ const JobPreview = () => {
                 <View style={styles.rowSection}>
                     <View style={styles.halfSection}>
                         <Text style={styles.sectionTitle}>{t('Job Duration')}</Text>
-                        <Text style={styles.sectionValue}>{duration?.label || duration?.value || '-'}</Text>
+                        <Text style={styles.sectionValue}>{displayDuration}</Text>
                     </View>
                     <View style={styles.halfSection}>
                         <Text style={styles.sectionTitle}>{t('Job Sector/Industry')}</Text>
-                        <Text style={styles.sectionValue}>{job_sector?.label || (job_sector as any)?.title || '-'}</Text>
+                        <Text style={styles.sectionValue}>{displaySector}</Text>
                     </View>
                 </View>
 
@@ -427,19 +547,19 @@ const JobPreview = () => {
                 <View style={styles.rowSection}>
                     <View style={styles.halfSection}>
                         <Text style={styles.sectionTitle}>{t('Start date')}</Text>
-                        <Text style={styles.sectionValue}>{startDate?.label || startDate?.value || '-'}</Text>
+                        <Text style={styles.sectionValue}>{displayStartDate}</Text>
                     </View>
                     <View style={styles.halfSection}>
                         <Text style={styles.sectionTitle}>{t('Number of positions available')}</Text>
-                        <Text style={styles.sectionValue}>{position?.value ? `${position.value} Positions` : '-'}</Text>
+                        <Text style={styles.sectionValue}>{displayPositions ? `${displayPositions} Positions` : '-'}</Text>
                     </View>
                 </View>
 
                 {/* Job Required Skills */}
-                {jobSkills && jobSkills.length > 0 && (
+                {displaySkills.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Job Required Skills')}</Text>
-                        {jobSkills.map((skill: any, index: number) => {
+                        {displaySkills.map((skill: any, index: number) => {
                             const raw = skill?.title || skill?.label || skill || '';
                             // If raw looks like a MongoDB ObjectId, resolve via skillMap
                             const display = /^[a-f\d]{24}$/i.test(String(raw).trim())
@@ -455,23 +575,23 @@ const JobPreview = () => {
                 )}
 
                 {/* Job Requirements */}
-                {requirements && requirements.length > 0 && (
+                {displayRequirements.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Job Requirements')}</Text>
-                        {requirements.filter((req: string) => req && req.trim()).map((req: string, index: number) => (
+                        {displayRequirements.filter((req: any) => req && String(req).trim()).map((req: any, index: number) => (
                             <View key={index} style={styles.bulletRow}>
                                 <View style={styles.bullet} />
-                                <Text style={styles.bulletText}>{req}</Text>
+                                <Text style={styles.bulletText}>{req?.title || req?.label || String(req)}</Text>
                             </View>
                         ))}
                     </View>
                 )}
 
                 {/* Education */}
-                {education && education.length > 0 && (
+                {displayEducation.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Education')}</Text>
-                        {education
+                        {displayEducation
                             .filter((item: any) => item)
                             .map((item: any, index: number) => (
                                 <View key={index} style={styles.bulletRow}>
@@ -488,10 +608,10 @@ const JobPreview = () => {
                 )}
 
                 {/* Experience */}
-                {experience && experience.length > 0 && (
+                {displayExperience.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Experience')}</Text>
-                        {experience
+                        {displayExperience
                             .filter((item: any) => item)
                             .map((item: any, index: number) => (
                                 <View key={index} style={styles.bulletRow}>
@@ -508,10 +628,10 @@ const JobPreview = () => {
                 )}
 
                 {/* Certifications */}
-                {certification && certification.length > 0 && (
+                {displayCertifications.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Certifications')}</Text>
-                        {certification
+                        {displayCertifications
                             .filter((item: any) => item)
                             .map((item: any, index: number) => (
                                 <View key={index} style={styles.bulletRow}>
@@ -531,23 +651,59 @@ const JobPreview = () => {
                 {previewLanguages.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Languages')}</Text>
-                        {previewLanguages.map((lang: any, index: number) => (
-                            <View key={index} style={styles.bulletRow}>
-                                <View style={styles.bullet} />
-                                <Text style={styles.bulletText}>
-                                    {lang?.name || '-'}
-                                    {lang?.level ? ` - ${lang.level}` : ''}
-                                </Text>
-                            </View>
-                        ))}
+                        <View style={styles.languageContainer}>
+                            {previewLanguages.map((lang: any, index: number) => (
+                                <View key={index} style={styles.languageChipWithDots}>
+                                    <Text style={styles.languageChipName}>{lang?.name || '-'}</Text>
+                                    <View style={styles.languageDotsRow}>
+                                        {proficiencyLevels.map(level => {
+                                            const isActive = lang?.level === level;
+                                            return (
+                                                <View
+                                                    key={level}
+                                                    style={[
+                                                        styles.langDotWrapper,
+                                                        isActive && {
+                                                            borderWidth: 2,
+                                                            borderColor: getLanguageDotColor(level),
+                                                            borderRadius: 16,
+                                                            width: 32,
+                                                            height: 32,
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center',
+                                                        },
+                                                    ]}>
+                                                    <View
+                                                        style={[
+                                                            styles.langDot,
+                                                            { backgroundColor: getLanguageDotColor(level) },
+                                                        ]}
+                                                    />
+                                                    {isActive && (
+                                                        <Text
+                                                            numberOfLines={1}
+                                                            style={[
+                                                                styles.langDotLabel,
+                                                                { color: getLanguageDotColor(level) },
+                                                            ]}>
+                                                            {level}
+                                                        </Text>
+                                                    )}
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
                     </View>
                 )}
 
                 {/* Other Requirements */}
-                {other_requirements && other_requirements.length > 0 && (
+                {displayOtherRequirements.length > 0 && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('Other Requirements')}</Text>
-                        {other_requirements
+                        {displayOtherRequirements
                             .filter((req: any) => req && String(req).trim())
                             .map((req: any, index: number) => (
                                 <View key={index} style={styles.bulletRow}>
@@ -565,13 +721,7 @@ const JobPreview = () => {
 
                 {/* Key Job Benefits */}
                 {(() => {
-                    // Prefer canonical essential_benefits from API (createdJobData)
-                    // and fall back to local form state while editing.
-                    const apiBenefits = (createdJobData as any)?.essential_benefits;
-                    const source =
-                        Array.isArray(apiBenefits) && apiBenefits.length > 0
-                            ? apiBenefits
-                            : essential_benefits || [];
+                    const source = displayBenefits;
 
                     if (!Array.isArray(source) || source.length === 0) return null;
 
@@ -604,15 +754,17 @@ const JobPreview = () => {
             </ScrollView>
 
             {/* Post / Update Job Button */}
-            <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
-                <GradientButton
-                    type="Company"
-                    title={t(editMode ? 'Update Job' : 'Post Job')}
-                    style={styles.postButton}
-                    onPress={handlePostJob}
-                    disabled={isLoading}
-                />
-            </View>
+            {!isReadOnlyPreview && (
+                <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
+                    <GradientButton
+                        type="Company"
+                        title={t(editMode ? 'Update Job' : 'Post Job')}
+                        style={styles.postButton}
+                        onPress={handlePostJob}
+                        disabled={isLoading}
+                    />
+                </View>
+            )}
 
             {/* Success Modal */}
             <BottomModal
@@ -705,7 +857,7 @@ const styles = StyleSheet.create({
     companyLogo: {
         width: wp(56),
         height: wp(56),
-        borderRadius: wp(12),
+        borderRadius: wp(56),
         backgroundColor: '#F5F6FA',
         alignItems: 'center',
         justifyContent: 'center',
@@ -805,6 +957,50 @@ const styles = StyleSheet.create({
     bulletItem: {
         ...commonFontStyle(400, 14, colors._4A4A4A),
         marginBottom: hp(6),
+    },
+    languageContainer: {
+        gap: hp(10),
+    },
+    languageChipWithDots: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E0D7C8',
+        backgroundColor: '#F5F5F5',
+        borderRadius: wp(12),
+        paddingVertical: hp(6),
+        paddingHorizontal: wp(12),
+        paddingBottom: hp(20),
+    },
+    languageChipName: {
+        ...commonFontStyle(400, 16, colors._0B3970),
+        flex: 1,
+        marginRight: wp(8),
+    },
+    languageDotsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: wp(8),
+    },
+    langDot: {
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+    },
+    langDotWrapper: {
+        width: 24,
+        height: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    langDotLabel: {
+        position: 'absolute',
+        top: 32,
+        ...commonFontStyle(500, 10, colors._0B3970),
+        textAlign: 'center',
+        width: 80,
+        alignSelf: 'center',
     },
     buttonContainer: {
         position: 'absolute',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { commonFontStyle, hp } from '../../theme/fonts';
+import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
 
 const stepperColors = {
@@ -18,7 +18,34 @@ const stepData = [
   { label: 'Upload', step: 4 },
 ];
 
-const Stepper = ({ activeStep = 1, onPress }: { activeStep?: number, onPress?: (step: number) => void }) => {
+type StepperProps = {
+  activeStep?: number;
+  onPress?: (step: number) => void;
+  useTabs?: boolean;
+};
+
+const Stepper = ({ activeStep = 1, onPress, useTabs = false }: StepperProps) => {
+  if (useTabs) {
+    return (
+      <View style={styles.tabContainer}>
+        {stepData.map(({ label, step }) => {
+          const isActive = step === activeStep;
+          return (
+            <TouchableOpacity
+              key={step}
+              style={[styles.tabButton, isActive && styles.tabButtonActive]}
+              onPress={() => onPress?.(step)}
+              activeOpacity={0.7}>
+              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {stepData.map(({ label, step }) => {
@@ -57,6 +84,35 @@ const styles = StyleSheet.create({
     paddingVertical: hp(14),
     justifyContent: 'space-around',
     // backgroundColor: colors.background,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    paddingVertical: hp(14),
+    paddingHorizontal: wp(6),
+    justifyContent: 'space-between',
+    gap: wp(6),
+  },
+  tabButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: wp(20),
+    borderColor: colors._0B3970,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: hp(38),
+    paddingHorizontal: wp(6),
+  },
+  tabButtonActive: {
+    backgroundColor: colors._0B3970,
+    borderColor: colors._0B3970,
+  },
+  tabText: {
+    ...commonFontStyle(500, 13, colors._0B3970),
+    textAlign: 'center',
+  },
+  tabTextActive: {
+    ...commonFontStyle(600, 13, colors.white),
   },
   stepItem: {
     alignItems: 'center',

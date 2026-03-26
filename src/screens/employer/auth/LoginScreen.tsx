@@ -59,7 +59,9 @@ const LoginScreen = () => {
           deviceToken: token,
           deviceType: Platform.OS,
         };
+        console.log("🔥 ~ handleLogin ~ data:", data)
         const response: any = await employeeLogin(data).unwrap();
+        console.log("🔥 ~ handleLogin ~ response:", response)
         if (response && response.status) {
           dispatch(setAuthData({email: '', password: ''}));
           console.log(response, 'response----');

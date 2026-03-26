@@ -57,9 +57,18 @@ const EmployeeProfile = () => {
 
   const educationRaw = toArray(userData?.education || userParam?.education);
   const experienceRaw = toArray(userData?.experience || userParam?.experience);
+  console.log("🔥 ~ EmployeeProfile ~ experienceRaw:", experienceRaw)
 
   const profileData = {
     name: userData?.name || userParam?.name || 'No data available',
+    desiredJobTitle:
+      userData?.desired_job_title ||
+      userParam?.desired_job_title ||
+      '',
+    yearsOfExperience:
+      userData?.years_of_experience ||
+      userParam?.years_of_experience ||
+      '',
     location: formatLocationToCityCountry(
       rawLocation,
       userData?.city || userParam?.city,
@@ -176,6 +185,23 @@ const EmployeeProfile = () => {
             )}
           </View>
           <Text style={styles.profileName}>{profileData.name}</Text>
+          {(!!profileData.desiredJobTitle || !!profileData.yearsOfExperience) && (
+            <View style={styles.jobInfoRow}>
+              {!!profileData.desiredJobTitle && (
+                <View style={styles.jobInfoPill}>
+                  <Text style={styles.jobInfoPillText}>{profileData.desiredJobTitle}</Text>
+                </View>
+              )}
+              {!!profileData.desiredJobTitle && !!profileData.yearsOfExperience && (
+                <View style={styles.pillDivider} />
+              )}
+              {!!profileData.yearsOfExperience && (
+                <View style={styles.jobInfoPill}>
+                  <Text style={styles.jobInfoPillText}>{profileData.yearsOfExperience}</Text>
+                </View>
+              )}
+            </View>
+          )}
           <View style={styles.locationContainer}>
             <Image
               source={IMAGES.location}
@@ -446,6 +472,31 @@ const styles = StyleSheet.create({
   profileName: {
     ...commonFontStyle(700, 24, colors._0B3970),
     marginBottom: hp(8),
+  },
+  jobInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: hp(8),
+    paddingHorizontal: wp(14),
+    backgroundColor: colors._0B3970 + '12',
+    borderRadius: wp(22),
+    alignSelf: 'center',
+    paddingVertical: hp(6),
+    maxWidth: '95%',
+  },
+  jobInfoPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  jobInfoPillText: {
+    ...commonFontStyle(500, 14, colors._0B3970),
+  },
+  pillDivider: {
+    width: 1,
+    height: hp(14),
+    backgroundColor: colors._0B3970 + '40',
+    marginHorizontal: wp(10),
   },
   locationContainer: {
     flexDirection: 'row',

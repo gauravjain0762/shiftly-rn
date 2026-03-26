@@ -95,6 +95,7 @@ export const axiosBaseQuery: BaseQueryFn<
       responseData: error?.response?.data ?? null,
       requestData: formatPayloadForLog(data),
       requestParams: params ?? null,
+      authHeaders: authHeaders,
     });
     if (error.response?.status === 401) {
       if (shouldHandle401()) {

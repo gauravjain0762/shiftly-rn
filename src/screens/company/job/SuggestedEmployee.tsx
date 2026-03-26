@@ -44,13 +44,13 @@ import { mapJobToFormState } from '../../../utils/jobFormMapper';
 import { Alert } from 'react-native';
 import { successToast } from '../../../utils/commonFunction';
 import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
-import { Earth } from 'lucide-react-native';
 import BaseText from '../../../component/common/BaseText';
 
 const SuggestedEmployeeScreen = () => {
   const { t } = useTranslation();
   const route = useRoute<any>();
   const { jobId, jobData, isFromJobCard, fromPostJob } = route.params || {};
+  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobData:", jobData)
 
   const shouldDefaultToShortlisted =
     route.params?.fromPendingInterview === true ||
@@ -881,11 +881,13 @@ const SuggestedEmployeeScreen = () => {
                           imageStyle={styles.companyLogo}
                           resizeMode="cover"
                         />
-                        : <BaseText style={{ ...commonFontStyle(600, 18, colors._0B3970) }}>
-                          {jobInfo?.title?.[0]?.toUpperCase() ||
-                            jobInfo?.company_name?.[0]?.toUpperCase() ||
-                            'N/A'}
-                        </BaseText>}
+                        : <View style={styles.companyLogo}>
+                          <BaseText style={styles.companyLogoText}>
+                            {jobInfo?.title?.[0]?.toUpperCase() ||
+                              jobInfo?.company_name?.[0]?.toUpperCase() ||
+                              'N/A'}
+                          </BaseText>
+                        </View>}
                     </Pressable>
                     <TouchableOpacity
                       activeOpacity={0.7}
@@ -893,8 +895,8 @@ const SuggestedEmployeeScreen = () => {
                       onPress={() => {
                         const id = jobId || jobInfo?._id;
                         if (!id) return;
-                        // `CoJobDetails` reads `route.params?._id` as the job id
-                        navigateTo(SCREENS.CoJobDetails, { _id: id });
+                        console.log("🔥 ~ SuggestedEmployeeScreen ~ id:", id)
+                        navigateTo(SCREENS.JobPreview, { jobId: id });
                       }}
                     >
                       <Text style={styles.jobTitle}>{jobInfo?.title || ''}</Text>
@@ -1324,6 +1326,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F6FA',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   companyLogoText: {
     ...commonFontStyle(600, 16, colors._0B3970),

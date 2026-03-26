@@ -56,6 +56,7 @@ const CoJobDetails = () => {
   const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
   const [closeJob] = useCloseCompanyJobMutation();
   const jobDetail = data?.data?.job;
+  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
 
   const getInitialsFromName = (name?: string) => {
     const safe = (name || '').trim();
@@ -67,7 +68,6 @@ const CoJobDetails = () => {
 
   const isValidImage = (uri?: string) =>
     typeof uri === 'string' && uri.trim().length > 0 && !uri.includes('blank');
-  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
 
   const shareUrl = data?.data?.share_url;
 
@@ -249,20 +249,19 @@ ${salary}${shareUrlText}`;
                       <Text style={styles.avatarInitials}>
                         {getInitialsFromName(
                           jobDetail?.applicants?.[0]?.user_id?.name ||
-                            'Tafnol Theresa',
+                            'N/A',
                         )}
                       </Text>
                     </View>
                   )}
                   <View style={styles.candidateInfo}>
-                    <Text style={styles.candidateName}>{jobDetail?.applicants?.[0]?.user_id?.name || 'Tafnol Theresa'}</Text>
-                    <Text style={styles.candidateRole}>{jobDetail?.applicants?.[0]?.user_id?.responsibility || 'Hotel Management'}</Text>
+                    <Text style={styles.candidateName}>{jobDetail?.applicants?.[0]?.user_id?.name || 'N/A'}</Text>
+                    <Text style={styles.candidateRole}>{jobDetail?.applicants?.[0]?.user_id?.responsibility || 'N/A'}</Text>
                   </View>
                   <View style={styles.statusCol}>
                     <View style={styles.statusBadge}>
-                      <Text style={styles.statusText}>{t('Completed')}</Text>
+                      <Text style={styles.statusText}>{jobDetail?.applicants?.[0]?.status || 'N/A'}</Text>
                     </View>
-                    <Text style={styles.dateText}>2:30 PM - 04Jan</Text>
                   </View>
                 </View>
               </View>
@@ -284,19 +283,15 @@ ${salary}${shareUrlText}`;
               <View style={styles.transcriptBox}>
                 <Text style={styles.transcriptText}>
                   <Text style={styles.speaker}>{t('Agent')}: </Text>
-                  Hi, I'm from Emirates Catering calling about your AI-powered
-                  interview. How are you doing?
+                  {jobDetail?.applicants?.[0]?.transcript || 'N/A'}
                 </Text>
                 <Text style={[styles.transcriptText, { marginTop: hp(12) }]}>
                   <Text style={styles.speaker}>{t('User')}: </Text>
-                  I'm very good. Thank you so much. How are you?
+                  {jobDetail?.applicants?.[0]?.transcript || 'N/A'}
                 </Text>
                 <Text style={[styles.transcriptText, { marginTop: hp(12) }]}>
                   <Text style={styles.speaker}>{t('Agent')}: </Text>
-                  I'm doing great, thanks for asking! I appreciate you taking the time
-                  to chat today. So, thanks for your interest in the Flight Attendant
-                  position with us. I'm really looking forward to learning more about
-                  your background and seeing how this role Read More...
+                  {jobDetail?.applicants?.[0]?.transcript || 'N/A'}
                 </Text>
               </View>
 
@@ -306,7 +301,7 @@ ${salary}${shareUrlText}`;
                   <Image source={IMAGES.chat} style={styles.chatIcon} resizeMode="contain" />
                 </View>
                 <View>
-                  <Text style={styles.chatTitle}>{t('Chat With Admin')}</Text>
+                  <Text style={styles.chatTitle}>{`Chat with ${jobDetail?.applicants?.[0]?.user_id?.name || 'N/A'}`}</Text>
                   <Text style={styles.chatSubtitle}>
                     {t('Get feel free information')}
                   </Text>

@@ -987,9 +987,6 @@ const CreateProfileScreen = () => {
     );
   };
 
-  const educationCount = educationList?.length ?? 0;
-  const experienceCount = experienceList?.length ?? 0;
-
   return (
     <SafeAreaView
       edges={['bottom']}
@@ -1069,6 +1066,7 @@ const CreateProfileScreen = () => {
 
         <Stepper
           activeStep={activeStep}
+          useTabs={Boolean(route.params?.isEdit)}
           onPress={(step) => {
             // In create flow, force sequential navigation via buttons only.
             if (!route.params?.isEdit) {
@@ -1410,11 +1408,7 @@ const CreateProfileScreen = () => {
               disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
               onPress={async () => {
                 // New profile flow: if user typed experience but didn't save first.
-                if (
-                  !route.params?.isEdit &&
-                  experienceList.length === 0 &&
-                  !isEmptyExperience(experienceListEdit)
-                ) {
+                if (!route.params?.isEdit && experienceList.length === 0) {
                   errorToast('You need to first Save the Experience.');
                   return;
                 }

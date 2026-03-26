@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState, useRef } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { commonFontStyle, hp, wp, SCREEN_WIDTH } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
@@ -9,7 +9,8 @@ import ReadMoreText from '../common/ReadMoreText';
 import CustomImage from '../common/CustomImage';
 import { SCREENS } from '../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
-import { useTogglePostLikeMutation, useDeleteCompanyPostMutation } from '../../api/dashboardApi';
+import { useTogglePostLikeMutation, useDeleteCompanyPostMutation, useEmpTogglePostLikeMutation } from '../../api/dashboardApi';
+import { normalizeUrl } from '../../utils/shareUtils';
 
 type card = {
   onPressCard?: () => void;
@@ -43,7 +44,7 @@ const FeedCard: FC<card> = ({
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const menuButtonRef = useRef<View>(null);
-  const [togglePostLike] = useTogglePostLikeMutation();
+  const [empTogglePostLike] = useEmpTogglePostLikeMutation();
   const [deleteCompanyPost] = useDeleteCompanyPostMutation();
 
   useEffect(() => {
@@ -58,7 +59,7 @@ const FeedCard: FC<card> = ({
     onPressLike();
 
     try {
-      await togglePostLike({ post_id: item?._id }).unwrap();
+      await empTogglePostLike({ post_id: item?._id }).unwrap();
     } catch (error) {
       console.log('Error toggling like:', error);
       setLocalLiked(localLiked);
@@ -127,6 +128,25 @@ const FeedCard: FC<card> = ({
     setMenuVisible(true);
   };
 
+  const handlePressPostImage = async () => {
+    const url = normalizeUrl(item?.external_link);
+    if (!url) {
+      onPressCard();
+      return;
+    }
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        errorToast(t('Invalid external link'));
+      }
+    } catch (error) {
+      console.log('Error opening external link:', error);
+      errorToast(t('Unable to open external link'));
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -193,7 +213,7 @@ const FeedCard: FC<card> = ({
         <Text style={styles.vacancy}>{item?.title || 'N/A'}</Text>
 
         {hasImage && (
-          <View style={styles.banner}>
+          <TouchableOpacity activeOpacity={0.9} onPress={handlePressPostImage} style={styles.banner}>
             <View style={styles.post}>
               {imageLoading && (
                 <View style={styles.loaderContainer}>
@@ -208,7 +228,7 @@ const FeedCard: FC<card> = ({
                 onLoadStart={() => hasImage && setImageLoading(true)}
               />
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       </TouchableOpacity>
 
