@@ -50,16 +50,13 @@ const CoJobDetails = () => {
   const job_id = params?._id as any;
   const [isShareModalVisible, setIsShareModalVisible] =
     useState<boolean>(false);
-  const [selectedMetricIndex, setSelectedMetricIndex] = useState<number>(0);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'General' | 'Languages'>('General');
 
   const { data, refetch, isLoading } = useGetCompanyJobDetailsQuery(job_id);
-  const [addShortListEmployee] = useAddShortlistEmployeeMutation({});
-  const [removeShortListEmployee] = useUnshortlistEmployeeMutation({});
   const [closeJob] = useCloseCompanyJobMutation();
   const jobDetail = data?.data?.job;
+  console.log("🔥 ~ CoJobDetails ~ jobDetail:", jobDetail)
 
   const shareUrl = data?.data?.share_url;
 
@@ -185,14 +182,19 @@ ${salary}${shareUrlText}`;
               <View style={styles.card}>
                 <View style={styles.row}>
                   <View style={styles.logoContainer}>
-                    <Text style={styles.logoText}>{jobDetail?.company_id?.company_name?.[0] || 'A'}</Text>
+                    <CustomImage
+                      uri={jobDetail?.company_id?.logo}
+                      containerStyle={styles.logoContainer}
+                      imageStyle={styles.logoImage}
+                      resizeMode='contain'
+                    />
                   </View>
                   <View style={styles.jobInfo}>
                     <Text style={styles.jobTitle}>{jobDetail?.title || 'N/A'}</Text>
                     <Text style={styles.companyName}>{jobDetail?.company_id?.company_name || 'N/A'}</Text>
                     <View style={styles.jobMetaRow}>
-                      <Text style={styles.jobMeta}>
-                        {`${jobDetail?.area || jobDetail?.address || 'Location'} - ${jobDetail?.contract_type || 'Full Time'}`}
+                      <Text style={styles.jobMeta} numberOfLines={1}>
+                        {`${jobDetail?.city || jobDetail?.country || 'N/A'} - ${jobDetail?.contract_type || 'N/A'}`}
                       </Text>
                       <View style={styles.salaryContainer}>
                         {jobDetail?.currency === 'AED' ? (
@@ -201,9 +203,20 @@ ${salary}${shareUrlText}`;
                           <Text style={styles.currencySymbol}>{getCurrencySymbol(jobDetail?.currency)}</Text>
                         )}
                         <Text style={styles.salary}>
-                          {jobDetail?.monthly_salary_to
-                            ? Number(jobDetail?.monthly_salary_to).toLocaleString()
-                            : 'N/A'}
+                          {(() => {
+                            const from = jobDetail?.monthly_salary_from;
+                            const to = jobDetail?.monthly_salary_to;
+                            const hasFrom = from !== null && from !== undefined && from !== '';
+                            const hasTo = to !== null && to !== undefined && to !== '';
+                            const fromNum = hasFrom ? Number(from) : NaN;
+                            const toNum = hasTo ? Number(to) : NaN;
+                            if (Number.isFinite(fromNum) && Number.isFinite(toNum)) {
+                              return `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`;
+                            }
+                            if (Number.isFinite(fromNum)) return `${fromNum.toLocaleString()}`;
+                            if (Number.isFinite(toNum)) return `${toNum.toLocaleString()}`;
+                            return 'N/A';
+                          })()}
                         </Text>
                       </View>
                     </View>
@@ -723,10 +736,15 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: wp(48),
     height: wp(48),
-    borderRadius: wp(12),
+    borderRadius: wp(48),
     backgroundColor: '#F2F4F7',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
   logoText: {
     fontSize: hp(24),
@@ -756,11 +774,15 @@ const styles = StyleSheet.create({
   jobMeta: {
     fontSize: hp(12),
     color: '#999999',
+    flex: 1,
+    flexShrink: 1,
+    marginRight: wp(10),
   },
   salary: {
     fontSize: hp(12),
     fontWeight: '600',
     color: colors._0B3970,
+    flexShrink: 1,
   },
   avatar: {
     width: wp(48),

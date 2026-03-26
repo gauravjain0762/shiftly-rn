@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    ...commonFontStyle(600, 25, colors._0B3970),
+    ...commonFontStyle(600, 22, colors._0B3970),
     marginTop: 8,
   },
   locationRow: {
@@ -613,12 +613,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   location: {
-    ...commonFontStyle(400, 20, colors._0B3970),
+    ...commonFontStyle(500, 16, colors._0B3970),
     textAlign: 'center',
   },
   locationicon: {
-    width: wp(24),
-    height: wp(24),
+    width: wp(20),
+    height: wp(20),
     resizeMode: 'contain',
     tintColor: colors._0B3970,
   },
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(10),
   },
   title: {
-    ...commonFontStyle(600, 20, colors._0B3970),
+    ...commonFontStyle(600, 16, colors._0B3970),
   },
   content: {
     ...commonFontStyle(400, 16, colors._4A4A4A),
@@ -786,7 +786,7 @@ const styles = StyleSheet.create({
     paddingLeft: wp(10),
   },
   sectionItemTitle: {
-    ...commonFontStyle(700, 18, colors._0B3970),
+    ...commonFontStyle(500, 16, colors._0B3970),
     marginBottom: hp(10),
   },
   kvRow: {
@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
     width: wp(92),
   },
   kvValue: {
-    ...commonFontStyle(500, 15, colors._0B3970),
+    ...commonFontStyle(500, 14, colors._0B3970),
     flex: 1,
     textAlign: 'left',
   },

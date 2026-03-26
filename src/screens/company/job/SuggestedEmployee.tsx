@@ -45,6 +45,7 @@ import { Alert } from 'react-native';
 import { successToast } from '../../../utils/commonFunction';
 import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
 import { Earth } from 'lucide-react-native';
+import BaseText from '../../../component/common/BaseText';
 
 const SuggestedEmployeeScreen = () => {
   const { t } = useTranslation();
@@ -465,7 +466,20 @@ const SuggestedEmployeeScreen = () => {
     const cur = (jobInfo?.currency || 'AED').toUpperCase();
     const symbol = getCurrencySymbol(cur);
 
-    if (!from && !to) return null;
+    const hasFrom = from !== null && from !== undefined && from !== '';
+    const hasTo = to !== null && to !== undefined && to !== '';
+    if (!hasFrom && !hasTo) return null;
+
+    const fromNum = hasFrom ? Number(from) : NaN;
+    const toNum = hasTo ? Number(to) : NaN;
+    const salaryText =
+      Number.isFinite(fromNum) && Number.isFinite(toNum)
+        ? `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`
+        : Number.isFinite(fromNum)
+          ? `${fromNum.toLocaleString()}`
+          : Number.isFinite(toNum)
+            ? `${toNum.toLocaleString()}`
+            : 'N/A';
 
     return (
       <View style={styles.salaryRow}>
@@ -474,10 +488,8 @@ const SuggestedEmployeeScreen = () => {
         ) : (
           <Text style={styles.currencySymbol}>{symbol}</Text>
         )}
-        <Text style={styles.jobSalary}>
-          {from && to
-            ? `${from.toLocaleString()} - ${to.toLocaleString()}`
-            : (from ? from.toLocaleString() : to.toLocaleString())}
+        <Text style={styles.jobSalary} numberOfLines={1}>
+          {salaryText}
         </Text>
       </View>
     );
@@ -857,14 +869,34 @@ const SuggestedEmployeeScreen = () => {
               <>
                 <View style={styles.jobCard}>
                   <View style={styles.jobCardRow}>
-                    <View style={styles.companyLogo}>
-                      <Text style={styles.companyLogoText}>
-                        {jobInfo?.title?.[0]?.toUpperCase() ||
-                          jobInfo?.company_name?.[0]?.toUpperCase() ||
-                          'J'}
-                      </Text>
-                    </View>
-                    <View style={styles.jobCardInfo}>
+                    <Pressable
+                      onPress={() =>{ 
+                        navigateTo(SCREENS.ViewCompanyProfile, { companyId: jobInfo?.company_id?._id })
+                      }}
+                    >
+                      {jobInfo?.company_id?.logo ?
+                        <CustomImage
+                          uri={jobInfo?.company_id?.logo}
+                          containerStyle={styles.companyLogo}
+                          imageStyle={styles.companyLogo}
+                          resizeMode="cover"
+                        />
+                        : <BaseText style={{ ...commonFontStyle(600, 18, colors._0B3970) }}>
+                          {jobInfo?.title?.[0]?.toUpperCase() ||
+                            jobInfo?.company_name?.[0]?.toUpperCase() ||
+                            'N/A'}
+                        </BaseText>}
+                    </Pressable>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={styles.jobCardInfo}
+                      onPress={() => {
+                        const id = jobId || jobInfo?._id;
+                        if (!id) return;
+                        // `CoJobDetails` reads `route.params?._id` as the job id
+                        navigateTo(SCREENS.CoJobDetails, { _id: id });
+                      }}
+                    >
                       <Text style={styles.jobTitle}>{jobInfo?.title || ''}</Text>
                       {(jobLocation || contractTypeLabel) && (
                         <Text style={styles.jobLocation}>
@@ -873,7 +905,7 @@ const SuggestedEmployeeScreen = () => {
                         </Text>
                       )}
                       {renderSalaryRange()}
-                    </View>
+                    </TouchableOpacity>
                   </View>
                   {isClosedJob && (
                     <View style={styles.closedBadge}>
@@ -1288,17 +1320,17 @@ const styles = StyleSheet.create({
   companyLogo: {
     width: wp(56),
     height: wp(56),
-    borderRadius: wp(12),
+    borderRadius: wp(56),
     backgroundColor: '#F5F6FA',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: wp(12),
   },
   companyLogoText: {
     ...commonFontStyle(600, 16, colors._0B3970),
   },
   jobCardInfo: {
     flex: 1,
+    marginLeft: wp(12),
   },
   jobActionsRow: {
     flexDirection: 'row',
@@ -1374,6 +1406,7 @@ const styles = StyleSheet.create({
   },
   jobSalary: {
     ...commonFontStyle(700, 16, colors._0B3970),
+    flexShrink: 1,
   },
   analyticsCard: {
     backgroundColor: '#072F61',

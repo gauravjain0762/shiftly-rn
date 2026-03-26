@@ -198,11 +198,13 @@ const CreateQuestion = () => {
                 {addedQuestions.map((question, index) => (
                   <View key={index} style={styles.addedQuestionCard}>
                     <Text style={styles.addedQuestionText}>{question}</Text>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveQuestion(index)}
-                      style={styles.removeButton}>
-                      <Text style={styles.removeButtonText}>×</Text>
-                    </TouchableOpacity>
+                    {index >= existingQuestions.length && (
+                      <TouchableOpacity
+                        onPress={() => handleRemoveQuestion(index)}
+                        style={styles.removeButton}>
+                        <Text style={styles.removeButtonText}>×</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 ))}
               </View>

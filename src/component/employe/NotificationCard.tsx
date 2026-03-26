@@ -6,7 +6,7 @@ import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { SCREENS } from '../../navigation/screenNames';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
-import { formatted, navigateTo } from '../../utils/commonFunction';
+import { formatDateTime, formatted, navigateTo } from '../../utils/commonFunction';
 import { useGetEmployeeJobDetailsQuery, useMarkReadNotificationsMutation } from '../../api/dashboardApi';
 
 type props = {
@@ -15,6 +15,7 @@ type props = {
 };
 
 const NotificationCard: FC<props> = ({ item }: any) => {
+  console.log("🔥 ~ NotificationCard ~ item:", item)
   const notifType = item?.data?.type || item?.type;
   const isRead = !!item?.isRead;
   const showUnreadDot = !isRead;
@@ -30,7 +31,7 @@ const NotificationCard: FC<props> = ({ item }: any) => {
     const notificationId = item?._id;
     try {
       if (notificationId) {
-        await markReadNotifications({notification_id: notificationId}).unwrap();
+        await markReadNotifications({ notification_id: notificationId }).unwrap();
       }
     } catch (e) {
       console.log('markReadNotifications error:', e);
@@ -87,14 +88,14 @@ const NotificationCard: FC<props> = ({ item }: any) => {
         <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
         <BaseText style={styles.message}>{item?.message}</BaseText>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
-          {notifType === 'interview' && (
+        <BaseText style={styles.time}>{formatDateTime(item?.createdAt)}</BaseText>
+        {notifType === 'interview' && (
+          <View style={{ alignItems: 'flex-end', marginTop: hp(6) }}>
             <Pressable
               onPress={handlePress}
               style={{
                 backgroundColor: colors._0B3970,
-                paddingHorizontal: wp(10),
+                paddingHorizontal: wp(14),
                 paddingVertical: hp(8),
                 borderRadius: hp(20),
               }}>
@@ -102,8 +103,8 @@ const NotificationCard: FC<props> = ({ item }: any) => {
                 {'View Invitation'}
               </BaseText>
             </Pressable>
-          )}
-        </View>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );

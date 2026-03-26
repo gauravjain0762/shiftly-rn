@@ -251,6 +251,11 @@ const CoStack = () => {
       />
       <CmpStack.Screen
         options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.ViewCompanyProfile}
+        component={ViewCompanyProfile}
+      />
+      <CmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
         name={SCREENS.CoMessage}
         component={CoMessage}
       />

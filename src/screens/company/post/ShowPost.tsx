@@ -7,6 +7,7 @@ import {
     ScrollView,
     ActivityIndicator,
     Linking,
+    Pressable,
 } from 'react-native';
 import {
     BackHeader,
@@ -61,7 +62,9 @@ const ShowPost = () => {
                 contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + hp(24) }]}
                 showsVerticalScrollIndicator={false}>
 
-                <View style={styles.card}>
+                {/* Outer: shadow (no overflow:hidden — that clips shadows on iOS) */}
+                <View style={styles.cardShadow}>
+                    <View style={styles.cardInner}>
                     {/* Company header */}
                     <View style={styles.cardHeader}>
                         <CustomImage
@@ -82,11 +85,12 @@ const ShowPost = () => {
                     </View>
 
                     {/* Title */}
-                    <Text style={styles.postTitle}>{post?.title || '–'}</Text>
+                    <Text style={styles.postTitle}>{post?.title || 'N/A'}</Text>
 
                     {/* Image */}
                     {hasImage && (
-                        <View style={styles.imageContainer}>
+                        <Pressable
+                            onPress={() => Linking.openURL(post?.external_link)} style={styles.imageContainer}>
                             {imageLoading && (
                                 <View style={styles.imageLoaderContainer}>
                                     <ActivityIndicator size="large" color={colors._0B3970} />
@@ -101,19 +105,14 @@ const ShowPost = () => {
                                 onLoadStart={() => setImageLoading(true)}
                                 onLoadEnd={() => setImageLoading(false)}
                             />
-                        </View>
+                        </Pressable>
                     )}
-
-                    {/* External Link */}
-                    <View style={{marginTop: hp(5)}}>
-                        <Text style={styles.postExternalLinkText}>{t('External Link')}:</Text>
-                        <Text onPress={() => Linking.openURL(post?.external_link)} style={styles.postExternalLink}>{post?.external_link}</Text>
-                    </View>
 
                     {/* Description */}
                     <Text style={styles.postDescription}>
                         {post?.description || '–'}
                     </Text>
+                    </View>
                 </View>
             </ScrollView>
         </LinearContainer>
@@ -144,15 +143,19 @@ const styles = StyleSheet.create({
     emptyText: {
         ...commonFontStyle(500, 16, colors._6A6A6A),
     },
-    card: {
+    cardShadow: {
+        borderRadius: wp(16),
         backgroundColor: colors.white,
+        shadowColor: '#0B3970',
+        shadowOpacity: 0.12,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 6 },
+        elevation: 8,
+    },
+    cardInner: {
         borderRadius: wp(16),
         overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 4,
+        backgroundColor: colors.white,
     },
     cardHeader: {
         flexDirection: 'row',

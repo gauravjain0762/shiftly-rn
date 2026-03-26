@@ -22,7 +22,7 @@ import {
   useCompanyMarkReadNotificationsMutation,
 } from '../../../api/dashboardApi';
 import { useFocusEffect } from '@react-navigation/native';
-import { formatted, navigateTo } from '../../../utils/commonFunction';
+import { formatDateTime, formatted, navigateTo } from '../../../utils/commonFunction';
 import { useAppDispatch } from '../../../redux/hooks';
 import { setHasUnreadNotification } from '../../../features/authSlice';
 import { AppStyles } from '../../../theme/appStyles';
@@ -37,7 +37,7 @@ const CoNotification = () => {
 
   const [companyMarkReadNotifications] = useCompanyMarkReadNotificationsMutation();
   const [getCompanyChats] = useLazyGetCompanyChatsQuery();
-  const [companyClearAllNotifications, {isLoading: isClearing}] = useCompanyClearAllNotificationsMutation();
+  const [companyClearAllNotifications, { isLoading: isClearing }] = useCompanyClearAllNotificationsMutation();
 
   useFocusEffect(
     useCallback(() => {
@@ -195,7 +195,7 @@ const CoNotification = () => {
             <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
             <BaseText style={styles.time}>{item?.message}</BaseText>
             <View style={styles.rowBetween}>
-              <BaseText style={styles.time}>{formatted(item?.createdAt)}</BaseText>
+              <BaseText style={styles.time}>{formatDateTime(item?.createdAt)}</BaseText>
               {notifType === 'interview' && (
                 <Pressable
                   onPress={() => handleNotificationPress(item)}
