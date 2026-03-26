@@ -528,8 +528,8 @@ const styles = StyleSheet.create({
     marginTop: hp(32),
   },
   sectionTitle: {
-    marginBottom: hp(10),
-    ...commonFontStyle(600, 20, colors._0B3970),
+    marginVertical: hp(16),
+    ...commonFontStyle(600, 18, colors._0B3970),
   },
   flatlist: {
     marginTop: hp(27),

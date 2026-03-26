@@ -34,6 +34,7 @@ import {
 import { AppDispatch, resetStore, RootState } from '../../../store';
 import LanguageModal from '../../../component/common/LanguageModel';
 import CustomImage from '../../../component/common/CustomImage';
+import { disconnectSocket } from '../../../hooks/socketManager';
 
 const AccountScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -163,10 +164,18 @@ const AccountScreen = () => {
   ];
 
   const handleLogout = async () => {
-    const res = await empLogout({}).unwrap() as any;
-    console.log("🔥 ~ handleLogout ~ res:", res)
-    if (res.status) {
-      successToast(res.message);
+    try {
+      const res = (await empLogout({}).unwrap()) as any;
+      console.log('🔥 ~ handleLogout ~ res:', res);
+      if (res?.status) {
+        successToast(res?.message);
+      }
+    } catch (error) {
+      // In debug, unwrap() rejection was causing red screen crash.
+      // Continue with local logout cleanup even if API fails.
+      console.log('🔥 ~ handleLogout ~ api error:', error);
+    } finally {
+      disconnectSocket();
       dispatch(logouts());
       await clearAsync();
       await resetStore();

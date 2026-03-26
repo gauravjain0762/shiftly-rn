@@ -361,6 +361,10 @@ const CreateProfileScreen = () => {
   }, [experienceUser?.department_id, experienceData, dispatch]);
 
   const handleSaveOrAddEducation = () => {
+    if (isEmptyEducation(educationListEdit)) {
+      return;
+    }
+
     if (educationListEdit?.isEditing) {
       dispatch(
         setEducationList(
@@ -415,6 +419,10 @@ const CreateProfileScreen = () => {
   };
 
   const handleSaveOrAddExperience = () => {
+    if (isEmptyExperience(experienceListEdit)) {
+      return;
+    }
+
     if (experienceListEdit?.isEditing) {
       dispatch(
         setExperienceList(
@@ -785,8 +793,8 @@ const CreateProfileScreen = () => {
         typeof serverDesiredDepartmentIdRaw === 'string'
           ? serverDesiredDepartmentIdRaw
           : serverDesiredDepartmentIdRaw?._id ??
-              serverDesiredDepartmentIdRaw?.id ??
-              '';
+          serverDesiredDepartmentIdRaw?.id ??
+          '';
       const currentDesiredDepartmentId = userDepartmentOption?.value ?? '';
 
       const hasDepartmentChanged =
@@ -1056,7 +1064,16 @@ const CreateProfileScreen = () => {
           />
         </View>
 
-        <Stepper activeStep={activeStep} onPress={(step) => dispatch(setActiveStep(step))} />
+        <Stepper
+          activeStep={activeStep}
+          onPress={(step) => {
+            // In create flow, force sequential navigation via buttons only.
+            if (!route.params?.isEdit) {
+              return;
+            }
+            dispatch(setActiveStep(step));
+          }}
+        />
 
         <KeyboardAwareScrollView
           ref={scrollRef}
@@ -1292,43 +1309,58 @@ const CreateProfileScreen = () => {
 
       {activeStep === 1 && (
         <View style={styles.buttonStyle}>
-          {educationList.length > 0 && !isEmptyEducation(educationListEdit) && (
-            <TouchableOpacity
-              onPress={handleSaveOrAddEducation}
-              style={styles.btnRow}>
-              <BaseText style={styles.addEduText}>
-                {'+ Add Education'}
-              </BaseText>
-            </TouchableOpacity>
-          )}
-
-          <GradientButton
-            type="Company"
+          <TouchableOpacity
+            onPress={handleSaveOrAddEducation}
+            disabled={isEmptyEducation(educationListEdit)}
             style={[
-              styles.btn,
-              educationList.length > 0 && !isEmptyEducation(educationListEdit)
-                ? { opacity: 0.5 }
-                : undefined,
-            ]}
-            title="Next"
-            disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
-            onPress={async () => {
-              if (isEmptyEducation(educationListEdit)) {
+              styles.btnRow,
+              isEmptyEducation(educationListEdit) ? { opacity: 0.5 } : undefined,
+            ]}>
+            <BaseText style={styles.addEduText}>
+              {educationListEdit?.isEditing ? 'Save Education' : '+ Add Education'}
+            </BaseText>
+          </TouchableOpacity>
+
+          {!route.params?.isEdit && (
+            <GradientButton
+              type="Company"
+              style={[
+                styles.btn,
+                educationList.length > 0 && !isEmptyEducation(educationListEdit)
+                  ? { opacity: 0.5 }
+                  : undefined,
+              ]}
+              title="Next"
+              disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
+              onPress={async () => {
+                // New profile flow: if user typed education but didn't save first.
+                if (
+                  !route.params?.isEdit &&
+                  educationList.length === 0 &&
+                  !isEmptyEducation(educationListEdit)
+                ) {
+                  errorToast('You need to first Save the Education or Experience.');
+                  return;
+                }
+
+                if (isEmptyEducation(educationListEdit)) {
+                  dispatch(setActiveStep(2));
+                  return;
+                }
+
+                const shouldAutoSaveFirstEducation =
+                  educationList.length === 0 && !isEmptyEducation(educationListEdit);
+
+                if (shouldAutoSaveFirstEducation) {
+                  handleSaveOrAddEducation();
+                }
+
+                await handleAddEducation();
                 dispatch(setActiveStep(2));
-                return;
-              }
-
-              const shouldAutoSaveFirstEducation =
-                educationList.length === 0 && !isEmptyEducation(educationListEdit);
-
-              if (shouldAutoSaveFirstEducation) {
-                handleSaveOrAddEducation();
-              }
-
-              await handleAddEducation();
-              dispatch(setActiveStep(2));
-            }}
-          />
+              }}
+              textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
+            />
+          )}
 
           {route.params?.isEdit && (
             <GradientButton
@@ -1339,9 +1371,10 @@ const CreateProfileScreen = () => {
                   ? { opacity: 0.5 }
                   : undefined,
               ]}
-              title={educationListEdit?.isEditing ? 'Update Education' : 'Update Profile'}
+              title="Update Profile"
               disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
               onPress={handleUpdateProfile}
+              textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
             />
           )}
         </View>
@@ -1349,50 +1382,65 @@ const CreateProfileScreen = () => {
 
       {activeStep === 2 && (
         <View style={styles.buttonStyle}>
-          {experienceList.length > 0 && !isEmptyExperience(experienceListEdit) && (
-            <TouchableOpacity
-              onPress={handleSaveOrAddExperience}
-              style={styles.btnRow}>
-              <BaseText style={styles.addEduText}>
-                {'+ Add Experience'}
-              </BaseText>
-            </TouchableOpacity>
-          )}
-
-          <GradientButton
-            type="Company"
+          <TouchableOpacity
+            onPress={handleSaveOrAddExperience}
+            disabled={isEmptyExperience(experienceListEdit)}
             style={[
-              styles.btn,
-              experienceList.length > 0 && !isEmptyExperience(experienceListEdit)
-                ? { opacity: 0.5 }
-                : undefined,
-            ]}
-            title={'Next'}
-            disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
-            onPress={async () => {
-              if (isEmptyExperience(experienceListEdit)) {
-                dispatch(setActiveStep(3));
-                return;
-              }
+              styles.btnRow,
+              isEmptyExperience(experienceListEdit) ? { opacity: 0.5 } : undefined,
+            ]}>
+            <BaseText style={styles.addEduText}>
+              {experienceListEdit?.isEditing ? 'Save Experience' : '+ Add Experience'}
+            </BaseText>
+          </TouchableOpacity>
 
-              const shouldAutoSaveFirstExperience =
-                experienceList.length === 0 && !isEmptyExperience(experienceListEdit);
-
-              if (shouldAutoSaveFirstExperience) {
-                handleSaveOrAddExperience();
-              }
-
-              if (yearsOfExperienceOption?.label) {
-                try {
-                  const fd = new FormData();
-                  fd.append('years_of_experience', yearsOfExperienceOption.label);
-                  await empUpdateProfile(fd).unwrap();
-                } catch (_) {
+          {!route.params?.isEdit && (
+            <GradientButton
+              type="Company"
+              style={[
+                styles.btn,
+                experienceList.length > 0 && !isEmptyExperience(experienceListEdit)
+                  ? { opacity: 0.5 }
+                  : undefined,
+              ]}
+              title={'Next'}
+              disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
+              onPress={async () => {
+                // New profile flow: if user typed experience but didn't save first.
+                if (
+                  !route.params?.isEdit &&
+                  experienceList.length === 0 &&
+                  !isEmptyExperience(experienceListEdit)
+                ) {
+                  errorToast('You need to first Save the Education or Experience.');
+                  return;
                 }
-              }
-              dispatch(setActiveStep(3));
-            }}
-          />
+
+                if (isEmptyExperience(experienceListEdit)) {
+                  dispatch(setActiveStep(3));
+                  return;
+                }
+
+                const shouldAutoSaveFirstExperience =
+                  experienceList.length === 0 && !isEmptyExperience(experienceListEdit);
+
+                if (shouldAutoSaveFirstExperience) {
+                  handleSaveOrAddExperience();
+                }
+
+                if (yearsOfExperienceOption?.label) {
+                  try {
+                    const fd = new FormData();
+                    fd.append('years_of_experience', yearsOfExperienceOption.label);
+                    await empUpdateProfile(fd).unwrap();
+                  } catch (_) {
+                  }
+                }
+                dispatch(setActiveStep(3));
+              }}
+              textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
+            />
+          )}
 
           {route.params?.isEdit && (
             <GradientButton
@@ -1406,6 +1454,7 @@ const CreateProfileScreen = () => {
               title={'Update Profile'}
               disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
               onPress={handleUpdateProfile}
+              textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
             />
           )}
         </View>
@@ -1413,24 +1462,27 @@ const CreateProfileScreen = () => {
 
       {activeStep === 3 && (
         <>
-          <GradientButton
-            type="Company"
-            style={[
-              styles.btn,
-              {
-                marginHorizontal: wp(25),
-              },
-            ]}
-            title={'Next'}
-            // disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
-            onPress={() => {
-              if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
-                errorToast('Please select at least one skill');
-                return;
-              }
-              dispatch(setActiveStep(4));
-            }}
-          />
+          {!route.params?.isEdit && (
+            <GradientButton
+              type="Company"
+              style={[
+                styles.btn,
+                {
+                  marginHorizontal: wp(25),
+                },
+              ]}
+              title={'Next'}
+              // disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
+              onPress={() => {
+                if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
+                  errorToast('Please select at least one skill');
+                  return;
+                }
+                dispatch(setActiveStep(4));
+              }}
+              textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
+            />
+          )}
           {route.params?.isEdit && (
             <GradientButton
               type="Company"
@@ -1441,6 +1493,7 @@ const CreateProfileScreen = () => {
                 },
               ]}
               title={'Update Profile'}
+              textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
               onPress={() => {
                 if (
                   !aboutEdit?.selectedSkills ||
@@ -1473,6 +1526,7 @@ const CreateProfileScreen = () => {
               handleUpdateProfile();
             }
           }}
+          textStyle={{ ...commonFontStyle(600, 18, colors.white) }}
         />
       )}
       {(isLoadingEducation || isLoadingAboutme) && <Loader />}
