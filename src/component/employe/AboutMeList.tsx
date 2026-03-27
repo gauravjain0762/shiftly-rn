@@ -61,6 +61,7 @@ const proficiencyLabels: { [key: string]: string } = {
 const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit }) => {
   const [pressedDot, setPressedDot] = useState<{ langName: string; level: string } | null>(null);
   const { data: languagesResponse } = useGetCompanyLanguagesQuery({});
+
   const languageOptions = useMemo(() => {
     const list = languagesResponse?.data?.languages ?? [];
     const options = list
@@ -186,7 +187,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
           isSearch={true}
           searchPlaceholder="Search skills..."
           lightTheme
-          dropdownPosition='top'
+          dropdownPosition='bottom'
           data={(skillsList || []).map((skill: any) => ({
             label: skill?.title,
             value: skill?._id,

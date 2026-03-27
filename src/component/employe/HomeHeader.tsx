@@ -45,6 +45,10 @@ const HomeHeader: FC<props> = ({
   const badgeCount = normalizedUnreadCount > 0
     ? normalizedUnreadCount
     : (isCompanyHeader && hasUnreadNotification ? 1 : null);
+  const isSingleDigitBadge =
+    badgeCount !== null && Number(badgeCount) >= 0 && Number(badgeCount) < 10;
+  const displayBadgeText =
+    badgeCount !== null ? (badgeCount > 99 ? '99+' : String(badgeCount)) : '';
 
   const imageUri =
     type === 'company'
@@ -112,16 +116,20 @@ const HomeHeader: FC<props> = ({
       <TouchableOpacity
         style={styles.bellIcon}
         onPress={() => onPressNotifi && onPressNotifi()}>
-        <View>
+        <View style={styles.notificationWrap}>
           <Image
             source={IMAGES.notification}
             style={styles.bell}
           />
           {showBadge && (
-            <View style={styles.badge}>
+            <View
+              style={[
+                styles.badge,
+                isSingleDigitBadge ? styles.badgeSingleDigit : styles.badgeMultiDigit,
+              ]}>
               {badgeCount !== null && (
                 <Text style={styles.badgeText}>
-                  {badgeCount > 99 ? '99+' : badgeCount}
+                  {displayBadgeText}
                 </Text>
               )}
             </View>
@@ -159,6 +167,13 @@ const styles = StyleSheet.create({
   bellIcon: {
     bottom: hp(8),
     marginLeft: 'auto',
+    paddingRight: wp(2),
+  },
+  notificationWrap: {
+    width: wp(32),
+    height: wp(32),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bell: {
     width: wp(30),
@@ -168,24 +183,38 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: -hp(3),
-    right: -wp(2),
+    top: -2,
+    right: -6,
     backgroundColor: '#E53935',
-    borderRadius: wp(20),
     borderWidth: 1.5,
     borderColor: 'white',
-    minWidth: wp(17),
-    height: wp(17),
-    paddingHorizontal: wp(4),
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  badgeSingleDigit: {
+    width: 16,
+    height: 16,
+    minWidth: 16,
+    paddingHorizontal: 0,
+    borderRadius: 8,
+    right: 1,
+    top: 0.5
+  },
+  badgeMultiDigit: {
+    minWidth: 20,
+    height: 16,
+    borderRadius: 8,
+    paddingHorizontal: 3,
+  },
   badgeText: {
     color: 'white',
-    fontSize: wp(10),
+    fontSize: 9,
     fontWeight: '700',
     textAlign: 'center',
     includeFontPadding: false,
+    textAlignVertical: 'center',
+    lineHeight: 10,
   },
   row: {
     flexDirection: 'row',

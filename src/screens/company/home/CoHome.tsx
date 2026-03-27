@@ -31,6 +31,7 @@ import { IMAGES } from '../../../assets/Images';
 import BottomModal from '../../../component/common/BottomModal';
 import BaseText from '../../../component/common/BaseText';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CoHome = () => {
   const { t } = useTranslation();
@@ -111,6 +112,13 @@ const CoHome = () => {
     { id: "1", title: "Live Jobs", value: job_stats?.active_jobs, color: "#F3F3F3" },
     { id: "3", title: "Closed Jobs", value: job_stats?.expired_jobs, color: "#FFEFF0" },
   ];
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Refresh profile when returning to this screen (e.g. from notifications)
+      refetchProfile();
+    }, [refetchProfile]),
+  );
 
   return (
     <LinearContainer colors={['#F7F7F7', '#FFFFFF']} containerStyle={styles.containerStyle}>

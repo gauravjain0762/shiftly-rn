@@ -359,8 +359,6 @@ const JobPreview = () => {
             { finalLat, finalLng, userAddress, fallbackLocation: location, userInfoLat: userInfo?.lat, userInfoLng: userInfo?.lng },
         );
 
-        const [from, to] = salary?.value?.split('-') || [];
-
         const params = {
             title: title,
             contract_type: contract_type?.label || contract_type?.value || '',
@@ -377,8 +375,7 @@ const JobPreview = () => {
             job_sector: job_sector?.label || job_sector?.value,
             expiry_date: expiry_date,
             start_date: startDate?.value,
-            monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
-            monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
+            monthly_salary_range: salary?.value || '',
             no_positions: position?.value,
             skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
             currency: currency?.value,

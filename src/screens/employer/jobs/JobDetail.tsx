@@ -66,6 +66,23 @@ const isProfileComplete = (user: any) => {
   return education?.length > 0 && experience?.length > 0;
 };
 
+const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
+
+const getLanguageDotColor = (level: string) => {
+  switch (level) {
+    case 'Native':
+      return colors._0B3970;
+    case 'Fluent':
+      return colors._4A4A4A;
+    case 'Conversational':
+      return colors._7B7878;
+    case 'Basic':
+      return colors._D9D9D9;
+    default:
+      return '#999';
+  }
+};
+
 const JobDetail = () => {
   const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
@@ -615,12 +632,47 @@ ${salary}${shareUrlText}`;
             {curr_jobdetails?.languages?.length > 0 && (
               <>
                 <Text style={styles.sectionTitle}>Languages</Text>
-                <View style={styles.bulletList}>
+                <View style={styles.languageContainer}>
                   {curr_jobdetails.languages.map((lang: any, index: number) => (
-                    <View key={index}>
-                      <BaseText style={styles.description}>
-                        {`• ${lang?.name || 'N/A'}${lang?.level ? ` - ${lang.level}` : ''}`}
-                      </BaseText>
+                    <View key={index} style={styles.languageChipWithDots}>
+                      <Text style={styles.languageChipName}>{lang?.name || 'N/A'}</Text>
+                      <View style={styles.languageDotsRow}>
+                        {proficiencyLevels.map(level => {
+                          const isSelected = lang?.level === level;
+                          return (
+                            <View
+                              key={level}
+                              style={[
+                                styles.langDotWrapper,
+                                isSelected && {
+                                  borderWidth: 2,
+                                  borderColor: getLanguageDotColor(level),
+                                  borderRadius: 16,
+                                  width: 32,
+                                  height: 32,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                },
+                              ]}>
+                              <View
+                                style={[
+                                  styles.langDot,
+                                  { backgroundColor: getLanguageDotColor(level) },
+                                ]}
+                              />
+                              {isSelected && (
+                                <Text
+                                  style={[
+                                    styles.langDotLabel,
+                                    { color: getLanguageDotColor(level) },
+                                  ]}>
+                                  {level}
+                                </Text>
+                              )}
+                            </View>
+                          );
+                        })}
+                      </View>
                     </View>
                   ))}
                 </View>
@@ -925,6 +977,51 @@ const styles = StyleSheet.create({
   },
   bulletList: {
     marginBottom: hp(20),
+  },
+  languageContainer: {
+    marginBottom: hp(20),
+    gap: hp(8),
+  },
+  languageChipWithDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E0D7C8',
+    backgroundColor: '#F5F5F5',
+    borderRadius: wp(12),
+    paddingVertical: hp(6),
+    paddingHorizontal: wp(12),
+    paddingBottom: hp(20),
+  },
+  languageChipName: {
+    ...commonFontStyle(400, 16, colors._0B3970),
+    flex: 1,
+    marginRight: wp(8),
+  },
+  languageDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(8),
+  },
+  langDotWrapper: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  langDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  langDotLabel: {
+    position: 'absolute',
+    top: 32,
+    ...commonFontStyle(500, 10, colors._0B3970),
+    textAlign: 'center',
+    width: 80,
+    alignSelf: 'center',
   },
   bullet: {
     ...commonFontStyle(400, 14, colors._4A4A4A),

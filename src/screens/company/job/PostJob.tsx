@@ -72,9 +72,8 @@ import {
 } from '../../../api/dashboardApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useIsFocused, useRoute } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../../redux/hooks';
-import { RootState } from '../../../store';
 import {
   resetJobFormState,
   selectJobForm,
@@ -386,16 +385,57 @@ const PostJob = () => {
     useCallback(() => {
       const task = InteractionManager.runAfterInteractions(async () => {
         try {
-          // For Edit Job: on first mount, keep the area coming from job details.
-          if (editMode && area?.value && !hasInitializedAreaFromEditRef.current) {
-            hasInitializedAreaFromEditRef.current = true;
-            return;
+          if (editMode) {
+            const routeLat = initialUserAddressFromRoute?.lat;
+            const routeLng = initialUserAddressFromRoute?.lng;
+            const hasRouteCoords =
+              Number.isFinite(Number(routeLat)) && Number.isFinite(Number(routeLng));
+
+            if (hasRouteCoords) {
+              const editAddress = initialUserAddressFromRoute?.address || area?.value || '';
+              const normalizedAddress = {
+                address: editAddress,
+                lat: Number(routeLat),
+                lng: Number(routeLng),
+                state: initialUserAddressFromRoute?.state || userAddress?.state || '',
+                country: initialUserAddressFromRoute?.country || userAddress?.country || '',
+              };
+
+              setUserAddress(normalizedAddress);
+              setJobAreaText(editAddress);
+              updateJobForm({
+                area: {
+                  label: editAddress,
+                  value: editAddress,
+                  coordinates: { lat: Number(routeLat), lng: Number(routeLng) },
+                },
+              });
+
+              if (!hasInitializedAreaFromEditRef.current) {
+                console.log('📍 [PostJob][Edit] using route job coordinates:', {
+                  lat: Number(routeLat),
+                  lng: Number(routeLng),
+                  address: editAddress,
+                });
+                hasInitializedAreaFromEditRef.current = true;
+              }
+              return;
+            }
+
+            if (!hasInitializedAreaFromEditRef.current) {
+              console.log('⚠️ [PostJob][Edit] route coordinates missing, fallback will be used');
+              hasInitializedAreaFromEditRef.current = true;
+            }
           }
 
           const locationString = await AsyncStorage.getItem('user_location');
           if (locationString !== null) {
             const location = JSON.parse(locationString);
-            if (location.address && location.lat && location.lng) {
+            if (
+              location.address &&
+              Number.isFinite(Number(location.lat)) &&
+              Number.isFinite(Number(location.lng))
+            ) {
               setUserAddress(location);
               setJobAreaText(location.address);
               updateJobForm({
@@ -409,11 +449,15 @@ const PostJob = () => {
             }
           }
 
-          if (userInfo?.address && userInfo?.lat && userInfo?.lng) {
+          if (
+            userInfo?.address &&
+            Number.isFinite(Number(userInfo?.lat)) &&
+            Number.isFinite(Number(userInfo?.lng))
+          ) {
             setUserAddress({
               address: userInfo.address,
-              lat: userInfo.lat,
-              lng: userInfo.lng,
+              lat: Number(userInfo.lat),
+              lng: Number(userInfo.lng),
               state: userInfo.state || '',
               country: userInfo.country || '',
             });
@@ -422,7 +466,7 @@ const PostJob = () => {
               area: {
                 label: userInfo.address,
                 value: userInfo.address,
-                coordinates: { lat: userInfo.lat, lng: userInfo.lng },
+                coordinates: { lat: Number(userInfo.lat), lng: Number(userInfo.lng) },
               },
             });
           } else {
@@ -461,7 +505,7 @@ const PostJob = () => {
       });
 
       return () => task.cancel();
-    }, [editMode, userInfo, area?.value]),
+    }, [editMode, userInfo, area?.value, initialUserAddressFromRoute?.lat, initialUserAddressFromRoute?.lng, initialUserAddressFromRoute?.address]),
   );
 
   useEffect(() => {
@@ -604,8 +648,6 @@ const PostJob = () => {
       { finalLat, finalLng, userAddress, fallbackLocation: location, userInfoLat: userInfo?.lat, userInfoLng: userInfo?.lng },
     );
 
-    const [from, to] = salary?.value?.split('-') || [];
-
     const params = {
       title: title,
       contract_type:
@@ -623,8 +665,7 @@ const PostJob = () => {
       job_sector: job_sector?.label || job_sector?.value,
       expiry_date: expiry_date,
       start_date: startDate?.value,
-      monthly_salary_from: from ? Number(from.replace(/,/g, '').trim()) : null,
-      monthly_salary_to: to ? Number(to.replace(/,/g, '').trim()) : null,
+      monthly_salary_range: salary?.value || '',
       no_positions: position?.value,
       skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
       currency: currency?.value,

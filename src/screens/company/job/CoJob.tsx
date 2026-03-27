@@ -120,7 +120,7 @@ const CoJob = () => {
   const queryParams: Record<string, any> = { page };
   if (hasContractFilter) queryParams.contract_types = filters.contract_types;
   if (hasLocationFilter) queryParams.location = filters.location;
-  if (hasSalaryFilter) queryParams.salary_range = filters.salary_range;
+  if (hasSalaryFilter) queryParams.monthly_salary_range = filters.salary_range;
 
   const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(
     queryParams,
@@ -431,9 +431,15 @@ const CoJob = () => {
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
               <CustomDropdown
                 data={salaryRangeData}
+                labelField="label"
+                valueField="value"
                 value={selectedSalaryRange}
                 placeholder="Select Salary Range"
-                dropdownStyle={styles.salaryDropdown}
+                dropdownStyle={styles.coFilterDropdown}
+                renderRightIcon={IMAGES.ic_down}
+                RightIconStyle={styles.rightIcon}
+                selectedTextStyle={styles.selectedTextStyle}
+                placeholderStyle={styles.placeholderStyle}
                 container={styles.salaryDropdownContainer}
                 onChange={(item: any) =>
                   setSelectedSalaryRange(item?.value ? String(item.value) : '')
@@ -569,14 +575,10 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors._181818),
   },
   salaryDropdownContainer: {
-    marginTop: hp(6),
+    marginTop: hp(8),
   },
-  salaryDropdown: {
-    height: hp(50),
-    borderBottomWidth: hp(1.5),
-    borderColor: colors._7B7878,
-    borderRadius: 0,
-    paddingHorizontal: 0,
+  coFilterDropdown: {
+    borderRadius: 10,
   },
   dropdown: {
     height: hp(50),
@@ -588,7 +590,12 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors._181818),
   },
   selectedTextStyle: {
-    ...commonFontStyle(400, 18, colors._181818),
+    ...commonFontStyle(400, 16, colors._181818),
+  },
+  rightIcon: {
+    width: wp(16),
+    height: hp(13),
+    tintColor: colors._0B3970,
   },
   dropdownIcon: {
     width: wp(14),

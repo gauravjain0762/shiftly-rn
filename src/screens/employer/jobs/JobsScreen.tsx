@@ -242,7 +242,7 @@ const JobsScreen = () => {
   useEffect(() => {
     const initialParams: any = { page: 1 };
     if (filters.salary_range) {
-      initialParams.salary_range = filters.salary_range;
+      initialParams.monthly_salary_range = filters.salary_range;
     }
     trigger(initialParams)
       .then((response: any) => {
@@ -470,7 +470,7 @@ const JobsScreen = () => {
     }
 
     if (newFilters.salary_range) {
-      newQueryParams.salary_range = newFilters.salary_range;
+      newQueryParams.monthly_salary_range = newFilters.salary_range;
     }
 
     // Add departments parameter only if any department is selected
@@ -615,7 +615,7 @@ const JobsScreen = () => {
     }
 
     if (filters.salary_range) {
-      queryParams.salary_range = filters.salary_range;
+      queryParams.monthly_salary_range = filters.salary_range;
     }
 
     // Add departments parameter only if any department is selected
@@ -687,7 +687,7 @@ const JobsScreen = () => {
       page: 1,
     };
     if (filters.salary_range) {
-      queryParams.salary_range = filters.salary_range;
+      queryParams.monthly_salary_range = filters.salary_range;
     }
     if (filters.location?.trim()) queryParams.location = filters.location;
     if (filters.contract_types?.length) queryParams.contract_types = filters.contract_types.join(',');
@@ -1101,14 +1101,20 @@ const JobsScreen = () => {
             <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
             <CustomDropdown
               data={salaryRangeOptions}
-                value={filters.salary_range}
+              labelField="label"
+              valueField="value"
+              value={filters.salary_range}
               placeholder={t('Select Salary Range')}
-              dropdownStyle={styles.salaryDropdown}
+              dropdownStyle={styles.dropdown}
+              renderRightIcon={IMAGES.ic_down}
+              RightIconStyle={styles.rightIcon}
+              selectedTextStyle={styles.selectedTextStyle}
+              placeholderStyle={styles.placeholderStyle}
               container={styles.salaryDropdownContainer}
               onChange={(item: any) => {
                 setFilters(prev => ({
                   ...prev,
-                    salary_range: item?.value ? String(item.value) : '',
+                  salary_range: item?.value ? String(item.value) : '',
                 }));
               }}
             />
@@ -1400,28 +1406,22 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 18, colors.black),
   },
   salaryDropdownContainer: {
-    marginTop: hp(6),
-  },
-  salaryDropdown: {
-    height: hp(50),
-    borderBottomWidth: hp(1.5),
-    borderColor: colors._7B7878,
-    borderRadius: 0,
-    paddingHorizontal: 0,
+    marginTop: hp(8),
   },
   dropdown: {
-    height: hp(50),
-    marginTop: hp(5),
-    borderBottomWidth: hp(1.5),
-    borderColor: colors._7B7878,
+    borderRadius: 10,
   },
   placeholderStyle: {
     fontSize: hp(14),
     color: colors._7B7878,
   },
   selectedTextStyle: {
-    fontSize: hp(14),
-    color: colors.black,
+    ...commonFontStyle(400, 16, colors._181818),
+  },
+  rightIcon: {
+    width: wp(16),
+    height: hp(13),
+    tintColor: colors._0B3970,
   },
   dropdownIcon: {
     width: wp(14),
