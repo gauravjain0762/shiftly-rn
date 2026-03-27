@@ -107,10 +107,9 @@ const JobDetail = () => {
     'Job Type': curr_jobdetails?.contract_type,
     Department: curr_jobdetails?.department_id?.title,
     'Start Date': curr_jobdetails?.start_date,
-    // Duration: curr_jobdetails?.duration,
-    Vacancy: curr_jobdetails?.no_positions,
   };
   const keyValueArray = Object.entries(JobDetailsArr);
+  const vacancyValue = curr_jobdetails?.no_positions;
 
   useEffect(() => {
     if (favJobList) {
@@ -669,6 +668,18 @@ ${salary}${shareUrlText}`;
                   );
                 }}
               />
+              <View style={styles.vacancyRow}>
+                <View style={styles.vacancyDetailBlock}>
+                  <Text style={styles.detailKey}>{t('Vacancy')}</Text>
+                  <View style={styles.valueWrapper}>
+                    <Text style={styles.detailValue}>
+                      {vacancyValue !== undefined && vacancyValue !== null && vacancyValue !== ''
+                        ? String(vacancyValue)
+                        : '-'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
 
             <View style={{ height: hp(40) }} />
@@ -902,6 +913,15 @@ const styles = StyleSheet.create({
   detailValue: {
     ...commonFontStyle(400, 16, colors._4A4A4A),
     textAlign: 'center',
+  },
+  vacancyRow: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: hp(34),
+  },
+  vacancyDetailBlock: {
+    alignItems: 'center',
+    gap: hp(8),
   },
   bulletList: {
     marginBottom: hp(20),

@@ -37,8 +37,14 @@ const HomeHeader: FC<props> = ({
   unreadCount = 0,
 }) => {
   const { hasUnreadNotification } = useSelector((state: RootState) => state.auth);
-  const showBadge = unreadCount > 0 || hasUnreadNotification;
-  const badgeCount = unreadCount > 0 ? unreadCount : null;
+  const isCompanyHeader = type === 'company';
+  const normalizedUnreadCount = Number(unreadCount) || 0;
+  const showBadge = isCompanyHeader
+    ? normalizedUnreadCount > 0 || hasUnreadNotification
+    : normalizedUnreadCount > 0 || hasUnreadNotification;
+  const badgeCount = normalizedUnreadCount > 0
+    ? normalizedUnreadCount
+    : (isCompanyHeader && hasUnreadNotification ? 1 : null);
 
   const imageUri =
     type === 'company'

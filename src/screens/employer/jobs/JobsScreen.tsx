@@ -36,11 +36,10 @@ import {
   useGetFavouritesJobQuery,
   useGetFilterDataQuery,
   useGetDropdownDataQuery,
+  useGetJobDropdownDataQuery,
   useLazyGetEmployeeJobsQuery,
 } from '../../../api/dashboardApi';
 import BottomModal from '../../../component/common/BottomModal';
-import RangeSlider from '../../../component/common/RangeSlider';
-import { SLIDER_WIDTH } from '../../company/job/CoJob';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import JobCardsSkeleton from '../../../component/skeletons/JobCardsSkeleton';
 import { useSelector } from 'react-redux';
@@ -52,6 +51,7 @@ import Tooltip from '../../../component/common/Tooltip';
 import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import CountryPicker from 'react-native-country-picker-modal';
+import CustomDropdown from '../../../component/common/CustomDropdown';
 
 const fallbackContractTypes: { _id: string; title: string }[] = [
   { _id: 'full_time', title: 'Full Time' },
@@ -111,6 +111,7 @@ const JobsScreen = () => {
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
   const { data: getDepartmentData } = useGetFilterDataQuery({});
   const { data: dropdownData } = useGetDropdownDataQuery();
+  const { data: jobDropdownData } = useGetJobDropdownDataQuery();
   const departments = getDepartmentData?.data?.job_sectors;
   const favJobList = getFavoriteJobs?.data?.jobs;
   const jobTypes = useMemo(() => {
@@ -128,18 +129,15 @@ const JobsScreen = () => {
   const [filters, setFilters] = useState<{
     job_sectors: string[];
     contract_types: string[];
-    salary_from: number;
-    salary_to: number;
+    salary_range: string;
     location: string;
   }>({
     job_sectors: [],
     contract_types: [],
-    salary_from: 0,
-    salary_to: 0,
+    salary_range: '',
     location: '',
   });
 
-  const [range, setRange] = useState<number[]>([0, 50000]);
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [jobSearchQuery, setJobSearchQuery] = useState('');
@@ -178,6 +176,43 @@ const JobsScreen = () => {
     return names.join(', ');
   }, [filters.job_sectors, departments]);
 
+  const formatSalaryRangeLabel = (value?: string) => {
+    if (!value || typeof value !== 'string') return '';
+    const [fromRaw, toRaw] = value.split('-').map((s: string) => s?.trim());
+    const fromNum = Number(fromRaw?.replace(/,/g, ''));
+    const toNum = Number(toRaw?.replace(/,/g, ''));
+    if (Number.isFinite(fromNum) && Number.isFinite(toNum)) {
+      return `AED ${fromNum.toLocaleString()} - AED ${toNum.toLocaleString()}`;
+    }
+    return value;
+  };
+
+  const salaryRangeOptions = useMemo(() => {
+    const salaryRanges = jobDropdownData?.data?.salary_ranges;
+    if (!Array.isArray(salaryRanges)) return [];
+    return salaryRanges
+      .map((item: any) => {
+        if (typeof item === 'string') {
+          return {
+            label: formatSalaryRangeLabel(item),
+            value: item,
+          };
+        }
+        const rangeValue = item?.range || item?.value || item?.title || item?.name || '';
+        const label =
+          item?.label ||
+          item?.title ||
+          item?.name ||
+          formatSalaryRangeLabel(typeof rangeValue === 'string' ? rangeValue : '');
+        if (!rangeValue || !label) return null;
+        return {
+          label,
+          value: String(rangeValue),
+        };
+      })
+      .filter(Boolean);
+  }, [jobDropdownData?.data?.salary_ranges]);
+
   useEffect(() => {
     const fetchUserLocation = async () => {
       try {
@@ -205,7 +240,11 @@ const JobsScreen = () => {
   }, [userInfo]);
 
   useEffect(() => {
-    trigger({ page: 1, salary_from: filters.salary_from ?? 0 })
+    const initialParams: any = { page: 1 };
+    if (filters.salary_range) {
+      initialParams.salary_range = filters.salary_range;
+    }
+    trigger(initialParams)
       .then((response: any) => {
         console.log('🔥 ~ Initial Load ~ getJobs API Response:', {
           status: response?.data?.status,
@@ -397,8 +436,6 @@ const JobsScreen = () => {
   const handleApplyFilter = () => {
     const newFilters = {
       ...filters,
-      salary_from: range[0],
-      salary_to: range[1],
     };
     setFilters(newFilters);
     setIsFilterModalVisible(false);
@@ -432,13 +469,8 @@ const JobsScreen = () => {
       newQueryParams.contract_types = newFilters.contract_types.join(',');
     }
 
-    // Always pass salary_from, defaulting to 0 if not selected
-    const defaultSalaryFrom = 0;
-    const defaultSalaryTo = 50000;
-
-    newQueryParams.salary_from = newFilters.salary_from ?? defaultSalaryFrom;
-    if (newFilters.salary_to && newFilters.salary_to !== defaultSalaryTo) {
-      newQueryParams.salary_to = newFilters.salary_to;
+    if (newFilters.salary_range) {
+      newQueryParams.salary_range = newFilters.salary_range;
     }
 
     // Add departments parameter only if any department is selected
@@ -487,12 +519,10 @@ const JobsScreen = () => {
     setFilters({
       job_sectors: [],
       contract_types: [],
-      salary_from: 0,
-      salary_to: 0,
+      salary_range: '',
       location: '',
       // employer_type: '',
     });
-    setRange([0, 100000]);
     // Reset pagination when clearing filters
     setCurrentPage(1);
     setAllJobs([]);
@@ -500,7 +530,7 @@ const JobsScreen = () => {
     setIsLoadingMore(false);
     lastLoadedPageRef.current = 0;
     isFilterAppliedRef.current = true; // Mark that filter was just applied
-    trigger({ page: 1, salary_from: 0 })
+    trigger({ page: 1 })
       .then((result: any) => {
         // Explicitly process result - ensures jobs show on return when RTK cache
         // returns same refs (useEffect may not run)
@@ -584,13 +614,8 @@ const JobsScreen = () => {
       queryParams.contract_types = filters.contract_types.join(',');
     }
 
-    // Always pass salary_from, defaulting to 0 if not selected
-    const defaultSalaryFrom = 0;
-    const defaultSalaryTo = 50000;
-
-    queryParams.salary_from = filters.salary_from ?? defaultSalaryFrom;
-    if (filters.salary_to && filters.salary_to !== defaultSalaryTo) {
-      queryParams.salary_to = filters.salary_to;
+    if (filters.salary_range) {
+      queryParams.salary_range = filters.salary_range;
     }
 
     // Add departments parameter only if any department is selected
@@ -658,15 +683,14 @@ const JobsScreen = () => {
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     lastLoadedPageRef.current = 0;
-    const defaultSalaryFrom = 0;
-    const defaultSalaryTo = 50000;
     const queryParams: any = {
       page: 1,
-      salary_from: filters.salary_from ?? defaultSalaryFrom,
     };
+    if (filters.salary_range) {
+      queryParams.salary_range = filters.salary_range;
+    }
     if (filters.location?.trim()) queryParams.location = filters.location;
     if (filters.contract_types?.length) queryParams.contract_types = filters.contract_types.join(',');
-    if (filters.salary_to && filters.salary_to !== defaultSalaryTo) queryParams.salary_to = filters.salary_to;
     const departmentIds = filters.job_sectors
       ?.filter((id: any) => typeof id === 'string' && id.trim() !== '')
       .join(',');
@@ -1075,7 +1099,19 @@ const JobsScreen = () => {
 
           <View style={styles.salarySection}>
             <Text style={styles.salaryLabel}>{t('Salary Range')}</Text>
-            <RangeSlider range={range} setRange={setRange} />
+            <CustomDropdown
+              data={salaryRangeOptions}
+                value={filters.salary_range}
+              placeholder={t('Select Salary Range')}
+              dropdownStyle={styles.salaryDropdown}
+              container={styles.salaryDropdownContainer}
+              onChange={(item: any) => {
+                setFilters(prev => ({
+                  ...prev,
+                    salary_range: item?.value ? String(item.value) : '',
+                }));
+              }}
+            />
           </View>
 
           <View style={styles.buttonContainer}>
@@ -1363,22 +1399,15 @@ const styles = StyleSheet.create({
   salaryLabel: {
     ...commonFontStyle(400, 18, colors.black),
   },
-  sliderWrapper: {
-    width: SLIDER_WIDTH,
+  salaryDropdownContainer: {
+    marginTop: hp(6),
   },
-  slider: {
-    marginTop: hp(13),
+  salaryDropdown: {
+    height: hp(50),
+    borderBottomWidth: hp(1.5),
     borderColor: colors._7B7878,
-  },
-  sliderTextWrapper: {
-    position: 'relative',
-    height: hp(20),
-  },
-  sliderValueText: {
-    position: 'absolute',
-    marginTop: hp(8),
-    textAlign: 'center',
-    ...commonFontStyle(600, 18, colors._0A0A0A),
+    borderRadius: 0,
+    paddingHorizontal: 0,
   },
   dropdown: {
     height: hp(50),

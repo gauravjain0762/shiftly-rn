@@ -8,7 +8,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {resetNavigation} from '../../utils/commonFunction';
 import {clearAsync} from '../../utils/asyncStorage';
-import {logouts} from '../../features/authSlice';
+import {logouts, setForcedLogoutBy401} from '../../features/authSlice';
 import {persistor} from '../../store';
 
 import {SCREENS} from '../../navigation/screenNames';
@@ -106,6 +106,7 @@ export const axiosBaseQuery: BaseQueryFn<
             clearAsync();
             dispatch({type: 'RESET_STORE'});
             dispatch(logouts());
+            dispatch(setForcedLogoutBy401(true));
             persistor.purge();
             if (role === 'company') {
               resetNavigation(SCREENS.CoStack, SCREENS.CoLogin);

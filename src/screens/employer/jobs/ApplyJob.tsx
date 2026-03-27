@@ -60,7 +60,7 @@ const ApplyJob = () => {
   const data = params?.data as any;
   console.log("🔥 ~ ApplyJob ~ data:", data)
   const [imageModal, setImageModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<any>(null);
+  const [selectedDocs, setSelectedDocs] = useState<any[]>([]);
   const resumeList = params?.resumeList as any;
   const { bottom } = useSafeAreaInsets();
   const [applyJob] = useEmployeeApplyJobMutation({});
@@ -90,23 +90,32 @@ const ApplyJob = () => {
       return;
     }
 
-    if (!selectedDoc || (!selectedDoc?._id && !selectedDoc?.file)) {
+    if (!selectedDocs?.length) {
       errorToast(t('Please select or upload a resume'));
       return;
     }
 
     const formData = new FormData();
     formData.append('job_id', data?._id);
+    const existingResumeIds = selectedDocs
+      .filter((doc: any) => doc?._id)
+      .map((doc: any) => String(doc._id));
+    const uploadedResumes = selectedDocs.filter((doc: any) => !doc?._id && doc?.file);
 
-    if (selectedDoc?._id) {
-      formData.append('resume_id', selectedDoc?._id);
-    } else {
-      formData.append('resume', {
-        uri: selectedDoc.file,
-        type: selectedDoc.type || 'image/jpeg',
-        name: selectedDoc.file_name || 'logo.jpg',
-      } as any);
-    }
+    existingResumeIds.forEach((id: string) => {
+      formData.append('resume_id', id);
+      formData.append('resume_id[]', id);
+    });
+
+    uploadedResumes.forEach((doc: any) => {
+      const filePayload = {
+        uri: doc.file,
+        type: doc.type || 'application/octet-stream',
+        name: doc.file_name || `resume_${Date.now()}`,
+      } as any;
+      formData.append('resume', filePayload);
+      formData.append('resume[]', filePayload);
+    });
 
     try {
       const res = await applyJob(formData).unwrap();
@@ -202,14 +211,26 @@ const ApplyJob = () => {
                   key={index}
                   style={styles.docRow}
                   onPress={() => {
-                    if (selectedDoc?.file_name === doc?.file_name) {
-                      setSelectedDoc(null);
-                    } else {
-                      setSelectedDoc(doc);
-                    }
+                    const docKey = doc?._id || doc?.file || doc?.file_name;
+                    setSelectedDocs(prev => {
+                      const exists = prev.some(
+                        (item: any) =>
+                          (item?._id || item?.file || item?.file_name) === docKey,
+                      );
+                      return exists
+                        ? prev.filter(
+                          (item: any) =>
+                            (item?._id || item?.file || item?.file_name) !== docKey,
+                        )
+                        : [...prev, doc];
+                    });
                   }}>
                   <View style={styles.radioCircle}>
-                    {selectedDoc?.file_name === doc?.file_name && (
+                    {selectedDocs.some(
+                      (item: any) =>
+                        (item?._id || item?.file || item?.file_name) ===
+                        (doc?._id || doc?.file || doc?.file_name),
+                    ) && (
                       <View style={styles.check}>
                         <Image
                           source={IMAGES.check}
@@ -339,7 +360,7 @@ const ApplyJob = () => {
           };
 
           setResumes(prev => [...prev, newResume]);
-          setSelectedDoc(newResume);
+          setSelectedDocs(prev => [...prev, newResume]);
         }}
         allowDocument={true}
       />
@@ -419,7 +440,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(20)
   },
   heading: {
-    ...commonFontStyle(700, 22, colors._0B3970),
+    ...commonFontStyle(700, 18, colors._0B3970),
   },
   tooltipIcon: {
     marginTop: hp(0),

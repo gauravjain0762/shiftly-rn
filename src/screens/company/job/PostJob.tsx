@@ -125,15 +125,6 @@ const DEFAULT_CURRENCIES = [
   { label: 'INR', value: 'INR' },
 ];
 
-const DEFAULT_SALARY_RANGE = [
-  { label: '0 - 1,000', value: '0-1000' },
-  { label: '1,000 - 2,000', value: '1000-2000' },
-  { label: '2,000 - 3,000', value: '2000-3000' },
-  { label: '3,000 - 5,000', value: '3000-5000' },
-  { label: '5,000 - 10,000', value: '5000-10000' },
-  { label: '10,000+', value: '10000+' },
-];
-
 const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 
 const formatSalaryRangeLabel = (range: string): string => {
@@ -229,7 +220,6 @@ const PostJob = () => {
         value: r,
       }));
     }
-    return DEFAULT_SALARY_RANGE;
   }, [jobDropdownData?.data?.salary_ranges]);
 
   const startDateData = useMemo(() => {
@@ -284,7 +274,7 @@ const PostJob = () => {
   } = useAppSelector((state: any) => selectJobForm(state));
 
   const salaryRangeDataWithCurrent = useMemo(() => {
-    const base = salaryRangeData ?? DEFAULT_SALARY_RANGE;
+    const base = salaryRangeData ?? [];
     if (salary?.value && base.length > 0 && !base.some((d: any) => d.value === salary.value)) {
       return [{ label: salary.label || salary.value, value: salary.value }, ...base];
     }

@@ -534,9 +534,6 @@ const CompanyProfile = () => {
     )
   ), [hasValidLogo, logoUri, logoLoadError, isLogoLoading, shouldShowCoverLoader]);
 
-
-
-  // Show skeleton only when loading AND we have no cached profile data. Stop after 12s (loadTimeout) to prevent infinite skeleton and crash.
   const showSkeleton = (isLoading || isCompanyLoading) && !displayProfile && !loadTimeout;
   if (showSkeleton) {
     return <CompanyProfileSkeleton />;

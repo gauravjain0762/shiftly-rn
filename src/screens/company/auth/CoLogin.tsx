@@ -20,7 +20,9 @@ import { colors } from '../../../theme/colors';
 import {
   emailCheck,
   errorToast,
+  goBack,
   navigateTo,
+  resetNavigation,
 } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useCompanyLoginMutation } from '../../../api/authApi';
@@ -28,12 +30,13 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { RootState } from '../../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAuthData } from '../../../features/companySlice';
+import { setForcedLogoutBy401 } from '../../../features/authSlice';
 import { ensureFcmToken } from '../../../hooks/notificationHandler';
 
 const CoLogin = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { fcmToken } = useSelector((state: RootState) => state.auth);
+  const { fcmToken, forcedLogoutBy401 } = useSelector((state: RootState) => state.auth);
   const { auth } = useSelector((state: RootState) => state.company);
   const [companyLogin] = useCompanyLoginMutation();
   const { email, password } = auth;
@@ -80,6 +83,14 @@ const CoLogin = () => {
           type="company"
           isRight={false}
           containerStyle={styles.header}
+          onBackPress={() => {
+            if (forcedLogoutBy401) {
+              dispatch(setForcedLogoutBy401(false));
+              resetNavigation(SCREENS.SelectRollScreen);
+              return;
+            }
+            goBack();
+          }}
         />
         <Image source={IMAGES.newlogo1} style={styles.logo} />
         <View style={styles.logincontainer}>

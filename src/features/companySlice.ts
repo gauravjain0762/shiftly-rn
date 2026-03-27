@@ -72,6 +72,7 @@ interface FiltersState {
   contract_types: string[];
   salary_from: number;
   salary_to: number;
+  salary_range: string;
   location: string;
 }
 
@@ -124,6 +125,7 @@ const initialState: CompanyState = {
     contract_types: [],
     salary_from: 1000,
     salary_to: 50000,
+    salary_range: '',
     location: '',
   },
   auth: {

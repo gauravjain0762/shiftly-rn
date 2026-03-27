@@ -9,7 +9,7 @@ import ReadMoreText from '../common/ReadMoreText';
 import CustomImage from '../common/CustomImage';
 import { SCREENS } from '../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
-import { useTogglePostLikeMutation, useDeleteCompanyPostMutation, useEmpTogglePostLikeMutation } from '../../api/dashboardApi';
+import { useDeleteCompanyPostMutation, useEmpTogglePostLikeMutation } from '../../api/dashboardApi';
 import { normalizeUrl } from '../../utils/shareUtils';
 
 type card = {
@@ -59,7 +59,8 @@ const FeedCard: FC<card> = ({
     onPressLike();
 
     try {
-      await empTogglePostLike({ post_id: item?._id }).unwrap();
+      const res = await empTogglePostLike({ post_id: item?._id }).unwrap();
+      console.log("🔥 ~ handleLike ~ res:", res)
     } catch (error) {
       console.log('Error toggling like:', error);
       setLocalLiked(localLiked);

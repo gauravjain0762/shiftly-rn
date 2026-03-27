@@ -21,6 +21,7 @@ import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { IMAGES } from '../../../assets/Images';
 import BottomModal from '../../../component/common/BottomModal';
+import ReadMoreText from '../../../component/common/ReadMoreText';
 import {
     errorToast,
     navigateTo,
@@ -523,12 +524,11 @@ const JobPreview = () => {
                 {/* Job Description */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t('Job Description')}</Text>
-                    <Text style={styles.sectionText} numberOfLines={4}>
-                        {displayDescription}
-                    </Text>
-                    {displayDescription && displayDescription.length > 150 && (
-                        <Text style={styles.readMore}>{t('Read More...')}</Text>
-                    )}
+                    <ReadMoreText
+                        text={displayDescription}
+                        numberOfLines={4}
+                        style={styles.sectionText}
+                    />
                 </View>
 
                 {/* Job Duration & Sector */}

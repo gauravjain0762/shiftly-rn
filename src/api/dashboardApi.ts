@@ -579,6 +579,9 @@ export const dashboardApi = createApi({
         contract_types,
         salary_from,
         salary_to,
+        salary_id,
+        salary_range_id,
+        salary_range,
         location,
         job_sectors,
         departments,
@@ -589,8 +592,16 @@ export const dashboardApi = createApi({
         const params = new URLSearchParams();
 
         if (contract_types) params.append('contract_types', contract_types);
-        // Always pass salary_from, defaulting to 0 if not provided
-        params.append('salary_from', (salary_from ?? 0).toString());
+        // Send salary range ID when selected from dropdown filter
+        if (salary_id) params.append('salary_id', salary_id.toString());
+        if (salary_range_id)
+          params.append('salary_range_id', salary_range_id.toString());
+        if (salary_range) params.append('salary_range', salary_range.toString());
+
+        // Backward compatibility for endpoints still using numeric range filters
+        if (salary_from !== undefined && salary_from !== null) {
+          params.append('salary_from', salary_from.toString());
+        }
         if (salary_to) params.append('salary_to', salary_to.toString());
         if (location) params.append('location', location);
         if (job_sectors) params.append('job_sectors', job_sectors);

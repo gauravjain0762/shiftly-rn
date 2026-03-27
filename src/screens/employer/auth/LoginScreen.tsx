@@ -23,21 +23,23 @@ import {useTranslation} from 'react-i18next';
 import {
   emailCheck,
   errorToast,
+  goBack,
   navigateTo,
+  resetNavigation,
 } from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
 import {useEmployeeLoginMutation} from '../../../api/authApi';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setAuthData} from '../../../features/employeeSlice';
-import {clearEmployeeAccount} from '../../../features/authSlice';
+import {clearEmployeeAccount, setForcedLogoutBy401} from '../../../features/authSlice';
 import {ensureFcmToken} from '../../../hooks/notificationHandler';
 
 const LoginScreen = () => {
   const {t} = useTranslation();
   const dispatch = useDispatch();
 
-  const {fcmToken, language} = useSelector((state: RootState) => state.auth);
+  const {fcmToken, language, forcedLogoutBy401} = useSelector((state: RootState) => state.auth);
   console.log(">>>>>>>>>>>>>>>>>>>>>>>. ~ LoginScreen ~ fcmToken:", fcmToken)
   const [employeeLogin] = useEmployeeLoginMutation({});
 
@@ -85,6 +87,14 @@ const LoginScreen = () => {
           type="company"
           isRight={false}
           containerStyle={styles.header}
+          onBackPress={() => {
+            if (forcedLogoutBy401) {
+              dispatch(setForcedLogoutBy401(false));
+              resetNavigation(SCREENS.SelectRollScreen);
+              return;
+            }
+            goBack();
+          }}
         />
         <Image source={IMAGES.newlogo1} style={styles.logo} />
 

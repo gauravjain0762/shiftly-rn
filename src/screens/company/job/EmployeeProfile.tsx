@@ -107,6 +107,7 @@ const EmployeeProfile = () => {
     }),
     skills: (userData?.skills || userParam?.skills || []).map((s: any) => s?.title).filter(Boolean),
     languages: userData?.languages || userParam?.languages || [],
+    resumes: toArray(userData?.resumes || userParam?.resumes).filter((r: any) => r?.file),
   };
 
   const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
@@ -141,6 +142,31 @@ const EmployeeProfile = () => {
     } catch (e: any) {
       console.error("Navigation failed", e);
       Alert.alert("Error", `Nav failed: ${e.message}`);
+    }
+  };
+
+  const handleViewResume = (resume: any) => {
+    const fileUrl = resume?.file;
+    if (!fileUrl) return;
+    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i.test(fileUrl);
+    navigateTo(SCREENS.AttachmentViewerScreen, {
+      url: fileUrl,
+      type: isImage ? 'image' : 'document',
+    });
+  };
+
+  const handleDownloadResume = async (resume: any) => {
+    const fileUrl = resume?.file;
+    if (!fileUrl) return;
+    try {
+      const supported = await Linking.canOpenURL(fileUrl);
+      if (supported) {
+        await Linking.openURL(fileUrl);
+      } else {
+        Alert.alert('Error', 'Could not open resume link');
+      }
+    } catch (_) {
+      Alert.alert('Error', 'Could not open resume link');
     }
   };
 
@@ -398,7 +424,37 @@ const EmployeeProfile = () => {
           </View>
         )}
 
-        {/* Bottom spacing for Chat button */}
+        {profileData.resumes.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Documents</Text>
+            {profileData.resumes.map((resume: any, index: number) => (
+              <View
+                key={resume?._id || resume?.file_name || index}
+                style={[styles.resumeRow, index > 0 && { marginTop: hp(10) }]}>
+                <View style={styles.resumeChip}>
+                  <Text numberOfLines={1} style={styles.resumeChipText}>
+                    {resume?.file_name || 'Resume'}
+                  </Text>
+                </View>
+                <View style={styles.resumeActions}>
+                  <TouchableOpacity
+                    style={styles.resumeActionIconBtn}
+                    onPress={() => handleViewResume(resume)}
+                    activeOpacity={0.8}>
+                    <Image source={IMAGES.view} style={styles.resumeActionIcon} resizeMode="contain" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.resumeActionIconBtn}
+                    onPress={() => handleDownloadResume(resume)}
+                    activeOpacity={0.8}>
+                    <Image source={IMAGES.download} style={styles.resumeActionIcon} resizeMode="contain" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
@@ -768,6 +824,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: 80,
     alignSelf: 'center',
+  },
+  resumeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  resumeChip: {
+    flex: 1,
+    maxWidth: '72%',
+    backgroundColor: '#EAF1F8',
+    borderWidth: 1,
+    borderColor: '#D6DEE8',
+    borderRadius: wp(25),
+    paddingHorizontal: wp(18),
+    paddingVertical: hp(10),
+  },
+  resumeChipText: {
+    ...commonFontStyle(500, 15, colors._0B3970),
+  },
+  resumeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(10),
+  },
+  resumeActionIconBtn: {
+    width: wp(30),
+    height: wp(30),
+    borderRadius: wp(15),
+    backgroundColor: colors._0B3970,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resumeActionIcon: {
+    width: wp(16),
+    height: wp(16),
+    tintColor: colors.white,
   },
 });
 

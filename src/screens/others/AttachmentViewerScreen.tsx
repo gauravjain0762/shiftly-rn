@@ -23,6 +23,8 @@ import { goBack } from '../../utils/commonFunction';
 import { useTranslation } from 'react-i18next';
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i;
+const PDF_EXTENSIONS = /\.(pdf)(\?|$)/i;
+const OFFICE_DOC_EXTENSIONS = /\.(doc|docx|ppt|pptx|xls|xlsx|rtf|txt)(\?|$)/i;
 
 const AttachmentViewerScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -34,9 +36,19 @@ const AttachmentViewerScreen: React.FC = () => {
     params?.type === 'image' ||
     IMAGE_EXTENSIONS.test(url) ||
     (!url.includes('pdf') && !url.includes('doc'));
+  const isPdf = params?.type === 'pdf' || PDF_EXTENSIONS.test(url);
+  const isOfficeDoc = params?.type === 'document' && OFFICE_DOC_EXTENSIONS.test(url);
 
   useEffect(() => {
     if (!url) goBack();
+  }, [url]);
+
+  useEffect(() => {
+    // Prevent infinite spinner when provider is slow.
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
+    return () => clearTimeout(timeout);
   }, [url]);
 
   if (!url) {
@@ -88,9 +100,8 @@ const AttachmentViewerScreen: React.FC = () => {
     );
   }
 
-  const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
-    url,
-  )}&embedded=true`;
+  const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+  const documentUrl = isOfficeDoc && !isPdf ? googleDocsUrl : url;
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors.white]}>
@@ -120,9 +131,15 @@ const AttachmentViewerScreen: React.FC = () => {
           </View>
         )}
         <WebView
-          source={{ uri: googleDocsUrl }}
+          source={{ uri: documentUrl }}
           style={styles.webView}
+          startInLoadingState={false}
           onLoadEnd={() => setLoading(false)}
+          onLoadProgress={({ nativeEvent }) => {
+            if ((nativeEvent?.progress ?? 0) > 0.1) {
+              setLoading(false);
+            }
+          }}
           javaScriptEnabled
           originWhitelist={['*']}
           mixedContentMode="compatibility"

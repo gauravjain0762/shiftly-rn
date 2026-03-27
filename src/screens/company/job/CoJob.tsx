@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import {
   CustomTextInput,
+  CustomDropdown,
   GradientButton,
   LinearContainer,
 } from '../../../component';
@@ -34,7 +35,6 @@ import {
   useGetCompanyJobsQuery,
   useGetJobDropdownDataQuery,
 } from '../../../api/dashboardApi';
-import RangeSlider from '../../../component/common/RangeSlider';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -45,9 +45,23 @@ import {
 } from '../../../features/companySlice';
 import { useFocusEffect } from '@react-navigation/native';
 
-export const SLIDER_WIDTH = SCREEN_WIDTH - 70;
-const DEFAULT_SALARY_FROM = 1000;
-const DEFAULT_SALARY_TO = 50000;
+const formatSalaryRangeLabel = (range: string): string => {
+  if (!range || typeof range !== 'string') return range || '';
+  const trimmed = range.trim();
+  if (trimmed.endsWith('+')) {
+    const num = parseInt(trimmed.replace(/[^\d]/g, ''), 10);
+    return Number.isNaN(num) ? trimmed : `${num.toLocaleString()}+`;
+  }
+  const parts = trimmed.split(/[-–—]/);
+  if (parts.length >= 2) {
+    const from = parseInt(parts[0].replace(/[^\d]/g, ''), 10);
+    const to = parseInt(parts[1].replace(/[^\d]/g, ''), 10);
+    if (!Number.isNaN(from) && !Number.isNaN(to)) {
+      return `${from.toLocaleString()} - ${to.toLocaleString()}`;
+    }
+  }
+  return trimmed;
+};
 
 const CoJob = () => {
   const { t } = useTranslation<any>();
@@ -56,7 +70,9 @@ const CoJob = () => {
   const { userInfo }: any = useSelector((state: any) => state.auth);
   const [completeProfileModal, setCompleteProfileModal] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
-  const [range, setRange] = useState<number[]>([filters.salary_from, filters.salary_to]);
+  const [selectedSalaryRange, setSelectedSalaryRange] = useState<string>(
+    filters.salary_range || '',
+  );
   const [value, setValue] = useState<any>(filters.contract_types || []);
   const [location, setLocation] = useState<string>(filters.location || '');
   const [page, setPage] = useState<number>(1);
@@ -76,6 +92,16 @@ const CoJob = () => {
     }
     return [];
   }, [jobDropdownData?.data?.job_types]);
+  const salaryRangeData = useMemo(() => {
+    const ranges = jobDropdownData?.data?.salary_ranges;
+    if (Array.isArray(ranges) && ranges.length > 0) {
+      return ranges.map((r: string) => ({
+        label: formatSalaryRangeLabel(r),
+        value: r,
+      }));
+    }
+    return [];
+  }, [jobDropdownData?.data?.salary_ranges]);
 
   // ─── Refs: always-fresh values accessible in callbacks ────────────────────
   const pageRef = useRef<number>(1);
@@ -89,17 +115,12 @@ const CoJob = () => {
   const hasContractFilter =
     Array.isArray(filters?.contract_types) && filters.contract_types.length > 0;
   const hasLocationFilter = !!String(filters?.location || '').trim();
-  const hasSalaryFilter =
-    filters?.salary_from !== DEFAULT_SALARY_FROM ||
-    filters?.salary_to !== DEFAULT_SALARY_TO;
+  const hasSalaryFilter = !!String(filters?.salary_range || '').trim();
 
   const queryParams: Record<string, any> = { page };
   if (hasContractFilter) queryParams.contract_types = filters.contract_types;
   if (hasLocationFilter) queryParams.location = filters.location;
-  if (hasSalaryFilter) {
-    queryParams.salary_from = filters.salary_from;
-    queryParams.salary_to = filters.salary_to;
-  }
+  if (hasSalaryFilter) queryParams.salary_range = filters.salary_range;
 
   const { data, isLoading, isFetching, refetch } = useGetCompanyJobsQuery(
     queryParams,
@@ -116,7 +137,7 @@ const CoJob = () => {
 
   // ─── Sync filter UI when Redux filters change ─────────────────────────────
   useEffect(() => {
-    setRange([filters.salary_from, filters.salary_to]);
+    setSelectedSalaryRange(filters.salary_range || '');
     setValue(filters.contract_types || []);
     setLocation(filters.location || '');
     syncPageRef(1);
@@ -214,8 +235,7 @@ const CoJob = () => {
         setFilters({
           location,
           contract_types: value,
-          salary_from: range[0],
-          salary_to: range[1],
+          salary_range: selectedSalaryRange,
         }),
       );
       setIsFilterModalVisible(false);
@@ -228,7 +248,7 @@ const CoJob = () => {
     dispatch(resetFilters());
     setLocation('');
     setValue(null);
-    setRange([DEFAULT_SALARY_FROM, DEFAULT_SALARY_TO]);
+    setSelectedSalaryRange('');
     setIsFilterModalVisible(false);
   };
 
@@ -258,8 +278,7 @@ const CoJob = () => {
   const isFilteredEmpty =
     filters?.location ||
     filters?.contract_types?.length ||
-    filters?.salary_from !== DEFAULT_SALARY_FROM ||
-    filters?.salary_to !== DEFAULT_SALARY_TO;
+    !!String(filters?.salary_range || '').trim();
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -288,10 +307,7 @@ const CoJob = () => {
               onPress={() => {
                 setValue(filters.contract_types || []);
                 setLocation(filters.location || '');
-                setRange([
-                  filters.salary_from || DEFAULT_SALARY_FROM,
-                  filters.salary_to || DEFAULT_SALARY_TO,
-                ]);
+                setSelectedSalaryRange(filters.salary_range || '');
                 setIsFilterModalVisible(true);
               }}>
               <Image source={IMAGES.post_filter} style={styles.filterLogo} />
@@ -413,7 +429,16 @@ const CoJob = () => {
 
             <View style={styles.salarySection}>
               <Text style={styles.salaryLabel}>{'Salary Range'}</Text>
-              <RangeSlider range={range} setRange={setRange} />
+              <CustomDropdown
+                data={salaryRangeData}
+                value={selectedSalaryRange}
+                placeholder="Select Salary Range"
+                dropdownStyle={styles.salaryDropdown}
+                container={styles.salaryDropdownContainer}
+                onChange={(item: any) =>
+                  setSelectedSalaryRange(item?.value ? String(item.value) : '')
+                }
+              />
             </View>
 
             <Dropdown
@@ -543,22 +568,15 @@ const styles = StyleSheet.create({
   salaryLabel: {
     ...commonFontStyle(400, 18, colors._181818),
   },
-  sliderWrapper: {
-    width: SLIDER_WIDTH,
+  salaryDropdownContainer: {
+    marginTop: hp(6),
   },
-  slider: {
-    marginTop: hp(13),
+  salaryDropdown: {
+    height: hp(50),
+    borderBottomWidth: hp(1.5),
     borderColor: colors._7B7878,
-  },
-  sliderTextWrapper: {
-    position: 'relative',
-    height: hp(20),
-  },
-  sliderValueText: {
-    marginTop: hp(8),
-    textAlign: 'center',
-    position: 'absolute',
-    ...commonFontStyle(600, 18, colors._0A0A0A),
+    borderRadius: 0,
+    paddingHorizontal: 0,
   },
   dropdown: {
     height: hp(50),

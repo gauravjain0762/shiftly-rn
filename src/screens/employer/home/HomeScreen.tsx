@@ -37,7 +37,7 @@ const HomeScreen = () => {
   const { data: dashboardData, isLoading: isLoadingDashboard, refetch: refetchDashboard } = useGetEmployeeDashboardQuery({});
 
   const stats = dashboardData?.data?.stats;
-  const recentJobs = dashboardData?.data?.recent_matched_jobs || [];
+  const recentJobs = dashboardData?.data?.recent_jobs || [];
 
   const interviewCount = stats?.interview_requests || 0;
   const appliedCount = stats?.applied_jobs || 0;

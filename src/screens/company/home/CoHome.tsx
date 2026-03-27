@@ -54,6 +54,11 @@ const CoHome = () => {
   };
 
   const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
+  const companyUnreadCount = Number(
+    userInfo?.unread_notifications ??
+    profileData?.data?.comnpany?.unread_notifications ??
+    0,
+  ) || 0;
   console.log('🔥 CoHome ~ fcmToken:', fcmToken);
 
   const metricOptions = [
@@ -113,7 +118,7 @@ const CoHome = () => {
         <HomeHeader
           type="company"
           companyProfile={userInfo}
-          unreadCount={userInfo?.unread_notifications ?? 0}
+          unreadCount={companyUnreadCount}
           onPressAvatar={() => navigateTo(SCREENS.CoMyProfile)}
           onPressNotifi={() => navigateTo(SCREENS.CoNotification)}
         />

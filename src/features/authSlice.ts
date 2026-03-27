@@ -81,6 +81,7 @@ interface AppState {
   };
   hasUnreadNotification?: boolean;
   selectedTabIndex: number;
+  forcedLogoutBy401: boolean;
 }
 
 const initialState: AppState = {
@@ -162,6 +163,7 @@ const initialState: AppState = {
   },
   hasUnreadNotification: false,
   selectedTabIndex: 0,
+  forcedLogoutBy401: false,
 };
 
 const authSlice = createSlice({
@@ -264,6 +266,9 @@ const authSlice = createSlice({
     setSelectedTabIndex: (state, action: PayloadAction<number>) => {
       state.selectedTabIndex = action.payload;
     },
+    setForcedLogoutBy401: (state, action: PayloadAction<boolean>) => {
+      state.forcedLogoutBy401 = action.payload;
+    },
   },
 });
 
@@ -305,6 +310,7 @@ export const {
   clearCompanyRegisterData,
   setHasUnreadNotification,
   setSelectedTabIndex,
+  setForcedLogoutBy401,
 } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -144,6 +144,8 @@ export const IMAGES = {
   priority_high: require('./image/priority_high.png'),
   record_voice_over: require('./image/record_voice_over.png'),
   video_cam: require('./image/videocam.png'),
+  view: require('./image/view.png'),
+  download: require('./image/download.png'),
 
   //tab
   Activity_off: require('./image/tab/Activity_off.png'),

@@ -13,6 +13,7 @@ type Props = {
 };
 
 const CoAboutTab = ({ companyProfileData }: Props) => {
+console.log("🔥 ~ CoAboutTab ~ companyProfileData:", companyProfileData)
 
   const openInMaps = (lat: any, lng: any, address: any) => {
     if (!lat || !lng) return;

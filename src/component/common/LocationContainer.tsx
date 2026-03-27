@@ -7,7 +7,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { IMAGES } from '../../assets/Images';
 import { getAsyncUserLocation } from '../../utils/asyncStorage';
@@ -35,8 +35,17 @@ const LocationContainer: FC<map> = ({
   address,
   showAddressCard = true,
 }) => {
-  const { getAppData } = useSelector((state: RootState) => state.auth);
-  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
+  console.log("🔥 ~ LocationContainer ~ lng:", lng)
+  console.log("🔥 ~ LocationContainer ~ lat:", lat)
+
+  const normalizedCoords = useMemo(() => {
+    const parsedLat = typeof lat === 'number' ? lat : Number(lat);
+    const parsedLng = typeof lng === 'number' ? lng : Number(lng);
+    const hasValidCoords = Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
+    return hasValidCoords
+      ? { latitude: parsedLat, longitude: parsedLng }
+      : null;
+  }, [lat, lng]);
 
   const [location, setLocation] = useState<{
     latitude: number;
@@ -44,8 +53,8 @@ const LocationContainer: FC<map> = ({
   } | null>(null);
 
   useEffect(() => {
-    if (typeof lat === 'number' && typeof lng === 'number') {
-      setLocation({ latitude: lat, longitude: lng });
+    if (normalizedCoords) {
+      setLocation(normalizedCoords);
       return;
     }
 
@@ -60,7 +69,7 @@ const LocationContainer: FC<map> = ({
     };
 
     loadLocation();
-  }, [lat, lng]);
+  }, [normalizedCoords]);
   return (
     <View style={[styles.map, containerStyle]}>
       {showAddressCard && (
