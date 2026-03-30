@@ -52,6 +52,7 @@ import { getAsyncUserLocation } from '../../../utils/asyncStorage';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import CountryPicker from 'react-native-country-picker-modal';
 import CustomDropdown from '../../../component/common/CustomDropdown';
+import { getJobMonthlySalaryBounds } from '../../../utils/monthlySalaryRange';
 
 const fallbackContractTypes: { _id: string; title: string }[] = [
   { _id: 'full_time', title: 'Full Time' },
@@ -60,6 +61,18 @@ const fallbackContractTypes: { _id: string; title: string }[] = [
   { _id: 'internship', title: 'Internship' },
   { _id: 'freelance', title: 'Freelance' },
 ];
+
+// Backend matching is strict for `monthly_salary_range`.
+// Dropdown labels may include commas/spaces; normalize to "1000-2000" or "10000+".
+const normalizeMonthlySalaryRange = (val: any): string => {
+  if (val === null || val === undefined) return '';
+  const raw = String(val).trim();
+  if (!raw || raw === '-') return '';
+  return raw
+    .replace(/,/g, '')
+    .replace(/\s*-\s*/g, '-')
+    .replace(/\s*\+\s*/g, '+');
+};
 
 const BannerItem = ({ item }: { item: any }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -242,7 +255,7 @@ const JobsScreen = () => {
   useEffect(() => {
     const initialParams: any = { page: 1 };
     if (filters.salary_range) {
-      initialParams.monthly_salary_range = filters.salary_range;
+      initialParams.monthly_salary_range = normalizeMonthlySalaryRange(filters.salary_range);
     }
     trigger(initialParams)
       .then((response: any) => {
@@ -388,15 +401,26 @@ const JobsScreen = () => {
       );
     } else if (sortBy === 'salary_high_low') {
       sorted.sort((a, b) => {
-        const diff = (b.monthly_salary_to || 0) - (a.monthly_salary_to || 0);
+        const aBounds = getJobMonthlySalaryBounds(a);
+        const bBounds = getJobMonthlySalaryBounds(b);
+
+        const aMax = aBounds.max === Number.POSITIVE_INFINITY ? Number.MAX_SAFE_INTEGER : aBounds.max;
+        const bMax = bBounds.max === Number.POSITIVE_INFINITY ? Number.MAX_SAFE_INTEGER : bBounds.max;
+        const aMin = aBounds.min;
+        const bMin = bBounds.min;
+
+        const diff = bMax - aMax;
         // When max salary is equal, use min salary as tiebreaker (higher min = better)
         if (diff !== 0) return diff;
-        return (b.monthly_salary_from || 0) - (a.monthly_salary_from || 0);
+        return bMin - aMin;
       });
     } else if (sortBy === 'salary_low_high') {
       sorted.sort(
-        (a, b) =>
-          (a.monthly_salary_from || 0) - (b.monthly_salary_from || 0),
+        (a, b) => {
+          const aMin = getJobMonthlySalaryBounds(a).min;
+          const bMin = getJobMonthlySalaryBounds(b).min;
+          return aMin - bMin;
+        },
       );
     } else if (sortBy === 'closest_location') {
       if (userLocation) {
@@ -429,7 +453,7 @@ const JobsScreen = () => {
       }
     }
 
-    console.log('🔥 [EMP SORT] sorted first 3:', sorted.slice(0, 3).map(j => ({ _id: j?._id, title: j?.title, salary_from: j?.monthly_salary_from, salary_to: j?.monthly_salary_to, createdAt: j?.createdAt })));
+    console.log('🔥 [EMP SORT] sorted first 3:', sorted.slice(0, 3).map(j => ({ _id: j?._id, title: j?.title, monthly_salary_range: j?.monthly_salary_range, createdAt: j?.createdAt })));
     setSortedJobList(sorted);
   }, [allJobs, sortBy, userLocation]);
 
@@ -470,7 +494,7 @@ const JobsScreen = () => {
     }
 
     if (newFilters.salary_range) {
-      newQueryParams.monthly_salary_range = newFilters.salary_range;
+      newQueryParams.monthly_salary_range = normalizeMonthlySalaryRange(newFilters.salary_range);
     }
 
     // Add departments parameter only if any department is selected
@@ -615,7 +639,7 @@ const JobsScreen = () => {
     }
 
     if (filters.salary_range) {
-      queryParams.monthly_salary_range = filters.salary_range;
+      queryParams.monthly_salary_range = normalizeMonthlySalaryRange(filters.salary_range);
     }
 
     // Add departments parameter only if any department is selected
@@ -1114,7 +1138,7 @@ const JobsScreen = () => {
               onChange={(item: any) => {
                 setFilters(prev => ({
                   ...prev,
-                  salary_range: item?.value ? String(item.value) : '',
+                  salary_range: item?.value ? normalizeMonthlySalaryRange(item.value) : '',
                 }));
               }}
             />

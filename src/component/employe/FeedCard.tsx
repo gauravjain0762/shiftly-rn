@@ -9,7 +9,7 @@ import ReadMoreText from '../common/ReadMoreText';
 import CustomImage from '../common/CustomImage';
 import { SCREENS } from '../../navigation/screenNames';
 import { useTranslation } from 'react-i18next';
-import { useDeleteCompanyPostMutation, useEmpTogglePostLikeMutation } from '../../api/dashboardApi';
+import { useDeleteCompanyPostMutation, useEmpTogglePostLikeMutation, useTogglePostLikeMutation } from '../../api/dashboardApi';
 import { normalizeUrl } from '../../utils/shareUtils';
 
 type card = {
@@ -24,6 +24,7 @@ type card = {
   itemIndex?: number;
   currentCompanyId?: string;
   onDeletePost?: () => void;
+  isCompanyFlow?: boolean;
 };
 
 const FeedCard: FC<card> = ({
@@ -35,6 +36,7 @@ const FeedCard: FC<card> = ({
   hideLike = false,
   currentCompanyId,
   onDeletePost,
+  isCompanyFlow = false,
 }) => {
   const { t } = useTranslation();
   const hasImage = item?.images?.length > 0;
@@ -45,6 +47,7 @@ const FeedCard: FC<card> = ({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const menuButtonRef = useRef<View>(null);
   const [empTogglePostLike] = useEmpTogglePostLikeMutation();
+  const [togglePostLike] = useTogglePostLikeMutation();
   const [deleteCompanyPost] = useDeleteCompanyPostMutation();
 
   useEffect(() => {
@@ -59,7 +62,8 @@ const FeedCard: FC<card> = ({
     onPressLike();
 
     try {
-      const res = await empTogglePostLike({ post_id: item?._id }).unwrap();
+      const toggleLikeApi = isCompanyFlow ? togglePostLike : empTogglePostLike;
+      const res = await toggleLikeApi({ post_id: item?._id }).unwrap();
       console.log("🔥 ~ handleLike ~ res:", res)
     } catch (error) {
       console.log('Error toggling like:', error);

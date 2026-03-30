@@ -29,6 +29,7 @@ import {
   resetNavigation,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { SCREENS } from '../../../navigation/screenNames';
 import { RootState } from '../../../store';
@@ -181,7 +182,7 @@ const ApplyJob = () => {
                   <Text
                     style={
                       styles.salary
-                    }>{`${data?.monthly_salary_from?.toLocaleString()} - ${data?.monthly_salary_to?.toLocaleString()}`}</Text>
+                    }>{getJobMonthlySalaryRangeText(data)}</Text>
                 </View>
               </View>
             </View>

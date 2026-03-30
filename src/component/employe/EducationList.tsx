@@ -1,5 +1,13 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import {
+  Image,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import CustomDatePicker from '../common/CustomDatePicker';
@@ -27,14 +35,14 @@ type Props = {
 export const isEmptyEducation = (edu: EducationItem) => {
   if (!edu) return true;
   const isDegreeEmpty = !edu.degree;
+  const isStillStudying = Boolean(edu.still_studying);
 
   return (
     isDegreeEmpty ||
     !edu.university ||
     !edu.startDate_month ||
     !edu.startDate_year ||
-    !edu.endDate_month ||
-    !edu.endDate_year ||
+    (!isStillStudying && (!edu.endDate_month || !edu.endDate_year)) ||
     !edu.country ||
     !edu.province
   );
@@ -115,20 +123,61 @@ const EducationList: FC<Props> = ({
             });
           }}
         />
-        <CustomDatePicker
-          type="Education"
-          label="End Date"
-          required
-          dateValue={educationListEdit}
-          onChange={(date: any) => {
+        {/* End Date Field - Disabled/cleared when user is currently studying */}
+        <View style={educationListEdit?.still_studying && styles.disabledContainer}>
+          <CustomDatePicker
+            type="Education"
+            label="End Date"
+            required={!educationListEdit?.still_studying}
+            dateValue={educationListEdit}
+            onChange={(date: any) => {
+              if (educationListEdit?.still_studying) return;
+              setEducationListEdit({
+                ...educationListEdit,
+                endDate_month: date?.month?.toString(),
+                endDate_year: date?.year?.toString(),
+              });
+            }}
+          />
+        </View>
+      </View>
+
+      {/* "Currently studying" checkbox - Right below End Date */}
+      <Pressable
+        onPress={() =>
+          setEducationListEdit({
+            ...educationListEdit,
+            still_studying: !educationListEdit?.still_studying,
+            // Clear end date when enabling "currently studying"
+            ...((!educationListEdit?.still_studying) && {
+              endDate_month: '',
+              endDate_year: '',
+            }),
+          })
+        }
+        style={styles.stillWrapper}>
+        <TouchableOpacity
+          onPress={() =>
             setEducationListEdit({
               ...educationListEdit,
-              endDate_month: date?.month?.toString(),
-              endDate_year: date?.year?.toString(),
-            });
-          }}
-        />
-      </View>
+              still_studying: !educationListEdit?.still_studying,
+              ...((!educationListEdit?.still_studying) && {
+                endDate_month: '',
+                endDate_year: '',
+              }),
+            })
+          }>
+          <ImageBackground
+            source={IMAGES.checkBox}
+            resizeMode="contain"
+            style={styles.checkbox}>
+            {educationListEdit?.still_studying && (
+              <Image source={IMAGES.check} style={styles.checkIcon} />
+            )}
+          </ImageBackground>
+        </TouchableOpacity>
+        <BaseText style={styles.stillText}>Currently studying</BaseText>
+      </Pressable>
 
       <View style={styles.row}>
         <View style={styles.halfWidth}>
@@ -213,6 +262,32 @@ const styles = StyleSheet.create({
   dateContainer: {
     marginBottom: hp(12),
     gap: 10,
+  },
+  disabledContainer: {
+    opacity: 0.5,
+    pointerEvents: 'none',
+  },
+  stillWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(12),
+    marginBottom: hp(20),
+    gap: wp(12),
+  },
+  checkbox: {
+    width: wp(30),
+    height: hp(30),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkIcon: {
+    width: wp(17),
+    height: hp(17),
+    resizeMode: 'contain',
+    tintColor: colors._0B3970,
+  },
+  stillText: {
+    ...commonFontStyle(400, wp(18), colors._050505),
   },
   row: {
     gap: wp(10),

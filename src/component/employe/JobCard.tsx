@@ -11,6 +11,7 @@ import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import RNFS from 'react-native-fs';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
 import { SCREENS } from '../../navigation/screenNames';
+import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 
 type props = {
   item?: any;
@@ -132,7 +133,7 @@ const JobCard: FC<props> = ({
           showStyle={{ paddingHorizontal: 0, fontSize: 15 }}
         />
 
-        {(item?.monthly_salary_from || item?.monthly_salary_to) && (
+        {getJobMonthlySalaryRangeText(item) && (
           <View style={styles.salaryContainer}>
             <Text style={styles.salaryAmount}>
               {`${item?.currency?.toUpperCase()} `}
@@ -141,7 +142,7 @@ const JobCard: FC<props> = ({
               ) : (
                 getCurrencySymbol(item?.currency)
               )}
-              {`${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+              {`${getJobMonthlySalaryRangeText(item)}`}
             </Text>
           </View>
         )}

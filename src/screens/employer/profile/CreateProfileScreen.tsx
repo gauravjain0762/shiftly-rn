@@ -130,6 +130,7 @@ const CreateProfileScreen = () => {
     label: string;
     value: string;
   } | null>(null);
+  const [noExperienceChecked, setNoExperienceChecked] = useState(false);
 
   const { data: departmentsData } = useGetDepartmentsQuery({});
   const departmentOptions = useMemo(() => {
@@ -331,12 +332,26 @@ const CreateProfileScreen = () => {
     } else if (!savedLabel) {
       setYearsOfExperienceOption(null);
     }
+
+    if (
+      typeof savedLabel === 'string' &&
+      (savedLabel.trim().toLowerCase() === '0 years experience' ||
+        savedLabel.trim().toLowerCase() === '0-2 years experience')
+    ) {
+      setNoExperienceChecked(true);
+    } else if (!savedLabel) {
+      setNoExperienceChecked(false);
+    }
   }, [
     experienceUser?.years_of_experience,
     aboutmeandResumes?.years_of_experience,
     userInfo?.years_of_experience,
     experienceOptionsData,
   ]);
+
+  const effectiveYearsOfExperienceLabel = noExperienceChecked
+    ? '0-2 years experience'
+    : (yearsOfExperienceOption?.label || '');
 
   // Pre-fill "Desired Department" dropdown from API.
   // UI reads/writes this value from `experienceListEdit.department`.
@@ -406,6 +421,7 @@ const CreateProfileScreen = () => {
         endDate_year: '',
         country: '',
         province: '',
+        still_studying: false,
         isEditing: false,
       }),
     );
@@ -513,6 +529,7 @@ const CreateProfileScreen = () => {
           : {};
 
       for (const edu of educationList) {
+        const stillStudying = Boolean((edu as any)?.still_studying);
         const payload = {
           education_id: edu._id || '',
           degree:
@@ -522,13 +539,14 @@ const CreateProfileScreen = () => {
           university: edu.university,
           country: edu.country,
           province: edu.province,
+          still_studying: stillStudying,
           start_date: {
             month: edu.startDate_month,
             year: edu.startDate_year,
           },
           end_date: {
-            month: edu.endDate_month,
-            year: edu.endDate_year,
+            month: stillStudying ? '' : edu.endDate_month,
+            year: stillStudying ? '' : edu.endDate_year,
           },
         };
 
@@ -638,8 +656,8 @@ const CreateProfileScreen = () => {
               year: exp?.jobEnd_year,
             },
           }),
-          ...(yearsOfExperienceOption?.label && {
-            years_of_experience: yearsOfExperienceOption.label,
+          ...(effectiveYearsOfExperienceLabel && {
+            years_of_experience: effectiveYearsOfExperienceLabel,
           }),
           ...(exp?.preferred_position && {
             desired_job_title: exp.preferred_position,
@@ -696,7 +714,7 @@ const CreateProfileScreen = () => {
       city,
       country,
       skills: aboutEdit?.selectedSkills || [],
-      years_of_experience: yearsOfExperienceOption?.label || null,
+      years_of_experience: effectiveYearsOfExperienceLabel || null,
       languages: (aboutEdit?.selectedLanguages || []).map((l: any) => ({
         name: l?.name,
         level: l?.level,
@@ -783,7 +801,7 @@ const CreateProfileScreen = () => {
         aboutmeandResumes?.years_of_experience ||
         userInfo?.years_of_experience ||
         '';
-      const currentYearsLabel = yearsOfExperienceOption?.label || '';
+      const currentYearsLabel = effectiveYearsOfExperienceLabel;
 
       const hasDesiredChanged =
         currentDesiredJobTitle.length > 0 &&
@@ -1014,6 +1032,7 @@ const CreateProfileScreen = () => {
                     endDate_year: '',
                     country: '',
                     province: '',
+                    still_studying: false,
                     isEditing: false,
                   }),
                 );
@@ -1124,18 +1143,22 @@ const CreateProfileScreen = () => {
                       const end = parseEduDate(
                         (item as any)?.endDate || (item as any)?.end_date,
                       );
+                      const stillStudying = Boolean((item as any)?.still_studying);
                       dispatch(
                         setEducationListEdit({
                           ...item,
                           degree: degreeId,
+                          still_studying: stillStudying,
                           startDate_month:
                             item?.startDate_month || start.month || '',
                           startDate_year:
                             (item?.startDate_year || start.year || '').toString(),
                           endDate_month:
-                            item?.endDate_month || end.month || '',
+                            stillStudying ? '' : item?.endDate_month || end.month || '',
                           endDate_year:
-                            (item?.endDate_year || end.year || '').toString(),
+                            stillStudying
+                              ? ''
+                              : (item?.endDate_year || end.year || '').toString(),
                           isEditing: true,
                         }),
                       );
@@ -1191,7 +1214,8 @@ const CreateProfileScreen = () => {
                       const start = parseDate(item?.job_start);
                       const end = parseDate(item?.job_end);
 
-                      const dep = item?.department ?? item?.department_id;
+                      const itemAny = item as any;
+                      const dep = itemAny?.department ?? itemAny?.department_id;
                       const departmentId =
                         typeof dep === 'object' && dep?._id
                           ? dep._id
@@ -1220,6 +1244,7 @@ const CreateProfileScreen = () => {
                 }
                 desiredJobTitle={globalDesiredJobTitle}
                 disableDesiredJob={false}
+                disablePastExperience={noExperienceChecked}
                 onExperienceTypePress={() => {
                   if (scrollRef.current) {
                     if (typeof scrollRef.current.scrollTo === 'function') {
@@ -1256,23 +1281,49 @@ const CreateProfileScreen = () => {
                       <BaseText style={styles.experienceDropdownLabel}>
                         {t('Years of Experience')}
                       </BaseText>
-                      <CustomDropdown
-                        data={experienceOptionsData}
-                        labelField="label"
-                        valueField="value"
-                        value={yearsOfExperienceOption?.value}
-                        onChange={(e: any) => {
-                          setYearsOfExperienceOption(
-                            e?.value != null ? { label: e.label, value: e.value } : null,
-                          );
-                        }}
-                        dropdownStyle={styles.experienceDropdown}
-                        renderRightIcon={IMAGES.ic_down}
-                        RightIconStyle={styles.experienceDropdownRightIcon}
-                        selectedTextStyle={styles.experienceDropdownSelectedText}
-                        placeholder={t('Select one')}
-                      />
+                      <View style={noExperienceChecked ? styles.disabledContainer : undefined}>
+                        <CustomDropdown
+                          data={experienceOptionsData}
+                          labelField="label"
+                          valueField="value"
+                          value={yearsOfExperienceOption?.value}
+                          onChange={(e: any) => {
+                            setYearsOfExperienceOption(
+                              e?.value != null ? { label: e.label, value: e.value } : null,
+                            );
+                          }}
+                          disable={noExperienceChecked}
+                          dropdownStyle={styles.experienceDropdown}
+                          renderRightIcon={IMAGES.ic_down}
+                          RightIconStyle={styles.experienceDropdownRightIcon}
+                          selectedTextStyle={styles.experienceDropdownSelectedText}
+                          placeholder={t('Select one')}
+                        />
+                      </View>
                     </View>
+
+                    <TouchableOpacity
+                      style={styles.noExperienceRow}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        const next = !noExperienceChecked;
+                        setNoExperienceChecked(next);
+                        if (next) {
+                          setYearsOfExperienceOption({
+                            label: '0-2 years experience',
+                            value: '0-2 years experience',
+                          });
+                        }
+                      }}>
+                      <View style={styles.checkbox}>
+                        {noExperienceChecked && (
+                          <BaseText style={styles.checkIcon}>✓</BaseText>
+                        )}
+                      </View>
+                      <BaseText style={styles.noExperienceText}>
+                        {t('I have no past job experience')}
+                      </BaseText>
+                    </TouchableOpacity>
                   </View>
                 }
               />
@@ -1337,8 +1388,7 @@ const CreateProfileScreen = () => {
                 // New profile flow: if user typed education but didn't save first.
                 if (
                   !route.params?.isEdit &&
-                  educationList.length === 0 &&
-                  !isEmptyEducation(educationListEdit)
+                  educationList.length === 0
                 ) {
                   errorToast('You need to first Save the Education.');
                   return;
@@ -1385,10 +1435,12 @@ const CreateProfileScreen = () => {
         <View style={styles.buttonStyle}>
           <TouchableOpacity
             onPress={handleSaveOrAddExperience}
-            disabled={isEmptyExperience(experienceListEdit)}
+            disabled={noExperienceChecked || isEmptyExperience(experienceListEdit)}
             style={[
               styles.btnRow,
-              isEmptyExperience(experienceListEdit) ? { opacity: 0.5 } : undefined,
+              noExperienceChecked || isEmptyExperience(experienceListEdit)
+                ? { opacity: 0.5 }
+                : undefined,
             ]}>
             <BaseText style={styles.addEduText}>
               {experienceListEdit?.isEditing ? 'Save Experience' : '+ Add Experience'}
@@ -1408,7 +1460,7 @@ const CreateProfileScreen = () => {
               disabled={experienceList.length > 0 && !isEmptyExperience(experienceListEdit)}
               onPress={async () => {
                 // New profile flow: if user typed experience but didn't save first.
-                if (!route.params?.isEdit && experienceList.length === 0) {
+                if (!route.params?.isEdit && !noExperienceChecked && experienceList.length === 0) {
                   errorToast('You need to first Save the Experience.');
                   return;
                 }
@@ -1425,10 +1477,10 @@ const CreateProfileScreen = () => {
                   handleSaveOrAddExperience();
                 }
 
-                if (yearsOfExperienceOption?.label) {
+                if (effectiveYearsOfExperienceLabel) {
                   try {
                     const fd = new FormData();
-                    fd.append('years_of_experience', yearsOfExperienceOption.label);
+                    fd.append('years_of_experience', effectiveYearsOfExperienceLabel);
                     await empUpdateProfile(fd).unwrap();
                   } catch (_) {
                   }
@@ -1589,6 +1641,32 @@ const styles = StyleSheet.create({
     gap: hp(12),
     marginBottom: hp(4),
     zIndex: 10,
+  },
+  disabledContainer: {
+    opacity: 0.5,
+  },
+  noExperienceRow: {
+    marginTop: hp(6),
+    marginBottom: hp(6),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(10),
+  },
+  checkbox: {
+    width: wp(20),
+    height: wp(20),
+    borderRadius: wp(4),
+    borderWidth: 1,
+    borderColor: colors._0B3970,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+  },
+  checkIcon: {
+    ...commonFontStyle(700, 12, colors._0B3970),
+  },
+  noExperienceText: {
+    ...commonFontStyle(400, 14, colors._2F2F2F),
   },
   experienceDropdownLabel: {
     ...commonFontStyle(600, 18, colors._050505),

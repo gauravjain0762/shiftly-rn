@@ -12,6 +12,7 @@ export interface EducationItem {
   endDate_year: string | null;
   country: string;
   province: string;
+  still_studying: boolean;
   isEditing?: boolean;
   isLocal?: boolean;
   _id?: string;
@@ -94,6 +95,7 @@ const initialState: EmployeeState = {
     country: '',
     province: '',
     education_id: '',
+    still_studying: false,
     isEditing: false,
     isLocal: true,
   },

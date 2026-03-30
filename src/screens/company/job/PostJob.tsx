@@ -125,27 +125,6 @@ const DEFAULT_CURRENCIES = [
 ];
 
 const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
-
-const formatSalaryRangeLabel = (range: string): string => {
-  if (!range || typeof range !== 'string') return range || '';
-  const trimmed = range.trim();
-  if (trimmed.endsWith('+')) {
-    const num = parseInt(trimmed.replace(/[^\d]/g, ''), 10);
-    return Number.isNaN(num) ? trimmed : `${num.toLocaleString()}+`;
-  }
-  const parts = trimmed.split(/[-–—]/);
-  if (parts.length >= 2) {
-    const from = parseInt(parts[0].replace(/[^\d]/g, ''), 10);
-    const to = parseInt(parts[1].replace(/[^\d]/g, ''), 10);
-    if (!Number.isNaN(from) && !Number.isNaN(to)) {
-      return `${from.toLocaleString()} - ${to.toLocaleString()}`;
-    }
-    if (!Number.isNaN(from)) return `${from.toLocaleString()} - ${parts[1].trim()}`;
-    if (!Number.isNaN(to)) return `${parts[0].trim()} - ${to.toLocaleString()}`;
-  }
-  return trimmed;
-};
-
 const getLanguageProficiencyColor = (level: string) => {
   switch (level) {
     case 'Native':
@@ -224,11 +203,17 @@ const PostJob = () => {
 
   const salaryRangeData = useMemo(() => {
     const ranges = jobDropdownData?.data?.salary_ranges;
+    console.log("🔥 ~ PostJob ~ ranges:", ranges)
     if (Array.isArray(ranges) && ranges.length > 0) {
-      return ranges.map((r: string) => ({
-        label: formatSalaryRangeLabel(r),
-        value: r,
-      }));
+      return ranges
+        .filter((r: any) => {
+          const v = typeof r === 'string' ? r.trim() : String(r).trim();
+          return Boolean(v) && v !== '-';
+        })
+        .map((r: any) => ({
+          label: typeof r === 'string' ? r.trim() : String(r).trim(),
+          value: r,
+        }));
     }
   }, [jobDropdownData?.data?.salary_ranges]);
 
@@ -283,13 +268,29 @@ const PostJob = () => {
     other_requirements,
   } = useAppSelector((state: any) => selectJobForm(state));
 
+  const selectedSalaryValue =
+    salary?.value != null && String(salary.value).trim() !== '-'
+      ? salary.value
+      : '';
+
   const salaryRangeDataWithCurrent = useMemo(() => {
     const base = salaryRangeData ?? [];
-    if (salary?.value && base.length > 0 && !base.some((d: any) => d.value === salary.value)) {
-      return [{ label: salary.label || salary.value, value: salary.value }, ...base];
+    if (
+      selectedSalaryValue &&
+      base.length > 0 &&
+      !base.some((d: any) => String(d?.value) === String(selectedSalaryValue))
+    ) {
+      const rawLabel = salary?.label ?? '';
+      const label = (() => {
+        const l = String(rawLabel).trim();
+        if (!l || l === '-') return selectedSalaryValue;
+        return l;
+      })();
+
+      return [{ label, value: selectedSalaryValue }, ...base];
     }
     return base;
-  }, [salary?.value, salary?.label, salaryRangeData]);
+  }, [selectedSalaryValue, salary?.label, salaryRangeData]);
 
   const startDateDataWithCurrent = useMemo(() => {
     const base = startDateData ?? START_DATE_FALLBACK;
@@ -311,6 +312,26 @@ const PostJob = () => {
   const { data: skillsData } = useGetSkillsQuery({});
   const skills = skillsData?.data?.skills as any[];
   const [skillSearch, setSkillSearch] = useState('');
+
+  useEffect(() => {
+    if (!editMode) return;
+    if (!Array.isArray(skills) || skills.length === 0) return;
+    if (!Array.isArray(jobSkills) || jobSkills.length === 0) return;
+
+    const jobSkillStrings = jobSkills.map(s => String(s));
+    const resolved = jobSkillStrings.map(skillValue => {
+      const match = skills.find(s => String(s?._id) === skillValue);
+      return match?.title ?? match?.name ?? skillValue;
+    });
+
+    const isSame =
+      resolved.length === jobSkillStrings.length &&
+      resolved.every((v, idx) => v === jobSkillStrings[idx]);
+    if (!isSame) {
+      updateJobForm({ jobSkills: resolved });
+    }
+  }, [editMode, skills, jobSkills, updateJobForm]);
+
   const filteredSkills = useMemo(() => {
     const q = skillSearch.trim().toLowerCase();
     const list = Array.isArray(skills) ? skills : [];
@@ -912,6 +933,24 @@ const PostJob = () => {
 
   const removeSkill = (skill: string) => {
     const updatedSkills = jobSkills.filter((s: string) => s !== skill);
+    // Submission uses `skillId`, so when we remove the chip we also need to
+    // remove the corresponding id from `skillId` (if we can resolve it).
+    const resolvedId =
+      Array.isArray(skills) && skills.length > 0
+        ? skills.find(
+            (s: any) =>
+              String(s?._id) === String(skill) || String(s?.title) === String(skill),
+          )?._id
+        : undefined;
+
+    if (resolvedId) {
+      updateJobForm({
+        jobSkills: updatedSkills,
+        skillId: skillId.filter((id: string) => String(id) !== String(resolvedId)),
+      });
+      return;
+    }
+
     updateJobForm({ jobSkills: updatedSkills });
   };
 
@@ -2073,7 +2112,7 @@ const PostJob = () => {
                       data={salaryRangeDataWithCurrent ?? salaryRangeData}
                       labelField="label"
                       valueField="value"
-                      value={salary?.value}
+                      value={selectedSalaryValue}
                       onChange={(e: any) => {
                         updateJobForm({ salary: { label: e.label, value: e.value } });
                       }}

@@ -5,6 +5,7 @@ import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 import Share from 'react-native-share';
 import { Eye } from 'lucide-react-native';
 import { SCREENS } from '../../navigation/screenNames';
@@ -23,10 +24,9 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
         try {
             const title = item?.title || 'Job Opportunity';
             const description = item?.description || '';
-            const salary =
-                item?.monthly_salary_from || item?.monthly_salary_to
-                    ? `Salary: ${getCurrencySymbol(item?.currency || 'USD')}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
-                    : '';
+            const salary = getJobMonthlySalaryRangeText(item)
+                ? `Salary: ${getCurrencySymbol(item?.currency || 'USD')}${getJobMonthlySalaryRangeText(item)}`
+                : '';
 
             const shareUrl = normalizeUrl(item?.share_url);
             const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
@@ -109,7 +109,7 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={{ gap: wp(8) }}
                         >
-                            {(item?.monthly_salary_from || item?.monthly_salary_to) && (
+                            {getJobMonthlySalaryRangeText(item) && (
                                 <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
                                     <View style={styles.salaryRow}>
                                         {item?.currency?.toUpperCase() === 'AED' ? (
@@ -118,7 +118,7 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                                             <Text style={styles.currencySymbol}>{getCurrencySymbol(item?.currency || 'USD')}</Text>
                                         )}
                                         <Text style={styles.tagText}>
-                                            {`${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+                                            {getJobMonthlySalaryRangeText(item)}
                                         </Text>
                                     </View>
                                 </View>

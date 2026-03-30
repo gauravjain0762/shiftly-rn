@@ -34,6 +34,7 @@ import {
   getExpiryDays,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useDispatch } from 'react-redux';
 import { setCoPostJobSteps, setJobFormState } from '../../../features/companySlice';
@@ -105,10 +106,10 @@ const CoJobDetails = () => {
       const title = jobDetail?.title || 'Job Opportunity';
       const area = jobDetail?.address || jobDetail?.area || '';
       const description = jobDetail?.description || '';
-      const salary =
-        jobDetail?.monthly_salary_from || jobDetail?.monthly_salary_to
-          ? `Salary: ${jobDetail?.currency === 'AED' ? 'AED' : getCurrencySymbol(jobDetail?.currency)}${jobDetail?.monthly_salary_from?.toLocaleString()} - ${jobDetail?.monthly_salary_to?.toLocaleString()}`
-          : '';
+      const salaryRangeText = getJobMonthlySalaryRangeText(jobDetail);
+      const salary = salaryRangeText
+        ? `Salary: ${jobDetail?.currency === 'AED' ? 'AED' : getCurrencySymbol(jobDetail?.currency)}${salaryRangeText}`
+        : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
@@ -214,20 +215,7 @@ ${salary}${shareUrlText}`;
                           <Text style={styles.currencySymbol}>{getCurrencySymbol(jobDetail?.currency)}</Text>
                         )}
                         <Text style={styles.salary}>
-                          {(() => {
-                            const from = jobDetail?.monthly_salary_from;
-                            const to = jobDetail?.monthly_salary_to;
-                            const hasFrom = from !== null && from !== undefined && from !== '';
-                            const hasTo = to !== null && to !== undefined && to !== '';
-                            const fromNum = hasFrom ? Number(from) : NaN;
-                            const toNum = hasTo ? Number(to) : NaN;
-                            if (Number.isFinite(fromNum) && Number.isFinite(toNum)) {
-                              return `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`;
-                            }
-                            if (Number.isFinite(fromNum)) return `${fromNum.toLocaleString()}`;
-                            if (Number.isFinite(toNum)) return `${toNum.toLocaleString()}`;
-                            return 'N/A';
-                          })()}
+                          {getJobMonthlySalaryRangeText(jobDetail) || 'N/A'}
                         </Text>
                       </View>
                     </View>
@@ -403,22 +391,63 @@ ${salary}${shareUrlText}`;
                     return { label: str, value: normalized };
                   })(),
                   salary: (() => {
-                    const from = jobDetail?.monthly_salary_from;
-                    const to = jobDetail?.monthly_salary_to;
-                    const fromNum = from != null && from !== '' ? Number(from) : NaN;
-                    const toNum = to != null && to !== '' ? Number(to) : NaN;
+                    const parseNum = (n: any) => {
+                      if (n === null || n === undefined) return NaN;
+                      const str = String(n).trim();
+                      if (!str || str === '-') return NaN;
+                      // Handle values like "2,000"
+                      return Number(str.replace(/,/g, ''));
+                    };
+
+                    const fromNum = parseNum(jobDetail?.monthly_salary_from);
+                    const toNum = parseNum(jobDetail?.monthly_salary_to);
+
                     if (Number.isFinite(fromNum) && Number.isFinite(toNum)) {
                       // Use API format "from-to" for dropdown matching (e.g. "3000-5000")
                       const value = `${fromNum}-${toNum}`;
                       const label = `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`;
                       return { label, value };
                     }
-                    if (Number.isFinite(fromNum) && (to === null || to === undefined || to === '')) {
+
+                    if (
+                      Number.isFinite(fromNum) &&
+                      (jobDetail?.monthly_salary_to === null ||
+                        jobDetail?.monthly_salary_to === undefined ||
+                        jobDetail?.monthly_salary_to === '' ||
+                        String(jobDetail?.monthly_salary_to).trim() === '-')
+                    ) {
                       // Handle "10000+" style - from exists, no upper bound
                       const value = `${fromNum}+`;
                       const label = `${fromNum.toLocaleString()}+`;
                       return { label, value };
                     }
+
+                    // Some APIs return only "monthly_salary_range" (e.g. "2000-3000" or "10000+")
+                    const rawRange = jobDetail?.monthly_salary_range;
+                    const rangeStr = rawRange === null || rawRange === undefined ? '' : String(rawRange).trim();
+                    if (rangeStr && rangeStr !== '-') {
+                      const plusMatch = rangeStr.match(/(\d[\d,]*)\s*\+/);
+                      if (plusMatch?.[1]) {
+                        const from = parseNum(plusMatch[1]);
+                        if (Number.isFinite(from)) {
+                          const value = `${from}+`;
+                          const label = `${from.toLocaleString()}+`;
+                          return { label, value };
+                        }
+                      }
+
+                      const dashMatch = rangeStr.match(/(\d[\d,]*)\s*-\s*(\d[\d,]*)/);
+                      if (dashMatch?.[1] && dashMatch?.[2]) {
+                        const from = parseNum(dashMatch[1]);
+                        const to = parseNum(dashMatch[2]);
+                        if (Number.isFinite(from) && Number.isFinite(to)) {
+                          const value = `${from}-${to}`;
+                          const label = `${from.toLocaleString()} - ${to.toLocaleString()}`;
+                          return { label, value };
+                        }
+                      }
+                    }
+
                     return { label: '0 - 1,000', value: '0-1000' };
                   })(),
                   currency: {

@@ -47,6 +47,7 @@ const ExperienceList: FC<any> = ({
   desiredJobTitle,
   disableDesiredJob,
   yearsOfExperienceNode,
+  disablePastExperience,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {data: departmentsResponse} = useGetDepartmentsQuery({});
@@ -101,146 +102,136 @@ const ExperienceList: FC<any> = ({
 
       {yearsOfExperienceNode}
 
-      <BaseText style={styles.headerText}>Past Job Experience</BaseText>
-      <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
-        <Text style={styles.fieldLabel}>
-          Job Title<Text style={styles.required}>*</Text>
-        </Text>
-        <Tooltip
-          message="Enter the position you held (e.g., Waiter, Receptionist). This helps us match your skills and salary expectations."
-          position="bottom"
-          containerStyle={styles.tooltipIcon}
-          tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+      <View
+        pointerEvents={disablePastExperience ? 'none' : 'auto'}
+        style={disablePastExperience ? styles.disabledContainer : undefined}>
+        <BaseText style={styles.headerText}>Past Job Experience</BaseText>
+        <View style={[styles.fieldHeader, {overflow: 'visible'}]}>
+          <Text style={styles.fieldLabel}>
+            Job Title<Text style={styles.required}>*</Text>
+          </Text>
+          <Tooltip
+            message="Enter the position you held (e.g., Waiter, Receptionist). This helps us match your skills and salary expectations."
+            position="bottom"
+            containerStyle={styles.tooltipIcon}
+            tooltipBoxStyle={{left: wp(-29), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000}}
+          />
+        </View>
+        <CustomInput
+          placeholder={'Enter Job Title'}
+          value={experienceListEdit.title}
+          onChange={(text: any) =>
+            setExperienceListEdit({...experienceListEdit, title: text})
+          }
+          label=""
         />
-      </View>
-      <CustomInput
-        placeholder={'Enter Job Title'}
-        value={experienceListEdit.title}
-        onChange={(text: any) =>
-          setExperienceListEdit({...experienceListEdit, title: text})
-        }
-        label=""
-      />
-      <CustomInput
-        label="Company Name"
-        required
-        placeholder={'Enter Company Name'}
-        value={experienceListEdit.company}
-        onChange={(text: any) =>
-          setExperienceListEdit({...experienceListEdit, company: text})
-        }
-      />
+        <CustomInput
+          label="Company Name"
+          required
+          placeholder={'Enter Company Name'}
+          value={experienceListEdit.company}
+          onChange={(text: any) =>
+            setExperienceListEdit({...experienceListEdit, company: text})
+          }
+        />
 
-      <CustomDropdown
-        data={departmentOptions}
-        label="Department"
-        required
-        placeholder={'Select Department'}
-        value={experienceListEdit?.department}
-        container={{marginBottom: hp(8)}}
-        onChange={(selectedItem: {label: string; value: string} | any) => {
-          setExperienceListEdit({
-            ...experienceListEdit,
-            department: selectedItem?.value ?? '',
-          });
-        }}
-        labelStyle={{...commonFontStyle(700, wp(18), colors._050505)}}
-      />
+        <CustomDropdown
+          data={departmentOptions}
+          label="Department"
+          required
+          placeholder={'Select Department'}
+          value={experienceListEdit?.department}
+          container={{marginBottom: hp(8)}}
+          onChange={(selectedItem: {label: string; value: string} | any) => {
+            setExperienceListEdit({
+              ...experienceListEdit,
+              department: selectedItem?.value ?? '',
+            });
+          }}
+          labelStyle={{...commonFontStyle(700, wp(18), colors._050505)}}
+        />
 
-      <View style={styles.countryWrapper}>
-        <BaseText style={styles.label}>
-          {'Country'}<Text style={styles.required}>*</Text>
-        </BaseText>
-        <TouchableOpacity
-          onPress={() => setIsVisible(true)}
-          style={styles.country}>
-          <BaseText
-            style={
-              experienceListEdit?.country
-                ? styles.countryText
-                : styles.countryPlaceholder
-            }
-            numberOfLines={2}>
-            {experienceListEdit?.country || 'Select Country'}
+        <View style={styles.countryWrapper}>
+          <BaseText style={styles.label}>
+            {'Country'}<Text style={styles.required}>*</Text>
           </BaseText>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            onPress={() => setIsVisible(true)}
+            style={styles.country}>
+            <BaseText
+              style={
+                experienceListEdit?.country
+                  ? styles.countryText
+                  : styles.countryPlaceholder
+              }
+              numberOfLines={2}>
+              {experienceListEdit?.country || 'Select Country'}
+            </BaseText>
+          </TouchableOpacity>
+        </View>
 
-      {isVisible && (
-        <CountryPicker
-          visible={isVisible}
-          countryCode="US"
-          withFilter
-          withCountryNameButton
-          withCallingCode={false}
-          withFlag
-          withEmoji={false}
-          modalProps={{
-            animationType: 'slide',
-            transparent: true,
-            presentationStyle: 'overFullScreen',
-          }}
-          onSelect={(item: any) => {
-            setExperienceListEdit({...experienceListEdit, country: item?.name});
-            setIsVisible(false);
-          }}
-          onClose={() => setIsVisible(false)}
-        />
-      )}
+        {isVisible && (
+          <CountryPicker
+            visible={isVisible}
+            countryCode="US"
+            withFilter
+            withCountryNameButton
+            withCallingCode={false}
+            withFlag
+            withEmoji={false}
+            modalProps={{
+              animationType: 'slide',
+              transparent: true,
+              presentationStyle: 'overFullScreen',
+            }}
+            onSelect={(item: any) => {
+              setExperienceListEdit({...experienceListEdit, country: item?.name});
+              setIsVisible(false);
+            }}
+            onClose={() => setIsVisible(false)}
+          />
+        )}
 
-      <BaseText style={styles.headerText}>
-        When did you start this job?
-      </BaseText>
-      <CustomDatePicker
-        type={'Experience'}
-        label={'Start Date'}
-        required
-        dateValue={experienceListEdit}
-        onChange={(date: any) =>
-          setExperienceListEdit({
-            ...experienceListEdit,
-            jobStart_month: date?.month?.toString(),
-            jobStart_year: date?.year?.toString(),
-          })
-        }
-      />
-
-      <BaseText style={styles.headerText}>When did it end?</BaseText>
-      
-      {/* End Date Field - Disabled when still working */}
-      <View style={experienceListEdit?.still_working && styles.disabledContainer}>
+        <BaseText style={styles.headerText}>
+          When did you start this job?
+        </BaseText>
         <CustomDatePicker
           type={'Experience'}
-          label={'End Date'}
-          required={!experienceListEdit?.still_working}
+          label={'Start Date'}
+          required
           dateValue={experienceListEdit}
-          onChange={(date: any) => {
-            if (!experienceListEdit?.still_working) {
-              setExperienceListEdit({
-                ...experienceListEdit,
-                jobEnd_month: date?.month?.toString(),
-                jobEnd_year: date?.year?.toString(),
-              });
-            }
-          }}
+          onChange={(date: any) =>
+            setExperienceListEdit({
+              ...experienceListEdit,
+              jobStart_month: date?.month?.toString(),
+              jobStart_year: date?.year?.toString(),
+            })
+          }
         />
-      </View>
 
-      {/* "I currently work here" checkbox - Right below End Date */}
-      <Pressable
-        onPress={() =>
-          setExperienceListEdit({
-            ...experienceListEdit,
-            still_working: !experienceListEdit?.still_working,
-            // Clear end date when checking "still working"
-            ...((!experienceListEdit?.still_working) && {
-              jobEnd_month: '',
-              jobEnd_year: '',
-            }),
-          })
-        }
-        style={styles.stillWrapper}>
-        <TouchableOpacity
+        <BaseText style={styles.headerText}>When did it end?</BaseText>
+
+        {/* End Date Field - Disabled when still working */}
+        <View style={experienceListEdit?.still_working && styles.disabledContainer}>
+          <CustomDatePicker
+            type={'Experience'}
+            label={'End Date'}
+            required={!experienceListEdit?.still_working}
+            dateValue={experienceListEdit}
+            onChange={(date: any) => {
+              if (!experienceListEdit?.still_working) {
+                setExperienceListEdit({
+                  ...experienceListEdit,
+                  jobEnd_month: date?.month?.toString(),
+                  jobEnd_year: date?.year?.toString(),
+                });
+              }
+            }}
+          />
+        </View>
+
+        {/* "I currently work here" checkbox - Right below End Date */}
+        <Pressable
           onPress={() =>
             setExperienceListEdit({
               ...experienceListEdit,
@@ -251,35 +242,49 @@ const ExperienceList: FC<any> = ({
                 jobEnd_year: '',
               }),
             })
-          }>
-          <ImageBackground
-            source={IMAGES.checkBox}
-            resizeMode="contain"
-            style={styles.checkbox}>
-            {experienceListEdit?.still_working && (
-              <Image source={IMAGES.check} style={styles.checkIcon} />
-            )}
-          </ImageBackground>
-        </TouchableOpacity>
-        <BaseText style={styles.stillText}>I currently work here</BaseText>
-      </Pressable>
+          }
+          style={styles.stillWrapper}>
+          <TouchableOpacity
+            onPress={() =>
+              setExperienceListEdit({
+                ...experienceListEdit,
+                still_working: !experienceListEdit?.still_working,
+                // Clear end date when checking "still working"
+                ...((!experienceListEdit?.still_working) && {
+                  jobEnd_month: '',
+                  jobEnd_year: '',
+                }),
+              })
+            }>
+            <ImageBackground
+              source={IMAGES.checkBox}
+              resizeMode="contain"
+              style={styles.checkbox}>
+              {experienceListEdit?.still_working && (
+                <Image source={IMAGES.check} style={styles.checkIcon} />
+              )}
+            </ImageBackground>
+          </TouchableOpacity>
+          <BaseText style={styles.stillText}>I currently work here</BaseText>
+        </Pressable>
 
-      <CustomDropdown
-        data={jobTypeOptions}
-        dropdownPosition="top"
-        label="What type of experience"
-        required
-        placeholder={'What type of experience'}
-        value={experienceListEdit?.experience_type}
-        container={{marginBottom: 15}}
-        onChange={(selectedItem: {label: string; value: string} | any) => {
-          setExperienceListEdit({
-            ...experienceListEdit,
-            experience_type: selectedItem?.value,
-          });
-        }}
-        labelStyle={{...commonFontStyle(700, wp(18), colors._050505)}}
-      />
+        <CustomDropdown
+          data={jobTypeOptions}
+          dropdownPosition="top"
+          label="What type of experience"
+          required
+          placeholder={'What type of experience'}
+          value={experienceListEdit?.experience_type}
+          container={{marginBottom: 15}}
+          onChange={(selectedItem: {label: string; value: string} | any) => {
+            setExperienceListEdit({
+              ...experienceListEdit,
+              experience_type: selectedItem?.value,
+            });
+          }}
+          labelStyle={{...commonFontStyle(700, wp(18), colors._050505)}}
+        />
+      </View>
     </View>
   );
 };

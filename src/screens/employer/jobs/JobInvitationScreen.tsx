@@ -11,6 +11,7 @@ import { navigateTo } from '../../../utils/commonFunction'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { commonFontStyle, hp, wp } from '../../../theme/fonts'
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import { BackHeader, LinearContainer } from '../../../component'
 import CommonButton from '../../../component/common/CommonButton'
 import BottomModal from '../../../component/common/BottomModal';
@@ -72,7 +73,7 @@ const JobInvitationScreen = () => {
                             ) : (
                                 getCurrencySymbol(job?.currency)
                             )}
-                            {` ${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`}
+                            {` ${getJobMonthlySalaryRangeText(job)}`}
                         </BaseText>
                     </View>
                 </View>

@@ -31,6 +31,7 @@ import {
 } from '../../../api/dashboardApi';
 import { navigateTo, errorToast, goBack, resetNavigation, getInitials, hasValidImage } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import { SCREENS } from '../../../navigation/screenNames';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
 
@@ -461,25 +462,11 @@ const SuggestedEmployeeScreen = () => {
   }, [applications, extraApplicants]);
 
   const renderSalaryRange = () => {
-    const from = jobInfo?.monthly_salary_from;
-    const to = jobInfo?.monthly_salary_to;
     const cur = (jobInfo?.currency || 'AED').toUpperCase();
     const symbol = getCurrencySymbol(cur);
+    const salaryText = getJobMonthlySalaryRangeText(jobInfo);
 
-    const hasFrom = from !== null && from !== undefined && from !== '';
-    const hasTo = to !== null && to !== undefined && to !== '';
-    if (!hasFrom && !hasTo) return null;
-
-    const fromNum = hasFrom ? Number(from) : NaN;
-    const toNum = hasTo ? Number(to) : NaN;
-    const salaryText =
-      Number.isFinite(fromNum) && Number.isFinite(toNum)
-        ? `${fromNum.toLocaleString()} - ${toNum.toLocaleString()}`
-        : Number.isFinite(fromNum)
-          ? `${fromNum.toLocaleString()}`
-          : Number.isFinite(toNum)
-            ? `${toNum.toLocaleString()}`
-            : 'N/A';
+    if (!salaryText) return null;
 
     return (
       <View style={styles.salaryRow}>
@@ -518,8 +505,39 @@ const SuggestedEmployeeScreen = () => {
   const handleEditJob = () => {
     if (!jobInfo) return;
 
-    const from_salary = jobInfo?.monthly_salary_from?.toString() || '';
-    const to_salary = jobInfo?.monthly_salary_to?.toString() || '';
+    const rawRange = jobInfo?.monthly_salary_range;
+    const rangeStr =
+      rawRange === null || rawRange === undefined ? '' : String(rawRange).trim();
+
+    const normalizedRangeStr = rangeStr
+      // Normalize "2000 - 3000" => "2000-3000" for dropdown matching
+      .replace(/\s*-\s*/g, '-')
+      .replace(/\s*\+\s*/g, '+');
+
+    // Dropdown values are expected to be the API "from-to" format (e.g. "2000-3000")
+    // so we must avoid sending "from - to" with spaces, and also avoid "-" placeholders.
+    const salaryValueFromRange =
+      normalizedRangeStr && normalizedRangeStr !== '-' ? normalizedRangeStr : '';
+
+    const fromNum = jobInfo?.monthly_salary_from !== null && jobInfo?.monthly_salary_from !== undefined
+      ? Number(jobInfo?.monthly_salary_from)
+      : NaN;
+    const toNum = jobInfo?.monthly_salary_to !== null && jobInfo?.monthly_salary_to !== undefined
+      ? Number(jobInfo?.monthly_salary_to)
+      : NaN;
+
+    const salaryValueFromFromTo =
+      Number.isFinite(fromNum) && Number.isFinite(toNum)
+        ? `${fromNum}-${toNum}`
+        : Number.isFinite(fromNum) &&
+            (jobInfo?.monthly_salary_to === null ||
+              jobInfo?.monthly_salary_to === undefined ||
+              jobInfo?.monthly_salary_to === '' ||
+              String(jobInfo?.monthly_salary_to).trim() === '-')
+          ? `${fromNum}+`
+          : '';
+
+    const salaryValue = salaryValueFromRange || salaryValueFromFromTo;
 
     const mapped = mapJobToFormState(jobInfo);
 
@@ -539,8 +557,8 @@ const SuggestedEmployeeScreen = () => {
         contract_type: { label: jobInfo?.contract_type, value: jobInfo?.contract_type },
         area: { label: jobInfo?.address || jobInfo?.area || '', value: jobInfo?.address || jobInfo?.area || '' },
         salary: {
-          label: `${from_salary} - ${to_salary}`,
-          value: `${from_salary} - ${to_salary}`,
+          label: salaryValue,
+          value: salaryValue,
         },
         currency: { label: jobInfo?.currency, value: jobInfo?.currency },
         position: { label: jobInfo?.no_positions?.toString(), value: jobInfo?.no_positions?.toString() },

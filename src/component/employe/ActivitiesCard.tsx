@@ -5,6 +5,7 @@ import { colors } from '../../theme/colors';
 import CustomImage from '../common/CustomImage';
 import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { SCREENS } from '../../navigation/screenNames';
 import { IMAGES } from '../../assets/Images';
@@ -49,8 +50,14 @@ const ActivitiesCard: FC<props> = ({ item }) => {
             contract_type: item?.contract_type,
             area: item?.area,
             country: item?.country,
-            monthly_salary_from: item?.monthly_salary_from,
-            monthly_salary_to: item?.monthly_salary_to,
+            monthly_salary_range:
+              item?.monthly_salary_range ||
+              (item?.monthly_salary_from != null &&
+              item?.monthly_salary_to != null &&
+              item?.monthly_salary_from !== '-' &&
+              item?.monthly_salary_to !== '-'
+                ? `${item?.monthly_salary_from}-${item?.monthly_salary_to}`
+                : ''),
             currency: item?.currency,
           },
           company_id: {
@@ -115,7 +122,7 @@ const ActivitiesCard: FC<props> = ({ item }) => {
               ) : (
                 getCurrencySymbol(item?.currency || jobDetail?.data?.job?.currency || 'AED')
               )}
-              {` ${(item?.monthly_salary_from || jobDetail?.data?.job?.monthly_salary_from)?.toLocaleString()} - ${(item?.monthly_salary_to || jobDetail?.data?.job?.monthly_salary_to)?.toLocaleString()}`}
+                  {` ${getJobMonthlySalaryRangeText(item || jobDetail?.data?.job)}`}
             </Text>
           </View>
 

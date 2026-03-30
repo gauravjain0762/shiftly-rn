@@ -17,6 +17,7 @@ import { IMAGES } from '../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
 import { getTimeAgo } from '../../utils/commonFunction';
+import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 
 export type JobListCardProps = {
   /** Job object - for employee, may come from item.job_id or item.job */
@@ -146,7 +147,7 @@ const JobListCard = ({
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: wp(8) }}
               >
-                {(job?.monthly_salary_from || job?.monthly_salary_to) && (
+                {getJobMonthlySalaryRangeText(job) && (
                   <View style={[styles.tag, { backgroundColor: '#2CCF54' }]}>
                     <View style={styles.salaryRow}>
                       {job?.currency?.toUpperCase() === 'AED' ? (
@@ -157,7 +158,7 @@ const JobListCard = ({
                         </Text>
                       )}
                       <Text style={styles.tagText}>
-                        {`${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`}
+                        {getJobMonthlySalaryRangeText(job)}
                       </Text>
                     </View>
                   </View>

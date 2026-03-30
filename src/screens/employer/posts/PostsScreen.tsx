@@ -82,6 +82,7 @@ const PostsScreen = () => {
                             <FeedCard
                                 item={item}
                                 showMenu={false}
+                                isCompanyFlow={false}
                                 itemIndex={index}
                                 onScrollToTop={() => handleScrollToPost(index)}
                                 onPressLogo={() => {

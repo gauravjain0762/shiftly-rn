@@ -10,6 +10,7 @@ import { useGetAppliedJobsQuery, useGetEmployeeJobsQuery, useGetInterviewsQuery 
 import { navigateTo } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { normalizeUrl } from '../../../utils/shareUtils';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import Share from 'react-native-share';
 import { SCREENS } from '../../../navigation/screenNames';
 
@@ -142,8 +143,8 @@ const MyJobs = () => {
             const title = job?.title || 'Job Opportunity';
             const description = job?.description || '';
             const salary =
-                job?.monthly_salary_from || job?.monthly_salary_to
-                    ? `Salary: ${getCurrencySymbol(job?.currency || 'USD')}${job?.monthly_salary_from?.toLocaleString()} - ${job?.monthly_salary_to?.toLocaleString()}`
+                getJobMonthlySalaryRangeText(job)
+                    ? `Salary: ${getCurrencySymbol(job?.currency || 'AED')}${getJobMonthlySalaryRangeText(job)}`
                     : '';
 
             const shareUrl = normalizeUrl(job?.share_url);

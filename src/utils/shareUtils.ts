@@ -1,6 +1,7 @@
 import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
 import {getCurrencySymbol} from './currencySymbols';
+import { getJobMonthlySalaryRangeText } from './monthlySalaryRange';
 import {IMAGES} from '../assets/Images';
 
 export const normalizeUrl = (raw?: string) => {
@@ -27,11 +28,10 @@ export const shareJob = async (item: any) => {
     const title = item?.title || 'Job Opportunity';
     const area = item?.address || item?.area || '';
     const description = item?.description || '';
+    const salaryRangeText = getJobMonthlySalaryRangeText(item);
     const salary =
-      item?.monthly_salary_from || item?.monthly_salary_to
-        ? `Salary: ${getCurrencySymbol(
-            item?.currency,
-          )}${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`
+      salaryRangeText
+        ? `Salary: ${getCurrencySymbol(item?.currency)}${salaryRangeText}`
         : '';
 
     const shareUrl = normalizeUrl(item?.share_url) || 'https://shiftly.ae/';

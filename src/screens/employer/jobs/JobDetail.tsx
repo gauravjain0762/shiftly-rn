@@ -32,6 +32,7 @@ import {
   resetNavigation,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import { SCREEN_NAMES, SCREENS } from '../../../navigation/screenNames';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -230,11 +231,10 @@ const JobDetail = () => {
       const title = curr_jobdetails?.title || 'Job Opportunity';
       const area = curr_jobdetails?.address || curr_jobdetails?.area || '';
       const description = curr_jobdetails?.description || '';
-      const salary =
-        curr_jobdetails?.monthly_salary_from ||
-          curr_jobdetails?.monthly_salary_to
-          ? `Salary: ${getCurrencySymbol(curr_jobdetails?.currency)}${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`
-          : '';
+      const salaryRangeText = getJobMonthlySalaryRangeText(curr_jobdetails);
+      const salary = salaryRangeText
+        ? `Salary: ${getCurrencySymbol(curr_jobdetails?.currency)}${salaryRangeText}`
+        : '';
 
       const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
@@ -403,8 +403,7 @@ ${salary}${shareUrlText}`;
                   {curr_jobdetails?.company_id?.company_name}
                 </Text>
 
-                {(curr_jobdetails?.monthly_salary_from ||
-                  curr_jobdetails?.monthly_salary_to) && (
+                {getJobMonthlySalaryRangeText(curr_jobdetails) && (
                     <View style={styles.salaryContainerHeader}>
                       <Text style={styles.salaryTextHeader}>
                         {curr_jobdetails?.currency?.toUpperCase()}
@@ -415,7 +414,7 @@ ${salary}${shareUrlText}`;
                         <Text style={styles.salaryTextHeader}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
                       )}
                       <Text style={styles.salaryTextHeader}>
-                        {`${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                        {getJobMonthlySalaryRangeText(curr_jobdetails)}
                       </Text>
                     </View>
                   )}
@@ -451,8 +450,7 @@ ${salary}${shareUrlText}`;
                 </View>
               )}
 
-              {curr_jobdetails?.monthly_salary_from &&
-                curr_jobdetails?.monthly_salary_to && (
+              {getJobMonthlySalaryRangeText(curr_jobdetails) && (
                   <View style={styles.snapshotItem}>
                     <Text style={styles.snapshotLabel}>Salary</Text>
                     <View style={styles.valueRow}>
@@ -465,7 +463,7 @@ ${salary}${shareUrlText}`;
                         <Text style={styles.snapshotValue}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
                       )}
                       <Text style={styles.snapshotValue}>
-                        {`${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                        {getJobMonthlySalaryRangeText(curr_jobdetails)}
                       </Text>
                     </View>
                   </View>
@@ -711,7 +709,7 @@ ${salary}${shareUrlText}`;
                                   {getCurrencySymbol(curr_jobdetails?.currency)}
                                 </BaseText>
                               )}
-                              {`${curr_jobdetails?.monthly_salary_from?.toLocaleString()} - ${curr_jobdetails?.monthly_salary_to?.toLocaleString()}`}
+                              {getJobMonthlySalaryRangeText(curr_jobdetails)}
                             </Text>
                           ) : (value || '-')}
                         </Text>

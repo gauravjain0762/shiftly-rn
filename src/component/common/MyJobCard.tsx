@@ -7,6 +7,7 @@ import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { getPostedTime, getExpiryDays } from '../../utils/commonFunction';
 import { shareJob } from '../../utils/shareUtils';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 
 type JobCardProps = {
   item?: any;
@@ -56,7 +57,7 @@ const MyJobCard = (props: JobCardProps) => {
           {`${item?.description} `}
         </Text>
 
-        {(item?.monthly_salary_from || item?.monthly_salary_to) && (
+        {getJobMonthlySalaryRangeText(item) && (
           <View style={styles.salaryContainer}>
             <Text style={styles.salaryText}>
               {`${item?.currency?.toUpperCase()} `}
@@ -65,7 +66,7 @@ const MyJobCard = (props: JobCardProps) => {
               ) : (
                 getCurrencySymbol(item?.currency)
               )}
-              {` ${item?.monthly_salary_from?.toLocaleString()} - ${item?.monthly_salary_to?.toLocaleString()}`}
+              {` ${getJobMonthlySalaryRangeText(item)}`}
             </Text>
           </View>
         )}

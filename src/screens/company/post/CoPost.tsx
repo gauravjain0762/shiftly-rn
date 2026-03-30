@@ -125,6 +125,7 @@ const CoPost = () => {
                 item={item}
                 showMenu={true}
                 hideLike={false}
+                isCompanyFlow={true}
                 currentCompanyId={currentCompanyId}
                 onScrollToTop={() => handleScrollToPost(index)}
                 onPressCard={() => navigateTo(SCREENS.ShowPost, { post: item })}

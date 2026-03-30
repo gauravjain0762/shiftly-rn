@@ -30,6 +30,10 @@ import {
     goBack,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import {
+    formatMonthlySalaryRangeText,
+    getJobMonthlySalaryRangeText,
+} from '../../../utils/monthlySalaryRange';
 import { SCREENS } from '../../../navigation/screenNames';
 import {
     useEditCompanyJobMutation,
@@ -284,12 +288,8 @@ const JobPreview = () => {
 
     const formatSalary = () => {
         const currencyCode = apiJob?.currency || currency?.value || 'AED';
-        const fromValue = apiJob?.monthly_salary_from;
-        const toValue = apiJob?.monthly_salary_to;
-
-        if (typeof fromValue === 'number' || typeof toValue === 'number') {
-            const fromText = typeof fromValue === 'number' ? fromValue.toLocaleString() : '0';
-            const toText = typeof toValue === 'number' ? toValue.toLocaleString() : '0';
+        const salaryRangeTextFromApi = getJobMonthlySalaryRangeText(apiJob);
+        if (salaryRangeTextFromApi) {
             return (
                 <View style={styles.salaryContainer}>
                     {currencyCode === 'AED' ? (
@@ -297,16 +297,14 @@ const JobPreview = () => {
                     ) : (
                         <Text style={styles.currencySymbol}>{getCurrencySymbol(currencyCode)}</Text>
                     )}
-                    <Text style={styles.jobSalary}>
-                        {`${fromText} - ${toText}`}
-                    </Text>
+                    <Text style={styles.jobSalary}>{salaryRangeTextFromApi}</Text>
                 </View>
             );
         }
 
         if (!salary?.value) return null;
-        const [from, to] = salary.value.split('-').map((s: string) => s.trim());
-        if (!from || !to) return null;
+        const salaryRangeText = formatMonthlySalaryRangeText(salary.value);
+        if (!salaryRangeText) return null;
         return (
             <View style={styles.salaryContainer}>
                 {currencyCode === 'AED' ? (
@@ -315,7 +313,7 @@ const JobPreview = () => {
                     <Text style={styles.currencySymbol}>{getCurrencySymbol(currencyCode)}</Text>
                 )}
                 <Text style={styles.jobSalary}>
-                    {`${Number(from.replace(/,/g, '')).toLocaleString()} - ${Number(to.replace(/,/g, '')).toLocaleString()}`}
+                    {salaryRangeText}
                 </Text>
             </View>
         );

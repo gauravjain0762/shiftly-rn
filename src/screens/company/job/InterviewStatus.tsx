@@ -13,6 +13,7 @@ import { useRoute } from '@react-navigation/native';
 import { BackHeader, LinearContainer } from '../../../component';
 import { navigateTo } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
+import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import { SCREENS } from '../../../navigation/screenNames';
 import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -51,12 +52,11 @@ const InterviewStatus = () => {
         : stripPlusCodeFromAddress(jobData?.address || jobData?.area) || 'N/A';
     const contract = jobData?.contract_type || 'N/A';
     const renderSalary = () => {
-        const from = jobData?.monthly_salary_from;
-        const to = jobData?.monthly_salary_to;
         const cur = (jobData?.currency || 'AED').toUpperCase();
         const sym = getCurrencySymbol(cur);
+        const salaryText = getJobMonthlySalaryRangeText(jobData);
 
-        if (!from && !to) return <Text style={styles.salary}>N/A</Text>;
+        if (!salaryText) return <Text style={styles.salary}>N/A</Text>;
 
         return (
             <View style={styles.salaryRow}>
@@ -66,9 +66,7 @@ const InterviewStatus = () => {
                     <Text style={styles.currencySymbol}>{sym}</Text>
                 )}
                 <Text style={styles.salary}>
-                    {from && to
-                        ? `${from.toLocaleString()} - ${to.toLocaleString()}`
-                        : (from ? from.toLocaleString() : to.toLocaleString())}
+                    {salaryText}
                 </Text>
             </View>
         );
