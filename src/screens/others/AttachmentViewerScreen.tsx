@@ -21,6 +21,7 @@ import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { goBack } from '../../utils/commonFunction';
 import { useTranslation } from 'react-i18next';
+import { Platform } from 'react-native';
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i;
 const PDF_EXTENSIONS = /\.(pdf)(\?|$)/i;
@@ -32,12 +33,19 @@ const AttachmentViewerScreen: React.FC = () => {
   const url = params?.url || '';
   const [loading, setLoading] = useState(true);
 
+  // Important: if type is explicitly provided as `pdf`/`document`,
+  // we should not fall back to `isImage` using URL heuristics.
+  const isPdf = params?.type === 'pdf' || PDF_EXTENSIONS.test(url);
+  const isOfficeDoc =
+    params?.type === 'document' && OFFICE_DOC_EXTENSIONS.test(url);
+
   const isImage =
     params?.type === 'image' ||
     IMAGE_EXTENSIONS.test(url) ||
-    (!url.includes('pdf') && !url.includes('doc'));
-  const isPdf = params?.type === 'pdf' || PDF_EXTENSIONS.test(url);
-  const isOfficeDoc = params?.type === 'document' && OFFICE_DOC_EXTENSIONS.test(url);
+    (!params?.type &&
+      !isPdf &&
+      !url.includes('doc') &&
+      !url.includes('pdf'));
 
   useEffect(() => {
     if (!url) goBack();
@@ -100,8 +108,22 @@ const AttachmentViewerScreen: React.FC = () => {
     );
   }
 
-  const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
-  const documentUrl = isOfficeDoc && !isPdf ? googleDocsUrl : url;
+  const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
+    url,
+  )}&embedded=true`;
+  const googleGviewUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(
+    url,
+  )}`;
+
+  // On Android, raw PDFs loaded directly in WebView can trigger download/open flows.
+  // Using Google embedded viewers keeps it inside the WebView.
+  const documentUrl = isPdf
+    ? Platform.OS === 'android'
+      ? googleGviewUrl
+      : googleDocsViewerUrl
+    : isOfficeDoc
+      ? googleDocsViewerUrl
+      : url;
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors.white]}>

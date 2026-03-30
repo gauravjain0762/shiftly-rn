@@ -4,8 +4,10 @@ import {
   ActivityIndicator,
   Image,
   Linking,
+  PermissionsAndroid,
   ScrollView,
   StyleSheet,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -22,6 +24,10 @@ import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { navigateTo, getInitials, hasValidImage, formatLocationToCityCountry } from '../../../utils/commonFunction';
 import { useGetEmployeeProfileByIdQuery } from '../../../api/dashboardApi';
+import RNFS from 'react-native-fs';
+
+const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i;
+const PDF_EXTENSIONS = /\.(pdf)(\?|$)/i;
 
 const EmployeeProfile = () => {
   const { params } = useRoute<any>();
@@ -42,6 +48,7 @@ const EmployeeProfile = () => {
     : (assessFirst?.report as any)?.url;
 
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+  const [downloadingResumeKey, setDownloadingResumeKey] = useState<string | null>(null);
 
   const rawLocation = userData?.location || userParam?.location || userParam?.area;
   console.log("🔥 ~ EmployeeProfile ~ userData:", JSON.stringify(userData, null, 2))
@@ -148,17 +155,90 @@ const EmployeeProfile = () => {
   const handleViewResume = (resume: any) => {
     const fileUrl = resume?.file;
     if (!fileUrl) return;
-    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i.test(fileUrl);
+    const fileName = resume?.file_name || '';
+    const lower = `${fileUrl} ${fileName}`.toLowerCase();
+
+    const isImage =
+      IMAGE_EXTENSIONS.test(fileUrl) || IMAGE_EXTENSIONS.test(fileName);
+    const isPdf =
+      PDF_EXTENSIONS.test(fileUrl) ||
+      PDF_EXTENSIONS.test(fileName) ||
+      lower.includes('pdf');
+
     navigateTo(SCREENS.AttachmentViewerScreen, {
       url: fileUrl,
-      type: isImage ? 'image' : 'document',
+      type: isImage ? 'image' : isPdf ? 'pdf' : 'document',
     });
   };
 
-  const handleDownloadResume = async (resume: any) => {
+  const handleDownloadResume = async (resume: any, options?: { showLoader?: boolean }) => {
     const fileUrl = resume?.file;
     if (!fileUrl) return;
+    const showLoader = options?.showLoader ?? true;
     try {
+      if (Platform.OS === 'android') {
+        const resumeKey = String(resume?._id || resume?.file_name || fileUrl);
+        if (showLoader) {
+          setDownloadingResumeKey(resumeKey);
+        }
+
+        const apiLevel =
+          typeof Platform.Version === 'string'
+            ? Number.parseInt(Platform.Version, 10)
+            : (Platform.Version as number | undefined);
+
+        // Storage runtime permission (needed on older Android versions)
+        if (apiLevel && apiLevel < 33) {
+          const permissions: any[] = [];
+          if (PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE) {
+            permissions.push(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+          }
+          if (PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE) {
+            permissions.push(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+          }
+
+          if (permissions.length > 0) {
+            const results = await Promise.all(
+              permissions.map((p: any) => PermissionsAndroid.request(p as any)),
+            );
+            const allGranted = results.every(
+              r => r === PermissionsAndroid.RESULTS.GRANTED,
+            );
+            if (!allGranted) {
+              Alert.alert('Permission denied', 'Cannot download resume.');
+              return;
+            }
+          }
+        }
+
+        const rawName =
+          resume?.file_name ||
+          fileUrl.split('?')[0].split('/').pop() ||
+          `resume_${Date.now()}`;
+        const safeName = String(rawName).replace(/[^\w.\-]/g, '_');
+
+        const downloadDirs = [
+          (RNFS as any).DownloadDirectoryPath,
+          RNFS.ExternalDirectoryPath,
+          RNFS.DocumentDirectoryPath,
+          RNFS.CachesDirectoryPath,
+        ].filter(Boolean);
+
+        let lastError: any = null;
+        for (const dir of downloadDirs) {
+          const toFile = `${dir}/${safeName}`;
+          try {
+            await RNFS.downloadFile({ fromUrl: fileUrl, toFile }).promise;
+            Alert.alert('Downloaded', 'Resume saved.');
+            return toFile;
+          } catch (e: any) {
+            lastError = e;
+          }
+        }
+
+        throw lastError || new Error('Download failed');
+      }
+
       const supported = await Linking.canOpenURL(fileUrl);
       if (supported) {
         await Linking.openURL(fileUrl);
@@ -166,7 +246,15 @@ const EmployeeProfile = () => {
         Alert.alert('Error', 'Could not open resume link');
       }
     } catch (_) {
-      Alert.alert('Error', 'Could not open resume link');
+      Alert.alert(
+        'Error',
+        Platform.OS === 'android' ? 'Could not download resume' : 'Could not open resume link',
+      );
+    } finally {
+      // Clear loader regardless of success/failure
+      if (Platform.OS === 'android' && showLoader) {
+        setDownloadingResumeKey(null);
+      }
     }
   };
 
@@ -437,18 +525,36 @@ const EmployeeProfile = () => {
                   </Text>
                 </View>
                 <View style={styles.resumeActions}>
+                  {(() => {
+                    return (
+                      <>
                   <TouchableOpacity
                     style={styles.resumeActionIconBtn}
                     onPress={() => handleViewResume(resume)}
                     activeOpacity={0.8}>
-                    <Image source={IMAGES.view} style={styles.resumeActionIcon} resizeMode="contain" />
+                    <Image
+                      source={IMAGES.view}
+                      style={styles.resumeActionIcon}
+                      resizeMode="contain"
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.resumeActionIconBtn}
                     onPress={() => handleDownloadResume(resume)}
                     activeOpacity={0.8}>
-                    <Image source={IMAGES.download} style={styles.resumeActionIcon} resizeMode="contain" />
+                    {downloadingResumeKey === String(resume?._id || resume?.file_name || resume?.file) ? (
+                      <ActivityIndicator size="small" color={colors.white} />
+                    ) : (
+                      <Image
+                        source={IMAGES.download}
+                        style={styles.resumeActionIcon}
+                        resizeMode="contain"
+                      />
+                    )}
                   </TouchableOpacity>
+                      </>
+                    );
+                  })()}
                 </View>
               </View>
             ))}

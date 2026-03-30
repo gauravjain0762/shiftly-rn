@@ -188,7 +188,18 @@ const PostJob = () => {
   }, [certificationDataVals]);
 
   const languageData = useMemo(() => {
-    return languageDataVals?.data?.languages?.map((item: any) => ({ label: item?.title, value: item?._id })) || [];
+    const list =
+      languageDataVals?.data?.languages?.map((item: any) => ({
+        label: item?.title,
+        value: item?._id,
+      })) || [];
+
+    // Sort A -> Z by language name for consistent UX.
+    return list.slice().sort((a: any, b: any) =>
+      String(a?.label ?? '').localeCompare(String(b?.label ?? ''), 'en', {
+        sensitivity: 'base',
+      }),
+    );
   }, [languageDataVals]);
 
   const otherRequirementsData = useMemo(() => {
@@ -1269,7 +1280,8 @@ const PostJob = () => {
                     />
                   </View>
                   <CustomDropdownMulti
-                    data={languageData}
+                    // dropdownPosition="top" renders the list upwards; reverse data so it still feels A -> Z.
+                    data={[...languageData].reverse()}
                     labelField="label"
                     valueField="value"
                     value={(languages || []).map((l: any) => (typeof l === 'object' ? l?.id : l) ?? '').filter(Boolean)}
@@ -1280,20 +1292,32 @@ const PostJob = () => {
                           : [];
                       const currentLangs = Array.isArray(languages) ? languages : [];
                       const updatedLanguages = selectedIds.map((id: string) => {
-                        const existing = currentLangs.find((l: any) => String((typeof l === 'object' ? l?.id : l)) === String(id));
+                        const existing: any = currentLangs.find((l: any) =>
+                          String((typeof l === 'object' ? l?.id : l)) ===
+                          String(id),
+                        );
                         const name =
-                          (typeof existing === 'object' && existing?.name) ||
+                          (typeof existing === 'object' && (existing as any)?.name) ||
                           languageData.find((o: any) => String(o?.value) === String(id))?.label ||
                           '';
                         const finalName = name || (id ? String(id) : '');
                         return existing
-                          ? { id, level: existing.level || '', name: finalName }
-                          : { id, level: '', name: finalName };
+                          ? ({
+                              id,
+                              level: existing.level || '',
+                              name: finalName,
+                            } as any)
+                          : ({
+                              id,
+                              level: '',
+                              name: finalName,
+                            } as any);
                       });
                       updateJobForm({ languages: updatedLanguages });
                     }}
                     placeholder={t('Select languages')}
                     dropdownStyle={styles.dropdown}
+                    maxDropdownHeight={270}
                     container={{ marginTop: 0, marginBottom: 0 }}
                     dropdownPosition="top"
                     selectedStyle={styles.hiddenSelectedStyle}
@@ -1319,8 +1343,13 @@ const PostJob = () => {
                                     <TouchableOpacity
                                       key={profLevel}
                                       onPress={() => {
-                                        const updated = [...languages];
-                                        const name = (typeof lang === 'object' && lang?.name) || languageData.find((o: any) => String(o?.value) === String(langId))?.label || '';
+                                        const updated: any[] = [...languages];
+                                        const name =
+                                          (typeof lang === 'object' &&
+                                            (lang as any)?.name) ||
+                                          languageData.find((o: any) => String(o?.value) === String(langId))
+                                            ?.label ||
+                                          '';
                                         const finalName = name || (langId ? String(langId) : '');
                                         updated[index] = { id: langId, level: profLevel, name: finalName };
                                         updateJobForm({ languages: updated });

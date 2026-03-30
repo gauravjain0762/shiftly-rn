@@ -40,6 +40,8 @@ type Props = {
   dateMode?: string;
   placeholderStyle?: any;
   flatListProps?: any;
+  /** Optional override for dropdown list max height (used for specific dropdowns) */
+  maxDropdownHeight?: number;
   required?: boolean;
   selectedStyle?: any;
   dropdownPosition?: 'top' | 'bottom' | 'auto';
@@ -75,6 +77,7 @@ const CustomDropdownMulti = ({
   dropIcon,
   dateMode,
   flatListProps,
+  maxDropdownHeight,
   required,
   selectedStyle,
   placeholderStyle,
@@ -118,7 +121,7 @@ const CustomDropdownMulti = ({
           search={isSearch || false}
           searchPlaceholder={searchPlaceholder}
           inputSearchStyle={lightTheme ? styles.searchInputLight : undefined}
-          maxHeight={300}
+          maxHeight={typeof maxDropdownHeight === 'number' ? maxDropdownHeight : 300}
           minHeight={30}
           keyboardAvoiding={true}
           activeColor={'transparent'}

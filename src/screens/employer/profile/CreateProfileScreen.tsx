@@ -1469,9 +1469,31 @@ const CreateProfileScreen = () => {
                 },
               ]}
               title={'Next'}
-              // disabled={!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0}
               onPress={() => {
-                if (!aboutEdit?.selectedSkills || aboutEdit?.selectedSkills?.length === 0) {
+                    if (
+                      !aboutEdit?.selectedLanguages ||
+                      aboutEdit?.selectedLanguages?.length === 0
+                    ) {
+                      errorToast('Please select at least one language');
+                      return;
+                    }
+
+                    const hasMissingLanguageLevels =
+                      (aboutEdit?.selectedLanguages || []).some(
+                        (l: any) => !l?.level || String(l?.level).trim() === '',
+                      );
+
+                    if (hasMissingLanguageLevels) {
+                      errorToast(
+                        'Please select proficiency level for all selected languages',
+                      );
+                      return;
+                    }
+
+                    if (
+                      !aboutEdit?.selectedSkills ||
+                      aboutEdit?.selectedSkills?.length === 0
+                    ) {
                   errorToast('Please select at least one skill');
                   return;
                 }
@@ -1499,6 +1521,27 @@ const CreateProfileScreen = () => {
                   errorToast('Please select at least one skill');
                   return;
                 }
+
+                    if (
+                      !aboutEdit?.selectedLanguages ||
+                      aboutEdit?.selectedLanguages?.length === 0
+                    ) {
+                      errorToast('Please select at least one language');
+                      return;
+                    }
+
+                    const hasMissingLanguageLevels =
+                      (aboutEdit?.selectedLanguages || []).some(
+                        (l: any) => !l?.level || String(l?.level).trim() === '',
+                      );
+
+                    if (hasMissingLanguageLevels) {
+                      errorToast(
+                        'Please select proficiency level for all selected languages',
+                      );
+                      return;
+                    }
+
                 handleUpdateProfile();
               }}
             />
