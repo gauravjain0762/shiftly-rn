@@ -75,13 +75,10 @@ const EducationCard = ({item, onRemove, onEdit, type}: Props) => {
         {isEducation ? (
           <BaseText style={styles.duration}>
             {item?.startDate_year || item?.start_date?.year || ''}
-            {(item?.still_studying ||
-              item?.endDate_year ||
-              item?.end_date?.year) &&
-              ' - '}
+            {(item?.startDate_year || item?.start_date?.year) && ' - '}
             {item?.still_studying
               ? 'Present'
-              : item?.endDate_year || item?.end_date?.year || ''}
+              : item?.endDate_year || item?.end_date?.year || 'Present'}
           </BaseText>
         ) : (
           <BaseText style={styles.duration}>

@@ -322,6 +322,10 @@ const CreateProfileScreen = () => {
       experienceUser?.years_of_experience ||
       aboutmeandResumes?.years_of_experience ||
       userInfo?.years_of_experience;
+    const savedNoPastExperience =
+      experienceUser?.no_past_experience ??
+      aboutmeandResumes?.no_past_experience ??
+      userInfo?.no_past_experience;
 
     if (savedLabel && experienceOptionsData.length > 0) {
       const match =
@@ -333,25 +337,29 @@ const CreateProfileScreen = () => {
       setYearsOfExperienceOption(null);
     }
 
-    if (
+    if (savedNoPastExperience === true) {
+      setNoExperienceChecked(true);
+    } else if (
       typeof savedLabel === 'string' &&
       (savedLabel.trim().toLowerCase() === '0 years experience' ||
         savedLabel.trim().toLowerCase() === '0-2 years experience')
     ) {
+      // Backward compatibility for older data where dedicated flag didn't exist.
       setNoExperienceChecked(true);
     } else if (!savedLabel) {
       setNoExperienceChecked(false);
     }
   }, [
     experienceUser?.years_of_experience,
+    experienceUser?.no_past_experience,
     aboutmeandResumes?.years_of_experience,
+    aboutmeandResumes?.no_past_experience,
     userInfo?.years_of_experience,
+    userInfo?.no_past_experience,
     experienceOptionsData,
   ]);
 
-  const effectiveYearsOfExperienceLabel = noExperienceChecked
-    ? '0-2 years experience'
-    : (yearsOfExperienceOption?.label || '');
+  const effectiveYearsOfExperienceLabel = yearsOfExperienceOption?.label || '';
 
   // Pre-fill "Desired Department" dropdown from API.
   // UI reads/writes this value from `experienceListEdit.department`.
@@ -659,6 +667,7 @@ const CreateProfileScreen = () => {
           ...(effectiveYearsOfExperienceLabel && {
             years_of_experience: effectiveYearsOfExperienceLabel,
           }),
+          no_past_experience: noExperienceChecked,
           ...(exp?.preferred_position && {
             desired_job_title: exp.preferred_position,
           }),
@@ -1308,12 +1317,6 @@ const CreateProfileScreen = () => {
                       onPress={() => {
                         const next = !noExperienceChecked;
                         setNoExperienceChecked(next);
-                        if (next) {
-                          setYearsOfExperienceOption({
-                            label: '0-2 years experience',
-                            value: '0-2 years experience',
-                          });
-                        }
                       }}>
                       <View style={styles.checkbox}>
                         {noExperienceChecked && (
@@ -1477,10 +1480,10 @@ const CreateProfileScreen = () => {
                   handleSaveOrAddExperience();
                 }
 
-                if (effectiveYearsOfExperienceLabel) {
+                if (yearsOfExperienceOption?.label) {
                   try {
                     const fd = new FormData();
-                    fd.append('years_of_experience', effectiveYearsOfExperienceLabel);
+                    fd.append('years_of_experience', yearsOfExperienceOption.label);
                     await empUpdateProfile(fd).unwrap();
                   } catch (_) {
                   }

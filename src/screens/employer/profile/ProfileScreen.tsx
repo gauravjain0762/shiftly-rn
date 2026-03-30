@@ -501,9 +501,12 @@ const ProfileScreen = () => {
                   const startYear = edu?.start_date?.year || edu?.startDate_year;
                   const endMonth = edu?.end_date?.month || edu?.endDate_month;
                   const endYear = edu?.end_date?.year || edu?.endDate_year;
+                  const endText = edu?.still_studying
+                    ? 'Present'
+                    : [endMonth, endYear].filter(Boolean).join(' ') || 'Present';
                   const duration =
-                    startMonth || startYear || endMonth || endYear
-                      ? `${[startMonth, startYear].filter(Boolean).join(' ')} - ${[endMonth, endYear].filter(Boolean).join(' ')}`
+                    startMonth || startYear || endText
+                      ? `${[startMonth, startYear].filter(Boolean).join(' ')} - ${endText}`
                       : '';
 
                   return (
