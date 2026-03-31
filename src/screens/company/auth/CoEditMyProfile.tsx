@@ -68,41 +68,62 @@ const CoEditMyProfile = () => {
   const [imgType, setImageType] = useState<'logo' | 'cover'>('logo');
   const [imageModal, setImageModal] = useState(false);
   const [removedCoverImages, setRemovedCoverImages] = useState<string[]>([]);
+  const [initialProfileSnapshot, setInitialProfileSnapshot] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!initialProfileSnapshot && userInfo) {
+      setInitialProfileSnapshot({
+        logo: userInfo?.logo,
+        about: userInfo?.about || '',
+        company_name: userInfo?.company_name || '',
+        website: userInfo?.website || '',
+        company_size: userInfo?.company_size || '',
+        business_type_id: userInfo?.business_type_id?._id || '',
+        cover_images: userInfo?.cover_images,
+        address: userInfo?.address || '',
+        lat: userInfo?.lat,
+        lng: userInfo?.lng,
+      });
+    }
+  }, [initialProfileSnapshot, userInfo]);
 
   const hasChanges = useMemo(() => {
-    if (!userInfo) return false;
+    if (!userInfo || !initialProfileSnapshot) return false;
 
     const logoChanged =
-      (logo && typeof logo === 'object') || logo !== userInfo.logo;
-    const aboutChanged = about !== (userInfo.about || '');
-    const locationChanged = userInfo?.address !== (updatedData?.address || '');
-    const companyNameChanged = companyName !== (userInfo.company_name || '');
-    const websiteChanged = website !== (userInfo.website || '');
-    const coSizeChanged = coSize !== (userInfo.company_size || '');
+      (logo && typeof logo === 'object') || logo !== initialProfileSnapshot.logo;
+    const aboutChanged = about !== (initialProfileSnapshot.about || '');
+    const companyNameChanged = companyName !== (initialProfileSnapshot.company_name || '');
+    const websiteChanged = website !== (initialProfileSnapshot.website || '');
+    const coSizeChanged = coSize !== (initialProfileSnapshot.company_size || '');
     const businessTypeChanged =
-      businessType !== (userInfo.business_type_id?._id || '');
-    const coverImagesChanged = coverImages !== userInfo.cover_images;
+      businessType !== (initialProfileSnapshot.business_type_id || '');
+    const coverImagesChanged = coverImages !== initialProfileSnapshot.cover_images;
+    const locationChanged =
+      (userInfo?.address || '') !== (initialProfileSnapshot.address || '') ||
+      String(userInfo?.lat ?? '') !== String(initialProfileSnapshot.lat ?? '') ||
+      String(userInfo?.lng ?? '') !== String(initialProfileSnapshot.lng ?? '');
 
     return (
       logoChanged ||
       aboutChanged ||
-      locationChanged ||
       companyNameChanged ||
       websiteChanged ||
       coSizeChanged ||
       businessTypeChanged ||
-      coverImagesChanged
+      coverImagesChanged ||
+      locationChanged
     );
   }, [
     logo,
     about,
-    userInfo?.address,
     companyName,
     website,
     coSize,
     businessType,
     userInfo,
     coverImages,
+    initialProfileSnapshot,
   ]);
 
   useEffect(() => {

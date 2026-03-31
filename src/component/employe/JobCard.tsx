@@ -7,7 +7,7 @@ import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import ExpandableText from '../common/ExpandableText';
 import FastImage from 'react-native-fast-image';
-import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
+import { getExpiryDays, getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import RNFS from 'react-native-fs';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
 import { SCREENS } from '../../navigation/screenNames';
@@ -135,15 +135,20 @@ const JobCard: FC<props> = ({
 
         {getJobMonthlySalaryRangeText(item) && (
           <View style={styles.salaryContainer}>
-            <Text style={styles.salaryAmount}>
-              {`${item?.currency?.toUpperCase()} `}
+            <View style={styles.salaryAmount}>
+              <Text style={styles.salaryAmountText}>{`${item?.currency?.toUpperCase()} `}</Text>
               {item?.currency?.toUpperCase() === 'AED' ? (
                 <Image source={IMAGES.currency} style={styles.currencyImage} />
               ) : (
-                getCurrencySymbol(item?.currency)
+                <Text style={styles.salaryAmountText}>{getCurrencySymbol(item?.currency)}</Text>
               )}
-              {`${getJobMonthlySalaryRangeText(item)}`}
-            </Text>
+              <Text style={styles.salaryAmountText}>{`${getJobMonthlySalaryRangeText(item)}`}</Text>
+            </View>
+            {item?.expiry_date && String(item?.status || '').toLowerCase() !== 'closed' && (
+              <Text style={styles.expiryText}>
+                {getExpiryDays(item?.expiry_date)}
+              </Text>
+            )}
           </View>
         )}
       </View>
@@ -207,19 +212,27 @@ const styles = StyleSheet.create({
   salaryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: hp(2),
   },
   salaryLabel: {
     ...commonFontStyle(500, 14, colors._656464),
   },
   salaryAmount: {
-    ...commonFontStyle(700, 13, colors.empPrimary),
     flexDirection: 'row',
     alignItems: 'center',
   },
+  salaryAmountText: {
+    ...commonFontStyle(700, 13, colors.empPrimary),
+  },
+  expiryText: {
+    ...commonFontStyle(500, 12, colors._EE4444),
+    marginTop: hp(1),
+    marginLeft: wp(8),
+  },
   currencyImage: {
     width: wp(14),
-    height: hp(11),
+    height: hp(10),
     resizeMode: 'contain',
     marginHorizontal: wp(2),
     tintColor: colors.empPrimary,

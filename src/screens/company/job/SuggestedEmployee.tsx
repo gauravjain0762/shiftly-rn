@@ -28,6 +28,7 @@ import {
   useGetCompanyJobDetailsQuery,
   useLazyGetSuggestedEmployeesQuery,
   useLazyGetCompanyJobDetailsQuery,
+  useSendInterviewInvitesMutation,
 } from '../../../api/dashboardApi';
 import { navigateTo, errorToast, goBack, resetNavigation, getInitials, hasValidImage } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
@@ -138,6 +139,54 @@ const SuggestedEmployeeScreen = () => {
 
   const [fetchMoreSuggested, { isFetching: isFetchingSuggested }] = useLazyGetSuggestedEmployeesQuery();
   const [fetchMoreJobDetails, { isFetching: isFetchingJobDetails }] = useLazyGetCompanyJobDetailsQuery();
+  const [sendInterviewInvites] = useSendInterviewInvitesMutation();
+  const [resendingUserId, setResendingUserId] = useState<string | null>(null);
+
+  const handleResendInvite = async (user: any) => {
+    const targetUserId = user?._id;
+    const targetJobId = jobId || jobInfo?._id;
+    if (!targetUserId || !targetJobId) {
+      errorToast(t('Missing invite information. Please try again.'));
+      return;
+    }
+
+    const existingQuestions: string[] = Array.isArray(jobInfo?.interview_questions)
+      ? jobInfo.interview_questions
+          .filter((q: any) => typeof q === 'string' && q.trim().length > 0)
+          .map((q: string) => q.trim())
+      : [];
+
+    if (existingQuestions.length === 0) {
+      errorToast(t('Please add interview questions first.'));
+      return;
+    }
+
+    try {
+      setResendingUserId(String(targetUserId));
+      const formData = new FormData();
+      formData.append('job_id', String(targetJobId));
+      formData.append('invite_to', 'specific');
+      formData.append('user_ids', String(targetUserId));
+      existingQuestions.forEach((question: string, index: number) => {
+        formData.append(`questions[${index}]`, question);
+      });
+
+      const res: any = await sendInterviewInvites(formData).unwrap();
+      if (res?.status) {
+        successToast(res?.message || t('Interview invitation sent successfully'));
+        refetchJobDetails();
+        refetchSuggested();
+      } else {
+        errorToast(res?.message || t('Failed to send interview invitation'));
+      }
+    } catch (error: any) {
+      const message =
+        error?.data?.message || error?.error || error?.message || t('Failed to send interview invitation');
+      errorToast(message);
+    } finally {
+      setResendingUserId(null);
+    }
+  };
 
   const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 
@@ -679,6 +728,17 @@ const SuggestedEmployeeScreen = () => {
               </View>
             )}
 
+            {(String(item?.status || '').toLowerCase().includes('interview') && !item?.assessment_completed) && (
+              <TouchableOpacity
+                style={[styles.resendButton, !!resendingUserId && resendingUserId !== String(user?._id) && { opacity: 0.6 }]}
+                onPress={() => handleResendInvite(user)}
+                disabled={resendingUserId === String(user?._id)}>
+                <Text style={styles.resendButtonText}>
+                  {resendingUserId === String(user?._id) ? t('Resending...') : t('Resend')}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             {item?.status === 'Interview_completed' && <View style={styles.shortlistedActions}>
               <TouchableOpacity
                 style={[
@@ -695,21 +755,19 @@ const SuggestedEmployeeScreen = () => {
                 }>
                 <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.assessmentButton,
-                  !item?.assessment_completed && { backgroundColor: '#D3D3D3' },
-                ]}
-                disabled={!item?.assessment_completed}
-                onPress={() =>
-                  navigateTo(SCREENS.InterviewStatus, {
-                    jobData: jobInfo,
-                    candidateData: user,
-                    inviteData: item,
-                  })
-                }>
-                <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
-              </TouchableOpacity>
+              {item?.assessment_completed && (
+                <TouchableOpacity
+                  style={styles.assessmentButton}
+                  onPress={() =>
+                    navigateTo(SCREENS.InterviewStatus, {
+                      jobData: jobInfo,
+                      candidateData: user,
+                      inviteData: item,
+                    })
+                  }>
+                  <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
+                </TouchableOpacity>
+              )}
             </View>}
           </View>
 
@@ -1750,6 +1808,17 @@ const styles = StyleSheet.create({
   assessmentButtonText: {
     ...commonFontStyle(600, 11, colors.white),
     textAlign: 'center',
+  },
+  resendButton: {
+    marginTop: hp(8),
+    alignSelf: 'flex-start',
+    backgroundColor: colors._0B3970,
+    borderRadius: wp(20),
+    paddingVertical: hp(7),
+    paddingHorizontal: wp(14),
+  },
+  resendButtonText: {
+    ...commonFontStyle(600, 12, colors.white),
   },
   timelineContainer: {
     width: wp(100),

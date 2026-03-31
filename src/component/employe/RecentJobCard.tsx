@@ -25,7 +25,7 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
             const title = item?.title || 'Job Opportunity';
             const description = item?.description || '';
             const salary = getJobMonthlySalaryRangeText(item)
-                ? `Salary: ${getCurrencySymbol(item?.currency || 'USD')}${getJobMonthlySalaryRangeText(item)}`
+                ? `Salary: ${getCurrencySymbol(item?.currency || 'AED')}${getJobMonthlySalaryRangeText(item)}`
                 : '';
 
             const shareUrl = normalizeUrl(item?.share_url);

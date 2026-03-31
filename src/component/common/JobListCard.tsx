@@ -16,7 +16,7 @@ import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
-import { getTimeAgo } from '../../utils/commonFunction';
+import { getExpiryDays, getTimeAgo } from '../../utils/commonFunction';
 import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 
 export type JobListCardProps = {
@@ -134,12 +134,6 @@ const JobListCard = ({
             </Text>
           )}
 
-          {!isCompanyFlow && job?.contract_type && (
-            <View style={[styles.tag, { backgroundColor: '#F0F4F8', alignSelf: 'flex-start' }]}>
-              <Text style={[styles.tagText, { color: '#0B1C39' }]}>{job?.contract_type}</Text>
-            </View>
-          )}
-
           {!isCompanyFlow && (
             <View style={styles.tagsRow}>
               <ScrollView
@@ -163,17 +157,12 @@ const JobListCard = ({
                     </View>
                   </View>
                 )}
-                {(job?.contract_period || job?.duration) && (
-                  <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
-                    <Text style={styles.tagText}>
-                      {job?.contract_period || job?.duration}
-                      {!(job?.contract_period || job?.duration)?.toLowerCase().includes('contract')
-                        ? ' Contract'
-                        : ''}
-                    </Text>
-                  </View>
-                )}
               </ScrollView>
+              {job?.expiry_date && String(job?.status || '').toLowerCase() !== 'closed' && (
+                <Text style={[styles.expiryText, statusBadge?.text && styles.expiryTextWithStatus]}>
+                  {getExpiryDays(job?.expiry_date)}
+                </Text>
+              )}
             </View>
           )}
 
@@ -290,6 +279,13 @@ const styles = StyleSheet.create({
   timeAgo: {
     ...commonFontStyle(400, 11, colors._656464),
     marginTop: hp(2),
+  },
+  expiryText: {
+    ...commonFontStyle(500, 11, colors._EE4444),
+    marginLeft: wp(8),
+  },
+  expiryTextWithStatus: {
+    marginRight: wp(52),
   },
   closedDate: {
     ...commonFontStyle(500, 12, '#E53935'),

@@ -7,7 +7,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { IMAGES } from '../../assets/Images';
 import { getAsyncUserLocation } from '../../utils/asyncStorage';
@@ -51,8 +51,11 @@ const LocationContainer: FC<map> = ({
     latitude: number;
     longitude: number;
   } | null>(null);
+  const loadRequestRef = useRef(0);
 
   useEffect(() => {
+    const requestId = ++loadRequestRef.current;
+
     if (normalizedCoords) {
       setLocation(normalizedCoords);
       return;
@@ -60,6 +63,9 @@ const LocationContainer: FC<map> = ({
 
     const loadLocation = async () => {
       const res = await getAsyncUserLocation();
+      if (loadRequestRef.current !== requestId) {
+        return;
+      }
       if (res) {
         setLocation({
           latitude: res.latitude,

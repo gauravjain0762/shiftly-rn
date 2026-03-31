@@ -109,13 +109,6 @@ const DEFAULT_POSITIONS = [
   { label: '5+', value: '5+' },
 ];
 
-const DEFAULT_CURRENCIES = [
-  { label: 'AED', value: 'AED' },
-  { label: 'USD', value: 'USD' },
-  { label: 'EUR', value: 'EUR' },
-  { label: 'INR', value: 'INR' },
-];
-
 const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 const getLanguageProficiencyColor = (level: string) => {
   switch (level) {
@@ -184,14 +177,6 @@ const PostJob = () => {
     }
     return DEFAULT_POSITIONS;
   }, [jobDropdownData?.data?.no_positions]);
-
-  const currencyData = useMemo(() => {
-    const list = jobDropdownData?.data?.currencies;
-    if (Array.isArray(list) && list.length > 0) {
-      return list.map((c: string) => ({ label: c, value: c }));
-    }
-    return DEFAULT_CURRENCIES;
-  }, [jobDropdownData?.data?.currencies]);
 
   const salaryRangeData = useMemo(() => {
     const ranges = jobDropdownData?.data?.salary_ranges;
@@ -432,6 +417,36 @@ const PostJob = () => {
     useCallback(() => {
       const task = InteractionManager.runAfterInteractions(async () => {
         try {
+          // Always prefer the latest location picked from map screen (saved on Save Location).
+          const locationString = await AsyncStorage.getItem('user_location');
+          if (locationString !== null) {
+            const location = JSON.parse(locationString);
+            if (
+              location.address &&
+              Number.isFinite(Number(location.lat)) &&
+              Number.isFinite(Number(location.lng))
+            ) {
+              const normalized = {
+                address: String(location.address),
+                lat: Number(location.lat),
+                lng: Number(location.lng),
+                state: location.state || '',
+                country: location.country || '',
+              };
+              setUserAddress(normalized);
+              setJobAreaText(normalized.address);
+              jobAreaRef.current?.setAddressText?.(normalized.address);
+              updateJobForm({
+                area: {
+                  label: normalized.address,
+                  value: normalized.address,
+                  coordinates: { lat: normalized.lat, lng: normalized.lng },
+                },
+              });
+              return;
+            }
+          }
+
           if (editMode) {
             const routeLat = initialUserAddressFromRoute?.lat;
             const routeLng = initialUserAddressFromRoute?.lng;
@@ -450,6 +465,7 @@ const PostJob = () => {
 
               setUserAddress(normalizedAddress);
               setJobAreaText(editAddress);
+              jobAreaRef.current?.setAddressText?.(editAddress);
               updateJobForm({
                 area: {
                   label: editAddress,
@@ -475,27 +491,6 @@ const PostJob = () => {
             }
           }
 
-          const locationString = await AsyncStorage.getItem('user_location');
-          if (locationString !== null) {
-            const location = JSON.parse(locationString);
-            if (
-              location.address &&
-              Number.isFinite(Number(location.lat)) &&
-              Number.isFinite(Number(location.lng))
-            ) {
-              setUserAddress(location);
-              setJobAreaText(location.address);
-              updateJobForm({
-                area: {
-                  label: location.address,
-                  value: location.address,
-                  coordinates: { lat: location.lat, lng: location.lng },
-                },
-              });
-              return;
-            }
-          }
-
           if (
             userInfo?.address &&
             Number.isFinite(Number(userInfo?.lat)) &&
@@ -509,6 +504,7 @@ const PostJob = () => {
               country: userInfo.country || '',
             });
             setJobAreaText(userInfo.address);
+            jobAreaRef.current?.setAddressText?.(userInfo.address);
             updateJobForm({
               area: {
                 label: userInfo.address,
@@ -532,6 +528,7 @@ const PostJob = () => {
                       country: '',
                     });
                     setJobAreaText(address);
+                    jobAreaRef.current?.setAddressText?.(address);
                     // Also update the Job Area field with fetched address
                     updateJobForm({
                       area: {
@@ -945,9 +942,9 @@ const PostJob = () => {
     const resolvedId =
       Array.isArray(skills) && skills.length > 0
         ? skills.find(
-            (s: any) =>
-              String(s?._id) === String(skill) || String(s?.title) === String(skill),
-          )?._id
+          (s: any) =>
+            String(s?._id) === String(skill) || String(s?.title) === String(skill),
+        )?._id
         : undefined;
 
     if (resolvedId) {
@@ -1349,15 +1346,15 @@ const PostJob = () => {
                         const finalName = name || (id ? String(id) : '');
                         return existing
                           ? ({
-                              id,
-                              level: existing.level || '',
-                              name: finalName,
-                            } as any)
+                            id,
+                            level: existing.level || '',
+                            name: finalName,
+                          } as any)
                           : ({
-                              id,
-                              level: '',
-                              name: finalName,
-                            } as any);
+                            id,
+                            level: '',
+                            name: finalName,
+                          } as any);
                       });
                       updateJobForm({ languages: updatedLanguages });
                     }}
@@ -1766,16 +1763,31 @@ const PostJob = () => {
                       ref={jobAreaRef}
                       placeholder={'Search your job area'}
                       textInputProps={{
-                        value: jobAreaText,
+                        // ❌ Removed `value: jobAreaText` — controlled value conflicts with
+                        //    GooglePlacesAutocomplete's internal input management after selection.
+                        //    Use setAddressText() via ref instead (already done in onPress & useEffects).
+                        defaultValue: jobAreaText,   // seed initial text only once (uncontrolled)
                         onChangeText: text => {
                           setJobAreaText(text);
                           setIsAutocompleteOpen(true);
                         },
                         placeholderTextColor: colors._7B7878,
+                        returnKeyType: 'search',
+                        numberOfLines: 1,
+                        multiline: false,
+                        autoCorrect: false,
+                        ellipsizeMode: 'tail',
+                        onFocus: () => {
+                          setIsAutocompleteOpen(true);
+                        },
+                        onBlur: () => {
+                          setTimeout(() => setIsAutocompleteOpen(false), 300);
+                        },
+                        clearButtonMode: 'while-editing',
                       }}
                       onFocus={() => setIsAutocompleteOpen(true)}
                       onBlur={() => setIsAutocompleteOpen(false)}
-                      onPress={(data, details = null) => {
+                      onPress={async (data, details = null) => {
                         try {
                           console.log(
                             '[GooglePlaces] location selection (data):',
@@ -1832,21 +1844,31 @@ const PostJob = () => {
 
                         displayAddress = displayAddress.replace(/^[A-Z0-9]{4}\+[A-Z0-9]{2,4}\s*[-–]\s*/i, '');
 
-                        const lat = details?.geometry?.location?.lat;
-                        const lng = details?.geometry?.location?.lng;
+                        const rawLat: any = details?.geometry?.location?.lat;
+                        const rawLng: any = details?.geometry?.location?.lng;
+                        const lat =
+                          typeof rawLat === 'function' ? Number(rawLat()) : Number(rawLat);
+                        const lng =
+                          typeof rawLng === 'function' ? Number(rawLng()) : Number(rawLng);
 
                         setJobAreaText(displayAddress);
-
+                        jobAreaRef.current?.setAddressText?.(displayAddress);
+                        setTimeout(() => {
+                          jobAreaRef.current?.setAddressText?.(displayAddress);
+                        }, 50);
                         updateJobForm({
                           area: {
-                            label: data.description,
-                            value: data.description,
+                            label: displayAddress,
+                            value: displayAddress,
                             place_id: data.place_id,
-                            coordinates: details?.geometry?.location,
+                            coordinates:
+                              Number.isFinite(lat) && Number.isFinite(lng)
+                                ? { lat, lng }
+                                : details?.geometry?.location,
                           },
                         });
 
-                        if (lat && lng) {
+                        if (Number.isFinite(lat) && Number.isFinite(lng)) {
                           setUserAddress({
                             address: displayAddress,
                             lat: lat,
@@ -1854,6 +1876,16 @@ const PostJob = () => {
                             state: city,
                             country: country,
                           });
+                          await AsyncStorage.setItem(
+                            'user_location',
+                            JSON.stringify({
+                              address: displayAddress,
+                              lat,
+                              lng,
+                              state: city,
+                              country,
+                            }),
+                          );
                         }
 
                         setIsAutocompleteOpen(false);
@@ -1939,32 +1971,26 @@ const PostJob = () => {
                       debounce={400}
                       minLength={2}
                       nearbyPlacesAPI="GooglePlacesSearch"
-                      textInputProps={{
-                        placeholderTextColor: colors._7B7878,
-                        returnKeyType: 'search',
-                        numberOfLines: 1,
-                        multiline: false,
-                        autoCorrect: false,
-                        ellipsizeMode: 'tail',
-                        onFocus: () => {
-                          setIsAutocompleteOpen(true);
-                        },
-                        onBlur: () => {
-                          setTimeout(() => setIsAutocompleteOpen(false), 300);
-                        },
-                        onChangeText: text => {
-                          setJobAreaText(text);
-                          setIsAutocompleteOpen(true);
-                        },
-                        clearButtonMode: 'while-editing',
-                      }}
                     />
                   </View>
                 </View>
                 <LocationContainer
                   address={userAddress?.address}
                   onPressMap={() => {
-                    navigateTo(SCREENS.CoPostJobLocationScreen, { userAddress });
+                    const areaAny: any = area as any;
+                    navigateTo(SCREENS.CoPostJobLocationScreen, {
+                      userAddress:
+                        userAddress ||
+                        (areaAny?.coordinates?.lat != null && areaAny?.coordinates?.lng != null
+                          ? {
+                              address: areaAny?.value || areaAny?.label || '',
+                              lat: Number(areaAny.coordinates.lat),
+                              lng: Number(areaAny.coordinates.lng),
+                              state: '',
+                              country: '',
+                            }
+                          : undefined),
+                    });
                   }}
                   containerStyle={styles.map}
                   lat={userAddress?.lat || location?.latitude}

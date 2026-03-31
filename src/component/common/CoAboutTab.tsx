@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppStyles } from '../../theme/appStyles';
@@ -6,6 +6,10 @@ import { IMAGES } from '../../assets/Images';
 import LocationContainer from './LocationContainer';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { colors } from '../../theme/colors';
+import { formatAreaNameFromComponents, getAddress } from '../../utils/locationHandler';
+import { API } from '../../utils/apiConstant';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 type Props = {
   companyProfileData?: any;
@@ -13,7 +17,40 @@ type Props = {
 };
 
 const CoAboutTab = ({ companyProfileData }: Props) => {
-console.log("🔥 ~ CoAboutTab ~ companyProfileData:", companyProfileData)
+  const { getAppData } = useSelector((state: RootState) => state.auth);
+  const mapKey = getAppData?.map_key || API?.GOOGLE_MAP_API_KEY;
+  const [resolvedAddress, setResolvedAddress] = useState<string>('');
+
+  const fallbackAddress = useMemo(
+    () => companyProfileData?.address || '',
+    [companyProfileData?.address],
+  );
+
+  useEffect(() => {
+    const lat = Number(companyProfileData?.lat);
+    const lng = Number(companyProfileData?.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      setResolvedAddress(fallbackAddress);
+      return;
+    }
+
+    getAddress(
+      { latitude: lat, longitude: lng },
+      (data: any) => {
+        const components = data?.results?.[0]?.address_components || [];
+        const formatted =
+          formatAreaNameFromComponents(components) ||
+          data?.results?.[0]?.formatted_address ||
+          fallbackAddress ||
+          '';
+        setResolvedAddress(formatted);
+      },
+      () => {
+        setResolvedAddress(fallbackAddress);
+      },
+      mapKey,
+    );
+  }, [companyProfileData?.lat, companyProfileData?.lng, fallbackAddress, mapKey]);
 
   const openInMaps = (lat: any, lng: any, address: any) => {
     if (!lat || !lng) return;
@@ -80,14 +117,14 @@ console.log("🔥 ~ CoAboutTab ~ companyProfileData:", companyProfileData)
           openInMaps(
             companyProfileData?.lat,
             companyProfileData?.lng,
-            companyProfileData?.address,
+            resolvedAddress || fallbackAddress,
           )
         }} >
           <LocationContainer
             containerStyle={styles.map}
             lat={companyProfileData?.lat}
             lng={companyProfileData?.lng}
-            address={companyProfileData?.address}
+            address={resolvedAddress || fallbackAddress}
           />
         </Pressable>
       )}
