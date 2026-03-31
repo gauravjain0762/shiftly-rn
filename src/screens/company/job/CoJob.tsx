@@ -29,11 +29,10 @@ import {
 } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import BottomModal from '../../../component/common/BottomModal';
-import { Dropdown } from 'react-native-element-dropdown';
 import CountryPicker from 'react-native-country-picker-modal';
 import {
   useGetCompanyJobsQuery,
-  useGetJobDropdownDataQuery,
+  useGetDropdownDataQuery,
 } from '../../../api/dashboardApi';
 import MyJobsSkeleton from '../../../component/skeletons/MyJobsSkeleton';
 import { useDispatch, useSelector } from 'react-redux';
@@ -73,27 +72,32 @@ const CoJob = () => {
   const [selectedSalaryRange, setSelectedSalaryRange] = useState<string>(
     filters.salary_range || '',
   );
-  const [value, setValue] = useState<any>(filters.contract_types || []);
+  const [value, setValue] = useState<string | null>(
+    Array.isArray(filters.contract_types) && filters.contract_types.length > 0
+      ? filters.contract_types[0]
+      : filters.contract_types || null,
+  );
   const [location, setLocation] = useState<string>(filters.location || '');
   const [page, setPage] = useState<number>(1);
   const [allJobs, setAllJobs] = useState<any[]>([]);
   const [onEndReachedCalled, setOnEndReachedCalled] = useState(false);
   const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
-  const { data: jobDropdownData } = useGetJobDropdownDataQuery();
+  const { data: dropdownData } = useGetDropdownDataQuery();
   const contractTypeData = useMemo(() => {
-    const list = jobDropdownData?.data?.job_types;
+    const list = dropdownData?.data?.job_types;
     if (Array.isArray(list) && list.length > 0) {
       return list
         .map((item: any) => ({
-          label: item?.title || '',
-          value: item?.title || item?._id || '',
+          label: item?.title || item?.name || item?.label || item?.value || '',
+          // Backend filter expects title text (e.g. "Part time"), not id.
+          value: item?.title || item?.name || item?.label || item?.value || '',
         }))
         .filter((item: any) => item.label && item.value);
     }
     return [];
-  }, [jobDropdownData?.data?.job_types]);
+  }, [dropdownData?.data?.job_types]);
   const salaryRangeData = useMemo(() => {
-    const ranges = jobDropdownData?.data?.salary_ranges;
+    const ranges = dropdownData?.data?.salary_ranges;
     if (Array.isArray(ranges) && ranges.length > 0) {
       return ranges.map((r: string) => ({
         label: formatSalaryRangeLabel(r),
@@ -101,7 +105,7 @@ const CoJob = () => {
       }));
     }
     return [];
-  }, [jobDropdownData?.data?.salary_ranges]);
+  }, [dropdownData?.data?.salary_ranges]);
 
   // ─── Refs: always-fresh values accessible in callbacks ────────────────────
   const pageRef = useRef<number>(1);
@@ -113,12 +117,17 @@ const CoJob = () => {
 
   // ─── Build query params ───────────────────────────────────────────────────
   const hasContractFilter =
-    Array.isArray(filters?.contract_types) && filters.contract_types.length > 0;
+    (Array.isArray(filters?.contract_types) && filters.contract_types.length > 0) ||
+    typeof filters?.contract_types === 'string';
   const hasLocationFilter = !!String(filters?.location || '').trim();
   const hasSalaryFilter = !!String(filters?.salary_range || '').trim();
 
   const queryParams: Record<string, any> = { page };
-  if (hasContractFilter) queryParams.contract_types = filters.contract_types;
+  if (hasContractFilter) {
+    queryParams.contract_types = Array.isArray(filters?.contract_types)
+      ? filters.contract_types[0]
+      : filters?.contract_types;
+  }
   if (hasLocationFilter) queryParams.location = filters.location;
   if (hasSalaryFilter) queryParams.monthly_salary_range = filters.salary_range;
 
@@ -138,12 +147,16 @@ const CoJob = () => {
   // ─── Sync filter UI when Redux filters change ─────────────────────────────
   useEffect(() => {
     setSelectedSalaryRange(filters.salary_range || '');
-    setValue(filters.contract_types || []);
+    // ✅ Normalize array → string to match Dropdown's expected value type
+    setValue(
+      Array.isArray(filters.contract_types) && filters.contract_types.length > 0
+        ? filters.contract_types[0]
+        : null,
+    );
     setLocation(filters.location || '');
     syncPageRef(1);
     setPage(1);
     setOnEndReachedCalled(false);
-    // allJobs will be replaced once the new query settles (see data effect below)
   }, [filters]);
 
   // ─── Core list population effect ──────────────────────────────────────────
@@ -234,7 +247,7 @@ const CoJob = () => {
       dispatch(
         setFilters({
           location,
-          contract_types: value,
+          contract_types: value ? [value] : [],
           salary_range: selectedSalaryRange,
         }),
       );
@@ -363,7 +376,7 @@ const CoJob = () => {
             }}
             ListFooterComponent={
               isFetching &&
-              pagination?.current_page < pagination?.total_pages ? (
+                pagination?.current_page < pagination?.total_pages ? (
                 <ActivityIndicator
                   color={colors._0B3970}
                   style={{ marginVertical: hp(16) }}
@@ -447,21 +460,27 @@ const CoJob = () => {
               />
             </View>
 
-            <Dropdown
-              data={contractTypeData}
-              labelField="label"
-              valueField="value"
-              placeholder="Job Type"
-              value={value}
-              onChange={item => setValue(item.value)}
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              dropdownPosition="top"
-              renderRightIcon={() => (
-                <Image source={IMAGES.dropdown} style={styles.dropdownIcon} />
-              )}
-            />
+            <View style={styles.salarySection}>
+              <Text style={styles.salaryLabel}>{'Contract Types'}</Text>
+              <CustomDropdown
+                data={contractTypeData}
+                labelField="label"
+                valueField="value"
+                placeholder="Select Contract Type"
+                value={value}
+                onChange={(item: any) =>
+                  setValue(item?.value ? String(item.value) : null)
+                }
+                disable={contractTypeData.length === 0}
+                dropdownPosition="top"
+                dropdownStyle={styles.coFilterDropdown}
+                renderRightIcon={IMAGES.ic_down}
+                RightIconStyle={styles.rightIcon}
+                selectedTextStyle={styles.selectedTextStyle}
+                placeholderStyle={styles.placeholderStyle}
+                container={styles.salaryDropdownContainer}
+              />
+            </View>
 
             <GradientButton
               style={styles.btn}
@@ -548,6 +567,8 @@ const styles = StyleSheet.create({
   modalContent: {
     paddingHorizontal: wp(15),
     paddingVertical: hp(4),
+    overflow: 'visible',
+    zIndex: 999,
   },
   filterHeader: {
     flexDirection: 'row',

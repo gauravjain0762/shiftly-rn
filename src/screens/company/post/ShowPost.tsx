@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
     Linking,
     Pressable,
+    Alert,
 } from 'react-native';
 import {
     BackHeader,
@@ -45,6 +46,25 @@ const ShowPost = () => {
 
     const companyName = post?.company_id?.company_name ?? post?.company_id ?? 'N/A';
     const companyLogo = post?.company_id?.logo;
+    const externalLink =
+        typeof post?.external_link === 'string' ? post.external_link.trim() : '';
+
+    const handleOpenExternalLink = async () => {
+        if (!externalLink) return;
+        const normalized = /^https?:\/\//i.test(externalLink)
+            ? externalLink
+            : `https://${externalLink}`;
+        try {
+            const supported = await Linking.canOpenURL(normalized);
+            if (!supported) {
+                Alert.alert('Error', 'Invalid link');
+                return;
+            }
+            await Linking.openURL(normalized);
+        } catch (error) {
+            Alert.alert('Error', 'Could not open link');
+        }
+    };
 
     return (
         <LinearContainer colors={['#F7F7F7', '#FFFFFF']}>
@@ -90,7 +110,9 @@ const ShowPost = () => {
                     {/* Image */}
                     {hasImage && (
                         <Pressable
-                            onPress={() => Linking.openURL(post?.external_link)} style={styles.imageContainer}>
+                            disabled={!externalLink}
+                            onPress={handleOpenExternalLink}
+                            style={styles.imageContainer}>
                             {imageLoading && (
                                 <View style={styles.imageLoaderContainer}>
                                     <ActivityIndicator size="large" color={colors._0B3970} />

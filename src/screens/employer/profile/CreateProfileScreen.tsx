@@ -62,6 +62,53 @@ type Resume = {
   type: string;
 };
 
+const parseMonthYear = (
+  raw?: string | { month?: string | number; year?: string | number } | null,
+): { month: string; year: string } => {
+  if (!raw) return { month: '', year: '' };
+
+  if (typeof raw === 'object') {
+    return {
+      month: raw?.month != null ? String(raw.month) : '',
+      year: raw?.year != null ? String(raw.year) : '',
+    };
+  }
+
+  if (typeof raw === 'string') {
+    const parts = raw.trim().split(/\s+/);
+    return {
+      month: parts[0] || '',
+      year: parts[1] || '',
+    };
+  }
+
+  return { month: '', year: '' };
+};
+
+const normalizeEducationItem = (edu: any): EducationItem => {
+  const start = parseMonthYear(
+    edu?.start_date ?? edu?.startDate ?? {
+      month: edu?.startDate_month,
+      year: edu?.startDate_year,
+    },
+  );
+  const end = parseMonthYear(
+    edu?.end_date ?? edu?.endDate ?? {
+      month: edu?.endDate_month,
+      year: edu?.endDate_year,
+    },
+  );
+
+  return {
+    ...edu,
+    startDate_month: edu?.startDate_month || start.month || '',
+    startDate_year: (edu?.startDate_year || start.year || '').toString(),
+    endDate_month: edu?.endDate_month || end.month || '',
+    endDate_year: (edu?.endDate_year || end.year || '').toString(),
+    still_studying: Boolean(edu?.still_studying),
+  };
+};
+
 const CreateProfileScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -252,7 +299,10 @@ const CreateProfileScreen = () => {
 
   useEffect(() => {
     if (educationData) {
-      dispatch(setEducationList(educationData));
+      const normalizedEducationData = Array.isArray(educationData)
+        ? educationData.map((edu: any) => normalizeEducationItem(edu))
+        : [];
+      dispatch(setEducationList(normalizedEducationData));
     }
 
     if (experienceData) {
@@ -553,6 +603,18 @@ const CreateProfileScreen = () => {
 
       for (const edu of list) {
         const stillStudying = Boolean((edu as any)?.still_studying);
+        const start = parseMonthYear(
+          (edu as any)?.start_date ?? (edu as any)?.startDate ?? {
+            month: (edu as any)?.startDate_month,
+            year: (edu as any)?.startDate_year,
+          },
+        );
+        const end = parseMonthYear(
+          (edu as any)?.end_date ?? (edu as any)?.endDate ?? {
+            month: (edu as any)?.endDate_month,
+            year: (edu as any)?.endDate_year,
+          },
+        );
         const payload = {
           education_id: edu._id || '',
           degree:
@@ -564,12 +626,12 @@ const CreateProfileScreen = () => {
           province: edu.province,
           still_studying: stillStudying,
           start_date: {
-            month: edu.startDate_month,
-            year: edu.startDate_year,
+            month: (edu as any)?.startDate_month || start.month || '',
+            year: (edu as any)?.startDate_year || start.year || '',
           },
           end_date: {
-            month: stillStudying ? '' : edu.endDate_month,
-            year: stillStudying ? '' : edu.endDate_year,
+            month: stillStudying ? '' : (edu as any)?.endDate_month || end.month || '',
+            year: stillStudying ? '' : (edu as any)?.endDate_year || end.year || '',
           },
         };
 
