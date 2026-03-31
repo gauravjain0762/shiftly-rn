@@ -108,7 +108,6 @@ const CreateProfileScreen = () => {
   const [isEducationSavedToApi, setIsEducationSavedToApi] = useState<boolean>(false);
   const experienceData = getExperiences?.data?.experiences;
   const experienceUser = getExperiences?.data?.user;
-  console.log("🔥 ~ CreateProfileScreen ~ experienceUser:", experienceUser)
   const aboutmeandResumes = getAboutmeandResumes?.data?.user;
   const uploadedResumes = aboutmeandResumes?.resumes;
   const experienceOptionsData = useMemo(() => {
@@ -183,10 +182,10 @@ const CreateProfileScreen = () => {
 
   useEffect(() => {
     if (experienceData) {
-      console.log(
-        '🔥 [CreateProfileScreen] useGetExperiencesQuery experienceData:',
-        JSON.stringify(experienceData, null, 2),
-      );
+      // console.log(
+      //   '🔥 [CreateProfileScreen] useGetExperiencesQuery experienceData:',
+      //   JSON.stringify(experienceData, null, 2),
+      // );
     }
   }, [experienceData]);
 
@@ -532,7 +531,7 @@ const CreateProfileScreen = () => {
     }
   };
 
-  const handleAddEducation = async () => {
+  const handleAddEducation = async (listOverride?: EducationItem[]) => {
     try {
       // Reset until we confirm at least one valid education exists in API.
       setIsEducationSavedToApi(false);
@@ -546,7 +545,13 @@ const CreateProfileScreen = () => {
           }, {})
           : {};
 
-      for (const edu of educationList) {
+      const list = Array.isArray(listOverride)
+        ? listOverride
+        : Array.isArray(educationList)
+          ? educationList
+          : [];
+
+      for (const edu of list) {
         const stillStudying = Boolean((edu as any)?.still_studying);
         const payload = {
           education_id: edu._id || '',
@@ -569,10 +574,18 @@ const CreateProfileScreen = () => {
         };
 
         try {
-
-          console.log('✅ ~ Education Payload:', JSON.stringify(payload, null, 2));
+          console.log(
+            '📤 [CreateProfileScreen] addUpdateEducation params:',
+            JSON.stringify(payload, null, 2),
+          );
+          console.log(
+            '🚀 [CreateProfileScreen] addUpdateEducation call started',
+          );
           const response = await addUpdateEducation(payload).unwrap();
-          console.log('✅ ~ Education Response:', JSON.stringify(response, null, 2));
+          console.log(
+            '✅ [CreateProfileScreen] addUpdateEducation response:',
+            JSON.stringify(response, null, 2),
+          );
 
 
           if (response?.status) {
@@ -581,7 +594,14 @@ const CreateProfileScreen = () => {
             errorToast(response?.message);
           }
         } catch (error) {
-          console.error('Error saving education:', error);
+          console.error(
+            '❌ [CreateProfileScreen] addUpdateEducation error:',
+            error,
+          );
+          console.error(
+            '❌ [CreateProfileScreen] failed education params:',
+            JSON.stringify(payload, null, 2),
+          );
         }
       }
 
@@ -602,7 +622,10 @@ const CreateProfileScreen = () => {
     }
   };
 
-  const handleAddUExperience = async (listOverride?: ExperienceItem[]) => {
+  const handleAddUExperience = async (
+    listOverride?: ExperienceItem[],
+    options?: { forceMetaOnly?: boolean },
+  ) => {
     try {
       if (noExperienceChecked) {
         const payload: any = {
@@ -637,6 +660,39 @@ const CreateProfileScreen = () => {
         : Array.isArray(experienceList)
           ? experienceList
           : [];
+
+      // Desired-only / meta-only updates (no experience rows) must still hit API.
+      if (options?.forceMetaOnly || list.length === 0) {
+        const payload: any = {
+          no_past_experience: Boolean(noExperienceChecked),
+          ...(globalDesiredJobTitle?.trim() && {
+            preferred_position: globalDesiredJobTitle.trim(),
+            desired_job_title: globalDesiredJobTitle.trim(),
+          }),
+          ...(userDepartmentOption?.value && {
+            user_department_id: userDepartmentOption.value,
+          }),
+          ...(effectiveYearsOfExperienceLabel && {
+            years_of_experience: effectiveYearsOfExperienceLabel,
+          }),
+        };
+        console.log(
+          '✅ ~ Experience Payload (meta-only):',
+          JSON.stringify(payload, null, 2),
+        );
+        const response = await addUpdateExperience(payload).unwrap();
+        console.log(
+          '✅ ~ Experience Response (meta-only):',
+          JSON.stringify(response, null, 2),
+        );
+        if (!response?.status) {
+          errorToast(response?.message);
+        }
+        refetchExperience();
+        setIsNoExperienceTouched(false);
+        return;
+      }
+
       for (const exp of list) {
         // API may return `department_id` while the UI/form state uses `department`.
         const dep = (exp as any)?.department ?? (exp as any)?.department_id as any;
@@ -844,6 +900,11 @@ const CreateProfileScreen = () => {
       if (isEducationUpdate) {
         console.log('isEducationUpdate called >>>>>>>>>>>.');
         await handleAddEducation();
+        // In edit flow, step 1 can be an education-only update.
+        // Show success modal even when experience/about APIs are not triggered.
+        if (route.params?.isEdit && activeStep === 1) {
+          dispatch(setShowModal(true));
+        }
       }
 
       const serverDesiredJobTitle =
@@ -973,6 +1034,10 @@ const CreateProfileScreen = () => {
 
         return experienceList;
       })();
+      const needsMetaOnlySubmit =
+        shouldSubmitExperienceMeta &&
+        !hasExperienceDraft &&
+        (!Array.isArray(experienceSubmitList) || experienceSubmitList.length === 0);
 
       if (
         isExperienceUpdate ||
@@ -984,7 +1049,10 @@ const CreateProfileScreen = () => {
         noExperienceChecked
       ) {
         console.log('isExperienceUpdate/changed called >>>>>>>>>>>.');
-        await handleAddUExperience(experienceSubmitList);
+        await handleAddUExperience(
+          experienceSubmitList,
+          needsMetaOnlySubmit ? { forceMetaOnly: true } : undefined,
+        );
         // In edit flow, step 2 updates only experience meta/list.
         // Show success popup here because About Me API (which also opens modal)
         // is intentionally skipped on step 1-2.
@@ -1455,16 +1523,13 @@ const CreateProfileScreen = () => {
               title="Next"
               disabled={educationList.length > 0 && !isEmptyEducation(educationListEdit)}
               onPress={async () => {
-                // New profile flow: if user typed education but didn't save first.
-                if (
-                  !route.params?.isEdit &&
-                  educationList.length === 0
-                ) {
-                  errorToast('You need to first Save the Education.');
+                if (isEmptyEducation(educationListEdit) && educationList.length === 0) {
+                  errorToast('Please add at least one education.');
                   return;
                 }
 
-                if (isEmptyEducation(educationListEdit)) {
+                if (isEmptyEducation(educationListEdit) && educationList.length > 0) {
+                  await handleAddEducation(educationList);
                   dispatch(setActiveStep(2));
                   return;
                 }
@@ -1472,11 +1537,22 @@ const CreateProfileScreen = () => {
                 const shouldAutoSaveFirstEducation =
                   educationList.length === 0 && !isEmptyEducation(educationListEdit);
 
+                let submitList: EducationItem[] = educationList;
+
                 if (shouldAutoSaveFirstEducation) {
+                  submitList = [
+                    ...educationList,
+                    {
+                      ...(educationListEdit as any),
+                      education_id: Date.now().toString(),
+                      isEditing: false,
+                      isLocal: true,
+                    } as EducationItem,
+                  ];
                   handleSaveOrAddEducation();
                 }
 
-                await handleAddEducation();
+                await handleAddEducation(submitList);
                 dispatch(setActiveStep(2));
               }}
               textStyle={{ ...commonFontStyle(600, 18, colors.white) }}

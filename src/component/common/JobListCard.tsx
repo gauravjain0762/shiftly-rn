@@ -158,11 +158,7 @@ const JobListCard = ({
                   </View>
                 )}
               </ScrollView>
-              {job?.expiry_date && String(job?.status || '').toLowerCase() !== 'closed' && (
-                <Text style={[styles.expiryText, statusBadge?.text && styles.expiryTextWithStatus]}>
-                  {getExpiryDays(job?.expiry_date)}
-                </Text>
-              )}
+
             </View>
           )}
 
@@ -181,6 +177,11 @@ const JobListCard = ({
             </View>
           )}
         </View>
+        {job?.expiry_date && String(job?.status || '').toLowerCase() !== 'closed' && (
+          <Text style={[styles.expiryText, statusBadge?.text && styles.expiryTextWithStatus]}>
+            {getExpiryDays(job?.expiry_date)}
+          </Text>
+        )}
       </View>
     </CardWrapper>
   );
@@ -282,10 +283,10 @@ const styles = StyleSheet.create({
   },
   expiryText: {
     ...commonFontStyle(500, 11, colors._EE4444),
-    marginLeft: wp(8),
+    textAlign: 'right'
   },
   expiryTextWithStatus: {
-    marginRight: wp(52),
+    marginTop: hp(10)
   },
   closedDate: {
     ...commonFontStyle(500, 12, '#E53935'),

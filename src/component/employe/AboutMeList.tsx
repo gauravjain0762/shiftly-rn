@@ -187,7 +187,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
           isSearch={true}
           searchPlaceholder="Search skills..."
           lightTheme
-          dropdownPosition='bottom'
+          dropdownPosition='top'
           data={(skillsList || []).map((skill: any) => ({
             label: skill?.title,
             value: skill?._id,
