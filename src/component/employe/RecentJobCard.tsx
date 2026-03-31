@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'rea
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
-import { getTimeAgo, navigateTo } from '../../utils/commonFunction';
+import { getExpiryDays, getTimeAgo, navigateTo } from '../../utils/commonFunction';
 import { getCurrencySymbol } from '../../utils/currencySymbols';
 import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
 import Share from 'react-native-share';
@@ -91,9 +91,11 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                     <Text style={styles.description} numberOfLines={2}>
                         {item?.description || 'N/A'}
                     </Text>
-                    <Text style={styles.timeAgo}>
-                        {getTimeAgo(item?.createdAt) || 'N/A'}
-                    </Text>
+                    <View style={styles.rightMeta}>
+                        <Text style={styles.timeAgo}>
+                            {getTimeAgo(item?.createdAt) || 'N/A'}
+                        </Text>
+                    </View>
                 </View>
 
                 {item?.contract_type && (
@@ -115,7 +117,7 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                                         {item?.currency?.toUpperCase() === 'AED' ? (
                                             <Image source={IMAGES.currency} style={styles.currencyImage} />
                                         ) : (
-                                            <Text style={styles.currencySymbol}>{getCurrencySymbol(item?.currency || 'USD')}</Text>
+                                            <Text style={styles.currencySymbol}>{getCurrencySymbol(item?.currency || 'AED')}</Text>
                                         )}
                                         <Text style={styles.tagText}>
                                             {getJobMonthlySalaryRangeText(item)}
@@ -123,15 +125,15 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                                     </View>
                                 </View>
                             )}
-                            {(item?.contract_period || item?.duration) && (
-                                <View style={[styles.tag, { backgroundColor: '#2196F3' }]}>
-                                    <Text style={styles.tagText}>
-                                        {item?.contract_period || item?.duration}{!(item?.contract_period || item?.duration)?.toLowerCase().includes('contract') ? ' Contract' : ''}
-                                    </Text>
-                                </View>
-                            )}
+                     
+
                         </ScrollView>
                     </View>
+                    {item?.expiry_date && String(item?.status || '').toLowerCase() !== 'closed' && (
+                        <Text style={styles.expiryText}>
+                            {getExpiryDays(item?.expiry_date)}
+                        </Text>
+                    )}
                 </View>
             </TouchableOpacity>
         </View>
@@ -239,6 +241,8 @@ const styles = StyleSheet.create({
         paddingVertical: hp(6),
         paddingHorizontal: wp(12),
         borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     tagText: {
         ...commonFontStyle(500, 10, colors.white),
@@ -246,8 +250,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     currencyImage: {
-        width: wp(18),
-        height: hp(18),
+        width: wp(12),
+        height: hp(12),
         resizeMode: 'contain',
         marginHorizontal: wp(2),
         tintColor: colors.white,
@@ -255,6 +259,14 @@ const styles = StyleSheet.create({
     timeAgo: {
         ...commonFontStyle(400, 11, colors._656464),
         marginTop: hp(2),
+    },
+    rightMeta: {
+        alignItems: 'flex-end',
+    },
+    expiryText: {
+        ...commonFontStyle(500, 11, colors._EE4444),
+        marginBottom: hp(2),
+        marginLeft: wp(8),
     },
     salaryRow: {
         flexDirection: 'row',

@@ -14,6 +14,8 @@ const ROLE_STORAGE_KEY = 'userRole';
 // 🔔 Display Notification + Badge Update
 //
 async function onDisplayNotification(message: any) {
+  // Pulse unread flag so repeated notifications also trigger UI updates.
+  store.dispatch(setHasUnreadNotification(false));
   store.dispatch(setHasUnreadNotification(true)); // Show red dot
   await notifee.requestPermission();
 
@@ -193,6 +195,8 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   let count = await notifee.getBadgeCount();
   count++;
   await notifee.setBadgeCount(count);
+  // Pulse unread flag so repeated notifications also trigger UI updates.
+  store.dispatch(setHasUnreadNotification(false));
   store.dispatch(setHasUnreadNotification(true)); // Show red dot
 
   // Create Android channel

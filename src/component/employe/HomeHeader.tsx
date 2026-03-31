@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
     top: -2,
-    right: -6,
+    right: -wp(4),
     backgroundColor: '#E53935',
     borderWidth: 1.5,
     borderColor: 'white',

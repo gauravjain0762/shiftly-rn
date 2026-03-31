@@ -3,15 +3,13 @@ import {
   StyleSheet,
   Text,
   ViewStyle,
-  TouchableOpacity,
   View,
-  Platform,
   Keyboard,
   ImageURISource,
   ImageStyle,
   TextStyle,
 } from 'react-native';
-import React, { ReactNode, useState, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
+import React, { useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { Dropdown as DropdownElement } from 'react-native-element-dropdown';

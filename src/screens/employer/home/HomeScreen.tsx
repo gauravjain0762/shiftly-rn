@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { HomeHeader, LinearContainer } from '../../../component';
@@ -20,12 +20,15 @@ import { useAppDispatch } from '../../../redux/hooks';
 import { connectSocket } from '../../../hooks/socketManager';
 import DashboardStats from '../../../component/employe/DashboardStats';
 import RecentJobCard from '../../../component/employe/RecentJobCard';
+import { useFocusEffect } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const { userInfo, fcmToken }: any = useSelector((state: RootState) => state.auth);
+  const { userInfo, fcmToken, hasUnreadNotification }: any = useSelector((state: RootState) => state.auth);
   const { data: profileData, refetch: refetchProfile } = useGetEmployeeProfileQuery({});
+  const [localUnreadCount, setLocalUnreadCount] = useState<number>(0);
+  const prevUnreadFlagRef = useRef<boolean>(false);
 
   const {
     data: getJobs,
@@ -54,8 +57,47 @@ const HomeScreen = () => {
   useEffect(() => {
     if (profileData) {
       dispatch(setUserInfo(profileData?.data?.user));
+      setLocalUnreadCount(Number(profileData?.data?.user?.unread_notifications ?? 0));
     }
   }, [profileData]);
+
+  useEffect(() => {
+    // Keep local unread in sync when Redux userInfo changes from other flows.
+    if (!profileData?.data?.user) {
+      setLocalUnreadCount(Number(userInfo?.unread_notifications ?? 0));
+    }
+  }, [userInfo?.unread_notifications, profileData?.data?.user]);
+
+  useEffect(() => {
+    // Instant update on incoming push while on Home.
+    const prev = prevUnreadFlagRef.current;
+    const curr = Boolean(hasUnreadNotification);
+    if (!prev && curr) {
+      setLocalUnreadCount(prevCount => prevCount + 1);
+    }
+    prevUnreadFlagRef.current = curr;
+  }, [hasUnreadNotification]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let mounted = true;
+      const syncUnreadFromProfile = async () => {
+        const refreshed: any = await refetchProfile();
+        const apiCount = Number(
+          refreshed?.data?.data?.user?.unread_notifications ??
+          refreshed?.data?.user?.unread_notifications ??
+          0,
+        );
+        if (mounted) {
+          setLocalUnreadCount(apiCount);
+        }
+      };
+      syncUnreadFromProfile();
+      return () => {
+        mounted = false;
+      };
+    }, [refetchProfile]),
+  );
 
   const handleLoadMore = () => {
     if (!isFetchingJobs && currentPage < totalPages) {
@@ -80,7 +122,7 @@ const HomeScreen = () => {
             companyProfile={userInfo}
             onPressAvatar={() => navigateTo(SCREENS.ProfileScreen)}
             onPressNotifi={() => navigateTo(SCREENS.NotificationScreen)}
-            unreadCount={profileData?.data?.user?.unread_notifications ?? 0}
+            unreadCount={localUnreadCount}
           />
         </View>
 

@@ -94,14 +94,6 @@ const CONTRACT_TYPE_FALLBACK = [
   { label: 'Seasonal', value: 'Seasonal' },
 ];
 
-const durationData = [
-  { label: '7 Days', value: '7 Days' },
-  { label: '14 Days', value: '14 Days' },
-  { label: '1 Month', value: '1 Month' },
-  { label: '3 Months', value: '3 Months' },
-  { label: 'Until Filled', value: 'Until Filled' },
-];
-
 const START_DATE_FALLBACK = [
   { label: 'Immediately', value: 'Immediately' },
   { label: 'Within 3 Days', value: 'Within 3 Days' },
@@ -217,6 +209,19 @@ const PostJob = () => {
     }
   }, [jobDropdownData?.data?.salary_ranges]);
 
+  const jobExpiryTimeData = useMemo(() => {
+    const list = jobDropdownData?.data?.job_expiry_times;
+    if (Array.isArray(list) && list.length > 0) {
+      return list
+        .filter((v: any) => typeof v === 'string' && v.trim().length > 0)
+        .map((v: string) => {
+          const trimmed = v.trim();
+          return { label: trimmed, value: trimmed };
+        });
+    }
+    return [];
+  }, [jobDropdownData?.data?.job_expiry_times]);
+
   const startDateData = useMemo(() => {
     const list = jobDropdownData?.data?.job_start_dates;
     if (Array.isArray(list) && list.length > 0) {
@@ -267,6 +272,16 @@ const PostJob = () => {
     languages,
     other_requirements,
   } = useAppSelector((state: any) => selectJobForm(state));
+
+  const jobExpiryTimeDataWithCurrent = useMemo(() => {
+    const currentValue = String(duration?.value || '').trim();
+    if (!currentValue) return jobExpiryTimeData;
+    const exists = jobExpiryTimeData.some(
+      (item: any) => String(item?.value || '').trim() === currentValue,
+    );
+    if (exists) return jobExpiryTimeData;
+    return [{ label: currentValue, value: currentValue }, ...jobExpiryTimeData];
+  }, [jobExpiryTimeData, duration?.value]);
 
   const selectedSalaryValue =
     salary?.value != null && String(salary.value).trim() !== '-'
@@ -700,7 +715,7 @@ const PostJob = () => {
       monthly_salary_range: salary?.value || '',
       no_positions: position?.value,
       skills: Array.isArray(skillId) ? skillId.filter(Boolean).join(',') : '',
-      currency: currency?.value,
+      currency: currency?.value || 'AED',
       essential_benefits: Array.isArray(essential_benefits)
         ? essential_benefits.map((item: any) => item?._id).filter(Boolean).join(',')
         : '',
@@ -892,26 +907,18 @@ const PostJob = () => {
   const calculateExpiryDate = (durationValue: string): string => {
     const today = new Date();
     const expiryDate = new Date(today);
-
-    switch (durationValue) {
-      case '7 Days':
-        expiryDate.setDate(today.getDate() + 7);
-        break;
-      case '14 Days':
-        expiryDate.setDate(today.getDate() + 14);
-        break;
-      case '1 Month':
-        expiryDate.setMonth(today.getMonth() + 1);
-        break;
-      case '3 Months':
-        expiryDate.setMonth(today.getMonth() + 3);
-        break;
-      case 'Until Filled':
-        expiryDate.setFullYear(today.getFullYear() + 1);
-        break;
-      default:
-        expiryDate.setMonth(today.getMonth() + 1);
-        break;
+    const val = String(durationValue || '').trim().toLowerCase();
+    const count = Number(val.match(/\d+/)?.[0] ?? 0);
+    if (val.includes('day') && count > 0) {
+      expiryDate.setDate(today.getDate() + count);
+    } else if (val.includes('month') && count > 0) {
+      expiryDate.setMonth(today.getMonth() + count);
+    } else if (val.includes('year') && count > 0) {
+      expiryDate.setFullYear(today.getFullYear() + count);
+    } else if (val.includes('until') || val.includes('filled')) {
+      expiryDate.setFullYear(today.getFullYear() + 1);
+    } else {
+      expiryDate.setMonth(today.getMonth() + 1);
     }
 
     return expiryDate.toISOString().split('T')[0];
@@ -1315,7 +1322,7 @@ const PostJob = () => {
                       message={t('Choose required languages and minimum proficiency level (Basic / Conversational / Fluent / Native).')}
                       position="bottom"
                       containerStyle={styles.tooltipIcon}
-                      tooltipBoxStyle={{ left: wp(-110), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
+                      tooltipBoxStyle={{ left: wp(-95), top: hp(28), width: wp(280), maxWidth: wp(280), zIndex: 1000 }}
                     />
                   </View>
                   <CustomDropdownMulti
@@ -1988,7 +1995,7 @@ const PostJob = () => {
                     />
                   </View>
                   <CustomDropdown
-                    data={durationData}
+                    data={jobExpiryTimeDataWithCurrent}
                     labelField="label"
                     valueField="value"
                     value={duration?.value}
@@ -2122,22 +2129,11 @@ const PostJob = () => {
                       selectedTextStyle={styles.selectedTextStyle}
                       container={AppStyles.flex}
                     />
-                    <CustomDropdown
-                      data={currencyData}
-                      labelField="label"
-                      valueField="value"
-                      value={currency?.value}
-                      onChange={(e: any) => {
-                        updateJobForm({
-                          currency: { label: e.label, value: e.value },
-                        });
-                      }}
-                      dropdownStyle={styles.dropdown}
-                      renderRightIcon={IMAGES.ic_down}
-                      RightIconStyle={styles.rightIcon}
-                      selectedTextStyle={styles.selectedTextStyle}
-                      container={{ flex: 0.5 }}
-                    />
+                    <View style={styles.currencyPill}>
+                      <Text style={styles.selectedTextStyle}>
+                        {currency?.value || 'AED'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
                 <View style={styles.field}>
@@ -2446,6 +2442,16 @@ const styles = StyleSheet.create({
     gap: wp(16),
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  currencyPill: {
+    flex: 0.5,
+    height: hp(52),
+    borderWidth: 1,
+    borderColor: colors._0B3970,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
   },
   btn: {
     marginVertical: hp(25),

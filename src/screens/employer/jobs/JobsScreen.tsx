@@ -1127,6 +1127,7 @@ const JobsScreen = () => {
               data={salaryRangeOptions}
               labelField="label"
               valueField="value"
+              dropdownPosition='top'
               value={filters.salary_range}
               placeholder={t('Select Salary Range')}
               dropdownStyle={styles.dropdown}

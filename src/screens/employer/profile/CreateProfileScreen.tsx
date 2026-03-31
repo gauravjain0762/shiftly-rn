@@ -131,6 +131,7 @@ const CreateProfileScreen = () => {
     value: string;
   } | null>(null);
   const [noExperienceChecked, setNoExperienceChecked] = useState(false);
+  const [isNoExperienceTouched, setIsNoExperienceTouched] = useState(false);
 
   const { data: departmentsData } = useGetDepartmentsQuery({});
   const departmentOptions = useMemo(() => {
@@ -337,17 +338,25 @@ const CreateProfileScreen = () => {
       setYearsOfExperienceOption(null);
     }
 
-    if (savedNoPastExperience === true) {
-      setNoExperienceChecked(true);
-    } else if (
-      typeof savedLabel === 'string' &&
-      (savedLabel.trim().toLowerCase() === '0 years experience' ||
-        savedLabel.trim().toLowerCase() === '0-2 years experience')
-    ) {
-      // Backward compatibility for older data where dedicated flag didn't exist.
-      setNoExperienceChecked(true);
-    } else if (!savedLabel) {
-      setNoExperienceChecked(false);
+    // Do not override user's in-progress toggle before submit.
+    if (!isNoExperienceTouched) {
+      // Checkbox must follow `data.user.no_past_experience` from getExperiences when present.
+      if (savedNoPastExperience === true) {
+        setNoExperienceChecked(true);
+      } else if (savedNoPastExperience === false) {
+        setNoExperienceChecked(false);
+      } else if (
+        typeof savedLabel === 'string' &&
+        (savedLabel.trim().toLowerCase() === '0 years experience' ||
+          savedLabel.trim().toLowerCase() === '0-2 years experience')
+      ) {
+        // Backward compatibility when API did not send `no_past_experience`.
+        setNoExperienceChecked(true);
+      } else if (!savedLabel) {
+        setNoExperienceChecked(false);
+      } else {
+        setNoExperienceChecked(false);
+      }
     }
   }, [
     experienceUser?.years_of_experience,
@@ -357,6 +366,7 @@ const CreateProfileScreen = () => {
     userInfo?.years_of_experience,
     userInfo?.no_past_experience,
     experienceOptionsData,
+    isNoExperienceTouched,
   ]);
 
   const effectiveYearsOfExperienceLabel = yearsOfExperienceOption?.label || '';
@@ -594,6 +604,34 @@ const CreateProfileScreen = () => {
 
   const handleAddUExperience = async (listOverride?: ExperienceItem[]) => {
     try {
+      if (noExperienceChecked) {
+        const payload: any = {
+          no_past_experience: true,
+          ...(globalDesiredJobTitle?.trim() && {
+            preferred_position: globalDesiredJobTitle.trim(),
+            desired_job_title: globalDesiredJobTitle.trim(),
+          }),
+          ...(userDepartmentOption?.value && {
+            user_department_id: userDepartmentOption.value,
+          }),
+        };
+        console.log(
+          '✅ ~ Experience Payload (no_past_experience):',
+          JSON.stringify(payload, null, 2),
+        );
+        const response = await addUpdateExperience(payload).unwrap();
+        console.log(
+          '✅ ~ Experience Response (no_past_experience):',
+          JSON.stringify(response, null, 2),
+        );
+        if (!response?.status) {
+          errorToast(response?.message);
+        }
+        setIsNoExperienceTouched(false);
+        refetchExperience();
+        return;
+      }
+
       const list = Array.isArray(listOverride)
         ? listOverride
         : Array.isArray(experienceList)
@@ -688,6 +726,7 @@ const CreateProfileScreen = () => {
       }
 
       refetchExperience();
+      setIsNoExperienceTouched(false);
     } catch (error) {
       console.error('Error adding experience:', error);
     }
@@ -752,8 +791,14 @@ const CreateProfileScreen = () => {
     }
 
     debugPayload.languages.forEach((lang: any, index: number) => {
-      formData.append(`languages[${index}][name]`, lang.name);
-      formData.append(`languages[${index}][level]`, lang.level);
+      formData.append(
+        `languages[${index}][name]`,
+        String(lang?.name ?? ''),
+      );
+      formData.append(
+        `languages[${index}][level]`,
+        String(lang?.level ?? ''),
+      );
     });
 
     debugPayload.resumes.forEach((resume: any) => {
@@ -834,8 +879,16 @@ const CreateProfileScreen = () => {
         Boolean(currentDesiredDepartmentId) &&
         String(currentDesiredDepartmentId) !== String(serverDesiredDepartmentId);
 
+      const serverNoPastExperience = Boolean(
+        experienceUser?.no_past_experience ??
+        aboutmeandResumes?.no_past_experience ??
+        userInfo?.no_past_experience,
+      );
+      const hasNoPastExperienceChanged =
+        Boolean(noExperienceChecked) !== serverNoPastExperience;
+
       const shouldSubmitExperienceMeta =
-        hasDesiredChanged || hasYearsChanged || hasDepartmentChanged;
+        hasDesiredChanged || hasYearsChanged || hasDepartmentChanged || hasNoPastExperienceChanged;
 
       const experienceSubmitList = (() => {
         // 1) If user filled experience row fields, use draft logic and merge meta fields.
@@ -926,14 +979,26 @@ const CreateProfileScreen = () => {
         hasDesiredChanged ||
         hasYearsChanged ||
         hasExperienceDraft ||
-        hasDepartmentChanged
+        hasDepartmentChanged ||
+        hasNoPastExperienceChanged ||
+        noExperienceChecked
       ) {
         console.log('isExperienceUpdate/changed called >>>>>>>>>>>.');
         await handleAddUExperience(experienceSubmitList);
+        // In edit flow, step 2 updates only experience meta/list.
+        // Show success popup here because About Me API (which also opens modal)
+        // is intentionally skipped on step 1-2.
+        if (route.params?.isEdit && activeStep === 2) {
+          dispatch(setShowModal(true));
+        }
       }
 
-      await handleAddAboutMe();
-      console.log('handleAddAboutMe called >>>>>>>>>>>.');
+      // About Me + resumes are only edited from step 3+; calling this on step 1–2
+      // sent empty/invalid payloads and could crash (FormData) or wipe `aboutEdit`.
+      if (activeStep >= 3) {
+        await handleAddAboutMe();
+        console.log('handleAddAboutMe called >>>>>>>>>>>.');
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {
@@ -1316,7 +1381,9 @@ const CreateProfileScreen = () => {
                       activeOpacity={0.7}
                       onPress={() => {
                         const next = !noExperienceChecked;
+                        setIsNoExperienceTouched(true);
                         setNoExperienceChecked(next);
+                        setIsExperienceUpdate(true);
                       }}>
                       <View style={styles.checkbox}>
                         {noExperienceChecked && (
@@ -1468,7 +1535,7 @@ const CreateProfileScreen = () => {
                   return;
                 }
 
-                if (isEmptyExperience(experienceListEdit)) {
+                if (isEmptyExperience(experienceListEdit) && !noExperienceChecked) {
                   dispatch(setActiveStep(3));
                   return;
                 }
@@ -1487,6 +1554,9 @@ const CreateProfileScreen = () => {
                     await empUpdateProfile(fd).unwrap();
                   } catch (_) {
                   }
+                }
+                if (noExperienceChecked) {
+                  await handleAddUExperience([]);
                 }
                 dispatch(setActiveStep(3));
               }}
