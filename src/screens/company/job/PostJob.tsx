@@ -2038,7 +2038,7 @@ const PostJob = () => {
                     selectedTextStyle={styles.selectedTextStyle}
                   />
                 </View>
-                <View style={styles.field}>
+                {/* <View style={styles.field}>
                   <Text style={styles.label}>{t('Expiry Date')}</Text>
                   <Pressable
                     style={{ position: 'relative' }}
@@ -2096,7 +2096,7 @@ const PostJob = () => {
                     }}
                     onCancel={() => updateJobForm({ isModalVisible: false })}
                   />
-                </View>
+                </View> */}
                 <View
                   style={styles.field}
                   collapsable={false}>

@@ -57,6 +57,9 @@ const PreviewPost = () => {
         externalLink,
     } = useAppSelector(state => selectPostForm(state as any));
     const { updatePostForm } = usePostFormUpdater();
+    const normalizedExternalLink =
+        typeof externalLink === 'string' ? externalLink.trim() : '';
+    const hasExternalLink = normalizedExternalLink.length > 0;
 
     const previewImageUri = useMemo(() => {
         const image = uploadedImages?.[0];
@@ -122,7 +125,7 @@ const PreviewPost = () => {
             const formData = new FormData();
             formData.append('title', title.trim());
             formData.append('description', description.trim());
-            formData.append('external_link', externalLink.trim());
+            formData.append('external_link', normalizedExternalLink);
 
             if (postEditMode && postId) {
                 formData.append('post_id', postId);
@@ -259,10 +262,16 @@ const PreviewPost = () => {
                     <View>
                         <Text style={styles.postExternalLink}>{t('External Link')}:</Text>
                         <Text
-                            onPress={() => Linking.openURL(externalLink)}
-                            style={styles.postExternalLinkText}
+                            onPress={() => {
+                                if (!hasExternalLink) return;
+                                Linking.openURL(normalizedExternalLink).catch(() => { });
+                            }}
+                            style={[
+                                styles.postExternalLinkText,
+                                !hasExternalLink && styles.postExternalLinkTextDisabled,
+                            ]}
                         >
-                            {externalLink}
+                            {normalizedExternalLink || '-'}
                         </Text>
                     </View>
                 </View>
@@ -433,5 +442,8 @@ const styles = StyleSheet.create({
         ...commonFontStyle(400, 15, colors._0B3970),
         paddingHorizontal: wp(16),
         paddingBottom: hp(16),
+    },
+    postExternalLinkTextDisabled: {
+        color: colors._7B7878,
     },
 });

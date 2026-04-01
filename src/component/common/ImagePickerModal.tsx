@@ -34,7 +34,7 @@ const ImagePickerModal = ({
       const image = await ImageCropPicker.openCamera({
         mediaType: 'photo',
         cropping: true,
-        compressImageQuality: 0.7, // Compress camera images to prevent memory issues
+        compressImageQuality: 1,
         cropperToolbarTitle: 'Edit Photo',
         cropperStatusBarColor: '#000000',
         cropperToolbarColor: '#000000',
@@ -115,7 +115,7 @@ const ImagePickerModal = ({
       const res = await ImageCropPicker.openPicker({
         mediaType: 'photo',
         cropping: true,
-        compressImageQuality: 0.5,
+        compressImageQuality: 1,
         cropperToolbarTitle: 'Edit Photo',
         cropperStatusBarColor: '#000000',
         cropperToolbarColor: '#000000',

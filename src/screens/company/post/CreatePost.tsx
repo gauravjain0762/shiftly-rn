@@ -45,11 +45,11 @@ const CreatePost = () => {
   const { updatePostForm } = usePostFormUpdater();
 
 
-  useEffect(() => {
-    if (!externalLink || externalLink === null) {
-      updatePostForm({externalLink: 'https://'});
-    }
-  }, [externalLink]);
+  // useEffect(() => {
+  //   if (!externalLink || externalLink === null) {
+  //     updatePostForm({externalLink: 'https://'});
+  //   }
+  // }, [externalLink]);
 
   useEffect(() => {
     const params = route.params;

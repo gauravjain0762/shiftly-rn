@@ -742,11 +742,11 @@ ${salary}${shareUrlText}`;
                     errorToast('You already applied for this job.');
                     return;
                   }
-                  const user = employeeProfile?.data?.user;
-                  if (!isProfileComplete(user)) {
-                    setCompleteProfileModal(true);
-                    return;
-                  }
+                  // const user = employeeProfile?.data?.user;
+                  // if (!isProfileComplete(user)) {
+                  //   setCompleteProfileModal(true);
+                  //   return;
+                  // }
                   navigateTo(SCREEN_NAMES.ApplyJob, {
                     data: curr_jobdetails,
                     resumeList: resumeList,

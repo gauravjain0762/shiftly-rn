@@ -663,6 +663,7 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const renderShortlistedEmployee = (item: any) => {
+    console.log("🔥 ~ renderShortlistedEmployee ~ item:", item);
     const user = item?.user_id || item;
     if (!user || !user?._id) return null;
 

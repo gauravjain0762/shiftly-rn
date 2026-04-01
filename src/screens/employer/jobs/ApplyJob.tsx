@@ -85,11 +85,11 @@ const ApplyJob = () => {
   };
 
   const handleApplyJob = async () => {
-    const user = employeeProfile?.data?.user;
-    if (!isProfileComplete(user)) {
-      setCompleteProfileModal(true);
-      return;
-    }
+    // const user = employeeProfile?.data?.user;
+    // if (!isProfileComplete(user)) {
+    //   setCompleteProfileModal(true);
+    //   return;
+    // }
 
     if (!selectedDocs?.length) {
       errorToast(t('Please select or upload a resume'));

@@ -851,85 +851,95 @@ const CreateProfileScreen = () => {
   };
 
   const handleAddAboutMe = async () => {
-    const formData = new FormData();
-
-    const locationData = route.params?.locationData;
-    const city =
-      locationData?.city ??
-      aboutmeandResumes?.city ??
-      userInfo?.city ??
-      (() => {
-        const loc = aboutEdit?.location || '';
-        if (!loc) return '';
-        const parts = loc.split(/\s*[,-]\s*/).map((p: string) => p.trim()).filter(Boolean);
-        return parts[0] ?? '';
-      })();
-    const country =
-      locationData?.country ??
-      aboutmeandResumes?.country ??
-      userInfo?.country ??
-      (() => {
-        const loc = aboutEdit?.location || '';
-        if (!loc) return '';
-        const parts = loc.split(/\s*[,-]\s*/).map((p: string) => p.trim()).filter(Boolean);
-        return parts.length >= 2 ? parts.slice(1).join(', ') : '';
-      })();
-
-    const debugPayload: any = {
-      about: aboutEdit?.about || '',
-      city,
-      country,
-      skills: aboutEdit?.selectedSkills || [],
-      years_of_experience: effectiveYearsOfExperienceLabel || null,
-      languages: (aboutEdit?.selectedLanguages || []).map((l: any) => ({
-        name: l?.name,
-        level: l?.level,
-      })),
-      resumes: (resumes || [])
-        .filter((resume: any) => !resume._id)
-        .map((resume: any, index: number) => ({
-          uri: resume.file,
-          type: resume.type,
-          name: resume.file_name || `resume_${index}.pdf`,
-        })),
-    };
-
-    console.log(
-      '🔥 [CreateProfileScreen] /updateAboutMe payload:',
-      JSON.stringify(debugPayload, null, 2),
-    );
-
-    formData.append('about', debugPayload.about);
-    if (city) formData.append('city', city);
-    if (country) formData.append('country', country);
-    formData.append('skills', (aboutEdit?.selectedSkills || []).join(','));
-
-    if (debugPayload.years_of_experience) {
-      formData.append('years_of_experience', debugPayload.years_of_experience);
-    }
-
-    debugPayload.languages.forEach((lang: any, index: number) => {
-      formData.append(
-        `languages[${index}][name]`,
-        String(lang?.name ?? ''),
-      );
-      formData.append(
-        `languages[${index}][level]`,
-        String(lang?.level ?? ''),
-      );
-    });
-
-    debugPayload.resumes.forEach((resume: any) => {
-      formData.append('resumes', resume as any);
-    });
-
     try {
+      const formData = new FormData();
+      const locationData = route.params?.locationData;
+      const city =
+        locationData?.city ??
+        aboutmeandResumes?.city ??
+        userInfo?.city ??
+        (() => {
+          const loc = aboutEdit?.location || '';
+          if (!loc) return '';
+          const parts = loc.split(/\s*[,-]\s*/).map((p: string) => p.trim()).filter(Boolean);
+          return parts[0] ?? '';
+        })();
+      const country =
+        locationData?.country ??
+        aboutmeandResumes?.country ??
+        userInfo?.country ??
+        (() => {
+          const loc = aboutEdit?.location || '';
+          if (!loc) return '';
+          const parts = loc.split(/\s*[,-]\s*/).map((p: string) => p.trim()).filter(Boolean);
+          return parts.length >= 2 ? parts.slice(1).join(', ') : '';
+        })();
+
+      const normalizedLanguages = (aboutEdit?.selectedLanguages || [])
+        .map((l: any) =>
+          typeof l === 'string'
+            ? { name: l, level: '' }
+            : { name: l?.name, level: l?.level },
+        )
+        .filter((l: any) => typeof l?.name === 'string' && l.name.trim().length > 0);
+
+      const normalizedResumes = (resumes || [])
+        .filter((resume: any) => !resume?._id)
+        .map((resume: any, index: number) => {
+          const uriRaw = resume?.file || resume?.uri || resume?.path || '';
+          const uri = typeof uriRaw === 'string' ? uriRaw.trim() : '';
+          const isLikelyLocal =
+            uri.startsWith('file://') ||
+            uri.startsWith('content://') ||
+            uri.startsWith('ph://') ||
+            uri.startsWith('/');
+          if (!uri || !isLikelyLocal) return null;
+          return {
+            uri,
+            type: resume?.type || 'application/pdf',
+            name: resume?.file_name || resume?.name || `resume_${index}.pdf`,
+          };
+        })
+        .filter(Boolean);
+
+      const debugPayload: any = {
+        about: aboutEdit?.about || '',
+        city,
+        country,
+        skills: aboutEdit?.selectedSkills || [],
+        years_of_experience: effectiveYearsOfExperienceLabel || null,
+        languages: normalizedLanguages,
+        resumes: normalizedResumes,
+      };
+
+      console.log(
+        '🔥 [CreateProfileScreen] /updateAboutMe payload:',
+        JSON.stringify(debugPayload, null, 2),
+      );
+
+      formData.append('about', debugPayload.about);
+      if (city) formData.append('city', city);
+      if (country) formData.append('country', country);
+      formData.append('skills', (aboutEdit?.selectedSkills || []).join(','));
+
+      if (debugPayload.years_of_experience) {
+        formData.append('years_of_experience', debugPayload.years_of_experience);
+      }
+
+      debugPayload.languages.forEach((lang: any, index: number) => {
+        formData.append(`languages[${index}][name]`, String(lang?.name ?? ''));
+        formData.append(`languages[${index}][level]`, String(lang?.level ?? ''));
+      });
+
+      debugPayload.resumes.forEach((resume: any) => {
+        formData.append('resumes', resume as any);
+      });
+
       const res = await updateAboutMe(formData).unwrap();
       console.log(
         '🔥 [CreateProfileScreen] /updateAboutMe response:',
         JSON.stringify(res, null, 2),
       );
-      const updatedData = res?.data?.user;
 
       if (res?.status) {
         dispatch(setShowModal(true));
