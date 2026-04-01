@@ -106,6 +106,7 @@ export const API = {
   getProfile: '/getProfile',
   empUpdateProfile: '/updateProfile',
   sendAssessmentLink: '/sendAssessmentLink',
+  openInterview: '/openInterview',
   addUpdateEducation: '/addUpdateEducation',
   addUpdateExperience: '/addUpdateExperience',
   updateAboutMe: '/updateAboutMe',

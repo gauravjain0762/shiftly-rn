@@ -18,6 +18,9 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
+import BottomModal from '../../../component/common/BottomModal';
+import LottieView from 'lottie-react-native';
+import { animation } from '../../../assets/animation';
 import { colors } from '../../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +37,7 @@ import { navigateTo, errorToast, goBack, resetNavigation, getInitials, hasValidI
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
 import { SCREENS } from '../../../navigation/screenNames';
+import { navigationRef } from '../../../navigation/RootContainer';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
 
 import { useFocusEffect } from '@react-navigation/native';
@@ -141,6 +145,7 @@ const SuggestedEmployeeScreen = () => {
   const [fetchMoreJobDetails, { isFetching: isFetchingJobDetails }] = useLazyGetCompanyJobDetailsQuery();
   const [sendInterviewInvites] = useSendInterviewInvitesMutation();
   const [resendingUserId, setResendingUserId] = useState<string | null>(null);
+  const [showResendSuccessModal, setShowResendSuccessModal] = useState(false);
 
   const handleResendInvite = async (user: any) => {
     const targetUserId = user?._id;
@@ -173,7 +178,7 @@ const SuggestedEmployeeScreen = () => {
 
       const res: any = await sendInterviewInvites(formData).unwrap();
       if (res?.status) {
-        successToast(res?.message || t('Interview invitation sent successfully'));
+        setShowResendSuccessModal(true);
         refetchJobDetails();
         refetchSuggested();
       } else {
@@ -729,7 +734,7 @@ const SuggestedEmployeeScreen = () => {
               </View>
             )}
 
-            {(String(item?.status || '').toLowerCase().includes('interview') && !item?.assessment_completed) && (
+            {(String(item?.status || '').trim().toLowerCase() === 'attempted') && (
               <TouchableOpacity
                 style={[styles.resendButton, !!resendingUserId && resendingUserId !== String(user?._id) && { opacity: 0.6 }]}
                 onPress={() => handleResendInvite(user)}
@@ -1350,6 +1355,47 @@ const SuggestedEmployeeScreen = () => {
           )}
         </>
       )}
+      <BottomModal
+        visible={showResendSuccessModal}
+        backgroundColor={colors.white}
+        onClose={() => { }}>
+        <View style={styles.modalIconWrapper}>
+          <LottieView
+            source={animation.success_check}
+            autoPlay
+            loop={false}
+            style={styles.modalCheckIcon}
+            resizeMode="cover"
+          />
+        </View>
+        <Text style={styles.modalTitle}>
+          {t('AI interviews successfully sent')}
+        </Text>
+        <Text style={styles.modalSubtitle}>
+          {t('Candidates will be automatically analyzed and scored')}
+        </Text>
+        <GradientButton
+          style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
+          type="Company"
+          title={t('View pending interviews')}
+          onPress={() => {
+            setShowResendSuccessModal(false);
+            selectTab('shortlisted');
+          }}
+        />
+        <GradientButton
+          style={[styles.modalPrimaryButton, styles.modalButtonSpacing]}
+          type="Company"
+          title={t('Back to dashboard')}
+          onPress={() => {
+            setShowResendSuccessModal(false);
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: SCREENS.CoTabNavigator }],
+            });
+          }}
+        />
+      </BottomModal>
     </LinearContainer>
   );
 };
@@ -1467,8 +1513,8 @@ const styles = StyleSheet.create({
     marginTop: hp(8),
   },
   currencyImage: {
-    width: wp(18),
-    height: hp(18),
+    width: wp(14),
+    height: hp(14),
     resizeMode: 'contain',
     marginRight: wp(4),
     tintColor: colors._0B3970,
@@ -1812,7 +1858,7 @@ const styles = StyleSheet.create({
   },
   resendButton: {
     marginTop: hp(8),
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     backgroundColor: colors._0B3970,
     borderRadius: wp(20),
     paddingVertical: hp(7),
@@ -1963,5 +2009,34 @@ const styles = StyleSheet.create({
   },
   suggestedLanguageName: {
     ...commonFontStyle(400, 13, colors._0B3970),
+  },
+  modalIconWrapper: {
+    width: wp(90),
+    height: wp(90),
+    alignSelf: 'center',
+    borderRadius: wp(45),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors._0B3970,
+    overflow: 'hidden',
+  },
+  modalCheckIcon: {
+    width: wp(90),
+    height: wp(90),
+  },
+  modalTitle: {
+    textAlign: 'center',
+    marginVertical: hp(16),
+    ...commonFontStyle(600, 25, colors.black),
+  },
+  modalSubtitle: {
+    textAlign: 'center',
+    ...commonFontStyle(400, 18, colors._6B6B6B),
+  },
+  modalPrimaryButton: {
+    borderRadius: wp(25),
+  },
+  modalButtonSpacing: {
+    marginTop: hp(20),
   },
 });

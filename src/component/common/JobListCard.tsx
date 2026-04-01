@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: -wp(16),
-    width: wp(75),
+    width: wp(80),
     height: hp(28),
     justifyContent: 'center',
     alignItems: 'center',

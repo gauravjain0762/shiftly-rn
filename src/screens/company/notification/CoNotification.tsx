@@ -171,7 +171,11 @@ const CoNotification = () => {
       }
     } else if (jobId || notifType === 'interview' || notifType.includes('interview')) {
       if (jobId) {
-        navigateTo(SCREENS.SuggestedEmployee, { jobId });
+        navigateTo(SCREENS.SuggestedEmployee, {
+          jobId,
+          invitationStatus:
+            firstData?.status || firstData?.invitation_status || item?.status,
+        });
       }
     }
   };

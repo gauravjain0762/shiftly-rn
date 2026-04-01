@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 
-import { useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { colors } from '../../../theme/colors';
 import { hp, wp, commonFontStyle } from '../../../theme/fonts';
 import { BackHeader, LinearContainer } from '../../../component';
@@ -31,6 +31,7 @@ const MyJobs = () => {
 
     const appliedJobsQuery = useGetAppliedJobsQuery({ page: pageApplied }, { skip: activeTab !== 'Applied' });
     const interviewsQuery = useGetInterviewsQuery({ page: pageInterviews }, { skip: activeTab !== 'Interviews' });
+    console.log("🔥 ~ MyJobs ~ interviewsQuery:", interviewsQuery)
     const matchedJobsQuery = useGetEmployeeJobsQuery(
         { type: 'matched', page: pageMatched },
         { skip: false, refetchOnMountOrArgChange: true }
@@ -124,6 +125,26 @@ const MyJobs = () => {
         setRefreshing(false);
     }, [activeTab, appliedJobsQuery, interviewsQuery, matchedJobsQuery]);
 
+    // Auto-refresh current tab when screen regains focus
+    // (e.g. returning from Interview/WebView flow).
+    useFocusEffect(
+        useCallback(() => {
+            const refreshOnFocus = async () => {
+                if (activeTab === 'Applied') {
+                    setPageApplied(1);
+                    await appliedJobsQuery.refetch();
+                } else if (activeTab === 'Interviews') {
+                    setPageInterviews(1);
+                    await interviewsQuery.refetch();
+                } else {
+                    setPageMatched(1);
+                    await matchedJobsQuery.refetch();
+                }
+            };
+            refreshOnFocus();
+        }, [activeTab, appliedJobsQuery, interviewsQuery, matchedJobsQuery]),
+    );
+
     const handleLoadMore = () => {
         const query = getActiveQuery();
         const totalPages = query.data?.data?.pagination?.total_pages || 1;
@@ -204,6 +225,9 @@ const MyJobs = () => {
                               navigateTo(SCREENS.JobInvitationScreen, {
                                   jobDetail: { job },
                                   link: item?.interview_link,
+                                  invitationStatus: item?.status,
+                                  // Invitation id is the root `_id` of invitation object.
+                                  invitationId: item?._id || item?.invitation_id || '',
                               })
                         : undefined
                 }

@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
-import { Image, ScrollView, StyleSheet, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { colors } from '../../../theme/colors'
-import { useRoute } from '@react-navigation/native'
+import { useFocusEffect, useRoute } from '@react-navigation/native'
 import { SCREENS } from '../../../navigation/screenNames'
 import BaseText from '../../../component/common/BaseText'
 import { navigateTo } from '../../../utils/commonFunction'
@@ -17,20 +17,110 @@ import CommonButton from '../../../component/common/CommonButton'
 import BottomModal from '../../../component/common/BottomModal';
 import { IMAGES } from '../../../assets/Images';
 import CustomImage from '../../../component/common/CustomImage';
+import { useGetInterviewsQuery, useOpenInterviewMutation } from '../../../api/dashboardApi';
+import { errorToast } from '../../../utils/commonFunction';
 
 const JobInvitationScreen = () => {
     const { userInfo } = useSelector((state: RootState) => state.auth);
     const [showInterviewSetupModal, setShowInterviewSetupModal] = useState(false);
+    const [openInterview, { isLoading: isOpeningInterview }] = useOpenInterviewMutation();
+    const hasStartedInterviewRef = useRef(false);
 
     const route = useRoute();
-    const { jobDetail, link } = route.params as {
+    const { jobDetail, link, invitationStatus, invitationId } = route.params as {
         jobDetail: any;
         link: string;
+        invitationStatus?: string;
+        invitationId?: string;
     };
-    const job = jobDetail?.job;
+    console.log("🔥 ~ JobInvitationScreen ~ invitationId:", invitationId)
+    console.log("🔥 ~ JobInvitationScreen ~ invitationStatus:", invitationStatus)
+    const job = jobDetail?.job || jobDetail;
+    console.log("🔥 ~ JobInvitationScreen ~ jobDetail:", jobDetail)
     console.log("jobDetail >>>>>>>>>>>", jobDetail);
 
-    const company = job?.company_id;
+    const company = job?.company_id || jobDetail?.company_id;
+    const { data: interviewsData, refetch: refetchInterviews } = useGetInterviewsQuery(
+        { page: 1 },
+        { refetchOnFocus: true, refetchOnMountOrArgChange: true },
+    );
+    const allInvitations = React.useMemo(() => {
+        const list =
+            interviewsData?.data?.invitations || interviewsData?.data?.interviews || [];
+        return Array.isArray(list) ? list : [];
+    }, [interviewsData]);
+
+    const matchedInvitation = React.useMemo(() => {
+        if (!allInvitations.length) return null;
+
+        if (invitationId) {
+            const byId = allInvitations.find((inv: any) => String(inv?._id) === String(invitationId));
+            if (byId) return byId;
+        }
+
+        if (link) {
+            const byLink = allInvitations.find((inv: any) => String(inv?.interview_link || '') === String(link));
+            if (byLink) return byLink;
+        }
+
+        const routeJobId = job?._id || jobDetail?._id || jobDetail?.job_id;
+        if (routeJobId) {
+            const byJobId = allInvitations.find((inv: any) => {
+                const invJobId = inv?.job_id?._id || inv?.job_id;
+                return String(invJobId || '') === String(routeJobId);
+            });
+            if (byJobId) return byJobId;
+        }
+
+        return null;
+    }, [allInvitations, invitationId, link, job?._id, jobDetail?._id, jobDetail?.job_id]);
+    const hasValidRouteInvitationId = React.useMemo(
+        () =>
+            Boolean(
+                invitationId &&
+                allInvitations.some((inv: any) => String(inv?._id) === String(invitationId)),
+            ),
+        [invitationId, allInvitations],
+    );
+    const effectiveInvitationId =
+        (hasValidRouteInvitationId ? invitationId : undefined) ||
+        jobDetail?.invitation?._id ||
+        job?.invitation?._id ||
+        matchedInvitation?._id;
+    const effectiveInvitationStatus = matchedInvitation?.status || invitationStatus;
+    const canJoinInterview =
+        String(effectiveInvitationStatus || '').trim().toLowerCase() === 'invited';
+
+    const callOpenInterviewApi = useCallback(async () => {
+        if (!effectiveInvitationId) {
+            errorToast('Invitation not found');
+            return false;
+        }
+        try {
+            console.log('openInterview payload >>>', { invitation_id: effectiveInvitationId });
+            const res: any = await openInterview({
+                invitation_id: effectiveInvitationId,
+            }).unwrap();
+            if (!res?.status) {
+                errorToast(res?.message || 'Failed to open interview');
+                return false;
+            }
+            return true;
+        } catch (e: any) {
+            errorToast(e?.data?.message || e?.message || 'Failed to open interview');
+            return false;
+        }
+    }, [effectiveInvitationId, openInterview]);
+
+    // Re-call openInterview when user returns from WebView to this screen.
+    useFocusEffect(
+        useCallback(() => {
+            refetchInterviews();
+            if (hasStartedInterviewRef.current) {
+                callOpenInterviewApi();
+            }
+        }, [callOpenInterviewApi, refetchInterviews]),
+    );
 
     return (
         <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>
@@ -66,7 +156,7 @@ const JobInvitationScreen = () => {
                         <BaseText style={styles.location}>
                             {job?.contract_type}
                         </BaseText>
-                        <BaseText style={styles.salary}>
+                        {/* <BaseText style={styles.salary}>
                             {`${job?.currency?.toUpperCase()} `}
                             {job?.currency?.toUpperCase() === 'AED' ? (
                                 <Image source={IMAGES.currency} style={styles.currencyImage} />
@@ -74,7 +164,17 @@ const JobInvitationScreen = () => {
                                 getCurrencySymbol(job?.currency)
                             )}
                             {` ${getJobMonthlySalaryRangeText(job)}`}
-                        </BaseText>
+                        </BaseText> */}
+                        <View style={styles.salaryRow}>
+                            {job?.currency?.toUpperCase() === 'AED' ? (
+                                <Image source={IMAGES.currency} style={styles.currencyImage} />
+                            ) : (
+                                <Text style={styles.currencySymbol}>{getCurrencySymbol(job?.currency)}</Text>
+                            )}
+                            <BaseText style={styles.salary} numberOfLines={1}>
+                                {getJobMonthlySalaryRangeText(job)}
+                            </BaseText>
+                        </View>
                     </View>
                 </View>
 
@@ -104,16 +204,18 @@ const JobInvitationScreen = () => {
                     </BaseText>
                 </View>
 
-                <CommonButton
-                    title='Join  Interview'
-                    textStyle={{ ...commonFontStyle(500, 20, colors.white) }}
-                    btnStyle={{
-                        marginVertical: hp(20), backgroundColor: colors._0B3970, borderRadius: hp(50),
-                    }}
-                    onPress={() => {
-                        setShowInterviewSetupModal(true);
-                    }}
-                />
+                {canJoinInterview && (
+                    <CommonButton
+                        title='Join  Interview'
+                        textStyle={{ ...commonFontStyle(500, 20, colors.white) }}
+                        btnStyle={{
+                            marginVertical: hp(20), backgroundColor: colors._0B3970, borderRadius: hp(50),
+                        }}
+                        onPress={() => {
+                            setShowInterviewSetupModal(true);
+                        }}
+                    />
+                )}
 
                 <BottomModal
                     visible={showInterviewSetupModal}
@@ -174,15 +276,22 @@ const JobInvitationScreen = () => {
                     </ScrollView>
 
                     <CommonButton
-                        title='Continue'
+                        title={isOpeningInterview ? 'Please wait...' : 'Continue'}
                         textStyle={{ ...commonFontStyle(500, 20, colors.white) }}
                         btnStyle={{
                             marginTop: hp(10),
                             marginBottom: hp(8),
                             backgroundColor: colors._0B3970,
                             borderRadius: hp(50),
+                            opacity: isOpeningInterview ? 0.8 : 1,
                         }}
-                        onPress={() => {
+                        isLoading={isOpeningInterview}
+                        disabled={isOpeningInterview}
+                        onPress={async () => {
+                            if (isOpeningInterview) return;
+                            const ok = await callOpenInterviewApi();
+                            if (!ok) return;
+                            hasStartedInterviewRef.current = true;
                             setShowInterviewSetupModal(false);
                             navigateTo(SCREENS.WebviewScreen, {
                                 link: link,
@@ -249,13 +358,20 @@ const styles = StyleSheet.create({
         ...commonFontStyle(700, 16, colors._0D468C),
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+    salaryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     currencyImage: {
-        width: wp(18),
-        height: hp(18),
+        width: wp(14),
+        height: hp(14),
         resizeMode: 'contain',
-        marginHorizontal: wp(2),
-        tintColor: colors._0D468C,
+        tintColor: colors._0B3970,
+    },
+    currencySymbol: {
+        ...commonFontStyle(400, 14, colors._0D468C),
     },
     sectionHeader: {
         flexDirection: 'row',

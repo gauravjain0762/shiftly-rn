@@ -40,6 +40,8 @@ const ActivitiesCard: FC<props> = ({ item }) => {
       navigation.navigate(SCREENS.JobInvitationScreen, {
         link: interviewLink || '',
         jobDetail: jobDetail.data,
+        invitationStatus: item?.status || item?.invitation_status,
+        invitationId: item?._id || item?.invitation_id,
       });
     } else if (item?.job_id) {
       navigation.navigate(SCREENS.JobInvitationScreen, {
@@ -65,6 +67,8 @@ const ActivitiesCard: FC<props> = ({ item }) => {
             logo: item?.company_logo,
           },
         },
+        invitationStatus: item?.status || item?.invitation_status,
+        invitationId: item?._id || item?.invitation_id,
       });
     }
   };

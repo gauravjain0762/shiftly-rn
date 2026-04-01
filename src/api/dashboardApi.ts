@@ -547,6 +547,16 @@ export const dashboardApi = createApi({
         }
       },
     }),
+    openInterview: builder.mutation<any, {invitation_id: string}>({
+      query: ({invitation_id}) => {
+        return {
+          url: API.openInterview,
+          method: HTTP_METHOD.POST,
+          data: {invitation_id},
+          skipLoader: false,
+        };
+      },
+    }),
     empUpdateProfile: builder.mutation<any, any>({
       query: credentials => {
         return {
@@ -1261,6 +1271,7 @@ export const {
   useGetEmployeeProfileByIdQuery,
   useGetCompletedInterviewsQuery,
   useSendAssessmentLinkMutation,
+  useOpenInterviewMutation,
   useMarkReadNotificationsMutation,
   useCompanyMarkReadNotificationsMutation,
   useClearAllNotificationsMutation,

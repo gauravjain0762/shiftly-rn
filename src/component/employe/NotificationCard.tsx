@@ -40,9 +40,32 @@ const NotificationCard: FC<props> = ({ item }: any) => {
     const type = (notifType ?? '').toString().toLowerCase();
 
     if (type === 'interview') {
+      const rawData = item?.data;
+      let dataObj: any = {};
+      if (Array.isArray(rawData)) {
+        dataObj = rawData[0] || {};
+      } else if (typeof rawData === 'string') {
+        try {
+          const parsed = JSON.parse(rawData);
+          dataObj = Array.isArray(parsed) ? parsed[0] || {} : parsed || {};
+        } catch {
+          dataObj = {};
+        }
+      } else if (rawData && typeof rawData === 'object') {
+        dataObj = rawData;
+      }
       navigateTo(SCREENS.JobInvitationScreen, {
         link: item?.data?.interview_link,
         jobDetail: jobDetail?.data,
+        invitationStatus:
+          dataObj?.status ||
+          dataObj?.invitation_status ||
+          item?.status,
+        invitationId:
+          dataObj?._id ||
+          dataObj?.invitation_id ||
+          dataObj?.id ||
+          item?._id,
       });
       return;
     }

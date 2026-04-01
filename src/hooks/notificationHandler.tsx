@@ -242,6 +242,9 @@ export const navigateToOrderDetails = async (remoteMessage: any) => {
         navigateTo(SCREENS.JobInvitationScreen, {
           link: data.interview_link,
           jobDetail: data.job_detail,
+          invitationStatus:
+            data.status || data.invitation_status || data.interview_status,
+          invitationId: data.invitation_id || data.id,
         });
       } else {
         console.error('Cannot open URL:', data.interview_link);

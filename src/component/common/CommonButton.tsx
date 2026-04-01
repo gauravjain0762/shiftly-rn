@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Image,
   ImageStyle,
   StyleSheet,
@@ -24,6 +25,7 @@ type Props = {
   disabled?: boolean;
   rightImgStyle?: ImageStyle;
   rightImg?: any;
+  isLoading?: boolean;
 } & TextProps;
 
 const CommonButton = ({
@@ -36,12 +38,13 @@ const CommonButton = ({
   disabled = false,
   rightImg,
   rightImgStyle,
+  isLoading = false,
 }: Props) => {
   return (
     <TouchableOpacity
       onPress={() => onPress()}
       activeOpacity={0.8}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       style={[styles.buttonStyle, btnStyle]}>
       {leftImg && (
         <Image
@@ -50,7 +53,11 @@ const CommonButton = ({
           resizeMode="contain"
         />
       )}
-      <Text style={[styles.text, textStyle]}>{title}</Text>
+      {isLoading ? (
+        <ActivityIndicator color={colors.white} />
+      ) : (
+        <Text style={[styles.text, textStyle]}>{title}</Text>
+      )}
       {rightImg && (
         <Image
           source={rightImg}
