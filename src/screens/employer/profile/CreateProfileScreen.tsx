@@ -850,7 +850,7 @@ const CreateProfileScreen = () => {
     }
   };
 
-  const handleAddAboutMe = async () => {
+  const handleAddAboutMe = async (options?: { includeResumes?: boolean }) => {
     try {
       const formData = new FormData();
       const locationData = route.params?.locationData;
@@ -887,13 +887,21 @@ const CreateProfileScreen = () => {
         .filter((resume: any) => !resume?._id)
         .map((resume: any, index: number) => {
           const uriRaw = resume?.file || resume?.uri || resume?.path || '';
-          const uri = typeof uriRaw === 'string' ? uriRaw.trim() : '';
+          let uri = typeof uriRaw === 'string' ? uriRaw.trim() : '';
           const isLikelyLocal =
             uri.startsWith('file://') ||
             uri.startsWith('content://') ||
             uri.startsWith('ph://') ||
             uri.startsWith('/');
           if (!uri || !isLikelyLocal) return null;
+          if (
+            uri.startsWith('/') &&
+            !uri.startsWith('file://') &&
+            !uri.startsWith('content://') &&
+            !uri.startsWith('ph://')
+          ) {
+            uri = `file://${uri}`;
+          }
           return {
             uri,
             type: resume?.type || 'application/pdf',
@@ -904,6 +912,7 @@ const CreateProfileScreen = () => {
 
       const debugPayload: any = {
         about: aboutEdit?.about || '',
+        open_for_job: Boolean(aboutEdit?.open_for_jobs),
         city,
         country,
         skills: aboutEdit?.selectedSkills || [],
@@ -916,8 +925,21 @@ const CreateProfileScreen = () => {
         '🔥 [CreateProfileScreen] /updateAboutMe payload:',
         JSON.stringify(debugPayload, null, 2),
       );
+      console.log(
+        '🔥 [CreateProfileScreen][Step 3] updateAboutMe params:',
+        JSON.stringify(
+          {
+            activeStep,
+            includeResumes: Boolean(options?.includeResumes),
+            payload: debugPayload,
+          },
+          null,
+          2,
+        ),
+      );
 
       formData.append('about', debugPayload.about);
+      formData.append('open_for_job', String(Boolean(debugPayload.open_for_job)));
       if (city) formData.append('city', city);
       if (country) formData.append('country', country);
       formData.append('skills', (aboutEdit?.selectedSkills || []).join(','));
@@ -931,14 +953,29 @@ const CreateProfileScreen = () => {
         formData.append(`languages[${index}][level]`, String(lang?.level ?? ''));
       });
 
-      debugPayload.resumes.forEach((resume: any) => {
-        formData.append('resumes', resume as any);
-      });
+      if (options?.includeResumes) {
+        debugPayload.resumes.forEach((resume: any) => {
+          formData.append('resumes', resume as any);
+        });
+      }
 
       const res = await updateAboutMe(formData).unwrap();
       console.log(
         '🔥 [CreateProfileScreen] /updateAboutMe response:',
         JSON.stringify(res, null, 2),
+      );
+      console.log(
+        '🔥 [CreateProfileScreen][Step 3] updateAboutMe response:',
+        JSON.stringify(
+          {
+            activeStep,
+            status: res?.status,
+            message: res?.message,
+            data: res?.data,
+          },
+          null,
+          2,
+        ),
       );
 
       if (res?.status) {
@@ -963,6 +1000,18 @@ const CreateProfileScreen = () => {
         }),
       );
     } catch (error) {
+      console.log(
+        '❌ [CreateProfileScreen][Step 3] updateAboutMe error:',
+        JSON.stringify(
+          {
+            activeStep,
+            includeResumes: Boolean(options?.includeResumes),
+            error,
+          },
+          null,
+          2,
+        ),
+      );
       console.error('Error adding about me:', error);
     }
   };
@@ -1136,7 +1185,7 @@ const CreateProfileScreen = () => {
       // About Me + resumes are only edited from step 3+; calling this on step 1–2
       // sent empty/invalid payloads and could crash (FormData) or wipe `aboutEdit`.
       if (activeStep >= 3) {
-        await handleAddAboutMe();
+        await handleAddAboutMe({ includeResumes: activeStep >= 4 });
         console.log('handleAddAboutMe called >>>>>>>>>>>.');
       }
     } catch (error) {
@@ -1743,30 +1792,30 @@ const CreateProfileScreen = () => {
               ]}
               title={'Next'}
               onPress={() => {
-                    if (
-                      !aboutEdit?.selectedLanguages ||
-                      aboutEdit?.selectedLanguages?.length === 0
-                    ) {
-                      errorToast('Please select at least one language');
-                      return;
-                    }
+                if (
+                  !aboutEdit?.selectedLanguages ||
+                  aboutEdit?.selectedLanguages?.length === 0
+                ) {
+                  errorToast('Please select at least one language');
+                  return;
+                }
 
-                    const hasMissingLanguageLevels =
-                      (aboutEdit?.selectedLanguages || []).some(
-                        (l: any) => !l?.level || String(l?.level).trim() === '',
-                      );
+                const hasMissingLanguageLevels =
+                  (aboutEdit?.selectedLanguages || []).some(
+                    (l: any) => !l?.level || String(l?.level).trim() === '',
+                  );
 
-                    if (hasMissingLanguageLevels) {
-                      errorToast(
-                        'Please select proficiency level for all selected languages',
-                      );
-                      return;
-                    }
+                if (hasMissingLanguageLevels) {
+                  errorToast(
+                    'Please select proficiency level for all selected languages',
+                  );
+                  return;
+                }
 
-                    if (
-                      !aboutEdit?.selectedSkills ||
-                      aboutEdit?.selectedSkills?.length === 0
-                    ) {
+                if (
+                  !aboutEdit?.selectedSkills ||
+                  aboutEdit?.selectedSkills?.length === 0
+                ) {
                   errorToast('Please select at least one skill');
                   return;
                 }
@@ -1795,25 +1844,25 @@ const CreateProfileScreen = () => {
                   return;
                 }
 
-                    if (
-                      !aboutEdit?.selectedLanguages ||
-                      aboutEdit?.selectedLanguages?.length === 0
-                    ) {
-                      errorToast('Please select at least one language');
-                      return;
-                    }
+                if (
+                  !aboutEdit?.selectedLanguages ||
+                  aboutEdit?.selectedLanguages?.length === 0
+                ) {
+                  errorToast('Please select at least one language');
+                  return;
+                }
 
-                    const hasMissingLanguageLevels =
-                      (aboutEdit?.selectedLanguages || []).some(
-                        (l: any) => !l?.level || String(l?.level).trim() === '',
-                      );
+                const hasMissingLanguageLevels =
+                  (aboutEdit?.selectedLanguages || []).some(
+                    (l: any) => !l?.level || String(l?.level).trim() === '',
+                  );
 
-                    if (hasMissingLanguageLevels) {
-                      errorToast(
-                        'Please select proficiency level for all selected languages',
-                      );
-                      return;
-                    }
+                if (hasMissingLanguageLevels) {
+                  errorToast(
+                    'Please select proficiency level for all selected languages',
+                  );
+                  return;
+                }
 
                 handleUpdateProfile();
               }}
