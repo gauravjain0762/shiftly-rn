@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {colors} from '../../theme/colors';
 import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import {MultiSelect} from 'react-native-element-dropdown';
@@ -91,9 +91,34 @@ const CustomDropdownMulti = ({
     ? [styles.containerStyle, styles.containerStyleLight]
     : styles.containerStyle;
 
+  const containerRef = useRef<View>(null);
+  const [computedPosition, setComputedPosition] = useState<'top' | 'bottom' | undefined>(undefined);
+  const resolvedMaxHeight = typeof maxDropdownHeight === 'number' ? maxDropdownHeight : 300;
+
+  const resolveAutoPosition = useCallback(() => {
+    if (dropdownPosition !== 'auto' || !containerRef.current) return;
+    const screenH = Dimensions.get('window').height;
+    containerRef.current.measureInWindow((_x, pageY, _w, h) => {
+      const spaceBelow = screenH - (pageY + h);
+      const spaceAbove = pageY;
+      if (spaceBelow >= resolvedMaxHeight) {
+        setComputedPosition('bottom');
+      } else if (spaceAbove >= resolvedMaxHeight) {
+        setComputedPosition('top');
+      } else {
+        // Open in whichever side has more space
+        setComputedPosition(spaceAbove > spaceBelow ? 'top' : 'bottom');
+      }
+    });
+  }, [dropdownPosition, resolvedMaxHeight]);
+
+  const effectivePosition = dropdownPosition === 'auto'
+    ? (computedPosition || 'bottom')
+    : (dropdownPosition || 'bottom');
+
   return (
     <>
-      <View style={container}>
+      <View style={container} ref={containerRef}>
         {label && (
           <Text style={[styles.label, labelStyle]}>
             {label}
@@ -103,12 +128,13 @@ const CustomDropdownMulti = ({
         <MultiSelect
           onFocus={() => {
             Keyboard.dismiss();
+            resolveAutoPosition();
           }}
           data={data}
           value={value}
           onChange={items => onChange?.(items)}
           disable={disable}
-          dropdownPosition={dropdownPosition ||'bottom'}
+          dropdownPosition={effectivePosition}
           style={[styles.dropdownStyle, dropdownStyle]}
           flatListProps={flatListProps}
           labelField={labelField === undefined ? 'label' : labelField}
@@ -121,7 +147,8 @@ const CustomDropdownMulti = ({
           search={isSearch || false}
           searchPlaceholder={searchPlaceholder}
           inputSearchStyle={lightTheme ? styles.searchInputLight : undefined}
-          maxHeight={typeof maxDropdownHeight === 'number' ? maxDropdownHeight : 300}
+          maxHeight={resolvedMaxHeight}
+          inverted={false}
           minHeight={30}
           keyboardAvoiding={true}
           activeColor={'transparent'}
@@ -194,7 +221,6 @@ const styles = StyleSheet.create({
   },
   containerStyle: {
     borderRadius: 20,
-    top: 2,
     backgroundColor: '#0D468C',
     borderColor: '#225797',
     borderWidth: 1.5,

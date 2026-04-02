@@ -420,8 +420,6 @@ const CreateProfileScreen = () => {
 
   const effectiveYearsOfExperienceLabel = yearsOfExperienceOption?.label || '';
 
-  // Pre-fill "Desired Department" dropdown from API.
-  // UI reads/writes this value from `experienceListEdit.department`.
   useEffect(() => {
     const desiredDepartmentId =
       experienceUser?.department_id ||
@@ -1526,6 +1524,7 @@ const CreateProfileScreen = () => {
                         data={departmentOptions}
                         labelField="label"
                         valueField="value"
+                        dropdownPosition='auto'
                         value={userDepartmentOption?.value}
                         onChange={(e: any) => {
                           setUserDepartmentOption(
@@ -1549,6 +1548,7 @@ const CreateProfileScreen = () => {
                           data={experienceOptionsData}
                           labelField="label"
                           valueField="value"
+                          dropdownPosition='auto'
                           value={yearsOfExperienceOption?.value}
                           onChange={(e: any) => {
                             setYearsOfExperienceOption(

@@ -87,6 +87,7 @@ const EducationList: FC<Props> = ({
         labelField="label"
         valueField="value"
         placeholder="Select Degree"
+        dropdownPosition='auto'
         value={educationListEdit?.degree}
         container={{}}
         onChange={(selectedItem: { label: string; value: string }) => {

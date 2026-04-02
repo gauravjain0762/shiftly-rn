@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Image,
   StyleSheet,
   Text,
@@ -9,7 +10,7 @@ import {
   ImageStyle,
   TextStyle,
 } from 'react-native';
-import React, { useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
+import React, { useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { Dropdown as DropdownElement } from 'react-native-element-dropdown';
@@ -99,6 +100,10 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
   ...props
 }, ref) => {
   const dropdownRef = useRef<any>(null);
+  const containerRef = useRef<View>(null);
+  const [computedPosition, setComputedPosition] = useState<'top' | 'bottom' | undefined>(undefined);
+  const resolvedMaxHeight = 200;
+
   // Use ref to track value without causing rerenders of renderItem
   const valueRef = useRef(value);
   valueRef.current = value;
@@ -112,6 +117,26 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
       dropdownRef.current?.close?.();
     },
   }));
+
+  const resolveAutoPosition = useCallback(() => {
+    if (dropdownPosition !== 'auto' || !containerRef.current) return;
+    const screenH = Dimensions.get('window').height;
+    containerRef.current.measureInWindow((_x, pageY, _w, h) => {
+      const spaceBelow = screenH - (pageY + h);
+      const spaceAbove = pageY;
+      if (spaceBelow >= resolvedMaxHeight) {
+        setComputedPosition('bottom');
+      } else if (spaceAbove >= resolvedMaxHeight) {
+        setComputedPosition('top');
+      } else {
+        setComputedPosition(spaceAbove > spaceBelow ? 'top' : 'bottom');
+      }
+    });
+  }, [dropdownPosition, resolvedMaxHeight]);
+
+  const effectivePosition = dropdownPosition === 'auto'
+    ? (computedPosition || 'bottom')
+    : (dropdownPosition || 'bottom');
 
   const handleChange = (item: any) => {
     onChange(item);
@@ -137,7 +162,7 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
 
   return (
     <>
-      <View style={container}>
+      <View style={container} ref={containerRef}>
         {label && (
           <Text style={[styles.label, labelStyle]}>
             {label}
@@ -148,13 +173,15 @@ const CustomDropdown = forwardRef<CustomDropdownRef, Props>(({
           ref={dropdownRef}
           onFocus={() => {
             Keyboard.dismiss();
+            resolveAutoPosition();
             onDropdownOpen?.();
           }}
           data={data}
           value={normalizedValue}
           onChange={handleChange}
           disable={disable}
-          dropdownPosition={dropdownPosition || 'bottom'}
+          inverted={false}
+          dropdownPosition={effectivePosition}
           style={[styles.dropdownStyle, dropdownStyle]}
           flatListProps={flatListProps}
           labelField={labelField === undefined ? 'label' : labelField}

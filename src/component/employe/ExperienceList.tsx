@@ -140,6 +140,7 @@ const ExperienceList: FC<any> = ({
           label="Department"
           required
           placeholder={'Select Department'}
+          dropdownPosition='auto'
           value={experienceListEdit?.department}
           container={{marginBottom: hp(8)}}
           onChange={(selectedItem: {label: string; value: string} | any) => {
@@ -270,7 +271,7 @@ const ExperienceList: FC<any> = ({
 
         <CustomDropdown
           data={jobTypeOptions}
-          dropdownPosition="top"
+          dropdownPosition='auto'
           label="What type of experience"
           required
           placeholder={'What type of experience'}

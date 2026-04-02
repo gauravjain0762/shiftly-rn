@@ -62,6 +62,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
   const [pressedDot, setPressedDot] = useState<{ langName: string; level: string } | null>(null);
   const { data: languagesResponse } = useGetCompanyLanguagesQuery({});
 
+  // Sorted A-Z
   const languageOptions = useMemo(() => {
     const list = languagesResponse?.data?.languages ?? [];
     const options = list
@@ -73,8 +74,43 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
     const sorted = options.slice().sort((a: any, b: any) =>
       (a.label || '').localeCompare(b.label || '', 'en', { sensitivity: 'base' })
     );
-    return sorted.reverse();
+    return sorted;
   }, [languagesResponse]);
+
+  // Skills dropdown data sorted A-Z
+  const sortedSkillsData = useMemo(() => {
+    return (skillsList || [])
+      .map((skill: any) => ({
+        label: skill?.title,
+        value: skill?._id,
+      }))
+      .sort((a, b) =>
+        (a.label || '').localeCompare(b.label || '', 'en', { sensitivity: 'base' })
+      );
+  }, [skillsList]);
+
+  // Selected skills sorted A-Z for chip display
+  const sortedSelectedSkills = useMemo(() => {
+    if (!aboutEdit?.selectedSkills?.length) return [];
+    return [...aboutEdit.selectedSkills]
+      .map((id: any) => {
+        const skill = skillsList?.find(
+          (s: any) => s._id === id || s._id === id?._id,
+        );
+        return { id, title: skill?.title || id };
+      })
+      .sort((a, b) =>
+        (a.title || '').localeCompare(b.title || '', 'en', { sensitivity: 'base' })
+      );
+  }, [aboutEdit?.selectedSkills, skillsList]);
+
+  // Selected languages sorted A-Z for chip display
+  const sortedSelectedLanguages = useMemo(() => {
+    if (!aboutEdit?.selectedLanguages?.length) return [];
+    return [...aboutEdit.selectedLanguages].sort((a: any, b: any) =>
+      (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' })
+    );
+  }, [aboutEdit?.selectedLanguages]);
 
   return (
     <View style={[styles.containerWrapper, { overflow: 'visible' }]}>
@@ -178,7 +214,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
         />
       </View>
 
-      <View>
+      <View style={{ overflow: 'visible', zIndex: 2 }}>
         <Text style={[styles.headerText, { marginTop: hp(20) }]}>
           Select your skills<Text style={styles.required}>*</Text>
         </Text>
@@ -187,11 +223,8 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
           isSearch={true}
           searchPlaceholder="Search skills..."
           lightTheme
-          dropdownPosition='top'
-          data={(skillsList || []).map((skill: any) => ({
-            label: skill?.title,
-            value: skill?._id,
-          }))}
+          dropdownPosition='auto'
+          data={sortedSkillsData}
           placeholder={'Add your skills'}
           value={aboutEdit?.selectedSkills}
           selectedStyle={styles.selectedStyle}
@@ -207,20 +240,15 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
             });
           }}
         />
-        {aboutEdit?.selectedSkills?.length > 0 && (
+        {sortedSelectedSkills.length > 0 && (
           <View style={[styles.languageListContainer, styles.skillsListContainer]}>
-            {aboutEdit?.selectedSkills?.map((id: any) => {
-              const skill = skillsList?.find(
-                (s: any) => s._id === id || s._id === id?._id,
-              );
-              return (
-                <View key={id} style={styles.languageChip}>
-                  <Text style={[styles.languageChipText, { fontSize: 16 }]}>
-                    {skill?.title || id}
-                  </Text>
-                </View>
-              );
-            })}
+            {sortedSelectedSkills.map(({ id, title }) => (
+              <View key={id} style={styles.languageChip}>
+                <Text style={[styles.languageChipText, { fontSize: 16 }]}>
+                  {title}
+                </Text>
+              </View>
+            ))}
           </View>
         )}
       </View>
@@ -239,7 +267,7 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
         </View>
         <CustomDropdownMulti
           disable={false}
-          dropdownPosition="top"
+          dropdownPosition="auto"
           data={languageOptions}
           labelField="label"
           valueField="value"
@@ -264,9 +292,9 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
         />
       </View>
 
-      {aboutEdit?.selectedLanguages?.length > 0 && (
+      {sortedSelectedLanguages.length > 0 && (
         <View style={styles.languageListContainer}>
-          {aboutEdit.selectedLanguages.map((lang: any, index: number) => (
+          {sortedSelectedLanguages.map((lang: any, index: number) => (
             <View key={`${lang.name}-${index}`} style={styles.languageChipWithDots}>
               <View style={styles.languageRow}>
                 <Text style={[styles.languageName, { fontSize: 16 }]}>{lang.name}</Text>
@@ -277,8 +305,12 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
                       <TouchableOpacity
                         key={level}
                         onPress={() => {
+                          // Find the original index in the unsorted source array
+                          const originalIndex = aboutEdit.selectedLanguages.findIndex(
+                            (l: any) => l.name === lang.name
+                          );
                           const updatedLanguages = [...aboutEdit.selectedLanguages];
-                          updatedLanguages[index] = { ...updatedLanguages[index], level: level };
+                          updatedLanguages[originalIndex] = { ...updatedLanguages[originalIndex], level: level };
                           setAboutEdit({
                             ...aboutEdit,
                             selectedLanguages: updatedLanguages,
@@ -291,9 +323,9 @@ const AboutMeList: FC<Props> = ({ aboutEdit, setAboutEdit, skillsList, isEdit })
                           isSelected && {
                             borderWidth: 2,
                             borderColor: getDotColor(level),
-                            borderRadius: 16, // Increased radius to half of 32
-                            width: 32, // Increased size
-                            height: 32, // Increased size
+                            borderRadius: 16,
+                            width: 32,
+                            height: 32,
                             justifyContent: 'center',
                             alignItems: 'center',
                           }
