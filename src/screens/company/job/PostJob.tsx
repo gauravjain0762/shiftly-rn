@@ -1306,6 +1306,7 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={certification || []}
+                    dropdownPosition='auto'
                     onChange={(items: any[]) => {
                       const ids =
                         Array.isArray(items)
@@ -1316,7 +1317,6 @@ const PostJob = () => {
                     placeholder={t('Select certifications')}
                     dropdownStyle={styles.dropdown}
                     container={{ marginTop: 10, marginBottom: 0 }}
-                    dropdownPosition="bottom"
                     hideSelectedItems
                   />
                   {Array.isArray(certification) && certification.length > 0 && (
@@ -1354,10 +1354,10 @@ const PostJob = () => {
                     />
                   </View>
                   <CustomDropdownMulti
-                    // dropdownPosition="top" renders the list upwards; reverse data so it still feels A -> Z.
-                    data={[...languageData].reverse()}
+                    data={languageData}
                     labelField="label"
                     valueField="value"
+                    dropdownPosition='auto'
                     value={(languages || []).map((l: any) => (typeof l === 'object' ? l?.id : l) ?? '').filter(Boolean)}
                     onChange={(items: any[]) => {
                       const selectedIds =
@@ -1393,7 +1393,6 @@ const PostJob = () => {
                     dropdownStyle={styles.dropdown}
                     maxDropdownHeight={270}
                     container={{ marginTop: 0, marginBottom: 0 }}
-                    dropdownPosition="top"
                     selectedStyle={styles.hiddenSelectedStyle}
                     hideSelectedItems
                   />
@@ -2056,6 +2055,7 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={duration?.value}
+                    dropdownPosition='auto'
                     onChange={(e: any) => {
                       updateJobForm({ duration: { label: e.label, value: e.value } });
                       if (!isExpiryDateManuallyChanged) {
@@ -2140,6 +2140,7 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={job_sector?.value}
+                    dropdownPosition='auto'
                     onChange={(e: any) => {
                       updateJobForm({
                         job_sector: { label: e.label, value: e.value },
@@ -2158,6 +2159,7 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={startDate?.value}
+                    dropdownPosition='auto'
                     onChange={(e: any) => {
                       updateJobForm({
                         startDate: { label: e.label, value: e.value },
@@ -2177,6 +2179,7 @@ const PostJob = () => {
                       labelField="label"
                       valueField="value"
                       value={selectedSalaryValue}
+                      dropdownPosition='auto'
                       onChange={(e: any) => {
                         updateJobForm({ salary: { label: e.label, value: e.value } });
                       }}
@@ -2202,7 +2205,7 @@ const PostJob = () => {
                     labelField="label"
                     valueField="value"
                     value={position?.value}
-                    dropdownPosition="top"
+                    dropdownPosition='auto'
                     onChange={(e: any) => {
                       updateJobForm({ position: { label: e.label, value: e.value } });
                     }}

@@ -50,6 +50,8 @@ type Props = {
   searchPlaceholder?: string;
   /** Light theme for dropdown overlay - white bg, dark text (for screens like About Me) */
   lightTheme?: boolean;
+  /** Invert dropdown list order/scroll direction */
+  inverted?: boolean;
 };
 
 const CustomDropdownMulti = ({
@@ -86,6 +88,7 @@ const CustomDropdownMulti = ({
   labelStyle,
   searchPlaceholder,
   lightTheme = false,
+  inverted = false,
 }: Props) => {
   const dropdownContainerStyle = lightTheme
     ? [styles.containerStyle, styles.containerStyleLight]
@@ -148,7 +151,7 @@ const CustomDropdownMulti = ({
           searchPlaceholder={searchPlaceholder}
           inputSearchStyle={lightTheme ? styles.searchInputLight : undefined}
           maxHeight={resolvedMaxHeight}
-          inverted={false}
+          inverted={inverted}
           minHeight={30}
           keyboardAvoiding={true}
           activeColor={'transparent'}
