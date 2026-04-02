@@ -67,6 +67,7 @@ const ApplyJob = () => {
   const [applyJob] = useEmployeeApplyJobMutation({});
   const [resumes, setResumes] = useState<any[]>(resumeList || []);
   const [completeProfileModal, setCompleteProfileModal] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
   const { data: employeeProfile } = useGetEmployeeProfileQuery({});
   const { isSuccessModalVisible } = useSelector(
     (state: RootState) => state.employee,
@@ -85,6 +86,8 @@ const ApplyJob = () => {
   };
 
   const handleApplyJob = async () => {
+    if (isApplying) return;
+
     // const user = employeeProfile?.data?.user;
     // if (!isProfileComplete(user)) {
     //   setCompleteProfileModal(true);
@@ -119,6 +122,7 @@ const ApplyJob = () => {
     });
 
     try {
+      setIsApplying(true);
       const res = await applyJob(formData).unwrap();
 
       if (res?.status) {
@@ -131,6 +135,8 @@ const ApplyJob = () => {
       errorToast(
         error?.message || error?.data?.message || 'Something went wrong',
       );
+    } finally {
+      setIsApplying(false);
     }
   };
 
@@ -285,7 +291,9 @@ const ApplyJob = () => {
             onPress={() => {
               handleApplyJob();
             }}
-            title={t('Apply Now')}
+            title={isApplying ? t('Applying...') : t('Apply Now')}
+            loading={isApplying}
+            disabled={isApplying}
           />
         </View>
       </LinearContainer>

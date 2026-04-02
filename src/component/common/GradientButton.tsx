@@ -1,5 +1,6 @@
 import LinearGradient from 'react-native-linear-gradient';
 import {
+  ActivityIndicator,
   GestureResponderEvent,
   Pressable,
   StyleProp,
@@ -38,6 +39,7 @@ interface DiamondGradientButtonProps extends TouchableOpacityProps {
 
   type?: 'Company' | 'Employee';
   textContainerStyle?: ViewStyle;
+  loading?: boolean;
 }
 
 const GradientButton: React.FC<DiamondGradientButtonProps> = ({
@@ -55,6 +57,7 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
   ry = '50%',
   type = 'Employee',
   textContainerStyle,
+  loading = false,
   ...rest
 }) => {
   return (
@@ -118,13 +121,20 @@ const GradientButton: React.FC<DiamondGradientButtonProps> = ({
         <View style={StyleSheet.absoluteFill} />
       )}
       <View style={[styles.content, textContainerStyle]}>
-        <Text
-          style={[
-            type == 'Employee' ? styles.buttonText : styles.CombuttonText,
-            textStyle,
-          ]}>
-          {title}
-        </Text>
+        {loading ? (
+          <ActivityIndicator
+            size="small"
+            color={type === 'Company' ? colors.white : colors.black}
+          />
+        ) : (
+          <Text
+            style={[
+              type == 'Employee' ? styles.buttonText : styles.CombuttonText,
+              textStyle,
+            ]}>
+            {title}
+          </Text>
+        )}
       </View>
     </TouchableOpacity>
   );
