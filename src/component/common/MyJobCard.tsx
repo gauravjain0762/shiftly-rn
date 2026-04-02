@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, {useState} from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../../theme/colors';
 import { IMAGES } from '../../assets/Images';
@@ -17,6 +17,7 @@ type JobCardProps = {
 
 const MyJobCard = (props: JobCardProps) => {
   const { onPressCard, item } = props;
+  const [isSharing, setIsSharing] = useState(false);
 
   const coverImages = (() => {
     const coverImgs = item?.company_id?.cover_images;
@@ -35,8 +36,16 @@ const MyJobCard = (props: JobCardProps) => {
     return [IMAGES.logoText];
   })();
 
-  const handleShare = () => {
-    shareJob(item);
+  const handleShare = async () => {
+    if (isSharing) {
+      return;
+    }
+    try {
+      setIsSharing(true);
+      await shareJob(item, { includeImageOnAndroid: true });
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -48,8 +57,12 @@ const MyJobCard = (props: JobCardProps) => {
             <Text style={styles.titleText}>{`${item?.title}`}</Text>
           </View>
 
-          <Pressable onPress={handleShare} style={styles.shareButton}>
-            <Image source={IMAGES.share} style={styles.shareIcon} />
+          <Pressable onPress={handleShare} style={styles.shareButton} disabled={isSharing}>
+            {isSharing ? (
+              <ActivityIndicator size="small" color={colors._0B3970} />
+            ) : (
+              <Image source={IMAGES.share} style={styles.shareIcon} />
+            )}
           </Pressable>
         </View>
 

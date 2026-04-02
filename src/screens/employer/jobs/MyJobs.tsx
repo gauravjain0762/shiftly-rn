@@ -8,10 +8,7 @@ import { BackHeader, LinearContainer } from '../../../component';
 import JobListCard from '../../../component/common/JobListCard';
 import { useGetAppliedJobsQuery, useGetEmployeeJobsQuery, useGetInterviewsQuery } from '../../../api/dashboardApi';
 import { navigateTo } from '../../../utils/commonFunction';
-import { getCurrencySymbol } from '../../../utils/currencySymbols';
-import { normalizeUrl } from '../../../utils/shareUtils';
-import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
-import Share from 'react-native-share';
+import { shareJob } from '../../../utils/shareUtils';
 import { SCREENS } from '../../../navigation/screenNames';
 
 const MyJobs = () => {
@@ -191,31 +188,7 @@ const MyJobs = () => {
     };
 
     const handleShare = async (job: any) => {
-        try {
-            const title = job?.title || 'Job Opportunity';
-            const description = job?.description || '';
-            const salary =
-                getJobMonthlySalaryRangeText(job)
-                    ? `Salary: ${getCurrencySymbol(job?.currency || 'AED')}${getJobMonthlySalaryRangeText(job)}`
-                    : '';
-
-            const shareUrl = normalizeUrl(job?.share_url);
-            const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-
-            const message = `${title}\n\n${description}\n\n${salary}${shareUrlText}`;
-
-            const shareOptions = {
-                title: title,
-                message: message,
-                url: shareUrl,
-            };
-
-            await Share.open(shareOptions);
-        } catch (err: any) {
-            if (err?.message !== 'User did not share') {
-                console.log('❌ Share error:', err);
-            }
-        }
+        await shareJob(job, { includeImageOnAndroid: true });
     };
 
     const renderTab = (tab: string) => (

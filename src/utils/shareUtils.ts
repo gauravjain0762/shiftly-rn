@@ -1,8 +1,8 @@
 import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
+import {Platform} from 'react-native';
 import {getCurrencySymbol} from './currencySymbols';
 import { getJobMonthlySalaryRangeText } from './monthlySalaryRange';
-import {IMAGES} from '../assets/Images';
 
 export const normalizeUrl = (raw?: string) => {
   const url = (raw ?? '').trim();
@@ -10,6 +10,10 @@ export const normalizeUrl = (raw?: string) => {
   if (/^https?:\/\//i.test(url)) return url;
   // Some backends send "www.domain.com/..." or "domain.com/..."
   return `https://${url.replace(/^\/+/, '')}`;
+};
+
+type ShareJobOptions = {
+  includeImageOnAndroid?: boolean;
 };
 
 const downloadImage = async (url: string) => {
@@ -23,7 +27,7 @@ const downloadImage = async (url: string) => {
   return `file://${filePath}`;
 };
 
-export const shareJob = async (item: any) => {
+export const shareJob = async (item: any, options?: ShareJobOptions) => {
   try {
     const title = item?.title || 'Job Opportunity';
     const companyName =
@@ -62,7 +66,7 @@ export const shareJob = async (item: any) => {
       .filter(Boolean)
       .join('\n\n');
 
-    const shareOptions: any = {
+    const baseShareOptions: any = {
       title: title,
       message: message,
       url: shareUrl,
@@ -89,17 +93,44 @@ export const shareJob = async (item: any) => {
       }
     }
 
-    if (imageToShare) {
+    let shareOptions: any = {...baseShareOptions};
+    // Android SMS and some targets often fail with local file attachments.
+    // Keep Android share text/link only to avoid native "Failed to add attachment" popups.
+    const shouldAttachImage =
+      Platform.OS !== 'android' || Boolean(options?.includeImageOnAndroid);
+    if (imageToShare && shouldAttachImage) {
       try {
         const imagePath = await downloadImage(imageToShare);
-        shareOptions.url = imagePath;
-        shareOptions.type = 'image/jpeg';
+        const exists = await RNFS.exists(imagePath.replace('file://', ''));
+        if (exists) {
+          shareOptions = {
+            ...baseShareOptions,
+            url: imagePath,
+            type: 'image/jpeg',
+            ...(Platform.OS === 'android' ? {useInternalStorage: true} : {}),
+          };
+        }
       } catch (imageError) {
         console.log('❌ Image download error:', imageError);
       }
     }
 
-    await Share.open(shareOptions);
+    try {
+      await Share.open(shareOptions);
+    } catch (shareError: any) {
+      // Android can fail to grant attachment access for some share targets.
+      // Retry without attachment so sharing still works.
+      const isAttachmentFailure =
+        Platform.OS === 'android' &&
+        String(shareError?.message || '')
+          .toLowerCase()
+          .includes('failed to share attachment');
+      if (isAttachmentFailure) {
+        await Share.open(baseShareOptions);
+      } else {
+        throw shareError;
+      }
+    }
   } catch (err: any) {
     if (err?.message !== 'User did not share') {
       console.log('❌ Share error:', err);

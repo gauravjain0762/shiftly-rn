@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { FC, useState } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Share from 'react-native-share';
 
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
@@ -46,9 +46,18 @@ const JobCard: FC<props> = ({
   const isCoverImage = item?.company_id?.cover_images?.length > 0;
   const coverImageUri = item?.company_id?.cover_images?.[0];
   const logoUri = item?.company_id?.logo;
+  const [isSharing, setIsSharing] = useState(false);
 
-  const handleShare = () => {
-    shareJob(item);
+  const handleShare = async () => {
+    if (isSharing) {
+      return;
+    }
+    try {
+      setIsSharing(true);
+      await shareJob(item, { includeImageOnAndroid: true });
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -86,12 +95,16 @@ const JobCard: FC<props> = ({
             styles.actions,
             { marginTop: !isShowFavIcon ? hp(80) : hp(50) },
           ]}>
-          <TouchableOpacity onPress={handleShare} style={styles.iconButton}>
-            <FastImage
-              source={IMAGES.share}
-              resizeMode="contain"
-              style={styles.icon}
-            />
+          <TouchableOpacity onPress={handleShare} style={styles.iconButton} disabled={isSharing}>
+            {isSharing ? (
+              <ActivityIndicator size="small" color={colors._0B3970} />
+            ) : (
+              <FastImage
+                source={IMAGES.share}
+                resizeMode="contain"
+                style={styles.icon}
+              />
+            )}
           </TouchableOpacity>
           {isShowFavIcon && (
             <TouchableOpacity

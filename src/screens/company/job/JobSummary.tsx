@@ -94,7 +94,7 @@ const JobSummary = () => {
   };
 
   const handleShare = async (job: any) => {
-    await shareJob(job);
+    await shareJob(job, { includeImageOnAndroid: true });
   };
 
   const handlePressView = (item: any) => () =>

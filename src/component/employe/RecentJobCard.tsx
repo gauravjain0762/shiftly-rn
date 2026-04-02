@@ -1,15 +1,13 @@
-import React, { FC } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native';
+import React, { FC, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native';
 import { colors } from '../../theme/colors';
 import { commonFontStyle, hp, wp } from '../../theme/fonts';
 import { IMAGES } from '../../assets/Images';
 import { getExpiryDays, getTimeAgo, navigateTo } from '../../utils/commonFunction';
-import { getCurrencySymbol } from '../../utils/currencySymbols';
 import { getJobMonthlySalaryRangeText } from '../../utils/monthlySalaryRange';
-import Share from 'react-native-share';
 import { Eye } from 'lucide-react-native';
 import { SCREENS } from '../../navigation/screenNames';
-import { normalizeUrl } from '../../utils/shareUtils';
+import { shareJob } from '../../utils/shareUtils';
 
 type Props = {
     item: any;
@@ -19,31 +17,21 @@ type Props = {
 
 const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
     const logoUri = item?.company_id?.logo;
+    const [isSharing, setIsSharing] = useState(false);
 
     const handleShare = async () => {
+        if (isSharing) {
+            return;
+        }
         try {
-            const title = item?.title || 'Job Opportunity';
-            const description = item?.description || '';
-            const salary = getJobMonthlySalaryRangeText(item)
-                ? `Salary: ${getCurrencySymbol(item?.currency || 'AED')}${getJobMonthlySalaryRangeText(item)}`
-                : '';
-
-            const shareUrl = normalizeUrl(item?.share_url);
-            const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-
-            const message = `${title}\n\n${description}\n\n${salary}${shareUrlText}`;
-
-            const shareOptions = {
-                title: title,
-                message: message,
-                url: shareUrl,
-            };
-
-            await Share.open(shareOptions);
+            setIsSharing(true);
+            await shareJob(item, { includeImageOnAndroid: true });
         } catch (err: any) {
             if (err?.message !== 'User did not share') {
                 console.log('❌ Share error:', err);
             }
+        } finally {
+            setIsSharing(false);
         }
     };
 
@@ -68,8 +56,12 @@ const RecentJobCard: FC<Props> = ({ item, onPress, onPressView }) => {
                         <Text style={styles.companyName} numberOfLines={1}>
                             {item?.company_id?.company_name || 'N/A'}
                         </Text>
-                        <TouchableOpacity onPress={handleShare}>
-                            <Image source={IMAGES.share} style={[styles.shareIcon, { tintColor: colors.black }]} resizeMode="contain" />
+                        <TouchableOpacity onPress={handleShare} disabled={isSharing}>
+                            {isSharing ? (
+                                <ActivityIndicator size="small" color={colors._0B3970} />
+                            ) : (
+                                <Image source={IMAGES.share} style={[styles.shareIcon, { tintColor: colors.black }]} resizeMode="contain" />
+                            )}
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.location} numberOfLines={1}>

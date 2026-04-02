@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Image,
   ImageBackground,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Eye } from 'lucide-react-native';
@@ -74,6 +75,19 @@ const JobListCard = ({
 
   const CardWrapper = onPress && !disabled ? TouchableOpacity : View;
   const wrapperProps = onPress && !disabled ? { activeOpacity: 0.7, onPress } : {};
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleSharePress = async () => {
+    if (isSharing) {
+      return;
+    }
+    try {
+      setIsSharing(true);
+      await Promise.resolve(onShare?.());
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <CardWrapper {...wrapperProps}>
@@ -100,8 +114,12 @@ const JobListCard = ({
               <Text style={styles.companyName} numberOfLines={1}>
                 {companyName}
               </Text>
-              <TouchableOpacity onPress={onShare}>
-                <Image source={IMAGES.share} style={styles.shareIcon} resizeMode="contain" />
+              <TouchableOpacity onPress={handleSharePress} disabled={isSharing}>
+                {isSharing ? (
+                  <ActivityIndicator size="small" color={colors._0B3970} />
+                ) : (
+                  <Image source={IMAGES.share} style={styles.shareIcon} resizeMode="contain" />
+                )}
               </TouchableOpacity>
             </View>
             <Text style={styles.location} numberOfLines={1}>
