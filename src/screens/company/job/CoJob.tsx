@@ -497,6 +497,34 @@ const CoJob = () => {
           </View>
         </BottomModal>
       )}
+
+      <BottomModal
+        visible={completeProfileModal}
+        onClose={() => setCompleteProfileModal(false)}
+        backgroundColor={colors.white}>
+        <Text style={styles.completeProfileModalHeading}>
+          {t('Complete Your Profile')}
+        </Text>
+        <Text style={styles.completeProfileModalDescription}>
+          {t('You need to complete your company profile before posting jobs or creating posts. Please add the required details to continue.')}
+        </Text>
+        <GradientButton
+          type="Company"
+          title={t('Complete Profile')}
+          style={styles.completeProfileModalButton}
+          onPress={() => {
+            setCompleteProfileModal(false);
+            navigateTo(SCREENS.CoEditMyProfile);
+          }}
+        />
+        <TouchableOpacity
+          style={styles.completeProfileModalCancel}
+          onPress={() => setCompleteProfileModal(false)}>
+          <Text style={styles.completeProfileModalCancelText}>
+            {t('Cancel')}
+          </Text>
+        </TouchableOpacity>
+      </BottomModal>
     </LinearContainer>
   );
 };
@@ -669,5 +697,26 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     marginTop: hp(12),
     paddingBottom: '20%',
+  },
+  completeProfileModalHeading: {
+    ...commonFontStyle(600, 18, colors._0B3970),
+    marginBottom: hp(12),
+    textAlign: 'center',
+  },
+  completeProfileModalDescription: {
+    ...commonFontStyle(400, 14, colors._4A4A4A),
+    marginBottom: hp(20),
+    textAlign: 'center',
+    lineHeight: hp(22),
+  },
+  completeProfileModalButton: {
+    marginBottom: hp(12),
+  },
+  completeProfileModalCancel: {
+    alignItems: 'center',
+    paddingVertical: hp(8),
+  },
+  completeProfileModalCancelText: {
+    ...commonFontStyle(500, 14, colors._0B3970),
   },
 });
