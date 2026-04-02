@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  LayoutChangeEvent,
   NativeSyntheticEvent,
   StyleProp,
   StyleSheet,
@@ -10,6 +11,9 @@ import {
   ViewStyle,
 } from 'react-native';
 import { colors } from '../../theme/colors';
+
+/** Ignore line layout until the row has a real width (avoids FlatList / nav timing bugs). */
+const MIN_LAYOUT_WIDTH = 24;
 
 interface ReadMoreTextProps {
   text: string;
@@ -43,7 +47,10 @@ const ReadMoreText: React.FC<ReadMoreTextProps> = ({
   containerStyle,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [layoutWidth, setLayoutWidth] = useState(0);
+  const layoutWidthRef = useRef(0);
   const [fullLines, setFullLines] = useState<Array<{ text: string }>>([]);
+  const [lineLayoutReady, setLineLayoutReady] = useState(false);
   const [isLinkPressed, setIsLinkPressed] = useState(false);
 
   const flattenedStyle = StyleSheet.flatten([
@@ -68,12 +75,22 @@ const ReadMoreText: React.FC<ReadMoreTextProps> = ({
   useEffect(() => {
     setExpanded(false);
     setFullLines([]);
+    setLineLayoutReady(false);
   }, [text]);
 
+  useEffect(() => {
+    setFullLines([]);
+    setLineLayoutReady(false);
+  }, [layoutWidth]);
+
   const trimmed = text?.trim?.() ?? '';
-  const showToggle = trimmed.length > 0 && fullLines.length > numberOfLines;
+  const showToggle =
+    trimmed.length > 0 && lineLayoutReady && fullLines.length > numberOfLines;
+
   const collapsedText = useMemo(() => {
-    if (!showToggle) return text;
+    if (!showToggle) {
+      return text;
+    }
 
     const visible = fullLines
       .slice(0, numberOfLines)
@@ -90,23 +107,41 @@ const ReadMoreText: React.FC<ReadMoreTextProps> = ({
       .replace(/[\s,.;:!?-]+$/g, '');
   }, [showToggle, text, fullLines, numberOfLines, seeMoreText]);
 
+  const handleContainerLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    layoutWidthRef.current = w;
+    setLayoutWidth(w);
+  };
+
   const handleLayoutMeasure = (
     e: NativeSyntheticEvent<TextLayoutEventData>,
   ) => {
+    if (layoutWidthRef.current < MIN_LAYOUT_WIDTH) {
+      return;
+    }
     const lines = e.nativeEvent.lines || [];
     setFullLines(lines.map((line) => ({ text: line.text || '' })));
+    setLineLayoutReady(true);
   };
 
+  const renderMeasureText = () => (
+    <Text
+      key={`measure-${layoutWidth}-${String(text).length}`}
+      accessible={false}
+      style={[flattenedStyle, styles.textFullWidth, styles.measure]}
+      onTextLayout={handleLayoutMeasure}
+    >
+      {text}
+    </Text>
+  );
+
   return (
-    <View style={[styles.wrap, containerStyle]}>
-      {/* Same typography & width as visible text; measures how many lines the full copy needs. */}
-      <Text
-        accessible={false}
-        style={[flattenedStyle, styles.textFullWidth, styles.measure]}
-        onTextLayout={handleLayoutMeasure}
-      >
-        {text}
-      </Text>
+    <View
+      style={[styles.wrap, containerStyle]}
+      onLayout={handleContainerLayout}
+      collapsable={false}
+    >
+      {renderMeasureText()}
 
       {expanded ? (
         <Text style={[flattenedStyle, styles.textFullWidth]}>
@@ -126,29 +161,33 @@ const ReadMoreText: React.FC<ReadMoreTextProps> = ({
             </Text>
           ) : null}
         </Text>
-      ) : (
-        <Text style={[flattenedStyle, styles.textFullWidth]}>
-          {showToggle ? (
-            <>
-              {collapsedText}
-              <Text>{'... '}</Text>
-              <Text
-                style={[
-                  flattenedLinkStyle,
-                  isLinkPressed && { color: linkPressedColor },
-                ]}
-                onPress={() => setExpanded(true)}
-                onPressIn={() => setIsLinkPressed(true)}
-                onPressOut={() => setIsLinkPressed(false)}
-                suppressHighlighting
-              >
-                {seeMoreText}
-              </Text>
-            </>
-          ) : (
-            text
-          )}
+      ) : !lineLayoutReady ? (
+        <Text
+          numberOfLines={numberOfLines}
+          ellipsizeMode="tail"
+          style={[flattenedStyle, styles.textFullWidth]}
+        >
+          {text}
         </Text>
+      ) : showToggle ? (
+        <Text style={[flattenedStyle, styles.textFullWidth]}>
+          {collapsedText}
+          <Text>{'... '}</Text>
+          <Text
+            style={[
+              flattenedLinkStyle,
+              isLinkPressed && { color: linkPressedColor },
+            ]}
+            onPress={() => setExpanded(true)}
+            onPressIn={() => setIsLinkPressed(true)}
+            onPressOut={() => setIsLinkPressed(false)}
+            suppressHighlighting
+          >
+            {seeMoreText}
+          </Text>
+        </Text>
+      ) : (
+        <Text style={[flattenedStyle, styles.textFullWidth]}>{text}</Text>
       )}
     </View>
   );

@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Image,
   Linking,
+  NativeModules,
   PermissionsAndroid,
   ScrollView,
   StyleSheet,
@@ -213,9 +214,44 @@ const EmployeeProfile = () => {
 
         const rawName =
           resume?.file_name ||
+          resume?.fileName ||
+          resume?.name ||
+          resume?.filename ||
           fileUrl.split('?')[0].split('/').pop() ||
           `resume_${Date.now()}`;
-        const safeName = String(rawName).replace(/[^\w.\-]/g, '_');
+
+        // Display name should match the resume name we show in UI.
+        const displayName = String(rawName);
+        const safeName = displayName.replace(/[^\w.\-]/g, '_');
+
+        const lowerName = displayName.toLowerCase();
+        const mimeType =
+          lowerName.endsWith('.pdf')
+            ? 'application/pdf'
+            : lowerName.endsWith('.docx')
+              ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+              : lowerName.endsWith('.doc')
+                ? 'application/msword'
+                : 'application/octet-stream';
+
+        // Prefer Android DownloadManager so the download shows in the system notification tray.
+        try {
+          const nativeModule = (NativeModules as any)?.DownloadResumeModule;
+          if (nativeModule?.downloadToDownloads) {
+            await nativeModule.downloadToDownloads(
+              fileUrl,
+              safeName,
+              mimeType,
+              displayName,
+              `Downloading ${displayName}`,
+            );
+            Alert.alert('Downloading', 'Resume added to your downloads.');
+            return;
+          }
+        } catch (e: any) {
+          // Fallback to RNFS if the native module is not available or download fails.
+          console.log('Native DownloadManager resume download failed:', e?.message || e);
+        }
 
         const downloadDirs = [
           (RNFS as any).DownloadDirectoryPath,

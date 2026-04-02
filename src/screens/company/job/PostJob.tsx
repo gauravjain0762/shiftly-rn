@@ -180,7 +180,6 @@ const PostJob = () => {
 
   const salaryRangeData = useMemo(() => {
     const ranges = jobDropdownData?.data?.salary_ranges;
-    console.log("🔥 ~ PostJob ~ ranges:", ranges)
     if (Array.isArray(ranges) && ranges.length > 0) {
       return ranges
         .filter((r: any) => {
@@ -376,9 +375,7 @@ const PostJob = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (!editMode && userInfo && !isCompanyProfileComplete(userInfo)) {
-        setCompleteProfileModal(true);
-      }
+      setCompleteProfileModal(!editMode && !isCompanyProfileComplete(userInfo));
     }, [editMode, userInfo]),
   );
 
@@ -569,16 +566,50 @@ const PostJob = () => {
   const hasCleanedRequirementsRef = useRef<boolean>(false);
 
   useEffect(() => {
-    if (
-      dropdownDepartmentsOptions?.length > 0 &&
-      (!job_sector || !job_sector?.value)
-    ) {
-      updateJobForm({ job_sector: dropdownDepartmentsOptions[0] });
+    if (!dropdownDepartmentsOptions?.length) return;
+
+    const options = dropdownDepartmentsOptions;
+    const currentValue = job_sector?.value;
+    const currentLabel = job_sector?.label;
+
+    const currentValueExists =
+      currentValue !== null &&
+      currentValue !== undefined &&
+      options.some(opt => String(opt?.value) === String(currentValue));
+
+    // In edit mode, try to resolve department by label/title -> correct option value.
+    if (editMode) {
+      if (!currentValueExists) {
+        const matchedByLabel = currentLabel
+          ? options.find(opt => String(opt?.label) === String(currentLabel))
+          : null;
+
+        // Some APIs may store only the title in `value`, so try that too.
+        const matchedByValueAsLabel = !matchedByLabel && currentValue
+          ? options.find(opt => String(opt?.label) === String(currentValue))
+          : null;
+
+        const matched = matchedByLabel || matchedByValueAsLabel;
+        if (matched) {
+          updateJobForm({ job_sector: matched });
+          hasInitializedJobSectorRef.current = true;
+          return;
+        }
+      }
+
+      // If editMode and nothing matched, avoid overriding saved selection
+      // (keep whatever the form already has).
+      return;
+    }
+
+    // Create mode: choose the first option when none is selected yet.
+    if (!job_sector || !job_sector?.value) {
+      updateJobForm({ job_sector: options[0] });
       if (!hasInitializedJobSectorRef.current) {
         hasInitializedJobSectorRef.current = true;
       }
     }
-  }, [dropdownDepartmentsOptions, job_sector, updateJobForm]);
+  }, [dropdownDepartmentsOptions, job_sector, updateJobForm, editMode]);
 
   useEffect(() => {
     if (

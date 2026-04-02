@@ -87,6 +87,7 @@ const FeedCard: FC<card> = ({
         post_id: item?._id,
         title: item?.title || '',
         description: item?.description || '',
+        external_link: item?.external_link || '',
         images: item?.images || [],
       },
     });

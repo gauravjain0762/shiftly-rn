@@ -84,7 +84,14 @@ const CreatePost = () => {
   useEffect(() => {
     const params = route.params;
     if (params?.editMode && params?.postData) {
-      const { post_id, title: postTitle, description: postDesc, images } = params.postData;
+      const {
+        post_id,
+        title: postTitle,
+        description: postDesc,
+        images,
+        external_link: externalLinkFromPost,
+        externalLink: externalLinkFromPostAlt,
+      } = params.postData;
 
       // Convert existing image URLs to uploadedImages format
       const existingImages = images?.length > 0
@@ -102,6 +109,10 @@ const CreatePost = () => {
         uploadedImages: existingImages,
         postEditMode: true,
         postId: post_id,
+        externalLink:
+          externalLinkFromPost ||
+          externalLinkFromPostAlt ||
+          '',
       });
     }
   }, [route.params]);

@@ -601,10 +601,19 @@ const SuggestedEmployeeScreen = () => {
         title: jobInfo?.title,
         describe: jobInfo?.description,
         job_sector: jobInfo?.department_id
-          ? {
-            label: jobInfo.department_id?.title,
-            value: jobInfo.department_id?._id,
-          }
+          ? typeof jobInfo.department_id === 'string'
+            ? {
+              // API sometimes returns `department_id` as a string id.
+              // Dropdown selection uses `value` and will resolve label from options.
+              label: '',
+              value: jobInfo.department_id,
+            }
+            : {
+              label: jobInfo.department_id?.title ?? '',
+              value:
+                (jobInfo.department_id as any)?._id ??
+                (jobInfo.department_id as any)?.id,
+            }
           : (typeof jobInfo?.job_sector === 'string'
             ? { label: jobInfo.job_sector, value: jobInfo.job_sector }
             : jobInfo?.job_sector),

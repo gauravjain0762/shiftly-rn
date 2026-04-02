@@ -35,9 +35,6 @@ const LocationContainer: FC<map> = ({
   address,
   showAddressCard = true,
 }) => {
-  console.log("🔥 ~ LocationContainer ~ lng:", lng)
-  console.log("🔥 ~ LocationContainer ~ lat:", lat)
-
   const normalizedCoords = useMemo(() => {
     const parsedLat = typeof lat === 'number' ? lat : Number(lat);
     const parsedLng = typeof lng === 'number' ? lng : Number(lng);

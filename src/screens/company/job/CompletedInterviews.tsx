@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BackHeader, LinearContainer } from '../../../component';
 import { colors } from '../../../theme/colors';
@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
     listContent: {
         paddingHorizontal: wp(20),
         paddingBottom: hp(20),
+        flexGrow: 1,
     },
     card: {
         backgroundColor: colors.white,
@@ -267,12 +268,14 @@ const styles = StyleSheet.create({
         ...commonFontStyle(400, 11, colors._656464),
     },
     emptyState: {
-        flex: 1,
-        paddingTop: hp(50),
+        flexGrow: 1,
+        justifyContent: 'center',
         alignItems: 'center',
+        paddingVertical: hp(30),
     },
     emptyText: {
         ...commonFontStyle(500, 16, colors._656464),
+        textAlign: 'center',
     },
 });
 

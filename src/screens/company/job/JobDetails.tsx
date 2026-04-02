@@ -376,10 +376,17 @@ ${salary}${shareUrlText}`;
                         value: jobDetail?.job_sector,
                       }
                       : jobDetail?.job_sector || (jobDetail?.department_id
-                        ? {
-                          label: jobDetail.department_id?.title,
-                          value: jobDetail.department_id?._id,
-                        }
+                        ? typeof jobDetail.department_id === 'string'
+                          ? {
+                              // API sometimes returns `department_id` as a string id.
+                              // Dropdown selection uses `value`, label will be resolved from options.
+                              label: '',
+                              value: jobDetail.department_id,
+                            }
+                          : {
+                              label: jobDetail.department_id?.title ?? '',
+                              value: jobDetail.department_id?._id ?? jobDetail.department_id?.id,
+                            }
                         : null),
                   startDate: (() => {
                     const sd = jobDetail?.start_date;

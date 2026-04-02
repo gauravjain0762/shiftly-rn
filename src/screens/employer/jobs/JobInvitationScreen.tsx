@@ -33,11 +33,7 @@ const JobInvitationScreen = () => {
         invitationStatus?: string;
         invitationId?: string;
     };
-    console.log("🔥 ~ JobInvitationScreen ~ invitationId:", invitationId)
-    console.log("🔥 ~ JobInvitationScreen ~ invitationStatus:", invitationStatus)
     const job = jobDetail?.job || jobDetail;
-    console.log("🔥 ~ JobInvitationScreen ~ jobDetail:", jobDetail)
-    console.log("jobDetail >>>>>>>>>>>", jobDetail);
 
     const company = job?.company_id || jobDetail?.company_id;
     const { data: interviewsData, refetch: refetchInterviews } = useGetInterviewsQuery(
@@ -140,7 +136,7 @@ const JobInvitationScreen = () => {
                         uri={company?.logo}
                         containerStyle={styles.avatar}
                         imageStyle={styles.avatar}
-                        resizeMode='contain'
+                        resizeMode='cover'
                     />
 
                     <View style={styles.textContainer}>
