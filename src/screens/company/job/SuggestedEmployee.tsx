@@ -1086,10 +1086,8 @@ const SuggestedEmployeeScreen = () => {
                       onPress={() => selectTab('suggested')}>
                       <Image
                         source={IMAGES.people}
-                        style={[
-                          styles.tabIcon,
-                          activeTab === 'suggested' && { tintColor: colors.white },
-                        ]}
+                        style={styles.tabIcon}
+                        tintColor={activeTab === 'suggested' ? colors.white : colors._0B3970}
                       />
                       <Text
                         style={[
@@ -1168,10 +1166,8 @@ const SuggestedEmployeeScreen = () => {
                       onPress={() => selectTab('applicants')}>
                       <Image
                         source={IMAGES.people} // Using same icon as Suggested for now
-                        style={[
-                          styles.tabIcon,
-                          activeTab === 'applicants' && { tintColor: colors.white },
-                        ]}
+                        style={styles.tabIcon}
+                        tintColor={activeTab === 'applicants' ? colors.white : colors._0B3970}
                       />
                       <Text
                         style={[
@@ -1284,47 +1280,65 @@ const SuggestedEmployeeScreen = () => {
                             user?.years_of_experience ||
                             user?.total_experience ||
                             0;
+                          const languages =
+                            user?.languages?.map((l: any) => l)?.filter(Boolean) || [];
+                          const languageNames = languages
+                            .map((l: any) => l?.name)
+                            .filter(Boolean);
 
                           return (
                             <Pressable
                               key={user?._id || item?._id}
                               onPress={() => handleNavigateToProfile(user)}
                               style={styles.employeeCard}>
-                              <TouchableOpacity
-                                onPress={() => handleNavigateToProfile(user)}
-                                activeOpacity={0.7}>
-                                {hasValidImage(user?.picture) ? (
-                                  <CustomImage
-                                    uri={user?.picture}
-                                    containerStyle={styles.employeeAvatar}
-                                    imageStyle={styles.employeeAvatar}
-                                    resizeMode="cover"
-                                  />
-                                ) : (
-                                  <View style={[styles.employeeAvatar, styles.avatarFallback]}>
-                                    <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
-                                  </View>
-                                )}
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                style={styles.employeeInfo}
-                                onPress={() => handleNavigateToProfile(user)}
-                                activeOpacity={0.7}>
-                                <Text style={styles.employeeName}>
-                                  {user?.name || 'N/A'}
-                                </Text>
-                                {!!user?.desired_job_title && (
-                                  <Text style={styles.employeeRole}>
-                                    {user.desired_job_title}
+                              <View style={styles.employeeTopRow}>
+                                <TouchableOpacity
+                                  onPress={() => handleNavigateToProfile(user)}
+                                  activeOpacity={0.7}>
+                                  {hasValidImage(user?.picture) ? (
+                                    <CustomImage
+                                      uri={user?.picture}
+                                      containerStyle={styles.employeeAvatar}
+                                      imageStyle={styles.employeeAvatar}
+                                      resizeMode="cover"
+                                    />
+                                  ) : (
+                                    <View style={[styles.employeeAvatar, styles.avatarFallback]}>
+                                      <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
+                                    </View>
+                                  )}
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={styles.employeeInfo}
+                                  onPress={() => handleNavigateToProfile(user)}
+                                  activeOpacity={0.7}>
+                                  <Text style={styles.employeeName} numberOfLines={1}>
+                                    {user?.name || 'N/A'}
                                   </Text>
-                                )}
-                                <Text style={styles.employeeRole}>
-                                  {user?.responsibility || user?.job_title || (!user?.desired_job_title ? 'N/A' : '')}
-                                </Text>
-                                <Text style={styles.employeeExperience}>
-                                  {`${experience || 0}`}
-                                </Text>
-                              </TouchableOpacity>
+                                  {!!user?.desired_job_title && (
+                                    <Text style={styles.employeeRole} numberOfLines={1}>
+                                      {user.desired_job_title}
+                                    </Text>
+                                  )}
+                                  <Text style={styles.employeeExperience} numberOfLines={1}>
+                                    {`${experience || 0}`}
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+
+                              {/* Languages row (same as Suggested cards) */}
+                              {languageNames.length > 0 && (
+                                <View style={styles.suggestedLanguageContainer}>
+                                  <View style={styles.suggestedLanguageRow}>
+                                    {languageNames.slice(0, 3).map((name: string, index: number) => (
+                                      <View key={`${name}-${index}`} style={styles.suggestedLanguageChip}>
+                                        <Text style={styles.suggestedLanguageName}>{name}</Text>
+                                      </View>
+                                    ))}
+                                  </View>
+                                </View>
+                              )}
                             </Pressable>
                           );
                         })}
@@ -1628,11 +1642,11 @@ const styles = StyleSheet.create({
     color: colors._0B3970,
   },
   employeeCard: {
-    flexDirection: 'column',        // ← changed from 'row' to 'column'
     borderWidth: 1,
-    borderColor: '#E0D7C8',
+    borderColor: '#E2E6F0',
     borderRadius: wp(18),
-    padding: wp(12),
+    paddingVertical: hp(14),
+    paddingHorizontal: wp(14),
     backgroundColor: colors.white,
     shadowColor: '#000',
     shadowOpacity: 0.04,
@@ -1657,7 +1671,7 @@ const styles = StyleSheet.create({
   },
   employeeInfo: {
     flex: 1,
-    marginHorizontal: wp(14),
+    marginLeft: wp(12),
   },
   employeeName: {
     ...commonFontStyle(600, 16, colors._0B3970),

@@ -26,8 +26,18 @@ const downloadImage = async (url: string) => {
 export const shareJob = async (item: any) => {
   try {
     const title = item?.title || 'Job Opportunity';
-    const area = item?.address || item?.area || '';
-    const description = item?.description || '';
+    const companyName =
+      item?.company_id?.company_name || item?.company?.company_name || item?.company?.name || '';
+    const area =
+      item?.address ||
+      item?.area ||
+      [item?.city, item?.country].filter(Boolean).join(', ') ||
+      '';
+    const rawDescription = String(item?.description || '').trim();
+    const description =
+      rawDescription.length > 200
+        ? `${rawDescription.slice(0, 200).trimEnd()}...`
+        : rawDescription;
     const salaryRangeText = getJobMonthlySalaryRangeText(item);
     const salary =
       salaryRangeText
@@ -37,12 +47,20 @@ export const shareJob = async (item: any) => {
     const shareUrl = normalizeUrl(item?.share_url) || 'https://shiftly.ae/';
     const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
 
-    const message = `${title}
-${area}
+    const companyLine = companyName ? `Company: ${companyName}` : '';
+    const locationLine = area ? `📍 LOCATION: ${area}` : '';
 
-${description}
-
-${salary}${shareUrlText}`;
+    const message = [
+      title,
+      description,
+      companyLine,
+      locationLine,
+      salary,
+      shareUrl,
+    ]
+      .map(line => String(line || '').trim())
+      .filter(Boolean)
+      .join('\n\n');
 
     const shareOptions: any = {
       title: title,

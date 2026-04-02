@@ -110,6 +110,39 @@ const MyJobs = () => {
         activeTab === 'Interviews' ? listInterviews :
             listMatched;
 
+    // If local state hasn't caught up yet (initial render / tab switch),
+    // fall back to the raw API list so FlatList isn't considered "empty"
+    // while data already exists.
+    const rawJobsList = (() => {
+        if (activeTab === 'Applied') {
+            return appliedJobsQuery.data?.data?.applicants ?? [];
+        }
+        if (activeTab === 'Interviews') {
+            return (
+                interviewsQuery.data?.data?.invitations ??
+                interviewsQuery.data?.data?.interviews ??
+                []
+            );
+        }
+
+        const res = matchedJobsQuery.data;
+        const raw = res?.data;
+        if (Array.isArray(raw?.jobs)) return raw.jobs;
+        if (Array.isArray(raw?.matched_jobs)) return raw.matched_jobs;
+        if (Array.isArray(raw)) return raw;
+        if (Array.isArray(res?.jobs)) return res.jobs;
+        if (Array.isArray(res)) return res;
+        return [];
+    })();
+
+    const flatListData = jobsList.length > 0 ? jobsList : rawJobsList;
+    const currentPage =
+        activeTab === 'Applied'
+            ? pageApplied
+            : activeTab === 'Interviews'
+                ? pageInterviews
+                : pageMatched;
+
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         if (activeTab === 'Applied') {
@@ -125,8 +158,6 @@ const MyJobs = () => {
         setRefreshing(false);
     }, [activeTab, appliedJobsQuery, interviewsQuery, matchedJobsQuery]);
 
-    // Auto-refresh current tab when screen regains focus
-    // (e.g. returning from Interview/WebView flow).
     useFocusEffect(
         useCallback(() => {
             const refreshOnFocus = async () => {
@@ -262,12 +293,12 @@ const MyJobs = () => {
                 </View>
 
                 <FlatList
-                    data={jobsList}
+                    data={flatListData}
                     renderItem={renderJobCard}
                     keyExtractor={(item, index) => item?._id || index.toString()}
                     contentContainerStyle={[
                         styles.contentContainer,
-                        jobsList.length === 0 && { flex: 1, justifyContent: 'center' }
+                        flatListData.length === 0 && { flex: 1, justifyContent: 'center' }
                     ]}
                     ListEmptyComponent={() => {
                         const query = getActiveQuery();
@@ -287,7 +318,13 @@ const MyJobs = () => {
                         }
                         const isActuallyEmpty = query.isSuccess && (!Array.isArray(rawData) || rawData.length === 0);
 
-                        if ((isLoading || isFetching) && !refreshing) {
+                        const isFirstLoad =
+                            !query.isSuccess &&
+                            (query.isLoading || (query.isFetching && !refreshing));
+
+                        // Only show loader during the very first load for a tab.
+                        // If we already have a successful response (even empty), show empty state instead.
+                        if (isFirstLoad) {
                             return <ActivityIndicator size="large" color={colors._0B3970} />;
                         }
 
@@ -299,14 +336,17 @@ const MyJobs = () => {
                             );
                         }
 
-                        return <ActivityIndicator size="large" color={colors._0B3970} />;
+                        return null;
                     }}
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
                     }
-                    ListFooterComponent={isFetching && jobsList.length > 0 ? (
+                    // Only show footer spinner when loading additional pages.
+                    // `isFetching` is also true for refetches on focus/tab change, which
+                    // causes the unwanted spinner even after first-page cards render.
+                    ListFooterComponent={isFetching && currentPage > 1 && flatListData.length > 0 ? (
                         <ActivityIndicator size="small" color={colors._0B3970} />
                     ) : null}
                     showsVerticalScrollIndicator={false}

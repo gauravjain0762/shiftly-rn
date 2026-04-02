@@ -357,12 +357,34 @@ const ProfileScreen = () => {
               <HeaderWithAdd title="Professional Experience" />
               <View style={styles.timelineContainer}>
                 {experienceList?.map((exp: any, index: number) => {
+                  console.log("🔥 ~ ProfileScreen ~ exp:", exp)
                   const isLast = index === experienceList.length - 1;
                   const title = exp?.title;
                   const location = [exp?.province, exp?.country].filter(Boolean).join(', ');
                   const startMonth = exp?.job_start?.month || exp?.jobStart_month;
                   const startYear = exp?.job_start?.year || exp?.jobStart_year;
                   const startDate = [startMonth, startYear].filter(Boolean).join(' ');
+                  const endMonth =
+                    exp?.job_end?.month ||
+                    exp?.jobEnd_month ||
+                    exp?.endDate_month ||
+                    exp?.end_date?.month;
+                  const endYear =
+                    exp?.job_end?.year ||
+                    exp?.jobEnd_year ||
+                    exp?.endDate_year ||
+                    exp?.end_date?.year;
+                  const endDate = exp?.still_working
+                    ? 'Present'
+                    : [endMonth, endYear].filter(Boolean).join(' ');
+                  const duration = (() => {
+                    const start = String(startDate || '').trim();
+                    const end = String(endDate || '').trim();
+                    if (!start && !end) return '';
+                    if (start && end) return `${start} - ${end}`;
+                    if (start) return start;
+                    return end;
+                  })();
                   const typeLabel = exp?.experience_type
                     ? exp.experience_type
                       .replace(/_/g, ' ')
@@ -401,18 +423,12 @@ const ProfileScreen = () => {
                                 <BaseText style={styles.kvValue}>{location}</BaseText>
                               </View>
                             )}
-                            {!!startDate && (
+                            {!!duration && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Start Date:</BaseText>
-                                <BaseText style={styles.kvValue}>{startDate}</BaseText>
+                                <BaseText style={styles.kvLabel}>Duration:</BaseText>
+                                <BaseText style={styles.kvValue}>{duration}</BaseText>
                               </View>
                             )}
-                            <View style={styles.kvRow}>
-                              <BaseText style={styles.kvLabel}>Status:</BaseText>
-                              <BaseText style={[styles.kvValue, exp?.still_working && styles.currentStatus]}>
-                                {exp?.still_working ? 'Currently Working' : 'Completed'}
-                              </BaseText>
-                            </View>
                             {!!typeLabel && (
                               <View style={styles.kvRow}>
                                 <BaseText style={styles.kvLabel}>Type:</BaseText>

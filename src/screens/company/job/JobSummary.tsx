@@ -16,7 +16,7 @@ import { hp, wp, commonFontStyle } from '../../../theme/fonts';
 import { useGetCompanyJobsQuery } from '../../../api/dashboardApi';
 import { goBack, navigateTo, resetNavigation } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
-import Share from 'react-native-share';
+import { shareJob } from '../../../utils/shareUtils';
 
 const tabs = ['Live Jobs', 'Closed Jobs'];
 
@@ -94,12 +94,7 @@ const JobSummary = () => {
   };
 
   const handleShare = async (job: any) => {
-    try {
-      const message = `${job?.title || 'Job'}\n\n${job?.description || ''}`;
-      await Share.open({ title: job?.title, message });
-    } catch (err: any) {
-      if (err?.message !== 'User did not share') return;
-    }
+    await shareJob(job);
   };
 
   const handlePressView = (item: any) => () =>
