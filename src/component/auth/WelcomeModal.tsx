@@ -40,7 +40,7 @@ const WelcomeModal = ({
         </View>
 
         <Text style={styles.welcomeText}>
-          {t('Welcome')}, {name} 👋
+          {t('Welcome')}, {name}
         </Text>
 
         <Text style={styles.messageText}>
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: wp(20),
-    width: '100%',
+    width: '90%',
   },
   buttonText: {
     ...commonFontStyle(400, 22, colors.white),

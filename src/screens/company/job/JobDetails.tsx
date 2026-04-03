@@ -8,8 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Share from 'react-native-share';
-import RNFS from 'react-native-fs';
 import {
   BackHeader,
   GradientButton,
@@ -31,7 +29,6 @@ import {
   errorToast,
   navigateTo,
   successToast,
-  getExpiryDays,
 } from '../../../utils/commonFunction';
 import { getCurrencySymbol } from '../../../utils/currencySymbols';
 import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
@@ -40,7 +37,6 @@ import { useDispatch } from 'react-redux';
 import { setCoPostJobSteps, setJobFormState } from '../../../features/companySlice';
 import { mapJobToFormState } from '../../../utils/jobFormMapper';
 import moment from 'moment';
-import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 import InterviewScoresModal from '../../../component/common/InterviewScoresModal';
 
@@ -69,87 +65,6 @@ const CoJobDetails = () => {
 
   const isValidImage = (uri?: string) =>
     typeof uri === 'string' && uri.trim().length > 0 && !uri.includes('blank');
-
-  const shareUrl = data?.data?.share_url;
-
-  const coverImages = (() => {
-    const coverImgs = jobDetail?.company_id?.cover_images;
-    const logo = jobDetail?.company_id?.logo;
-
-    if (coverImgs && Array.isArray(coverImgs) && coverImgs.length > 0) {
-      const validCoverImages = coverImgs.filter(img => img && typeof img === 'string' && img.trim() !== '');
-      if (validCoverImages.length > 0) {
-        return validCoverImages;
-      }
-    }
-
-    if (logo && typeof logo === 'string' && logo.trim() !== '') {
-      return [logo];
-    }
-
-    return [IMAGES.logoText];
-  })();
-
-  const downloadImage = async (url: string) => {
-    const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
-
-    await RNFS.downloadFile({
-      fromUrl: url,
-      toFile: filePath,
-    }).promise;
-
-    return `file://${filePath}`;
-  };
-
-  const handleShare = async () => {
-    try {
-      const title = jobDetail?.title || 'Job Opportunity';
-      const area = jobDetail?.address || jobDetail?.area || '';
-      const description = jobDetail?.description || '';
-      const salaryRangeText = getJobMonthlySalaryRangeText(jobDetail);
-      const salary = salaryRangeText
-        ? `Salary: ${jobDetail?.currency === 'AED' ? 'AED' : getCurrencySymbol(jobDetail?.currency)}${salaryRangeText}`
-        : '';
-
-      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-
-      const message = `${title}
-${area}
-
-${description}
-
-${salary}${shareUrlText}`;
-
-      const shareOptions: any = {
-        title: title,
-        message: message,
-        url: shareUrl,
-      };
-
-      const coverImageUri = coverImages && coverImages.length > 0 && typeof coverImages[0] === 'string'
-        ? coverImages[0]
-        : (jobDetail?.company_id?.logo && typeof jobDetail.company_id.logo === 'string'
-          ? jobDetail.company_id.logo
-          : null);
-
-      if (coverImageUri && typeof coverImageUri === 'string') {
-        try {
-          const imagePath = await downloadImage(coverImageUri);
-          shareOptions.url = imagePath;
-          shareOptions.type = 'image/jpeg';
-        } catch (imageError) {
-          console.log('❌ Image download error:', imageError);
-        }
-      }
-
-      await Share.open(shareOptions);
-
-    } catch (err: any) {
-      if (err?.message !== 'User did not share') {
-        console.log('❌ Share error:', err);
-      }
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {

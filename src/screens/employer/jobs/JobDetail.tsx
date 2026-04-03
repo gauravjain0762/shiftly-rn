@@ -10,9 +10,6 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import Share from 'react-native-share';
-import RNFS from 'react-native-fs';
-
 import {
   BackHeader,
   GradientButton,
@@ -49,7 +46,7 @@ import ReadMoreText from '../../../component/common/ReadMoreText';
 import CustomImage from '../../../component/common/CustomImage';
 import Carousel from 'react-native-reanimated-carousel';
 import { navigationRef } from '../../../navigation/RootContainer';
-import { normalizeUrl } from '../../../utils/shareUtils';
+import { shareJob } from '../../../utils/shareUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -111,7 +108,6 @@ const JobDetail = () => {
   const curr_jobdetails = jobDetail?.data?.job;
   console.log("🔥 ~ JobDetail ~ curr_jobdetails:", curr_jobdetails)
   const resumeList = jobDetail?.data?.resumes;
-  const shareUrl = normalizeUrl(jobDetail?.data?.share_url);
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const [addRemoveFavoriteJob] = useAddRemoveFavouriteMutation({});
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
@@ -215,70 +211,14 @@ const JobDetail = () => {
     );
   };
 
-  const downloadImage = async (url: string) => {
-    const filePath = `${RNFS.CachesDirectoryPath}/job_${Date.now()}.jpg`;
-
-    await RNFS.downloadFile({
-      fromUrl: url,
-      toFile: filePath,
-    }).promise;
-
-    return `file://${filePath}`;
-  };
-
   const handleShare = async () => {
-    try {
-      const title = curr_jobdetails?.title || 'Job Opportunity';
-      const area = curr_jobdetails?.address || curr_jobdetails?.area || '';
-      const description = curr_jobdetails?.description || '';
-      const salaryRangeText = getJobMonthlySalaryRangeText(curr_jobdetails);
-      const salary = salaryRangeText
-        ? `Salary: ${getCurrencySymbol(curr_jobdetails?.currency)}${salaryRangeText}`
-        : '';
-
-      const shareUrlText = shareUrl ? `\n\n${shareUrl}` : '';
-
-      const message = `${title}
-${area}
-
-${description}
-
-${salary}${shareUrlText}`;
-
-      const shareOptions: any = {
-        title: title,
-        message: message,
-        url: shareUrl,
-      };
-
-      // Use cover image if available, otherwise use company logo
-      // Only use string URLs for sharing (not require resources)
-      const coverImageUri =
-        coverImages &&
-          coverImages.length > 0 &&
-          typeof coverImages[0] === 'string'
-          ? coverImages[0]
-          : curr_jobdetails?.company_id?.logo &&
-            typeof curr_jobdetails.company_id.logo === 'string'
-            ? curr_jobdetails.company_id.logo
-            : null;
-
-      if (coverImageUri && typeof coverImageUri === 'string') {
-        try {
-          const imagePath = await downloadImage(coverImageUri);
-          shareOptions.url = imagePath;
-          shareOptions.type = 'image/jpeg';
-        } catch (imageError) {
-          console.log('❌ Image download error:', imageError);
-        }
-      }
-
-      await Share.open(shareOptions);
-    } catch (err: any) {
-      if (err?.message !== 'User did not share') {
-        console.log('❌ Share error:', err);
-      }
-    }
+    await shareJob(
+      {
+        ...curr_jobdetails,
+        share_url: jobDetail?.data?.share_url,
+      },
+      { includeImageOnAndroid: true },
+    );
   };
 
   const handleGoBack = () => {
@@ -404,20 +344,20 @@ ${salary}${shareUrlText}`;
                 </Text>
 
                 {getJobMonthlySalaryRangeText(curr_jobdetails) && (
-                    <View style={styles.salaryContainerHeader}>
-                      <Text style={styles.salaryTextHeader}>
-                        {curr_jobdetails?.currency?.toUpperCase()}
-                      </Text>
-                      {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
-                        <Image source={IMAGES.currency} style={styles.currencyImage} />
-                      ) : (
-                        <Text style={styles.salaryTextHeader}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
-                      )}
-                      <Text style={styles.salaryTextHeader}>
-                        {getJobMonthlySalaryRangeText(curr_jobdetails)}
-                      </Text>
-                    </View>
-                  )}
+                  <View style={styles.salaryContainerHeader}>
+                    <Text style={styles.salaryTextHeader}>
+                      {curr_jobdetails?.currency?.toUpperCase()}
+                    </Text>
+                    {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
+                      <Image source={IMAGES.currency} style={styles.currencyImage} />
+                    ) : (
+                      <Text style={styles.salaryTextHeader}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
+                    )}
+                    <Text style={styles.salaryTextHeader}>
+                      {getJobMonthlySalaryRangeText(curr_jobdetails)}
+                    </Text>
+                  </View>
+                )}
               </View>
               <TouchableOpacity
                 onPress={() => handleToggleFavorite(curr_jobdetails)}
@@ -451,23 +391,23 @@ ${salary}${shareUrlText}`;
               )}
 
               {getJobMonthlySalaryRangeText(curr_jobdetails) && (
-                  <View style={styles.snapshotItem}>
-                    <Text style={styles.snapshotLabel}>Salary</Text>
-                    <View style={styles.valueRow}>
-                      <Text style={styles.snapshotValue}>
-                        {curr_jobdetails?.currency?.toUpperCase()}
-                      </Text>
-                      {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
-                        <Image source={IMAGES.currency} style={styles.currencyImageSnapshot} />
-                      ) : (
-                        <Text style={styles.snapshotValue}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
-                      )}
-                      <Text style={styles.snapshotValue}>
-                        {getJobMonthlySalaryRangeText(curr_jobdetails)}
-                      </Text>
-                    </View>
+                <View style={styles.snapshotItem}>
+                  <Text style={styles.snapshotLabel}>Salary</Text>
+                  <View style={styles.valueRow}>
+                    <Text style={styles.snapshotValue}>
+                      {curr_jobdetails?.currency?.toUpperCase()}
+                    </Text>
+                    {curr_jobdetails?.currency?.toUpperCase() === 'AED' ? (
+                      <Image source={IMAGES.currency} style={styles.currencyImageSnapshot} />
+                    ) : (
+                      <Text style={styles.snapshotValue}>{getCurrencySymbol(curr_jobdetails?.currency)}</Text>
+                    )}
+                    <Text style={styles.snapshotValue}>
+                      {getJobMonthlySalaryRangeText(curr_jobdetails)}
+                    </Text>
                   </View>
-                )}
+                </View>
+              )}
 
               {curr_jobdetails?.createdAt && (
                 <View style={styles.snapshotItem}>
