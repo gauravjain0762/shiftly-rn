@@ -62,6 +62,7 @@ const CompanyProfile = () => {
 
   const [isLogoLoading, setIsLogoLoading] = useState(false);
   const [logoLoadError, setLogoLoadError] = useState(false);
+  const [isCoverImageLoading, setIsCoverImageLoading] = useState(false);
   const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // ── Own-company (no companyId) ──────────────────────────────────────────
@@ -481,11 +482,21 @@ const CompanyProfile = () => {
   const CoverImage = useMemo(() => (
     <>
       {coverImages.length > 0 && coverImages[0]?.uri ? (
-        <Image
-          source={{ uri: coverImages[0].uri }}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode="cover"
-        />
+        <>
+          <Image
+            source={{ uri: coverImages[0].uri }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+            onLoadStart={() => setIsCoverImageLoading(true)}
+            onLoad={() => setIsCoverImageLoading(false)}
+            onError={() => setIsCoverImageLoading(false)}
+          />
+          {isCoverImageLoading && (
+            <View style={{ ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2F4F7' }}>
+              <ActivityIndicator size="small" color={colors._0B3970} />
+            </View>
+          )}
+        </>
       ) : (
         !shouldShowCoverLoader && (
           <Image
@@ -496,7 +507,7 @@ const CompanyProfile = () => {
         )
       )}
     </>
-  ), [coverImages, shouldShowCoverLoader]);
+  ), [coverImages, shouldShowCoverLoader, isCoverImageLoading]);
 
   const LogoImage = useMemo(() => (
     hasValidLogo && logoUri && !logoLoadError ? (

@@ -206,6 +206,8 @@ const JobDetail = () => {
           imageStyle={styles.imageStyle}
           containerStyle={styles.carouselImage}
           source={imageSource}
+          showLoader={isCoverImage}
+          showDefaultSource={!isCoverImage}
         />
       </View>
     );

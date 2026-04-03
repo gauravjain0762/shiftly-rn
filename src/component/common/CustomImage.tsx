@@ -1,5 +1,5 @@
-import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
-import React from 'react';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import React, { useState } from 'react';
 import FastImage, { FastImageProps, ImageStyle } from 'react-native-fast-image';
 import { colors } from '../../theme/colors';
 import { hp, wp } from '../../theme/fonts';
@@ -23,6 +23,7 @@ interface Props {
   onLoadStart?: () => void;
   onLoad?: () => void;
   showDefaultSource?: boolean;
+  showLoader?: boolean;
 }
 
 const CustomImage = ({
@@ -40,10 +41,14 @@ const CustomImage = ({
   viewRef,
   children,
   showDefaultSource = true,
+  showLoader = false,
   ...props
 }: Props) => {
+  const [loading, setLoading] = useState(false);
+
   // Ensure we always have a valid source for FastImage
   // If both uri and source are null/undefined, use logoText as fallback
+  const isRemoteImage = !!uri || (typeof source === 'string' && source.startsWith('http'));
   const imageSource = uri
     ? { uri: uri }
     : typeof source === 'string'
@@ -67,11 +72,21 @@ const CustomImage = ({
         resizeMode={resizeMode}
         source={imageSource}
         tintColor={tintColor}
-        defaultSource={showDefaultSource ? IMAGES.logoText : undefined}
+        defaultSource={showDefaultSource && !showLoader ? IMAGES.logoText : undefined}
         style={[{ width: size, height: size }, imageStyle]}
+        onLoadStart={() => {
+          if (showLoader && isRemoteImage) setLoading(true);
+        }}
+        onLoad={() => setLoading(false)}
+        onError={() => setLoading(false)}
         {...props}>
         {children}
       </FastImage>
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="small" color={colors._0B3970} />
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -86,5 +101,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors._041326,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F2F4F7',
   },
 });
