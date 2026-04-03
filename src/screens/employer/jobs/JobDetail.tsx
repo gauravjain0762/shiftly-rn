@@ -370,7 +370,6 @@ const JobDetail = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Quick Info Snapshot */}
             <View style={styles.snapshotContainer}>
               {curr_jobdetails?.contract_type && (
                 <View style={styles.snapshotItem}>
@@ -454,41 +453,6 @@ const JobDetail = () => {
                   });
                 }
 
-                const experienceTitles =
-                  curr_jobdetails?.experiences
-                    ?.map((exp: any) => exp?.title)
-                    .filter(Boolean)
-                    .join(', ');
-                if (experienceTitles) {
-                  requirementItems.push(`Experience: ${experienceTitles}`);
-                }
-
-                const educationTitles =
-                  curr_jobdetails?.educations
-                    ?.map((edu: any) => edu?.title)
-                    .filter(Boolean)
-                    .join(', ');
-                if (educationTitles) {
-                  requirementItems.push(`Education: ${educationTitles}`);
-                }
-
-                const certificationTitles =
-                  curr_jobdetails?.certifications
-                    ?.map((cert: any) => cert?.title)
-                    .filter(Boolean)
-                    .join(', ');
-                if (certificationTitles) {
-                  requirementItems.push(`Certifications: ${certificationTitles}`);
-                }
-
-                const skillTitles =
-                  curr_jobdetails?.skills
-                    ?.map((skill: any) => skill?.title)
-                    .filter(Boolean)
-                    .join(', ');
-                if (skillTitles) {
-                  requirementItems.push(`Skills: ${skillTitles}`);
-                }
 
                 if (requirementItems.length === 0) {
                   return <Text style={styles.description}>N/A</Text>;

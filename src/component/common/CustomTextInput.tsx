@@ -18,22 +18,26 @@ interface CustomTextInputProps extends TextInputProps {
   label?: string;
   required?: boolean;
   showRightIcon?: boolean;
+  showClearButton?: boolean;
   containerStyle?: ViewStyle | any;
   imgStyle?: ImageStyle;
   isPassword?: boolean;
   inputStyle?: ViewStyle | any;
   onShow?: (e: boolean) => void;
+  onClearPress?: () => void;
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = ({
   label,
   required = false,
   showRightIcon,
+  showClearButton = false,
   containerStyle,
   imgStyle,
   inputStyle,
   isPassword = false,
   onShow = () => {},
+  onClearPress,
   ...rest
 }) => {
   const styles = React.useMemo(() => getGlobalStyles({colors}), [colors]);
@@ -73,6 +77,28 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
                 resizeMode: 'contain',
                 tintColor: colors._0B3970,
                 ...imgStyle,
+              }}
+            />
+          </TouchableOpacity>
+        )}
+        {showClearButton && !!rest.value && String(rest.value).length > 0 && (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              if (onClearPress) {
+                onClearPress();
+              } else if (rest.onChangeText) {
+                rest.onChangeText('');
+              }
+            }}>
+            <Image
+              source={IMAGES.close}
+              style={{
+                width: 18,
+                height: 18,
+                resizeMode: 'contain',
+                tintColor: colors._7B7878,
+                marginLeft: 8,
               }}
             />
           </TouchableOpacity>

@@ -710,14 +710,11 @@ const SuggestedEmployeeScreen = () => {
                 <Text style={styles.shortlistedEmployeeName}>
                   {user?.name || 'N/A'}
                 </Text>
-                {!!user?.desired_job_title && (
+                {!!user?.department_id?.title && (
                   <Text style={styles.shortlistedEmployeeRole}>
-                    {user.desired_job_title}
+                    {user.department_id?.title || 'N/A'}
                   </Text>
                 )}
-                <Text style={styles.shortlistedEmployeeRole}>
-                  {user?.responsibility || user?.job_title || (!user?.desired_job_title ? 'N/A' : '')}
-                </Text>
               </View>
             </TouchableOpacity>
 

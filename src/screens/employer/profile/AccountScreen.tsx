@@ -32,7 +32,6 @@ import {
   useEmployeeLogoutMutation,
 } from '../../../api/authApi';
 import { AppDispatch, resetStore, RootState } from '../../../store';
-import LanguageModal from '../../../component/common/LanguageModel';
 import CustomImage from '../../../component/common/CustomImage';
 import { disconnectSocket } from '../../../hooks/socketManager';
 
@@ -43,8 +42,6 @@ const AccountScreen = () => {
   const [popupVisible, setPopupVisible] = useState<boolean>(false);
   const [employeeDeleteAccount] = useEmployeeDeleteAccountMutation({});
   const [deletepopupVisible, setdeletePopupVisible] = useState<boolean>(false);
-  const [isLanguageModalVisible, setLanguageModalVisible] =
-    useState<boolean>(false);
 
   const settingsData = [
     {

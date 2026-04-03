@@ -885,6 +885,8 @@ const CreateAccount = () => {
                     placeholderTextColor={colors._7B7878}
                     onChangeText={handleEmailChange}
                     value={companyRegisterData?.email}
+                    showClearButton
+                    onClearPress={() => handleEmailChange('')}
                     inputStyle={[styles.input1, { textTransform: 'lowercase', marginTop: 20, paddingLeft: 0, marginLeft: 0, overflow: 'hidden' }]}
                     containerStyle={[styles.Inputcontainer, { marginBottom: 0, marginTop: 0, paddingLeft: 0 }]}
                     autoCapitalize="none"

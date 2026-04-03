@@ -19,10 +19,8 @@ import { IMAGES } from '../../../assets/Images';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../../theme/colors';
 import {
-  useAddShortlistEmployeeMutation,
   useCloseCompanyJobMutation,
   useGetCompanyJobDetailsQuery,
-  useUnshortlistEmployeeMutation,
 } from '../../../api/dashboardApi';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import {

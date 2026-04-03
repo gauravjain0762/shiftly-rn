@@ -522,6 +522,8 @@ const SignUp = () => {
                 placeholderTextColor={colors._7B7878}
                 onChangeText={text => updateSignupData({ email: text })}
                 value={email}
+                showClearButton
+                onClearPress={() => updateSignupData({ email: '' })}
                 inputStyle={{ ...styles.input, textTransform: 'lowercase' }}
                 keyboardType="email-address"
                 returnKeyType='next'

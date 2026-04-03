@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LinearContainer } from '../../../component';
 import { IMAGES } from '../../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
@@ -41,9 +41,13 @@ const CoProfile = () => {
   const [companyDeleteAccount] = useCompanyDeleteAccountMutation({});
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
-  const [headerLogo] = useState<string | undefined>(
-    userInfo?.logo || undefined,
-  );
+  const headerLogo = useMemo(() => {
+    const logo = userInfo?.logo;
+    if (!logo) return undefined;
+    if (typeof logo === 'string') return logo;
+    if (typeof logo === 'object' && logo?.uri) return logo.uri as string;
+    return undefined;
+  }, [userInfo?.logo]);
 
   const settingsData = [
     {
