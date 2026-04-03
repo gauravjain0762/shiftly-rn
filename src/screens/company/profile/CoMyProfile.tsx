@@ -1,6 +1,5 @@
-import React, {useCallback, useState} from 'react';
+import React from 'react';
 import {
-  Image,
   Linking,
   Platform,
   ScrollView,
@@ -182,10 +181,10 @@ const styles = StyleSheet.create({
     borderRadius: wp(90),
   },
   coTitle: {
-    ...commonFontStyle(600, 25, colors._0B3970),
+    ...commonFontStyle(600, 22, colors._0B3970),
   },
   typeText: {
-    ...commonFontStyle(400, 20, colors._4D4D4D),
+    ...commonFontStyle(400, 18, colors._4D4D4D),
   },
   descText: {
     marginTop: hp(10),

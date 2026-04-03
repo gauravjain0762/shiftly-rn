@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -20,18 +20,14 @@ import { IMAGES } from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { AppStyles } from '../../../theme/appStyles';
-import { errorToast, goBack, isCompanyProfileComplete, navigateTo } from '../../../utils/commonFunction';
+import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
 import { SCREENS } from '../../../navigation/screenNames';
 import { useAppSelector } from '../../../redux/hooks';
 import { selectPostForm } from '../../../features/companySlice';
 import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
 import CharLength from '../../../component/common/CharLength';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
-import BottomModal from '../../../component/common/BottomModal';
-import BaseText from '../../../component/common/BaseText';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import { useRoute } from '@react-navigation/native';
 
 const CreatePost = () => {
   const { t } = useTranslation();
@@ -39,11 +35,10 @@ const CreatePost = () => {
   const insets = useSafeAreaInsets();
   const [imageModal, setImageModal] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
-  const { title, description, uploadedImages, postEditMode, postId, externalLink } = useAppSelector(state =>
+  const { title, description, uploadedImages, postEditMode, externalLink } = useAppSelector(state =>
     selectPostForm(state as any),
   );
   const { updatePostForm } = usePostFormUpdater();
-
 
   // useEffect(() => {
   //   if (!externalLink || externalLink === null) {
@@ -139,10 +134,7 @@ const CreatePost = () => {
     };
 
     updatePostForm({ uploadedImages: [imageObject] });
-
-    setTimeout(() => {
-      setImageModal(false);
-    }, 200);
+    setImageModal(false);
   };
 
   const removeImage = () => {
@@ -193,13 +185,12 @@ const CreatePost = () => {
                   <ActivityIndicator size="large" color={colors._0B3970} />
                 </View>
               )}
-             // Update the Image component:
               <Image
                 source={{ uri: uploadedImages[0]?.uri }}
                 style={styles.uploadedImage}
                 onLoadStart={handleImageLoadStart}
                 onLoadEnd={handleImageLoadEnd}
-                onError={handleImageLoadEnd}  // ← same handler clears loader on error
+                onError={handleImageLoadEnd}
               />
               <View style={styles.imageActions}>
                 <TouchableOpacity
@@ -230,7 +221,6 @@ const CreatePost = () => {
           )}
         </View>
 
-        {/* Title Input */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{t('Post Title')}</Text>
           <CustomTextInput
@@ -245,7 +235,6 @@ const CreatePost = () => {
           <CharLength chars={60} value={title} style={styles.charLength} />
         </View>
 
-        {/* Description Input */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{t('Description')}</Text>
           <CustomTextInput
@@ -276,7 +265,6 @@ const CreatePost = () => {
         </View>
       </KeyboardAwareScrollView>
 
-      {/* Review Post Button */}
       <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
         <GradientButton
           style={styles.reviewBtn}

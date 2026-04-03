@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Alert,
+  Linking,
   View,
   Text,
   TouchableOpacity,
@@ -25,15 +27,15 @@ const ImagePickerModal = ({
   allowDocument?: boolean;
   isGalleryEnable?: boolean;
 }) => {
+  const pendingAction = React.useRef<'camera' | null>(null);
   const closeActionSheet = () => setActionSheet(false);
 
-  const openCamera = async () => {
+  const launchCamera = async () => {
     try {
-      closeActionSheet(); // Close modal first to prevent UI issues
-      
       const image = await ImageCropPicker.openCamera({
         mediaType: 'photo',
-        cropping: true,
+        // Cropping with camera is unstable on some iOS devices.
+        cropping: Platform.OS === 'ios' ? false : true,
         compressImageQuality: 1,
         cropperToolbarTitle: 'Edit Photo',
         cropperStatusBarColor: '#000000',
@@ -96,17 +98,38 @@ const ImagePickerModal = ({
 
       onUpdate(temp);
     } catch (err: any) {
-      // Handle different error types
       if (err?.code === 'E_PICKER_CANCELLED' || err?.message?.includes('cancel')) {
-        console.log('Camera cancelled by user');
-        // Don't show error for user cancellation
+        // user cancelled — no-op
+      } else if (
+        err?.code === 'E_NO_CAMERA_PERMISSION' ||
+        err?.message?.toLowerCase().includes('permission')
+      ) {
+        Alert.alert(
+          'Camera Permission Required',
+          'Please allow camera access in Settings to take a photo.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ],
+        );
       } else {
         console.error('Camera error:', err);
-        // You might want to show an error toast here
-        // errorToast('Failed to capture image. Please try again.');
       }
-      // Ensure modal is closed even on error
-      closeActionSheet();
+    }
+  };
+
+  const openCamera = () => {
+    pendingAction.current = 'camera';
+    closeActionSheet();
+  };
+
+  const handleModalHide = () => {
+    if (pendingAction.current === 'camera') {
+      pendingAction.current = null;
+      // Delay gives iOS time to fully release the modal's UIViewController
+      // before presenting the camera. Without this, iOS silently rejects the
+      // camera presentation and no permission prompt appears.
+      setTimeout(() => launchCamera(), 300);
     }
   };
 
@@ -206,6 +229,7 @@ const ImagePickerModal = ({
     <Modal
       isVisible={actionSheet}
       onBackdropPress={closeActionSheet}
+      onModalHide={handleModalHide}
       style={styles.modal}>
       <View style={styles.container}>
         <View style={styles.optionGroup}>
