@@ -101,7 +101,6 @@ const CoHome = () => {
     }
   }, [dispatch, userdata]);
 
-  console.log("🔥 ~ CoHome ~ userInfo:", userInfo)
   useEffect(() => {
     if (userInfo?._id) {
       connectSocket(userInfo?._id, 'company');
@@ -115,7 +114,6 @@ const CoHome = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      // Refresh profile when returning to this screen (e.g. from notifications)
       refetchProfile();
     }, [refetchProfile]),
   );
