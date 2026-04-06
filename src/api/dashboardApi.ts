@@ -1236,6 +1236,7 @@ export const {
   useLazyEmployeeGetChatMessagesQuery,
   useLazyGetCompanyChatMessagesQuery,
   useGetCompanyNotificationQuery,
+  useLazyGetCompanyNotificationQuery,
   useGetEmployeeNotificationsQuery,
   useRemoveEducationMutation,
   useRemoveExperienceMutation,

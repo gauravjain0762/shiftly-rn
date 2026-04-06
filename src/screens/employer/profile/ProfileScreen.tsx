@@ -287,8 +287,31 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.assessmentCard}
-            onPress={() => setShowAssessmentModal(true)}
-            activeOpacity={0.8}>
+            disabled={assessStatus !== 'Invited'}
+            activeOpacity={assessStatus === 'Invited' ? 0.8 : 1}
+            onPress={async () => {
+              try {
+                const response = await sendAssessmentLink().unwrap();
+                console.log("🔥 ~ ProfileScreen ~ response:", response);
+
+                if (response?.status) {
+                  const innerStatus = response?.data?.response?.status;
+
+                  if (innerStatus && innerStatus !== 'invited' && innerStatus !== 'completed') {
+                    const readableStatus = innerStatus
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, (l: string) => l.toUpperCase());
+                    errorToast(readableStatus);
+                  } else {
+                    setShowAssessmentModal(true);
+                  }
+                } else {
+                  errorToast(response?.message || 'Something went wrong');
+                }
+              } catch (error: any) {
+                errorToast(error?.data?.message || error?.message || 'Something went wrong');
+              }
+            }}>
             <View style={styles.iconCircle}>
               <Image source={IMAGES.document} style={styles.assessmentIcon} />
             </View>
@@ -313,26 +336,6 @@ const ProfileScreen = () => {
               {hasAssessment && assessStatus === 'Invited' && 'Your soft skill assessment link has been sent. You will be notified once it is completed.'}
               {hasAssessment && assessStatus === 'Completed' && 'You have already completed your soft skill assessment.'}
             </BaseText>
-            {!hasAssessment && (
-              <GradientButton
-                type="Company"
-                title="Send Link"
-                style={styles.sendLinkButton}
-                disabled={isSendingAssessment}
-                onPress={async () => {
-                  if (isSendingAssessment) return;
-                  try {
-                    const response: any = await sendAssessmentLink().unwrap();
-                    console.log("🔥 ~ sendAssessmentLink ~ response:", response)
-                  } catch (error: any) {
-                    console.error('Error sendAssessmentLink user:', error);
-                    errorToast(error?.message || 'Something went wrong');
-                  } finally {
-                    setShowAssessmentModal(false);
-                  }
-                }}
-              />
-            )}
             <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAssessmentModal(false)}>
               <BaseText style={styles.cancelButtonText}>Cancel</BaseText>
             </TouchableOpacity>

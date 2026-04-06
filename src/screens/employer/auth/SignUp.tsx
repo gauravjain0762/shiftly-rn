@@ -340,6 +340,8 @@ const SignUp = () => {
           await sendAssessmentLink().unwrap();
         } catch {
         }
+
+        nextStep();
       }
     } catch (error) {
       console.error('Error handleFinishSetup user:', error);

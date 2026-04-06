@@ -17,7 +17,7 @@ import { colors } from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
 import {
   useCompanyClearAllNotificationsMutation,
-  useGetCompanyNotificationQuery,
+  useLazyGetCompanyNotificationQuery,
   useLazyGetCompanyChatsQuery,
   useCompanyMarkReadNotificationsMutation,
 } from '../../../api/dashboardApi';
@@ -34,10 +34,14 @@ const CoNotification = () => {
 
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const [companyMarkReadNotifications] = useCompanyMarkReadNotificationsMutation();
   const [getCompanyChats] = useLazyGetCompanyChatsQuery();
   const [companyClearAllNotifications, { isLoading: isClearing }] = useCompanyClearAllNotificationsMutation();
+  const [getNotifications, { isLoading }] = useLazyGetCompanyNotificationQuery();
 
   useFocusEffect(
     useCallback(() => {
@@ -45,26 +49,26 @@ const CoNotification = () => {
     }, [dispatch]),
   );
 
-  const {
-    data: notificationsData,
-    isLoading,
-    refetch,
-  } = useGetCompanyNotificationQuery({}, { refetchOnMountOrArgChange: true });
-
-  const notificationList = notificationsData?.data?.notifications || [];
+  const fetchNotifications = async (pageNum: number, append: boolean) => {
+    if (pageNum > 1) setIsFetchingMore(true);
+    try {
+      const res = await getNotifications({ page: pageNum, per_page: 10 }).unwrap();
+      const list = res?.data?.notifications || [];
+      const pagination = res?.data?.pagination;
+      setAllNotifications(prev => (append ? [...prev, ...list] : list));
+      setHasMore((pagination?.current_page ?? 1) < (pagination?.total_pages ?? 1));
+      setPage(pageNum);
+    } catch (e) {
+      console.log('🔥 [Company] notifications fetch error:', e);
+    } finally {
+      setIsFetchingMore(false);
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    if (notificationsData) {
-      console.log(
-        '🔥 [Company] getCompanyNotifications list response:',
-        JSON.stringify(notificationsData, null, 2),
-      );
-      setAllNotifications(notificationList);
-      if (isRefreshing) {
-        setIsRefreshing(false);
-      }
-    }
-  }, [notificationsData, isRefreshing]);
+    fetchNotifications(1, false);
+  }, []);
 
   const handleClearAll = async () => {
     try {
@@ -74,6 +78,8 @@ const CoNotification = () => {
         JSON.stringify(clearResponse, null, 2),
       );
       setAllNotifications([]);
+      setPage(1);
+      setHasMore(false);
       dispatch(setHasUnreadNotification(false));
     } catch (error) {
       console.log('🔥 [Company] clearAllNotifications error:', error);
@@ -81,13 +87,13 @@ const CoNotification = () => {
   };
 
   const handleRefresh = async () => {
-    try {
-      setIsRefreshing(true);
-      await refetch();
-    } catch (error) {
-      console.log('🔥 [Company] notifications refresh error:', error);
-    } finally {
-      setIsRefreshing(false);
+    setIsRefreshing(true);
+    await fetchNotifications(1, false);
+  };
+
+  const handleEndReached = () => {
+    if (!isFetchingMore && !isLoading && hasMore) {
+      fetchNotifications(page + 1, true);
     }
   };
 
@@ -250,6 +256,17 @@ const CoNotification = () => {
           onRefresh={handleRefresh}
           refreshing={isRefreshing}
           contentContainerStyle={styles.scrollContainer}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={() =>
+            isFetchingMore ? (
+              <ActivityIndicator
+                size="small"
+                color={colors._D5D5D5}
+                style={{ marginVertical: hp(16) }}
+              />
+            ) : null
+          }
           ListEmptyComponent={() => {
             return (
               <View style={styles.emptyContainer}>
