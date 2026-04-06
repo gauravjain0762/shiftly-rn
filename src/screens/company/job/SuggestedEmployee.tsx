@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   Pressable,
   Image,
-  Linking,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -56,13 +56,11 @@ const SuggestedEmployeeScreen = () => {
   const { t } = useTranslation();
   const route = useRoute<any>();
   const { jobId, jobData, isFromJobCard, fromPostJob } = route.params || {};
-  console.log("🔥 ~ SuggestedEmployeeScreen ~ jobData:", jobData)
 
   const shouldDefaultToShortlisted =
     route.params?.fromPendingInterview === true ||
     route.params?.fromPendingInterviews === true;
 
-  // Default tab depends on the entry point.
   const [activeTab, setActiveTab] = useState<
     'suggested' | 'shortlisted' | 'applicants'
   >(() => (shouldDefaultToShortlisted ? 'shortlisted' : 'suggested'));
@@ -157,8 +155,8 @@ const SuggestedEmployeeScreen = () => {
 
     const existingQuestions: string[] = Array.isArray(jobInfo?.interview_questions)
       ? jobInfo.interview_questions
-          .filter((q: any) => typeof q === 'string' && q.trim().length > 0)
-          .map((q: string) => q.trim())
+        .filter((q: any) => typeof q === 'string' && q.trim().length > 0)
+        .map((q: string) => q.trim())
       : [];
 
     if (existingQuestions.length === 0) {
@@ -190,18 +188,6 @@ const SuggestedEmployeeScreen = () => {
       errorToast(message);
     } finally {
       setResendingUserId(null);
-    }
-  };
-
-  const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
-
-  const getLanguageDotColor = (level: string) => {
-    switch (level) {
-      case 'Native': return colors._0B3970;
-      case 'Fluent': return colors._4A4A4A;
-      case 'Conversational': return colors._7B7878;
-      case 'Basic': return colors._D9D9D9;
-      default: return '#999';
     }
   };
 
@@ -429,7 +415,6 @@ const SuggestedEmployeeScreen = () => {
     const nextPage = suggestedPage + 1;
     try {
       const result = await fetchMoreSuggested({ job_id: jobId, page: nextPage, tab: 'suggested' }).unwrap();
-      console.log("🔥 ~ SuggestedEmployeeScreen ~ result:", result)
       const newUsers =
         result?.data?.suggested_employees ||
         result?.data?.users ||
@@ -584,10 +569,10 @@ const SuggestedEmployeeScreen = () => {
       Number.isFinite(fromNum) && Number.isFinite(toNum)
         ? `${fromNum}-${toNum}`
         : Number.isFinite(fromNum) &&
-            (jobInfo?.monthly_salary_to === null ||
-              jobInfo?.monthly_salary_to === undefined ||
-              jobInfo?.monthly_salary_to === '' ||
-              String(jobInfo?.monthly_salary_to).trim() === '-')
+          (jobInfo?.monthly_salary_to === null ||
+            jobInfo?.monthly_salary_to === undefined ||
+            jobInfo?.monthly_salary_to === '' ||
+            String(jobInfo?.monthly_salary_to).trim() === '-')
           ? `${fromNum}+`
           : '';
 
@@ -677,7 +662,7 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const renderShortlistedEmployee = (item: any) => {
-    console.log("🔥 ~ renderShortlistedEmployee ~ item:", item);
+    console.log("🔥 ~ renderShortlistedEmployee ~ item:", item?.status);
     const user = item?.user_id || item;
     if (!user || !user?._id) return null;
 
@@ -740,36 +725,21 @@ const SuggestedEmployeeScreen = () => {
               </View>
             )}
 
-            {(String(item?.status || '').trim().toLowerCase() === 'attempted') && (
+            {(['invited', 'attempted'].includes(String(item?.status || '').trim().toLowerCase())) && (
               <TouchableOpacity
                 style={[styles.resendButton, !!resendingUserId && resendingUserId !== String(user?._id) && { opacity: 0.6 }]}
                 onPress={() => handleResendInvite(user)}
                 disabled={resendingUserId === String(user?._id)}>
                 <Text style={styles.resendButtonText}>
-                  {resendingUserId === String(user?._id) ? t('Resending...') : t('Resend')}
+                  {resendingUserId === String(user?._id) ? t('Resending...') : t('Resend Invite')}
                 </Text>
               </TouchableOpacity>
             )}
 
-            {item?.status === 'Interview_completed' && <View style={styles.shortlistedActions}>
-              <TouchableOpacity
-                style={[
-                  styles.viewAiButton,
-                  item?.status !== 'Interview_completed' && { backgroundColor: '#D3D3D3' }
-                ]}
-                disabled={item?.status !== 'Interview_completed'}
-                onPress={() =>
-                  navigateTo(SCREENS.InterviewStatus, {
-                    jobData: jobInfo,
-                    candidateData: user,
-                    inviteData: item,
-                  })
-                }>
-                <Text style={styles.viewAiButtonText}>{t('View AI Interview')}</Text>
-              </TouchableOpacity>
-              {item?.assessment_completed && (
+            <View style={styles.shortlistedActions}>
+              {String(item?.status || '').trim().toLowerCase() === 'completed' && (
                 <TouchableOpacity
-                  style={styles.assessmentButton}
+                  style={styles.viewAiButton}
                   onPress={() =>
                     navigateTo(SCREENS.InterviewStatus, {
                       jobData: jobInfo,
@@ -777,10 +747,19 @@ const SuggestedEmployeeScreen = () => {
                       inviteData: item,
                     })
                   }>
-                  <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
+                  <Text style={styles.viewAiButtonText}>{t('AI Interview')}</Text>
                 </TouchableOpacity>
               )}
-            </View>}
+              <TouchableOpacity
+                style={[styles.assessmentButton, item?.tracking[3]?.assessment_link === null && { opacity: 0.5 }]}
+                disabled={item?.tracking[3]?.assessment_link === null}
+                onPress={() => {
+                  Linking.openURL(item?.tracking[3]?.assessment_link)
+                }
+                }>
+                <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.timelineContainer}>
@@ -958,7 +937,7 @@ const SuggestedEmployeeScreen = () => {
                 <View style={styles.jobCard}>
                   <View style={styles.jobCardRow}>
                     <Pressable
-                      onPress={() =>{ 
+                      onPress={() => {
                         navigateTo(SCREENS.ViewCompanyProfile, { companyId: jobInfo?.company_id?._id })
                       }}
                     >
@@ -1798,17 +1777,15 @@ const styles = StyleSheet.create({
     padding: wp(14),
     backgroundColor: '#F0F8FF',
     marginBottom: hp(16),
-    height: hp(190), // Fixed height as requested
-    justifyContent: 'center', // Center content vertically
-    overflow: 'hidden', // Ensure no overflow
   },
   shortlistedContent: {
     flexDirection: 'row',
   },
   shortlistedLeft: {
-    flex: 1, // Reduced from 1.2
-    marginRight: wp(8), // Reduced margin,
-    paddingTop: hp(10)
+    flex: 1,
+    marginRight: wp(8),
+    paddingTop: hp(10),
+    paddingBottom: hp(14),
   },
   shortlistedHeader: {
     flexDirection: 'row',
@@ -1816,9 +1793,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   shortlistedAvatar: {
-    width: wp(65),
-    height: wp(65),
-    borderRadius: wp(65) / 2,
+    width: wp(51),
+    height: wp(51),
+    borderRadius: wp(56) / 2,
     overflow: 'hidden',
     marginRight: wp(10),
   },
@@ -1836,24 +1813,25 @@ const styles = StyleSheet.create({
     gap: hp(2),
   },
   shortlistedEmployeeName: {
-    ...commonFontStyle(700, 17, colors._0B3970),
+    ...commonFontStyle(700, 16, colors._0B3970),
   },
   shortlistedEmployeeRole: {
     ...commonFontStyle(400, 14, colors.black),
   },
   shortlistedExp: {
     ...commonFontStyle(400, 15, colors._4A4A4A),
-    marginTop: hp(2), // Reduced top margin
+    marginTop: hp(2),
     marginBottom: hp(16),
   },
   shortlistedActions: {
     flexDirection: 'row',
-    gap: wp(8), // Reduced gap
+    gap: wp(8),
+    marginTop: hp(8),
   },
   viewAiButton: {
     backgroundColor: '#341A95',
     borderRadius: wp(24),
-    paddingVertical: hp(8),
+    paddingVertical: hp(10),
     paddingHorizontal: wp(6), // Reduced horizontal padding
     alignItems: 'center',
     justifyContent: 'center',
@@ -1866,7 +1844,7 @@ const styles = StyleSheet.create({
   assessmentButton: {
     backgroundColor: '#1F8A4D',
     borderRadius: wp(24),
-    paddingVertical: hp(12),
+    paddingVertical: hp(10),
     paddingHorizontal: wp(8),
     alignItems: 'center',
     justifyContent: 'center',
@@ -1878,7 +1856,7 @@ const styles = StyleSheet.create({
   },
   resendButton: {
     marginTop: hp(8),
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
     backgroundColor: colors._0B3970,
     borderRadius: wp(20),
     paddingVertical: hp(7),
@@ -1888,6 +1866,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(600, 12, colors.white),
   },
   timelineContainer: {
+    left: wp(16),
     width: wp(100),
     borderLeftWidth: 2,
     borderLeftColor: '#D9D9D9',
@@ -1896,7 +1875,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // Distribute items evenly
   },
   timelineItem: {
-    marginBottom: hp(6), // Significantly reduced from 20 to fit 4 items
+    marginBottom: hp(6),
   },
   timelineIndicator: {
     position: 'absolute',
@@ -1904,13 +1883,13 @@ const styles = StyleSheet.create({
     top: hp(11), // Align with timelineTitle
     alignItems: 'center',
     justifyContent: 'center',
-    width: wp(20),
-    height: wp(20), // Use wp for height to keep circle
+    width: wp(18),
+    height: wp(18), // Use wp for height to keep circle
     backgroundColor: '#F0F8FF',
   },
   timelineIcon: {
-    width: wp(18), // Slightly smaller icons
-    height: wp(18),
+    width: wp(16), // Slightly smaller icons
+    height: wp(16),
     resizeMode: 'contain',
   },
   timelineLine: {

@@ -25,7 +25,6 @@ async function onDisplayNotification(message: any) {
   const channelId = await notifee.createChannel({
     id: 'default',
     name: 'Default Channel',
-    sound: 'default',
     importance: AndroidImportance.HIGH,
     badge: true,
     vibration: true,
@@ -38,7 +37,6 @@ async function onDisplayNotification(message: any) {
     data: message?.data,
     android: {
       channelId,
-      sound: 'default',
       pressAction: { id: 'default', launchActivity: 'default' },
     },
     ios: {
@@ -186,36 +184,17 @@ export const openAppNotificationEvent = () =>
   });
 
 //
-// 📩 Background Message Handler
+// 📢 Create Default Notification Channel (call at app startup)
 //
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('📩 Background FCM:', remoteMessage);
-
-  // Increment badge
-  let count = await notifee.getBadgeCount();
-  count++;
-  await notifee.setBadgeCount(count);
-  // Pulse unread flag so repeated notifications also trigger UI updates.
-  store.dispatch(setHasUnreadNotification(false));
-  store.dispatch(setHasUnreadNotification(true)); // Show red dot
-
-  // Create Android channel
-  const channelId = await notifee.createChannel({
+export const createDefaultChannel = async () => {
+  await notifee.createChannel({
     id: 'default',
-    name: 'Default',
+    name: 'Default Channel',
     importance: AndroidImportance.HIGH,
-    sound: 'default',
+    vibration: true,
     badge: true,
   });
-
-  // Show notification
-  await notifee.displayNotification({
-    title: (remoteMessage?.data?.title as string) || 'Notification',
-    body: (remoteMessage?.data?.body as string) || '',
-    android: { channelId, sound: 'default' },
-    ios: { sound: 'default', badgeCount: count },
-  });
-});
+};
 
 //
 // 🔗 Navigate on Notification Press

@@ -364,7 +364,7 @@ const EmployeeProfile = () => {
 
         <TouchableOpacity
           style={styles.assessmentCard}
-          onPress={() => setShowAssessmentModal(true)}
+          // onPress={() => setShowAssessmentModal(true)}
           activeOpacity={0.8}>
           <View style={styles.iconCircle}>
             <Image

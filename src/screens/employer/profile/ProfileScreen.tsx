@@ -322,15 +322,11 @@ const ProfileScreen = () => {
                 onPress={async () => {
                   if (isSendingAssessment) return;
                   try {
-                    const res: any = await sendAssessmentLink().unwrap();
-                    if (res?.status) {
-                      successToast(res?.message);
-                    } else {
-                      errorToast(res?.message || 'Failed to send assessment link.');
-                    }
-                  } catch (err: any) {
-                    const message = err?.data?.message || err?.error || err?.message || 'Failed to send assessment link.';
-                    errorToast(message);
+                    const response: any = await sendAssessmentLink().unwrap();
+                    console.log("🔥 ~ sendAssessmentLink ~ response:", response)
+                  } catch (error: any) {
+                    console.error('Error sendAssessmentLink user:', error);
+                    errorToast(error?.message || 'Something went wrong');
                   } finally {
                     setShowAssessmentModal(false);
                   }

@@ -226,13 +226,13 @@ const MyJobs = () => {
                 onPress={
                     activeTab === 'Interviews'
                         ? () =>
-                              navigateTo(SCREENS.JobInvitationScreen, {
-                                  jobDetail: { job },
-                                  link: item?.interview_link,
-                                  invitationStatus: item?.status,
-                                  // Invitation id is the root `_id` of invitation object.
-                                  invitationId: item?._id || item?.invitation_id || '',
-                              })
+                            navigateTo(SCREENS.JobInvitationScreen, {
+                                jobDetail: { job },
+                                link: item?.interview_link,
+                                invitationStatus: item?.status,
+                                // Invitation id is the root `_id` of invitation object.
+                                invitationId: item?._id || item?.invitation_id || '',
+                            })
                         : undefined
                 }
                 onPressView={() =>

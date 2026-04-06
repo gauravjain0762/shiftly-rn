@@ -336,16 +336,10 @@ const SignUp = () => {
         } catch (profileError) {
         }
 
-        // Send assessment link so user receives email from AssessFirst
         try {
           await sendAssessmentLink().unwrap();
         } catch {
-          // Silently continue - user can request link later from profile
         }
-
-        nextStep();
-      } else {
-        errorToast(res?.message);
       }
     } catch (error) {
       console.error('Error handleFinishSetup user:', error);

@@ -10,6 +10,7 @@ import { colors } from '../theme/colors';
 import { useSelector } from 'react-redux';
 import { selectIsLoading } from '../features/loaderSlice';
 import {
+  createDefaultChannel,
   onBackgroundNotificationPress,
   onMessage,
   onNotificationPress,
@@ -38,6 +39,7 @@ const RootContainer: FC = () => {
   useGetAppDataQuery();
 
   useEffect(() => {
+    createDefaultChannel();
     requestNotificationUserPermission(dispatch);
     onMessage();
     onBackgroundNotificationPress();

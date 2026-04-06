@@ -150,8 +150,9 @@ const JobPreview = () => {
         skillId,
         location,
         jobId: routeJobId,
+        readOnly,
     } = route.params || {};
-    const isReadOnlyPreview = Boolean(routeJobId) && !editMode;
+    const isReadOnlyPreview = readOnly || (Boolean(routeJobId) && !editMode);
 
     const [createdJobId, setCreatedJobId] = useState<string>('');
     const [createdJobData, setCreatedJobData] = useState<any>(null);

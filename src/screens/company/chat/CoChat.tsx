@@ -11,7 +11,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { LinearContainer } from '../../../component';
@@ -236,15 +236,34 @@ const CoChat = () => {
               <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
-              <Text style={styles.company}>
-                {chats?.data?.chat?.user_id?.name ||
-                  jobdetail_chatData?.user_id?.name}
-              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  const user = chats?.data?.chat?.user_id || jobdetail_chatData?.user_id;
+                  const jobData = chats?.data?.chat?.job_id || mainjob_data;
+                  const jobId = jobData?._id;
+                  navigateTo(SCREENS.EmployeeProfile, { user, jobData, jobId });
+                }}>
+                <Text style={styles.company}>
+                  {chats?.data?.chat?.user_id?.name ||
+                    jobdetail_chatData?.user_id?.name}
+                </Text>
+              </TouchableOpacity>
+              {(chats?.data?.chat?.job_id?.title || mainjob_data?.title) ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    const jobData = chats?.data?.chat?.job_id || mainjob_data;
+                    navigateTo(SCREENS.JobPreview, { job: jobData, readOnly: true, jobId: jobData?._id });
+                  }}>
+                  <Text style={styles.jobSubtitle}>
+                    {chats?.data?.chat?.job_id?.title || mainjob_data?.title}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
             </View>
           </View>
         </View>
 
-      
+
 
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -304,15 +323,15 @@ const CoChat = () => {
             </ScrollView>
 
             <View style={styles.chatInputWrapper}>
-            <ChatInput
-              image={logo}
-              setImage={setLogo}
-              handleSendChat={handleSendChat}
-              message={message}
-              setMessage={setMessage}
-              onPressAttachment={() => setImagePickerVisible(true)}
-              type={'company'}
-            />
+              <ChatInput
+                image={logo}
+                setImage={setLogo}
+                handleSendChat={handleSendChat}
+                message={message}
+                setMessage={setMessage}
+                onPressAttachment={() => setImagePickerVisible(true)}
+                type={'company'}
+              />
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -361,6 +380,11 @@ const styles = StyleSheet.create({
   company: {
     alignSelf: 'flex-start',
     ...commonFontStyle(700, 20, colors._0B3970),
+  },
+  jobSubtitle: {
+    ...commonFontStyle(400, 13, colors._0B3970),
+    opacity: 0.7,
+    marginTop: hp(2),
   },
   hrText: {
     ...commonFontStyle(400, 13, colors.black),

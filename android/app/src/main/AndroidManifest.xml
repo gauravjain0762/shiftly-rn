@@ -11,6 +11,7 @@
         android:maxSdkVersion="28"
         tools:replace="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
       android:name=".MainApplication"
@@ -51,6 +52,17 @@
       <meta-data
      android:name="com.google.android.geo.API_KEY"
      android:value="AIzaSyAYbNFq_5Ydz63BbVwFh7NXpqRmb6F_zDU"/>
+
+      <!-- FCM: default channel for background/killed-state notifications (Android 8+) -->
+      <meta-data
+        android:name="com.google.firebase.messaging.default_notification_channel_id"
+        android:value="default"
+        tools:replace="android:value" />
+
+      <!-- FCM: default notification icon -->
+      <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@mipmap/ic_launcher" />
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -86,6 +86,21 @@ const JobListCard = ({
       await Promise.resolve(onShare?.());
     } finally {
       setIsSharing(false);
+    }
+  };
+
+  const getStatusColor = (status?: string) => {
+    const value = (status || '').toLowerCase();
+
+    switch (value) {
+      case 'completed':
+        return '#2CCF54'; // Green
+      case 'invited':
+        return '#F4C430'; // Yellow
+      case 'attempted':
+        return '#3B82F6'; // Blue (you can change)
+      default:
+        return '#999999'; // Fallback
     }
   };
 
@@ -184,14 +199,24 @@ const JobListCard = ({
             <ImageBackground
               source={IMAGES.tag}
               style={styles.tagImage}
-              imageStyle={statusBadge?.tintColor ? { tintColor: statusBadge.tintColor } : undefined}
-              resizeMode="cover">
+              imageStyle={{
+                tintColor: getStatusColor(statusBadge.text),
+              }}
+              resizeMode="cover"
+            >
               <Text style={styles.appliedTagText}>{statusBadge.text}</Text>
             </ImageBackground>
           )}
           {statusBadge?.text && !statusBadge?.useImageBg && (
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusBadgeText}>{statusBadge.text}</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(statusBadge.text) },
+              ]}
+            >
+              <Text style={styles.statusBadgeText}>
+                {statusBadge.text}
+              </Text>
             </View>
           )}
         </View>
@@ -344,7 +369,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: -wp(16),
-    width: wp(80),
+    width: wp(92),
     height: hp(28),
     justifyContent: 'center',
     alignItems: 'center',

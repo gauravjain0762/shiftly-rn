@@ -141,6 +141,7 @@ const InterviewStatus = () => {
                                 uri={candidateImg}
                                 containerStyle={styles.avatar}
                                 imageStyle={styles.avatar}
+                                resizeMode='cover'
                             />
                         ) : (
                             <View style={styles.avatarInitials}>
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     avatar: {
         width: wp(50),
         height: wp(50),
-        borderRadius: wp(8),
+        borderRadius: wp(50),
     },
     avatarInitials: {
         width: wp(50),
