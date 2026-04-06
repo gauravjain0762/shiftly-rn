@@ -251,7 +251,7 @@ const EmpForgotPassword = () => {
               />
             </View>
             <GradientButton
-              type="Employee"
+              type="Company"
               title="Submit"
               style={passwordStyles.button}
               onPress={handleSendOtpwithEmail}
@@ -308,7 +308,7 @@ const EmpForgotPassword = () => {
               </>
             </View>
             <GradientButton
-              type="Employee"
+              type="Company"
               style={styles.btn}
               title={t('Verify')}
               onPress={() => verifyOTP()}
@@ -368,7 +368,7 @@ const EmpForgotPassword = () => {
               })}
             </View>
             <GradientButton
-              type="Employee"
+              type="Company"
               title="Submit"
               style={passwordStyles.button}
               onPress={handleChangePassword}

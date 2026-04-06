@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(700, 20, colors._0B3970),
   },
   jobSubtitle: {
-    ...commonFontStyle(400, 13, colors._0B3970),
+    ...commonFontStyle(400, 15, colors._0B3970),
     opacity: 0.7,
     marginTop: hp(2),
   },

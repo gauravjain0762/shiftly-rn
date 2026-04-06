@@ -209,6 +209,11 @@ const EmployeeStack = () => {
         name={SCREENS.MyJobs}
         component={MyJobs}
       />
+      <EmpStack.Screen
+        options={({ navigation }) => ({ headerShown: false })}
+        name={SCREENS.JobPreview}
+        component={JobPreview}
+      />
     </EmpStack.Navigator>
   );
 };

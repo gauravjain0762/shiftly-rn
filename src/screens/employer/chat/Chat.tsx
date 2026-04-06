@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -13,7 +14,8 @@ import {
 import {KeyboardAvoidingView} from 'react-native-keyboard-controller';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { BackHeader, LinearContainer } from '../../../component';
+import { LinearContainer } from '../../../component';
+import { navigationRef } from '../../../navigation/RootContainer';
 import { IMAGES } from '../../../assets/Images';
 import { commonFontStyle, hp, wp } from '../../../theme/fonts';
 import {
@@ -186,27 +188,43 @@ const Chat = () => {
   return (
       <View style={{ flex: 1, paddingBottom: isAndroid ? 0 : hp(25), paddingTop: insets.top, backgroundColor: Colors.white}}>
         <View style={styles.container}>
-          <BackHeader
-            title={
-              jobdetail_chatData?.company_name ||
-              chats?.data?.chat?.company_id?.company_name ||
-              'Unknown'
-            }
-            // RightIcon={
-            //   <CustomImage
-            //     onPress={() => {
-            //       setShowJobCard(prev => !prev);
-            //     }}
-            //     size={wp(24)}
-            //     tintColor={colors._0B3970}
-            //     source={showJobCard ? IMAGES.eye_on : IMAGES.eye}
-            //   />
-            // }
-            titleStyle={{
-              flex: 1,
-              paddingHorizontal: hp(10),
-            }}
-          />
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => navigationRef.goBack()}>
+              <Image source={IMAGES.backArrow} style={styles.arrowIcon} />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  const companyId =
+                    chats?.data?.chat?.company_id?._id ||
+                    chats?.data?.chat?.company_id ||
+                    jobdetail_chatData?.company_id;
+                  navigateTo(SCREENS.ViewCompanyProfile, { companyId });
+                }}>
+                <Text style={styles.company}>
+                  {jobdetail_chatData?.company_name ||
+                    chats?.data?.chat?.company_id?.company_name ||
+                    'Unknown'}
+                </Text>
+              </TouchableOpacity>
+              {(jobdetail_chatData?.job_title || chats?.data?.chat?.job_id?.title) ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    const jobId =
+                      typeof jobdetail_chatData?.job_id === 'object'
+                        ? jobdetail_chatData?.job_id?._id
+                        : jobdetail_chatData?.job_id ||
+                          chats?.data?.chat?.job_id?._id ||
+                          chats?.data?.chat?.job_id;
+                    navigateTo(SCREENS.JobDetail, { jobId, is_applied: true });
+                  }}>
+                  <Text style={styles.jobSubtitle}>
+                    {jobdetail_chatData?.job_title || chats?.data?.chat?.job_id?.title}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          </View>
         </View>
 
         {/* {showJobCard && (
@@ -311,6 +329,26 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: hp(8),
     paddingHorizontal: wp(22),
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp(12),
+  },
+  arrowIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    marginRight: wp(17),
+    tintColor: colors._0B3970,
+  },
+  company: {
+    ...commonFontStyle(700, 20, colors._0B3970),
+  },
+  jobSubtitle: {
+    ...commonFontStyle(400, 13, colors._0B3970),
+    opacity: 0.7,
+    marginTop: hp(2),
   },
 
   dotIcon: {
