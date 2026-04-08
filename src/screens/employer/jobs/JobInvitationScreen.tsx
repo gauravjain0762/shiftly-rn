@@ -34,6 +34,7 @@ const JobInvitationScreen = () => {
         invitationId?: string;
     };
     const job = jobDetail?.job || jobDetail;
+    console.log("🔥 ~ JobInvitationScreen ~ job:", JSON.stringify(job, null, 2))
 
     const company = job?.company_id || jobDetail?.company_id;
     const { data: interviewsData, refetch: refetchInterviews } = useGetInterviewsQuery(

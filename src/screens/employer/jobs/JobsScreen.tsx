@@ -122,9 +122,9 @@ const JobsScreen = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
 
   const { data: getFavoriteJobs, refetch } = useGetFavouritesJobQuery({});
-  const { data: getDepartmentData } = useGetFilterDataQuery({});
-  const { data: dropdownData } = useGetDropdownDataQuery();
-  const { data: jobDropdownData } = useGetJobDropdownDataQuery();
+  const { data: getDepartmentData, refetch: refetchDepartments } = useGetFilterDataQuery({});
+  const { data: dropdownData, refetch: refetchDropdown } = useGetDropdownDataQuery();
+  const { data: jobDropdownData, refetch: refetchJobDropdown } = useGetJobDropdownDataQuery();
   const departments = getDepartmentData?.data?.job_sectors;
   const favJobList = getFavoriteJobs?.data?.jobs;
   const jobTypes = useMemo(() => {
@@ -719,8 +719,13 @@ const JobsScreen = () => {
       ?.filter((id: any) => typeof id === 'string' && id.trim() !== '')
       .join(',');
     if (departmentIds) queryParams.departments = departmentIds;
-    trigger(queryParams).finally(() => setRefreshing(false));
-  }, [trigger, filters]);
+    Promise.all([
+      trigger(queryParams),
+      refetchDepartments(),
+      refetchDropdown(),
+      refetchJobDropdown(),
+    ]).finally(() => setRefreshing(false));
+  }, [trigger, filters, refetchDepartments, refetchDropdown, refetchJobDropdown]);
 
   useEffect(() => {
     if (carouselImages?.length) {
@@ -1127,7 +1132,7 @@ const JobsScreen = () => {
               data={salaryRangeOptions}
               labelField="label"
               valueField="value"
-              dropdownPosition='auto'
+              dropdownPosition='top'
               value={filters.salary_range}
               placeholder={t('Select Salary Range')}
               dropdownStyle={styles.dropdown}

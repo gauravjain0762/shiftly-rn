@@ -28,11 +28,14 @@ const MyJobs = () => {
 
     const appliedJobsQuery = useGetAppliedJobsQuery({ page: pageApplied }, { skip: activeTab !== 'Applied' });
     const interviewsQuery = useGetInterviewsQuery({ page: pageInterviews }, { skip: activeTab !== 'Interviews' });
-    console.log("🔥 ~ MyJobs ~ interviewsQuery:", interviewsQuery)
     const matchedJobsQuery = useGetEmployeeJobsQuery(
         { type: 'matched', page: pageMatched },
         { skip: false, refetchOnMountOrArgChange: true }
     );
+
+    const refetchApplied = appliedJobsQuery.refetch;
+    const refetchInterviews = interviewsQuery.refetch;
+    const refetchMatched = matchedJobsQuery.refetch;
 
     const getActiveQuery = () => {
         switch (activeTab) {
@@ -144,33 +147,33 @@ const MyJobs = () => {
         setRefreshing(true);
         if (activeTab === 'Applied') {
             setPageApplied(1);
-            await appliedJobsQuery.refetch();
+            await refetchApplied();
         } else if (activeTab === 'Interviews') {
             setPageInterviews(1);
-            await interviewsQuery.refetch();
+            await refetchInterviews();
         } else {
             setPageMatched(1);
-            await matchedJobsQuery.refetch();
+            await refetchMatched();
         }
         setRefreshing(false);
-    }, [activeTab, appliedJobsQuery, interviewsQuery, matchedJobsQuery]);
+    }, [activeTab, refetchApplied, refetchInterviews, refetchMatched]);
 
     useFocusEffect(
         useCallback(() => {
             const refreshOnFocus = async () => {
                 if (activeTab === 'Applied') {
                     setPageApplied(1);
-                    await appliedJobsQuery.refetch();
+                    await refetchApplied();
                 } else if (activeTab === 'Interviews') {
                     setPageInterviews(1);
-                    await interviewsQuery.refetch();
+                    await refetchInterviews();
                 } else {
                     setPageMatched(1);
-                    await matchedJobsQuery.refetch();
+                    await refetchMatched();
                 }
             };
             refreshOnFocus();
-        }, [activeTab, appliedJobsQuery, interviewsQuery, matchedJobsQuery]),
+        }, [activeTab, refetchApplied, refetchInterviews, refetchMatched]),
     );
 
     const handleLoadMore = () => {

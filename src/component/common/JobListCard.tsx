@@ -65,13 +65,19 @@ const JobListCard = ({
   const companyName = job?.company_id?.company_name || job?.company?.name || 'N/A';
   const companyLogo = job?.company_id?.logo || job?.company?.logo;
   const location = (job?.city || job?.country)
-    ? `${job?.city || ''}${job?.city && job?.country ? ', ' : ''}${job?.country || ''}`
-    : (job?.location || job?.address || job?.area || job?.company?.location || 'N/A');
+  ? `${job?.city || ''}${job?.city && job?.country ? ', ' : ''}${job?.country || ''}`
+  : (job?.location || job?.address || job?.area || job?.company?.location || 'N/A');
+  console.log("🔥 ~ JobListCard ~ job:", job)
+
+  const isCompleted = (statusBadge?.text || '').toLowerCase() === 'completed';
+  const dateSource = isCompleted
+    ? rawItem?.interview_completed
+    : job?.createdAt;
 
   const dateText =
     dateFormat === 'relative'
-      ? getTimeAgo(job?.createdAt) || 'N/A'
-      : moment(job?.createdAt).format('DD MMM');
+      ? getTimeAgo(dateSource) || 'N/A'
+      : moment(dateSource).format('DD MMM');
 
   const CardWrapper = onPress && !disabled ? TouchableOpacity : View;
   const wrapperProps = onPress && !disabled ? { activeOpacity: 0.7, onPress } : {};
@@ -369,7 +375,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: -wp(16),
-    width: wp(92),
+    width: wp(100),
     height: hp(28),
     justifyContent: 'center',
     alignItems: 'center',
