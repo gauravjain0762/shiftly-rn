@@ -695,9 +695,9 @@ const SuggestedEmployeeScreen = () => {
                 <Text style={styles.shortlistedEmployeeName}>
                   {user?.name || 'N/A'}
                 </Text>
-                {!!user?.department_id?.title && (
+                {!!user?.desired_job_title && (
                   <Text style={styles.shortlistedEmployeeRole}>
-                    {user.department_id?.title || 'N/A'}
+                    {user.desired_job_title || 'N/A'}
                   </Text>
                 )}
               </View>

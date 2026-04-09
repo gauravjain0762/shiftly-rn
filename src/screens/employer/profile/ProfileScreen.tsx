@@ -8,26 +8,36 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useMemo, useState } from 'react';
-import Svg, { Line } from 'react-native-svg';
-import { GradientButton, LinearContainer } from '../../../component';
+import React, {useCallback, useMemo, useState} from 'react';
+import Svg, {Line} from 'react-native-svg';
+import {GradientButton, LinearContainer} from '../../../component';
 import BottomModal from '../../../component/common/BottomModal';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { colors } from '../../../theme/colors';
-import { IMAGES } from '../../../assets/Images';
-import { getInitials, hasValidImage, navigateTo, successToast, errorToast } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {colors} from '../../../theme/colors';
+import {IMAGES} from '../../../assets/Images';
+import {
+  getInitials,
+  hasValidImage,
+  navigateTo,
+  successToast,
+  errorToast,
+} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 import CustomImage from '../../../component/common/CustomImage';
 import BaseText from '../../../component/common/BaseText';
 import ReadMoreText from '../../../component/common/ReadMoreText';
-import { navigationRef } from '../../../navigation/RootContainer';
-import { useGetCompanyEducationsQuery, useGetEmployeeProfileQuery, useSendAssessmentLinkMutation } from '../../../api/dashboardApi';
-import { useFocusEffect } from '@react-navigation/native';
-import { Briefcase, Clock } from 'lucide-react-native';
+import {navigationRef} from '../../../navigation/RootContainer';
+import {
+  useGetCompanyEducationsQuery,
+  useGetEmployeeProfileQuery,
+  useSendAssessmentLinkMutation,
+} from '../../../api/dashboardApi';
+import {useFocusEffect} from '@react-navigation/native';
+import {Briefcase, Clock} from 'lucide-react-native';
 
 const DASH_COLOR = '#D9D9D9';
 const DASH_PATTERN = '4 4';
@@ -40,17 +50,15 @@ const VerticalDashedLine = () => {
   return (
     <View
       style={styles.dashedLineContainer}
-      onLayout={(e) => {
+      onLayout={e => {
         const h = e.nativeEvent.layout.height;
         if (h > 0 && Math.abs(h - height) > 1) setHeight(h);
-      }}
-    >
+      }}>
       {height > 0 && (
         <Svg
           width={2}
           height={height + LINE_EXTENSION_TOUCH_NEXT_DOT}
-          style={styles.verticalLineSvg}
-        >
+          style={styles.verticalLineSvg}>
           <Line
             x1={1}
             y1={0}
@@ -71,11 +79,10 @@ const HorizontalDashedLine = () => {
   return (
     <View
       style={styles.horizontalLineWrapper}
-      onLayout={(e) => {
+      onLayout={e => {
         const w = e.nativeEvent.layout.width;
         if (w > 0) setWidth(w);
-      }}
-    >
+      }}>
       {width > 0 && (
         <Svg width={width} height={2}>
           <Line
@@ -94,20 +101,22 @@ const HorizontalDashedLine = () => {
 };
 
 const ProfileScreen = () => {
-  const { data: getProfile, refetch } = useGetEmployeeProfileQuery({});
-  const { userInfo: reduxUserInfo } = useSelector((state: RootState) => state.auth);
+  const {data: getProfile, refetch} = useGetEmployeeProfileQuery({});
+  const {userInfo: reduxUserInfo} = useSelector(
+    (state: RootState) => state.auth,
+  );
   const userInfo = getProfile?.data?.user || reduxUserInfo;
 
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
 
   const [showAllSkills, setShowAllSkills] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
-  const [sendAssessmentLink, { isLoading: isSendingAssessment }] =
+  const [sendAssessmentLink, {isLoading: isSendingAssessment}] =
     useSendAssessmentLinkMutation();
 
   const assessStatus = userInfo?.assess_first?.status as string | undefined;
@@ -115,48 +124,56 @@ const ProfileScreen = () => {
 
   const aboutText = userInfo?.about || '';
 
-  const desiredJobTitle: string = userInfo?.desired_job_title || userInfo?.desiredJobTitle || '';
-  const yearsOfExperience: string | number = userInfo?.years_of_experience ?? '';
+  const desiredJobTitle: string =
+    userInfo?.desired_job_title || userInfo?.desiredJobTitle || '';
+  const yearsOfExperience: string | number =
+    userInfo?.years_of_experience ?? '';
 
   const hasJobInfo =
     !!desiredJobTitle ||
-    (yearsOfExperience !== '' && yearsOfExperience !== null && yearsOfExperience !== undefined);
+    (yearsOfExperience !== '' &&
+      yearsOfExperience !== null &&
+      yearsOfExperience !== undefined);
 
   const handleEditProfile = async () => {
-    navigateTo(SCREENS.CreateProfileScreen, { isEdit: true });
+    navigateTo(SCREENS.CreateProfileScreen, {isEdit: true});
   };
 
   const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 
   const getLanguageDotColor = (level: string) => {
     switch (level) {
-      case 'Native': return colors._0B3970;
-      case 'Fluent': return colors._4A4A4A;
-      case 'Conversational': return colors._7B7878;
-      case 'Basic': return colors._D9D9D9;
-      default: return '#999';
+      case 'Native':
+        return colors._0B3970;
+      case 'Fluent':
+        return colors._4A4A4A;
+      case 'Conversational':
+        return colors._7B7878;
+      case 'Basic':
+        return colors._D9D9D9;
+      default:
+        return '#999';
     }
   };
 
   const skills = userInfo?.skills || [];
   const hasMoreThan8Skills = skills.length > 8;
-  const displayedSkills = hasMoreThan8Skills && !showAllSkills
-    ? skills.slice(0, 8)
-    : skills;
+  const displayedSkills =
+    hasMoreThan8Skills && !showAllSkills ? skills.slice(0, 8) : skills;
 
   const educationList = Array.isArray(userInfo?.education)
     ? userInfo?.education
     : userInfo?.education
-      ? [userInfo?.education]
-      : [];
+    ? [userInfo?.education]
+    : [];
 
   const experienceList = Array.isArray(userInfo?.experience)
     ? userInfo?.experience
     : userInfo?.experience
-      ? [userInfo?.experience]
-      : [];
+    ? [userInfo?.experience]
+    : [];
 
-  const { data: educationOptionsResponse } = useGetCompanyEducationsQuery({});
+  const {data: educationOptionsResponse} = useGetCompanyEducationsQuery({});
 
   const degreeMap = useMemo(() => {
     const list = educationOptionsResponse?.data?.educations ?? [];
@@ -172,7 +189,9 @@ const ProfileScreen = () => {
   const getDegreeLabel = (degree: any) => {
     if (!degree) return '';
     if (typeof degree === 'object') {
-      return degree?.title ?? degree?.name ?? degree?.label ?? degree?.value ?? '';
+      return (
+        degree?.title ?? degree?.name ?? degree?.label ?? degree?.value ?? ''
+      );
     }
     if (typeof degree === 'string') {
       return degreeMap[degree] ?? degree;
@@ -181,7 +200,7 @@ const ProfileScreen = () => {
   };
 
   const HeaderWithAdd = useCallback(
-    ({ title }: any) => (
+    ({title}: any) => (
       <View style={styles.headerRow}>
         <BaseText style={styles.title}>{title}</BaseText>
       </View>
@@ -190,7 +209,7 @@ const ProfileScreen = () => {
   );
 
   const Section = useCallback(
-    ({ title, content }: any) => (
+    ({title, content}: any) => (
       <View style={styles.card}>
         <HeaderWithAdd title={title} />
         <BaseText style={styles.content}>{content}</BaseText>
@@ -206,10 +225,10 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}>
         <Pressable
           onPress={() => navigationRef.goBack()}
-          style={{ padding: wp(23), paddingBottom: 0 }}>
+          style={{padding: wp(23), paddingBottom: 0}}>
           <Image
             source={IMAGES.backArrow}
-            style={{ height: hp(20), width: wp(24), tintColor: colors._0B3970 }}
+            style={{height: hp(20), width: wp(24), tintColor: colors._0B3970}}
           />
         </Pressable>
         <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -217,8 +236,8 @@ const ProfileScreen = () => {
             <View style={styles.avatar}>
               <CustomImage
                 uri={userInfo?.picture}
-                imageStyle={{ height: '100%', width: '100%', borderRadius: 100 }}
-                containerStyle={{ flex: 1 }}
+                imageStyle={{height: '100%', width: '100%', borderRadius: 100}}
+                containerStyle={{flex: 1}}
                 resizeMode="cover"
                 showDefaultSource={false}
                 onLoadStart={() => setAvatarLoading(true)}
@@ -232,7 +251,9 @@ const ProfileScreen = () => {
             </View>
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarText}>{getInitials(userInfo?.name)}</Text>
+              <Text style={styles.avatarText}>
+                {getInitials(userInfo?.name)}
+              </Text>
             </View>
           )}
 
@@ -241,7 +262,11 @@ const ProfileScreen = () => {
           </BaseText>
 
           <View style={styles.locationRow}>
-            <Image source={IMAGES.marker} style={styles.locationicon} tintColor={colors._0B3970} />
+            <Image
+              source={IMAGES.marker}
+              style={styles.locationicon}
+              tintColor={colors._0B3970}
+            />
             <BaseText style={styles.location}>
               {userInfo?.country || 'No data available'}
             </BaseText>
@@ -250,21 +275,21 @@ const ProfileScreen = () => {
           {/* ── Desired Job Title + Years of Experience — single row ───── */}
           {hasJobInfo && (
             <View style={styles.jobInfoRow}>
-              {!!desiredJobTitle && (
+              {/* {!!desiredJobTitle && (
                 <View style={styles.pill}>
                   <Briefcase size={14} color={colors._0B3970} />
                   <BaseText style={styles.pillText} numberOfLines={1}>
                     {desiredJobTitle}
                   </BaseText>
                 </View>
-              )}
+              )} */}
 
-              {!!desiredJobTitle &&
+              {/* {!!desiredJobTitle &&
                 yearsOfExperience !== '' &&
                 yearsOfExperience !== null &&
                 yearsOfExperience !== undefined && (
                   <View style={styles.pillDivider} />
-                )}
+                )} */}
 
               {yearsOfExperience !== '' &&
                 yearsOfExperience !== null &&
@@ -278,12 +303,33 @@ const ProfileScreen = () => {
                 )}
             </View>
           )}
+          {hasJobInfo && (
+            <View style={{marginTop: hp(12)}}>
+              <BaseText style={styles.desiredText} numberOfLines={1}>
+                {'Desired Job:'}
+              </BaseText>
+              <View style={[styles.jobInfoRow, {marginTop: hp(5)}]}>
+                {!!desiredJobTitle && (
+                  <View style={styles.pill}>
+                    <Briefcase size={14} color={colors._0B3970} />
+                    <BaseText style={styles.pillText} numberOfLines={1}>
+                      {desiredJobTitle}
+                    </BaseText>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
 
-          <TouchableOpacity onPress={handleEditProfile} style={styles.editButton}>
+          <TouchableOpacity
+            onPress={handleEditProfile}
+            style={styles.editButton}>
             <BaseText style={styles.editButtonText}>Edit Profile</BaseText>
           </TouchableOpacity>
 
-          {!userInfo?.profile_completion && <View style={{ marginTop: hp(15) }} />}
+          {!userInfo?.profile_completion && (
+            <View style={{marginTop: hp(15)}} />
+          )}
 
           <TouchableOpacity
             style={styles.assessmentCard}
@@ -292,12 +338,16 @@ const ProfileScreen = () => {
             onPress={async () => {
               try {
                 const response = await sendAssessmentLink().unwrap();
-                console.log("🔥 ~ ProfileScreen ~ response:", response);
+                console.log('🔥 ~ ProfileScreen ~ response:', response);
 
                 if (response?.status) {
                   const innerStatus = response?.data?.response?.status;
 
-                  if (innerStatus && innerStatus !== 'invited' && innerStatus !== 'completed') {
+                  if (
+                    innerStatus &&
+                    innerStatus !== 'invited' &&
+                    innerStatus !== 'completed'
+                  ) {
                     const readableStatus = innerStatus
                       .replace(/_/g, ' ')
                       .replace(/\b\w/g, (l: string) => l.toUpperCase());
@@ -309,19 +359,33 @@ const ProfileScreen = () => {
                   errorToast(response?.message || 'Something went wrong');
                 }
               } catch (error: any) {
-                errorToast(error?.data?.message || error?.message || 'Something went wrong');
+                errorToast(
+                  error?.data?.message ||
+                    error?.message ||
+                    'Something went wrong',
+                );
               }
             }}>
             <View style={styles.iconCircle}>
               <Image source={IMAGES.document} style={styles.assessmentIcon} />
             </View>
             <View style={styles.assessmentTextContainer}>
-              <BaseText style={styles.assessmentTitle}>Skill assessment</BaseText>
+              <BaseText style={styles.assessmentTitle}>
+                Skill assessment
+              </BaseText>
               <BaseText style={styles.assessmentSubtitle}>
                 {!hasAssessment && 'Soft Skill Assessment is pending'}
-                {hasAssessment && assessStatus === 'Invited' && 'Assessment link sent – awaiting completion'}
-                {hasAssessment && assessStatus === 'Completed' && 'Soft Skill Assessment completed'}
-                {hasAssessment && assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' && `Status: ${assessStatus}`}
+                {hasAssessment &&
+                  assessStatus === 'Invited' &&
+                  'Assessment link sent – awaiting completion'}
+                {hasAssessment &&
+                  assessStatus === 'Completed' &&
+                  'Soft Skill Assessment completed'}
+                {hasAssessment &&
+                  assessStatus &&
+                  assessStatus !== 'Invited' &&
+                  assessStatus !== 'Completed' &&
+                  `Status: ${assessStatus}`}
               </BaseText>
             </View>
           </TouchableOpacity>
@@ -332,11 +396,18 @@ const ProfileScreen = () => {
             backgroundColor={colors.white}>
             <BaseText style={styles.modalHeading}>Skill Assessment</BaseText>
             <BaseText style={styles.modalDescription}>
-              {!hasAssessment && 'Request a new link for your soft skill assessment.'}
-              {hasAssessment && assessStatus === 'Invited' && 'Your soft skill assessment link has been sent. You will be notified once it is completed.'}
-              {hasAssessment && assessStatus === 'Completed' && 'You have already completed your soft skill assessment.'}
+              {!hasAssessment &&
+                'Request a new link for your soft skill assessment.'}
+              {hasAssessment &&
+                assessStatus === 'Invited' &&
+                'Your soft skill assessment link has been sent. You will be notified once it is completed.'}
+              {hasAssessment &&
+                assessStatus === 'Completed' &&
+                'You have already completed your soft skill assessment.'}
             </BaseText>
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAssessmentModal(false)}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowAssessmentModal(false)}>
               <BaseText style={styles.cancelButtonText}>Cancel</BaseText>
             </TouchableOpacity>
           </BottomModal>
@@ -356,13 +427,18 @@ const ProfileScreen = () => {
               <HeaderWithAdd title="Professional Experience" />
               <View style={styles.timelineContainer}>
                 {experienceList?.map((exp: any, index: number) => {
-                  console.log("🔥 ~ ProfileScreen ~ exp:", exp)
+                  console.log('🔥 ~ ProfileScreen ~ exp:', exp);
                   const isLast = index === experienceList.length - 1;
                   const title = exp?.title;
-                  const location = [exp?.province, exp?.country].filter(Boolean).join(', ');
-                  const startMonth = exp?.job_start?.month || exp?.jobStart_month;
+                  const location = [exp?.province, exp?.country]
+                    .filter(Boolean)
+                    .join(', ');
+                  const startMonth =
+                    exp?.job_start?.month || exp?.jobStart_month;
                   const startYear = exp?.job_start?.year || exp?.jobStart_year;
-                  const startDate = [startMonth, startYear].filter(Boolean).join(' ');
+                  const startDate = [startMonth, startYear]
+                    .filter(Boolean)
+                    .join(' ');
                   const endMonth =
                     exp?.job_end?.month ||
                     exp?.jobEnd_month ||
@@ -386,8 +462,8 @@ const ProfileScreen = () => {
                   })();
                   const typeLabel = exp?.experience_type
                     ? exp.experience_type
-                      .replace(/_/g, ' ')
-                      .replace(/\b\w/g, (l: string) => l.toUpperCase())
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, (l: string) => l.toUpperCase())
                     : '';
 
                   return (
@@ -400,17 +476,25 @@ const ProfileScreen = () => {
                         <View style={styles.timelineContentWrapper}>
                           <View style={styles.timelineContent}>
                             {!!title && (
-                              <BaseText style={styles.sectionItemTitle}>{title}</BaseText>
+                              <BaseText style={styles.sectionItemTitle}>
+                                {title}
+                              </BaseText>
                             )}
                             {exp?.company && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Company:</BaseText>
-                                <BaseText style={styles.kvValue}>{exp?.company}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Company:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {exp?.company}
+                                </BaseText>
                               </View>
                             )}
                             {(exp?.preferred_position || exp?.position) && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Position:</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Position:
+                                </BaseText>
                                 <BaseText style={styles.kvValue}>
                                   {exp?.preferred_position || exp?.position}
                                 </BaseText>
@@ -418,20 +502,32 @@ const ProfileScreen = () => {
                             )}
                             {!!location && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Location:</BaseText>
-                                <BaseText style={styles.kvValue}>{location}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Location:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {location}
+                                </BaseText>
                               </View>
                             )}
                             {!!duration && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Duration:</BaseText>
-                                <BaseText style={styles.kvValue}>{duration}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Duration:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {duration}
+                                </BaseText>
                               </View>
                             )}
                             {!!typeLabel && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Type:</BaseText>
-                                <BaseText style={styles.kvValue}>{typeLabel}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Type:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {typeLabel}
+                                </BaseText>
                               </View>
                             )}
                           </View>
@@ -450,13 +546,15 @@ const ProfileScreen = () => {
           )}
 
           {/* ── My Languages ─────────────────────────────────────────────── */}
-          <View style={[styles.card, { width: '90%' }]}>
+          <View style={[styles.card, {width: '90%'}]}>
             <HeaderWithAdd title="My Languages" />
             <View style={styles.languageContainer}>
               {userInfo?.languages?.length ? (
                 userInfo.languages.map((item: any, index: number) => (
                   <View key={index} style={styles.languageChipWithDots}>
-                    <BaseText style={styles.languageChipName}>{item?.name}</BaseText>
+                    <BaseText style={styles.languageChipName}>
+                      {item?.name}
+                    </BaseText>
                     <View style={styles.languageDotsRow}>
                       {proficiencyLevels.map(level => {
                         const isSelected = item?.level === level;
@@ -478,7 +576,7 @@ const ProfileScreen = () => {
                             <View
                               style={[
                                 styles.langDot,
-                                { backgroundColor: getLanguageDotColor(level) },
+                                {backgroundColor: getLanguageDotColor(level)},
                               ]}
                             />
                             {isSelected && (
@@ -486,7 +584,7 @@ const ProfileScreen = () => {
                                 numberOfLines={1}
                                 style={[
                                   styles.langDotLabel,
-                                  { color: getLanguageDotColor(level) },
+                                  {color: getLanguageDotColor(level)},
                                 ]}>
                                 {level}
                               </BaseText>
@@ -511,17 +609,24 @@ const ProfileScreen = () => {
                 {educationList?.map((edu: any, index: number) => {
                   const isLast = index === educationList.length - 1;
                   const degree = getDegreeLabel(edu?.degree);
-                  const location = [edu?.province, edu?.country].filter(Boolean).join(', ');
-                  const startMonth = edu?.start_date?.month || edu?.startDate_month;
-                  const startYear = edu?.start_date?.year || edu?.startDate_year;
+                  const location = [edu?.province, edu?.country]
+                    .filter(Boolean)
+                    .join(', ');
+                  const startMonth =
+                    edu?.start_date?.month || edu?.startDate_month;
+                  const startYear =
+                    edu?.start_date?.year || edu?.startDate_year;
                   const endMonth = edu?.end_date?.month || edu?.endDate_month;
                   const endYear = edu?.end_date?.year || edu?.endDate_year;
                   const endText = edu?.still_studying
                     ? 'Present'
-                    : [endMonth, endYear].filter(Boolean).join(' ') || 'Present';
+                    : [endMonth, endYear].filter(Boolean).join(' ') ||
+                      'Present';
                   const duration =
                     startMonth || startYear || endText
-                      ? `${[startMonth, startYear].filter(Boolean).join(' ')} - ${endText}`
+                      ? `${[startMonth, startYear]
+                          .filter(Boolean)
+                          .join(' ')} - ${endText}`
                       : '';
 
                   return (
@@ -534,24 +639,38 @@ const ProfileScreen = () => {
                         <View style={styles.timelineContentWrapper}>
                           <View style={styles.timelineContent}>
                             {!!degree && (
-                              <BaseText style={styles.sectionItemTitle}>{degree}</BaseText>
+                              <BaseText style={styles.sectionItemTitle}>
+                                {degree}
+                              </BaseText>
                             )}
                             {edu?.university && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>University:</BaseText>
-                                <BaseText style={styles.kvValue}>{edu?.university}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  University:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {edu?.university}
+                                </BaseText>
                               </View>
                             )}
                             {!!location && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Location:</BaseText>
-                                <BaseText style={styles.kvValue}>{location}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Location:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {location}
+                                </BaseText>
                               </View>
                             )}
                             {!!duration && (
                               <View style={styles.kvRow}>
-                                <BaseText style={styles.kvLabel}>Duration:</BaseText>
-                                <BaseText style={styles.kvValue}>{duration}</BaseText>
+                                <BaseText style={styles.kvLabel}>
+                                  Duration:
+                                </BaseText>
+                                <BaseText style={styles.kvValue}>
+                                  {duration}
+                                </BaseText>
                               </View>
                             )}
                           </View>
@@ -576,8 +695,12 @@ const ProfileScreen = () => {
               {skills.length ? (
                 <>
                   {displayedSkills.map((skill: any, index: number) => (
-                    <View key={skill?._id || skill?.title || index} style={styles.skillBadge}>
-                      <BaseText style={styles.skillText}>{skill?.title}</BaseText>
+                    <View
+                      key={skill?._id || skill?.title || index}
+                      style={styles.skillBadge}>
+                      <BaseText style={styles.skillText}>
+                        {skill?.title}
+                      </BaseText>
                     </View>
                   ))}
                 </>
@@ -586,7 +709,9 @@ const ProfileScreen = () => {
               )}
             </View>
             {hasMoreThan8Skills && (
-              <TouchableOpacity onPress={() => setShowAllSkills(!showAllSkills)} style={styles.showMoreButton}>
+              <TouchableOpacity
+                onPress={() => setShowAllSkills(!showAllSkills)}
+                style={styles.showMoreButton}>
                 <BaseText style={styles.showMoreText}>
                   {showAllSkills ? 'Show less' : 'Show more'}
                 </BaseText>
@@ -612,14 +737,17 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     backgroundColor: colors.white,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
   },
   avatarLoaderOverlay: {
     position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     borderRadius: 100,
     backgroundColor: 'rgba(255,255,255,0.3)',
     justifyContent: 'center',
@@ -660,7 +788,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(25),
     alignSelf: 'center',
     paddingVertical: hp(7),
-    width: '90%',
+    // width: '90%',
   },
   pill: {
     flexDirection: 'row',
@@ -669,6 +797,9 @@ const styles = StyleSheet.create({
   },
   pillText: {
     ...commonFontStyle(500, 14, colors._0B3970),
+  },
+  desiredText: {
+    ...commonFontStyle(500, 12, colors._4A4A4A),
   },
   pillDivider: {
     width: 1,
@@ -860,7 +991,7 @@ const styles = StyleSheet.create({
     marginHorizontal: wp(20),
     marginVertical: hp(20),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,
@@ -922,7 +1053,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: hp(8),
     paddingHorizontal: wp(12),
-    paddingBottom: hp(20),   // ← space for the absolute label
+    paddingBottom: hp(20), // ← space for the absolute label
     marginBottom: hp(8),
     width: '100%',
   },

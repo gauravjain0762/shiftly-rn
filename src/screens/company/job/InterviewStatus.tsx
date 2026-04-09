@@ -81,8 +81,8 @@ const InterviewStatus = () => {
     const candidateImg = candidateData?.picture || inviteData?.user_id?.picture;
 
     const rawStatus = inviteData?.status || 'Pending';
-    const interviewStatus = rawStatus === 'Interview_completed' ? 'Completed' : rawStatus;
-    const isInterviewCompleted = rawStatus === 'Interview_completed';
+    const interviewStatus = rawStatus === 'Completed' ? 'Completed' : rawStatus;
+    const isInterviewCompleted = rawStatus === 'Completed';
     const interviewDate = inviteData?.interview_completed
         ? moment(inviteData.interview_completed).format('h:mm A - DDMMM')
         : '';

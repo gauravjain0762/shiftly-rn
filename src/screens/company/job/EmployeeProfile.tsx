@@ -1,5 +1,5 @@
-import { useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import {useRoute} from '@react-navigation/native';
+import React, {useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -12,49 +12,62 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Alert
+  Alert,
 } from 'react-native';
-import { IMAGES } from '../../../assets/Images';
-import { BackHeader, GradientButton, LinearContainer } from '../../../component';
+import {IMAGES} from '../../../assets/Images';
+import {BackHeader, GradientButton, LinearContainer} from '../../../component';
 import BottomModal from '../../../component/common/BottomModal';
 import BaseText from '../../../component/common/BaseText';
 import CustomImage from '../../../component/common/CustomImage';
 import ReadMoreText from '../../../component/common/ReadMoreText';
-import { SCREENS } from '../../../navigation/screenNames';
-import { colors } from '../../../theme/colors';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { navigateTo, getInitials, hasValidImage, formatLocationToCityCountry } from '../../../utils/commonFunction';
-import { useGetEmployeeProfileByIdQuery } from '../../../api/dashboardApi';
+import {SCREENS} from '../../../navigation/screenNames';
+import {colors} from '../../../theme/colors';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {
+  navigateTo,
+  getInitials,
+  hasValidImage,
+  formatLocationToCityCountry,
+} from '../../../utils/commonFunction';
+import {useGetEmployeeProfileByIdQuery} from '../../../api/dashboardApi';
 import RNFS from 'react-native-fs';
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i;
 const PDF_EXTENSIONS = /\.(pdf)(\?|$)/i;
 
 const EmployeeProfile = () => {
-  const { params } = useRoute<any>();
+  const {params} = useRoute<any>();
   const userParam = params?.user;
   const userId = userParam?._id;
 
-  const { data: profileResponse, isLoading } = useGetEmployeeProfileByIdQuery(
-    { user_id: userId },
-    { skip: !userId }
+  const {data: profileResponse, isLoading} = useGetEmployeeProfileByIdQuery(
+    {user_id: userId},
+    {skip: !userId},
   );
 
   const userData = profileResponse?.data?.user;
   const assessFirst = userData?.assess_first || userParam?.assess_first;
   const hasAssessFirst = !!assessFirst;
   const assessStatus = assessFirst?.status as string | undefined;
-  const reportUrl = typeof assessFirst?.report === 'string'
-    ? assessFirst.report
-    : (assessFirst?.report as any)?.url;
+  const reportUrl =
+    typeof assessFirst?.report === 'string'
+      ? assessFirst.report
+      : (assessFirst?.report as any)?.url;
 
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
-  const [downloadingResumeKey, setDownloadingResumeKey] = useState<string | null>(null);
+  const [downloadingResumeKey, setDownloadingResumeKey] = useState<
+    string | null
+  >(null);
 
-  const rawLocation = userData?.location || userParam?.location || userParam?.area;
-  console.log("🔥 ~ EmployeeProfile ~ userData:", JSON.stringify(userData, null, 2))
+  const rawLocation =
+    userData?.location || userParam?.location || userParam?.area;
+  console.log(
+    '🔥 ~ EmployeeProfile ~ userData:',
+    JSON.stringify(userData, null, 2),
+  );
 
-  const toArray = (value: any) => (Array.isArray(value) ? value : value ? [value] : []);
+  const toArray = (value: any) =>
+    Array.isArray(value) ? value : value ? [value] : [];
   const formatMonthYear = (dateObj: any) => {
     if (!dateObj) return '';
     if (typeof dateObj === 'string') return dateObj;
@@ -65,29 +78,29 @@ const EmployeeProfile = () => {
 
   const educationRaw = toArray(userData?.education || userParam?.education);
   const experienceRaw = toArray(userData?.experience || userParam?.experience);
-  console.log("🔥 ~ EmployeeProfile ~ experienceRaw:", experienceRaw)
-
+  console.log('🔥 ~ EmployeeProfile ~ experienceRaw:', experienceRaw);
   const profileData = {
     name: userData?.name || userParam?.name || 'No data available',
     desiredJobTitle:
-      userData?.desired_job_title ||
-      userParam?.desired_job_title ||
-      '',
+      userData?.desired_job_title || userParam?.desired_job_title || '',
     yearsOfExperience:
-      userData?.years_of_experience ||
-      userParam?.years_of_experience ||
-      '',
-    location: formatLocationToCityCountry(
-      rawLocation,
-      userData?.city || userParam?.city,
-      userData?.country || userParam?.country
-    ) || userData?.country || userParam?.country || 'No data available',
+      userData?.years_of_experience || userParam?.years_of_experience || '',
+    location:
+      formatLocationToCityCountry(
+        rawLocation,
+        userData?.city || userParam?.city,
+        userData?.country || userParam?.country,
+      ) ||
+      userData?.country ||
+      userParam?.country ||
+      'No data available',
     picture: userData?.picture || userParam?.picture || null,
     about: userData?.about || 'No about information provided.',
     education: educationRaw.map((edu: any) => {
-      const degree = typeof edu?.degree === 'object'
-        ? edu?.degree?.title || edu?.degree?.name || edu?.degree?.label || ''
-        : edu?.degree || '';
+      const degree =
+        typeof edu?.degree === 'object'
+          ? edu?.degree?.title || edu?.degree?.name || edu?.degree?.label || ''
+          : edu?.degree || '';
       const start = formatMonthYear(edu?.start_date || edu?.startDate);
       const end = formatMonthYear(edu?.end_date || edu?.endDate);
       const years = [start, end].filter(Boolean).join(' - ');
@@ -102,7 +115,9 @@ const EmployeeProfile = () => {
     }),
     experience: experienceRaw.map((exp: any) => {
       const start = formatMonthYear(exp?.job_start);
-      const end = exp?.still_working ? 'Present' : formatMonthYear(exp?.job_end);
+      const end = exp?.still_working
+        ? 'Present'
+        : formatMonthYear(exp?.job_end);
       return {
         title: exp?.title || 'No data available',
         years: [start, end].filter(Boolean).join(' - '),
@@ -113,20 +128,29 @@ const EmployeeProfile = () => {
           'No data available',
       };
     }),
-    skills: (userData?.skills || userParam?.skills || []).map((s: any) => s?.title).filter(Boolean),
+    skills: (userData?.skills || userParam?.skills || [])
+      .map((s: any) => s?.title)
+      .filter(Boolean),
     languages: userData?.languages || userParam?.languages || [],
-    resumes: toArray(userData?.resumes || userParam?.resumes).filter((r: any) => r?.file),
+    resumes: toArray(userData?.resumes || userParam?.resumes).filter(
+      (r: any) => r?.file,
+    ),
   };
 
   const proficiencyLevels = ['Basic', 'Conversational', 'Fluent', 'Native'];
 
   const getLanguageDotColor = (level: string) => {
     switch (level) {
-      case 'Native': return colors._0B3970;
-      case 'Fluent': return colors._4A4A4A;
-      case 'Conversational': return colors._7B7878;
-      case 'Basic': return colors._D9D9D9;
-      default: return '#999';
+      case 'Native':
+        return colors._0B3970;
+      case 'Fluent':
+        return colors._4A4A4A;
+      case 'Conversational':
+        return colors._7B7878;
+      case 'Basic':
+        return colors._D9D9D9;
+      default:
+        return '#999';
     }
   };
 
@@ -142,14 +166,14 @@ const EmployeeProfile = () => {
         params: {
           isFromJobDetail: true,
           data: {
-            user_id: userData || userParam
+            user_id: userData || userParam,
           },
-          mainjob_data: jobData || { _id: jobId }
-        }
+          mainjob_data: jobData || {_id: jobId},
+        },
       });
     } catch (e: any) {
-      console.error("Navigation failed", e);
-      Alert.alert("Error", `Nav failed: ${e.message}`);
+      console.error('Navigation failed', e);
+      Alert.alert('Error', `Nav failed: ${e.message}`);
     }
   };
 
@@ -172,7 +196,10 @@ const EmployeeProfile = () => {
     });
   };
 
-  const handleDownloadResume = async (resume: any, options?: { showLoader?: boolean }) => {
+  const handleDownloadResume = async (
+    resume: any,
+    options?: {showLoader?: boolean},
+  ) => {
     const fileUrl = resume?.file;
     if (!fileUrl) return;
     const showLoader = options?.showLoader ?? true;
@@ -192,10 +219,14 @@ const EmployeeProfile = () => {
         if (apiLevel && apiLevel < 33) {
           const permissions: any[] = [];
           if (PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE) {
-            permissions.push(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+            permissions.push(
+              PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            );
           }
           if (PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE) {
-            permissions.push(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+            permissions.push(
+              PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            );
           }
 
           if (permissions.length > 0) {
@@ -225,14 +256,13 @@ const EmployeeProfile = () => {
         const safeName = displayName.replace(/[^\w.\-]/g, '_');
 
         const lowerName = displayName.toLowerCase();
-        const mimeType =
-          lowerName.endsWith('.pdf')
-            ? 'application/pdf'
-            : lowerName.endsWith('.docx')
-              ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-              : lowerName.endsWith('.doc')
-                ? 'application/msword'
-                : 'application/octet-stream';
+        const mimeType = lowerName.endsWith('.pdf')
+          ? 'application/pdf'
+          : lowerName.endsWith('.docx')
+          ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          : lowerName.endsWith('.doc')
+          ? 'application/msword'
+          : 'application/octet-stream';
 
         // Prefer Android DownloadManager so the download shows in the system notification tray.
         try {
@@ -250,7 +280,10 @@ const EmployeeProfile = () => {
           }
         } catch (e: any) {
           // Fallback to RNFS if the native module is not available or download fails.
-          console.log('Native DownloadManager resume download failed:', e?.message || e);
+          console.log(
+            'Native DownloadManager resume download failed:',
+            e?.message || e,
+          );
         }
 
         const downloadDirs = [
@@ -264,7 +297,7 @@ const EmployeeProfile = () => {
         for (const dir of downloadDirs) {
           const toFile = `${dir}/${safeName}`;
           try {
-            await RNFS.downloadFile({ fromUrl: fileUrl, toFile }).promise;
+            await RNFS.downloadFile({fromUrl: fileUrl, toFile}).promise;
             Alert.alert('Downloaded', 'Resume saved.');
             return toFile;
           } catch (e: any) {
@@ -284,7 +317,9 @@ const EmployeeProfile = () => {
     } catch (_) {
       Alert.alert(
         'Error',
-        Platform.OS === 'android' ? 'Could not download resume' : 'Could not open resume link',
+        Platform.OS === 'android'
+          ? 'Could not download resume'
+          : 'Could not open resume link',
       );
     } finally {
       // Clear loader regardless of success/failure
@@ -330,26 +365,48 @@ const EmployeeProfile = () => {
               />
             ) : (
               <View style={[styles.profileImage, styles.avatarPlaceholder]}>
-                <Text style={styles.avatarInitial}>{getInitials(profileData.name)}</Text>
+                <Text style={styles.avatarInitial}>
+                  {getInitials(profileData.name)}
+                </Text>
               </View>
             )}
           </View>
           <Text style={styles.profileName}>{profileData.name}</Text>
-          {(!!profileData.desiredJobTitle || !!profileData.yearsOfExperience) && (
+          {(!!profileData.desiredJobTitle ||
+            !!profileData.yearsOfExperience) && (
             <View style={styles.jobInfoRow}>
-              {!!profileData.desiredJobTitle && (
+              {/* {!!profileData.desiredJobTitle && (
                 <View style={styles.jobInfoPill}>
                   <Text style={styles.jobInfoPillText}>{profileData.desiredJobTitle}</Text>
                 </View>
               )}
               {!!profileData.desiredJobTitle && !!profileData.yearsOfExperience && (
                 <View style={styles.pillDivider} />
-              )}
+              )} */}
               {!!profileData.yearsOfExperience && (
                 <View style={styles.jobInfoPill}>
-                  <Text style={styles.jobInfoPillText}>{profileData.yearsOfExperience}</Text>
+                  <Text style={styles.jobInfoPillText}>
+                    {profileData.yearsOfExperience}
+                  </Text>
                 </View>
               )}
+            </View>
+          )}
+          {(!!profileData.desiredJobTitle ||
+            !!profileData.yearsOfExperience) && (
+            <View>
+              <BaseText style={styles.desiredText} numberOfLines={1}>
+                {'Desired Job:'}
+              </BaseText>
+              <View style={[styles.jobInfoRow, {marginTop: hp(5)}]}>
+                {!!profileData.desiredJobTitle && (
+                  <View style={styles.jobInfoPill}>
+                    <Text style={styles.jobInfoPillText}>
+                      {profileData.desiredJobTitle}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
           )}
           <View style={styles.locationContainer}>
@@ -368,28 +425,51 @@ const EmployeeProfile = () => {
           activeOpacity={0.8}>
           <View style={styles.iconCircle}>
             <Image
-              source={assessStatus === 'Completed' ? IMAGES.check : IMAGES.document}
-              style={[styles.assessmentIcon, assessStatus === 'Completed' && { tintColor: colors._0B3970 }]}
+              source={
+                assessStatus === 'Completed' ? IMAGES.check : IMAGES.document
+              }
+              style={[
+                styles.assessmentIcon,
+                assessStatus === 'Completed' && {tintColor: colors._0B3970},
+              ]}
             />
           </View>
           <View style={styles.assessmentTextContainer}>
             <BaseText style={styles.assessmentTitle}>
-              {assessStatus === 'Completed' ? 'Assessment Completed' : 'Skill Assessment'}
+              {assessStatus === 'Completed'
+                ? 'Assessment Completed'
+                : 'Skill Assessment'}
             </BaseText>
             <BaseText style={styles.assessmentSubtitle}>
               {!hasAssessFirst && 'Soft Skill Assessment is pending'}
-              {hasAssessFirst && assessStatus === 'Invited' && 'Assessment link sent – awaiting completion'}
-              {hasAssessFirst && assessStatus === 'Completed' && (reportUrl ? 'View the assessment report' : 'Soft Skill Assessment completed')}
-              {hasAssessFirst && assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' && `Status: ${assessStatus}`}
+              {hasAssessFirst &&
+                assessStatus === 'Invited' &&
+                'Assessment link sent – awaiting completion'}
+              {hasAssessFirst &&
+                assessStatus === 'Completed' &&
+                (reportUrl
+                  ? 'View the assessment report'
+                  : 'Soft Skill Assessment completed')}
+              {hasAssessFirst &&
+                assessStatus &&
+                assessStatus !== 'Invited' &&
+                assessStatus !== 'Completed' &&
+                `Status: ${assessStatus}`}
             </BaseText>
-            {assessStatus === 'Completed' && typeof reportUrl === 'string' && reportUrl.trim() !== '' && (
-              <TouchableOpacity
-                style={styles.showReportButton}
-                onPress={() => Linking.openURL(reportUrl).catch(() => Alert.alert('Error', 'Could not open report'))}
-                activeOpacity={0.8}>
-                <Text style={styles.showReportText}>Show Report</Text>
-              </TouchableOpacity>
-            )}
+            {assessStatus === 'Completed' &&
+              typeof reportUrl === 'string' &&
+              reportUrl.trim() !== '' && (
+                <TouchableOpacity
+                  style={styles.showReportButton}
+                  onPress={() =>
+                    Linking.openURL(reportUrl).catch(() =>
+                      Alert.alert('Error', 'Could not open report'),
+                    )
+                  }
+                  activeOpacity={0.8}>
+                  <Text style={styles.showReportText}>Show Report</Text>
+                </TouchableOpacity>
+              )}
           </View>
         </TouchableOpacity>
 
@@ -401,25 +481,34 @@ const EmployeeProfile = () => {
           <BaseText style={styles.modalDescription}>
             {!hasAssessFirst &&
               'Soft Skill Assessment has not been requested for this employee yet.'}
-            {hasAssessFirst && assessStatus === 'Invited' &&
+            {hasAssessFirst &&
+              assessStatus === 'Invited' &&
               'The assessment link has been sent to this employee. You will be notified once it is completed.'}
-            {hasAssessFirst && assessStatus === 'Completed' &&
+            {hasAssessFirst &&
+              assessStatus === 'Completed' &&
               'This employee has completed the soft skill assessment.'}
-            {hasAssessFirst && assessStatus && assessStatus !== 'Invited' && assessStatus !== 'Completed' &&
+            {hasAssessFirst &&
+              assessStatus &&
+              assessStatus !== 'Invited' &&
+              assessStatus !== 'Completed' &&
               `Status: ${assessStatus}`}
             {hasAssessFirst && !assessStatus && 'Assessment status is pending.'}
           </BaseText>
-          {assessStatus === 'Completed' && typeof reportUrl === 'string' && reportUrl.trim() !== '' && (
-            <TouchableOpacity
-              style={styles.modalShowReportButton}
-              onPress={() => {
-                Linking.openURL(reportUrl).catch(() => Alert.alert('Error', 'Could not open report'));
-                setShowAssessmentModal(false);
-              }}
-              activeOpacity={0.8}>
-              <Text style={styles.modalShowReportText}>Show Report</Text>
-            </TouchableOpacity>
-          )}
+          {assessStatus === 'Completed' &&
+            typeof reportUrl === 'string' &&
+            reportUrl.trim() !== '' && (
+              <TouchableOpacity
+                style={styles.modalShowReportButton}
+                onPress={() => {
+                  Linking.openURL(reportUrl).catch(() =>
+                    Alert.alert('Error', 'Could not open report'),
+                  );
+                  setShowAssessmentModal(false);
+                }}
+                activeOpacity={0.8}>
+                <Text style={styles.modalShowReportText}>Show Report</Text>
+              </TouchableOpacity>
+            )}
           <TouchableOpacity
             style={styles.modalCancelButton}
             onPress={() => setShowAssessmentModal(false)}>
@@ -429,14 +518,23 @@ const EmployeeProfile = () => {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About me</Text>
-          <ReadMoreText text={profileData?.about} numberOfLines={8} style={styles.cardText} />
+          <ReadMoreText
+            text={profileData?.about}
+            numberOfLines={8}
+            style={styles.cardText}
+          />
         </View>
 
         {profileData.education.length > 0 && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Education</Text>
             {profileData.education.map((edu: any, index: number) => (
-              <View key={index} style={[styles.entryContainer, index > 0 && { marginTop: hp(15) }]}>
+              <View
+                key={index}
+                style={[
+                  styles.entryContainer,
+                  index > 0 && {marginTop: hp(15)},
+                ]}>
                 <View style={styles.entryHeader}>
                   <Text style={styles.entryTitle}>{edu.degree}</Text>
                   <Text style={styles.entryYears}>{edu.years}</Text>
@@ -462,7 +560,12 @@ const EmployeeProfile = () => {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Recent Past Experience</Text>
             {profileData.experience.map((exp: any, index: number) => (
-              <View key={index} style={[styles.entryContainer, index > 0 && { marginTop: hp(15) }]}>
+              <View
+                key={index}
+                style={[
+                  styles.entryContainer,
+                  index > 0 && {marginTop: hp(15)},
+                ]}>
                 <View style={styles.entryHeader}>
                   <Text style={styles.entryTitle}>{exp.title}</Text>
                   <Text style={styles.entryYears}>{exp.years}</Text>
@@ -525,7 +628,7 @@ const EmployeeProfile = () => {
                           <View
                             style={[
                               styles.langDot,
-                              { backgroundColor: getLanguageDotColor(level) },
+                              {backgroundColor: getLanguageDotColor(level)},
                             ]}
                           />
                           {isActive && (
@@ -533,7 +636,7 @@ const EmployeeProfile = () => {
                               numberOfLines={1}
                               style={[
                                 styles.langDotLabel,
-                                { color: getLanguageDotColor(level) },
+                                {color: getLanguageDotColor(level)},
                               ]}>
                               {level}
                             </Text>
@@ -554,7 +657,7 @@ const EmployeeProfile = () => {
             {profileData.resumes.map((resume: any, index: number) => (
               <View
                 key={resume?._id || resume?.file_name || index}
-                style={[styles.resumeRow, index > 0 && { marginTop: hp(10) }]}>
+                style={[styles.resumeRow, index > 0 && {marginTop: hp(10)}]}>
                 <View style={styles.resumeChip}>
                   <Text numberOfLines={1} style={styles.resumeChipText}>
                     {resume?.file_name || 'Resume'}
@@ -564,30 +667,36 @@ const EmployeeProfile = () => {
                   {(() => {
                     return (
                       <>
-                  <TouchableOpacity
-                    style={styles.resumeActionIconBtn}
-                    onPress={() => handleViewResume(resume)}
-                    activeOpacity={0.8}>
-                    <Image
-                      source={IMAGES.view}
-                      style={styles.resumeActionIcon}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.resumeActionIconBtn}
-                    onPress={() => handleDownloadResume(resume)}
-                    activeOpacity={0.8}>
-                    {downloadingResumeKey === String(resume?._id || resume?.file_name || resume?.file) ? (
-                      <ActivityIndicator size="small" color={colors.white} />
-                    ) : (
-                      <Image
-                        source={IMAGES.download}
-                        style={styles.resumeActionIcon}
-                        resizeMode="contain"
-                      />
-                    )}
-                  </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.resumeActionIconBtn}
+                          onPress={() => handleViewResume(resume)}
+                          activeOpacity={0.8}>
+                          <Image
+                            source={IMAGES.view}
+                            style={styles.resumeActionIcon}
+                            resizeMode="contain"
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.resumeActionIconBtn}
+                          onPress={() => handleDownloadResume(resume)}
+                          activeOpacity={0.8}>
+                          {downloadingResumeKey ===
+                          String(
+                            resume?._id || resume?.file_name || resume?.file,
+                          ) ? (
+                            <ActivityIndicator
+                              size="small"
+                              color={colors.white}
+                            />
+                          ) : (
+                            <Image
+                              source={IMAGES.download}
+                              style={styles.resumeActionIcon}
+                              resizeMode="contain"
+                            />
+                          )}
+                        </TouchableOpacity>
                       </>
                     );
                   })()}
@@ -618,10 +727,9 @@ const EmployeeProfile = () => {
           />
         </View>
       </View>
-    </LinearContainer >
+    </LinearContainer>
   );
 };
-
 
 export default EmployeeProfile;
 
@@ -636,7 +744,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: wp(25),
     paddingTop: hp(20),
-    paddingBottom: hp(50)
+    paddingBottom: hp(50),
   },
   profileHeader: {
     alignItems: 'center',
@@ -690,6 +798,9 @@ const styles = StyleSheet.create({
   jobInfoPillText: {
     ...commonFontStyle(500, 14, colors._0B3970),
   },
+  desiredText: {
+    ...commonFontStyle(500, 12, colors._4A4A4A),
+  },
   pillDivider: {
     width: 1,
     height: hp(14),
@@ -733,8 +844,7 @@ const styles = StyleSheet.create({
     ...commonFontStyle(400, 14, colors._656464),
     lineHeight: hp(20),
   },
-  entryContainer: {
-  },
+  entryContainer: {},
   entryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -827,7 +937,7 @@ const styles = StyleSheet.create({
     width: wp(22),
     height: wp(22),
     left: '39%',
-    top: "32%",
+    top: '32%',
     position: 'absolute',
     alignSelf: 'center',
     tintColor: colors.white,
@@ -845,7 +955,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(20),
     marginBottom: hp(20),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,
@@ -936,7 +1046,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(12),
     paddingVertical: hp(6),
     paddingHorizontal: wp(12),
-    paddingBottom: hp(20),   // space for the absolute label
+    paddingBottom: hp(20), // space for the absolute label
   },
   languageChipName: {
     ...commonFontStyle(400, 16, colors._0B3970),
@@ -1004,4 +1114,3 @@ const styles = StyleSheet.create({
     tintColor: colors.white,
   },
 });
-
