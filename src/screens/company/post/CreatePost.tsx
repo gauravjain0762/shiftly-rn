@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -13,32 +13,31 @@ import {
   GradientButton,
   LinearContainer,
 } from '../../../component';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { useTranslation } from 'react-i18next';
-import { colors } from '../../../theme/colors';
-import { IMAGES } from '../../../assets/Images';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {useTranslation} from 'react-i18next';
+import {colors} from '../../../theme/colors';
+import {IMAGES} from '../../../assets/Images';
 import ImagePickerModal from '../../../component/common/ImagePickerModal';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { AppStyles } from '../../../theme/appStyles';
-import { errorToast, goBack, navigateTo } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
-import { useAppSelector } from '../../../redux/hooks';
-import { selectPostForm } from '../../../features/companySlice';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-controller';
+import {AppStyles} from '../../../theme/appStyles';
+import {errorToast, goBack, navigateTo} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import {useAppSelector} from '../../../redux/hooks';
+import {selectPostForm} from '../../../features/companySlice';
 import usePostFormUpdater from '../../../hooks/usePostFormUpdater';
 import CharLength from '../../../component/common/CharLength';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRoute } from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useRoute} from '@react-navigation/native';
 
 const CreatePost = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const route = useRoute<any>();
   const insets = useSafeAreaInsets();
   const [imageModal, setImageModal] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
-  const { title, description, uploadedImages, postEditMode, externalLink } = useAppSelector(state =>
-    selectPostForm(state as any),
-  );
-  const { updatePostForm } = usePostFormUpdater();
+  const {title, description, uploadedImages, postEditMode, externalLink} =
+    useAppSelector(state => selectPostForm(state as any));
+  const {updatePostForm} = usePostFormUpdater();
 
   // useEffect(() => {
   //   if (!externalLink || externalLink === null) {
@@ -54,7 +53,9 @@ const CreatePost = () => {
   }, [route.params]);
 
   // Add this ref at the top of the component
-  const imageLoadTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const imageLoadTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Replace your image onLoadStart/onLoadEnd handlers:
   const handleImageLoadStart = () => {
@@ -89,14 +90,17 @@ const CreatePost = () => {
       } = params.postData;
 
       // Convert existing image URLs to uploadedImages format
-      const existingImages = images?.length > 0
-        ? [{
-          uri: images[0],
-          type: 'image/jpeg',
-          name: images[0].split('/').pop() || 'image.jpg',
-          isExisting: true
-        }]
-        : [];
+      const existingImages =
+        images?.length > 0
+          ? [
+              {
+                uri: images[0],
+                type: 'image/jpeg',
+                name: images[0].split('/').pop() || 'image.jpg',
+                isExisting: true,
+              },
+            ]
+          : [];
 
       updatePostForm({
         title: postTitle || '',
@@ -104,10 +108,7 @@ const CreatePost = () => {
         uploadedImages: existingImages,
         postEditMode: true,
         postId: post_id,
-        externalLink:
-          externalLinkFromPost ||
-          externalLinkFromPostAlt ||
-          '',
+        externalLink: externalLinkFromPost || externalLinkFromPostAlt || '',
       });
     }
   }, [route.params]);
@@ -116,10 +117,7 @@ const CreatePost = () => {
     setImageLoading(false); // ← Reset stale loading state first
 
     const resolvedUri =
-      newImage?.path ||
-      newImage?.uri ||
-      newImage?.sourceURL ||
-      '';
+      newImage?.path || newImage?.uri || newImage?.sourceURL || '';
 
     const imageObject = {
       uri: resolvedUri,
@@ -133,12 +131,12 @@ const CreatePost = () => {
       isExisting: false,
     };
 
-    updatePostForm({ uploadedImages: [imageObject] });
+    updatePostForm({uploadedImages: [imageObject]});
     setImageModal(false);
   };
 
   const removeImage = () => {
-    updatePostForm({ uploadedImages: [] });
+    updatePostForm({uploadedImages: []});
   };
 
   const hasValidImage = () => {
@@ -174,7 +172,6 @@ const CreatePost = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContent}
         style={AppStyles.flex}>
-
         {/* Image Upload Section */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{t('Post Image')}</Text>
@@ -186,7 +183,7 @@ const CreatePost = () => {
                 </View>
               )}
               <Image
-                source={{ uri: uploadedImages[0]?.uri }}
+                source={{uri: uploadedImages[0]?.uri}}
                 style={styles.uploadedImage}
                 onLoadStart={handleImageLoadStart}
                 onLoadEnd={handleImageLoadEnd}
@@ -201,10 +198,7 @@ const CreatePost = () => {
                 <TouchableOpacity
                   style={styles.removeImageBtn}
                   onPress={removeImage}>
-                  <Image
-                    source={IMAGES.close}
-                    style={styles.removeIcon}
-                  />
+                  <Image source={IMAGES.close} style={styles.removeIcon} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -229,7 +223,7 @@ const CreatePost = () => {
             inputStyle={styles.input}
             placeholderTextColor={colors._7B7878}
             placeholder={t('Enter the post title')}
-            onChangeText={(e: any) => updatePostForm({ title: e })}
+            onChangeText={(e: any) => updatePostForm({title: e})}
             containerStyle={styles.inputContainer}
           />
           <CharLength chars={60} value={title} style={styles.charLength} />
@@ -244,10 +238,14 @@ const CreatePost = () => {
             inputStyle={[styles.input, styles.descriptionInput]}
             placeholderTextColor={colors._7B7878}
             placeholder={t('What do you want to share with job seekers?')}
-            onChangeText={(e: any) => updatePostForm({ description: e })}
+            onChangeText={(e: any) => updatePostForm({description: e})}
             containerStyle={styles.inputContainer}
           />
-          <CharLength chars={4000} value={description} style={styles.charLength} />
+          <CharLength
+            chars={4000}
+            value={description}
+            style={styles.charLength}
+          />
         </View>
 
         <View style={styles.section}>
@@ -261,11 +259,19 @@ const CreatePost = () => {
             onChangeText={(e: any) => updatePostForm({externalLink: e})}
             containerStyle={styles.inputContainer}
           />
-          <CharLength chars={100} value={externalLink} style={styles.charLength} />
+          <CharLength
+            chars={100}
+            value={externalLink}
+            style={styles.charLength}
+          />
         </View>
       </KeyboardAwareScrollView>
 
-      <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + hp(20) }]}>
+      <View
+        style={[
+          styles.buttonContainer,
+          {paddingBottom: insets.bottom + hp(20)},
+        ]}>
         <GradientButton
           style={styles.reviewBtn}
           type="Company"
@@ -278,6 +284,7 @@ const CreatePost = () => {
         actionSheet={imageModal}
         setActionSheet={() => setImageModal(false)}
         onUpdate={(e: any) => addImage(e)}
+        cropSize={{width: 2000, height: 1080}}
       />
     </LinearContainer>
   );

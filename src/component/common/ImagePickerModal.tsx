@@ -14,29 +14,46 @@ import { pick, types, isErrorWithCode } from '@react-native-documents/picker';
 import { colors } from '../../theme/colors';
 import { hp, wp } from '../../theme/fonts';
 
+type CropSize = {
+  width: number;
+  height: number;
+};
 const ImagePickerModal = ({
   actionSheet,
   setActionSheet = () => { },
   onUpdate = () => { },
   allowDocument = false,
   isGalleryEnable = true,
+  cropSize
 }: {
   actionSheet?: boolean;
   setActionSheet?: (value: boolean) => void;
   onUpdate?: (value: any) => void;
   allowDocument?: boolean;
   isGalleryEnable?: boolean;
+  cropSize?: CropSize;
 }) => {
   const pendingAction = React.useRef<'camera' | null>(null);
   const closeActionSheet = () => setActionSheet(false);
 
+  const getCropOptions = () => {
+    if (cropSize) {
+      return {
+        cropping: true,
+        width: cropSize.width,
+        height: cropSize.height,
+        cropperToolbarTitle: `Crop (${cropSize.width} x ${cropSize.height})`,
+        enableRotationGesture: false,
+        freeStyleCropEnabled: false, // lock to exact ratio
+      };
+    }
+    return {cropping: true};
+  };
   const launchCamera = async () => {
     try {
       const image = await ImageCropPicker.openCamera({
         mediaType: 'photo',
-        // Cropping with camera is unstable on some iOS devices.
-        cropping: Platform.OS === 'ios' ? false : true,
-        compressImageQuality: 1,
+        // compressImageQuality: 1,
         cropperToolbarTitle: 'Edit Photo',
         cropperStatusBarColor: '#000000',
         cropperToolbarColor: '#000000',
@@ -52,6 +69,7 @@ const ImagePickerModal = ({
         ...(Platform.OS === 'ios' && {
           cropperStatusBarTranslucent: false,
         }),
+         ...getCropOptions(),
       });
 
       // Validate image object
@@ -137,8 +155,7 @@ const ImagePickerModal = ({
     try {
       const res = await ImageCropPicker.openPicker({
         mediaType: 'photo',
-        cropping: true,
-        compressImageQuality: 1,
+        // compressImageQuality: 1,
         cropperToolbarTitle: 'Edit Photo',
         cropperStatusBarColor: '#000000',
         cropperToolbarColor: '#000000',
@@ -149,7 +166,9 @@ const ImagePickerModal = ({
         ...(Platform.OS === 'ios' && {
           cropperStatusBarTranslucent: false,
         }),
+        ...getCropOptions(),
       });
+console.log(res,'resresres');
 
       const temp = {
         ...res,

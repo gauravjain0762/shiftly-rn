@@ -31,7 +31,7 @@ export const IMAGES = {
   ring: require('./image/ring.png'),
   posts: require('./image/posts.png'),
   home: require('./image/home.png'),
-  profile: require('./image/profile.png'),
+  profile: require('./image/Profile.png'),
 
   logog: require('./image/logog.png'),
   logo1: require('./image/logo.png'),
