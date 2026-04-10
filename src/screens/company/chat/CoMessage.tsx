@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -7,29 +7,36 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 
-import { BackHeader, LinearContainer, SearchBar } from '../../../component';
-import { useTranslation } from 'react-i18next';
-import { navigateTo, getInitials, hasValidImage } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
-import { hp, wp, commonFontStyle } from '../../../theme/fonts';
-import { colors } from '../../../theme/colors';
-import { useGetCompanyChatsQuery } from '../../../api/dashboardApi';
+import {BackHeader, LinearContainer, SearchBar} from '../../../component';
+import {useTranslation} from 'react-i18next';
+import {
+  navigateTo,
+  getInitials,
+  hasValidImage,
+} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import {hp, wp, commonFontStyle} from '../../../theme/fonts';
+import {colors} from '../../../theme/colors';
+import {useGetCompanyChatsQuery} from '../../../api/dashboardApi';
 import NoDataText from '../../../component/common/NoDataText';
 import FastImage from 'react-native-fast-image';
-import { onChatMessage, offChatMessage } from '../../../hooks/socketManager';
+import {onChatMessage, offChatMessage} from '../../../hooks/socketManager';
 
 const CoMessage = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [value, setValue] = useState<string>('');
-  const { data: chats, isLoading, refetch } = useGetCompanyChatsQuery({ page: 1 });
+  const {data: chats, isLoading, refetch} = useGetCompanyChatsQuery({page: 1});
   const chatList = chats?.data?.chats || [];
   const isFocused = useIsFocused();
 
   useEffect(() => {
     if (chats) {
-      console.log('🔥 [CoMessage] getCompanyChats response:', JSON.stringify(chats, null, 2));
+      console.log(
+        '🔥 [CoMessage] getCompanyChats response:',
+        JSON.stringify(chats, null, 2),
+      );
     }
   }, [chats]);
 
@@ -61,11 +68,11 @@ const CoMessage = () => {
     item?.user_id?.name?.toLowerCase().includes(value.toLowerCase()),
   );
 
-  const renderChatCard = ({ item }: { item: any }) => {
+  const renderChatCard = ({item}: {item: any}) => {
     const userName = item?.user_id?.name || 'Unknown';
     const userAvatar = item?.user_id?.picture;
     const lastMessage = item?.last_message || '';
-    console.log("🔥 ~ renderChatCard ~ lastMessage:", lastMessage)
+    console.log('🔥 ~ renderChatCard ~ lastMessage:', lastMessage);
     const rawJobCode = item?.job_id?.job_code || '';
     const jobCode = rawJobCode.replace(/^JOB-/, '');
     const updatedAt = item?.updatedAt || item?.createdAt;
@@ -76,6 +83,7 @@ const CoMessage = () => {
         })
       : '';
     const unreadCount = item?.unread_counter || 0;
+    console.log(item, 'itemitemitem');
 
     return (
       <View style={styles.cardRow}>
@@ -91,7 +99,7 @@ const CoMessage = () => {
           }>
           {hasValidImage(userAvatar) ? (
             <FastImage
-              source={{ uri: userAvatar }}
+              source={{uri: userAvatar}}
               style={styles.avatar}
               resizeMode="cover"
             />
@@ -106,9 +114,9 @@ const CoMessage = () => {
               <Text style={styles.name} numberOfLines={1}>
                 {userName}
               </Text>
-              {!!jobCode && (
+              {!!item?.job_id?.title && (
                 <Text style={styles.jobCode} numberOfLines={1}>
-                  {jobCode}
+                  {item?.job_id?.title}
                 </Text>
               )}
             </View>
@@ -116,9 +124,7 @@ const CoMessage = () => {
               <Text style={styles.lastMessage} numberOfLines={1}>
                 {lastMessage || 'No messages yet'}
               </Text>
-              {!!timeLabel && (
-                <Text style={styles.timeLabel}>{timeLabel}</Text>
-              )}
+              {!!timeLabel && <Text style={styles.timeLabel}>{timeLabel}</Text>}
             </View>
           </View>
 
@@ -156,12 +162,12 @@ const CoMessage = () => {
         <FlatList
           data={filteredChatList}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: hp(10) }}
+          contentContainerStyle={{flexGrow: 1, paddingBottom: hp(10)}}
           keyExtractor={(item, index) => item?._id || index.toString()}
           renderItem={renderChatCard}
           ListEmptyComponent={() => (
             <NoDataText
-              style={{ paddingHorizontal: wp(22) }}
+              style={{paddingHorizontal: wp(22)}}
               text="You don't have any activity yet. Once you post jobs or content, updates will appear here."
             />
           )}
@@ -233,14 +239,16 @@ const styles = StyleSheet.create({
     gap: hp(4),
   },
   infoTopRow: {
+    flexShrink:1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   name: {
+    flex:1,
     ...commonFontStyle(600, 16, colors._0B3970),
-    flex: 1,
     marginRight: wp(8),
+    width:'50%'
   },
   timeLabel: {
     ...commonFontStyle(400, 11, '#999999'),
@@ -251,7 +259,9 @@ const styles = StyleSheet.create({
     marginRight: wp(8),
   },
   jobCode: {
-    ...commonFontStyle(400, 12, '#999999'),
+    ...commonFontStyle(400, 12, '#4A4A4A'),
+    width:'50%',
+    textAlign:'right'
   },
   messageRow: {
     flexDirection: 'row',

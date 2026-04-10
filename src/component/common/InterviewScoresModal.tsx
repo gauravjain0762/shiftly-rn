@@ -75,13 +75,13 @@ const InterviewScoresModal = ({
     };
 
     const generalScores = [
-        {
-            title: t('Overall'),
-            score: 0,
-            max: 5,
-            desc: '',
-            color: '#2FB465',
-        },
+        // {
+        //     title: t('Overall'),
+        //     score: 0,
+        //     max: 5,
+        //     desc: '',
+        //     color: '#2FB465',
+        // },
         {
             title: t('Enthusiasm & Motivation'),
             score: scores?.motivation || 0,

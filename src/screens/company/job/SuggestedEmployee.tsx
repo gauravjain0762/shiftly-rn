@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, {useEffect, useMemo, useRef, useState, useCallback} from 'react';
 import moment from 'moment';
 import {
   View,
@@ -12,20 +12,16 @@ import {
   ActivityIndicator,
   Linking,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import {
-  BackHeader,
-  GradientButton,
-  LinearContainer,
-} from '../../../component';
+import {useRoute} from '@react-navigation/native';
+import {BackHeader, GradientButton, LinearContainer} from '../../../component';
 import BottomModal from '../../../component/common/BottomModal';
 import LottieView from 'lottie-react-native';
-import { animation } from '../../../assets/animation';
-import { colors } from '../../../theme/colors';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { useTranslation } from 'react-i18next';
+import {animation} from '../../../assets/animation';
+import {colors} from '../../../theme/colors';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {useTranslation} from 'react-i18next';
 import CustomImage from '../../../component/common/CustomImage';
-import { IMAGES } from '../../../assets/Images';
+import {IMAGES} from '../../../assets/Images';
 import {
   useGetSuggestedEmployeesQuery,
   useGetCompanyJobDetailsQuery,
@@ -33,29 +29,36 @@ import {
   useLazyGetCompanyJobDetailsQuery,
   useSendInterviewInvitesMutation,
 } from '../../../api/dashboardApi';
-import { navigateTo, errorToast, goBack, resetNavigation, getInitials, hasValidImage } from '../../../utils/commonFunction';
-import { getCurrencySymbol } from '../../../utils/currencySymbols';
-import { getJobMonthlySalaryRangeText } from '../../../utils/monthlySalaryRange';
-import { SCREENS } from '../../../navigation/screenNames';
-import { navigationRef } from '../../../navigation/RootContainer';
+import {
+  navigateTo,
+  errorToast,
+  goBack,
+  resetNavigation,
+  getInitials,
+  hasValidImage,
+} from '../../../utils/commonFunction';
+import {getCurrencySymbol} from '../../../utils/currencySymbols';
+import {getJobMonthlySalaryRangeText} from '../../../utils/monthlySalaryRange';
+import {SCREENS} from '../../../navigation/screenNames';
+import {navigationRef} from '../../../navigation/RootContainer';
 import SuggestedEmployeeSkeleton from '../../../component/skeletons/SuggestedEmployeeSkeleton';
 
-import { useFocusEffect } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
 import {
   setCoPostJobSteps,
   setJobFormState,
 } from '../../../features/companySlice';
-import { mapJobToFormState } from '../../../utils/jobFormMapper';
-import { Alert } from 'react-native';
-import { successToast } from '../../../utils/commonFunction';
-import { useCloseCompanyJobMutation } from '../../../api/dashboardApi';
+import {mapJobToFormState} from '../../../utils/jobFormMapper';
+import {Alert} from 'react-native';
+import {successToast} from '../../../utils/commonFunction';
+import {useCloseCompanyJobMutation} from '../../../api/dashboardApi';
 import BaseText from '../../../component/common/BaseText';
 
 const SuggestedEmployeeScreen = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const route = useRoute<any>();
-  const { jobId, jobData, isFromJobCard, fromPostJob } = route.params || {};
+  const {jobId, jobData, isFromJobCard, fromPostJob} = route.params || {};
 
   const shouldDefaultToShortlisted =
     route.params?.fromPendingInterview === true ||
@@ -70,19 +73,19 @@ const SuggestedEmployeeScreen = () => {
     isLoading,
     isFetching,
     refetch: refetchSuggested,
-  } = useGetSuggestedEmployeesQuery(jobId, { skip: !jobId });
+  } = useGetSuggestedEmployeesQuery(jobId, {skip: !jobId});
 
   const {
     data: jobDetailsResponse,
     isLoading: isJobLoading,
     refetch: refetchJobDetails,
-  } = useGetCompanyJobDetailsQuery(jobId, { skip: !jobId });
+  } = useGetCompanyJobDetailsQuery(jobId, {skip: !jobId});
 
   useFocusEffect(
     React.useCallback(() => {
       refetchSuggested();
       refetchJobDetails();
-    }, [jobId])
+    }, [jobId]),
   );
 
   const employees = useMemo(() => {
@@ -107,18 +110,10 @@ const SuggestedEmployeeScreen = () => {
       refetchJobDetails();
     }, 4000);
     return () => clearTimeout(timer);
-  }, [
-    jobId,
-    employees.length,
-    refetchSuggested,
-    refetchJobDetails,
-  ]);
+  }, [jobId, employees.length, refetchSuggested, refetchJobDetails]);
 
   const jobInfo =
-    jobData?.data?.job ||
-    jobData?.job ||
-    jobDetailsResponse?.data?.job ||
-    {};
+    jobData?.data?.job || jobData?.job || jobDetailsResponse?.data?.job || {};
   const isClosedJob = String(jobInfo?.status ?? '').toLowerCase() === 'closed';
 
   const ai_data = jobDetailsResponse?.data || suggestedResponse?.data || {};
@@ -134,13 +129,16 @@ const SuggestedEmployeeScreen = () => {
   const [extraSuggested, setExtraSuggested] = useState<any[]>([]);
   const [extraShortlisted, setExtraShortlisted] = useState<any[]>([]);
   const [extraApplicants, setExtraApplicants] = useState<any[]>([]);
+  const [inviteAllApplicantsSelected, setInviteAllApplicantsSelected] = useState(false);
 
   const [suggestedHasMore, setSuggestedHasMore] = useState(true);
   const [shortlistedHasMore, setShortlistedHasMore] = useState(true);
   const [applicantsHasMore, setApplicantsHasMore] = useState(true);
 
-  const [fetchMoreSuggested, { isFetching: isFetchingSuggested }] = useLazyGetSuggestedEmployeesQuery();
-  const [fetchMoreJobDetails, { isFetching: isFetchingJobDetails }] = useLazyGetCompanyJobDetailsQuery();
+  const [fetchMoreSuggested, {isFetching: isFetchingSuggested}] =
+    useLazyGetSuggestedEmployeesQuery();
+  const [fetchMoreJobDetails, {isFetching: isFetchingJobDetails}] =
+    useLazyGetCompanyJobDetailsQuery();
   const [sendInterviewInvites] = useSendInterviewInvitesMutation();
   const [resendingUserId, setResendingUserId] = useState<string | null>(null);
   const [showResendSuccessModal, setShowResendSuccessModal] = useState(false);
@@ -153,10 +151,12 @@ const SuggestedEmployeeScreen = () => {
       return;
     }
 
-    const existingQuestions: string[] = Array.isArray(jobInfo?.interview_questions)
+    const existingQuestions: string[] = Array.isArray(
+      jobInfo?.interview_questions,
+    )
       ? jobInfo.interview_questions
-        .filter((q: any) => typeof q === 'string' && q.trim().length > 0)
-        .map((q: string) => q.trim())
+          .filter((q: any) => typeof q === 'string' && q.trim().length > 0)
+          .map((q: string) => q.trim())
       : [];
 
     if (existingQuestions.length === 0) {
@@ -184,12 +184,55 @@ const SuggestedEmployeeScreen = () => {
       }
     } catch (error: any) {
       const message =
-        error?.data?.message || error?.error || error?.message || t('Failed to send interview invitation');
+        error?.data?.message ||
+        error?.error ||
+        error?.message ||
+        t('Failed to send interview invitation');
       errorToast(message);
     } finally {
       setResendingUserId(null);
     }
   };
+
+  const allApplicantsInvited = useMemo(() => {
+  if (!Array.isArray(applications) || applications.length === 0) return false;
+  if (!Array.isArray(invitedEmployees) || invitedEmployees.length === 0) return false;
+
+  const invitedIds = invitedEmployees
+    .map((inv: any) => inv?.user_id?._id || inv?.user_id || inv)
+    .filter(Boolean);
+
+  const applicantIds = applications
+    .map((app: any) => app?.user_id?._id || app?._id)
+    .filter(Boolean);
+
+  if (applicantIds.length === 0) return false;
+
+  return applicantIds.every(id => invitedIds.includes(id));
+}, [applications, invitedEmployees]);
+
+const handleInviteAllApplicants = () => {
+  const ids = (displayApplicants || [])
+    .map((item: any) => item?.user_id?._id || item?._id)
+    .filter((id: string | null) => !!id) as string[];
+
+  if (!ids || ids.length === 0) {
+    errorToast(t('No applicants available to invite'));
+    return;
+  }
+
+  if (inviteAllApplicantsSelected) {
+    setSelectedUserIds(prev => prev.filter(id => !ids.includes(id)));
+    setInviteAllApplicantsSelected(false);
+    return;
+  }
+
+  setSelectedUserIds(prev => {
+    const merged = [...new Set([...prev, ...ids])];
+    return merged;
+  });
+  setInviteAllApplicantsSelected(true);
+};
 
   const invitedEmployees = useMemo(() => {
     const list =
@@ -223,15 +266,15 @@ const SuggestedEmployeeScreen = () => {
   const scrollToTab = useCallback(
     (tab: 'suggested' | 'shortlisted' | 'applicants') => {
       if (tab === 'suggested') {
-        tabScrollRef.current?.scrollTo({ x: 0, animated: true });
+        tabScrollRef.current?.scrollTo({x: 0, animated: true});
       } else {
         const x = tabLayouts.current[tab];
         if (typeof x === 'number') {
-          tabScrollRef.current?.scrollTo({ x, animated: true });
+          tabScrollRef.current?.scrollTo({x, animated: true});
         }
       }
     },
-    []
+    [],
   );
 
   const selectTab = useCallback(
@@ -239,7 +282,7 @@ const SuggestedEmployeeScreen = () => {
       setActiveTab(tab);
       scrollToTab(tab);
     },
-    [scrollToTab]
+    [scrollToTab],
   );
 
   useEffect(() => {
@@ -251,14 +294,21 @@ const SuggestedEmployeeScreen = () => {
   const showSkeleton = useMemo(() => {
     // Show content immediately when from post job or job list - don't block on loading
     if (jobId && (fromPostJob || isFromJobCard)) return false;
-    if (hasDataLoaded.current || (employees && employees.length > 0) || (jobInfo && Object.keys(jobInfo).length > 0)) {
+    if (
+      hasDataLoaded.current ||
+      (employees && employees.length > 0) ||
+      (jobInfo && Object.keys(jobInfo).length > 0)
+    ) {
       return false;
     }
     return isScreenLoading;
   }, [jobId, fromPostJob, isFromJobCard, isScreenLoading, employees, jobInfo]);
 
   useEffect(() => {
-    if (!isScreenLoading && (employees?.length > 0 || (jobInfo && Object.keys(jobInfo).length > 0))) {
+    if (
+      !isScreenLoading &&
+      (employees?.length > 0 || (jobInfo && Object.keys(jobInfo).length > 0))
+    ) {
       hasDataLoaded.current = true;
     }
   }, [isScreenLoading, employees, jobInfo]);
@@ -324,7 +374,7 @@ const SuggestedEmployeeScreen = () => {
 
   const handleBulkInvite = () => {
     if (inviteAllSelected) {
-      handleNavigateToQuestions({ invite_to: 'all', user_ids: [] });
+      handleNavigateToQuestions({invite_to: 'all', user_ids: []});
       return;
     }
     if (!selectedUserIds.length) {
@@ -362,9 +412,7 @@ const SuggestedEmployeeScreen = () => {
       .map((inv: any) => inv?.user_id?._id || inv?.user_id || inv)
       .filter(Boolean);
 
-    const suggestedIds = employees
-      .map((emp: any) => emp?._id)
-      .filter(Boolean);
+    const suggestedIds = employees.map((emp: any) => emp?._id).filter(Boolean);
 
     if (suggestedIds.length === 0) return false;
 
@@ -382,6 +430,8 @@ const SuggestedEmployeeScreen = () => {
     setSuggestedHasMore(true);
     setShortlistedHasMore(true);
     setApplicantsHasMore(true);
+    setInviteAllApplicantsSelected(false); // ✅ add this line
+  setInviteAllSelected(false);           
   }, [activeTab]);
 
   // Set initial hasMore based on response
@@ -414,11 +464,13 @@ const SuggestedEmployeeScreen = () => {
 
     const nextPage = suggestedPage + 1;
     try {
-      const result = await fetchMoreSuggested({ job_id: jobId, page: nextPage, tab: 'suggested' }).unwrap();
+      const result = await fetchMoreSuggested({
+        job_id: jobId,
+        page: nextPage,
+        tab: 'suggested',
+      }).unwrap();
       const newUsers =
-        result?.data?.suggested_employees ||
-        result?.data?.users ||
-        [];
+        result?.data?.suggested_employees || result?.data?.users || [];
 
       if (newUsers.length > 0) {
         setExtraSuggested(prev => [...prev, ...newUsers]);
@@ -437,7 +489,13 @@ const SuggestedEmployeeScreen = () => {
       console.log('Error loading more suggested:', error);
       setSuggestedHasMore(false);
     }
-  }, [suggestedHasMore, isFetchingSuggested, suggestedPage, jobId, fetchMoreSuggested]);
+  }, [
+    suggestedHasMore,
+    isFetchingSuggested,
+    suggestedPage,
+    jobId,
+    fetchMoreSuggested,
+  ]);
 
   const handleLoadMoreShortlisted = useCallback(async () => {
     if (!shortlistedHasMore || isFetchingJobDetails) return;
@@ -460,7 +518,13 @@ const SuggestedEmployeeScreen = () => {
       console.log('Error loading more shortlisted:', error);
       setShortlistedHasMore(false);
     }
-  }, [shortlistedHasMore, isFetchingJobDetails, shortlistedPage, jobId, fetchMoreJobDetails]);
+  }, [
+    shortlistedHasMore,
+    isFetchingJobDetails,
+    shortlistedPage,
+    jobId,
+    fetchMoreJobDetails,
+  ]);
 
   const handleLoadMoreApplicants = useCallback(async () => {
     if (!applicantsHasMore || isFetchingJobDetails) return;
@@ -483,11 +547,19 @@ const SuggestedEmployeeScreen = () => {
       console.log('Error loading more applicants:', error);
       setApplicantsHasMore(false);
     }
-  }, [applicantsHasMore, isFetchingJobDetails, applicantsPage, jobId, fetchMoreJobDetails]);
+  }, [
+    applicantsHasMore,
+    isFetchingJobDetails,
+    applicantsPage,
+    jobId,
+    fetchMoreJobDetails,
+  ]);
 
   // Combined data for each tab
   const displaySuggested = useMemo(() => {
-    return [...(employees || []), ...extraSuggested].filter((item: any) => item && item._id);
+    return [...(employees || []), ...extraSuggested].filter(
+      (item: any) => item && item._id,
+    );
   }, [employees, extraSuggested]);
 
   const displayShortlisted = useMemo(() => {
@@ -500,6 +572,16 @@ const SuggestedEmployeeScreen = () => {
     return [...initial, ...extraApplicants];
   }, [applications, extraApplicants]);
 
+  useEffect(() => {
+  const validIds = (displayApplicants || [])
+    .map((item: any) => item?.user_id?._id || item?._id)
+    .filter(Boolean);
+
+  const allSelected =
+    validIds.length > 0 && validIds.every(id => selectedUserIds.includes(id));
+
+  setInviteAllApplicantsSelected(allSelected);
+}, [displayApplicants, selectedUserIds]);
   const renderSalaryRange = () => {
     const cur = (jobInfo?.currency || 'AED').toUpperCase();
     const symbol = getCurrencySymbol(cur);
@@ -524,8 +606,9 @@ const SuggestedEmployeeScreen = () => {
   const jobLocation = useMemo(() => {
     // Show only city and country, not the full address
     if (jobInfo?.city || jobInfo?.country) {
-      return `${jobInfo?.city || ''}${jobInfo?.city && jobInfo?.country ? ' - ' : ''
-        }${jobInfo?.country || ''}`;
+      return `${jobInfo?.city || ''}${
+        jobInfo?.city && jobInfo?.country ? ' - ' : ''
+      }${jobInfo?.country || ''}`;
     }
     return '';
   }, [jobInfo]);
@@ -537,7 +620,7 @@ const SuggestedEmployeeScreen = () => {
     navigateTo(SCREENS.EmployeeProfile, {
       user,
       jobId: jobId || jobInfo?._id,
-      jobData: jobInfo
+      jobData: jobInfo,
     });
   };
 
@@ -546,7 +629,9 @@ const SuggestedEmployeeScreen = () => {
 
     const rawRange = jobInfo?.monthly_salary_range;
     const rangeStr =
-      rawRange === null || rawRange === undefined ? '' : String(rawRange).trim();
+      rawRange === null || rawRange === undefined
+        ? ''
+        : String(rawRange).trim();
 
     const normalizedRangeStr = rangeStr
       // Normalize "2000 - 3000" => "2000-3000" for dropdown matching
@@ -556,14 +641,20 @@ const SuggestedEmployeeScreen = () => {
     // Dropdown values are expected to be the API "from-to" format (e.g. "2000-3000")
     // so we must avoid sending "from - to" with spaces, and also avoid "-" placeholders.
     const salaryValueFromRange =
-      normalizedRangeStr && normalizedRangeStr !== '-' ? normalizedRangeStr : '';
+      normalizedRangeStr && normalizedRangeStr !== '-'
+        ? normalizedRangeStr
+        : '';
 
-    const fromNum = jobInfo?.monthly_salary_from !== null && jobInfo?.monthly_salary_from !== undefined
-      ? Number(jobInfo?.monthly_salary_from)
-      : NaN;
-    const toNum = jobInfo?.monthly_salary_to !== null && jobInfo?.monthly_salary_to !== undefined
-      ? Number(jobInfo?.monthly_salary_to)
-      : NaN;
+    const fromNum =
+      jobInfo?.monthly_salary_from !== null &&
+      jobInfo?.monthly_salary_from !== undefined
+        ? Number(jobInfo?.monthly_salary_from)
+        : NaN;
+    const toNum =
+      jobInfo?.monthly_salary_to !== null &&
+      jobInfo?.monthly_salary_to !== undefined
+        ? Number(jobInfo?.monthly_salary_to)
+        : NaN;
 
     const salaryValueFromFromTo =
       Number.isFinite(fromNum) && Number.isFinite(toNum)
@@ -573,8 +664,8 @@ const SuggestedEmployeeScreen = () => {
             jobInfo?.monthly_salary_to === undefined ||
             jobInfo?.monthly_salary_to === '' ||
             String(jobInfo?.monthly_salary_to).trim() === '-')
-          ? `${fromNum}+`
-          : '';
+        ? `${fromNum}+`
+        : '';
 
     const salaryValue = salaryValueFromRange || salaryValueFromFromTo;
 
@@ -588,31 +679,40 @@ const SuggestedEmployeeScreen = () => {
         job_sector: jobInfo?.department_id
           ? typeof jobInfo.department_id === 'string'
             ? {
-              // API sometimes returns `department_id` as a string id.
-              // Dropdown selection uses `value` and will resolve label from options.
-              label: '',
-              value: jobInfo.department_id,
-            }
+                // API sometimes returns `department_id` as a string id.
+                // Dropdown selection uses `value` and will resolve label from options.
+                label: '',
+                value: jobInfo.department_id,
+              }
             : {
-              label: jobInfo.department_id?.title ?? '',
-              value:
-                (jobInfo.department_id as any)?._id ??
-                (jobInfo.department_id as any)?.id,
-            }
-          : (typeof jobInfo?.job_sector === 'string'
-            ? { label: jobInfo.job_sector, value: jobInfo.job_sector }
-            : jobInfo?.job_sector),
-        contract_type: { label: jobInfo?.contract_type, value: jobInfo?.contract_type },
-        area: { label: jobInfo?.address || jobInfo?.area || '', value: jobInfo?.address || jobInfo?.area || '' },
+                label: jobInfo.department_id?.title ?? '',
+                value:
+                  (jobInfo.department_id as any)?._id ??
+                  (jobInfo.department_id as any)?.id,
+              }
+          : typeof jobInfo?.job_sector === 'string'
+          ? {label: jobInfo.job_sector, value: jobInfo.job_sector}
+          : jobInfo?.job_sector,
+        contract_type: {
+          label: jobInfo?.contract_type,
+          value: jobInfo?.contract_type,
+        },
+        area: {
+          label: jobInfo?.address || jobInfo?.area || '',
+          value: jobInfo?.address || jobInfo?.area || '',
+        },
         salary: {
           label: salaryValue,
           value: salaryValue,
         },
-        currency: { label: jobInfo?.currency, value: jobInfo?.currency },
-        position: { label: jobInfo?.no_positions?.toString(), value: jobInfo?.no_positions?.toString() },
-        duration: { label: jobInfo?.duration, value: jobInfo?.duration },
+        currency: {label: jobInfo?.currency, value: jobInfo?.currency},
+        position: {
+          label: jobInfo?.no_positions?.toString(),
+          value: jobInfo?.no_positions?.toString(),
+        },
+        duration: {label: jobInfo?.duration, value: jobInfo?.duration},
         expiry_date: jobInfo?.expiry_date,
-        startDate: { label: jobInfo?.start_date, value: jobInfo?.start_date },
+        startDate: {label: jobInfo?.start_date, value: jobInfo?.start_date},
         skillId: mapped.skillId,
         jobSkills: mapped.jobSkills,
         essential_benefits: mapped.essential_benefits,
@@ -632,43 +732,41 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const handleCloseJob = () => {
-    Alert.alert(
-      t('Close Job'),
-      t('Are you sure you want to close this job?'),
-      [
-        { text: t('Cancel'), style: 'cancel' },
-        {
-          text: t('Close'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const res = await closeJob({ job_id: jobId }).unwrap();
-              if (res?.status) {
-                successToast(res?.message || t('Job closed successfully'));
-                navigateTo(SCREENS.CoJobSummary, {
-                  initialTab: 'Closed Jobs',
-                  fromSuggestedEmployee: true,
-                });
-              } else {
-                errorToast(res?.message || t('Failed to close job'));
-              }
-            } catch (error: any) {
-              errorToast(error?.data?.message || t('Something went wrong'));
+    Alert.alert(t('Close Job'), t('Are you sure you want to close this job?'), [
+      {text: t('Cancel'), style: 'cancel'},
+      {
+        text: t('Close'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const res = await closeJob({job_id: jobId}).unwrap();
+            if (res?.status) {
+              successToast(res?.message || t('Job closed successfully'));
+              navigateTo(SCREENS.CoJobSummary, {
+                initialTab: 'Closed Jobs',
+                fromSuggestedEmployee: true,
+              });
+            } else {
+              errorToast(res?.message || t('Failed to close job'));
             }
-          },
+          } catch (error: any) {
+            errorToast(error?.data?.message || t('Something went wrong'));
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const renderShortlistedEmployee = (item: any) => {
-    console.log("🔥 ~ renderShortlistedEmployee ~ item:", item?.status);
+    console.log('🔥 ~ renderShortlistedEmployee ~ item:', item?.status);
     const user = item?.user_id || item;
     if (!user || !user?._id) return null;
 
     const experience = user?.years_of_experience || 0;
     const tracking = item?.tracking || [];
-    const languages = user?.languages?.map((l: any) => l?.name)?.filter(Boolean);
+    const languages = user?.languages
+      ?.map((l: any) => l?.name)
+      ?.filter(Boolean);
 
     return (
       <View key={user?._id} style={styles.shortlistedCard}>
@@ -677,8 +775,7 @@ const SuggestedEmployeeScreen = () => {
             <TouchableOpacity
               style={styles.shortlistedHeader}
               onPress={() => handleNavigateToProfile(user)}
-              activeOpacity={0.7}
-            >
+              activeOpacity={0.7}>
               {hasValidImage(user?.picture) ? (
                 <CustomImage
                   uri={user?.picture || ''}
@@ -688,7 +785,9 @@ const SuggestedEmployeeScreen = () => {
                 />
               ) : (
                 <View style={[styles.shortlistedAvatar, styles.avatarFallback]}>
-                  <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
+                  <Text style={styles.avatarInitial}>
+                    {getInitials(user?.name)}
+                  </Text>
                 </View>
               )}
               <View style={styles.shortlistedInfo}>
@@ -704,40 +803,53 @@ const SuggestedEmployeeScreen = () => {
             </TouchableOpacity>
 
             <Text style={styles.shortlistedExp}>
-              {experience !== ""
-                ? `${experience}`
-                : t('No Experience')}
+              {experience !== '' ? `${experience}` : t('No Experience')}
             </Text>
 
             {languages.length > 0 && (
               <View style={styles.languageRow}>
                 <Image source={IMAGES.globe} style={styles.globeIcon} />
-                {languages.slice(0, 3).map(
-                  (language: string, index: number, arr: string[]) => (
+                {languages
+                  .slice(0, 3)
+                  .map((language: string, index: number, arr: string[]) => (
                     <React.Fragment key={index}>
                       <Text style={styles.shortlistedLanguage}>{language}</Text>
                       {index !== arr.length - 1 && (
-                        <Text style={styles.shortlistedLanguageSeparator}> | </Text>
+                        <Text style={styles.shortlistedLanguageSeparator}>
+                          {' '}
+                          |{' '}
+                        </Text>
                       )}
                     </React.Fragment>
-                  ),
-                )}
+                  ))}
               </View>
             )}
 
-            {(['invited', 'attempted'].includes(String(item?.status || '').trim().toLowerCase())) && (
+            {['invited', 'attempted'].includes(
+              String(item?.status || '')
+                .trim()
+                .toLowerCase(),
+            ) && (
               <TouchableOpacity
-                style={[styles.resendButton, !!resendingUserId && resendingUserId !== String(user?._id) && { opacity: 0.6 }]}
+                style={[
+                  styles.resendButton,
+                  !!resendingUserId &&
+                    resendingUserId !== String(user?._id) && {opacity: 0.6},
+                ]}
                 onPress={() => handleResendInvite(user)}
                 disabled={resendingUserId === String(user?._id)}>
                 <Text style={styles.resendButtonText}>
-                  {resendingUserId === String(user?._id) ? t('Resending...') : t('Resend Invite')}
+                  {resendingUserId === String(user?._id)
+                    ? t('Resending...')
+                    : t('Resend Invite')}
                 </Text>
               </TouchableOpacity>
             )}
 
             <View style={styles.shortlistedActions}>
-              {String(item?.status || '').trim().toLowerCase() === 'completed' && (
+              {String(item?.status || '')
+                .trim()
+                .toLowerCase() === 'completed' && (
                 <TouchableOpacity
                   style={styles.viewAiButton}
                   onPress={() =>
@@ -747,17 +859,23 @@ const SuggestedEmployeeScreen = () => {
                       inviteData: item,
                     })
                   }>
-                  <Text style={styles.viewAiButtonText}>{t('AI Interview')}</Text>
+                  <Text style={styles.viewAiButtonText}>
+                    {t('AI Interview')}
+                  </Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
-                style={[styles.assessmentButton, item?.tracking[3]?.assessment_link === null && { opacity: 0.5 }]}
+                style={[
+                  styles.assessmentButton,
+                  item?.tracking[3]?.assessment_link === null && {opacity: 0.5},
+                ]}
                 disabled={item?.tracking[3]?.assessment_link === null}
                 onPress={() => {
-                  Linking.openURL(item?.tracking[3]?.assessment_link)
-                }
-                }>
-                <Text style={styles.assessmentButtonText}>{t('Assessment')}</Text>
+                  Linking.openURL(item?.tracking[3]?.assessment_link);
+                }}>
+                <Text style={styles.assessmentButtonText}>
+                  {t('Assessment')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -766,7 +884,9 @@ const SuggestedEmployeeScreen = () => {
             {tracking.map((step: any, index: number) => {
               const isLast = index === tracking.length - 1;
               const isCompleted = step?.is_done;
-              const dateDisplay = step?.date_time ? moment(step.date_time).format('h:mm A - DDMMM') : '';
+              const dateDisplay = step?.date_time
+                ? moment(step.date_time).format('h:mm A - DDMMM')
+                : '';
 
               return (
                 <View key={index} style={styles.timelineItem}>
@@ -775,7 +895,7 @@ const SuggestedEmployeeScreen = () => {
                       source={IMAGES.checked}
                       style={[
                         styles.timelineIcon,
-                        { tintColor: isCompleted ? colors._0B3970 : '#D9D9D9' }
+                        {tintColor: isCompleted ? colors._0B3970 : '#D9D9D9'},
                       ]}
                     />
                     {!isLast && <View style={styles.timelineLine} />}
@@ -784,10 +904,18 @@ const SuggestedEmployeeScreen = () => {
                     <View style={styles.timelineRow}>
                       <Text style={styles.timelineTime}>{dateDisplay}</Text>
                     </View>
-                    <Text style={[styles.timelineTitle, !isCompleted && { color: '#939393' }]}>
+                    <Text
+                      style={[
+                        styles.timelineTitle,
+                        !isCompleted && {color: '#939393'},
+                      ]}>
                       {t(step?.title || '')}
                     </Text>
-                    <Text style={[styles.timelineStatus, !isCompleted && { color: '#939393' }]}>
+                    <Text
+                      style={[
+                        styles.timelineStatus,
+                        !isCompleted && {color: '#939393'},
+                      ]}>
                       {t(step?.desc || '')}
                     </Text>
                   </View>
@@ -809,10 +937,11 @@ const SuggestedEmployeeScreen = () => {
       item?.total_experience ||
       0;
 
-    const isInvited = invitedEmployees?.some((invited: any) =>
-      (invited?.user_id?._id === item?._id) ||
-      (invited?.user_id === item?._id) ||
-      (invited === item?._id)
+    const isInvited = invitedEmployees?.some(
+      (invited: any) =>
+        invited?.user_id?._id === item?._id ||
+        invited?.user_id === item?._id ||
+        invited === item?._id,
     );
 
     const isSelected = selectedUserIds.includes(item?._id);
@@ -821,16 +950,19 @@ const SuggestedEmployeeScreen = () => {
     return (
       <Pressable
         key={item._id}
-        onPress={() => !isClosedJob && !isInvited && toggleUserSelection(item?._id)}
+        onPress={() =>
+          !isClosedJob && !isInvited && toggleUserSelection(item?._id)
+        }
         style={[
           styles.employeeCard,
           isSelected && styles.selectedEmployeeCard,
           isInvited && styles.invitedCard,
         ]}>
-
         {/* ── Top row: avatar + info + invite button ── */}
         <View style={styles.employeeTopRow}>
-          <TouchableOpacity onPress={() => handleNavigateToProfile(item)} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={() => handleNavigateToProfile(item)}
+            activeOpacity={0.7}>
             {hasValidImage(item?.picture) ? (
               <CustomImage
                 uri={item?.picture}
@@ -840,7 +972,9 @@ const SuggestedEmployeeScreen = () => {
               />
             ) : (
               <View style={[styles.employeeAvatar, styles.avatarFallback]}>
-                <Text style={styles.avatarInitial}>{getInitials(item?.name)}</Text>
+                <Text style={styles.avatarInitial}>
+                  {getInitials(item?.name)}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
@@ -850,8 +984,12 @@ const SuggestedEmployeeScreen = () => {
             onPress={() => handleNavigateToProfile(item)}
             activeOpacity={0.7}>
             <Text style={styles.employeeName}>{item?.name || 'N/A'}</Text>
-            <Text style={styles.employeeRole}>{item?.department_id?.title || 'N/A'}</Text>
-            <Text style={styles.employeeExperience}>{`${experience || 0}`}</Text>
+            <Text style={styles.employeeRole}>
+              {item?.department_id?.title || 'N/A'}
+            </Text>
+            <Text style={styles.employeeExperience}>{`${
+              experience || 0
+            }`}</Text>
           </TouchableOpacity>
 
           {isInvited || isSelected ? (
@@ -923,11 +1061,23 @@ const SuggestedEmployeeScreen = () => {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             onEndReached={() => {
-              if (activeTab === 'suggested' && suggestedHasMore && !isFetchingSuggested) {
+              if (
+                activeTab === 'suggested' &&
+                suggestedHasMore &&
+                !isFetchingSuggested
+              ) {
                 handleLoadMoreSuggested();
-              } else if (activeTab === 'shortlisted' && shortlistedHasMore && !isFetchingJobDetails) {
+              } else if (
+                activeTab === 'shortlisted' &&
+                shortlistedHasMore &&
+                !isFetchingJobDetails
+              ) {
                 handleLoadMoreShortlisted();
-              } else if (activeTab === 'applicants' && applicantsHasMore && !isFetchingJobDetails) {
+              } else if (
+                activeTab === 'applicants' &&
+                applicantsHasMore &&
+                !isFetchingJobDetails
+              ) {
                 handleLoadMoreApplicants();
               }
             }}
@@ -938,23 +1088,26 @@ const SuggestedEmployeeScreen = () => {
                   <View style={styles.jobCardRow}>
                     <Pressable
                       onPress={() => {
-                        navigateTo(SCREENS.ViewCompanyProfile, { companyId: jobInfo?.company_id?._id })
-                      }}
-                    >
-                      {jobInfo?.company_id?.logo ?
+                        navigateTo(SCREENS.ViewCompanyProfile, {
+                          companyId: jobInfo?.company_id?._id,
+                        });
+                      }}>
+                      {jobInfo?.company_id?.logo ? (
                         <CustomImage
                           uri={jobInfo?.company_id?.logo}
                           containerStyle={styles.companyLogo}
                           imageStyle={styles.companyLogo}
                           resizeMode="cover"
                         />
-                        : <View style={styles.companyLogo}>
+                      ) : (
+                        <View style={styles.companyLogo}>
                           <BaseText style={styles.companyLogoText}>
                             {jobInfo?.title?.[0]?.toUpperCase() ||
                               jobInfo?.company_name?.[0]?.toUpperCase() ||
                               'N/A'}
                           </BaseText>
-                        </View>}
+                        </View>
+                      )}
                     </Pressable>
                     <TouchableOpacity
                       activeOpacity={0.7}
@@ -962,11 +1115,12 @@ const SuggestedEmployeeScreen = () => {
                       onPress={() => {
                         const id = jobId || jobInfo?._id;
                         if (!id) return;
-                        console.log("🔥 ~ SuggestedEmployeeScreen ~ id:", id)
-                        navigateTo(SCREENS.JobPreview, { jobId: id });
-                      }}
-                    >
-                      <Text style={styles.jobTitle}>{jobInfo?.title || ''}</Text>
+                        console.log('🔥 ~ SuggestedEmployeeScreen ~ id:', id);
+                        navigateTo(SCREENS.JobPreview, {jobId: id});
+                      }}>
+                      <Text style={styles.jobTitle}>
+                        {jobInfo?.title || ''}
+                      </Text>
                       {(jobLocation || contractTypeLabel) && (
                         <Text style={styles.jobLocation}>
                           {jobLocation}
@@ -992,7 +1146,9 @@ const SuggestedEmployeeScreen = () => {
                           style={styles.actionIcon}
                           tintColor={colors.white}
                         />
-                        <Text style={styles.actionBtnText}>{t('Edit Job')}</Text>
+                        <Text style={styles.actionBtnText}>
+                          {t('Edit Job')}
+                        </Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
@@ -1003,7 +1159,9 @@ const SuggestedEmployeeScreen = () => {
                           style={[styles.actionIcon, styles.closeIcon]}
                           tintColor={colors.white}
                         />
-                        <Text style={styles.actionBtnText}>{t('Close Job')}</Text>
+                        <Text style={styles.actionBtnText}>
+                          {t('Close Job')}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -1016,7 +1174,9 @@ const SuggestedEmployeeScreen = () => {
                     </View>
                     <View style={styles.analyticsTextWrapper}>
                       <Text style={styles.analyticsPrimary}>
-                        {`${ai_data?.ai_candidates || 0} ${t('Candidates Analyzed by AI')}`}
+                        {`${ai_data?.ai_candidates || 0} ${t(
+                          'Candidates Analyzed by AI',
+                        )}`}
                       </Text>
                       <Text style={styles.analyticsSecondary}>
                         {t('Covers all received profiles')}
@@ -1029,10 +1189,14 @@ const SuggestedEmployeeScreen = () => {
                     </View>
                     <View style={styles.analyticsTextWrapper}>
                       <Text style={styles.analyticsPrimary}>
-                        {`${ai_data?.matched_candidates || 0} ${t('Highly Matched Profiles')}`}
+                        {`${ai_data?.matched_candidates || 0} ${t(
+                          'Highly Matched Profiles',
+                        )}`}
                       </Text>
                       <Text style={styles.analyticsSecondary}>
-                        {`${t('For profiles above')} ${ai_data?.match_threshold || 0}% ${t('match score')}`}
+                        {`${t('For profiles above')} ${
+                          ai_data?.match_threshold || 0
+                        }% ${t('match score')}`}
                       </Text>
                     </View>
                   </View>
@@ -1043,10 +1207,13 @@ const SuggestedEmployeeScreen = () => {
                   ref={tabScrollRef}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={[styles.tabContainer, styles.tabScroll]}
+                  contentContainerStyle={[
+                    styles.tabContainer,
+                    styles.tabScroll,
+                  ]}
                   style={styles.tabScrollView}>
                   <View
-                    onLayout={(e) => {
+                    onLayout={e => {
                       tabLayouts.current.suggested = e.nativeEvent.layout.x;
                     }}
                     collapsable={false}>
@@ -1063,13 +1230,17 @@ const SuggestedEmployeeScreen = () => {
                       <Image
                         source={IMAGES.people}
                         style={styles.tabIcon}
-                        tintColor={activeTab === 'suggested' ? colors.white : colors._0B3970}
+                        tintColor={
+                          activeTab === 'suggested'
+                            ? colors.white
+                            : colors._0B3970
+                        }
                       />
                       <Text
                         style={[
                           styles.tabText,
                           activeTab === 'suggested' && styles.activeTabText,
-                          activeTab === 'suggested' && { color: colors.white },
+                          activeTab === 'suggested' && {color: colors.white},
                         ]}
                         numberOfLines={1}>
                         {t('Suggested List')}
@@ -1078,7 +1249,7 @@ const SuggestedEmployeeScreen = () => {
                   </View>
 
                   <View
-                    onLayout={(e) => {
+                    onLayout={e => {
                       tabLayouts.current.shortlisted = e.nativeEvent.layout.x;
                     }}
                     collapsable={false}>
@@ -1099,7 +1270,9 @@ const SuggestedEmployeeScreen = () => {
                             styles.starSmall,
                             {
                               tintColor:
-                                activeTab === 'shortlisted' ? '#8FDBF5' : '#0B3970',
+                                activeTab === 'shortlisted'
+                                  ? '#8FDBF5'
+                                  : '#0B3970',
                             },
                           ]}
                         />
@@ -1109,7 +1282,9 @@ const SuggestedEmployeeScreen = () => {
                             styles.starLarge,
                             {
                               tintColor:
-                                activeTab === 'shortlisted' ? '#D4C6F9' : '#0B3970',
+                                activeTab === 'shortlisted'
+                                  ? '#D4C6F9'
+                                  : '#0B3970',
                             },
                           ]}
                         />
@@ -1117,7 +1292,7 @@ const SuggestedEmployeeScreen = () => {
                       <Text
                         style={[
                           styles.tabText,
-                          activeTab === 'shortlisted' && { color: colors.white },
+                          activeTab === 'shortlisted' && {color: colors.white},
                         ]}
                         numberOfLines={1}>
                         {t('AI Shortlisted')}
@@ -1126,7 +1301,7 @@ const SuggestedEmployeeScreen = () => {
                   </View>
 
                   <View
-                    onLayout={(e) => {
+                    onLayout={e => {
                       tabLayouts.current.applicants = e.nativeEvent.layout.x;
                     }}
                     collapsable={false}>
@@ -1143,12 +1318,16 @@ const SuggestedEmployeeScreen = () => {
                       <Image
                         source={IMAGES.people} // Using same icon as Suggested for now
                         style={styles.tabIcon}
-                        tintColor={activeTab === 'applicants' ? colors.white : colors._0B3970}
+                        tintColor={
+                          activeTab === 'applicants'
+                            ? colors.white
+                            : colors._0B3970
+                        }
                       />
                       <Text
                         style={[
                           styles.tabText,
-                          activeTab === 'applicants' && { color: colors.white },
+                          activeTab === 'applicants' && {color: colors.white},
                         ]}
                         numberOfLines={1}>
                         {t('Applicants')}
@@ -1159,16 +1338,23 @@ const SuggestedEmployeeScreen = () => {
 
                 {activeTab === 'suggested' ? (
                   <>
-
                     <View style={styles.sectionHeader}>
-                      <Text style={styles.sectionTitle}>{t('Suggested Employee')}</Text>
+                      <Text style={styles.sectionTitle}>
+                        {t('Suggested Employee')}
+                      </Text>
                       <TouchableOpacity
                         style={[
                           styles.inviteAllButton,
                           inviteAllSelected && styles.inviteAllButtonSelected,
-                          (isClosedJob || allSuggestedInvited || !displaySuggested?.length) && { opacity: 0.5 },
+                          (isClosedJob ||
+                            allSuggestedInvited ||
+                            !displaySuggested?.length) && {opacity: 0.5},
                         ]}
-                        disabled={isClosedJob || allSuggestedInvited || !displaySuggested?.length}
+                        disabled={
+                          isClosedJob ||
+                          allSuggestedInvited ||
+                          !displaySuggested?.length
+                        }
                         onPress={handleInviteAll}>
                         <View
                           style={[
@@ -1178,7 +1364,8 @@ const SuggestedEmployeeScreen = () => {
                           <Text
                             style={[
                               styles.inviteAllIconText,
-                              inviteAllSelected && styles.inviteAllIconTextSelected,
+                              inviteAllSelected &&
+                                styles.inviteAllIconTextSelected,
                             ]}>
                             ✓
                           </Text>
@@ -1195,12 +1382,14 @@ const SuggestedEmployeeScreen = () => {
 
                     {displaySuggested && displaySuggested.length > 0 ? (
                       <>
-                        {displaySuggested.map((item: any, index: number) => renderEmployee(item))}
+                        {displaySuggested.map((item: any, index: number) =>
+                          renderEmployee(item),
+                        )}
                         {isFetchingSuggested && (
                           <ActivityIndicator
                             size="large"
                             color={colors._0B3970}
-                            style={{ marginVertical: hp(20) }}
+                            style={{marginVertical: hp(20)}}
                           />
                         )}
                       </>
@@ -1222,7 +1411,8 @@ const SuggestedEmployeeScreen = () => {
                     {displayShortlisted && displayShortlisted.length > 0 ? (
                       <>
                         {displayShortlisted.map((item: any) => (
-                          <React.Fragment key={item.user_id?._id || item._id || ''}>
+                          <React.Fragment
+                            key={item.user_id?._id || item._id || ''}>
                             {renderShortlistedEmployee(item)}
                           </React.Fragment>
                         ))}
@@ -1230,7 +1420,7 @@ const SuggestedEmployeeScreen = () => {
                           <ActivityIndicator
                             size="large"
                             color={colors._0B3970}
-                            style={{ marginVertical: hp(20) }}
+                            style={{marginVertical: hp(20)}}
                           />
                         )}
                       </>
@@ -1247,6 +1437,47 @@ const SuggestedEmployeeScreen = () => {
                   </>
                 ) : (
                   <>
+                   <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>
+        {t('Applicants')}
+      </Text>
+      <TouchableOpacity
+        style={[
+          styles.inviteAllButton,
+          inviteAllApplicantsSelected && styles.inviteAllButtonSelected,
+          (isClosedJob ||
+            allApplicantsInvited ||
+            !displayApplicants?.length) && {opacity: 0.5},
+        ]}
+        disabled={
+          isClosedJob ||
+          allApplicantsInvited ||
+          !displayApplicants?.length
+        }
+        onPress={handleInviteAllApplicants}>
+        <View
+          style={[
+            styles.inviteAllIcon,
+            inviteAllApplicantsSelected && styles.inviteAllIconSelected,
+          ]}>
+          <Text
+            style={[
+              styles.inviteAllIconText,
+              inviteAllApplicantsSelected && styles.inviteAllIconTextSelected,
+            ]}>
+            ✓
+          </Text>
+        </View>
+        <Text
+          style={[
+            styles.inviteAllText,
+            inviteAllApplicantsSelected && styles.inviteAllTextSelected,
+          ]}>
+          {t('Invite All')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+
                     {displayApplicants && displayApplicants.length > 0 ? (
                       <>
                         {displayApplicants.map((item: any) => {
@@ -1257,61 +1488,145 @@ const SuggestedEmployeeScreen = () => {
                             user?.total_experience ||
                             0;
                           const languages =
-                            user?.languages?.map((l: any) => l)?.filter(Boolean) || [];
+                            user?.languages
+                              ?.map((l: any) => l)
+                              ?.filter(Boolean) || [];
                           const languageNames = languages
                             .map((l: any) => l?.name)
                             .filter(Boolean);
 
+
+                          const applicantUserId = item?.user_id?._id || item?._id;
+
+const isInvited = invitedEmployees?.some(
+  (invited: any) =>
+    invited?.user_id?._id === applicantUserId ||
+    invited?.user_id === applicantUserId ||
+    invited === applicantUserId,
+);
+
+const isSelected = selectedUserIds.includes(applicantUserId);
                           return (
                             <Pressable
                               key={user?._id || item?._id}
-                              onPress={() => handleNavigateToProfile(user)}
-                              style={styles.employeeCard}>
-                              <View style={styles.employeeTopRow}>
-                                <TouchableOpacity
-                                  onPress={() => handleNavigateToProfile(user)}
-                                  activeOpacity={0.7}>
-                                  {hasValidImage(user?.picture) ? (
-                                    <CustomImage
-                                      uri={user?.picture}
-                                      containerStyle={styles.employeeAvatar}
-                                      imageStyle={styles.employeeAvatar}
-                                      resizeMode="cover"
-                                    />
-                                  ) : (
-                                    <View style={[styles.employeeAvatar, styles.avatarFallback]}>
-                                      <Text style={styles.avatarInitial}>{getInitials(user?.name)}</Text>
-                                    </View>
-                                  )}
-                                </TouchableOpacity>
+                              onPress={() =>
+      !isClosedJob && !isInvited && toggleUserSelection(applicantUserId)
+    }
+    style={[
+      styles.employeeCard,
+      isSelected && styles.selectedEmployeeCard,  // ✅ add selected style
+      isInvited && styles.invitedCard,             // ✅ add invited style
+    ]}>
+                              <View
+                                style={[
+                                  styles.employeeTopRow,
+                                  {
+                                    flexShrink: 1,
+                                    justifyContent: 'space-between',
+                                  },
+                                ]}>
+                                <View
+                                  style={[
+                                    styles.employeeTopRow,
+                                    {flexShrink: 1},
+                                  ]}>
+                                  <TouchableOpacity
+                                    onPress={() =>
+                                      handleNavigateToProfile(user)
+                                    }
+                                    activeOpacity={0.7}>
+                                    {hasValidImage(user?.picture) ? (
+                                      <CustomImage
+                                        uri={user?.picture}
+                                        containerStyle={styles.employeeAvatar}
+                                        imageStyle={styles.employeeAvatar}
+                                        resizeMode="cover"
+                                      />
+                                    ) : (
+                                      <View
+                                        style={[
+                                          styles.employeeAvatar,
+                                          styles.avatarFallback,
+                                        ]}>
+                                        <Text style={styles.avatarInitial}>
+                                          {getInitials(user?.name)}
+                                        </Text>
+                                      </View>
+                                    )}
+                                  </TouchableOpacity>
 
-                                <TouchableOpacity
-                                  style={styles.employeeInfo}
-                                  onPress={() => handleNavigateToProfile(user)}
-                                  activeOpacity={0.7}>
-                                  <Text style={styles.employeeName} numberOfLines={1}>
-                                    {user?.name || 'N/A'}
-                                  </Text>
-                                  {!!user?.desired_job_title && (
-                                    <Text style={styles.employeeRole} numberOfLines={1}>
-                                      {user.desired_job_title}
+                                  <TouchableOpacity
+                                    style={styles.employeeInfo}
+                                    onPress={() =>
+                                      handleNavigateToProfile(user)
+                                    }
+                                    activeOpacity={0.7}>
+                                    <Text
+                                      style={styles.employeeName}
+                                      numberOfLines={1}>
+                                      {user?.name || 'N/A'}
                                     </Text>
-                                  )}
-                                  <Text style={styles.employeeExperience} numberOfLines={1}>
-                                    {`${experience || 0}`}
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
+                                    {!!user?.desired_job_title && (
+                                      <Text
+                                        style={styles.employeeRole}
+                                        numberOfLines={1}>
+                                        {user.desired_job_title}
+                                      </Text>
+                                    )}
+                                    <Text
+                                      style={styles.employeeExperience}
+                                      numberOfLines={1}>
+                                      {`${experience || 0}`}
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                                {isInvited || isSelected ? (
+        <View style={styles.invitedIconContainer}>
+          <Image source={IMAGES.checked} style={styles.invitedIcon} />
+        </View>
+      ) : (
+        <Pressable
+          onPress={event => {
+            event.stopPropagation();
+            if (isClosedJob) return;
+            setInviteAllSelected(false);
+            toggleUserSelection(applicantUserId);  // ✅ consistent ID
+          }}
+          style={[
+            styles.inviteButton,
+            isSelected && styles.inviteButtonSelected,
+            isClosedJob && styles.disabledInviteButton,
+          ]}>
+          <Text
+            style={[
+              styles.inviteButtonText,
+              isSelected && styles.inviteButtonTextSelected,
+              isClosedJob && styles.disabledInviteButtonText,
+            ]}>
+            {t('Invite')}
+          </Text>
+        </Pressable>
+      )}
+    </View>
 
                               {/* Languages row (same as Suggested cards) */}
                               {languageNames.length > 0 && (
                                 <View style={styles.suggestedLanguageContainer}>
                                   <View style={styles.suggestedLanguageRow}>
-                                    {languageNames.slice(0, 3).map((name: string, index: number) => (
-                                      <View key={`${name}-${index}`} style={styles.suggestedLanguageChip}>
-                                        <Text style={styles.suggestedLanguageName}>{name}</Text>
-                                      </View>
-                                    ))}
+                                    {languageNames
+                                      .slice(0, 3)
+                                      .map((name: string, index: number) => (
+                                        <View
+                                          key={`${name}-${index}`}
+                                          style={styles.suggestedLanguageChip}>
+                                          <Text
+                                            style={
+                                              styles.suggestedLanguageName
+                                            }>
+                                            {name}
+                                          </Text>
+                                        </View>
+                                      ))}
                                   </View>
                                 </View>
                               )}
@@ -1322,7 +1637,7 @@ const SuggestedEmployeeScreen = () => {
                           <ActivityIndicator
                             size="large"
                             color={colors._0B3970}
-                            style={{ marginVertical: hp(20) }}
+                            style={{marginVertical: hp(20)}}
                           />
                         )}
                       </>
@@ -1341,13 +1656,18 @@ const SuggestedEmployeeScreen = () => {
               </>
             )}
           />
-          {activeTab === 'suggested' && (
+          {['applicants', 'suggested'].includes(activeTab) && (
             <View style={styles.ctaWrapper}>
               <GradientButton
                 type="Company"
                 style={styles.ctaButton}
                 onPress={handleBulkInvite}
-                disabled={isClosedJob || allSuggestedInvited || !displaySuggested?.length}
+                disabled={
+                  isClosedJob ||
+                  allSuggestedInvited ||
+                  (activeTab === 'suggested' && !displaySuggested?.length) ||
+                  (activeTab === 'applicants' && !displayApplicants?.length)
+                }
                 title={t('Invite for AI Interview')}
               />
             </View>
@@ -1357,7 +1677,7 @@ const SuggestedEmployeeScreen = () => {
       <BottomModal
         visible={showResendSuccessModal}
         backgroundColor={colors.white}
-        onClose={() => { }}>
+        onClose={() => {}}>
         <View style={styles.modalIconWrapper}>
           <LottieView
             source={animation.success_check}
@@ -1390,7 +1710,7 @@ const SuggestedEmployeeScreen = () => {
             setShowResendSuccessModal(false);
             navigationRef.reset({
               index: 0,
-              routes: [{ name: SCREENS.CoTabNavigator }],
+              routes: [{name: SCREENS.CoTabNavigator}],
             });
           }}
         />
@@ -1433,7 +1753,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     elevation: 2,
     marginBottom: hp(16),
   },
@@ -1627,7 +1947,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.04,
     shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     elevation: 1,
     marginBottom: hp(12),
   },
@@ -1892,10 +2212,8 @@ const styles = StyleSheet.create({
     height: wp(16),
     resizeMode: 'contain',
   },
-  timelineLine: {
-  },
-  timelineContent: {
-  },
+  timelineLine: {},
+  timelineContent: {},
   timelineRow: {
     flexDirection: 'row',
     marginBottom: hp(0), // Remove extra margin

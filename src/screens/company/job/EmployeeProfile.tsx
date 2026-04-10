@@ -1,5 +1,5 @@
 import {useRoute} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -31,6 +31,9 @@ import {
 } from '../../../utils/commonFunction';
 import {useGetEmployeeProfileByIdQuery} from '../../../api/dashboardApi';
 import RNFS from 'react-native-fs';
+import ProfileImageViewer, {
+  ProfileImageViewerRef,
+} from '../../../component/common/ProfileImageViewer';
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|gif|webp|bmp)(\?|$)/i;
 const PDF_EXTENSIONS = /\.(pdf)(\?|$)/i;
@@ -44,7 +47,7 @@ const EmployeeProfile = () => {
     {user_id: userId},
     {skip: !userId},
   );
-
+  const profileViewerRef = useRef<ProfileImageViewerRef>(null);
   const userData = profileResponse?.data?.user;
   const assessFirst = userData?.assess_first || userParam?.assess_first;
   const hasAssessFirst = !!assessFirst;
@@ -362,6 +365,7 @@ const EmployeeProfile = () => {
                 imageStyle={styles.profileImage}
                 containerStyle={styles.profileImage}
                 resizeMode="cover"
+                onPress={() => profileViewerRef.current?.open()}
               />
             ) : (
               <View style={[styles.profileImage, styles.avatarPlaceholder]}>
@@ -708,6 +712,11 @@ const EmployeeProfile = () => {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
+      <ProfileImageViewer
+        ref={profileViewerRef}
+        imageUri={profileData.picture}
+        userName={profileData.name}
+      />
 
       {/* Chat Button */}
       <View style={styles.chatButtonContainer}>
