@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -9,11 +9,11 @@ import {
   View,
 } from 'react-native';
 
-import { BackHeader, LinearContainer } from '../../../component';
-import { useTranslation } from 'react-i18next';
-import { SCREEN_WIDTH, commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { IMAGES } from '../../../assets/Images';
-import { colors } from '../../../theme/colors';
+import {BackHeader, LinearContainer} from '../../../component';
+import {useTranslation} from 'react-i18next';
+import {SCREEN_WIDTH, commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {IMAGES} from '../../../assets/Images';
+import {colors} from '../../../theme/colors';
 import BaseText from '../../../component/common/BaseText';
 import {
   useCompanyClearAllNotificationsMutation,
@@ -21,15 +21,19 @@ import {
   useLazyGetCompanyChatsQuery,
   useCompanyMarkReadNotificationsMutation,
 } from '../../../api/dashboardApi';
-import { useFocusEffect } from '@react-navigation/native';
-import { formatDateTime, formatted, navigateTo } from '../../../utils/commonFunction';
-import { useAppDispatch } from '../../../redux/hooks';
-import { setHasUnreadNotification } from '../../../features/authSlice';
-import { AppStyles } from '../../../theme/appStyles';
-import { SCREENS } from '../../../navigation/screenNames';
+import {useFocusEffect} from '@react-navigation/native';
+import {
+  formatDateTime,
+  formatted,
+  navigateTo,
+} from '../../../utils/commonFunction';
+import {useAppDispatch} from '../../../redux/hooks';
+import {setHasUnreadNotification} from '../../../features/authSlice';
+import {AppStyles} from '../../../theme/appStyles';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const CoNotification = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const dispatch = useAppDispatch();
 
   const [allNotifications, setAllNotifications] = useState<any[]>([]);
@@ -38,25 +42,33 @@ const CoNotification = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const [companyMarkReadNotifications] = useCompanyMarkReadNotificationsMutation();
+  const [companyMarkReadNotifications] =
+    useCompanyMarkReadNotificationsMutation();
   const [getCompanyChats] = useLazyGetCompanyChatsQuery();
-  const [companyClearAllNotifications, { isLoading: isClearing }] = useCompanyClearAllNotificationsMutation();
-  const [getNotifications, { isLoading }] = useLazyGetCompanyNotificationQuery();
+  const [companyClearAllNotifications, {isLoading: isClearing}] =
+    useCompanyClearAllNotificationsMutation();
+  const [getNotifications, {isLoading}] = useLazyGetCompanyNotificationQuery();
 
   useFocusEffect(
     useCallback(() => {
       dispatch(setHasUnreadNotification(false));
     }, [dispatch]),
   );
+  console.log(allNotifications, 'allNotificationsallNotifications');
 
   const fetchNotifications = async (pageNum: number, append: boolean) => {
     if (pageNum > 1) setIsFetchingMore(true);
     try {
-      const res = await getNotifications({ page: pageNum, per_page: 10 }).unwrap();
+      const res = await getNotifications({
+        page: pageNum,
+        per_page: 10,
+      }).unwrap();
       const list = res?.data?.notifications || [];
       const pagination = res?.data?.pagination;
       setAllNotifications(prev => (append ? [...prev, ...list] : list));
-      setHasMore((pagination?.current_page ?? 1) < (pagination?.total_pages ?? 1));
+      setHasMore(
+        (pagination?.current_page ?? 1) < (pagination?.total_pages ?? 1),
+      );
       setPage(pageNum);
     } catch (e) {
       console.log('🔥 [Company] notifications fetch error:', e);
@@ -98,49 +110,38 @@ const CoNotification = () => {
   };
 
   const handleNotificationPress = async (item: any) => {
-    const notifType = (item?.data?.type || item?.type || '').toString().toLowerCase();
+    const notifType = (item?.data?.type || item?.type || '')
+      .toString()
+      .toLowerCase();
     const notificationId = item?._id;
 
     try {
       if (notificationId) {
-        console.log('[Company] companyMarkReadNotifications - params:', { notification_id: notificationId });
-        const result = await companyMarkReadNotifications({ notification_id: notificationId }).unwrap();
-        console.log('[Company] companyMarkReadNotifications - response:', result);
+        console.log('[Company] companyMarkReadNotifications - params:', {
+          notification_id: notificationId,
+        });
+        const result = await companyMarkReadNotifications({
+          notification_id: notificationId,
+        }).unwrap();
+        console.log(
+          '[Company] companyMarkReadNotifications - response:',
+          result,
+        );
         setAllNotifications(prev =>
-          prev.map(n =>
-            n._id === notificationId
-              ? { ...n, is_read: true }
-              : n,
-          ),
+          prev.map(n => (n._id === notificationId ? {...n, is_read: true} : n)),
         );
       }
     } catch (e) {
       console.log('[Company] markReadNotifications error:', e);
     }
 
-    // Navigate based on notification type - "New Chat Message!" should go to chat
-    const titleLower = (item?.title || '').toString().toLowerCase();
     const isChatNotification =
-      titleLower.includes('chat') ||
-      titleLower.includes('message') ||
       notifType === 'chat' ||
       notifType === 'message' ||
-      notifType === 'chat_message' ||
-      notifType.includes('chat');
+      notifType === 'chat_message';
 
-    // API shape: data: [{ type: 'chat', id: 'chatId' }]
-    let dataList: any[] = [];
-    if (Array.isArray(item?.data)) {
-      dataList = item.data;
-    } else if (typeof item?.data === 'string') {
-      try {
-        const parsed = JSON.parse(item.data);
-        dataList = Array.isArray(parsed) ? parsed : [];
-      } catch {
-        dataList = [];
-      }
-    }
-    const firstData = dataList[0] || {};
+    const firstData = item?.data || {};
+
     const chatId =
       firstData?.id ||
       firstData?._id ||
@@ -160,33 +161,63 @@ const CoNotification = () => {
 
     const dataType = (firstData?.type || '').toString().toLowerCase();
     const isChatFromData = dataType === 'chat';
-    const jobId = null;
+    const jobId = firstData?.type;
 
     if (isChatNotification || isChatFromData) {
-      if (chatId) {
-        navigateTo(SCREENS.CoChat, {
-          data: {
-            chat_id: chatId,
-            _id: chatId,
-            user_id: employeeData || (employeeId ? { _id: employeeId } : undefined),
-          },
-          isFromJobDetail: false,
-        });
-      } else {
-        navigateTo(SCREENS.CoChat);
-      }
-    } else if (jobId || notifType === 'interview' || notifType.includes('interview')) {
-      if (jobId) {
-        navigateTo(SCREENS.SuggestedEmployee, {
-          jobId,
-          invitationStatus:
-            firstData?.status || firstData?.invitation_status || item?.status,
-        });
-      }
+      navigateTo(SCREENS.CoChat, {
+        data: {
+          chat_id: chatId,
+          _id: chatId,
+          user_id: employeeData || (employeeId ? {_id: employeeId} : undefined),
+        },
+        isFromJobDetail: false,
+      });
+    } else if (
+      jobId === 'job' ||
+      notifType === 'interview' ||
+      notifType.includes('interview')
+    ) {
+      // interview_completed
+      navigateTo(SCREENS.SuggestedEmployee, {
+        jobId: firstData?.id,
+        invitationStatus:
+          firstData?.status || firstData?.invitation_status || item?.status,
+      });
+    } else if (firstData?.type === 'post') {
+      navigateTo(SCREENS.ShowPost, {post: firstData?.post_data});
     }
   };
 
-  const renderItem = ({ item, index }: any) => {
+  const HighlightMessage = ({message}: any) => {
+    // Split text by quotes
+    const parts = message.split(/(".*?")/g);
+
+    return (
+      <BaseText style={styles.time}>
+        {parts.map((part, index) => {
+          // Check if part is inside quotes
+          if (part.startsWith('"') && part.endsWith('"')) {
+            return (
+              <BaseText
+                key={index}
+                style={[
+                  styles.time,
+                  {...commonFontStyle(600, 16, colors._0B3970)},
+                ]}>
+                {part}
+              </BaseText>
+            );
+          }
+          return (
+            <BaseText key={index} style={styles.time}>
+              {part}
+            </BaseText>
+          );
+        })}
+      </BaseText>
+    );
+  };
+  const renderItem = ({item, index}: any) => {
     const notifType = item?.data?.type || item?.type;
     const isRead = Boolean(item?.is_read);
     const showUnreadDot = !isRead;
@@ -201,11 +232,14 @@ const CoNotification = () => {
             <Image source={IMAGES.bell} style={styles.bell} />
             {showUnreadDot && <View style={styles.readDot} />}
           </View>
-          <View style={{ flex: 1, gap: hp(5) }}>
+          <View style={{flex: 1, gap: hp(5)}}>
             <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
-            <BaseText style={styles.time}>{item?.message}</BaseText>
+            {/* <BaseText style={styles.time}>{item?.message}</BaseText> */}
+            <HighlightMessage message={item?.message} />
             <View style={styles.rowBetween}>
-              <BaseText style={styles.time}>{formatDateTime(item?.createdAt)}</BaseText>
+              <BaseText style={styles.time}>
+                {formatDateTime(item?.createdAt)}
+              </BaseText>
               {notifType === 'interview' && (
                 <Pressable
                   onPress={() => handleNotificationPress(item)}
@@ -235,7 +269,7 @@ const CoNotification = () => {
         <TouchableOpacity
           onPress={handleClearAll}
           disabled={isClearing}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
           style={styles.clearAllButton}>
           <BaseText style={styles.clearAllText}>
             {isClearing ? 'clearing...' : 'clear all'}
@@ -263,7 +297,7 @@ const CoNotification = () => {
               <ActivityIndicator
                 size="small"
                 color={colors._D5D5D5}
-                style={{ marginVertical: hp(16) }}
+                style={{marginVertical: hp(16)}}
               />
             ) : null
           }

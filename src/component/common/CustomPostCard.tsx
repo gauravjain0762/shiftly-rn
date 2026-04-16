@@ -1,26 +1,33 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-import { colors } from '../../theme/colors';
-import { commonFontStyle, hp, wp } from '../../theme/fonts';
+import {colors} from '../../theme/colors';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
 import CustomImage from './CustomImage';
-import { IMAGES } from '../../assets/Images';
+import {IMAGES} from '../../assets/Images';
+import {navigateTo} from '../../utils/commonFunction';
+import {SCREENS} from '../../navigation/screenNames';
 
 type Props = {
   title?: string;
   image?: string | string[];
+  item?: any;
 };
 
-const CustomPostCard = ({ title, image }: Props) => {
+const CustomPostCard = ({title, image, item}: Props) => {
   const resolvedImage =
     Array.isArray(image) && image.length > 0
       ? image[0]
       : typeof image === 'string'
-        ? image
-        : null;
+      ? image
+      : null;
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      onPress={() => {
+        navigateTo(SCREENS.ShowPost, {post: item});
+      }}
+      style={styles.card}>
       <View style={styles.imageContainer}>
         <CustomImage
           uri={resolvedImage || undefined}
@@ -32,9 +39,11 @@ const CustomPostCard = ({ title, image }: Props) => {
         />
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.text} numberOfLines={2}>{title}</Text>
+        <Text style={styles.text} numberOfLines={2}>
+          {title}
+        </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -50,7 +59,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E6F0',
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },

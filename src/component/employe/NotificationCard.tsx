@@ -1,27 +1,40 @@
-import React, { FC } from 'react';
-import { Image, Pressable, StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, {FC} from 'react';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 
 import BaseText from '../common/BaseText';
-import { colors } from '../../theme/colors';
-import { IMAGES } from '../../assets/Images';
-import { SCREENS } from '../../navigation/screenNames';
-import { commonFontStyle, hp, wp } from '../../theme/fonts';
-import { formatDateTime, formatted, navigateTo } from '../../utils/commonFunction';
-import { useGetEmployeeJobDetailsQuery, useMarkReadNotificationsMutation } from '../../api/dashboardApi';
+import {colors} from '../../theme/colors';
+import {IMAGES} from '../../assets/Images';
+import {SCREENS} from '../../navigation/screenNames';
+import {commonFontStyle, hp, wp} from '../../theme/fonts';
+import {
+  formatDateTime,
+  formatted,
+  navigateTo,
+} from '../../utils/commonFunction';
+import {
+  useGetEmployeeJobDetailsQuery,
+  useMarkReadNotificationsMutation,
+} from '../../api/dashboardApi';
 
 type props = {
   onPress: () => void;
   item?: any;
 };
 
-const NotificationCard: FC<props> = ({ item }: any) => {
-  console.log("🔥 ~ NotificationCard ~ item:", item)
+const NotificationCard: FC<props> = ({item}: any) => {
+  console.log('🔥 ~ NotificationCard ~ item:', item);
   const notifType = item?.data?.type || item?.type;
   const isRead = !!item?.isRead;
   const showUnreadDot = !isRead;
 
   const interviewJobId = notifType === 'interview' ? item?.data?.id : undefined;
-  const { data: jobDetail } = useGetEmployeeJobDetailsQuery(interviewJobId, {
+  const {data: jobDetail} = useGetEmployeeJobDetailsQuery(interviewJobId, {
     skip: notifType !== 'interview' || !interviewJobId,
   } as any);
 
@@ -31,7 +44,7 @@ const NotificationCard: FC<props> = ({ item }: any) => {
     const notificationId = item?._id;
     try {
       if (notificationId) {
-        await markReadNotifications({ notification_id: notificationId }).unwrap();
+        await markReadNotifications({notification_id: notificationId}).unwrap();
       }
     } catch (e) {
       console.log('markReadNotifications error:', e);
@@ -58,14 +71,9 @@ const NotificationCard: FC<props> = ({ item }: any) => {
         link: item?.data?.interview_link,
         jobDetail: jobDetail?.data,
         invitationStatus:
-          dataObj?.status ||
-          dataObj?.invitation_status ||
-          item?.status,
+          dataObj?.status || dataObj?.invitation_status || item?.status,
         invitationId:
-          dataObj?._id ||
-          dataObj?.invitation_id ||
-          dataObj?.id ||
-          item?._id,
+          dataObj?._id || dataObj?.invitation_id || dataObj?.id || item?._id,
       });
       return;
     }
@@ -95,25 +103,72 @@ const NotificationCard: FC<props> = ({ item }: any) => {
         });
       }
     }
+    if (type === 'job') {
+      navigateTo(SCREENS.JobDetail, {
+        role: 'employee',
+        jobId: item?.data?.id,
+        is_applied: true,
+      });
+    }
   };
 
+  const HighlightMessage = ({message}: any) => {
+    // Split text by quotes
+    const parts = message.split(/(".*?")/g);
+
+    return (
+      <BaseText style={styles.message}>
+        {parts.map((part, index) => {
+          // Check if part is inside quotes
+          if (part.startsWith('"') && part.endsWith('"')) {
+            return (
+              <BaseText
+                key={index}
+                style={[
+                  styles.message,
+                  {...commonFontStyle(600, 16, colors._0B3970)},
+                ]}>
+                {part}
+              </BaseText>
+            );
+          }
+          return (
+            <BaseText key={index} style={styles.message}>
+              {part}
+            </BaseText>
+          );
+        })}
+      </BaseText>
+    );
+  };
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={handlePress}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={handlePress}>
       <View style={[styles.iconWrapper, styles.starIcon]}>
         <Image
           source={IMAGES.bell}
-          style={{ width: wp(16), height: hp(16), resizeMode: 'contain', tintColor: colors._0B3970 }}
+          style={{
+            width: wp(16),
+            height: hp(16),
+            resizeMode: 'contain',
+            tintColor: colors._0B3970,
+          }}
         />
         {showUnreadDot && <View style={styles.readDot} />}
       </View>
-      <View style={{ flex: 1, gap: hp(5) }}>
+      <View style={{flex: 1, gap: hp(5)}}>
         {/* <BaseText style={styles.notificationTitle}>{index + 1}</BaseText> */}
         <BaseText style={styles.notificationTitle}>{item?.title}</BaseText>
-        <BaseText style={styles.message}>{item?.message}</BaseText>
+        {/* <BaseText style={styles.message}>{item?.message}</BaseText> */}
+        <HighlightMessage message={item?.message} />
 
-        <BaseText style={styles.time}>{formatDateTime(item?.createdAt)}</BaseText>
+        <BaseText style={styles.time}>
+          {formatDateTime(item?.createdAt)}
+        </BaseText>
         {notifType === 'interview' && (
-          <View style={{ alignItems: 'flex-end', marginTop: hp(6) }}>
+          <View style={{alignItems: 'flex-end', marginTop: hp(6)}}>
             <Pressable
               onPress={handlePress}
               style={{
@@ -122,7 +177,7 @@ const NotificationCard: FC<props> = ({ item }: any) => {
                 paddingVertical: hp(8),
                 borderRadius: hp(20),
               }}>
-              <BaseText style={{ ...commonFontStyle(500, 13, colors.white) }}>
+              <BaseText style={{...commonFontStyle(500, 13, colors.white)}}>
                 {'View Invitation'}
               </BaseText>
             </Pressable>

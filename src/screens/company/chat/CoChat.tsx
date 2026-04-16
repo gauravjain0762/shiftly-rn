@@ -63,6 +63,8 @@ const quickReplies = ['Hi', 'How are you?', 'Are you available?', 'Check your em
 const CoChat = () => {
   const insets = useSafeAreaInsets();
   const { params } = useRoute<any>();
+  console.log(params,'paramsparamsparams');
+  
   const jobdetail_chatData = params?.data;
   const mainjob_data = params?.mainjob_data;
   const isFromJobDetail = params?.isFromJobDetail ?? false;

@@ -82,6 +82,7 @@ const NotificationScreen = () => {
       console.log('clearAllNotifications error:', error);
     }
   };
+console.log(allNotifications,'allNotificationsallNotifications');
 
   return (
     <LinearContainer colors={[colors._F7F7F7, colors._F7F7F7]}>

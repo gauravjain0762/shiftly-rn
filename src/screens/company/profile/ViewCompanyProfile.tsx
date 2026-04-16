@@ -1,257 +1,278 @@
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import {
-    GradientButton,
-    LinearContainer,
-} from '../../../component';
-import { IMAGES } from '../../../assets/Images';
-import { colors } from '../../../theme/colors';
+import React, {useEffect, useMemo, useState, useCallback, useRef} from 'react';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {GradientButton, LinearContainer} from '../../../component';
+import {IMAGES} from '../../../assets/Images';
+import {colors} from '../../../theme/colors';
 import CustomPostCard from '../../../component/common/CustomPostCard';
 import MyJobCard from '../../../component/common/MyJobCard';
-import { useGetCompanyProfileByIdQuery, useLazyGetCompanyProfileByIdQuery } from '../../../api/dashboardApi';
+import {
+  useGetCompanyProfileByIdQuery,
+  useLazyGetCompanyProfileByIdQuery,
+} from '../../../api/dashboardApi';
 import CoAboutTab from '../../../component/common/CoAboutTab';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectEmployeeState, setViewCompanyProfileInfo, setViewCompanyProfileTabIndex } from '../../../features/employeeSlice';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  selectEmployeeState,
+  setViewCompanyProfileInfo,
+  setViewCompanyProfileTabIndex,
+} from '../../../features/employeeSlice';
 import ExpandableText from '../../../component/common/ExpandableText';
 
 import CompanyProfileSkeleton from '../../../component/skeletons/CompanyProfileSkeleton';
 import PostGridSkeleton from '../../../component/skeletons/PostGridSkeleton';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import {navigateTo} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
 
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
 const ViewCompanyProfile = () => {
-    const { params } = useRoute<any>();
-    const companyId = params?.companyId;
-    console.log("🔥 ~ ViewCompanyProfile ~ companyId:", companyId)
-    const navigation = useNavigation();
+  const {params} = useRoute<any>();
+  const companyId = params?.companyId;
+  console.log('🔥 ~ ViewCompanyProfile ~ companyId:', companyId);
+  const navigation = useNavigation();
 
-    const dispatch = useDispatch();
-    const { viewCompanyProfileTabIndex, viewCompanyProfileInfo } = useSelector(selectEmployeeState);
-    const selectedTabIndex = viewCompanyProfileTabIndex;
-    const companyInfo = viewCompanyProfileInfo;
+  const dispatch = useDispatch();
+  const {viewCompanyProfileTabIndex, viewCompanyProfileInfo} =
+    useSelector(selectEmployeeState);
+  const selectedTabIndex = viewCompanyProfileTabIndex;
+  const companyInfo = viewCompanyProfileInfo;
 
-    // const [companyInfo, setCompanyInfo] = useState<any>(null); // Removed local state
-    const [companyPosts, setCompanyPosts] = useState<any[]>([]);
-    const [companyJobs, setCompanyJobs] = useState<any[]>([]);
+  // const [companyInfo, setCompanyInfo] = useState<any>(null); // Removed local state
+  const [companyPosts, setCompanyPosts] = useState<any[]>([]);
+  const [companyJobs, setCompanyJobs] = useState<any[]>([]);
 
-    const [isLogoLoading, setIsLogoLoading] = useState(false);
-    const [logoLoadError, setLogoLoadError] = useState(false);
-    const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [isCoverImageLoading, setIsCoverImageLoading] = useState(true);
-    const coverImageUriRef = useRef<string | null>(null);
+  const [isLogoLoading, setIsLogoLoading] = useState(false);
+  const [logoLoadError, setLogoLoadError] = useState(false);
+  const logoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isCoverImageLoading, setIsCoverImageLoading] = useState(true);
+  const coverImageUriRef = useRef<string | null>(null);
 
-    const lastLogoUriRef = useRef<string | null>(null);
-    const [postsFetched, setPostsFetched] = useState(false);
-    const [jobsFetched, setJobsFetched] = useState(false);
+  const lastLogoUriRef = useRef<string | null>(null);
+  const [postsFetched, setPostsFetched] = useState(false);
+  const [jobsFetched, setJobsFetched] = useState(false);
 
-    // Extra pages (page 2+) accumulated from lazy load-more calls
-    const [extraPosts, setExtraPosts] = useState<any[]>([]);
-    const [extraJobs, setExtraJobs] = useState<any[]>([]);
-    const [postsPage, setPostsPage] = useState(1);
-    const [jobsPage, setJobsPage] = useState(1);
-    const [postsHasMore, setPostsHasMore] = useState(false);
-    const [jobsHasMore, setJobsHasMore] = useState(false);
+  // Extra pages (page 2+) accumulated from lazy load-more calls
+  const [extraPosts, setExtraPosts] = useState<any[]>([]);
+  const [extraJobs, setExtraJobs] = useState<any[]>([]);
+  const [postsPage, setPostsPage] = useState(1);
+  const [jobsPage, setJobsPage] = useState(1);
+  const [postsHasMore, setPostsHasMore] = useState(false);
+  const [jobsHasMore, setJobsHasMore] = useState(false);
 
-    const queryTab = useMemo(() => {
-        if (selectedTabIndex === 0) return 'info';
-        if (selectedTabIndex === 1) return 'posts';
-        if (selectedTabIndex === 2) return 'jobs';
-        return 'info';
-    }, [selectedTabIndex]);
+  const queryTab = useMemo(() => {
+    if (selectedTabIndex === 0) return 'info';
+    if (selectedTabIndex === 1) return 'posts';
+    if (selectedTabIndex === 2) return 'jobs';
+    return 'info';
+  }, [selectedTabIndex]);
 
-    const { data: companyData, isLoading: isCompanyLoading } =
-        useGetCompanyProfileByIdQuery(
-            { company_id: companyId, tab: queryTab, page: 1 },
-            { skip: !companyId }
+  const {data: companyData, isLoading: isCompanyLoading} =
+    useGetCompanyProfileByIdQuery(
+      {company_id: companyId, tab: queryTab, page: 1},
+      {skip: !companyId},
+    );
+
+  // Lazy query used only for loading additional pages (page 2+)
+  const [fetchMorePages, {isFetching: isFetchingMore}] =
+    useLazyGetCompanyProfileByIdQuery();
+
+  const linearColors = useMemo(() => [colors.white, colors.white], []);
+  const safeAreaProps = useMemo(() => ({edges: ['bottom'] as const}), []);
+
+  // Reset extra-page buffers whenever the tab changes (fresh start for load-more)
+  useEffect(() => {
+    setExtraPosts([]);
+    setExtraJobs([]);
+    setPostsPage(1);
+    setJobsPage(1);
+  }, [selectedTabIndex]);
+
+  useEffect(() => {
+    if (!companyData?.status) return;
+
+    if (companyData?.data?.company) {
+      if (!companyInfo || companyInfo._id !== companyData.data.company._id) {
+        dispatch(setViewCompanyProfileInfo(companyData.data.company));
+      }
+    }
+
+    const tabData = companyData?.data?.tab_data;
+    const pagination = companyData?.data?.pagination;
+    if (Array.isArray(tabData)) {
+      if (selectedTabIndex === 1) {
+        if (tabData.length > 0 || companyPosts.length === 0) {
+          setCompanyPosts(tabData);
+          setExtraPosts([]);
+          const hasMore = pagination
+            ? pagination.current_page < pagination.total_pages
+            : tabData.length >= 10;
+          setPostsHasMore(hasMore);
+          setPostsPage(1);
+          setPostsFetched(true);
+        }
+      } else if (selectedTabIndex === 2) {
+        if (tabData.length > 0 || companyJobs.length === 0) {
+          setCompanyJobs(tabData);
+          setExtraJobs([]);
+          const hasMore = pagination
+            ? pagination.current_page < pagination.total_pages
+            : tabData.length >= 10;
+          setJobsHasMore(hasMore);
+          setJobsPage(1);
+          setJobsFetched(true);
+        }
+      }
+    }
+  }, [
+    companyData,
+    companyInfo,
+    selectedTabIndex,
+    dispatch,
+    companyPosts.length,
+    companyJobs.length,
+  ]);
+
+  const handleLoadMorePosts = useCallback(async () => {
+    if (!postsHasMore || isFetchingMore) return;
+    const nextPage = postsPage + 1;
+    try {
+      const result = await fetchMorePages({
+        company_id: companyId,
+        tab: 'posts',
+        page: nextPage,
+      }).unwrap();
+      if (result?.status && Array.isArray(result?.data?.tab_data)) {
+        setExtraPosts(prev => [...prev, ...result.data.tab_data]);
+        const pagination = result?.data?.pagination;
+        setPostsHasMore(
+          pagination
+            ? pagination.current_page < pagination.total_pages
+            : result.data.tab_data.length >= 10,
         );
+        setPostsPage(nextPage);
+      }
+    } catch (_) {}
+  }, [postsHasMore, isFetchingMore, postsPage, companyId, fetchMorePages]);
 
-    // Lazy query used only for loading additional pages (page 2+)
-    const [fetchMorePages, { isFetching: isFetchingMore }] = useLazyGetCompanyProfileByIdQuery();
+  const handleLoadMoreJobs = useCallback(async () => {
+    if (!jobsHasMore || isFetchingMore) return;
+    const nextPage = jobsPage + 1;
+    try {
+      const result = await fetchMorePages({
+        company_id: companyId,
+        tab: 'jobs',
+        page: nextPage,
+      }).unwrap();
+      if (result?.status && Array.isArray(result?.data?.tab_data)) {
+        setExtraJobs(prev => [...prev, ...result.data.tab_data]);
+        const pagination = result?.data?.pagination;
+        setJobsHasMore(
+          pagination
+            ? pagination.current_page < pagination.total_pages
+            : result.data.tab_data.length >= 10,
+        );
+        setJobsPage(nextPage);
+      }
+    } catch (_) {}
+  }, [jobsHasMore, isFetchingMore, jobsPage, companyId, fetchMorePages]);
 
-    const linearColors = useMemo(() => [colors.white, colors.white], []);
-    const safeAreaProps = useMemo(() => ({ edges: ['bottom'] as const }), []);
+  const displayProfile = companyInfo || companyData?.data?.company || null;
 
-    // Reset extra-page buffers whenever the tab changes (fresh start for load-more)
-    useEffect(() => {
-        setExtraPosts([]);
-        setExtraJobs([]);
-        setPostsPage(1);
-        setJobsPage(1);
-    }, [selectedTabIndex]);
+  const coverImages = useMemo(() => {
+    if (!displayProfile) return [];
 
-    useEffect(() => {
-        if (!companyData?.status) return;
+    const images = displayProfile?.cover_images;
 
-        if (companyData?.data?.company) {
-            if (!companyInfo || companyInfo._id !== companyData.data.company._id) {
-                dispatch(setViewCompanyProfileInfo(companyData.data.company));
-            }
-        }
+    const getCleanUrl = (url: any): string | null => {
+      if (!url) return null;
+      let urlStr =
+        typeof url === 'string'
+          ? url
+          : typeof url === 'object' && url.uri
+          ? url.uri
+          : null;
+      if (!urlStr || typeof urlStr !== 'string') return null;
 
-        const tabData = companyData?.data?.tab_data;
-        const pagination = companyData?.data?.pagination;
-        if (Array.isArray(tabData)) {
-            if (selectedTabIndex === 1) {
-                if (tabData.length > 0 || companyPosts.length === 0) {
-                    setCompanyPosts(tabData);
-                    setExtraPosts([]);
-                    const hasMore = pagination
-                        ? pagination.current_page < pagination.total_pages
-                        : tabData.length >= 10;
-                    setPostsHasMore(hasMore);
-                    setPostsPage(1);
-                    setPostsFetched(true);
-                }
-            } else if (selectedTabIndex === 2) {
-                if (tabData.length > 0 || companyJobs.length === 0) {
-                    setCompanyJobs(tabData);
-                    setExtraJobs([]);
-                    const hasMore = pagination
-                        ? pagination.current_page < pagination.total_pages
-                        : tabData.length >= 10;
-                    setJobsHasMore(hasMore);
-                    setJobsPage(1);
-                    setJobsFetched(true);
-                }
-            }
-        }
-    }, [companyData, companyInfo, selectedTabIndex, dispatch, companyPosts.length, companyJobs.length]);
-
-    const handleLoadMorePosts = useCallback(async () => {
-        if (!postsHasMore || isFetchingMore) return;
-        const nextPage = postsPage + 1;
-        try {
-            const result = await fetchMorePages({
-                company_id: companyId,
-                tab: 'posts',
-                page: nextPage,
-            }).unwrap();
-            if (result?.status && Array.isArray(result?.data?.tab_data)) {
-                setExtraPosts(prev => [...prev, ...result.data.tab_data]);
-                const pagination = result?.data?.pagination;
-                setPostsHasMore(
-                    pagination
-                        ? pagination.current_page < pagination.total_pages
-                        : result.data.tab_data.length >= 10,
-                );
-                setPostsPage(nextPage);
-            }
-        } catch (_) {}
-    }, [postsHasMore, isFetchingMore, postsPage, companyId, fetchMorePages]);
-
-    const handleLoadMoreJobs = useCallback(async () => {
-        if (!jobsHasMore || isFetchingMore) return;
-        const nextPage = jobsPage + 1;
-        try {
-            const result = await fetchMorePages({
-                company_id: companyId,
-                tab: 'jobs',
-                page: nextPage,
-            }).unwrap();
-            if (result?.status && Array.isArray(result?.data?.tab_data)) {
-                setExtraJobs(prev => [...prev, ...result.data.tab_data]);
-                const pagination = result?.data?.pagination;
-                setJobsHasMore(
-                    pagination
-                        ? pagination.current_page < pagination.total_pages
-                        : result.data.tab_data.length >= 10,
-                );
-                setJobsPage(nextPage);
-            }
-        } catch (_) {}
-    }, [jobsHasMore, isFetchingMore, jobsPage, companyId, fetchMorePages]);
-
-    const displayProfile = companyInfo || companyData?.data?.company || null;
-
-    const coverImages = useMemo(() => {
-        if (!displayProfile) return [];
-
-        const images = displayProfile?.cover_images;
-
-        const getCleanUrl = (url: any): string | null => {
-            if (!url) return null;
-            let urlStr =
-                typeof url === 'string'
-                    ? url
-                    : typeof url === 'object' && url.uri
-                        ? url.uri
-                        : null;
-            if (!urlStr || typeof urlStr !== 'string') return null;
-
-            const trimmed = urlStr.trim();
-            if (trimmed === '' || trimmed.toLowerCase().includes('blank'))
-                return null;
-
-            const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
-            if (trimmed.includes(baseUrl + baseUrl)) {
-                return trimmed.replace(baseUrl + baseUrl, baseUrl);
-            }
-            return trimmed;
-        };
-
-        if (images && Array.isArray(images) && images.length > 0) {
-            const validImages = images
-                .map(img => getCleanUrl(img))
-                .filter((url): url is string => !!url);
-
-            if (validImages.length > 0) {
-                return validImages.map(url => ({ uri: url }));
-            }
-        }
-
-        return [];
-    }, [displayProfile]);
-
-    // Memoize the source object for Image to prevent unnecessary re-fetches/updates
-    const coverImageSource = useMemo(() => {
-        if (coverImages.length > 0 && coverImages[0]?.uri) {
-            return { uri: coverImages[0].uri };
-        }
+      const trimmed = urlStr.trim();
+      if (trimmed === '' || trimmed.toLowerCase().includes('blank'))
         return null;
-    }, [coverImages]);
 
-    const shouldShowCoverLoader = isCompanyLoading && !companyInfo;
+      const baseUrl = 'https://sky.devicebee.com/Shiftly/public/uploads/';
+      if (trimmed.includes(baseUrl + baseUrl)) {
+        return trimmed.replace(baseUrl + baseUrl, baseUrl);
+      }
+      return trimmed;
+    };
 
-    useEffect(() => {
-        const uri = coverImageSource?.uri || null;
-        if (uri !== coverImageUriRef.current) {
-            coverImageUriRef.current = uri;
-            setIsCoverImageLoading(!!uri);
-        }
-    }, [coverImageSource]);
+    if (images && Array.isArray(images) && images.length > 0) {
+      const validImages = images
+        .map(img => getCleanUrl(img))
+        .filter((url): url is string => !!url);
 
-    const displayPosts = [...(Array.isArray(companyPosts) ? companyPosts : []), ...extraPosts];
-    const displayJobs = [...(Array.isArray(companyJobs) ? companyJobs : []), ...extraJobs];
+      if (validImages.length > 0) {
+        return validImages.map(url => ({uri: url}));
+      }
+    }
 
-    // Debug render counts
-    const renderCount = useRef(0);
-    renderCount.current += 1;
-    // console.log(`ViewCompanyProfile Render #${renderCount.current} - Tab: ${selectedTabIndex} IsLoading: ${isCompanyLoading}`);
+    return [];
+  }, [displayProfile]);
 
-    // Log important state for debugging (can be removed later)
-    useEffect(() => {
-        console.log('DEBUG: displayProfile:', displayProfile);
-        console.log('DEBUG: shouldShowCoverLoader:', shouldShowCoverLoader);
-        // console.log(`Stable Check - Loading: ${isCompanyLoading}, Info: ${!!companyInfo}, ShowLoader: ${shouldShowCoverLoader}`);
-    }, [isCompanyLoading, companyInfo, shouldShowCoverLoader, displayProfile]);
+  // Memoize the source object for Image to prevent unnecessary re-fetches/updates
+  const coverImageSource = useMemo(() => {
+    if (coverImages.length > 0 && coverImages[0]?.uri) {
+      return {uri: coverImages[0].uri};
+    }
+    return null;
+  }, [coverImages]);
 
-    // Clear info when leaving the screen completely (optional, depends on UX preference)
-    // For now, let's clear it on unmount to force fresh fetch next time the screen is opened
-    /* 
+  const shouldShowCoverLoader = isCompanyLoading && !companyInfo;
+
+  useEffect(() => {
+    const uri = coverImageSource?.uri || null;
+    if (uri !== coverImageUriRef.current) {
+      coverImageUriRef.current = uri;
+      setIsCoverImageLoading(!!uri);
+    }
+  }, [coverImageSource]);
+
+  const displayPosts = [
+    ...(Array.isArray(companyPosts) ? companyPosts : []),
+    ...extraPosts,
+  ];
+  const displayJobs = [
+    ...(Array.isArray(companyJobs) ? companyJobs : []),
+    ...extraJobs,
+  ];
+
+  // Debug render counts
+  const renderCount = useRef(0);
+  renderCount.current += 1;
+  // console.log(`ViewCompanyProfile Render #${renderCount.current} - Tab: ${selectedTabIndex} IsLoading: ${isCompanyLoading}`);
+
+  // Log important state for debugging (can be removed later)
+  useEffect(() => {
+    console.log('DEBUG: displayProfile:', displayProfile);
+    console.log('DEBUG: shouldShowCoverLoader:', shouldShowCoverLoader);
+    // console.log(`Stable Check - Loading: ${isCompanyLoading}, Info: ${!!companyInfo}, ShowLoader: ${shouldShowCoverLoader}`);
+  }, [isCompanyLoading, companyInfo, shouldShowCoverLoader, displayProfile]);
+
+  // Clear info when leaving the screen completely (optional, depends on UX preference)
+  // For now, let's clear it on unmount to force fresh fetch next time the screen is opened
+  /* 
     // REMOVED CLEANUP TO PREVENT FLICKER ON TAB CHANGE / REMOUNT
     useEffect(() => {
         return () => {
@@ -260,498 +281,541 @@ const ViewCompanyProfile = () => {
     }, [dispatch]);
     */
 
-    const handleBackPress = useCallback(() => {
-        dispatch(setViewCompanyProfileTabIndex(0));
-        dispatch(setViewCompanyProfileInfo(null)); // Clear info on back press explicitly
-        if (navigation.canGoBack()) {
-            navigation.goBack();
-        }
-    }, [navigation, dispatch]);
+  const handleBackPress = useCallback(() => {
+    dispatch(setViewCompanyProfileTabIndex(0));
+    dispatch(setViewCompanyProfileInfo(null)); // Clear info on back press explicitly
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  }, [navigation, dispatch]);
 
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         return () => {
-    //             dispatch(setViewCompanyProfileTabIndex(0));
-    //         };
-    //     }, [dispatch])
-    // );
+  // useFocusEffect(
+  //     useCallback(() => {
+  //         return () => {
+  //             dispatch(setViewCompanyProfileTabIndex(0));
+  //         };
+  //     }, [dispatch])
+  // );
 
-    const handleTabPress = useCallback((index: number) => {
-        dispatch(setViewCompanyProfileTabIndex(index));
-    }, [dispatch]);
+  const handleTabPress = useCallback(
+    (index: number) => {
+      dispatch(setViewCompanyProfileTabIndex(index));
+    },
+    [dispatch],
+  );
 
-    const renderJobs = useMemo(() => {
-        if (selectedTabIndex !== 2) return null;
+  const renderJobs = useMemo(() => {
+    if (selectedTabIndex !== 2) return null;
 
-        if (isCompanyLoading && !jobsFetched) {
-            return (
-                <ActivityIndicator
-                    size="small"
-                    color={colors._0B3970}
-                    style={{ marginTop: hp(20) }}
-                />
-            );
-        }
+    if (isCompanyLoading && !jobsFetched) {
+      return (
+        <ActivityIndicator
+          size="small"
+          color={colors._0B3970}
+          style={{marginTop: hp(20)}}
+        />
+      );
+    }
 
-        if (!Array.isArray(displayJobs) || displayJobs.length === 0) {
-            return (
-                <View style={styles.emptyContainer}>
-                    <Text
-                        style={[
-                            commonFontStyle(500, 16, colors._0B3970),
-                            { textAlign: 'center', marginTop: hp(20) },
-                        ]}>
-                        No Jobs Found
-                    </Text>
-                </View>
-            );
-        }
-
-        return (
-            <>
-                {displayJobs.map((item: any, index: number) => {
-                    if (!item) return null;
-                    return (
-                        <View style={{ marginBottom: hp(15) }} key={`job-${item._id || item.id || index}`}>
-                            <MyJobCard item={item} onPressShare={() => { }} />
-                        </View>
-                    );
-                })}
-                {isFetchingMore && (
-                    <ActivityIndicator
-                        size="large"
-                        color={colors._0B3970}
-                        style={{marginVertical: hp(20)}}
-                    />
-                )}
-            </>
-        );
-    }, [selectedTabIndex, displayJobs, isCompanyLoading, jobsFetched, jobsHasMore, isFetchingMore, handleLoadMoreJobs]);
-
-    const hasValidLogo = useMemo(() => {
-        const logo = displayProfile?.logo;
-        if (logo) {
-            if (typeof logo === 'string' && logo.trim() !== '') return true;
-            if (typeof logo === 'object' && logo?.uri) return true;
-        }
-        return false;
-    }, [displayProfile?.logo]);
-
-    const logoUri = useMemo(() => {
-        const logo = displayProfile?.logo;
-        if (logo) {
-            if (typeof logo === 'object' && logo?.uri) return logo.uri;
-            if (typeof logo === 'string' && logo.trim() !== '') return logo;
-        }
-        return null;
-    }, [displayProfile?.logo]);
-
-    const logoSource = useMemo(() => logoUri ? { uri: logoUri } : null, [logoUri]);
-
-    useEffect(() => {
-        if (logoLoadTimeoutRef.current) {
-            clearTimeout(logoLoadTimeoutRef.current);
-            logoLoadTimeoutRef.current = null;
-        }
-        return () => {
-            if (logoLoadTimeoutRef.current) {
-                clearTimeout(logoLoadTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    const coverImageContent = useMemo(() => (
-        <>
-            {coverImageSource ? (
-                <>
-                    <Image
-                        source={coverImageSource}
-                        style={{ width: '100%', height: '100%' }}
-                        resizeMode="cover"
-                        onLoadStart={() => setIsCoverImageLoading(true)}
-                        onLoad={() => setIsCoverImageLoading(false)}
-                        onError={() => setIsCoverImageLoading(false)}
-                    />
-                    {isCoverImageLoading && (
-                        <View
-                            style={[StyleSheet.absoluteFillObject, { overflow: 'hidden' }]}
-                            pointerEvents="none"
-                        >
-                            <SkeletonPlaceholder
-                                backgroundColor={colors._F7F7F7}
-                                highlightColor={colors.white}
-                                borderRadius={4}
-                            >
-                                <View
-                                    style={{
-                                        width: Dimensions.get('window').width,
-                                        height: 250,
-                                    }}
-                                />
-                            </SkeletonPlaceholder>
-                        </View>
-                    )}
-                </>
-            ) : (
-                !shouldShowCoverLoader && (
-                    <Image
-                        source={IMAGES.logoText}
-                        style={{ width: '100%', height: '100%' }}
-                        resizeMode="contain"
-                    />
-                )
-            )}
-        </>
-    ), [coverImageSource, shouldShowCoverLoader, isCoverImageLoading]);
-
-    const logoImageContent = useMemo(() => (
-        hasValidLogo && logoSource && !logoLoadError ? (
-            <View style={styles.logoContainerWrapper}>
-                <Image
-                    source={logoSource}
-                    style={styles.logoImage}
-                    resizeMode="cover"
-                    onLoadStart={() => {
-                        if (logoUri !== lastLogoUriRef.current) {
-                            setIsLogoLoading(true);
-                            setLogoLoadError(false);
-                        }
-                    }}
-                    onLoad={() => {
-                        setIsLogoLoading(false);
-                        setLogoLoadError(false);
-                        lastLogoUriRef.current = logoUri;
-                    }}
-                    onError={() => {
-                        setIsLogoLoading(false);
-                        setLogoLoadError(true);
-                    }}
-                />
-                {isLogoLoading && (
-                    <View style={styles.logoLoaderContainer}>
-                        <ActivityIndicator size="small" color={colors._0B3970} />
-                    </View>
-                )}
-            </View>
-        ) : (
-            !isLogoLoading && !shouldShowCoverLoader && (
-                <Image
-                    resizeMode="contain"
-                    source={IMAGES.logoText}
-                    style={styles.logoPlaceholderImage}
-                />
-            )
-        )
-    ), [hasValidLogo, logoUri, logoLoadError, isLogoLoading, shouldShowCoverLoader, logoSource]);
-
-    if (isCompanyLoading && !companyInfo) {
-        return <CompanyProfileSkeleton />;
+    if (!Array.isArray(displayJobs) || displayJobs.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text
+            style={[
+              commonFontStyle(500, 16, colors._0B3970),
+              {textAlign: 'center', marginTop: hp(20)},
+            ]}>
+            No Jobs Found
+          </Text>
+        </View>
+      );
     }
 
     return (
-        <SafeAreaView
-            edges={['bottom']}
-            style={{ flex: 1, backgroundColor: colors.white }}>
-            <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-                <Image source={IMAGES.backArrow} style={styles.backArrow} />
-            </TouchableOpacity>
-            <ScrollView
-                contentContainerStyle={{
-                    paddingBottom: hp(40),
-                    backgroundColor: colors.white,
+      <>
+        {displayJobs.map((item: any, index: number) => {
+          if (!item) return null;
+          return (
+            <View
+              style={{marginBottom: hp(15)}}
+              key={`job-${item._id || item.id || index}`}>
+              <MyJobCard
+                item={item}
+                onPressShare={() => {}}
+                onPressCard={() => {
+                  navigateTo(SCREENS.JobDetail, {
+                    role: 'employee',
+                    jobId: item?._id,
+                    is_applied: item?.is_applied,
+                  });
                 }}
-                showsVerticalScrollIndicator={false}
-                onScroll={({ nativeEvent }) => {
-                    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-                    const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
-                    if (isCloseToBottom) {
-                        if (selectedTabIndex === 1 && postsHasMore && !isFetchingMore) {
-                            handleLoadMorePosts();
-                        } else if (selectedTabIndex === 2 && jobsHasMore && !isFetchingMore) {
-                            handleLoadMoreJobs();
-                        }
-                    }
-                }}
-                scrollEventThrottle={400}>
-                <View style={styles.container}>
-                    <View style={{ width: '100%', height: 250 }}>
-                        {coverImageContent}
-                        {shouldShowCoverLoader && (
-                            <View style={[styles.logoLoaderContainer, { backgroundColor: 'rgba(255,255,255,0.5)' }]}>
-                                <ActivityIndicator size="small" color={colors._0B3970} />
-                            </View>
-                        )}
-                    </View>
-
-                    <LinearContainer
-                        SafeAreaProps={safeAreaProps}
-                        containerStyle={styles.linearContainer}
-                        colors={linearColors}>
-                        <View style={styles.profileHeader}>
-                            <View style={styles.logoContainer}>
-                                {logoImageContent}
-                            </View>
-
-                            <View style={styles.titleTextContainer}>
-                                <Text style={styles.companyName}>
-                                    {typeof displayProfile?.company_name === 'string'
-                                        ? displayProfile.company_name
-                                            .split(' ')
-                                            .filter(Boolean)
-                                            .map((word: string) =>
-                                                /[A-Z]/.test(word.slice(1))
-                                                    ? word
-                                                    : word.charAt(0).toUpperCase() +
-                                                    word.slice(1).toLowerCase(),
-                                            )
-                                            .join(' ')
-                                        : displayProfile?.company_name
-                                            ? String(displayProfile.company_name)
-                                            : isCompanyLoading
-                                                ? 'Loading...'
-                                                : 'N/A'}
-                                </Text>
-
-                                {displayProfile?.mission && (
-                                    <Text style={styles.tagline}>{displayProfile?.mission}</Text>
-                                )}
-                            </View>
-                        </View>
-
-                        {displayProfile?.about && (
-                            <ExpandableText
-                                maxLines={3}
-                                showStyle={{ paddingHorizontal: 0 }}
-                                descriptionStyle={styles.description}
-                                description={String(displayProfile?.about)}
-                            />
-                        )}
-
-                        {displayProfile?.values && (
-                            <Text style={styles.description}>{displayProfile?.values}</Text>
-                        )}
-
-                        <View style={styles.tabRow}>
-                            {ProfileTabs.map((item, index) => (
-                                <Pressable
-                                    key={item}
-                                    onPress={() => handleTabPress(index)}
-                                    style={styles.tabItem}>
-                                    <Text style={styles.tabText}>{item}</Text>
-                                    {selectedTabIndex === index && (
-                                        <View style={styles.tabIndicator} />
-                                    )}
-                                </Pressable>
-                            ))}
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        {selectedTabIndex === 0 && displayProfile && (
-                            <CoAboutTab
-                                companyProfileData={displayProfile}
-                                companyProfileAllData={displayProfile}
-                            />
-                        )}
-
-                        {selectedTabIndex === 1 && (
-                            <View style={{ marginTop: hp(10) }}>
-                                {(isCompanyLoading || isFetchingMore) && displayPosts.length === 0 ? (
-                                    <PostGridSkeleton />
-                                ) : displayPosts && displayPosts.length > 0 ? (
-                                    <>
-                                        <View
-                                            style={{
-                                                flexDirection: 'row',
-                                                flexWrap: 'wrap',
-                                                justifyContent: 'space-between',
-                                            }}>
-                                            {displayPosts.map((item: any, index: number) => (
-                                                <View
-                                                    key={`post-${item._id || item.id || index}`}
-                                                    style={{ width: '48%', marginBottom: hp(10) }}>
-                                                    <CustomPostCard
-                                                        title={item?.title}
-                                                        image={item?.images}
-                                                    />
-                                                </View>
-                                            ))}
-                                        </View>
-                                        {isFetchingMore && (
-                                            <ActivityIndicator
-                                                size="large"
-                                                color={colors._0B3970}
-                                                style={{marginVertical: hp(20)}}
-                                            />
-                                        )}
-                                    </>
-                                ) : (
-                                    // Show "No Posts Found" only after initial fetch completes
-                                    postsFetched ? (
-                                        <View style={styles.emptyContainer}>
-                                            <Text
-                                                style={[
-                                                    commonFontStyle(500, 16, colors._0B3970),
-                                                    { textAlign: 'center' },
-                                                ]}>
-                                                No Posts Found
-                                            </Text>
-                                        </View>
-                                    ) : (
-                                        <PostGridSkeleton />
-                                    )
-                                )}
-                            </View>
-                        )}
-
-                        {renderJobs}
-
-
-                    </LinearContainer>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+              />
+            </View>
+          );
+        })}
+        {isFetchingMore && (
+          <ActivityIndicator
+            size="large"
+            color={colors._0B3970}
+            style={{marginVertical: hp(20)}}
+          />
+        )}
+      </>
     );
+  }, [
+    selectedTabIndex,
+    displayJobs,
+    isCompanyLoading,
+    jobsFetched,
+    jobsHasMore,
+    isFetchingMore,
+    handleLoadMoreJobs,
+  ]);
+
+  const hasValidLogo = useMemo(() => {
+    const logo = displayProfile?.logo;
+    if (logo) {
+      if (typeof logo === 'string' && logo.trim() !== '') return true;
+      if (typeof logo === 'object' && logo?.uri) return true;
+    }
+    return false;
+  }, [displayProfile?.logo]);
+
+  const logoUri = useMemo(() => {
+    const logo = displayProfile?.logo;
+    if (logo) {
+      if (typeof logo === 'object' && logo?.uri) return logo.uri;
+      if (typeof logo === 'string' && logo.trim() !== '') return logo;
+    }
+    return null;
+  }, [displayProfile?.logo]);
+
+  const logoSource = useMemo(
+    () => (logoUri ? {uri: logoUri} : null),
+    [logoUri],
+  );
+
+  useEffect(() => {
+    if (logoLoadTimeoutRef.current) {
+      clearTimeout(logoLoadTimeoutRef.current);
+      logoLoadTimeoutRef.current = null;
+    }
+    return () => {
+      if (logoLoadTimeoutRef.current) {
+        clearTimeout(logoLoadTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const coverImageContent = useMemo(
+    () => (
+      <>
+        {coverImageSource ? (
+          <>
+            <Image
+              source={coverImageSource}
+              style={{width: '100%', height: '100%'}}
+              resizeMode="cover"
+              onLoadStart={() => setIsCoverImageLoading(true)}
+              onLoad={() => setIsCoverImageLoading(false)}
+              onError={() => setIsCoverImageLoading(false)}
+            />
+            {isCoverImageLoading && (
+              <View
+                style={[StyleSheet.absoluteFillObject, {overflow: 'hidden'}]}
+                pointerEvents="none">
+                <SkeletonPlaceholder
+                  backgroundColor={colors._F7F7F7}
+                  highlightColor={colors.white}
+                  borderRadius={4}>
+                  <View
+                    style={{
+                      width: Dimensions.get('window').width,
+                      height: 250,
+                    }}
+                  />
+                </SkeletonPlaceholder>
+              </View>
+            )}
+          </>
+        ) : (
+          !shouldShowCoverLoader && (
+            <Image
+              source={IMAGES.logoText}
+              style={{width: '100%', height: '100%'}}
+              resizeMode="contain"
+            />
+          )
+        )}
+      </>
+    ),
+    [coverImageSource, shouldShowCoverLoader, isCoverImageLoading],
+  );
+
+  const logoImageContent = useMemo(
+    () =>
+      hasValidLogo && logoSource && !logoLoadError ? (
+        <View style={styles.logoContainerWrapper}>
+          <Image
+            source={logoSource}
+            style={styles.logoImage}
+            resizeMode="cover"
+            onLoadStart={() => {
+              if (logoUri !== lastLogoUriRef.current) {
+                setIsLogoLoading(true);
+                setLogoLoadError(false);
+              }
+            }}
+            onLoad={() => {
+              setIsLogoLoading(false);
+              setLogoLoadError(false);
+              lastLogoUriRef.current = logoUri;
+            }}
+            onError={() => {
+              setIsLogoLoading(false);
+              setLogoLoadError(true);
+            }}
+          />
+          {isLogoLoading && (
+            <View style={styles.logoLoaderContainer}>
+              <ActivityIndicator size="small" color={colors._0B3970} />
+            </View>
+          )}
+        </View>
+      ) : (
+        !isLogoLoading &&
+        !shouldShowCoverLoader && (
+          <Image
+            resizeMode="contain"
+            source={IMAGES.logoText}
+            style={styles.logoPlaceholderImage}
+          />
+        )
+      ),
+    [
+      hasValidLogo,
+      logoUri,
+      logoLoadError,
+      isLogoLoading,
+      shouldShowCoverLoader,
+      logoSource,
+    ],
+  );
+
+  if (isCompanyLoading && !companyInfo) {
+    return <CompanyProfileSkeleton />;
+  }
+
+  return (
+    <SafeAreaView
+      edges={['bottom']}
+      style={{flex: 1, backgroundColor: colors.white}}>
+      <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <Image source={IMAGES.backArrow} style={styles.backArrow} />
+      </TouchableOpacity>
+      <ScrollView
+        contentContainerStyle={{
+          paddingBottom: hp(40),
+          backgroundColor: colors.white,
+        }}
+        showsVerticalScrollIndicator={false}
+        onScroll={({nativeEvent}) => {
+          const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
+          const isCloseToBottom =
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 100;
+          if (isCloseToBottom) {
+            if (selectedTabIndex === 1 && postsHasMore && !isFetchingMore) {
+              handleLoadMorePosts();
+            } else if (
+              selectedTabIndex === 2 &&
+              jobsHasMore &&
+              !isFetchingMore
+            ) {
+              handleLoadMoreJobs();
+            }
+          }
+        }}
+        scrollEventThrottle={400}>
+        <View style={styles.container}>
+          <View style={{width: '100%', height: 250}}>
+            {coverImageContent}
+            {shouldShowCoverLoader && (
+              <View
+                style={[
+                  styles.logoLoaderContainer,
+                  {backgroundColor: 'rgba(255,255,255,0.5)'},
+                ]}>
+                <ActivityIndicator size="small" color={colors._0B3970} />
+              </View>
+            )}
+          </View>
+
+          <LinearContainer
+            SafeAreaProps={safeAreaProps}
+            containerStyle={styles.linearContainer}
+            colors={linearColors}>
+            <View style={styles.profileHeader}>
+              <View style={styles.logoContainer}>{logoImageContent}</View>
+
+              <View style={styles.titleTextContainer}>
+                <Text style={styles.companyName}>
+                  {typeof displayProfile?.company_name === 'string'
+                    ? displayProfile.company_name
+                        .split(' ')
+                        .filter(Boolean)
+                        .map((word: string) =>
+                          /[A-Z]/.test(word.slice(1))
+                            ? word
+                            : word.charAt(0).toUpperCase() +
+                              word.slice(1).toLowerCase(),
+                        )
+                        .join(' ')
+                    : displayProfile?.company_name
+                    ? String(displayProfile.company_name)
+                    : isCompanyLoading
+                    ? 'Loading...'
+                    : 'N/A'}
+                </Text>
+
+                {displayProfile?.mission && (
+                  <Text style={styles.tagline}>{displayProfile?.mission}</Text>
+                )}
+              </View>
+            </View>
+
+            {displayProfile?.about && (
+              <ExpandableText
+                maxLines={3}
+                showStyle={{paddingHorizontal: 0}}
+                descriptionStyle={styles.description}
+                description={String(displayProfile?.about)}
+              />
+            )}
+
+            {displayProfile?.values && (
+              <Text style={styles.description}>{displayProfile?.values}</Text>
+            )}
+
+            <View style={styles.tabRow}>
+              {ProfileTabs.map((item, index) => (
+                <Pressable
+                  key={item}
+                  onPress={() => handleTabPress(index)}
+                  style={styles.tabItem}>
+                  <Text style={styles.tabText}>{item}</Text>
+                  {selectedTabIndex === index && (
+                    <View style={styles.tabIndicator} />
+                  )}
+                </Pressable>
+              ))}
+            </View>
+
+            <View style={styles.divider} />
+
+            {selectedTabIndex === 0 && displayProfile && (
+              <CoAboutTab
+                companyProfileData={displayProfile}
+                companyProfileAllData={displayProfile}
+              />
+            )}
+
+            {selectedTabIndex === 1 && (
+              <View style={{marginTop: hp(10)}}>
+                {(isCompanyLoading || isFetchingMore) &&
+                displayPosts.length === 0 ? (
+                  <PostGridSkeleton />
+                ) : displayPosts && displayPosts.length > 0 ? (
+                  <>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'space-between',
+                      }}>
+                      {displayPosts.map((item: any, index: number) => (
+                        <View
+                          key={`post-${item._id || item.id || index}`}
+                          style={{width: '48%', marginBottom: hp(10)}}>
+                          <CustomPostCard
+                            title={item?.title}
+                            image={item?.images}
+                            item={item}
+                          />
+                        </View>
+                      ))}
+                    </View>
+                    {isFetchingMore && (
+                      <ActivityIndicator
+                        size="large"
+                        color={colors._0B3970}
+                        style={{marginVertical: hp(20)}}
+                      />
+                    )}
+                  </>
+                ) : // Show "No Posts Found" only after initial fetch completes
+                postsFetched ? (
+                  <View style={styles.emptyContainer}>
+                    <Text
+                      style={[
+                        commonFontStyle(500, 16, colors._0B3970),
+                        {textAlign: 'center'},
+                      ]}>
+                      No Posts Found
+                    </Text>
+                  </View>
+                ) : (
+                  <PostGridSkeleton />
+                )}
+              </View>
+            )}
+
+            {renderJobs}
+          </LinearContainer>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 export default ViewCompanyProfile;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  linearContainer: {
+    paddingHorizontal: wp(21),
+    backgroundColor: colors.white,
+    paddingTop: 0,
+    marginTop: hp(10),
+    flex: 1,
+    padding: 0,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 22,
+    zIndex: 111,
+  },
+  backArrow: {
+    width: wp(21),
+    height: wp(21),
+    tintColor: colors.empPrimary,
+  },
+  profileHeader: {
+    gap: 12,
+    marginTop: hp(-30),
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  logoContainer: {
+    width: wp(90),
+    height: wp(90),
+    borderRadius: 100,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    linearContainer: {
-        paddingHorizontal: wp(21),
-        backgroundColor: colors.white,
-        paddingTop: 0,
-        marginTop: hp(10),
-        flex: 1,
-        padding: 0,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 60,
-        left: 22,
-        zIndex: 111,
-    },
-    backArrow: {
-        width: wp(21),
-        height: wp(21),
-        tintColor: colors.empPrimary,
-    },
-    profileHeader: {
-        gap: 12,
-        marginTop: hp(-30),
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        width: '100%',
-        alignSelf: 'center',
-    },
-    logoContainer: {
-        width: wp(90),
-        height: wp(90),
-        borderRadius: 100,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 8,
-        elevation: 1,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    logoLoaderContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        borderRadius: 100,
-        zIndex: 1,
-    },
-    logoPlaceholderImage: {
-        width: '80%',
-        height: '80%',
-    },
-    titleTextContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        gap: hp(7),
-    },
-    companyName: {
-        ...commonFontStyle(600, 22, colors._0B3970),
-    },
-    tagline: {
-        ...commonFontStyle(400, 14, colors.black),
-    },
-    description: {
-        ...commonFontStyle(400, 15, colors._3D3D3D),
-        marginTop: hp(11),
-        // lineHeight: hp(25), // Potential crash cause with certain fonts/Android versions
-    },
-    tabRow: {
-        marginTop: hp(25),
-        flexDirection: 'row',
-    },
-    tabItem: {
-        flex: 1,
-        alignItems: 'center',
-    },
-    tabText: {
-        ...commonFontStyle(500, 18, colors._0B3970),
-    },
-    tabIndicator: {
-        bottom: '-85%',
-        height: hp(4),
-        width: '50%',
-        alignSelf: 'center',
-        position: 'absolute',
-        borderRadius: hp(20),
-        backgroundColor: colors._0B3970,
-    },
-    divider: {
-        height: 1,
-        width: '150%',
-        alignSelf: 'center',
-        marginVertical: hp(16),
-        backgroundColor: colors.coPrimary,
-    },
-    emptyContainer: {
-        flex: 1,
-        backgroundColor: colors.white,
-        paddingVertical: hp(20),
-    },
-    logoContainerWrapper: {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-    },
-    logoImage: {
-        width: '100%',
-        height: '100%',
-    },
-    loadMoreButton: {
-        alignSelf: 'center',
-        marginVertical: hp(16),
-        paddingVertical: hp(10),
-        paddingHorizontal: wp(32),
-        borderRadius: hp(50),
-        borderWidth: 1.5,
-        borderColor: colors._0B3970,
-        minWidth: wp(120),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    loadMoreText: {
-        ...commonFontStyle(600, 15, colors._0B3970),
-    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 1,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoLoaderContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 100,
+    zIndex: 1,
+  },
+  logoPlaceholderImage: {
+    width: '80%',
+    height: '80%',
+  },
+  titleTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: hp(7),
+  },
+  companyName: {
+    ...commonFontStyle(600, 22, colors._0B3970),
+  },
+  tagline: {
+    ...commonFontStyle(400, 14, colors.black),
+  },
+  description: {
+    ...commonFontStyle(400, 15, colors._3D3D3D),
+    marginTop: hp(11),
+    // lineHeight: hp(25), // Potential crash cause with certain fonts/Android versions
+  },
+  tabRow: {
+    marginTop: hp(25),
+    flexDirection: 'row',
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  tabText: {
+    ...commonFontStyle(500, 18, colors._0B3970),
+  },
+  tabIndicator: {
+    bottom: '-85%',
+    height: hp(4),
+    width: '50%',
+    alignSelf: 'center',
+    position: 'absolute',
+    borderRadius: hp(20),
+    backgroundColor: colors._0B3970,
+  },
+  divider: {
+    height: 1,
+    width: '150%',
+    alignSelf: 'center',
+    marginVertical: hp(16),
+    backgroundColor: colors.coPrimary,
+  },
+  emptyContainer: {
+    flex: 1,
+    backgroundColor: colors.white,
+    paddingVertical: hp(20),
+  },
+  logoContainerWrapper: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+  },
+  loadMoreButton: {
+    alignSelf: 'center',
+    marginVertical: hp(16),
+    paddingVertical: hp(10),
+    paddingHorizontal: wp(32),
+    borderRadius: hp(50),
+    borderWidth: 1.5,
+    borderColor: colors._0B3970,
+    minWidth: wp(120),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadMoreText: {
+    ...commonFontStyle(600, 15, colors._0B3970),
+  },
 });
