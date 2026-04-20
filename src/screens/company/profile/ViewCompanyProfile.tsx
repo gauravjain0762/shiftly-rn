@@ -36,6 +36,7 @@ import PostGridSkeleton from '../../../component/skeletons/PostGridSkeleton';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {navigateTo} from '../../../utils/commonFunction';
 import {SCREENS} from '../../../navigation/screenNames';
+import useRole from '../../../hooks/useRole';
 
 const ProfileTabs = ['About', 'Posts', 'Jobs'];
 
@@ -48,8 +49,10 @@ const ViewCompanyProfile = () => {
   const dispatch = useDispatch();
   const {viewCompanyProfileTabIndex, viewCompanyProfileInfo} =
     useSelector(selectEmployeeState);
+  const {role} = useRole();
   const selectedTabIndex = viewCompanyProfileTabIndex;
   const companyInfo = viewCompanyProfileInfo;
+  console.log(role, 'rolerole');
 
   // const [companyInfo, setCompanyInfo] = useState<any>(null); // Removed local state
   const [companyPosts, setCompanyPosts] = useState<any[]>([]);
@@ -344,9 +347,11 @@ const ViewCompanyProfile = () => {
                 onPressShare={() => {}}
                 onPressCard={() => {
                   navigateTo(SCREENS.JobDetail, {
-                    role: 'employee',
                     jobId: item?._id,
+                    role: role,
                     is_applied: item?.is_applied,
+                    hide_apply: role !== 'employee',
+                    fromCompany: role !== 'employee',
                   });
                 }}
               />

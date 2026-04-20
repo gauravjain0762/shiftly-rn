@@ -1,28 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { GradientButton, LinearContainer } from '../../../component';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {GradientButton, LinearContainer} from '../../../component';
 import LinearGradient from 'react-native-linear-gradient';
-import { commonFontStyle, hp, wp } from '../../../theme/fonts';
-import { useTranslation } from 'react-i18next';
-import { colors } from '../../../theme/colors';
-import { IMAGES } from '../../../assets/Images';
-import { AppStyles } from '../../../theme/appStyles';
-import { navigateTo, isCompanyProfileComplete } from '../../../utils/commonFunction';
-import { SCREENS } from '../../../navigation/screenNames';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import {commonFontStyle, hp, wp} from '../../../theme/fonts';
+import {useTranslation} from 'react-i18next';
+import {colors} from '../../../theme/colors';
+import {IMAGES} from '../../../assets/Images';
+import {AppStyles} from '../../../theme/appStyles';
+import {
+  navigateTo,
+  isCompanyProfileComplete,
+} from '../../../utils/commonFunction';
+import {SCREENS} from '../../../navigation/screenNames';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../store';
 import BottomModal from '../../../component/common/BottomModal';
-import { useGetCompanyPostsQuery, useGetProfileQuery } from '../../../api/dashboardApi';
-import { useAppDispatch } from '../../../redux/hooks';
-import { setCoPostSteps } from '../../../features/companySlice';
+import {
+  useGetCompanyPostsQuery,
+  useGetProfileQuery,
+} from '../../../api/dashboardApi';
+import {useAppDispatch} from '../../../redux/hooks';
+import {setCoPostSteps} from '../../../features/companySlice';
 import FeedCard from '../../../component/employe/FeedCard';
 import PostSkeleton from '../../../component/skeletons/PostSkeleton';
 import BaseText from '../../../component/common/BaseText';
 
 const CoPost = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const { userInfo }: any = useSelector((state: RootState) => state.auth);
+  const {userInfo}: any = useSelector((state: RootState) => state.auth);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<any[]>([]);
@@ -32,11 +46,15 @@ const CoPost = () => {
 
   const handleScrollToPost = (index: number) => {
     setTimeout(() => {
-      flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
+      flatListRef.current?.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0,
+      });
     }, 100);
   };
 
-  const { data: profileData } = useGetProfileQuery();
+  const {data: profileData} = useGetProfileQuery();
   const currentCompanyId = profileData?.data?.company?._id;
 
   const {
@@ -44,7 +62,7 @@ const CoPost = () => {
     isFetching,
     isLoading,
     refetch,
-  } = useGetCompanyPostsQuery({ page: currentPage });
+  } = useGetCompanyPostsQuery({page: currentPage});
 
   const totalPages = getPost?.data?.pagination?.total_pages ?? 1;
 
@@ -89,10 +107,7 @@ const CoPost = () => {
       <View style={AppStyles.flex}>
         <View style={styles.header}>
           <View style={styles.customHeader}>
-            <BaseText
-              style={styles.centeredTitle}>
-              {t('Posts')}
-            </BaseText>
+            <BaseText style={styles.centeredTitle}>{t('Posts')}</BaseText>
             <View style={styles.rightButtonContainer}>
               <LinearGradient
                 colors={['#024AA1', '#041428']}
@@ -119,8 +134,8 @@ const CoPost = () => {
             style={AppStyles.flex}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollcontainer}
-            ItemSeparatorComponent={() => <View style={{ height: hp(15) }} />}
-            renderItem={({ item, index }) => (
+            ItemSeparatorComponent={() => <View style={{height: hp(15)}} />}
+            renderItem={({item, index}) => (
               <FeedCard
                 item={item}
                 showMenu={true}
@@ -128,13 +143,22 @@ const CoPost = () => {
                 isCompanyFlow={true}
                 currentCompanyId={currentCompanyId}
                 onScrollToTop={() => handleScrollToPost(index)}
-                onPressCard={() => navigateTo(SCREENS.ShowPost, { post: item })}
+                onPressLogo={() => {
+                  navigateTo(SCREENS.ViewCompanyProfile, {
+                    companyId: item?.company_id?._id,
+                  });
+                }}
+                onPressCard={() => navigateTo(SCREENS.ShowPost, {post: item})}
                 onDeletePost={handleRefresh}
               />
             )}
-            onScrollToIndexFailed={(info) => {
+            onScrollToIndexFailed={info => {
               setTimeout(() => {
-                flatListRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0 });
+                flatListRef.current?.scrollToIndex({
+                  index: info.index,
+                  animated: true,
+                  viewPosition: 0,
+                });
               }, 200);
             }}
             onEndReachedThreshold={0.5}
@@ -146,12 +170,10 @@ const CoPost = () => {
               return (
                 <View style={styles.emptyContainer}>
                   <View style={styles.emptyTextWrapper}>
-                    <BaseText
-                      style={styles.emptyTextLine}>
+                    <BaseText style={styles.emptyTextLine}>
                       {t('No posts yet.')}
                     </BaseText>
-                    <BaseText
-                      style={styles.emptyTextLine}>
+                    <BaseText style={styles.emptyTextLine}>
                       {t('Start sharing by creating your first post.')}
                     </BaseText>
                   </View>
@@ -169,7 +191,7 @@ const CoPost = () => {
                 <ActivityIndicator
                   size="large"
                   color={colors._D5D5D5}
-                  style={{ marginVertical: hp(10) }}
+                  style={{marginVertical: hp(10)}}
                 />
               ) : null
             }
@@ -185,7 +207,9 @@ const CoPost = () => {
           {t('Complete Your Profile')}
         </BaseText>
         <BaseText style={styles.completeProfileModalDescription}>
-          {t('You need to complete your company profile before posting jobs or creating posts. Please add the required details to continue.')}
+          {t(
+            'You need to complete your company profile before posting jobs or creating posts. Please add the required details to continue.',
+          )}
         </BaseText>
         <GradientButton
           type="Company"
