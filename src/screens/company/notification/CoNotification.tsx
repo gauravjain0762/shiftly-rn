@@ -182,6 +182,7 @@ const CoNotification = () => {
         jobId: firstData?.id,
         invitationStatus:
           firstData?.status || firstData?.invitation_status || item?.status,
+        isApplicant: firstData?.tab,
       });
     } else if (firstData?.type === 'post') {
       navigateTo(SCREENS.ShowPost, {post: firstData?.post_data});
@@ -189,31 +190,31 @@ const CoNotification = () => {
   };
 
   const HighlightMessage = ({message}: any) => {
-    // Split text by quotes
-    const parts = message.split(/(".*?")/g);
+    const parts = message && message?.split(/(".*?")/g);
 
     return (
       <BaseText style={styles.time}>
-        {parts.map((part, index) => {
-          // Check if part is inside quotes
-          if (part.startsWith('"') && part.endsWith('"')) {
+        {parts &&
+          parts.map((part, index) => {
+            // Check if part is inside quotes
+            if (part.startsWith('"') && part.endsWith('"')) {
+              return (
+                <BaseText
+                  key={index}
+                  style={[
+                    styles.time,
+                    {...commonFontStyle(600, 16, colors._0B3970)},
+                  ]}>
+                  {part}
+                </BaseText>
+              );
+            }
             return (
-              <BaseText
-                key={index}
-                style={[
-                  styles.time,
-                  {...commonFontStyle(600, 16, colors._0B3970)},
-                ]}>
+              <BaseText key={index} style={styles.time}>
                 {part}
               </BaseText>
             );
-          }
-          return (
-            <BaseText key={index} style={styles.time}>
-              {part}
-            </BaseText>
-          );
-        })}
+          })}
       </BaseText>
     );
   };

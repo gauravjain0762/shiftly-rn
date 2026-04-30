@@ -113,12 +113,11 @@ const NotificationCard: FC<props> = ({item}: any) => {
   };
 
   const HighlightMessage = ({message}: any) => {
-    // Split text by quotes
-    const parts = message.split(/(".*?")/g);
+    const parts = message && message.split(/(".*?")/g);
 
     return (
       <BaseText style={styles.message}>
-        {parts.map((part, index) => {
+        {parts &&parts.map((part, index) => {
           // Check if part is inside quotes
           if (part.startsWith('"') && part.endsWith('"')) {
             return (

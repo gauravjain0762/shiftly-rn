@@ -58,15 +58,26 @@ import BaseText from '../../../component/common/BaseText';
 const SuggestedEmployeeScreen = () => {
   const {t} = useTranslation();
   const route = useRoute<any>();
-  const {jobId, jobData, isFromJobCard, fromPostJob} = route.params || {};
+  const {
+    jobId,
+    jobData,
+    isFromJobCard,
+    fromPostJob,
+    isApplicant = '',
+  } = route.params || {};
 
   const shouldDefaultToShortlisted =
     route.params?.fromPendingInterview === true ||
     route.params?.fromPendingInterviews === true;
-
   const [activeTab, setActiveTab] = useState<
     'suggested' | 'shortlisted' | 'applicants'
-  >(() => (shouldDefaultToShortlisted ? 'shortlisted' : 'suggested'));
+  >(() =>
+    isApplicant
+      ? isApplicant
+      : shouldDefaultToShortlisted
+      ? 'shortlisted'
+      : 'suggested',
+  );
 
   const {
     data: suggestedResponse,
@@ -129,7 +140,8 @@ const SuggestedEmployeeScreen = () => {
   const [extraSuggested, setExtraSuggested] = useState<any[]>([]);
   const [extraShortlisted, setExtraShortlisted] = useState<any[]>([]);
   const [extraApplicants, setExtraApplicants] = useState<any[]>([]);
-  const [inviteAllApplicantsSelected, setInviteAllApplicantsSelected] = useState(false);
+  const [inviteAllApplicantsSelected, setInviteAllApplicantsSelected] =
+    useState(false);
 
   const [suggestedHasMore, setSuggestedHasMore] = useState(true);
   const [shortlistedHasMore, setShortlistedHasMore] = useState(true);
@@ -195,44 +207,45 @@ const SuggestedEmployeeScreen = () => {
   };
 
   const allApplicantsInvited = useMemo(() => {
-  if (!Array.isArray(applications) || applications.length === 0) return false;
-  if (!Array.isArray(invitedEmployees) || invitedEmployees.length === 0) return false;
+    if (!Array.isArray(applications) || applications.length === 0) return false;
+    if (!Array.isArray(invitedEmployees) || invitedEmployees.length === 0)
+      return false;
 
-  const invitedIds = invitedEmployees
-    .map((inv: any) => inv?.user_id?._id || inv?.user_id || inv)
-    .filter(Boolean);
+    const invitedIds = invitedEmployees
+      .map((inv: any) => inv?.user_id?._id || inv?.user_id || inv)
+      .filter(Boolean);
 
-  const applicantIds = applications
-    .map((app: any) => app?.user_id?._id || app?._id)
-    .filter(Boolean);
+    const applicantIds = applications
+      .map((app: any) => app?.user_id?._id || app?._id)
+      .filter(Boolean);
 
-  if (applicantIds.length === 0) return false;
+    if (applicantIds.length === 0) return false;
 
-  return applicantIds.every(id => invitedIds.includes(id));
-}, [applications, invitedEmployees]);
+    return applicantIds.every(id => invitedIds.includes(id));
+  }, [applications, invitedEmployees]);
 
-const handleInviteAllApplicants = () => {
-  const ids = (displayApplicants || [])
-    .map((item: any) => item?.user_id?._id || item?._id)
-    .filter((id: string | null) => !!id) as string[];
+  const handleInviteAllApplicants = () => {
+    const ids = (displayApplicants || [])
+      .map((item: any) => item?.user_id?._id || item?._id)
+      .filter((id: string | null) => !!id) as string[];
 
-  if (!ids || ids.length === 0) {
-    errorToast(t('No applicants available to invite'));
-    return;
-  }
+    if (!ids || ids.length === 0) {
+      errorToast(t('No applicants available to invite'));
+      return;
+    }
 
-  if (inviteAllApplicantsSelected) {
-    setSelectedUserIds(prev => prev.filter(id => !ids.includes(id)));
-    setInviteAllApplicantsSelected(false);
-    return;
-  }
+    if (inviteAllApplicantsSelected) {
+      setSelectedUserIds(prev => prev.filter(id => !ids.includes(id)));
+      setInviteAllApplicantsSelected(false);
+      return;
+    }
 
-  setSelectedUserIds(prev => {
-    const merged = [...new Set([...prev, ...ids])];
-    return merged;
-  });
-  setInviteAllApplicantsSelected(true);
-};
+    setSelectedUserIds(prev => {
+      const merged = [...new Set([...prev, ...ids])];
+      return merged;
+    });
+    setInviteAllApplicantsSelected(true);
+  };
 
   const invitedEmployees = useMemo(() => {
     const list =
@@ -265,17 +278,27 @@ const handleInviteAllApplicants = () => {
 
   const scrollToTab = useCallback(
     (tab: 'suggested' | 'shortlisted' | 'applicants') => {
-      if (tab === 'suggested') {
-        tabScrollRef.current?.scrollTo({x: 0, animated: true});
-      } else {
-        const x = tabLayouts.current[tab];
-        if (typeof x === 'number') {
-          tabScrollRef.current?.scrollTo({x, animated: true});
+      requestAnimationFrame(() => {
+        if (tab === 'suggested') {
+          tabScrollRef.current?.scrollTo({x: 0, animated: true});
+        } else {
+          const x = tabLayouts.current[tab];
+          if (typeof x === 'number') {
+            tabScrollRef.current?.scrollTo({x: x - 20, animated: true});
+            // 👆 little offset for better UX
+          }
         }
-      }
+      });
     },
     [],
   );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToTab(activeTab);
+    }, 300); // small delay to wait for layout
+
+    return () => clearTimeout(timer);
+  }, [activeTab]);
 
   const selectTab = useCallback(
     (tab: 'suggested' | 'shortlisted' | 'applicants') => {
@@ -431,7 +454,7 @@ const handleInviteAllApplicants = () => {
     setShortlistedHasMore(true);
     setApplicantsHasMore(true);
     setInviteAllApplicantsSelected(false); // ✅ add this line
-  setInviteAllSelected(false);           
+    setInviteAllSelected(false);
   }, [activeTab]);
 
   // Set initial hasMore based on response
@@ -573,15 +596,15 @@ const handleInviteAllApplicants = () => {
   }, [applications, extraApplicants]);
 
   useEffect(() => {
-  const validIds = (displayApplicants || [])
-    .map((item: any) => item?.user_id?._id || item?._id)
-    .filter(Boolean);
+    const validIds = (displayApplicants || [])
+      .map((item: any) => item?.user_id?._id || item?._id)
+      .filter(Boolean);
 
-  const allSelected =
-    validIds.length > 0 && validIds.every(id => selectedUserIds.includes(id));
+    const allSelected =
+      validIds.length > 0 && validIds.every(id => selectedUserIds.includes(id));
 
-  setInviteAllApplicantsSelected(allSelected);
-}, [displayApplicants, selectedUserIds]);
+    setInviteAllApplicantsSelected(allSelected);
+  }, [displayApplicants, selectedUserIds]);
   const renderSalaryRange = () => {
     const cur = (jobInfo?.currency || 'AED').toUpperCase();
     const symbol = getCurrencySymbol(cur);
@@ -1437,46 +1460,48 @@ const handleInviteAllApplicants = () => {
                   </>
                 ) : (
                   <>
-                   <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>
-        {t('Applicants')}
-      </Text>
-      <TouchableOpacity
-        style={[
-          styles.inviteAllButton,
-          inviteAllApplicantsSelected && styles.inviteAllButtonSelected,
-          (isClosedJob ||
-            allApplicantsInvited ||
-            !displayApplicants?.length) && {opacity: 0.5},
-        ]}
-        disabled={
-          isClosedJob ||
-          allApplicantsInvited ||
-          !displayApplicants?.length
-        }
-        onPress={handleInviteAllApplicants}>
-        <View
-          style={[
-            styles.inviteAllIcon,
-            inviteAllApplicantsSelected && styles.inviteAllIconSelected,
-          ]}>
-          <Text
-            style={[
-              styles.inviteAllIconText,
-              inviteAllApplicantsSelected && styles.inviteAllIconTextSelected,
-            ]}>
-            ✓
-          </Text>
-        </View>
-        <Text
-          style={[
-            styles.inviteAllText,
-            inviteAllApplicantsSelected && styles.inviteAllTextSelected,
-          ]}>
-          {t('Invite All')}
-        </Text>
-      </TouchableOpacity>
-    </View>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>{t('Applicants')}</Text>
+                      <TouchableOpacity
+                        style={[
+                          styles.inviteAllButton,
+                          inviteAllApplicantsSelected &&
+                            styles.inviteAllButtonSelected,
+                          (isClosedJob ||
+                            allApplicantsInvited ||
+                            !displayApplicants?.length) && {opacity: 0.5},
+                        ]}
+                        disabled={
+                          isClosedJob ||
+                          allApplicantsInvited ||
+                          !displayApplicants?.length
+                        }
+                        onPress={handleInviteAllApplicants}>
+                        <View
+                          style={[
+                            styles.inviteAllIcon,
+                            inviteAllApplicantsSelected &&
+                              styles.inviteAllIconSelected,
+                          ]}>
+                          <Text
+                            style={[
+                              styles.inviteAllIconText,
+                              inviteAllApplicantsSelected &&
+                                styles.inviteAllIconTextSelected,
+                            ]}>
+                            ✓
+                          </Text>
+                        </View>
+                        <Text
+                          style={[
+                            styles.inviteAllText,
+                            inviteAllApplicantsSelected &&
+                              styles.inviteAllTextSelected,
+                          ]}>
+                          {t('Invite All')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
 
                     {displayApplicants && displayApplicants.length > 0 ? (
                       <>
@@ -1495,28 +1520,31 @@ const handleInviteAllApplicants = () => {
                             .map((l: any) => l?.name)
                             .filter(Boolean);
 
+                          const applicantUserId =
+                            item?.user_id?._id || item?._id;
 
-                          const applicantUserId = item?.user_id?._id || item?._id;
+                          const isInvited = invitedEmployees?.some(
+                            (invited: any) =>
+                              invited?.user_id?._id === applicantUserId ||
+                              invited?.user_id === applicantUserId ||
+                              invited === applicantUserId,
+                          );
 
-const isInvited = invitedEmployees?.some(
-  (invited: any) =>
-    invited?.user_id?._id === applicantUserId ||
-    invited?.user_id === applicantUserId ||
-    invited === applicantUserId,
-);
-
-const isSelected = selectedUserIds.includes(applicantUserId);
+                          const isSelected =
+                            selectedUserIds.includes(applicantUserId);
                           return (
                             <Pressable
                               key={user?._id || item?._id}
                               onPress={() =>
-      !isClosedJob && !isInvited && toggleUserSelection(applicantUserId)
-    }
-    style={[
-      styles.employeeCard,
-      isSelected && styles.selectedEmployeeCard,  // ✅ add selected style
-      isInvited && styles.invitedCard,             // ✅ add invited style
-    ]}>
+                                !isClosedJob &&
+                                !isInvited &&
+                                toggleUserSelection(applicantUserId)
+                              }
+                              style={[
+                                styles.employeeCard,
+                                isSelected && styles.selectedEmployeeCard, // ✅ add selected style
+                                isInvited && styles.invitedCard, // ✅ add invited style
+                              ]}>
                               <View
                                 style={[
                                   styles.employeeTopRow,
@@ -1581,33 +1609,39 @@ const isSelected = selectedUserIds.includes(applicantUserId);
                                   </TouchableOpacity>
                                 </View>
                                 {isInvited || isSelected ? (
-        <View style={styles.invitedIconContainer}>
-          <Image source={IMAGES.checked} style={styles.invitedIcon} />
-        </View>
-      ) : (
-        <Pressable
-          onPress={event => {
-            event.stopPropagation();
-            if (isClosedJob) return;
-            setInviteAllSelected(false);
-            toggleUserSelection(applicantUserId);  // ✅ consistent ID
-          }}
-          style={[
-            styles.inviteButton,
-            isSelected && styles.inviteButtonSelected,
-            isClosedJob && styles.disabledInviteButton,
-          ]}>
-          <Text
-            style={[
-              styles.inviteButtonText,
-              isSelected && styles.inviteButtonTextSelected,
-              isClosedJob && styles.disabledInviteButtonText,
-            ]}>
-            {t('Invite')}
-          </Text>
-        </Pressable>
-      )}
-    </View>
+                                  <View style={styles.invitedIconContainer}>
+                                    <Image
+                                      source={IMAGES.checked}
+                                      style={styles.invitedIcon}
+                                    />
+                                  </View>
+                                ) : (
+                                  <Pressable
+                                    onPress={event => {
+                                      event.stopPropagation();
+                                      if (isClosedJob) return;
+                                      setInviteAllSelected(false);
+                                      toggleUserSelection(applicantUserId); // ✅ consistent ID
+                                    }}
+                                    style={[
+                                      styles.inviteButton,
+                                      isSelected && styles.inviteButtonSelected,
+                                      isClosedJob &&
+                                        styles.disabledInviteButton,
+                                    ]}>
+                                    <Text
+                                      style={[
+                                        styles.inviteButtonText,
+                                        isSelected &&
+                                          styles.inviteButtonTextSelected,
+                                        isClosedJob &&
+                                          styles.disabledInviteButtonText,
+                                      ]}>
+                                      {t('Invite')}
+                                    </Text>
+                                  </Pressable>
+                                )}
+                              </View>
 
                               {/* Languages row (same as Suggested cards) */}
                               {languageNames.length > 0 && (

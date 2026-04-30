@@ -351,6 +351,7 @@ const EditAccountScreen = () => {
           }}
           actionSheet={isImagePickerVisible}
           setActionSheet={setIsImagePickerVisible}
+          cropSize={{width: 800, height: 800}}
         />
       </SafeAreaView>
     </LinearContainer>

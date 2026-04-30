@@ -32,15 +32,20 @@ import {useEmployeeLoginMutation} from '../../../api/authApi';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../../store';
 import {setAuthData} from '../../../features/employeeSlice';
-import {clearEmployeeAccount, setForcedLogoutBy401} from '../../../features/authSlice';
+import {
+  clearEmployeeAccount,
+  setForcedLogoutBy401,
+} from '../../../features/authSlice';
 import {ensureFcmToken} from '../../../hooks/notificationHandler';
 
 const LoginScreen = () => {
   const {t} = useTranslation();
   const dispatch = useDispatch();
 
-  const {fcmToken, language, forcedLogoutBy401} = useSelector((state: RootState) => state.auth);
-  console.log(">>>>>>>>>>>>>>>>>>>>>>>. ~ LoginScreen ~ fcmToken:", fcmToken)
+  const {fcmToken, language, forcedLogoutBy401} = useSelector(
+    (state: RootState) => state.auth,
+  );
+  console.log('>>>>>>>>>>>>>>>>>>>>>>>. ~ LoginScreen ~ fcmToken:', fcmToken);
   const [employeeLogin] = useEmployeeLoginMutation({});
 
   const {auth} = useSelector((state: RootState) => state.employee);
@@ -61,9 +66,9 @@ const LoginScreen = () => {
           deviceToken: token,
           deviceType: Platform.OS,
         };
-        console.log("🔥 ~ handleLogin ~ data:", data)
+        console.log('🔥 ~ handleLogin ~ data:', data);
         const response: any = await employeeLogin(data).unwrap();
-        console.log("🔥 ~ handleLogin ~ response:", response)
+        console.log('🔥 ~ handleLogin ~ response:', response);
         if (response && response.status) {
           dispatch(setAuthData({email: '', password: ''}));
           console.log(response, 'response----');
@@ -100,27 +105,28 @@ const LoginScreen = () => {
 
         <View style={styles.inputWrapper}>
           <Text style={styles.labelText}>Email</Text>
-
           <CustomTextInput
+            inputStyle={[
+              styles.input,
+              {color: colors._0B3970, textTransform: 'lowercase'},
+            ]}
             placeholder="Enter your email"
             placeholderTextColor={colors._7B7878}
             value={email}
-            inputStyle={{color: colors._0B3970, textTransform: 'lowercase'}}
             onChangeText={e => {
               dispatch(setAuthData({email: e, password}));
             }}
-            autoCapitalize="none"
             keyboardType="email-address"
+            autoCapitalize="none"
           />
-        </View>
 
-        <View style={styles.inputWrapper}>
           <Text style={styles.labelText}>Password</Text>
           <CustomTextInput
             placeholder="Enter your password"
             placeholderTextColor={colors._7B7878}
             showRightIcon={true}
-            inputStyle={{color: colors._0B3970}}
+            inputStyle={styles.passinput}
+            containerStyle={styles.inputcontainer}
             value={password}
             onChangeText={e => {
               dispatch(setAuthData({password: e, email}));
@@ -128,7 +134,6 @@ const LoginScreen = () => {
             isPassword
           />
         </View>
-
         <TouchableOpacity
           activeOpacity={0.5}
           onPress={() => navigateTo(SCREENS.EmpForgotPassword)}>
@@ -180,9 +185,7 @@ const styles = StyleSheet.create({
     marginTop: hp(15),
   },
   inputWrapper: {
-    marginBottom: hp(30),
-    borderBottomWidth: 1,
-    borderBottomColor: colors._0B3970,
+    marginBottom: hp(20),
     marginHorizontal: 35,
   },
   labelText: {
@@ -228,5 +231,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: hp(12),
     ...commonFontStyle(500, 15, colors._0B3970),
+  },
+  input: {
+    ...commonFontStyle(400, 18, colors._181818),
+    borderWidth: 2,
+    borderColor: colors._234F86,
+    borderRadius: 10,
+    flex: 1,
+    paddingHorizontal: wp(23),
+    paddingVertical: hp(18),
+    textTransform: 'lowercase',
+  },
+  inputcontainer: {
+    borderWidth: 2,
+    borderRadius: 10,
+    textAlign: 'center',
+    paddingHorizontal: wp(23),
+    borderColor: colors._234F86,
+    justifyContent: 'space-between',
+    paddingVertical: Platform.OS === 'ios' ? hp(16) : hp(8),
+  },
+  passinput: {
+    flex: 1,
+    paddingRight: wp(10),
+    ...commonFontStyle(400, 18, colors._0B3970),
+  },
+  eye: {
+    tintColor: colors._0B3970,
   },
 });
