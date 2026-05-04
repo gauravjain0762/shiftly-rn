@@ -665,7 +665,7 @@ const CompanyProfile = () => {
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                       {displayPosts.map((item: any, index: number) => (
                         <View key={`post-${item._id || item.id || index}`} style={{ width: '48%', marginBottom: hp(10) }}>
-                          <CustomPostCard title={item?.title} image={item?.images} />
+                          <CustomPostCard item={item} title={item?.title} image={item?.images} />
                         </View>
                       ))}
                     </View>
