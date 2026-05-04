@@ -115,7 +115,7 @@ const CoLogin = () => {
               containerStyle={styles.inputcontainer}
               placeholderTextColor={colors._7B7878}
               imgStyle={styles.eye}
-              placeholder="* * * * * * * * *"
+              placeholder="Enter your password"
               onChangeText={e => {
                 dispatch(setAuthData({ email, password: e }));
               }}
